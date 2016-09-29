@@ -223,16 +223,16 @@ void GlopBuilder::setFill(int color, float alphaScale,
         SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage,
         const SkShader* shader, const SkColorFilter* colorFilter) {
     if (mode != SkXfermode::kClear_Mode) {
-        float alpha = (SkColorGetA(color) / 255.0f) * alphaScale;
         if (!shader) {
-            float colorScale = alpha / 255.0f;
-            mOutGlop->fill.color = {
-                    colorScale * SkColorGetR(color),
-                    colorScale * SkColorGetG(color),
-                    colorScale * SkColorGetB(color),
-                    alpha
-            };
+            FloatColor c;
+            c.set(color);
+            c.r *= alphaScale;
+            c.g *= alphaScale;
+            c.b *= alphaScale;
+            c.a *= alphaScale;
+            mOutGlop->fill.color = c;
         } else {
+            float alpha = (SkColorGetA(color) / 255.0f) * alphaScale;
             mOutGlop->fill.color = { 1, 1, 1, alpha };
         }
     } else {
@@ -276,15 +276,7 @@ void GlopBuilder::setFill(int color, float alphaScale,
         if (colorFilter->asColorMode(&color, &mode)) {
             mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::ColorFilterMode::Blend;
             mDescription.colorMode = mode;
-
-            const float alpha = SkColorGetA(color) / 255.0f;
-            float colorScale = alpha / 255.0f;
-            mOutGlop->fill.filter.color = {
-                    colorScale * SkColorGetR(color),
-                    colorScale * SkColorGetG(color),
-                    colorScale * SkColorGetB(color),
-                    alpha,
-            };
+            mOutGlop->fill.filter.color.set(color);
         } else if (colorFilter->asColorMatrix(srcColorMatrix)) {
             mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::ColorFilterMode::Matrix;
 
@@ -297,10 +289,10 @@ void GlopBuilder::setFill(int color, float alphaScale,
             // Skia uses the range [0..255] for the addition vector, but we need
             // the [0..1] range to apply the vector in GLSL
             float* colorVector = mOutGlop->fill.filter.matrix.vector;
-            colorVector[0] = srcColorMatrix[4] / 255.0f;
-            colorVector[1] = srcColorMatrix[9] / 255.0f;
-            colorVector[2] = srcColorMatrix[14] / 255.0f;
-            colorVector[3] = srcColorMatrix[19] / 255.0f;
+            colorVector[0] = EOCF_sRGB(srcColorMatrix[4]  / 255.0f);
+            colorVector[1] = EOCF_sRGB(srcColorMatrix[9]  / 255.0f);
+            colorVector[2] = EOCF_sRGB(srcColorMatrix[14] / 255.0f);
+            colorVector[3] = EOCF_sRGB(srcColorMatrix[19] / 255.0f);
         } else {
             LOG_ALWAYS_FATAL("unsupported ColorFilter");
         }
@@ -478,6 +470,13 @@ GlopBuilder& GlopBuilder::setFillExternalTexture(Texture& texture, Matrix4& text
 
     mDescription.modulate = mOutGlop->fill.color.a < 1.0f;
     mDescription.hasTextureTransform = true;
+    return *this;
+}
+
+GlopBuilder& GlopBuilder::setGammaCorrection(bool enabled) {
+    REQUIRE_STAGES(kFillStage);
+
+    mDescription.hasGammaCorrection = enabled;
     return *this;
 }
 

@@ -916,7 +916,6 @@ public final class ThreadedRenderer {
             mInitialized = true;
             initSched(context, renderProxy);
             initGraphicsStats(context, renderProxy);
-            initAssetAtlas(context, renderProxy);
         }
 
         private static void initSched(Context context, long renderProxy) {
@@ -944,32 +943,6 @@ public final class ThreadedRenderer {
                 Log.w(LOG_TAG, "Could not acquire gfx stats buffer", t);
             }
         }
-
-        private static void initAssetAtlas(Context context, long renderProxy) {
-            IBinder binder = ServiceManager.getService("assetatlas");
-            if (binder == null) return;
-
-            IAssetAtlas atlas = IAssetAtlas.Stub.asInterface(binder);
-            try {
-                if (atlas.isCompatible(android.os.Process.myPpid())) {
-                    GraphicBuffer buffer = atlas.getBuffer();
-                    if (buffer != null) {
-                        long[] map = atlas.getMap();
-                        if (map != null) {
-                            nSetAtlas(renderProxy, buffer, map);
-                        }
-                        // If IAssetAtlas is not the same class as the IBinder
-                        // we are using a remote service and we can safely
-                        // destroy the graphic buffer
-                        if (atlas.getClass() != binder.getClass()) {
-                            buffer.destroy();
-                        }
-                    }
-                }
-            } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Could not acquire atlas", e);
-            }
-        }
     }
 
     void addFrameMetricsObserver(FrameMetricsObserver observer) {
@@ -984,7 +957,6 @@ public final class ThreadedRenderer {
 
     static native void setupShadersDiskCache(String cacheFile);
 
-    private static native void nSetAtlas(long nativeProxy, GraphicBuffer buffer, long[] map);
     private static native void nSetProcessStatsBuffer(long nativeProxy, int fd);
     private static native int nGetRenderThreadTid(long nativeProxy);
 

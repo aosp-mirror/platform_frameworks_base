@@ -385,11 +385,8 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     // Set the alpha type for the decode.
     SkAlphaType alphaType = codec->computeOutputAlphaType(requireUnpremultiplied);
 
-    // Enable legacy behavior to avoid any gamma correction.  Android's assets are
-    // adjusted to expect a non-gamma correct premultiply.
-    sk_sp<SkColorSpace> colorSpace = nullptr;
-    const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(), decodeColorType,
-                                                     alphaType, colorSpace);
+    const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(),
+            decodeColorType, alphaType, GraphicsJNI::defaultColorSpace());
 
     SkImageInfo bitmapInfo = decodeInfo;
     if (decodeColorType == kGray_8_SkColorType) {
@@ -413,7 +410,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     // Use SkAndroidCodec to perform the decode.
     SkAndroidCodec::AndroidOptions codecOptions;
-    codecOptions.fZeroInitialized =  decodeAllocator == &defaultAllocator ?
+    codecOptions.fZeroInitialized = decodeAllocator == &defaultAllocator ?
             SkCodec::kYes_ZeroInitialized : SkCodec::kNo_ZeroInitialized;
     codecOptions.fColorPtr = colorPtr;
     codecOptions.fColorCount = colorCount;
@@ -452,8 +449,10 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     jobject ninePatchInsets = NULL;
     if (peeker.mHasInsets) {
         ninePatchInsets = env->NewObject(gInsetStruct_class, gInsetStruct_constructorMethodID,
-                peeker.mOpticalInsets[0], peeker.mOpticalInsets[1], peeker.mOpticalInsets[2], peeker.mOpticalInsets[3],
-                peeker.mOutlineInsets[0], peeker.mOutlineInsets[1], peeker.mOutlineInsets[2], peeker.mOutlineInsets[3],
+                peeker.mOpticalInsets[0], peeker.mOpticalInsets[1],
+                peeker.mOpticalInsets[2], peeker.mOpticalInsets[3],
+                peeker.mOutlineInsets[0], peeker.mOutlineInsets[1],
+                peeker.mOutlineInsets[2], peeker.mOutlineInsets[3],
                 peeker.mOutlineRadius, peeker.mOutlineAlpha, scale);
         if (ninePatchInsets == NULL) {
             return nullObjectReturn("nine patch insets == null");
@@ -495,11 +494,11 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         }
 
         SkPaint paint;
-        // kSrc_Mode instructs us to overwrite the unininitialized pixels in
+        // kSrc_Mode instructs us to overwrite the uninitialized pixels in
         // outputBitmap.  Otherwise we would blend by default, which is not
         // what we want.
         paint.setXfermodeMode(SkXfermode::kSrc_Mode);
-        paint.setFilterQuality(kLow_SkFilterQuality);
+        paint.setFilterQuality(kLow_SkFilterQuality); // bilinear filtering
 
         SkCanvas canvas(outputBitmap);
         canvas.scale(sx, sy);

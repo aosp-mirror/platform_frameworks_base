@@ -69,8 +69,8 @@ public:
      *
      * The image data is undefined after calling this.
      */
-    void resize(uint32_t width, uint32_t height, GLint format) {
-        upload(format, width, height, format, GL_UNSIGNED_BYTE, nullptr);
+    void resize(uint32_t width, uint32_t height, GLint internalFormat, GLint format) {
+        upload(internalFormat, width, height, format, GL_UNSIGNED_BYTE, nullptr);
     }
 
     /**
@@ -85,13 +85,13 @@ public:
     /**
      * Basically glTexImage2D/glTexSubImage2D.
      */
-    void upload(GLint internalformat, uint32_t width, uint32_t height,
+    void upload(GLint internalFormat, uint32_t width, uint32_t height,
             GLenum format, GLenum type, const void* pixels);
 
     /**
      * Wraps an existing texture.
      */
-    void wrap(GLuint id, uint32_t width, uint32_t height, GLint format);
+    void wrap(GLuint id, uint32_t width, uint32_t height, GLint internalFormat, GLint format);
 
     GLuint id() const {
         return mId;
@@ -107,6 +107,10 @@ public:
 
     GLint format() const {
         return mFormat;
+    }
+
+    GLint internalFormat() const {
+        return mInternalFormat;
     }
 
     /**
@@ -148,13 +152,14 @@ private:
     friend class Layer;
 
     // Returns true if the size changed, false if it was the same
-    bool updateSize(uint32_t width, uint32_t height, GLint format);
+    bool updateSize(uint32_t width, uint32_t height, GLint internalFormat, GLint format);
     void resetCachedParams();
 
     GLuint mId = 0;
     uint32_t mWidth = 0;
     uint32_t mHeight = 0;
     GLint mFormat = 0;
+    GLint mInternalFormat = 0;
 
     /* See GLES spec section 3.8.14
      * "In the initial state, the value assigned to TEXTURE_MIN_FILTER is

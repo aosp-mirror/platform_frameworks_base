@@ -58,7 +58,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.Collection;
 
 /**
  * A Drawable is a general abstraction for "something that can be drawn."  Most
@@ -1365,19 +1364,6 @@ public abstract class Drawable {
          * this drawable (and thus require completely reloading it).
          */
         public abstract @Config int getChangingConfigurations();
-
-        /**
-         * @return Total pixel count
-         * @hide
-         */
-        public int addAtlasableBitmaps(@NonNull Collection<Bitmap> atlasList) {
-            return 0;
-        }
-
-        /** @hide */
-        protected final boolean isAtlasable(@Nullable Bitmap bitmap) {
-            return bitmap != null && bitmap.getConfig() == Bitmap.Config.ARGB_8888;
-        }
 
         /**
          * Return whether this constant state can have a theme applied.

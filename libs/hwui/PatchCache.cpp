@@ -225,17 +225,15 @@ void PatchCache::setupMesh(Patch* newMesh) {
 
 static const UvMapper sIdentity;
 
-const Patch* PatchCache::get(const AssetAtlas::Entry* entry,
-        const uint32_t bitmapWidth, const uint32_t bitmapHeight,
+const Patch* PatchCache::get( const uint32_t bitmapWidth, const uint32_t bitmapHeight,
         const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch) {
 
     const PatchDescription description(bitmapWidth, bitmapHeight, pixelWidth, pixelHeight, patch);
     const Patch* mesh = mCache.get(description);
 
     if (!mesh) {
-        const UvMapper& mapper = entry ? entry->uvMapper : sIdentity;
         Patch* newMesh = new Patch(bitmapWidth, bitmapHeight,
-                pixelWidth, pixelHeight, mapper, patch);
+                pixelWidth, pixelHeight, sIdentity, patch);
 
         if (newMesh->vertices) {
             setupMesh(newMesh);

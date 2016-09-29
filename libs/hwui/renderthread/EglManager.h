@@ -79,8 +79,6 @@ public:
     // Returns true iff the surface is now preserving buffers.
     bool setPreserveBuffer(EGLSurface surface, bool preserve);
 
-    void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize);
-
     void fence();
 
 private:
@@ -94,7 +92,6 @@ private:
     void createPBufferSurface();
     void loadConfig();
     void createContext();
-    void initAtlas();
     EGLint queryBufferAge(EGLSurface surface);
 
     RenderThread& mRenderThread;
@@ -105,10 +102,6 @@ private:
     EGLSurface mPBufferSurface;
 
     EGLSurface mCurrentSurface;
-
-    sp<GraphicBuffer> mAtlasBuffer;
-    int64_t* mAtlasMap;
-    size_t mAtlasMapSize;
 
     enum class SwapBehavior {
         Discard,

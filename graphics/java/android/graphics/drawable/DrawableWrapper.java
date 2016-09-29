@@ -28,7 +28,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
@@ -41,7 +40,6 @@ import android.util.DisplayMetrics;
 import android.view.View;
 
 import java.io.IOException;
-import java.util.Collection;
 
 /**
  * Drawable container with only one child element.
@@ -505,15 +503,6 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
             return mThemeAttrs != null
                     || (mDrawableState != null && mDrawableState.canApplyTheme())
                     || super.canApplyTheme();
-        }
-
-        @Override
-        public int addAtlasableBitmaps(Collection<Bitmap> atlasList) {
-            final Drawable.ConstantState state = mDrawableState;
-            if (state != null) {
-                return state.addAtlasableBitmaps(atlasList);
-            }
-            return 0;
         }
 
         @Override

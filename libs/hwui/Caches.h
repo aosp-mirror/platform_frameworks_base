@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include "AssetAtlas.h"
-#include "Dither.h"
 #include "Extensions.h"
 #include "FboCache.h"
 #include "GammaFontRenderer.h"
@@ -130,6 +128,15 @@ public:
     TextureVertex* getRegionMesh();
 
     /**
+     * Returns the GL RGBA internal format to use for the current device
+     * If the device supports linear blending and needSRGB is true,
+     * this function returns GL_SRGB8_ALPHA8, otherwise it returns GL_RGBA
+     */
+    constexpr GLint rgbaInternalFormat(bool needSRGB = true) const {
+        return extensions().hasSRGB() && needSRGB ? GL_SRGB8_ALPHA8 : GL_RGBA;
+    }
+
+    /**
      * Displays the memory usage of each cache and the total sum.
      */
     void dumpMemoryUsage();
@@ -157,8 +164,6 @@ public:
 
     TaskManager tasks;
 
-    Dither dither;
-
     bool gpuPixelBuffersEnabled;
 
     // Debug methods
@@ -169,7 +174,7 @@ public:
     void setProgram(const ProgramDescription& description);
     void setProgram(Program* program);
 
-    Extensions& extensions() { return mExtensions; }
+    const Extensions& extensions() const { return mExtensions; }
     Program& program() { return *mProgram; }
     PixelBufferState& pixelBufferState() { return *mPixelBufferState; }
     TextureState& textureState() { return *mTextureState; }

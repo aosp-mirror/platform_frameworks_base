@@ -91,9 +91,7 @@ EglManager::EglManager(RenderThread& thread)
         , mEglConfig(nullptr)
         , mEglContext(EGL_NO_CONTEXT)
         , mPBufferSurface(EGL_NO_SURFACE)
-        , mCurrentSurface(EGL_NO_SURFACE)
-        , mAtlasMap(nullptr)
-        , mAtlasMapSize(0) {
+        , mCurrentSurface(EGL_NO_SURFACE) {
 }
 
 void EglManager::initialize() {
@@ -128,7 +126,6 @@ void EglManager::initialize() {
     makeCurrent(mPBufferSurface);
     DeviceInfo::initialize();
     mRenderThread.renderState().onGLContextCreated();
-    initAtlas();
 }
 
 void EglManager::initExtensions() {
@@ -191,32 +188,6 @@ void EglManager::createContext() {
         "Failed to create context, error = %s", egl_error_str());
 }
 
-void EglManager::setTextureAtlas(const sp<GraphicBuffer>& buffer,
-        int64_t* map, size_t mapSize) {
-
-    // Already initialized
-    if (mAtlasBuffer.get()) {
-        ALOGW("Multiple calls to setTextureAtlas!");
-        delete map;
-        return;
-    }
-
-    mAtlasBuffer = buffer;
-    mAtlasMap = map;
-    mAtlasMapSize = mapSize;
-
-    if (hasEglContext()) {
-        initAtlas();
-    }
-}
-
-void EglManager::initAtlas() {
-    if (mAtlasBuffer.get()) {
-        mRenderThread.renderState().assetAtlas().init(mAtlasBuffer,
-                mAtlasMap, mAtlasMapSize);
-    }
-}
-
 void EglManager::createPBufferSurface() {
     LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY,
             "usePBufferSurface() called on uninitialized GlobalContext!");
@@ -229,7 +200,16 @@ void EglManager::createPBufferSurface() {
 
 EGLSurface EglManager::createSurface(EGLNativeWindowType window) {
     initialize();
-    EGLSurface surface = eglCreateWindowSurface(mEglDisplay, mEglConfig, window, nullptr);
+
+    EGLint attribs[] = {
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+            EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_SRGB_KHR,
+            EGL_COLORSPACE, EGL_COLORSPACE_sRGB,
+#endif
+            EGL_NONE
+    };
+
+    EGLSurface surface = eglCreateWindowSurface(mEglDisplay, mEglConfig, window, attribs);
     LOG_ALWAYS_FATAL_IF(surface == EGL_NO_SURFACE,
             "Failed to create EGLSurface for window %p, eglErr = %s",
             (void*) window, egl_error_str());

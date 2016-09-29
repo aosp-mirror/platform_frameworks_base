@@ -22,6 +22,7 @@
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+
 #include <utils/Log.h>
 
 namespace android {
@@ -44,6 +45,14 @@ Extensions::Extensions() {
     mHas1BitStencil = extensions.has("GL_OES_stencil1");
     mHas4BitStencil = extensions.has("GL_OES_stencil4");
     mHasUnpackSubImage = extensions.has("GL_EXT_unpack_subimage");
+    mHasSRGB = extensions.has("GL_EXT_sRGB");
+    mHasSRGBWriteControl = extensions.has("GL_EXT_sRGB_write_control");
+
+    // If linear blending is enabled, the device must have ES3.0 and GL_EXT_sRGB_write_control
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+    assert(mVersionMajor >= 3 || mHasSRGB);
+    assert(mHasSRGBWriteControl);
+#endif
 
     const char* version = (const char*) glGetString(GL_VERSION);
 

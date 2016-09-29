@@ -52,7 +52,6 @@ void RenderState::onGLContextCreated() {
         mCaches = &Caches::createInstance(*this);
     }
     mCaches->init();
-    mCaches->textureCache.setAssetAtlas(&mAssetAtlas);
 }
 
 static void layerLostGlContext(Layer* layer) {
@@ -64,7 +63,6 @@ void RenderState::onGLContextDestroyed() {
 
     // TODO: reset all cached state in state objects
     std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerLostGlContext);
-    mAssetAtlas.terminate();
 
     mCaches->terminate();
 
@@ -147,9 +145,17 @@ void RenderState::interruptForFunctorInvoke() {
     meshState().resetVertexPointers();
     meshState().disableTexCoordsVertexArray();
     debugOverdraw(false, false);
+    // TODO: We need a way to know whether the functor is sRGB aware (b/32072673)
+    if (mCaches->extensions().hasSRGBWriteControl()) {
+        glDisable(GL_FRAMEBUFFER_SRGB_EXT);
+    }
 }
 
 void RenderState::resumeFromFunctorInvoke() {
+    if (mCaches->extensions().hasSRGBWriteControl()) {
+        glEnable(GL_FRAMEBUFFER_SRGB_EXT);
+    }
+
     glViewport(0, 0, mViewportWidth, mViewportHeight);
     glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
     debugOverdraw(false, false);
@@ -308,7 +314,7 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
         glVertexAttribPointer(alphaLocation, 1, GL_FLOAT, GL_FALSE, vertices.stride, alphaCoords);
     }
     // Shader uniforms
-    SkiaShader::apply(*mCaches, fill.skiaShaderData);
+    SkiaShader::apply(*mCaches, fill.skiaShaderData, mViewportWidth, mViewportHeight);
 
     GL_CHECKPOINT(MODERATE);
     Texture* texture = (fill.skiaShaderData.skiaShaderType & kBitmap_SkiaShaderType) ?

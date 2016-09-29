@@ -613,21 +613,6 @@ static jboolean android_view_ThreadedRenderer_supportsOpenGL(JNIEnv* env, jobjec
     return atoi(prop) > 0 ? JNI_TRUE : JNI_FALSE;
 }
 
-static void android_view_ThreadedRenderer_setAtlas(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jobject graphicBuffer, jlongArray atlasMapArray) {
-    sp<GraphicBuffer> buffer = graphicBufferForJavaObject(env, graphicBuffer);
-    jsize len = env->GetArrayLength(atlasMapArray);
-    if (len <= 0) {
-        ALOGW("Failed to initialize atlas, invalid map length: %d", len);
-        return;
-    }
-    int64_t* map = new int64_t[len];
-    env->GetLongArrayRegion(atlasMapArray, 0, len, map);
-
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->setTextureAtlas(buffer, map, len);
-}
-
 static void android_view_ThreadedRenderer_setProcessStatsBuffer(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jint fd) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -955,7 +940,6 @@ const char* const kClassPathName = "android/view/ThreadedRenderer";
 
 static const JNINativeMethod gMethods[] = {
     { "nSupportsOpenGL", "()Z", (void*) android_view_ThreadedRenderer_supportsOpenGL },
-    { "nSetAtlas", "(JLandroid/view/GraphicBuffer;[J)V",   (void*) android_view_ThreadedRenderer_setAtlas },
     { "nSetProcessStatsBuffer", "(JI)V", (void*) android_view_ThreadedRenderer_setProcessStatsBuffer },
     { "nGetRenderThreadTid", "(J)I", (void*) android_view_ThreadedRenderer_getRenderThreadTid },
     { "nCreateRootRenderNode", "()J", (void*) android_view_ThreadedRenderer_createRootRenderNode },

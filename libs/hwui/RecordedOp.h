@@ -216,7 +216,6 @@ struct BitmapOp : RecordedOp {
             : SUPER(BitmapOp)
             , bitmap(bitmap) {}
     const SkBitmap* bitmap;
-    // TODO: asset atlas/texture id lookup?
 };
 
 struct BitmapMeshOp : RecordedOp {

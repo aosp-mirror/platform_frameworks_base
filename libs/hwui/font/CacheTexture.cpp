@@ -180,7 +180,12 @@ void CacheTexture::allocatePixelBuffer() {
         mPixelBuffer = PixelBuffer::create(mFormat, getWidth(), getHeight());
     }
 
-    mTexture.resize(mWidth, mHeight, mFormat);
+    GLint internalFormat = mFormat;
+    if (mFormat == GL_RGBA) {
+        internalFormat = mCaches.rgbaInternalFormat();
+    }
+
+    mTexture.resize(mWidth, mHeight, internalFormat, mFormat);
     mTexture.setFilter(getLinearFiltering() ? GL_LINEAR : GL_NEAREST);
     mTexture.setWrap(GL_CLAMP_TO_EDGE);
 }

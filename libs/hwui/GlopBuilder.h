@@ -105,6 +105,8 @@ public:
 
     GlopBuilder& setRoundRectClipState(const RoundRectClipState* roundRectClipState);
 
+    GlopBuilder& setGammaCorrection(bool enabled);
+
     void build();
 
     static void dump(const Glop& glop);

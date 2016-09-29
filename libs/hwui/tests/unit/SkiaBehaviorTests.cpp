@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 #include <SkColorMatrixFilter.h>
+#include <SkColorSpace.h>
 #include <SkImagePriv.h>
 #include <SkShader.h>
 
@@ -81,4 +82,10 @@ TEST(SkiaBehavior, porterDuffCreateIsCached) {
     ASSERT_NE(expected, paint.getXfermode());
     paint.setXfermodeMode(SkXfermode::kOverlay_Mode);
     ASSERT_EQ(expected, paint.getXfermode());
+}
+
+TEST(SkiaBehavior, srgbColorSpaceIsSingleton) {
+    sk_sp<SkColorSpace> sRGB1 = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
+    sk_sp<SkColorSpace> sRGB2 = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
+    ASSERT_EQ(sRGB1.get(), sRGB2.get());
 }

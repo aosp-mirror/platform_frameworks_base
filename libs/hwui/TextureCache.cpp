@@ -18,7 +18,6 @@
 
 #include <utils/Mutex.h>
 
-#include "AssetAtlas.h"
 #include "Caches.h"
 #include "Texture.h"
 #include "TextureCache.h"
@@ -36,8 +35,7 @@ TextureCache::TextureCache()
         : mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity)
         , mSize(0)
         , mMaxSize(Properties::textureCacheSize)
-        , mFlushRate(Properties::textureCacheFlushRate)
-        , mAssetAtlas(nullptr) {
+        , mFlushRate(Properties::textureCacheFlushRate) {
     mCache.setOnEntryRemovedListener(this);
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
@@ -84,10 +82,6 @@ void TextureCache::operator()(uint32_t&, Texture*& texture) {
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
 
-void TextureCache::setAssetAtlas(AssetAtlas* assetAtlas) {
-    mAssetAtlas = assetAtlas;
-}
-
 void TextureCache::resetMarkInUse(void* ownerToken) {
     LruCache<uint32_t, Texture*>::Iterator iter(mCache);
     while (iter.next()) {
@@ -108,14 +102,7 @@ bool TextureCache::canMakeTextureFromBitmap(const SkBitmap* bitmap) {
 
 // Returns a prepared Texture* that either is already in the cache or can fit
 // in the cache (and is thus added to the cache)
-Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap, AtlasUsageType atlasUsageType) {
-    if (CC_LIKELY(mAssetAtlas != nullptr) && atlasUsageType == AtlasUsageType::Use) {
-        AssetAtlas::Entry* entry = mAssetAtlas->getEntry(bitmap->pixelRef());
-        if (CC_UNLIKELY(entry)) {
-            return entry->texture;
-        }
-    }
-
+Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
     Texture* texture = mCache.get(bitmap->pixelRef()->getStableID());
 
     if (!texture) {
@@ -160,7 +147,7 @@ Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap, AtlasUsageType a
 }
 
 bool TextureCache::prefetchAndMarkInUse(void* ownerToken, const SkBitmap* bitmap) {
-    Texture* texture = getCachedTexture(bitmap, AtlasUsageType::Use);
+    Texture* texture = getCachedTexture(bitmap);
     if (texture) {
         texture->isInUse = ownerToken;
     }
@@ -168,11 +155,11 @@ bool TextureCache::prefetchAndMarkInUse(void* ownerToken, const SkBitmap* bitmap
 }
 
 bool TextureCache::prefetch(const SkBitmap* bitmap) {
-    return getCachedTexture(bitmap, AtlasUsageType::Use);
+    return getCachedTexture(bitmap);
 }
 
-Texture* TextureCache::get(const SkBitmap* bitmap, AtlasUsageType atlasUsageType) {
-    Texture* texture = getCachedTexture(bitmap, atlasUsageType);
+Texture* TextureCache::get(const SkBitmap* bitmap) {
+    Texture* texture = getCachedTexture(bitmap);
 
     if (!texture) {
         if (!canMakeTextureFromBitmap(bitmap)) {

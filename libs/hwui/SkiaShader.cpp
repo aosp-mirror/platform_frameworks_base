@@ -177,11 +177,12 @@ bool tryStoreGradient(Caches& caches, const SkShader& shader, const Matrix4 mode
         outData->endColor.set(gradInfo.fColors[1]);
     }
 
-    outData->ditherSampler = (*textureUnit)++;
     return true;
 }
 
-void applyGradient(Caches& caches, const SkiaShaderData::GradientShaderData& data) {
+void applyGradient(Caches& caches, const SkiaShaderData::GradientShaderData& data,
+        const GLsizei width, const GLsizei height) {
+
     if (CC_UNLIKELY(data.gradientTexture)) {
         caches.textureState().activateTexture(data.gradientSampler);
         bindTexture(&caches, data.gradientTexture, data.wrapST, data.wrapST);
@@ -191,10 +192,7 @@ void applyGradient(Caches& caches, const SkiaShaderData::GradientShaderData& dat
         bindUniformColor(caches.program().getUniform("endColor"), data.endColor);
     }
 
-    // TODO: remove sampler slot incrementing from dither.setupProgram,
-    // since this assignment of slots is done at store, not apply time
-    GLuint ditherSampler = data.ditherSampler;
-    caches.dither.setupProgram(caches.program(), &ditherSampler);
+    glUniform2f(caches.program().getUniform("screenSize"), 1.0f / width, 1.0f / height);
     glUniformMatrix4fv(caches.program().getUniform("screenSpace"), 1,
             GL_FALSE, &data.screenSpace.data[0]);
 }
@@ -208,13 +206,7 @@ bool tryStoreBitmap(Caches& caches, const SkShader& shader, const Matrix4& model
         return false;
     }
 
-    /*
-     * Bypass the AssetAtlas, since those textures:
-     * 1) require UV mapping, which isn't implemented in matrix computation below
-     * 2) can't handle REPEAT simply
-     * 3) are safe to upload here (outside of sync stage), since they're static
-     */
-    outData->bitmapTexture = caches.textureCache.getAndBypassAtlas(&bitmap);
+    outData->bitmapTexture = caches.textureCache.get(&bitmap);
     if (!outData->bitmapTexture) return false;
 
     outData->bitmapSampler = (*textureUnit)++;
@@ -388,11 +380,12 @@ void SkiaShader::store(Caches& caches, const SkShader& shader, const Matrix4& mo
     outData->skiaShaderType = kNone_SkiaShaderType;
 }
 
-void SkiaShader::apply(Caches& caches, const SkiaShaderData& data) {
+void SkiaShader::apply(Caches& caches, const SkiaShaderData& data,
+        const GLsizei width, const GLsizei height) {
     if (!data.skiaShaderType) return;
 
     if (data.skiaShaderType & kGradient_SkiaShaderType) {
-        applyGradient(caches, data.gradientData);
+        applyGradient(caches, data.gradientData, width, height);
     }
     if (data.skiaShaderType & kBitmap_SkiaShaderType) {
         applyBitmap(caches, data.bitmapData);

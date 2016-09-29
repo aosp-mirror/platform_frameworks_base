@@ -10,6 +10,7 @@
 #include "SkMallocPixelRef.h"
 #include "SkPoint.h"
 #include "SkRect.h"
+#include "SkColorSpace.h"
 #include <jni.h>
 #include <hwui/Canvas.h>
 
@@ -93,6 +94,8 @@ public:
     static bool SetPixels(JNIEnv* env, jintArray colors, int srcOffset,
             int srcStride, int x, int y, int width, int height,
             const SkBitmap& dstBitmap);
+
+    static sk_sp<SkColorSpace> defaultColorSpace();
 };
 
 class HeapAllocator : public SkBRDAllocator {

@@ -22,7 +22,6 @@
 
 #include <androidfw/ResourceTypes.h>
 
-#include "AssetAtlas.h"
 #include "Debug.h"
 #include "utils/Pair.h"
 
@@ -54,8 +53,7 @@ public:
     explicit PatchCache(RenderState& renderState);
     ~PatchCache();
 
-    const Patch* get(const AssetAtlas::Entry* entry,
-            const uint32_t bitmapWidth, const uint32_t bitmapHeight,
+    const Patch* get(const uint32_t bitmapWidth, const uint32_t bitmapHeight,
             const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch);
     void clear();
 

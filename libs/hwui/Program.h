@@ -85,6 +85,8 @@ namespace uirenderer {
 #define PROGRAM_HAS_DEBUG_HIGHLIGHT 42
 #define PROGRAM_HAS_ROUND_RECT_CLIP 43
 
+#define PROGRAM_HAS_GAMMA_CORRECTION 44
+
 ///////////////////////////////////////////////////////////////////////////////
 // Types
 ///////////////////////////////////////////////////////////////////////////////
@@ -158,6 +160,8 @@ struct ProgramDescription {
     bool hasDebugHighlight;
     bool hasRoundRectClip;
 
+    bool hasGammaCorrection;
+
     /**
      * Resets this description. All fields are reset back to the default
      * values they hold after building a new instance.
@@ -196,6 +200,8 @@ struct ProgramDescription {
 
         hasDebugHighlight = false;
         hasRoundRectClip = false;
+
+        hasGammaCorrection = false;
     }
 
     /**
@@ -262,6 +268,7 @@ struct ProgramDescription {
         if (hasColors) key |= programid(0x1) << PROGRAM_HAS_COLORS;
         if (hasDebugHighlight) key |= programid(0x1) << PROGRAM_HAS_DEBUG_HIGHLIGHT;
         if (hasRoundRectClip) key |= programid(0x1) << PROGRAM_HAS_ROUND_RECT_CLIP;
+        if (hasGammaCorrection) key |= programid(0x1) << PROGRAM_HAS_GAMMA_CORRECTION;
         return key;
     }
 

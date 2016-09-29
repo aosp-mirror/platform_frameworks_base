@@ -2077,9 +2077,6 @@ android.view.Gravity
 android.view.HandlerActionQueue
 android.view.HandlerActionQueue$HandlerAction
 android.view.HardwareLayer
-android.view.IAssetAtlas
-android.view.IAssetAtlas$Stub
-android.view.IAssetAtlas$Stub$Proxy
 android.view.IGraphicsStats
 android.view.IGraphicsStats$Stub
 android.view.IGraphicsStats$Stub$Proxy

@@ -47,8 +47,6 @@ class Texture;
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
 
-class AssetAtlas;
-
 /**
  * A simple LRU texture cache. The cache has a maximum size expressed in bytes.
  * Any texture added to the cache causing the cache to grow beyond the maximum
@@ -85,20 +83,10 @@ public:
     bool prefetch(const SkBitmap* bitmap);
 
     /**
-     * Returns the texture associated with the specified bitmap from either within the cache, or
-     * the AssetAtlas. If the texture cannot be found in the cache, a new texture is generated.
+     * Returns the texture associated with the specified bitmap from within the cache.
+     * If the texture cannot be found in the cache, a new texture is generated.
      */
-    Texture* get(const SkBitmap* bitmap) {
-        return get(bitmap, AtlasUsageType::Use);
-    }
-
-    /**
-     * Returns the texture associated with the specified bitmap. If the texture cannot be found in
-     * the cache, a new texture is generated, even if it resides in the AssetAtlas.
-     */
-    Texture* getAndBypassAtlas(const SkBitmap* bitmap) {
-        return get(bitmap, AtlasUsageType::Bypass);
-    }
+    Texture* get(const SkBitmap* bitmap);
 
     /**
      * Removes the texture associated with the specified pixelRef. This is meant
@@ -130,18 +118,10 @@ public:
      */
     void flush();
 
-    void setAssetAtlas(AssetAtlas* assetAtlas);
-
 private:
-    enum class AtlasUsageType {
-        Use,
-        Bypass,
-    };
-
     bool canMakeTextureFromBitmap(const SkBitmap* bitmap);
 
-    Texture* get(const SkBitmap* bitmap, AtlasUsageType atlasUsageType);
-    Texture* getCachedTexture(const SkBitmap* bitmap, AtlasUsageType atlasUsageType);
+    Texture* getCachedTexture(const SkBitmap* bitmap);
 
     LruCache<uint32_t, Texture*> mCache;
 
@@ -155,8 +135,6 @@ private:
 
     std::vector<uint32_t> mGarbage;
     mutable Mutex mLock;
-
-    AssetAtlas* mAssetAtlas;
 }; // class TextureCache
 
 }; // namespace uirenderer

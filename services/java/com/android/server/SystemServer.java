@@ -747,7 +747,6 @@ public final class SystemServer {
         LocationManagerService location = null;
         CountryDetectorService countryDetector = null;
         ILockSettings lockSettings = null;
-        AssetAtlasService atlas = null;
         MediaRouterService mediaRouter = null;
 
         // Bring up services needed for UI.
@@ -1235,17 +1234,6 @@ public final class SystemServer {
                 traceEnd();
             }
 
-            if (!disableNonCoreServices && ZygoteInit.PRELOAD_RESOURCES) {
-                traceBeginAndSlog("StartAssetAtlasService");
-                try {
-                    atlas = new AssetAtlasService(context);
-                    ServiceManager.addService(AssetAtlasService.ASSET_ATLAS_SERVICE, atlas);
-                } catch (Throwable e) {
-                    reportWtf("starting AssetAtlasService", e);
-                }
-                traceEnd();
-            }
-
             if (!disableNonCoreServices) {
                 traceBeginAndSlog("AddGraphicsStatsService");
                 ServiceManager.addService(GraphicsStatsService.GRAPHICS_STATS_SERVICE,
@@ -1465,7 +1453,6 @@ public final class SystemServer {
         final CountryDetectorService countryDetectorF = countryDetector;
         final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
         final CommonTimeManagementService commonTimeMgmtServiceF = commonTimeMgmtService;
-        final AssetAtlasService atlasF = atlas;
         final InputManagerService inputManagerF = inputManager;
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
         final MediaRouterService mediaRouterF = mediaRouter;
@@ -1581,13 +1568,6 @@ public final class SystemServer {
                     }
                 } catch (Throwable e) {
                     reportWtf("Notifying CommonTimeManagementService running", e);
-                }
-                traceEnd();
-                traceBeginAndSlog("MakeAtlasServiceReady");
-                try {
-                    if (atlasF != null) atlasF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying AssetAtlasService running", e);
                 }
                 traceEnd();
                 traceBeginAndSlog("MakeInputManagerServiceReady");

@@ -480,23 +480,6 @@ void RenderProxy::dumpGraphicsMemory(int fd) {
     staticPostAndWait(task);
 }
 
-CREATE_BRIDGE4(setTextureAtlas, RenderThread* thread, GraphicBuffer* buffer, int64_t* map,
-               size_t size) {
-    CanvasContext::setTextureAtlas(*args->thread, args->buffer, args->map, args->size);
-    args->buffer->decStrong(nullptr);
-    return nullptr;
-}
-
-void RenderProxy::setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size) {
-    SETUP_TASK(setTextureAtlas);
-    args->thread = &mRenderThread;
-    args->buffer = buffer.get();
-    args->buffer->incStrong(nullptr);
-    args->map = map;
-    args->size = size;
-    post(task);
-}
-
 CREATE_BRIDGE2(setProcessStatsBuffer, RenderThread* thread, int fd) {
     args->thread->jankTracker().switchStorageToAshmem(args->fd);
     close(args->fd);

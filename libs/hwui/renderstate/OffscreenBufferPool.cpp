@@ -22,6 +22,7 @@
 #include "utils/FatVector.h"
 #include "utils/TraceUtils.h"
 
+#include <utils/Color.h>
 #include <utils/Log.h>
 
 #include <GLES2/gl2.h>
@@ -44,7 +45,7 @@ OffscreenBuffer::OffscreenBuffer(RenderState& renderState, Caches& caches,
     uint32_t height = computeIdealDimension(viewportHeight);
     ATRACE_FORMAT("Allocate %ux%u HW Layer", width, height);
     caches.textureState().activateTexture(0);
-    texture.resize(width, height, GL_RGBA);
+    texture.resize(width, height, caches.rgbaInternalFormat(), GL_RGBA);
     texture.blend = true;
     texture.setWrap(GL_CLAMP_TO_EDGE);
     // not setting filter on texture, since it's set when drawing, based on transform

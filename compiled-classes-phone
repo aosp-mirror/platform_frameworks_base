@@ -1168,14 +1168,6 @@ android.drm.DrmManagerClient$OnEventListener
 android.drm.DrmManagerClient$OnInfoListener
 android.drm.DrmOutputStream
 android.drm.DrmSupportInfo
-android.graphics.Atlas
-android.graphics.Atlas$Entry
-android.graphics.Atlas$Policy
-android.graphics.Atlas$SlicePolicy
-android.graphics.Atlas$SlicePolicy$Cell
-android.graphics.Atlas$SlicePolicy$MinAreaSplitDecision
-android.graphics.Atlas$SlicePolicy$SplitDecision
-android.graphics.Atlas$Type
 android.graphics.Bitmap
 android.graphics.Bitmap$1
 android.graphics.Bitmap$CompressFormat
@@ -4264,9 +4256,6 @@ android.view.IAppTransitionAnimationSpecsFuture$Stub
 android.view.IAppTransitionAnimationSpecsFuture$Stub$Proxy
 android.view.IApplicationToken
 android.view.IApplicationToken$Stub
-android.view.IAssetAtlas
-android.view.IAssetAtlas$Stub
-android.view.IAssetAtlas$Stub$Proxy
 android.view.IDockedStackListener
 android.view.IDockedStackListener$Stub
 android.view.IDockedStackListener$Stub$Proxy

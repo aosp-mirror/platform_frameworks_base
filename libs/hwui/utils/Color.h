@@ -16,6 +16,8 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include <math.h>
+
 #include <SkColor.h>
 
 namespace android {
@@ -80,6 +82,28 @@ namespace uirenderer {
     };
     static constexpr int BrightColorsCount = sizeof(BrightColors) / sizeof(Color::Color);
 
+    // Opto-electronic conversion function for the sRGB color space
+    // Takes a gamma-encoded sRGB value and converts it to a linear sRGB value
+    static constexpr float OECF_sRGB(float linear) {
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+        // IEC 61966-2-1:1999
+        return linear <= 0.0031308f ?
+                linear * 12.92f : (powf(linear, 1.0f / 2.4f) * 1.055f) - 0.055f;
+#else
+        return linear;
+#endif
+    }
+
+    // Electro-optical conversion function for the sRGB color space
+    // Takes a linear sRGB value and converts it to a gamma-encoded sRGB value
+    static constexpr float EOCF_sRGB(float srgb) {
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+        // IEC 61966-2-1:1999
+        return srgb <= 0.04045f ? srgb / 12.92f : powf((srgb + 0.055f) / 1.055f, 2.4f);
+#else
+        return srgb;
+#endif
+    }
 } /* namespace uirenderer */
 } /* namespace android */
 

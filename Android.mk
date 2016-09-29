@@ -288,7 +288,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
 	core/java/android/view/IApplicationToken.aidl \
 	core/java/android/view/IAppTransitionAnimationSpecsFuture.aidl \
-	core/java/android/view/IAssetAtlas.aidl \
 	core/java/android/view/IDockedStackListener.aidl \
 	core/java/android/view/IGraphicsStats.aidl \
 	core/java/android/view/IInputFilter.aidl \

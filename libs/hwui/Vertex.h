@@ -19,6 +19,7 @@
 
 #include "Vector.h"
 
+#include "FloatColor.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -76,21 +77,19 @@ struct TextureVertex {
 REQUIRE_COMPATIBLE_LAYOUT(TextureVertex);
 
 /**
- * Simple structure to describe a vertex with a position, texture UV and ARGB color.
+ * Simple structure to describe a vertex with a position, texture UV and an
+ * sRGB color with alpha. The color is stored pre-multiplied in linear space.
  */
 struct ColorTextureVertex {
     float x, y;
     float u, v;
-    float r, g, b, a;
+    float r, g, b, a; // pre-multiplied linear
 
     static inline void set(ColorTextureVertex* vertex, float x, float y,
-            float u, float v, int color) {
-
-        float a =     ((color >> 24) & 0xff) / 255.0f;
-        float r = a * ((color >> 16) & 0xff) / 255.0f;
-        float g = a * ((color >>  8) & 0xff) / 255.0f;
-        float b = a * ((color) & 0xff) / 255.0f;
-        *vertex = { x, y, u, v, r, g, b, a };
+            float u, float v, uint32_t color) {
+        FloatColor c;
+        c.set(color);
+        *vertex = { x, y, u, v, c.r, c.g, c.b, c.a };
     }
 }; // struct ColorTextureVertex
 

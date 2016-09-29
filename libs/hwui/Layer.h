@@ -75,7 +75,7 @@ public:
     }
 
     void setSize(uint32_t width, uint32_t height) {
-        texture.updateSize(width, height, texture.format());
+        texture.updateSize(width, height, texture.internalFormat(), texture.format());
     }
 
     inline void setBlend(bool blend) {

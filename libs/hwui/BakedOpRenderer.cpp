@@ -182,11 +182,7 @@ void BakedOpRenderer::clearColorBuffer(const Rect& rect) {
 }
 
 Texture* BakedOpRenderer::getTexture(const SkBitmap* bitmap) {
-    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap->pixelRef());
-    if (!texture) {
-        return mCaches.textureCache.get(bitmap);
-    }
-    return texture;
+    return mCaches.textureCache.get(bitmap);
 }
 
 void BakedOpRenderer::drawRects(const float* rects, int count, const SkPaint* paint) {
