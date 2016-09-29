@@ -311,9 +311,7 @@ public class AppOpsManager {
     /** Access APIs for SIP calling over VOIP or WiFi */
     public static final String OPSTR_USE_SIP
             = "android:use_sip";
-    /** Access APIs for diverting outgoing calls
-     * @hide
-     */
+    /** Access APIs for diverting outgoing calls */
     public static final String OPSTR_PROCESS_OUTGOING_CALLS
             = "android:process_outgoing_calls";
     /** Use the fingerprint API. */
