@@ -57,8 +57,7 @@ import java.util.concurrent.TimeoutException;
  * This is the base class for print tests.
  */
 abstract class BasePrintTest {
-
-    private static final long OPERATION_TIMEOUT = 30000;
+    protected static final long OPERATION_TIMEOUT = 30000;
     private static final String PM_CLEAR_SUCCESS_OUTPUT = "Success";
     private static final int CURRENT_USER_ID = -2; // Mirrors UserHandle.USER_CURRENT
 
@@ -73,6 +72,39 @@ abstract class BasePrintTest {
     @Rule
     public ActivityTestRule<PrintTestActivity> mActivityRule =
             new ActivityTestRule<>(PrintTestActivity.class, false, true);
+
+    /**
+     * {@link Runnable} that can throw and {@link Exception}
+     */
+    interface Invokable {
+        /**
+         * Execute the invokable
+         *
+         * @throws Exception
+         */
+        void run() throws Exception;
+    }
+
+    /**
+     * Assert that the invokable throws an expectedException
+     *
+     * @param invokable The {@link Invokable} to run
+     * @param expectedClass The {@link Exception} that is supposed to be thrown
+     */
+    void assertException(Invokable invokable, Class<? extends Exception> expectedClass)
+            throws Exception {
+        try {
+            invokable.run();
+        } catch (Exception e) {
+            if (e.getClass().isAssignableFrom(expectedClass)) {
+                return;
+            } else {
+                throw e;
+            }
+        }
+
+        throw new AssertionError("No exception thrown");
+    }
 
     /**
      * Return the UI device
@@ -105,14 +137,14 @@ abstract class BasePrintTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void initCounters() throws Exception {
         // Initialize the latches.
         mStartCallCounter = new CallCounter();
         mStartSessionCallCounter = new CallCounter();
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void exitActivities() throws Exception {
         // Exit print spooler
         getUiDevice().pressBack();
         getUiDevice().pressBack();

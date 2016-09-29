@@ -41,6 +41,7 @@ import android.print.mockservice.StubbablePrinterDiscoverySession;
 import android.support.test.filters.LargeTest;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -219,48 +220,12 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         return new PrinterId(getActivity().getComponentName(), "dummy printer");
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUpMockService() throws Exception {
         MockPrintService.setCallbacks(createMockCallbacks());
 
         mIPrintManager = IPrintManager.Stub
                 .asInterface(ServiceManager.getService(Context.PRINT_SERVICE));
-    }
-
-    /**
-     * {@link Runnable} that can throw and {@link Exception}
-     */
-    private interface Invokable {
-        /**
-         * Execute the invokable
-         *
-         * @throws Exception
-         */
-        void run() throws Exception;
-    }
-
-    /**
-     * Assert that the invokable throws an expectedException
-     *
-     * @param invokable The {@link Invokable} to run
-     * @param expectedClass The {@link Exception} that is supposed to be thrown
-     */
-    public void assertException(Invokable invokable, Class<? extends Exception> expectedClass)
-            throws Exception {
-        try {
-            invokable.run();
-        } catch (Exception e) {
-            if (e.getClass().isAssignableFrom(expectedClass)) {
-                return;
-            } else {
-                throw new AssertionError("Expected: " + expectedClass.getName() + ", got: "
-                                + e.getClass().getName());
-            }
-        }
-
-        throw new AssertionError("No exception thrown");
     }
 
     /**

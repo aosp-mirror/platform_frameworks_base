@@ -17,4 +17,5 @@
 -->
 
 <print-service  xmlns:android="http://schemas.android.com/apk/res/android"
-     android:settingsActivity="android.print.mockservice.SettingsActivity"/>
+     android:settingsActivity="android.print.mockservice.SettingsActivity"
+     android:addPrintersActivity="android.print.mockservice.AddPrintersActivity" />

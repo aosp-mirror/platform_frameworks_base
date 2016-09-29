@@ -760,6 +760,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 mPrintJob.setPrinterId(printerInfo.getId());
                 mPrintJob.setPrinterName(printerInfo.getName());
 
+                if (printerInfo.getCapabilities() != null) {
+                    updatePrintAttributesFromCapabilities(printerInfo.getCapabilities());
+                }
+
                 mDestinationSpinnerAdapter.ensurePrinterInVisibleAdapterPosition(printerInfo);
 
                 MetricsLogger.action(this, MetricsEvent.ACTION_PRINTER_SELECT_ALL,

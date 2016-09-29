@@ -1329,6 +1329,11 @@
             android:exported="true">
         </activity>
 
+        <activity
+                android:name="android.print.mockservice.AddPrintersActivity"
+                android:exported="true">
+        </activity>
+
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
