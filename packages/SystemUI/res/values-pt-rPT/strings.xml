@@ -237,7 +237,8 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Dados 4G em pausa"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Dados de redes móveis em pausa"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Dados em pausa"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Uma vez que foi atingido o limite de dados definido, foi interrompida a utilização de dados no seu dispositivo durante o tempo restante deste ciclo.\n\nSe retomar a utilização, o seu operador pode efetuar cobranças."</string>
+    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Retomar"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sem ligação internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi ligado"</string>

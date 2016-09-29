@@ -237,7 +237,8 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-data zijn onderbroken"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobiele gegevens zijn onderbroken"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Gegevens zijn onderbroken"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Omdat de ingestelde gegevenslimiet is bereikt, heeft het apparaat het gegevensverbruik onderbroken voor de rest van deze cyclus.\n\nAls u het gegevensverbruik hervat, kan je provider kosten in rekening brengen."</string>
+    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Hervatten"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Geen internetverbinding"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Verbonden via wifi"</string>

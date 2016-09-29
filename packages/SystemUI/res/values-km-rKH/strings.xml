@@ -237,7 +237,8 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"ទិន្នន័យ 4G ត្រូវបានផ្អាក"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"ទិន្នន័យចល័តត្រូវបានផ្អាក"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ទិន្នន័យត្រូវបានផ្អាក"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"ដោយសារទិន្នន័យរបស់អ្នកបានឈានដល់កំណត់ ឧបករណ៍នេះបានផ្អាកការប្រើប្រាស់ទិន្នន័យសម្រាប់ការរំលឹកនៃវគ្គនេះ។\n\nការបន្តប្រើប្រាស់អាចនាំឲ្យមានការគិតប្រាក់ពីក្រុមហ៊ុនផ្តល់សេវាកម្ម។"</string>
+    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"បន្ត"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"គ្មាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"បាន​ភ្ជាប់​វ៉ាយហ្វាយ"</string>

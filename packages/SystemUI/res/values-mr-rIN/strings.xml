@@ -237,7 +237,8 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G डेटास विराम दिला आहे"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"सेल्युलर डेटास विराम दिला आहे"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"डेटास विराम दिला आहे"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"आपली सेट केलेली डेटा मर्यादा गाठल्यामुळे, डिव्हाइसने या चक्राच्या उर्वरित डेटा वापरास विराम दिला आहे.\n\nपुन्हा सुरु करण्यामुळे आपल्या वाहकाकडून शुल्क आकारले जाऊ शकते."</string>
+    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"पुन्हा सुरु करा"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"इंटरनेट कनेक्शन नाही"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"वाय-फाय कनेक्ट केले"</string>
