@@ -94,13 +94,6 @@ public class TileUtils {
     private static final String EXTRA_CATEGORY_KEY = "com.android.settings.category";
 
     /**
-     * The key used to get the category from metadata of activities of action
-     * {@link #EXTRA_SETTINGS_ACTION}
-     * The value must be one of constants defined in {@code CategoryKey}.
-     */
-    private static final String EXTRA_IA_CATEGORY_KEY = "com.android.settings.iacategory";
-
-    /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
      * to specify the icon that should be displayed for the preference.
      */
@@ -240,20 +233,18 @@ public class TileUtils {
             ActivityInfo activityInfo = resolved.activityInfo;
             Bundle metaData = activityInfo.metaData;
             String categoryKey = defaultCategory;
-            if (metaData != null && categoryKey == null) {
-                // categoryKey is null, try to get it from metadata.
-                if (metaData.containsKey(EXTRA_IA_CATEGORY_KEY)) {
-                    categoryKey = metaData.getString(EXTRA_IA_CATEGORY_KEY);
-                } else if (metaData.containsKey(EXTRA_CATEGORY_KEY)) {
-                    categoryKey = metaData.getString(EXTRA_CATEGORY_KEY);
-                }
-            }
-            if (checkCategory && categoryKey == null) {
+
+            // Load category
+            if (checkCategory && ((metaData == null) || !metaData.containsKey(EXTRA_CATEGORY_KEY))
+                    && categoryKey == null) {
                 Log.w(LOG_TAG, "Found " + resolved.activityInfo.name + " for intent "
                         + intent + " missing metadata "
                         + (metaData == null ? "" : EXTRA_CATEGORY_KEY));
                 continue;
+            } else {
+                categoryKey = metaData.getString(EXTRA_CATEGORY_KEY);
             }
+
             Pair<String, String> key = new Pair<String, String>(activityInfo.packageName,
                     activityInfo.name);
             Tile tile = addedCache.get(key);
