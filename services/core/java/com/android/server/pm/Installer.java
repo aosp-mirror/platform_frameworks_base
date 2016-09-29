@@ -230,6 +230,11 @@ public final class Installer extends SystemService {
         mInstaller.execute("move_ab", apkPath, instructionSet, outputPath);
     }
 
+    public void deleteOdex(String apkPath, String instructionSet, String outputPath)
+            throws InstallerException {
+        mInstaller.execute("delete_odex", apkPath, instructionSet, outputPath);
+    }
+
     private static void assertValidInstructionSet(String instructionSet)
             throws InstallerException {
         for (String abi : Build.SUPPORTED_ABIS) {
