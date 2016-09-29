@@ -1332,7 +1332,8 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"ឧបករណ៍ផ្ទុក USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"ឧបករណ៍​ផ្ទុក​យូអេសប៊ី"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"កែសម្រួល​"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"ការព្រមាន​ប្រើ​ទិន្នន័យ"</string>
+    <!-- no translation found for data_usage_warning_title (3620440638180218181) -->
+    <skip />
     <string name="data_usage_warning_body" msgid="6660692274311972007">"ប៉ះដើម្បីមើលការប្រើប្រាស់ និងការកំណត់"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"បាន​ដល់​ដែន​កំណត់​ទិន្នន័យ 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"បាន​ដល់​ដែន​កំណត់​ទិន្នន័យ 4G"</string>
