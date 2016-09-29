@@ -238,7 +238,8 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"ຂໍ້​ມູນ 4G ຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"ຂໍ້​ມູນເຊວ​ລູ​ລາຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ຂໍ້​ມູນ​ຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"ເນື່ອງ​ຈາກວ່າ​ຮອດ​ຂີດ​ຈຳ​ກັດ​ຂໍ້​ມູນ​ທີ່​ຕັ້ງ​ໄວ້​ຂອ​ງ​ທ່ານ​ແລ້ວ, ອຸ​ປະ​ກອນ​ຢຸດ​ການ​ນຳ​ໃຊ້​ຂໍ້​ມູນ​ສຳ​ລັບ​ສ່ວນ​ທີ່​ຍັງ​ເຫຼືອ​ຂອງ​ຮອບ​ວຽນ​ນີ້.\n\nການ​ເລີ່ມ​ຕໍ່​ອາດ​ຈະ​ນຳ​ໄປ​ສູ່​ການ​ປ່ຽນ​ແປງ​ຈາກ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ."</string>
+    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ເລີ່ມຕໍ່"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"ເຊື່ອມ​ຕໍ່ Wi-​-Fi ແລ້ວ"</string>
