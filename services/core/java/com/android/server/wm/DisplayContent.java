@@ -697,7 +697,8 @@ class DisplayContent {
         for (int i = 0; i < windowCount; i++) {
             WindowState window = windows.get(i);
             if (window.mAttrs.type == TYPE_TOAST && window.mOwnerUid == uid
-                    && !window.mPermanentlyHidden && !window.mAnimatingExit) {
+                    && !window.mPermanentlyHidden && !window.mAnimatingExit
+                    && !window.mRemoveOnExit) {
                 return false;
             }
         }
