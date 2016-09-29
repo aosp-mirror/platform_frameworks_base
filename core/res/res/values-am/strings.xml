@@ -1330,7 +1330,8 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"የ<xliff:g id="MANUFACTURER">%s</xliff:g> ዩኤስቢ አንጻፊ"</string>
     <string name="storage_usb" msgid="3017954059538517278">"የUSB  ማከማቻ"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"አርትዕ"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"የውሂብ አጠቃቀም ማስጠንቀቂየ"</string>
+    <!-- no translation found for data_usage_warning_title (3620440638180218181) -->
+    <skip />
     <string name="data_usage_warning_body" msgid="6660692274311972007">"አጠቃቀምን እና ቅንብሮችን ለማየት መታ ያድርጉ።"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"የ2ጂ-3ጂ ውሂብ ገደብ ላይ ተደርሷል"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"የ4ጂ ውሂብ ገደብ ላይ ተደርሷል"</string>

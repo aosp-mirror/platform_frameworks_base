@@ -251,17 +251,17 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Օրացույց"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"օգտագործել օրացույցը"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Կարճ հաղորդագրություն"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"ուղարկել և դիտել SMS հաղորդագրությունները"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"ուղարկել և դիտել SMS հաղորդ․-ները"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Պահոց"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"օգտագործել լուսանկարները, մեդիա ֆայլերը և ձեր սարքում պահվող այլ ֆայլերը"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"օգտագործել լուսանկարները, մեդիա ֆայլերը և ձեր սարքում պահվող մյուս ֆայլերը"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Բարձրախոս"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ձայնագրում"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ձայնագրել"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Ֆոտոխցիկ"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"լուսանկարում և տեսագրում"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"լուսանկարել և տեսագրել"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Հեռախոս"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"հեռախոսազանգերի կատարում և կառավարում"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"կատարել զանգեր և կառավարել զանգերը"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Մարմնի սենսորներ"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"օգտագործել ձեր հիմնական ֆիզիոլոգիական ցուցանիշների վերաբերյալ սենսորի տվյալները"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"օգտագործել սենսորների տվյալները ձեր օրգանիզմի վիճակի մասին"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Առբերել պատուհանի բովանդակությունը"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ստուգեք պատուհանի բովանդակությունը, որի հետ փոխգործակցում եք:"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Միացնել Հպման միջոցով հետազոտումը"</string>
@@ -1330,7 +1330,8 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"USB սարքավար <xliff:g id="MANUFACTURER">%s</xliff:g>-ից"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB կրիչ"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Խմբագրել"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Տվյալների օգտագործման նախազգուշացում"</string>
+    <!-- no translation found for data_usage_warning_title (3620440638180218181) -->
+    <skip />
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Հպեք և տեսեք օգտագործումը և կարգավորումները:"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G տվյալների սահմանաչափը սպառվել է"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G տվյալների սահմանաչափը սպառվել է"</string>
