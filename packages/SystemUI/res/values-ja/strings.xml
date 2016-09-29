@@ -239,7 +239,8 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4Gデータは一時停止中です"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"モバイルデータは一時停止中です"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"データの一時停止"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"設定されたデータの上限に達したため、このサイクルの終了までこの端末でのデータの利用を一時停止しました。\n\n再開すると、携帯通信会社から課金される可能性があります。"</string>
+    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"再開"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"インターネット未接続"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi接続済み"</string>

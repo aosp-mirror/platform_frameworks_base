@@ -237,7 +237,8 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-data er satt på pause"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobildata er satt på pause"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data er satt på pause"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Fordi den angitte datagrensen ble nådd, har enheten satt databruk på pause for resten av denne syklusen. \n\nHvis du gjenopptar bruken, kan det føre til avgifter fra operatøren din."</string>
+    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Gjenoppta"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ingen Internett-forbindelse"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi tilkoblet"</string>

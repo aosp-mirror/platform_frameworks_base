@@ -241,7 +241,8 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Dátové prenosy 4G sú pozastavené"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobilné dáta sú pozastavené"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Dáta sú pozastavené"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Keďže ste dosiahli nastavený limit pre mobilné dáta, na zariadení bola pre zvyšok tohto cyklu pozastavená spotreba dát.\n\nJej opätovné spustenie môže mať za následok účtovanie poplatkov vaším operátorom."</string>
+    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Znova spustiť"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Bez prip. na Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: pripojené"</string>
