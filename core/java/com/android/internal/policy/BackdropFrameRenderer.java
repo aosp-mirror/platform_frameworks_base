@@ -110,12 +110,15 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
             int statusBarColor, int navigationBarColor) {
         mDecorView = decorView;
         mResizingBackgroundDrawable = resizingBackgroundDrawable != null
+                        && resizingBackgroundDrawable.getConstantState() != null
                 ? resizingBackgroundDrawable.getConstantState().newDrawable()
                 : null;
         mCaptionBackgroundDrawable = captionBackgroundDrawableDrawable != null
+                        && captionBackgroundDrawableDrawable.getConstantState() != null
                 ? captionBackgroundDrawableDrawable.getConstantState().newDrawable()
                 : null;
         mUserCaptionBackgroundDrawable = userCaptionBackgroundDrawable != null
+                        && userCaptionBackgroundDrawable.getConstantState() != null
                 ? userCaptionBackgroundDrawable.getConstantState().newDrawable()
                 : null;
         if (mCaptionBackgroundDrawable == null) {
