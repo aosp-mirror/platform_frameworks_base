@@ -1330,7 +1330,8 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"USB-drif frá <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-geymsla"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Breyta"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Viðvörun vegna gagnanotkunar"</string>
+    <!-- no translation found for data_usage_warning_title (3620440638180218181) -->
+    <skip />
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Ýttu fyrir uppl. og stillingar"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Gagnahámarki 2G og 3G náð"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Gagnahámarki 4G náð"</string>
