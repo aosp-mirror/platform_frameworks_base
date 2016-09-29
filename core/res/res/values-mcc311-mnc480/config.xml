@@ -52,11 +52,6 @@
     <bool name="config_carrier_volte_provisioned">true</bool>
 
     <bool name="config_auto_attach_data_on_creation">false</bool>
-    <!-- service number convert map in roaming network. -->
-    <string-array translatable="false" name="dial_string_replace">
-        <item>"*611:+19085594899,"</item>
-        <item>"*86:+1MDN,"</item>
-    </string-array>
 
     <!-- Flag indicating whether strict threshold is used, or lenient threshold is used,
           when evaluating RSRP for LTE antenna bar display
