@@ -28,6 +28,7 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.storage.StorageManager;
 import android.util.Log;
 import android.util.Slog;
@@ -107,9 +108,9 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
         (new OtaDexoptShellCommand(this)).exec(
-                this, in, out, err, args, resultReceiver);
+                this, in, out, err, args, callback, resultReceiver);
     }
 
     @Override

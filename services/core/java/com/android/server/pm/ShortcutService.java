@@ -67,6 +67,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SELinux;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -3366,13 +3367,14 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
 
         enforceShell();
 
         final long token = injectClearCallingIdentity();
         try {
-            final int status = (new MyShellCommand()).exec(this, in, out, err, args, resultReceiver);
+            final int status = (new MyShellCommand()).exec(this, in, out, err, args, callback,
+                    resultReceiver);
             resultReceiver.send(status, null);
         } finally {
             injectRestoreCallingIdentity(token);

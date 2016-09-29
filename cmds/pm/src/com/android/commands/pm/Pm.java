@@ -49,9 +49,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IUserManager;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.SELinux;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -68,6 +71,7 @@ import libcore.io.IoUtils;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -284,13 +288,45 @@ public final class Pm {
         }
     }
 
+    static final class MyShellCallback extends ShellCallback {
+        @Override public ParcelFileDescriptor onOpenOutputFile(String path, String seLinuxContext) {
+            File file = new File(path);
+            final ParcelFileDescriptor fd;
+            try {
+                fd = ParcelFileDescriptor.open(file,
+                            ParcelFileDescriptor.MODE_CREATE |
+                            ParcelFileDescriptor.MODE_TRUNCATE |
+                            ParcelFileDescriptor.MODE_WRITE_ONLY);
+            } catch (FileNotFoundException e) {
+                String msg = "Unable to open file " + path + ": " + e;
+                System.err.println(msg);
+                throw new IllegalArgumentException(msg);
+            }
+            if (seLinuxContext != null) {
+                final String tcon = SELinux.getFileContext(file.getAbsolutePath());
+                if (!SELinux.checkSELinuxAccess(seLinuxContext, tcon, "file", "write")) {
+                    try {
+                        fd.close();
+                    } catch (IOException e) {
+                    }
+                    String msg = "System server has no access to file context " + tcon;
+                    System.err.println(msg + " (from path " + file.getAbsolutePath()
+                            + ", context " + seLinuxContext + ")");
+                    throw new IllegalArgumentException(msg);
+                }
+            }
+            return fd;
+        }
+    }
+
     private int runShellCommand(String serviceName, String[] args) {
         final HandlerThread handlerThread = new HandlerThread("results");
         handlerThread.start();
         try {
             ServiceManager.getService(serviceName).shellCommand(
                     FileDescriptor.in, FileDescriptor.out, FileDescriptor.err,
-                    args, new ResultReceiver(new Handler(handlerThread.getLooper())));
+                    args, new MyShellCallback(),
+                    new ResultReceiver(new Handler(handlerThread.getLooper())));
             return 0;
         } catch (RemoteException e) {
             e.printStackTrace();

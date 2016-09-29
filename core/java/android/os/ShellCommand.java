@@ -40,6 +40,7 @@ public abstract class ShellCommand {
     private FileDescriptor mOut;
     private FileDescriptor mErr;
     private String[] mArgs;
+    private ShellCallback mShellCallback;
     private ResultReceiver mResultReceiver;
 
     private String mCmd;
@@ -55,12 +56,13 @@ public abstract class ShellCommand {
     private InputStream mInputStream;
 
     public void init(Binder target, FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, int firstArgPos) {
+            String[] args, ShellCallback callback, int firstArgPos) {
         mTarget = target;
         mIn = in;
         mOut = out;
         mErr = err;
         mArgs = args;
+        mShellCallback = callback;
         mResultReceiver = null;
         mCmd = null;
         mArgPos = firstArgPos;
@@ -74,7 +76,7 @@ public abstract class ShellCommand {
     }
 
     public int exec(Binder target, FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ResultReceiver resultReceiver) {
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
         String cmd;
         int start;
         if (args != null && args.length > 0) {
@@ -84,7 +86,7 @@ public abstract class ShellCommand {
             cmd = null;
             start = 0;
         }
-        init(target, in, out, err, args, start);
+        init(target, in, out, err, args, callback, start);
         mCmd = cmd;
         mResultReceiver = resultReceiver;
 
@@ -105,7 +107,7 @@ public abstract class ShellCommand {
             // go.
             PrintWriter eout = getErrPrintWriter();
             eout.println();
-            eout.println("Exception occurred while dumping:");
+            eout.println("Exception occurred while executing:");
             e.printStackTrace(eout);
         } finally {
             if (DEBUG) Slog.d(TAG, "Flushing output streams on " + mTarget);
@@ -255,6 +257,13 @@ public abstract class ShellCommand {
             throw new IllegalArgumentException("Argument expected after \"" + prev + "\"");
         }
         return arg;
+    }
+
+    /**
+     * Return the {@link ShellCallback} for communicating back with the calling shell.
+     */
+    public ShellCallback getShellCallback() {
+        return mShellCallback;
     }
 
     public int handleDefaultCommands(String cmd) {

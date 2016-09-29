@@ -20,6 +20,7 @@ import android.database.ContentObserver;
 import android.os.BatteryStats;
 
 import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.ShellCommand;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.am.BatteryStatsService;
@@ -789,7 +790,7 @@ public final class BatteryService extends SystemService {
                 pw.println("  technology: " + mBatteryProps.batteryTechnology);
             } else {
                 Shell shell = new Shell();
-                shell.exec(mBinderService, null, fd, null, args, new ResultReceiver(null));
+                shell.exec(mBinderService, null, fd, null, args, null, new ResultReceiver(null));
             }
         }
     }
@@ -875,8 +876,9 @@ public final class BatteryService extends SystemService {
         }
 
         @Override public void onShellCommand(FileDescriptor in, FileDescriptor out,
-                FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
-            (new Shell()).exec(this, in, out, err, args, resultReceiver);
+                FileDescriptor err, String[] args, ShellCallback callback,
+                ResultReceiver resultReceiver) {
+            (new Shell()).exec(this, in, out, err, args, callback, resultReceiver);
         }
     }
 

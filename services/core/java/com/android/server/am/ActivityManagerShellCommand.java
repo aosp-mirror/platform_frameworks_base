@@ -17,26 +17,57 @@
 package com.android.server.am;
 
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
+import android.app.ProfilerInfo;
+import android.content.Intent;
+import android.content.pm.IPackageManager;
+import android.content.pm.ResolveInfo;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ShellCommand;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.DebugUtils;
 
 import java.io.PrintWriter;
+import java.net.URISyntaxException;
+import java.util.List;
+
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 class ActivityManagerShellCommand extends ShellCommand {
+    public static final String NO_CLASS_ERROR_CODE = "Error type 3";
+
     // IPC interface to activity manager -- don't need to do additional security checks.
     final IActivityManager mInterface;
 
     // Internal service impl -- must perform security checks before touching.
     final ActivityManagerService mInternal;
 
+    // Convenience for interacting with package manager.
+    final IPackageManager mPm;
+
+    private int mStartFlags = 0;
+    private boolean mWaitOption = false;
+    private boolean mStopOption = false;
+
+    private int mRepeat = 0;
+    private int mUserId;
+    private String mReceiverPermission;
+
+    private String mProfileFile;
+    private int mSamplingInterval;
+    private boolean mAutoStop;
+    private int mStackId;
+
     final boolean mDumping;
 
     ActivityManagerShellCommand(ActivityManagerService service, boolean dumping) {
         mInterface = service;
         mInternal = service;
+        mPm = AppGlobals.getPackageManager();
         mDumping = dumping;
     }
 
@@ -48,6 +79,15 @@ class ActivityManagerShellCommand extends ShellCommand {
         PrintWriter pw = getOutPrintWriter();
         try {
             switch (cmd) {
+                case "start":
+                case "start-activity":
+                    return runStartActivity(pw);
+                case "startservice":
+                case "start-service":
+                    return 1; //runStartService(pw);
+                case "stopservice":
+                case "stop-service":
+                    return 1; //runStopService(pw);
                 case "force-stop":
                     return runForceStop(pw);
                 case "kill":
@@ -73,6 +113,241 @@ class ActivityManagerShellCommand extends ShellCommand {
             pw.println("Remote exception: " + e);
         }
         return -1;
+    }
+
+    private Intent makeIntent(int defUser) throws URISyntaxException {
+        mStartFlags = 0;
+        mWaitOption = false;
+        mStopOption = false;
+        mRepeat = 0;
+        mProfileFile = null;
+        mSamplingInterval = 0;
+        mAutoStop = false;
+        mUserId = defUser;
+        mStackId = INVALID_STACK_ID;
+
+        return Intent.parseCommandArgs(this, new Intent.CommandOptionHandler() {
+            @Override
+            public boolean handleOption(String opt, ShellCommand cmd) {
+                if (opt.equals("-D")) {
+                    mStartFlags |= ActivityManager.START_FLAG_DEBUG;
+                } else if (opt.equals("-N")) {
+                    mStartFlags |= ActivityManager.START_FLAG_NATIVE_DEBUGGING;
+                } else if (opt.equals("-W")) {
+                    mWaitOption = true;
+                } else if (opt.equals("-P")) {
+                    mProfileFile = getNextArgRequired();
+                    mAutoStop = true;
+                } else if (opt.equals("--start-profiler")) {
+                    mProfileFile = getNextArgRequired();
+                    mAutoStop = false;
+                } else if (opt.equals("--sampling")) {
+                    mSamplingInterval = Integer.parseInt(getNextArgRequired());
+                } else if (opt.equals("-R")) {
+                    mRepeat = Integer.parseInt(getNextArgRequired());
+                } else if (opt.equals("-S")) {
+                    mStopOption = true;
+                } else if (opt.equals("--track-allocation")) {
+                    mStartFlags |= ActivityManager.START_FLAG_TRACK_ALLOCATION;
+                } else if (opt.equals("--user")) {
+                    mUserId = UserHandle.parseUserArg(getNextArgRequired());
+                } else if (opt.equals("--receiver-permission")) {
+                    mReceiverPermission = getNextArgRequired();
+                } else if (opt.equals("--stack")) {
+                    mStackId = Integer.parseInt(getNextArgRequired());
+                } else {
+                    return false;
+                }
+                return true;
+            }
+        });
+    }
+
+    ParcelFileDescriptor openOutputFile(String path) {
+        try {
+            ParcelFileDescriptor pfd = getShellCallback().openOutputFile(path,
+                    "u:r:system_server:s0");
+            if (pfd != null) {
+                return pfd;
+            }
+        } catch (RuntimeException e) {
+            getErrPrintWriter().println("Failure opening file: " + e.getMessage());
+        }
+        getErrPrintWriter().println("Error: Unable to open file: " + path);
+        getErrPrintWriter().println("Consider using a file under /data/local/tmp/");
+        return null;
+    }
+
+    int runStartActivity(PrintWriter pw) throws RemoteException {
+        Intent intent;
+        try {
+            intent = makeIntent(UserHandle.USER_CURRENT);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+
+        if (mUserId == UserHandle.USER_ALL) {
+            getErrPrintWriter().println("Error: Can't start service with user 'all'");
+            return 1;
+        }
+
+        String mimeType = intent.getType();
+        if (mimeType == null && intent.getData() != null
+                && "content".equals(intent.getData().getScheme())) {
+            mimeType = mInterface.getProviderMimeType(intent.getData(), mUserId);
+        }
+
+        do {
+            if (mStopOption) {
+                String packageName;
+                if (intent.getComponent() != null) {
+                    packageName = intent.getComponent().getPackageName();
+                } else {
+                    List<ResolveInfo> activities = mPm.queryIntentActivities(intent, mimeType, 0,
+                            mUserId).getList();
+                    if (activities == null || activities.size() <= 0) {
+                        getErrPrintWriter().println("Error: Intent does not match any activities: "
+                                + intent);
+                        return 1;
+                    } else if (activities.size() > 1) {
+                        getErrPrintWriter().println(
+                                "Error: Intent matches multiple activities; can't stop: "
+                                + intent);
+                        return 1;
+                    }
+                    packageName = activities.get(0).activityInfo.packageName;
+                }
+                pw.println("Stopping: " + packageName);
+                mInterface.forceStopPackage(packageName, mUserId);
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException e) {
+                }
+            }
+
+            ProfilerInfo profilerInfo = null;
+
+            if (mProfileFile != null) {
+                ParcelFileDescriptor fd = openOutputFile(mProfileFile);
+                if (fd == null) {
+                    return 1;
+                }
+                profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop);
+            }
+
+            pw.println("Starting: " + intent);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            IActivityManager.WaitResult result = null;
+            int res;
+            final long startTime = SystemClock.uptimeMillis();
+            ActivityOptions options = null;
+            if (mStackId != INVALID_STACK_ID) {
+                options = ActivityOptions.makeBasic();
+                options.setLaunchStackId(mStackId);
+            }
+            if (mWaitOption) {
+                result = mInterface.startActivityAndWait(null, null, intent, mimeType,
+                        null, null, 0, mStartFlags, profilerInfo,
+                        options != null ? options.toBundle() : null, mUserId);
+                res = result.result;
+            } else {
+                res = mInterface.startActivityAsUser(null, null, intent, mimeType,
+                        null, null, 0, mStartFlags, profilerInfo,
+                        options != null ? options.toBundle() : null, mUserId);
+            }
+            final long endTime = SystemClock.uptimeMillis();
+            PrintWriter out = mWaitOption ? pw : getErrPrintWriter();
+            boolean launched = false;
+            switch (res) {
+                case ActivityManager.START_SUCCESS:
+                    launched = true;
+                    break;
+                case ActivityManager.START_SWITCHES_CANCELED:
+                    launched = true;
+                    out.println(
+                            "Warning: Activity not started because the "
+                                    + " current activity is being kept for the user.");
+                    break;
+                case ActivityManager.START_DELIVERED_TO_TOP:
+                    launched = true;
+                    out.println(
+                            "Warning: Activity not started, intent has "
+                                    + "been delivered to currently running "
+                                    + "top-most instance.");
+                    break;
+                case ActivityManager.START_RETURN_INTENT_TO_CALLER:
+                    launched = true;
+                    out.println(
+                            "Warning: Activity not started because intent "
+                                    + "should be handled by the caller");
+                    break;
+                case ActivityManager.START_TASK_TO_FRONT:
+                    launched = true;
+                    out.println(
+                            "Warning: Activity not started, its current "
+                                    + "task has been brought to the front");
+                    break;
+                case ActivityManager.START_INTENT_NOT_RESOLVED:
+                    out.println(
+                            "Error: Activity not started, unable to "
+                                    + "resolve " + intent.toString());
+                    break;
+                case ActivityManager.START_CLASS_NOT_FOUND:
+                    out.println(NO_CLASS_ERROR_CODE);
+                    out.println("Error: Activity class " +
+                            intent.getComponent().toShortString()
+                            + " does not exist.");
+                    break;
+                case ActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
+                    out.println(
+                            "Error: Activity not started, you requested to "
+                                    + "both forward and receive its result");
+                    break;
+                case ActivityManager.START_PERMISSION_DENIED:
+                    out.println(
+                            "Error: Activity not started, you do not "
+                                    + "have permission to access it.");
+                    break;
+                case ActivityManager.START_NOT_VOICE_COMPATIBLE:
+                    out.println(
+                            "Error: Activity not started, voice control not allowed for: "
+                                    + intent);
+                    break;
+                case ActivityManager.START_NOT_CURRENT_USER_ACTIVITY:
+                    out.println(
+                            "Error: Not allowed to start background user activity"
+                                    + " that shouldn't be displayed for all users.");
+                    break;
+                default:
+                    out.println(
+                            "Error: Activity not started, unknown error code " + res);
+                    break;
+            }
+            if (mWaitOption && launched) {
+                if (result == null) {
+                    result = new IActivityManager.WaitResult();
+                    result.who = intent.getComponent();
+                }
+                pw.println("Status: " + (result.timeout ? "timeout" : "ok"));
+                if (result.who != null) {
+                    pw.println("Activity: " + result.who.flattenToShortString());
+                }
+                if (result.thisTime >= 0) {
+                    pw.println("ThisTime: " + result.thisTime);
+                }
+                if (result.totalTime >= 0) {
+                    pw.println("TotalTime: " + result.totalTime);
+                }
+                pw.println("WaitTime: " + (endTime-startTime));
+                pw.println("Complete");
+            }
+            mRepeat--;
+            if (mRepeat > 0) {
+                mInterface.unhandledBack();
+            }
+        } while (mRepeat > 0);
+        return 0;
     }
 
     int runIsUserStopped(PrintWriter pw) {
@@ -223,6 +498,24 @@ class ActivityManagerShellCommand extends ShellCommand {
             pw.println("Activity manager (activity) commands:");
             pw.println("  help");
             pw.println("    Print this help text.");
+            pw.println("  start-activity [-D] [-N] [-W] [-P <FILE>] [--start-profiler <FILE>]");
+            pw.println("          [--sampling INTERVAL] [-R COUNT] [-S]");
+            pw.println("          [--track-allocation] [--user <USER_ID> | current] <INTENT>");
+            pw.println("    Start an Activity.  Options are:");
+            pw.println("    -D: enable debugging");
+            pw.println("    -N: enable native debugging");
+            pw.println("    -W: wait for launch to complete");
+            pw.println("    --start-profiler <FILE>: start profiler and send results to <FILE>");
+            pw.println("    --sampling INTERVAL: use sample profiling with INTERVAL microseconds");
+            pw.println("        between samples (use with --start-profiler)");
+            pw.println("    -P <FILE>: like above, but profiling stops when app goes idle");
+            pw.println("    -R: repeat the activity launch <COUNT> times.  Prior to each repeat,");
+            pw.println("        the top activity will be finished.");
+            pw.println("    -S: force stop the target app before starting the activity");
+            pw.println("    --track-allocation: enable tracking of object allocations");
+            pw.println("    --user <USER_ID> | current: Specify which user to run as; if not");
+            pw.println("        specified then run as the current user.");
+            pw.println("    --stack <STACK_ID>: Specify into which stack should the activity be put.");
             pw.println("  force-stop [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("    Completely stop the given application package.");
             pw.println("  kill [--user <USER_ID> | all | current] <PACKAGE>");
@@ -241,6 +534,8 @@ class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    Optionally controls lenient background check mode, returns current mode.");
             pw.println("  get-uid-state <UID>");
             pw.println("    Gets the process state of an app given its <UID>.");
+            pw.println();
+            Intent.printIntentArgsHelp(pw, "");
         }
     }
 }

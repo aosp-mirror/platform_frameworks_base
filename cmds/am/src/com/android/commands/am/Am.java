@@ -26,7 +26,6 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerNative;
-import android.app.ActivityOptions;
 import android.app.IActivityContainer;
 import android.app.IActivityController;
 import android.app.IActivityManager;
@@ -46,7 +45,6 @@ import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.ParceledListSlice;
-import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -55,10 +53,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.SELinux;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.ShellCommand;
-import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -72,6 +71,7 @@ import com.android.internal.util.Preconditions;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -96,6 +96,7 @@ public class Am extends BaseCommand {
     // Amount we reduce the stack size by when testing a task re-size.
     private static final int STACK_BOUNDS_INSET = 10;
 
+    public static final String NO_CLASS_ERROR_CODE = "Error type 3";
     private IActivityManager mAm;
     private IPackageManager mPm;
 
@@ -198,7 +199,7 @@ public class Am extends BaseCommand {
                 "    --track-allocation: enable tracking of object allocations\n" +
                 "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
                 "        specified then run as the current user.\n" +
-                "    --stack <STACK_ID>: Specify into which stack should the activity be put." +
+                "    --stack <STACK_ID>: Specify into which stack should the activity be put.\n" +
                 "\n" +
                 "am startservice: start a Service.  Options are:\n" +
                 "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
@@ -385,17 +386,13 @@ public class Am extends BaseCommand {
         String op = nextArgRequired();
 
         if (op.equals("start")) {
-            runStart();
+            runAmCmd(getRawArgs());
         } else if (op.equals("startservice")) {
             runStartService();
         } else if (op.equals("stopservice")) {
             runStopService();
-        } else if (op.equals("force-stop")) {
-            runForceStop();
-        } else if (op.equals("kill")) {
-            runKill();
-        } else if (op.equals("kill-all")) {
-            runKillAll();
+        } else if (op.equals("force-stop") || op.equals("kill") || op.equals("kill-all")) {
+            runAmCmd(getRawArgs());
         } else if (op.equals("instrument")) {
             runInstrument();
         } else if (op.equals("trace-ipc")) {
@@ -473,6 +470,49 @@ public class Am extends BaseCommand {
             userId = Integer.parseInt(arg);
         }
         return userId;
+    }
+
+    static final class MyShellCallback extends ShellCallback {
+        @Override public ParcelFileDescriptor onOpenOutputFile(String path, String seLinuxContext) {
+            File file = new File(path);
+            //System.err.println("Opening file: " + file.getAbsolutePath());
+            //Log.i("Am", "Opening file: " + file.getAbsolutePath());
+            final ParcelFileDescriptor fd;
+            try {
+                fd = ParcelFileDescriptor.open(file,
+                        ParcelFileDescriptor.MODE_CREATE |
+                        ParcelFileDescriptor.MODE_TRUNCATE |
+                        ParcelFileDescriptor.MODE_WRITE_ONLY);
+            } catch (FileNotFoundException e) {
+                String msg = "Unable to open file " + path + ": " + e;
+                System.err.println(msg);
+                throw new IllegalArgumentException(msg);
+            }
+            if (seLinuxContext != null) {
+                final String tcon = SELinux.getFileContext(file.getAbsolutePath());
+                if (!SELinux.checkSELinuxAccess(seLinuxContext, tcon, "file", "write")) {
+                    try {
+                        fd.close();
+                    } catch (IOException e) {
+                    }
+                    String msg = "System server has no access to file context " + tcon;
+                    System.err.println(msg + " (from path " + file.getAbsolutePath()
+                            + ", context " + seLinuxContext + ")");
+                    throw new IllegalArgumentException(msg);
+                }
+            }
+            return fd;
+        }
+    }
+
+    void runAmCmd(String[] args) throws AndroidException {
+        try {
+            mAm.asBinder().shellCommand(FileDescriptor.in, FileDescriptor.out, FileDescriptor.err,
+                    args, new MyShellCallback(), new ResultReceiver(null) { });
+        } catch (RemoteException e) {
+            System.err.println(NO_SYSTEM_ERROR_CODE);
+            throw new AndroidException("Can't call activity manager; is the system running?");
+        }
     }
 
     private Intent makeIntent(int defUser) throws URISyntaxException {
@@ -556,211 +596,6 @@ public class Am extends BaseCommand {
         } else if (result == -1) {
             System.err.println("Error stopping service");
         }
-    }
-
-    private void runStart() throws Exception {
-        Intent intent = makeIntent(UserHandle.USER_CURRENT);
-
-        if (mUserId == UserHandle.USER_ALL) {
-            System.err.println("Error: Can't start service with user 'all'");
-            return;
-        }
-
-        String mimeType = intent.getType();
-        if (mimeType == null && intent.getData() != null
-                && "content".equals(intent.getData().getScheme())) {
-            mimeType = mAm.getProviderMimeType(intent.getData(), mUserId);
-        }
-
-
-        do {
-            if (mStopOption) {
-                String packageName;
-                if (intent.getComponent() != null) {
-                    packageName = intent.getComponent().getPackageName();
-                } else {
-                    List<ResolveInfo> activities = mPm.queryIntentActivities(intent, mimeType, 0,
-                            mUserId).getList();
-                    if (activities == null || activities.size() <= 0) {
-                        System.err.println("Error: Intent does not match any activities: "
-                                + intent);
-                        return;
-                    } else if (activities.size() > 1) {
-                        System.err.println("Error: Intent matches multiple activities; can't stop: "
-                                + intent);
-                        return;
-                    }
-                    packageName = activities.get(0).activityInfo.packageName;
-                }
-                System.out.println("Stopping: " + packageName);
-                mAm.forceStopPackage(packageName, mUserId);
-                Thread.sleep(250);
-            }
-
-            System.out.println("Starting: " + intent);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            ParcelFileDescriptor fd = null;
-            ProfilerInfo profilerInfo = null;
-
-            if (mProfileFile != null) {
-                try {
-                    fd = openForSystemServer(
-                            new File(mProfileFile),
-                            ParcelFileDescriptor.MODE_CREATE |
-                            ParcelFileDescriptor.MODE_TRUNCATE |
-                            ParcelFileDescriptor.MODE_WRITE_ONLY);
-                } catch (FileNotFoundException e) {
-                    System.err.println("Error: Unable to open file: " + mProfileFile);
-                    System.err.println("Consider using a file under /data/local/tmp/");
-                    return;
-                }
-                profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop);
-            }
-
-            IActivityManager.WaitResult result = null;
-            int res;
-            final long startTime = SystemClock.uptimeMillis();
-            ActivityOptions options = null;
-            if (mStackId != INVALID_STACK_ID) {
-                options = ActivityOptions.makeBasic();
-                options.setLaunchStackId(mStackId);
-            }
-            if (mWaitOption) {
-                result = mAm.startActivityAndWait(null, null, intent, mimeType,
-                        null, null, 0, mStartFlags, profilerInfo,
-                        options != null ? options.toBundle() : null, mUserId);
-                res = result.result;
-            } else {
-                res = mAm.startActivityAsUser(null, null, intent, mimeType,
-                        null, null, 0, mStartFlags, profilerInfo,
-                        options != null ? options.toBundle() : null, mUserId);
-            }
-            final long endTime = SystemClock.uptimeMillis();
-            PrintStream out = mWaitOption ? System.out : System.err;
-            boolean launched = false;
-            switch (res) {
-                case ActivityManager.START_SUCCESS:
-                    launched = true;
-                    break;
-                case ActivityManager.START_SWITCHES_CANCELED:
-                    launched = true;
-                    out.println(
-                            "Warning: Activity not started because the "
-                            + " current activity is being kept for the user.");
-                    break;
-                case ActivityManager.START_DELIVERED_TO_TOP:
-                    launched = true;
-                    out.println(
-                            "Warning: Activity not started, intent has "
-                            + "been delivered to currently running "
-                            + "top-most instance.");
-                    break;
-                case ActivityManager.START_RETURN_INTENT_TO_CALLER:
-                    launched = true;
-                    out.println(
-                            "Warning: Activity not started because intent "
-                            + "should be handled by the caller");
-                    break;
-                case ActivityManager.START_TASK_TO_FRONT:
-                    launched = true;
-                    out.println(
-                            "Warning: Activity not started, its current "
-                            + "task has been brought to the front");
-                    break;
-                case ActivityManager.START_INTENT_NOT_RESOLVED:
-                    out.println(
-                            "Error: Activity not started, unable to "
-                            + "resolve " + intent.toString());
-                    break;
-                case ActivityManager.START_CLASS_NOT_FOUND:
-                    out.println(NO_CLASS_ERROR_CODE);
-                    out.println("Error: Activity class " +
-                            intent.getComponent().toShortString()
-                            + " does not exist.");
-                    break;
-                case ActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
-                    out.println(
-                            "Error: Activity not started, you requested to "
-                            + "both forward and receive its result");
-                    break;
-                case ActivityManager.START_PERMISSION_DENIED:
-                    out.println(
-                            "Error: Activity not started, you do not "
-                            + "have permission to access it.");
-                    break;
-                case ActivityManager.START_NOT_VOICE_COMPATIBLE:
-                    out.println(
-                            "Error: Activity not started, voice control not allowed for: "
-                                    + intent);
-                    break;
-                case ActivityManager.START_NOT_CURRENT_USER_ACTIVITY:
-                    out.println(
-                            "Error: Not allowed to start background user activity"
-                            + " that shouldn't be displayed for all users.");
-                    break;
-                default:
-                    out.println(
-                            "Error: Activity not started, unknown error code " + res);
-                    break;
-            }
-            if (mWaitOption && launched) {
-                if (result == null) {
-                    result = new IActivityManager.WaitResult();
-                    result.who = intent.getComponent();
-                }
-                System.out.println("Status: " + (result.timeout ? "timeout" : "ok"));
-                if (result.who != null) {
-                    System.out.println("Activity: " + result.who.flattenToShortString());
-                }
-                if (result.thisTime >= 0) {
-                    System.out.println("ThisTime: " + result.thisTime);
-                }
-                if (result.totalTime >= 0) {
-                    System.out.println("TotalTime: " + result.totalTime);
-                }
-                System.out.println("WaitTime: " + (endTime-startTime));
-                System.out.println("Complete");
-            }
-            mRepeat--;
-            if (mRepeat > 0) {
-                mAm.unhandledBack();
-            }
-        } while (mRepeat > 0);
-    }
-
-    private void runForceStop() throws Exception {
-        int userId = UserHandle.USER_ALL;
-
-        String opt;
-        while ((opt=nextOption()) != null) {
-            if (opt.equals("--user")) {
-                userId = parseUserArg(nextArgRequired());
-            } else {
-                System.err.println("Error: Unknown option: " + opt);
-                return;
-            }
-        }
-        mAm.forceStopPackage(nextArgRequired(), userId);
-    }
-
-    private void runKill() throws Exception {
-        int userId = UserHandle.USER_ALL;
-
-        String opt;
-        while ((opt=nextOption()) != null) {
-            if (opt.equals("--user")) {
-                userId = parseUserArg(nextArgRequired());
-            } else {
-                System.err.println("Error: Unknown option: " + opt);
-                return;
-            }
-        }
-        mAm.killBackgroundProcesses(nextArgRequired(), userId);
-    }
-
-    private void runKillAll() throws Exception {
-        mAm.killAllBackgroundProcesses();
     }
 
     private void sendBroadcast() throws Exception {

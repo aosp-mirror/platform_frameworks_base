@@ -18,8 +18,8 @@ package com.android.server.input;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Build;
 import android.os.LocaleList;
+import android.os.ShellCallback;
 import android.util.Log;
 import android.view.Display;
 import com.android.internal.inputmethod.InputMethodSubtypeHandle;
@@ -91,10 +91,8 @@ import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicy;
-import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -103,11 +101,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1739,8 +1734,9 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
-            FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
-        (new Shell()).exec(this, in, out, err, args, resultReceiver);
+            FileDescriptor err, String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) {
+        (new Shell()).exec(this, in, out, err, args, callback, resultReceiver);
     }
 
     public int onShellCommand(Shell shell, String cmd) {

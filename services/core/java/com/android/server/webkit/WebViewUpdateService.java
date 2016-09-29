@@ -25,10 +25,10 @@ import android.os.Binder;
 import android.os.PatternMatcher;
 import android.os.Process;
 import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.webkit.IWebViewUpdateService;
-import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
 
@@ -140,9 +140,10 @@ public class WebViewUpdateService extends SystemService {
 
         @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out,
-                FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
+                FileDescriptor err, String[] args, ShellCallback callback,
+                ResultReceiver resultReceiver) {
             (new WebViewUpdateServiceShellCommand(this)).exec(
-                    this, in, out, err, args, resultReceiver);
+                    this, in, out, err, args, callback, resultReceiver);
         }
 
 

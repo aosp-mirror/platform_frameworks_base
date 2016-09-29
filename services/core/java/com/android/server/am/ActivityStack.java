@@ -5029,7 +5029,7 @@ final class ActivityStack {
         if (top >= 0) {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(top).mActivities;
             int activityTop = activities.size() - 1;
-            if (activityTop > 0) {
+            if (activityTop >= 0) {
                 finishActivityLocked(activities.get(activityTop), Activity.RESULT_CANCELED, null,
                         "unhandled-back", true);
             }
