@@ -79,11 +79,20 @@ import java.util.concurrent.TimeUnit;
  * {@hide}
  */
 public class NetworkMonitor extends StateMachine {
-    private static final boolean DBG = false;
     private static final String TAG = NetworkMonitor.class.getSimpleName();
-    private static final String DEFAULT_SERVER = "connectivitycheck.gstatic.com";
+    private static final boolean DBG = false;
+
+    // Default urls for captive portal detection probes
+    private static final String DEFAULT_HTTPS_URL     =
+            "https://connectivitycheck.gstatic.com/generate_204";
+    private static final String DEFAULT_HTTP_URL      =
+            "http://connectivitycheck.gstatic.com/generate_204";
+    private static final String DEFAULT_FALLBACK_URL  = null;
+    private static final String DEFAULT_USER_AGENT    = null;
+
     private static final int SOCKET_TIMEOUT_MS = 10000;
-    private static final int PROBE_TIMEOUT_MS = 3000;
+    private static final int PROBE_TIMEOUT_MS  = 3000;
+
     public static final String ACTION_NETWORK_CONDITIONS_MEASURED =
             "android.net.conn.NETWORK_CONDITIONS_MEASURED";
     public static final String EXTRA_CONNECTIVITY_TYPE = "extra_connectivity_type";
@@ -596,22 +605,33 @@ public class NetworkMonitor extends StateMachine {
         }
     }
 
-    private static String getCaptivePortalServerUrl(Context context, boolean isHttps) {
-        String server = Settings.Global.getString(context.getContentResolver(),
-                Settings.Global.CAPTIVE_PORTAL_SERVER);
-        if (server == null) server = DEFAULT_SERVER;
-        return (isHttps ? "https" : "http") + "://" + server + "/generate_204";
+    private static String getCaptivePortalServerHttpsUrl(Context context) {
+        return getSetting(context, Settings.Global.CAPTIVE_PORTAL_HTTPS_URL, DEFAULT_HTTPS_URL);
     }
 
-    public static String getCaptivePortalServerUrl(Context context) {
-        return getCaptivePortalServerUrl(context, false);
+    public static String getCaptivePortalServerHttpUrl(Context context) {
+        return getSetting(context, Settings.Global.CAPTIVE_PORTAL_HTTP_URL, DEFAULT_HTTP_URL);
+    }
+
+    private static String getCaptivePortalFallbackUrl(Context context) {
+        return getSetting(context,
+                Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL, DEFAULT_FALLBACK_URL);
+    }
+
+    private static String getCaptivePortalUserAgent(Context context) {
+        return getSetting(context, Settings.Global.CAPTIVE_PORTAL_USER_AGENT, DEFAULT_USER_AGENT);
+    }
+
+    private static String getSetting(Context context, String symbol, String defaultValue) {
+        final String value = Settings.Global.getString(context.getContentResolver(), symbol);
+        return value != null ? value : defaultValue;
     }
 
     @VisibleForTesting
     protected CaptivePortalProbeResult isCaptivePortal() {
         if (!mIsCaptivePortalCheckEnabled) return new CaptivePortalProbeResult(204);
 
-        URL pacUrl = null, httpUrl = null, httpsUrl = null;
+        URL pacUrl = null, httpsUrl = null, httpUrl = null, fallbackUrl = null;
 
         // On networks with a PAC instead of fetching a URL that should result in a 204
         // response, we instead simply fetch the PAC script.  This is done for a few reasons:
@@ -632,20 +652,17 @@ public class NetworkMonitor extends StateMachine {
         //    results for network validation.
         final ProxyInfo proxyInfo = mNetworkAgentInfo.linkProperties.getHttpProxy();
         if (proxyInfo != null && !Uri.EMPTY.equals(proxyInfo.getPacFileUrl())) {
-            try {
-                pacUrl = new URL(proxyInfo.getPacFileUrl().toString());
-            } catch (MalformedURLException e) {
-                validationLog("Invalid PAC URL: " + proxyInfo.getPacFileUrl().toString());
+            pacUrl = makeURL(proxyInfo.getPacFileUrl().toString());
+            if (pacUrl == null) {
                 return CaptivePortalProbeResult.FAILED;
             }
         }
 
         if (pacUrl == null) {
-            try {
-                httpUrl = new URL(getCaptivePortalServerUrl(mContext, false));
-                httpsUrl = new URL(getCaptivePortalServerUrl(mContext, true));
-            } catch (MalformedURLException e) {
-                validationLog("Bad validation URL: " + getCaptivePortalServerUrl(mContext, false));
+            httpsUrl = makeURL(getCaptivePortalServerHttpsUrl(mContext));
+            httpUrl = makeURL(getCaptivePortalServerHttpUrl(mContext));
+            fallbackUrl = makeURL(getCaptivePortalFallbackUrl(mContext));
+            if (httpUrl == null || httpsUrl == null) {
                 return CaptivePortalProbeResult.FAILED;
             }
         }
@@ -691,7 +708,7 @@ public class NetworkMonitor extends StateMachine {
         if (pacUrl != null) {
             result = sendHttpProbe(pacUrl, ValidationProbeEvent.PROBE_PAC);
         } else if (mUseHttps) {
-            result = sendParallelHttpProbes(httpsUrl, httpUrl, null);
+            result = sendParallelHttpProbes(httpsUrl, httpUrl, fallbackUrl);
         } else {
             result = sendHttpProbe(httpUrl, ValidationProbeEvent.PROBE_HTTP);
         }
@@ -721,6 +738,10 @@ public class NetworkMonitor extends StateMachine {
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setUseCaches(false);
+            final String userAgent = getCaptivePortalUserAgent(mContext);
+            if (userAgent != null) {
+               urlConnection.setRequestProperty("User-Agent", userAgent);
+            }
 
             // Time how long it takes to get a response to our request
             long requestTimestamp = SystemClock.elapsedRealtime();
@@ -844,6 +865,17 @@ public class NetworkMonitor extends StateMachine {
             return CaptivePortalProbeResult.FAILED;
         }
         return httpsProbe.result();
+    }
+
+    private URL makeURL(String url) {
+        if (url != null) {
+            try {
+                return new URL(url);
+            } catch (MalformedURLException e) {
+                validationLog("Bad URL: " + url);
+            }
+        }
+        return null;
     }
 
     /**
