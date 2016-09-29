@@ -201,6 +201,8 @@ public class WifiNanManager {
      * Use the {@link #isAvailable()} to query the current status.
      * This broadcast is <b>not</b> sticky, use the {@link #isAvailable()} API after registering
      * the broadcast to check the current state of Wi-Fi NAN.
+     * <p>Note: The broadcast is only delivered to registered receivers - no manifest registered
+     * components will be launched.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_WIFI_NAN_STATE_CHANGED =
