@@ -8,18 +8,24 @@ toc:
 - title: API Overview
   path: /wear/preview/api-overview.html
   section:
-  - title: Notification Improvements
-    path: /wear/preview/features/notifications.html
-  - title: Input Method Framework
-    path: /wear/preview/features/ime.html
   - title: Complications
     path: /wear/preview/features/complications.html
   - title: Navigation and Actions
     path: /wear/preview/features/ui-nav-actions.html
+  - title: Curved Layout
+    path: /wear/preview/features/wearable-recycler-view.html
+  - title: Notification Improvements
+    path: /wear/preview/features/notifications.html
   - title: Bridging for Notifications
     path: /wear/preview/features/bridger.html
+  - title: Input Method Framework
+    path: /wear/preview/features/ime.html
   - title: Wrist Gestures
     path: /wear/preview/features/gestures.html
+  - title: Standalone apps
+    path: /wear/preview/features/standalone-apps.html
+  - title: App Distribution
+    path: /wear/preview/features/app-distribution.html
 
 - title: Get Started
   path: /wear/preview/start.html
