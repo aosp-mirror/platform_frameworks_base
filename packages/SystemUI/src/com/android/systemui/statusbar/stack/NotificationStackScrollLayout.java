@@ -1228,7 +1228,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (!isScrollingEnabled()) {
             return false;
         }
-        if (ev.getY() < mQsContainer.getBottom()) {
+        if (ev.getY() < mQsContainer.getBottom() && !mIsBeingDragged) {
             return false;
         }
         mForcedScroll = null;
