@@ -5489,7 +5489,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public String getCaptivePortalServerUrl() {
-        return NetworkMonitor.getCaptivePortalServerUrl(mContext);
+        return NetworkMonitor.getCaptivePortalServerHttpUrl(mContext);
     }
 
     @Override
