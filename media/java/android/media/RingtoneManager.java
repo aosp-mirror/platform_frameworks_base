@@ -727,7 +727,9 @@ public class RingtoneManager {
 
         String setting = getSettingForType(type);
         if (setting == null) return;
-        ringtoneUri = ContentProvider.maybeAddUserId(ringtoneUri, context.getUserId());
+        if(!isInternalRingtoneUri(ringtoneUri)) {
+            ringtoneUri = ContentProvider.maybeAddUserId(ringtoneUri, context.getUserId());
+        }
         Settings.System.putStringForUser(resolver, setting,
                 ringtoneUri != null ? ringtoneUri.toString() : null, context.getUserId());
 
@@ -742,6 +744,12 @@ public class RingtoneManager {
                 Log.w(TAG, "Failed to cache ringtone: " + e);
             }
         }
+    }
+
+    private static boolean isInternalRingtoneUri(Uri uri) {
+        Uri uriWithoutUserId = ContentProvider.getUriWithoutUserId(uri);
+        return uriWithoutUserId == null ? false : uriWithoutUserId.toString()
+                        .startsWith(MediaStore.Audio.Media.INTERNAL_CONTENT_URI.toString());
     }
 
     /**
