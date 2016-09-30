@@ -466,8 +466,8 @@ public class RetailDemoModeService extends SystemService {
                 mInjector.getSystemUsersConfiguration(), userId);
         mInjector.turnOffAllFlashLights(mCameraIdsWithFlash);
         muteVolumeStreams();
-        if (!mInjector.isWifiEnabled()) {
-            mInjector.enableWifi();
+        if (!mInjector.getWifiManager().isWifiEnabled()) {
+            mInjector.getWifiManager().setWifiEnabled(true);
         }
         // Disable lock screen for demo users.
         mInjector.getLockPatternUtils().setLockScreenDisabled(true, userId);
@@ -535,7 +535,7 @@ public class RetailDemoModeService extends SystemService {
             return mContext;
         }
 
-        private WifiManager getWifiManager() {
+        WifiManager getWifiManager() {
             if (mWifiManager == null) {
                 mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
             }
@@ -642,14 +642,6 @@ public class RetailDemoModeService extends SystemService {
 
         void releaseWakeLock() {
             mWakeLock.release();
-        }
-
-        boolean isWifiEnabled() {
-            return getWifiManager().isWifiEnabled();
-        }
-
-        void enableWifi() {
-            getWifiManager().setWifiEnabled(true);
         }
 
         void logSessionDuration(int duration) {
