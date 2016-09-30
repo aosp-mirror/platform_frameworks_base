@@ -88,9 +88,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         if (mListening == listening) return;
         mListening = listening;
         if (mListening) {
-            mPages.get(mPosition).setListening(listening);
+            setPageListening(mPosition, true);
             if (mOffPage) {
-                mPages.get(mPosition + 1).setListening(listening);
+                setPageListening(mPosition + 1, true);
             }
         } else {
             // Make sure no pages are listening.
@@ -131,6 +131,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     private void setPageListening(int position, boolean listening) {
         if (position >= mPages.size()) return;
+        if (isLayoutRtl()) {
+            position = mPages.size() - 1 - position;
+        }
         mPages.get(position).setListening(listening);
     }
 
