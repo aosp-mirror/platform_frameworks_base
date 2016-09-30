@@ -51,7 +51,7 @@ public class PluginManagerTest extends SysuiTestCase {
         mMockFactory = mock(PluginInstanceManagerFactory.class);
         mMockPluginInstance = mock(PluginInstanceManager.class);
         when(mMockFactory.createPluginInstanceManager(Mockito.any(), Mockito.any(), Mockito.any(),
-                Mockito.anyBoolean(), Mockito.any(), Mockito.anyInt()))
+                Mockito.anyBoolean(), Mockito.any(), Mockito.anyInt(), Mockito.any()))
                 .thenReturn(mMockPluginInstance);
         mPluginManager = new PluginManager(getContext(), mMockFactory, true, mMockExceptionHandler);
         resetExceptionHandler();
@@ -62,7 +62,7 @@ public class PluginManagerTest extends SysuiTestCase {
     public void testAddListener() {
         mPluginManager.addPluginListener("myAction", mMockListener, 1);
 
-        verify(mMockPluginInstance).startListening();
+        verify(mMockPluginInstance).loadAll();
     }
 
     @Test
@@ -70,7 +70,7 @@ public class PluginManagerTest extends SysuiTestCase {
         mPluginManager.addPluginListener("myAction", mMockListener, 1);
 
         mPluginManager.removePluginListener(mMockListener);
-        verify(mMockPluginInstance).stopListening();
+        verify(mMockPluginInstance).destroy();
     }
 
     @Test
@@ -80,7 +80,7 @@ public class PluginManagerTest extends SysuiTestCase {
         resetExceptionHandler();
         mPluginManager.addPluginListener("myAction", mMockListener, 1);
 
-        verify(mMockPluginInstance, Mockito.never()).startListening();
+        verify(mMockPluginInstance, Mockito.never()).loadAll();
     }
 
     @Test

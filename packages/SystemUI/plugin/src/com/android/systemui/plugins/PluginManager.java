@@ -14,7 +14,11 @@
 
 package com.android.systemui.plugins;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Build;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -22,26 +26,31 @@ import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import dalvik.system.PathClassLoader;
+
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.Map;
 
 /**
  * @see Plugin
  */
-public class PluginManager {
+public class PluginManager extends BroadcastReceiver {
 
     private static PluginManager sInstance;
 
     private final HandlerThread mBackgroundThread;
     private final ArrayMap<PluginListener<?>, PluginInstanceManager> mPluginMap
             = new ArrayMap<>();
+    private final Map<String, ClassLoader> mClassLoaders = new ArrayMap<>();
     private final Context mContext;
     private final PluginInstanceManagerFactory mFactory;
     private final boolean isDebuggable;
     private final PluginPrefs mPluginPrefs;
+    private ClassLoaderFilter mParentClassLoader;
 
     private PluginManager(Context context) {
-        this(context, new PluginInstanceManagerFactory(), Build.IS_DEBUGGABLE,
-                Thread.getDefaultUncaughtExceptionHandler());
+        this(context, new PluginInstanceManagerFactory(),
+                Build.IS_DEBUGGABLE, Thread.getDefaultUncaughtExceptionHandler());
     }
 
     @VisibleForTesting
@@ -72,9 +81,12 @@ public class PluginManager {
         }
         mPluginPrefs.addAction(action);
         PluginInstanceManager p = mFactory.createPluginInstanceManager(mContext, action, listener,
-                allowMultiple, mBackgroundThread.getLooper(), version);
-        p.startListening();
+                allowMultiple, mBackgroundThread.getLooper(), version, this);
+        p.loadAll();
         mPluginMap.put(listener, p);
+        if (mPluginMap.size() == 1) {
+            startListening();
+        }
     }
 
     public void removePluginListener(PluginListener<?> listener) {
@@ -83,7 +95,68 @@ public class PluginManager {
             return;
         }
         if (!mPluginMap.containsKey(listener)) return;
-        mPluginMap.remove(listener).stopListening();
+        mPluginMap.remove(listener).destroy();
+        if (mPluginMap.size() == 0) {
+            stopListening();
+        }
+    }
+
+    private void startListening() {
+        IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addDataScheme("package");
+        mContext.registerReceiver(this, filter);
+        filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
+        mContext.registerReceiver(this, filter);
+    }
+
+    private void stopListening() {
+        mContext.unregisterReceiver(this);
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if (Intent.ACTION_USER_UNLOCKED.equals(intent.getAction())) {
+            for (PluginInstanceManager manager : mPluginMap.values()) {
+                manager.loadAll();
+            }
+        } else {
+            Uri data = intent.getData();
+            String pkg = data.getEncodedSchemeSpecificPart();
+            clearClassLoader(pkg);
+            if (!Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
+                for (PluginInstanceManager manager : mPluginMap.values()) {
+                    manager.onPackageChange(pkg);
+                }
+            } else {
+                for (PluginInstanceManager manager : mPluginMap.values()) {
+                    manager.onPackageRemoved(pkg);
+                }
+            }
+        }
+    }
+
+    public ClassLoader getClassLoader(String sourceDir, String pkg) {
+        if (mClassLoaders.containsKey(pkg)) {
+            return mClassLoaders.get(pkg);
+        }
+        ClassLoader classLoader = new PathClassLoader(sourceDir, getParentClassLoader());
+        mClassLoaders.put(pkg, classLoader);
+        return classLoader;
+    }
+
+    private void clearClassLoader(String pkg) {
+        mClassLoaders.remove(pkg);
+    }
+
+    ClassLoader getParentClassLoader() {
+        if (mParentClassLoader == null) {
+            // Lazily load this so it doesn't have any effect on devices without plugins.
+            mParentClassLoader = new ClassLoaderFilter(getClass().getClassLoader(),
+                    "com.android.systemui.plugin");
+        }
+        return mParentClassLoader;
     }
 
     public static PluginManager getInstance(Context context) {
@@ -97,9 +170,29 @@ public class PluginManager {
     public static class PluginInstanceManagerFactory {
         public <T extends Plugin> PluginInstanceManager createPluginInstanceManager(Context context,
                 String action, PluginListener<T> listener, boolean allowMultiple, Looper looper,
-                int version) {
+                int version, PluginManager manager) {
             return new PluginInstanceManager(context, action, listener, allowMultiple, looper,
-                    version);
+                    version, manager);
+        }
+    }
+
+
+    // This allows plugins to include any libraries or copied code they want by only including
+    // classes from the plugin library.
+    private static class ClassLoaderFilter extends ClassLoader {
+        private final String mPackage;
+        private final ClassLoader mBase;
+
+        public ClassLoaderFilter(ClassLoader base, String pkg) {
+            super(ClassLoader.getSystemClassLoader());
+            mBase = base;
+            mPackage = pkg;
+        }
+
+        @Override
+        protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+            if (!name.startsWith(mPackage)) super.loadClass(name, resolve);
+            return mBase.loadClass(name);
         }
     }
 

@@ -33,13 +33,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.net.Uri;
 import android.os.HandlerThread;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.PluginInstanceManager.ClassLoaderFactory;
 
 import org.junit.After;
 import org.junit.Before;
@@ -64,6 +62,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     private PackageManager mMockPm;
     private PluginListener mMockListener;
     private PluginInstanceManager mPluginInstanceManager;
+    private PluginManager mMockManager;
 
     @Before
     public void setup() throws Exception {
@@ -72,9 +71,11 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mContextWrapper = new MyContextWrapper(getContext());
         mMockPm = mock(PackageManager.class);
         mMockListener = mock(PluginListener.class);
+        mMockManager = mock(PluginManager.class);
+        when(mMockManager.getClassLoader(Mockito.any(), Mockito.any()))
+                .thenReturn(getClass().getClassLoader());
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
-                mMockListener, true, mHandlerThread.getLooper(), 1, true,
-                new TestClassLoaderFactory());
+                mMockListener, true, mHandlerThread.getLooper(), 1, mMockManager, true);
         sMockPlugin = mock(Plugin.class);
         when(sMockPlugin.getVersion()).thenReturn(1);
     }
@@ -89,7 +90,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     public void testNoPlugins() {
         when(mMockPm.queryIntentServices(Mockito.any(), Mockito.anyInt())).thenReturn(
                 Collections.emptyList());
-        mPluginInstanceManager.startListening();
+        mPluginInstanceManager.loadAll();
 
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
         waitForIdleSync(mPluginInstanceManager.mMainHandler);
@@ -112,7 +113,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     public void testPluginDestroy() {
         createPlugin(); // Get into valid created state.
 
-        mPluginInstanceManager.stopListening();
+        mPluginInstanceManager.destroy();
 
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
         waitForIdleSync(mPluginInstanceManager.mMainHandler);
@@ -127,7 +128,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         setupFakePmQuery();
         when(sMockPlugin.getVersion()).thenReturn(2);
 
-        mPluginInstanceManager.startListening();
+        mPluginInstanceManager.loadAll();
 
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
         waitForIdleSync(mPluginInstanceManager.mMainHandler);
@@ -141,10 +142,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     public void testReloadOnChange() {
         createPlugin(); // Get into valid created state.
 
-        // Send a package changed broadcast.
-        Intent i = new Intent(Intent.ACTION_PACKAGE_CHANGED,
-                Uri.fromParts("package", "com.android.systemui", null));
-        mPluginInstanceManager.onReceive(mContextWrapper, i);
+        mPluginInstanceManager.onPackageChange("com.android.systemui");
 
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
         waitForIdleSync(mPluginInstanceManager.mMainHandler);
@@ -164,11 +162,10 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     public void testNonDebuggable() {
         // Create a version that thinks the build is not debuggable.
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
-                mMockListener, true, mHandlerThread.getLooper(), 1, false,
-                new TestClassLoaderFactory());
+                mMockListener, true, mHandlerThread.getLooper(), 1, mMockManager, false);
         setupFakePmQuery();
 
-        mPluginInstanceManager.startListening();
+        mPluginInstanceManager.loadAll();
 
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
         waitForIdleSync(mPluginInstanceManager.mMainHandler);;
@@ -236,17 +233,10 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     private void createPlugin() {
         setupFakePmQuery();
 
-        mPluginInstanceManager.startListening();
+        mPluginInstanceManager.loadAll();
 
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
         waitForIdleSync(mPluginInstanceManager.mMainHandler);
-    }
-
-    private static class TestClassLoaderFactory extends ClassLoaderFactory {
-        @Override
-        public ClassLoader createClassLoader(String path, ClassLoader base) {
-            return base;
-        }
     }
 
     // Real context with no registering/unregistering of receivers.
