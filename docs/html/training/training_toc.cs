@@ -649,25 +649,7 @@
           </li>
         </ul>
       </li>
-
       <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/backup/index.html"
-             description=
-             "How to sync and back up app and user data to remote web services in the
-              cloud and how to restore the data back to multiple devices."
-            >Backing up App Data to the Cloud</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/backup/autosyncapi.html">
-            Configuring Auto Backup
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/backup/backupapi.html">
-            Using the Backup API
-          </a>
-          </li>
-        </ul>
         <li><a href="<?cs var:toroot ?>training/cloudsave/conflict-res.html"
            description=
            "How to design a robust conflict resolution strategy for apps that save data to the cloud."

@@ -438,16 +438,6 @@ toc:
       path: /training/efficient-downloads/redundant_redundant.html
     - title: Modifying Patterns Based on the Connectivity Type
       path: /training/efficient-downloads/connectivity_patterns.html
-  - title: Backing up App Data to the Cloud
-    path: /training/backup/index.html
-    path_attributes:
-    - name: description
-      value: How to sync and back up app and user data to remote web services in the cloud and how to restore the data back to multiple devices.
-    section:
-    - title: Configuring Auto Backup
-      path: /training/backup/autosyncapi.html
-    - title: Using the Backup API
-      path: /training/backup/backupapi.html
   - title: Resolving Cloud Save Conflicts
     path: /training/cloudsave/conflict-res.html
     path_attributes:
@@ -1156,7 +1146,7 @@ toc:
         value: 维护兼容性
       - name: zh-tw-lang
         value: 維持相容性
-    - title: Selecting Colors with the Palette API 
+    - title: Selecting Colors with the Palette API
       path: /training/material/palette-colors.html
 
 - title: Best Practices for User Input

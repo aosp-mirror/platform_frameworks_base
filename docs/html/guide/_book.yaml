@@ -396,6 +396,13 @@ toc:
     path: /guide/topics/data/data-storage.html
   - title: Data Backup
     path: /guide/topics/data/backup.html
+    section:
+    - title: Auto Backup
+      path: /guide/topics/data/autobackup.html
+    - title: Key/Value Backup
+      path: /guide/topics/data/keyvaluebackup.html
+    - title: Testing Backup and Restore
+      path: /guide/topics/data/testingbackup.html
   - title: App Install Location
     path: /guide/topics/data/install-location.html
 
