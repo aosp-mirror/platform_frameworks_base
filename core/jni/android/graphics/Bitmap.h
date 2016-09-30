@@ -28,7 +28,7 @@ namespace android {
 enum class PixelStorageType {
     Invalid,
     External,
-    Java,
+    Heap,
     Ashmem,
 };
 
@@ -47,20 +47,14 @@ typedef void (*FreeFunc)(void* addr, void* context);
  */
 class Bitmap {
 public:
-    Bitmap(JNIEnv* env, jbyteArray storageObj, void* address,
-            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
+    Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes,
+            SkColorTable* ctable);
     Bitmap(void* address, void* context, FreeFunc freeFunc,
             const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
             size_t rowBytes, SkColorTable* ctable);
 
     const SkImageInfo& info() const;
-
-    // Returns nullptr if it is not backed by a jbyteArray
-    jbyteArray javaByteArray() const {
-        return mPixelStorageType == PixelStorageType::Java
-                ? mPixelStorage.java.jstrongRef : nullptr;
-    }
 
     int width() const { return info().width(); }
     int height() const { return info().height(); }
@@ -81,6 +75,7 @@ public:
     bool hasHardwareMipMap();
     void setHasHardwareMipMap(bool hasMipMap);
     int getAshmemFd() const;
+    size_t getAllocationByteCount() const;
 
 private:
     friend class WrappedPixelRef;
@@ -90,8 +85,6 @@ private:
     void onStrongRefDestroyed();
 
     void pinPixelsLocked();
-    void unpinPixelsLocked();
-    JNIEnv* jniEnv();
     bool shouldDisposeSelfLocked();
     void assertValid() const;
     SkPixelRef* refPixelRefLocked();
@@ -114,10 +107,9 @@ private:
             size_t size;
         } ashmem;
         struct {
-            JavaVM* jvm;
-            jweak jweakRef;
-            jbyteArray jstrongRef;
-        } java;
+            void* address;
+            size_t size;
+        } heap;
     } mPixelStorage;
 };
 

@@ -416,9 +416,8 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, android::Bitmap* bitmap,
     assert_premultiplied(bitmap->info(), isPremultiplied);
 
     jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
-            reinterpret_cast<jlong>(bitmap), bitmap->javaByteArray(),
-            bitmap->width(), bitmap->height(), density, isMutable, isPremultiplied,
-            ninePatchChunk, ninePatchInsets);
+            reinterpret_cast<jlong>(bitmap), bitmap->width(), bitmap->height(), density, isMutable,
+            isPremultiplied, ninePatchChunk, ninePatchInsets);
     hasException(env); // For the side effect of logging.
     return obj;
 }
@@ -483,37 +482,28 @@ static bool computeAllocationSize(const SkBitmap& bitmap, size_t* size) {
     return true;
 }
 
-android::Bitmap* GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
-                                             SkColorTable* ctable) {
+android::Bitmap* GraphicsJNI::allocateHeapPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
     const SkImageInfo& info = bitmap->info();
     if (info.colorType() == kUnknown_SkColorType) {
-        doThrowIAE(env, "unknown bitmap configuration");
-        return NULL;
+        LOG_ALWAYS_FATAL("unknown bitmap configuration");
+        return nullptr;
     }
 
     size_t size;
     if (!computeAllocationSize(*bitmap, &size)) {
-        return NULL;
+        return nullptr;
     }
 
     // we must respect the rowBytes value already set on the bitmap instead of
     // attempting to compute our own.
     const size_t rowBytes = bitmap->rowBytes();
 
-    jbyteArray arrayObj = (jbyteArray) env->CallObjectMethod(gVMRuntime,
-                                                             gVMRuntime_newNonMovableArray,
-                                                             gByte_class, size);
-    if (env->ExceptionCheck() != 0) {
-        return NULL;
+    void* addr = calloc(size, 1);
+    if (!addr) {
+        return nullptr;
     }
-    SkASSERT(arrayObj);
-    jbyte* addr = (jbyte*) env->CallLongMethod(gVMRuntime, gVMRuntime_addressOf, arrayObj);
-    if (env->ExceptionCheck() != 0) {
-        return NULL;
-    }
-    SkASSERT(addr);
-    android::Bitmap* wrapper = new android::Bitmap(env, arrayObj, (void*) addr,
-            info, rowBytes, ctable);
+
+    android::Bitmap* wrapper = new android::Bitmap(addr, size, info, rowBytes, ctable);
     wrapper->getSkBitmap(bitmap);
     // since we're already allocated, we lockPixels right away
     // HeapAllocator behaves this way too
@@ -658,21 +648,16 @@ android::Bitmap* GraphicsJNI::mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-JavaPixelAllocator::JavaPixelAllocator(JNIEnv* env) {
-    LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&mJavaVM) != JNI_OK,
-            "env->GetJavaVM failed");
-}
+HeapAllocator::HeapAllocator() {}
 
-JavaPixelAllocator::~JavaPixelAllocator() {
+HeapAllocator::~HeapAllocator() {
     if (mStorage) {
         mStorage->detachFromJava();
     }
 }
 
-bool JavaPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
-    JNIEnv* env = vm2env(mJavaVM);
-
-    mStorage = GraphicsJNI::allocateJavaPixelRef(env, bitmap, ctable);
+bool HeapAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
+    mStorage = GraphicsJNI::allocateHeapPixelRef(bitmap, ctable);
     return mStorage != nullptr;
 }
 
@@ -830,7 +815,7 @@ int register_android_graphics_Graphics(JNIEnv* env)
 
     gBitmap_class = make_globalref(env, "android/graphics/Bitmap");
     gBitmap_nativePtr = getFieldIDCheck(env, gBitmap_class, "mNativePtr", "J");
-    gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>", "(J[BIIIZZ[BLandroid/graphics/NinePatch$InsetStruct;)V");
+    gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>", "(JIIIZZ[BLandroid/graphics/NinePatch$InsetStruct;)V");
     gBitmap_reinitMethodID = env->GetMethodID(gBitmap_class, "reinit", "(IIZ)V");
     gBitmap_getAllocationByteCountMethodID = env->GetMethodID(gBitmap_class, "getAllocationByteCount", "()I");
     gBitmapRegionDecoder_class = make_globalref(env, "android/graphics/BitmapRegionDecoder");
