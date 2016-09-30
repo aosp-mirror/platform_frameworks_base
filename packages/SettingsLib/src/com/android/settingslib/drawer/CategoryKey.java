@@ -18,17 +18,17 @@ package com.android.settingslib.drawer;
 public final class CategoryKey {
 
     // Activities in this category shows up in Settings homepage.
-    public static final String CATEGORY_HOMEPAGE = "com.android.settings.category.homepage";
+    public static final String CATEGORY_HOMEPAGE = "com.android.settings.category.ia.homepage";
 
-    // Top level categor.
-    public static final String CATEGORY_NETWORK = "com.android.settings.category.wireless";
-    public static final String CATEGORY_DEVICE = "com.android.settings.category.device";
-    public static final String CATEGORY_APPS = "com.android.settings.category.apps";
-    public static final String CATEGORY_BATTERY = "com.android.settings.category.battery";
-    public static final String CATEGORY_DISPLAY = "com.android.settings.category.display";
-    public static final String CATEGORY_SOUND = "com.android.settings.category.sound";
-    public static final String CATEGORY_STORAGE = "com.android.settings.category.storage";
-    public static final String CATEGORY_SECURITY = "com.android.settings.category.security";
-    public static final String CATEGORY_ACCOUNT = "com.android.settings.category.accounts";
-    public static final String CATEGORY_SYSTEM = "com.android.settings.category.system";
+    // Top level category.
+    public static final String CATEGORY_NETWORK = "com.android.settings.category.ia.wireless";
+    public static final String CATEGORY_DEVICE = "com.android.settings.category.ia.device";
+    public static final String CATEGORY_APPS = "com.android.settings.category.ia.apps";
+    public static final String CATEGORY_BATTERY = "com.android.settings.category.ia.battery";
+    public static final String CATEGORY_DISPLAY = "com.android.settings.category.ia.display";
+    public static final String CATEGORY_SOUND = "com.android.settings.category.ia.sound";
+    public static final String CATEGORY_STORAGE = "com.android.settings.category.ia.storage";
+    public static final String CATEGORY_SECURITY = "com.android.settings.category.ia.security";
+    public static final String CATEGORY_ACCOUNT = "com.android.settings.category.ia.accounts";
+    public static final String CATEGORY_SYSTEM = "com.android.settings.category.ia.system";
 }
