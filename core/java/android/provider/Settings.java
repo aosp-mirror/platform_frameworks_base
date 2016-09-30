@@ -8968,6 +8968,14 @@ public final class Settings {
         public static final String DATABASE_DOWNGRADE_REASON = "database_downgrade_reason";
 
         /**
+         * Flag to toggle journal mode WAL on or off for the contacts database. WAL is enabled by
+         * default. Set to 0 to disable.
+         *
+         * @hide
+         */
+        public static final String CONTACTS_DATABASE_WAL_ENABLED = "contacts_database_wal_enabled";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
