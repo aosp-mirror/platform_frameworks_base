@@ -352,6 +352,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
             };
     private boolean mQsExpanded;
+    private boolean mForwardScrollable;
+    private boolean mBackwardScrollable;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -597,7 +599,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 if (startingPosition < mOwnScrollY) {
                     // This child starts off screen, so let's keep it offscreen to keep the others visible
 
-                    mOwnScrollY += childHeight;
+                    setOwnScrollY(mOwnScrollY + childHeight);
                 }
             }
         }
@@ -620,7 +622,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             // Only apply the scroll if we're scrolling the view upwards, or the view is so far up
             // that it is not visible anymore.
             if (mOwnScrollY < targetScroll || outOfViewScroll < mOwnScrollY) {
-                mOwnScrollY = targetScroll;
+                setOwnScrollY(targetScroll);
             }
         }
     }
@@ -640,7 +642,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void clampScrollPosition() {
         int scrollRange = getScrollRange();
         if (scrollRange < mOwnScrollY) {
-            mOwnScrollY = scrollRange;
+            setOwnScrollY(scrollRange);
         }
     }
 
@@ -1442,7 +1444,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                         false /* onTop */,
                         false /* animate */);
             }
-            mOwnScrollY = range;
+            setOwnScrollY(range);
             scrollAmount = 0.0f;
         }
         return scrollAmount;
@@ -1473,7 +1475,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             setOverScrolledPixels(currentTopPixels - newScrollY,
                     true /* onTop */,
                     false /* animate */);
-            mOwnScrollY = 0;
+            setOwnScrollY(0);
             scrollAmount = 0.0f;
         }
         return scrollAmount;
@@ -1687,7 +1689,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void customScrollTo(int y) {
-        mOwnScrollY = y;
+        setOwnScrollY(y);
         updateChildren();
     }
 
@@ -1698,7 +1700,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             final int oldX = mScrollX;
             final int oldY = mOwnScrollY;
             mScrollX = scrollX;
-            mOwnScrollY = scrollY;
+            setOwnScrollY(scrollY);
             if (clampedY) {
                 springBack();
             } else {
@@ -1728,12 +1730,12 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (overScrolledTop) {
                 onTop = true;
                 newAmount = -mOwnScrollY;
-                mOwnScrollY = 0;
+                setOwnScrollY(0);
                 mDontReportNextOverScroll = true;
             } else {
                 onTop = false;
                 newAmount = mOwnScrollY - scrollRange;
-                mOwnScrollY = scrollRange;
+                setOwnScrollY(scrollRange);
             }
             setOverScrollAmount(newAmount, onTop, false);
             setOverScrollAmount(0.0f, onTop, true);
@@ -1861,6 +1863,19 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (scrollable != mScrollable) {
             mScrollable = scrollable;
             setFocusable(scrollable);
+            updateForwardAndBackwardScrollability();
+        }
+    }
+
+    private void updateForwardAndBackwardScrollability() {
+        boolean forwardScrollable = mScrollable && mOwnScrollY < getScrollRange();
+        boolean backwardsScrollable = mScrollable && mOwnScrollY > 0;
+        boolean changed = forwardScrollable != mForwardScrollable
+                || backwardsScrollable != mBackwardScrollable;
+        mForwardScrollable = forwardScrollable;
+        mBackwardScrollable = backwardsScrollable;
+        if (changed) {
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         }
     }
 
@@ -2120,13 +2135,13 @@ public class NotificationStackScrollLayout extends ViewGroup
             float topAmount = getCurrentOverScrollAmount(true);
             float bottomAmount = getCurrentOverScrollAmount(false);
             if (velocityY < 0 && topAmount > 0) {
-                mOwnScrollY -= (int) topAmount;
+                setOwnScrollY(mOwnScrollY - (int) topAmount);
                 mDontReportNextOverScroll = true;
                 setOverScrollAmount(0, true, false);
                 mMaxOverScroll = Math.abs(velocityY) / 1000f * getRubberBandFactor(true /* onTop */)
                         * mOverflingDistance + topAmount;
             } else if (velocityY > 0 && bottomAmount > 0) {
-                mOwnScrollY += bottomAmount;
+                setOwnScrollY((int) (mOwnScrollY + bottomAmount));
                 setOverScrollAmount(0, false, false);
                 mMaxOverScroll = Math.abs(velocityY) / 1000f
                         * getRubberBandFactor(false /* onTop */) * mOverflingDistance
@@ -2477,11 +2492,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (endPosition <= mOwnScrollY) {
             // This child is fully scrolled of the top, so we have to deduct its height from the
             // scrollPosition
-            mOwnScrollY -= childHeight;
+            setOwnScrollY(mOwnScrollY - childHeight);
         } else if (startingPosition < mOwnScrollY) {
             // This child is currently being scrolled into, set the scroll position to the start of
             // this child
-            mOwnScrollY = startingPosition;
+            setOwnScrollY(startingPosition);
         }
     }
 
@@ -3066,7 +3081,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void onExpansionStopped() {
         mIsExpansionChanging = false;
         if (!mIsExpanded) {
-            mOwnScrollY = 0;
+            setOwnScrollY(0);
             mPhoneStatusBar.resetUserExpandedStates();
 
             // lets make sure nothing is in the overlay / transient anymore
@@ -3099,7 +3114,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void resetScrollPosition() {
         mScroller.abortAnimation();
-        mOwnScrollY = 0;
+        setOwnScrollY(0);
     }
 
     private void setIsExpanded(boolean isExpanded) {
@@ -3168,7 +3183,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
                 int stackEnd = getStackEndPosition();
                 if (endPosition > stackEnd) {
-                    mOwnScrollY += endPosition - stackEnd;
+                    setOwnScrollY((int) (mOwnScrollY + endPosition - stackEnd));
                     mDisallowScrollingInThisMotion = true;
                 }
             }
@@ -3730,15 +3745,14 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        final int scrollRange = getScrollRange();
-        if (scrollRange > 0) {
+        if (mScrollable) {
             info.setScrollable(true);
-            if (mScrollY > 0) {
+            if (mBackwardScrollable) {
                 info.addAction(
                         AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
                 info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP);
             }
-            if (mScrollY < scrollRange) {
+            if (mForwardScrollable) {
                 info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
                 info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_DOWN);
             }
@@ -3912,6 +3926,13 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setQsExpanded(boolean qsExpanded) {
         mQsExpanded = qsExpanded;
         updateAlgorithmLayoutMinHeight();
+    }
+
+    public void setOwnScrollY(int ownScrollY) {
+        if (ownScrollY != mOwnScrollY) {
+            mOwnScrollY = ownScrollY;
+            updateForwardAndBackwardScrollability();
+        }
     }
 
     /**
