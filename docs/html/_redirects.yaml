@@ -1246,6 +1246,44 @@ redirects:
   to: /studio/write/lint.html?utm_source=android-studio
 - from: /r/studio-ui/gradle-console.html
   to: /studio/run/index.html?utm_source=android-studio#gradle-console
+- from: /r/studio-ui/app-indexing-test.html
+  to: /studio/write/app-link-indexing.html#appindexingtest?utm_source=android-studio
+- from: /r/studio-ui/vcs.html
+  to: /studio/intro/index.html#version_control_basics?utm_source=android-studio
+- from: /r/studio-ui/create-new-module.html
+  to: /studio/projects/index.html#ApplicationModules?utm_source=android-studio
+- from: /r/studio-ui/build-variants.html
+  to: /studio/run/index.html#changing-variant?utm_source=android-studio
+- from: /r/studio-ui/generate-signed-apk.html
+  to: /studio/publish/app-signing.html#release-mode?utm_source=android-studio
+- from: /r/studio-ui/import-project-vcs.html
+  to: /studio/projects/create-project.html#ImportAProject?utm_source=android-studio
+- from: /r/studio-ui/apk-analyzer.html
+  to: /studio/build/apk-analyzer.html?utm_source=android-studio
+- from: /r/studio-ui/breakpoints.html
+  to: /studio/debug/index.html#breakPointsView?utm_source=android-studio
+- from: /r/studio-ui/attach-debugger-to-process.html
+  to: /studio/debug/index.html?utm_source=android-studio
+- from: /r/studio-ui/import-sample.html
+  to: /samples/index.html?utm_source=android-studio
+- from: /r/studio-ui/import-module.html
+  to: /studio/projects/add-app-module.html#ImportAModule?utm_source=android-studio
+- from: /r/studio-ui/import-project.html
+  to: /studio/projects/create-project.html#ImportAProject?utm_source=android-studio
+- from: /r/studio-ui/create-project.html
+  to: /studio/projects/create-project.html?utm_source=android-studio
+- from: /r/studio-ui/new-activity.html
+  to: /studio/projects/template.html?utm_source=android-studio
+- from: /r/studio-ui/new-resource-file.html
+  to: /studio/write/add-resources.html?utm_source=android-studio
+- from: /r/studio-ui/new-resource-dir.html
+  to: /studio/write/add-resources.html#add_a_resource_directory?utm_source=android-studio
+- from: /r/studio-ui/configure-component.html
+  to: /studio/write/add-resources.html?utm_source=android-studio
+- from: /r/studio-ui/ninepatch.html
+  to: /studio/write/draw9patch.html?utm_source=android-studio
+- from: /r/studio-ui/firebase-assistant.html
+  to: /studio/write/firebase.html?utm_source=android-studio
 
 # Redirects from (removed) N Preview documentation
 - from: /preview/features/afw.html
