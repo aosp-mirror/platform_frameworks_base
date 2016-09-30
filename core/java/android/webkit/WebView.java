@@ -1768,10 +1768,22 @@ public class WebView extends AbsoluteLayout
      * requests. This will replace the current handler.
      *
      * @param client an implementation of WebViewClient
+     * @see #getWebViewClient
      */
     public void setWebViewClient(WebViewClient client) {
         checkThread();
         mProvider.setWebViewClient(client);
+    }
+
+    /**
+     * Gets the WebViewClient.
+     *
+     * @return the WebViewClient, or a default client if not yet set
+     * @see #setWebViewClient
+     */
+    public WebViewClient getWebViewClient() {
+        checkThread();
+        return mProvider.getWebViewClient();
     }
 
     /**
@@ -1792,10 +1804,22 @@ public class WebView extends AbsoluteLayout
      * This will replace the current handler.
      *
      * @param client an implementation of WebChromeClient
+     * @see #getWebChromeClient
      */
     public void setWebChromeClient(WebChromeClient client) {
         checkThread();
         mProvider.setWebChromeClient(client);
+    }
+
+    /**
+     * Gets the chrome handler.
+     *
+     * @return the WebChromeClient, or null if not yet set
+     * @see #setWebChromeClient
+     */
+    public WebChromeClient getWebChromeClient() {
+        checkThread();
+        return mProvider.getWebChromeClient();
     }
 
     /**
