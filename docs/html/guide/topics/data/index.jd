@@ -5,21 +5,3 @@ page.landing.image=
 
 @jd:body
 
-<div class="landing-docs">
-
-
-  <div class="col-12">
-    <h3>Training</h3>
-
-    <a href="{@docRoot}training/backup/index.html">
-      <h4>Backing up App Data to the Cloud</h4>
-      <p>
-        This class covers techniques for backing up data to the cloud so that
-        users can restore their data when recovering from a data loss (such as a
-        factory reset) or installing your application on a new device.
-      </p>
-    </a>
-
-  </div>
-
-</div>
