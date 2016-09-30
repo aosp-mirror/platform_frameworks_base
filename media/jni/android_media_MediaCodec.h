@@ -146,8 +146,9 @@ private:
 
     status_t mInitStatus;
 
+    template <typename T>
     status_t createByteBufferFromABuffer(
-            JNIEnv *env, bool readOnly, bool clearBuffer, const sp<ABuffer> &buffer,
+            JNIEnv *env, bool readOnly, bool clearBuffer, const sp<T> &buffer,
             jobject *buf) const;
 
     void cacheJavaObjects(JNIEnv *env);
