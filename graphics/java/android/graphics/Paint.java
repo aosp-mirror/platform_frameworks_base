@@ -27,6 +27,9 @@ import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
 
+import dalvik.annotation.optimization.CriticalNative;
+import dalvik.annotation.optimization.FastNative;
+
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -604,8 +607,6 @@ public class Paint {
         return nGetFlags(mNativePaint);
     }
 
-    private native int nGetFlags(long paintPtr);
-
     /**
      * Set the paint's flags. Use the Flag enum to specific flag values.
      *
@@ -615,8 +616,6 @@ public class Paint {
         nSetFlags(mNativePaint, flags);
     }
 
-    private native void nSetFlags(long paintPtr, int flags);
-
     /**
      * Return the paint's hinting mode.  Returns either
      * {@link #HINTING_OFF} or {@link #HINTING_ON}.
@@ -625,8 +624,6 @@ public class Paint {
         return nGetHinting(mNativePaint);
     }
 
-    private native int nGetHinting(long paintPtr);
-
     /**
      * Set the paint's hinting mode.  May be either
      * {@link #HINTING_OFF} or {@link #HINTING_ON}.
@@ -634,8 +631,6 @@ public class Paint {
     public void setHinting(int mode) {
         nSetHinting(mNativePaint, mode);
     }
-
-    private native void nSetHinting(long paintPtr, int mode);
 
     /**
      * Helper for getFlags(), returning true if ANTI_ALIAS_FLAG bit is set
@@ -660,8 +655,6 @@ public class Paint {
     public void setAntiAlias(boolean aa) {
         nSetAntiAlias(mNativePaint, aa);
     }
-
-    private native void nSetAntiAlias(long paintPtr, boolean aa);
 
     /**
      * Helper for getFlags(), returning true if DITHER_FLAG bit is set
@@ -691,8 +684,6 @@ public class Paint {
         nSetDither(mNativePaint, dither);
     }
 
-    private native void nSetDither(long paintPtr, boolean dither);
-
     /**
      * Helper for getFlags(), returning true if LINEAR_TEXT_FLAG bit is set
      *
@@ -711,8 +702,6 @@ public class Paint {
     public void setLinearText(boolean linearText) {
         nSetLinearText(mNativePaint, linearText);
     }
-
-    private native void nSetLinearText(long paintPtr, boolean linearText);
 
     /**
      * Helper for getFlags(), returning true if SUBPIXEL_TEXT_FLAG bit is set
@@ -733,8 +722,6 @@ public class Paint {
         nSetSubpixelText(mNativePaint, subpixelText);
     }
 
-    private native void nSetSubpixelText(long paintPtr, boolean subpixelText);
-
     /**
      * Helper for getFlags(), returning true if UNDERLINE_TEXT_FLAG bit is set
      *
@@ -753,8 +740,6 @@ public class Paint {
     public void setUnderlineText(boolean underlineText) {
         nSetUnderlineText(mNativePaint, underlineText);
     }
-
-    private native void nSetUnderlineText(long paintPtr, boolean underlineText);
 
     /**
      * Helper for getFlags(), returning true if STRIKE_THRU_TEXT_FLAG bit is set
@@ -775,8 +760,6 @@ public class Paint {
         nSetStrikeThruText(mNativePaint, strikeThruText);
     }
 
-    private native void nSetStrikeThruText(long paintPtr, boolean strikeThruText);
-
     /**
      * Helper for getFlags(), returning true if FAKE_BOLD_TEXT_FLAG bit is set
      *
@@ -795,8 +778,6 @@ public class Paint {
     public void setFakeBoldText(boolean fakeBoldText) {
         nSetFakeBoldText(mNativePaint, fakeBoldText);
     }
-
-    private native void nSetFakeBoldText(long paintPtr, boolean fakeBoldText);
 
     /**
      * Whether or not the bitmap filter is activated.
@@ -822,8 +803,6 @@ public class Paint {
     public void setFilterBitmap(boolean filter) {
         nSetFilterBitmap(mNativePaint, filter);
     }
-
-    private native void nSetFilterBitmap(long paintPtr, boolean filter);
 
     /**
      * Return the paint's style, used for controlling how primitives'
@@ -860,8 +839,6 @@ public class Paint {
         return nGetColor(mNativePaint);
     }
 
-    private native int nGetColor(long paintPtr);
-
     /**
      * Set the paint's color. Note that the color is an int containing alpha
      * as well as r,g,b. This 32bit value is not premultiplied, meaning that
@@ -874,8 +851,6 @@ public class Paint {
         nSetColor(mNativePaint, color);
     }
 
-    private native void nSetColor(long paintPtr, @ColorInt int color);
-
     /**
      * Helper to getColor() that just returns the color's alpha value. This is
      * the same as calling getColor() >>> 24. It always returns a value between
@@ -887,8 +862,6 @@ public class Paint {
         return nGetAlpha(mNativePaint);
     }
 
-    private native int nGetAlpha(long paintPtr);
-
     /**
      * Helper to setColor(), that only assigns the color's alpha value,
      * leaving its r,g,b values unchanged. Results are undefined if the alpha
@@ -899,8 +872,6 @@ public class Paint {
     public void setAlpha(int a) {
         nSetAlpha(mNativePaint, a);
     }
-
-    private native void nSetAlpha(long paintPtr, int a);
 
     /**
      * Helper to setColor(), that takes a,r,g,b and constructs the color int
@@ -927,8 +898,6 @@ public class Paint {
         return nGetStrokeWidth(mNativePaint);
     }
 
-    private native float nGetStrokeWidth(long paintPtr);
-
     /**
      * Set the width for stroking.
      * Pass 0 to stroke in hairline mode.
@@ -941,8 +910,6 @@ public class Paint {
         nSetStrokeWidth(mNativePaint, width);
     }
 
-    private native void nSetStrokeWidth(long paintPtr, float width);
-
     /**
      * Return the paint's stroke miter value. Used to control the behavior
      * of miter joins when the joins angle is sharp.
@@ -954,8 +921,6 @@ public class Paint {
         return nGetStrokeMiter(mNativePaint);
     }
 
-    private native float nGetStrokeMiter(long paintPtr);
-
     /**
      * Set the paint's stroke miter value. This is used to control the behavior
      * of miter joins when the joins angle is sharp. This value must be >= 0.
@@ -966,8 +931,6 @@ public class Paint {
     public void setStrokeMiter(float miter) {
         nSetStrokeMiter(mNativePaint, miter);
     }
-
-    private native void nSetStrokeMiter(long paintPtr, float miter);
 
     /**
      * Return the paint's Cap, controlling how the start and end of stroked
@@ -1387,8 +1350,6 @@ public class Paint {
         return nIsElegantTextHeight(mNativePaint);
     }
 
-    private native boolean nIsElegantTextHeight(long paintPtr);
-
     /**
      * Set the paint's elegant height metrics flag. This setting selects font
      * variants that have not been compacted to fit Latin-based vertical
@@ -1400,8 +1361,6 @@ public class Paint {
         nSetElegantTextHeight(mNativePaint, elegant);
     }
 
-    private native void nSetElegantTextHeight(long paintPtr, boolean elegant);
-
     /**
      * Return the paint's text size.
      *
@@ -1410,8 +1369,6 @@ public class Paint {
     public float getTextSize() {
         return nGetTextSize(mNativePaint);
     }
-
-    private native float nGetTextSize(long paintPtr);
 
     /**
      * Set the paint's text size. This value must be > 0
@@ -1422,8 +1379,6 @@ public class Paint {
         nSetTextSize(mNativePaint, textSize);
     }
 
-    private native void nSetTextSize(long paintPtr, float textSize);
-
     /**
      * Return the paint's horizontal scale factor for text. The default value
      * is 1.0.
@@ -1433,8 +1388,6 @@ public class Paint {
     public float getTextScaleX() {
         return nGetTextScaleX(mNativePaint);
     }
-
-    private native float nGetTextScaleX(long paintPtr);
 
     /**
      * Set the paint's horizontal scale factor for text. The default value
@@ -1447,8 +1400,6 @@ public class Paint {
         nSetTextScaleX(mNativePaint, scaleX);
     }
 
-    private native void nSetTextScaleX(long paintPtr, float scaleX);
-
     /**
      * Return the paint's horizontal skew factor for text. The default value
      * is 0.
@@ -1459,8 +1410,6 @@ public class Paint {
         return nGetTextSkewX(mNativePaint);
     }
 
-    private native float nGetTextSkewX(long paintPtr);
-
     /**
      * Set the paint's horizontal skew factor for text. The default value
      * is 0. For approximating oblique text, use values around -0.25.
@@ -1470,8 +1419,6 @@ public class Paint {
     public void setTextSkewX(float skewX) {
         nSetTextSkewX(mNativePaint, skewX);
     }
-
-    private native void nSetTextSkewX(long paintPtr, float skewX);
 
     /**
      * Return the paint's letter-spacing for text. The default value
@@ -1565,8 +1512,6 @@ public class Paint {
         return nAscent(mNativePaint, mNativeTypeface);
     }
 
-    private native float nAscent(long paintPtr, long typefacePtr);
-
     /**
      * Return the distance below (positive) the baseline (descent) based on the
      * current typeface and text size.
@@ -1577,8 +1522,6 @@ public class Paint {
     public float descent() {
         return nDescent(mNativePaint, mNativeTypeface);
     }
-
-    private native float nDescent(long paintPtr, long typefacePtr);
 
     /**
      * Class that describes the various metrics for a font at a given text size.
@@ -1623,9 +1566,6 @@ public class Paint {
     public float getFontMetrics(FontMetrics metrics) {
         return nGetFontMetrics(mNativePaint, mNativeTypeface, metrics);
     }
-
-    private native float nGetFontMetrics(long paintPtr,
-            long typefacePtr, FontMetrics metrics);
 
     /**
      * Allocates a new FontMetrics object, and then calls getFontMetrics(fm)
@@ -1685,9 +1625,6 @@ public class Paint {
     public int getFontMetricsInt(FontMetricsInt fmi) {
         return nGetFontMetricsInt(mNativePaint, mNativeTypeface, fmi);
     }
-
-    private native int nGetFontMetricsInt(long paintPtr,
-            long typefacePtr, FontMetricsInt fmi);
 
     public FontMetricsInt getFontMetricsInt() {
         FontMetricsInt fm = new FontMetricsInt();
@@ -1860,10 +1797,6 @@ public class Paint {
         return res;
     }
 
-    private static native int nBreakText(long nObject, long nTypeface,
-                                               char[] text, int index, int count,
-                                               float maxWidth, int bidiFlags, float[] measuredWidth);
-
     /**
      * Measure the text, stopping early if the measured width exceeds maxWidth.
      * Return the number of chars that were measured, and if measuredWidth is
@@ -1951,10 +1884,6 @@ public class Paint {
         if (measuredWidth != null) measuredWidth[0] *= mInvCompatScaling;
         return res;
     }
-
-    private static native int nBreakText(long nObject, long nTypeface,
-                                        String text, boolean measureForwards,
-                                        float maxWidth, int bidiFlags, float[] measuredWidth);
 
     /**
      * Return the advance widths for the characters in the string.
@@ -2679,73 +2608,34 @@ public class Paint {
         return result;
     }
 
+    // regular JNI
+    private static native long nGetNativeFinalizer();
     private static native long nInit();
     private static native long nInitWithPaint(long paint);
-    private static native void nReset(long paintPtr);
-    private static native void nSet(long paintPtrDest, long paintPtrSrc);
-    private static native int nGetStyle(long paintPtr);
-    private static native void nSetStyle(long paintPtr, int style);
-    private static native int nGetStrokeCap(long paintPtr);
-    private static native void nSetStrokeCap(long paintPtr, int cap);
-    private static native int nGetStrokeJoin(long paintPtr);
-    private static native void nSetStrokeJoin(long paintPtr,
-                                                    int join);
-    private static native boolean nGetFillPath(long paintPtr,
-                                                     long src, long dst);
-    private static native long nSetShader(long paintPtr, long shader);
-    private static native long nSetColorFilter(long paintPtr,
-                                                    long filter);
-    private static native void nSetXfermode(long paintPtr, int xfermode);
-    private static native long nSetPathEffect(long paintPtr,
-                                                    long effect);
-    private static native long nSetMaskFilter(long paintPtr,
-                                                    long maskfilter);
-    private static native long nSetTypeface(long paintPtr,
-                                                  long typeface);
-    private static native long nSetRasterizer(long paintPtr,
-                                                   long rasterizer);
-
-    private static native int nGetTextAlign(long paintPtr);
-    private static native void nSetTextAlign(long paintPtr,
-                                                   int align);
-
-    private static native int nSetTextLocales(long paintPtr, String locales);
-    private static native void nSetTextLocalesByMinikinLangListId(long paintPtr,
-            int mMinikinLangListId);
-
+    private static native int nBreakText(long nObject, long nTypeface,
+            char[] text, int index, int count,
+            float maxWidth, int bidiFlags, float[] measuredWidth);
+    private static native int nBreakText(long nObject, long nTypeface,
+            String text, boolean measureForwards,
+            float maxWidth, int bidiFlags, float[] measuredWidth);
     private static native float nGetTextAdvances(long paintPtr, long typefacePtr,
             char[] text, int index, int count, int contextIndex, int contextCount,
             int bidiFlags, float[] advances, int advancesIndex);
     private static native float nGetTextAdvances(long paintPtr, long typefacePtr,
             String text, int start, int end, int contextStart, int contextEnd,
             int bidiFlags, float[] advances, int advancesIndex);
-
     private native int nGetTextRunCursor(long paintPtr, char[] text,
             int contextStart, int contextLength, int dir, int offset, int cursorOpt);
     private native int nGetTextRunCursor(long paintPtr, String text,
             int contextStart, int contextEnd, int dir, int offset, int cursorOpt);
-
     private static native void nGetTextPath(long paintPtr, long typefacePtr,
             int bidiFlags, char[] text, int index, int count, float x, float y, long path);
     private static native void nGetTextPath(long paintPtr, long typefacePtr,
             int bidiFlags, String text, int start, int end, float x, float y, long path);
     private static native void nGetStringBounds(long nativePaint, long typefacePtr,
-                                String text, int start, int end, int bidiFlags, Rect bounds);
+            String text, int start, int end, int bidiFlags, Rect bounds);
     private static native void nGetCharArrayBounds(long nativePaint, long typefacePtr,
-                                char[] text, int index, int count, int bidiFlags, Rect bounds);
-    private static native long nGetNativeFinalizer();
-
-    private static native void nSetShadowLayer(long paintPtr,
-            float radius, float dx, float dy, int color);
-    private static native boolean nHasShadowLayer(long paintPtr);
-
-    private static native float nGetLetterSpacing(long paintPtr);
-    private static native void nSetLetterSpacing(long paintPtr,
-                                                       float letterSpacing);
-    private static native void nSetFontFeatureSettings(long paintPtr,
-                                                             String settings);
-    private static native int nGetHyphenEdit(long paintPtr);
-    private static native void nSetHyphenEdit(long paintPtr, int hyphen);
+            char[] text, int index, int count, int bidiFlags, Rect bounds);
     private static native boolean nHasGlyph(long paintPtr, long typefacePtr,
             int bidiFlags, String string);
     private static native float nGetRunAdvance(long paintPtr, long typefacePtr,
@@ -2754,4 +2644,134 @@ public class Paint {
     private static native int nGetOffsetForAdvance(long paintPtr,
             long typefacePtr, char[] text, int start, int end, int contextStart, int contextEnd,
             boolean isRtl, float advance);
+
+
+    // ---------------- @FastNative ------------------------
+
+    @FastNative
+    private static native int nSetTextLocales(long paintPtr, String locales);
+    @FastNative
+    private static native void nSetFontFeatureSettings(long paintPtr, String settings);
+    @FastNative
+    private static native float nGetFontMetrics(long paintPtr,
+            long typefacePtr, FontMetrics metrics);
+    @FastNative
+    private static native int nGetFontMetricsInt(long paintPtr,
+            long typefacePtr, FontMetricsInt fmi);
+
+    
+    // ---------------- @CriticalNative ------------------------
+
+    @CriticalNative
+    private static native void nReset(long paintPtr);
+    @CriticalNative
+    private static native void nSet(long paintPtrDest, long paintPtrSrc);
+    @CriticalNative
+    private static native int nGetStyle(long paintPtr);
+    @CriticalNative
+    private static native void nSetStyle(long paintPtr, int style);
+    @CriticalNative
+    private static native int nGetStrokeCap(long paintPtr);
+    @CriticalNative
+    private static native void nSetStrokeCap(long paintPtr, int cap);
+    @CriticalNative
+    private static native int nGetStrokeJoin(long paintPtr);
+    @CriticalNative
+    private static native void nSetStrokeJoin(long paintPtr, int join);
+    @CriticalNative
+    private static native boolean nGetFillPath(long paintPtr, long src, long dst);
+    @CriticalNative
+    private static native long nSetShader(long paintPtr, long shader);
+    @CriticalNative
+    private static native long nSetColorFilter(long paintPtr, long filter);
+    @CriticalNative
+    private static native void nSetXfermode(long paintPtr, int xfermode);
+    @CriticalNative
+    private static native long nSetPathEffect(long paintPtr, long effect);
+    @CriticalNative
+    private static native long nSetMaskFilter(long paintPtr, long maskfilter);
+    @CriticalNative
+    private static native long nSetTypeface(long paintPtr, long typeface);
+    @CriticalNative
+    private static native long nSetRasterizer(long paintPtr, long rasterizer);
+    @CriticalNative
+    private static native int nGetTextAlign(long paintPtr);
+    @CriticalNative
+    private static native void nSetTextAlign(long paintPtr, int align);
+    @CriticalNative
+    private static native void nSetTextLocalesByMinikinLangListId(long paintPtr,
+            int mMinikinLangListId);
+    @CriticalNative
+    private static native void nSetShadowLayer(long paintPtr,
+            float radius, float dx, float dy, int color);
+    @CriticalNative
+    private static native boolean nHasShadowLayer(long paintPtr);
+    @CriticalNative
+    private static native float nGetLetterSpacing(long paintPtr);
+    @CriticalNative
+    private static native void nSetLetterSpacing(long paintPtr, float letterSpacing);
+    @CriticalNative
+    private static native int nGetHyphenEdit(long paintPtr);
+    @CriticalNative
+    private static native void nSetHyphenEdit(long paintPtr, int hyphen);
+    @CriticalNative
+    private static native void nSetStrokeMiter(long paintPtr, float miter);
+    @CriticalNative
+    private static native float nGetStrokeMiter(long paintPtr);
+    @CriticalNative
+    private static native void nSetStrokeWidth(long paintPtr, float width);
+    @CriticalNative
+    private static native float nGetStrokeWidth(long paintPtr);
+    @CriticalNative
+    private static native void nSetAlpha(long paintPtr, int a);
+    @CriticalNative
+    private static native void nSetDither(long paintPtr, boolean dither);
+    @CriticalNative
+    private static native int nGetFlags(long paintPtr);
+    @CriticalNative
+    private static native void nSetFlags(long paintPtr, int flags);
+    @CriticalNative
+    private static native int nGetHinting(long paintPtr);
+    @CriticalNative
+    private static native void nSetHinting(long paintPtr, int mode);
+    @CriticalNative
+    private static native void nSetAntiAlias(long paintPtr, boolean aa);
+    @CriticalNative
+    private static native void nSetLinearText(long paintPtr, boolean linearText);
+    @CriticalNative
+    private static native void nSetSubpixelText(long paintPtr, boolean subpixelText);
+    @CriticalNative
+    private static native void nSetUnderlineText(long paintPtr, boolean underlineText);
+    @CriticalNative
+    private static native void nSetFakeBoldText(long paintPtr, boolean fakeBoldText);
+    @CriticalNative
+    private static native void nSetFilterBitmap(long paintPtr, boolean filter);
+    @CriticalNative
+    private static native int nGetColor(long paintPtr);
+    @CriticalNative
+    private static native void nSetColor(long paintPtr, @ColorInt int color);
+    @CriticalNative
+    private static native int nGetAlpha(long paintPtr);
+    @CriticalNative
+    private static native void nSetStrikeThruText(long paintPtr, boolean strikeThruText);
+    @CriticalNative
+    private static native boolean nIsElegantTextHeight(long paintPtr);
+    @CriticalNative
+    private static native void nSetElegantTextHeight(long paintPtr, boolean elegant);
+    @CriticalNative
+    private static native float nGetTextSize(long paintPtr);
+    @CriticalNative
+    private static native float nGetTextScaleX(long paintPtr);
+    @CriticalNative
+    private static native void nSetTextScaleX(long paintPtr, float scaleX);
+    @CriticalNative
+    private static native float nGetTextSkewX(long paintPtr);
+    @CriticalNative
+    private static native void nSetTextSkewX(long paintPtr, float skewX);
+    @CriticalNative
+    private static native float nAscent(long paintPtr, long typefacePtr);
+    @CriticalNative
+    private static native float nDescent(long paintPtr, long typefacePtr);
+    @CriticalNative
+    private static native void nSetTextSize(long paintPtr, float textSize);
 }
