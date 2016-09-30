@@ -127,12 +127,10 @@ private:
     }
 };
 
-Bitmap::Bitmap(JNIEnv* env, jbyteArray storageObj, void* address,
-            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
-        : mPixelStorageType(PixelStorageType::Java) {
-    env->GetJavaVM(&mPixelStorage.java.jvm);
-    mPixelStorage.java.jweakRef = env->NewWeakGlobalRef(storageObj);
-    mPixelStorage.java.jstrongRef = nullptr;
+Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
+        : mPixelStorageType(PixelStorageType::Heap) {
+    mPixelStorage.heap.address = address;
+    mPixelStorage.heap.size = size;
     mPixelRef.reset(new WrappedPixelRef(this, address, info, rowBytes, ctable));
     // Note: this will trigger a call to onStrongRefDestroyed(), but
     // we want the pixel ref to have a ref count of 0 at this point
@@ -187,12 +185,8 @@ void Bitmap::doFreePixels() {
         munmap(mPixelStorage.ashmem.address, mPixelStorage.ashmem.size);
         close(mPixelStorage.ashmem.fd);
         break;
-    case PixelStorageType::Java:
-        JNIEnv* env = jniEnv();
-        LOG_ALWAYS_FATAL_IF(mPixelStorage.java.jstrongRef,
-                "Deleting a bitmap wrapper while there are outstanding strong "
-                "references! mPinnedRefCount = %d", mPinnedRefCount);
-        env->DeleteWeakGlobalRef(mPixelStorage.java.jweakRef);
+    case PixelStorageType::Heap:
+        free(mPixelStorage.heap.address);
         break;
     }
 
@@ -216,6 +210,15 @@ int Bitmap::getAshmemFd() const {
         return mPixelStorage.ashmem.fd;
     default:
         return -1;
+    }
+}
+
+size_t Bitmap::getAllocationByteCount() const {
+    switch (mPixelStorageType) {
+    case PixelStorageType::Heap:
+        return mPixelStorage.heap.size;
+    default:
+        return rowBytes() * height();
     }
 }
 
@@ -244,7 +247,6 @@ SkPixelRef* Bitmap::refPixelRefLocked() {
         // We just restored this from 0, pin the pixels and inc the strong count
         // Note that there *might be* an incoming onStrongRefDestroyed from whatever
         // last unref'd
-        pinPixelsLocked();
         mPinnedRefCount++;
     }
     return mPixelRef.get();
@@ -283,13 +285,6 @@ bool Bitmap::shouldDisposeSelfLocked() {
     return mPinnedRefCount == 0 && !mAttachedToJava;
 }
 
-JNIEnv* Bitmap::jniEnv() {
-    JNIEnv* env;
-    auto success = mPixelStorage.java.jvm->GetEnv((void**)&env, JNI_VERSION_1_6);
-    LOG_ALWAYS_FATAL_IF(success != JNI_OK,
-        "Failed to get JNIEnv* from JVM: %p", mPixelStorage.java.jvm);
-    return env;
-}
 
 void Bitmap::onStrongRefDestroyed() {
     bool disposeSelf = false;
@@ -298,56 +293,12 @@ void Bitmap::onStrongRefDestroyed() {
         if (mPinnedRefCount > 0) {
             mPinnedRefCount--;
             if (mPinnedRefCount == 0) {
-                unpinPixelsLocked();
                 disposeSelf = shouldDisposeSelfLocked();
             }
         }
     }
     if (disposeSelf) {
         delete this;
-    }
-}
-
-void Bitmap::pinPixelsLocked() {
-    switch (mPixelStorageType) {
-    case PixelStorageType::Invalid:
-        LOG_ALWAYS_FATAL("Cannot pin invalid pixels!");
-        break;
-    case PixelStorageType::External:
-    case PixelStorageType::Ashmem:
-        // Nothing to do
-        break;
-    case PixelStorageType::Java: {
-        JNIEnv* env = jniEnv();
-        if (!mPixelStorage.java.jstrongRef) {
-            mPixelStorage.java.jstrongRef = reinterpret_cast<jbyteArray>(
-                    env->NewGlobalRef(mPixelStorage.java.jweakRef));
-            if (!mPixelStorage.java.jstrongRef) {
-                LOG_ALWAYS_FATAL("Failed to acquire strong reference to pixels");
-            }
-        }
-        break;
-    }
-    }
-}
-
-void Bitmap::unpinPixelsLocked() {
-    switch (mPixelStorageType) {
-    case PixelStorageType::Invalid:
-        LOG_ALWAYS_FATAL("Cannot unpin invalid pixels!");
-        break;
-    case PixelStorageType::External:
-    case PixelStorageType::Ashmem:
-        // Don't need to do anything
-        break;
-    case PixelStorageType::Java: {
-        JNIEnv* env = jniEnv();
-        if (mPixelStorage.java.jstrongRef) {
-            env->DeleteGlobalRef(mPixelStorage.java.jstrongRef);
-            mPixelStorage.java.jstrongRef = nullptr;
-        }
-        break;
-    }
     }
 }
 
@@ -723,7 +674,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     SkBitmap bitmap;
     bitmap.setInfo(SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType));
 
-    Bitmap* nativeBitmap = GraphicsJNI::allocateJavaPixelRef(env, &bitmap, NULL);
+    Bitmap* nativeBitmap = GraphicsJNI::allocateHeapPixelRef(&bitmap, NULL);
     if (!nativeBitmap) {
         return NULL;
     }
@@ -742,8 +693,8 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
     SkBitmap src;
     reinterpret_cast<Bitmap*>(srcHandle)->getSkBitmap(&src);
     SkColorType dstCT = GraphicsJNI::legacyBitmapConfigToColorType(dstConfigHandle);
-    SkBitmap            result;
-    JavaPixelAllocator  allocator(env);
+    SkBitmap result;
+    HeapAllocator allocator;
 
     if (!src.copyTo(&result, dstCT, &allocator)) {
         return NULL;
@@ -798,8 +749,7 @@ static jboolean Bitmap_recycle(JNIEnv* env, jobject, jlong bitmapHandle) {
 }
 
 static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
-        jint width, jint height, jint configHandle, jint allocSize,
-        jboolean requestPremul) {
+        jint width, jint height, jint configHandle, jboolean requestPremul) {
     LocalScopedBitmap bitmap(bitmapHandle);
     SkColorType colorType = GraphicsJNI::legacyBitmapConfigToColorType(configHandle);
 
@@ -807,8 +757,8 @@ static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
     if (colorType == kARGB_4444_SkColorType) {
         colorType = kN32_SkColorType;
     }
-
-    if (width * height * SkColorTypeBytesPerPixel(colorType) > allocSize) {
+    size_t requestedSize = width * height * SkColorTypeBytesPerPixel(colorType);
+    if (requestedSize > bitmap->getAllocationByteCount()) {
         // done in native as there's no way to get BytesPerPixel in Java
         doThrowIAE(env, "Bitmap not large enough to support new configuration");
         return;
@@ -1053,7 +1003,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 #endif
 
         // Copy the pixels into a new buffer.
-        nativeBitmap = GraphicsJNI::allocateJavaPixelRef(env, bitmap.get(), ctable);
+        nativeBitmap = GraphicsJNI::allocateHeapPixelRef(bitmap.get(), ctable);
         SkSafeUnref(ctable);
         if (!nativeBitmap) {
             blob.release();
@@ -1165,7 +1115,7 @@ static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
     const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     SkIPoint  offset;
     SkBitmap dst;
-    JavaPixelAllocator allocator(env);
+    HeapAllocator allocator;
 
     src.extractAlpha(&dst, paint, &allocator, &offset);
     // If Skia can't allocate pixels for destination bitmap, it resets
@@ -1370,6 +1320,11 @@ static void Bitmap_prepareToDraw(JNIEnv* env, jobject, jlong bitmapPtr) {
     android::uirenderer::renderthread::RenderProxy::prepareToDraw(bitmap);
 }
 
+static jint Bitmap_getAllocationByteCount(JNIEnv* env, jobject, jlong bitmapPtr) {
+    LocalScopedBitmap bitmapHandle(bitmapPtr);
+    return static_cast<jint>(bitmapHandle->getAllocationByteCount());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gBitmapMethods[] = {
@@ -1383,7 +1338,7 @@ static const JNINativeMethod gBitmapMethods[] = {
         (void*)Bitmap_copyAshmemConfig },
     {   "nativeGetNativeFinalizer", "()J", (void*)Bitmap_getNativeFinalizer },
     {   "nativeRecycle",            "(J)Z", (void*)Bitmap_recycle },
-    {   "nativeReconfigure",        "(JIIIIZ)V", (void*)Bitmap_reconfigure },
+    {   "nativeReconfigure",        "(JIIIZ)V", (void*)Bitmap_reconfigure },
     {   "nativeCompress",           "(JIILjava/io/OutputStream;[B)Z",
         (void*)Bitmap_compress },
     {   "nativeErase",              "(JI)V", (void*)Bitmap_erase },
@@ -1414,6 +1369,7 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeSameAs",             "(JJ)Z", (void*)Bitmap_sameAs },
     {   "nativeRefPixelRef",        "(J)J", (void*)Bitmap_refPixelRef },
     {   "nativePrepareToDraw",      "(J)V", (void*)Bitmap_prepareToDraw },
+    {   "nativeGetAllocationByteCount", "(J)I", (void*)Bitmap_getAllocationByteCount },
 };
 
 int register_android_graphics_Bitmap(JNIEnv* env)

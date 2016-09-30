@@ -627,7 +627,7 @@ public final class Bitmap_Delegate {
         boolean isPremultiplied = createFlags.contains(BitmapCreateFlags.PREMULTIPLIED);
 
         // and create/return a new Bitmap with it
-        return new Bitmap(nativeInt, null /* buffer */, width, height, density, isMutable,
+        return new Bitmap(nativeInt, width, height, density, isMutable,
                           isPremultiplied, null /*ninePatchChunk*/, null /* layoutBounds */);
     }
 

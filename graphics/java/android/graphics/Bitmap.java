@@ -48,11 +48,6 @@ public final class Bitmap implements Parcelable {
     // pixel data.
     private static final long NATIVE_ALLOCATION_SIZE = 32;
 
-    /**
-     * Backing buffer for the Bitmap.
-     */
-    private byte[] mBuffer;
-
     // Convenience for JNI access
     private final long mNativePtr;
 
@@ -108,7 +103,7 @@ public final class Bitmap implements Parcelable {
      * int (pointer).
      */
     // called from JNI
-    Bitmap(long nativeBitmap, byte[] buffer, int width, int height, int density,
+    Bitmap(long nativeBitmap, int width, int height, int density,
             boolean isMutable, boolean requestPremultiplied,
             byte[] ninePatchChunk, NinePatch.InsetStruct ninePatchInsets) {
         if (nativeBitmap == 0) {
@@ -119,7 +114,6 @@ public final class Bitmap implements Parcelable {
         mHeight = height;
         mIsMutable = isMutable;
         mRequestPremultiplied = requestPremultiplied;
-        mBuffer = buffer;
 
         mNinePatchChunk = ninePatchChunk;
         mNinePatchInsets = ninePatchInsets;
@@ -128,10 +122,7 @@ public final class Bitmap implements Parcelable {
         }
 
         mNativePtr = nativeBitmap;
-        long nativeSize = NATIVE_ALLOCATION_SIZE;
-        if (buffer == null) {
-            nativeSize += getByteCount();
-        }
+        long nativeSize = NATIVE_ALLOCATION_SIZE + getAllocationByteCount();
         NativeAllocationRegistry registry = new NativeAllocationRegistry(
             Bitmap.class.getClassLoader(), nativeGetNativeFinalizer(), nativeSize);
         registry.registerNativeAllocation(this, nativeBitmap);
@@ -256,12 +247,8 @@ public final class Bitmap implements Parcelable {
         if (!isMutable()) {
             throw new IllegalStateException("only mutable bitmaps may be reconfigured");
         }
-        if (mBuffer == null) {
-            throw new IllegalStateException("native-backed bitmaps may not be reconfigured");
-        }
 
-        nativeReconfigure(mNativePtr, width, height, config.nativeInt,
-                mBuffer.length, mRequestPremultiplied);
+        nativeReconfigure(mNativePtr, width, height, config.nativeInt, mRequestPremultiplied);
         mWidth = width;
         mHeight = height;
     }
@@ -343,7 +330,6 @@ public final class Bitmap implements Parcelable {
                 // false indicates that it is still in use at the native level and these
                 // objects should not be collected now. They will be collected later when the
                 // Bitmap itself is collected.
-                mBuffer = null;
                 mNinePatchChunk = null;
             }
             mRecycled = true;
@@ -1273,12 +1259,7 @@ public final class Bitmap implements Parcelable {
      * @see #reconfigure(int, int, Config)
      */
     public final int getAllocationByteCount() {
-        if (mBuffer == null) {
-            // native backed bitmaps don't support reconfiguration,
-            // so alloc size is always content size
-            return getByteCount();
-        }
-        return mBuffer.length;
+        return nativeGetAllocationByteCount(mNativePtr);
     }
 
     /**
@@ -1695,8 +1676,7 @@ public final class Bitmap implements Parcelable {
     private static native long nativeGetNativeFinalizer();
     private static native boolean nativeRecycle(long nativeBitmap);
     private static native void nativeReconfigure(long nativeBitmap, int width, int height,
-                                                 int config, int allocSize,
-                                                 boolean isPremultiplied);
+                                                 int config, boolean isPremultiplied);
 
     private static native boolean nativeCompress(long nativeBitmap, int format,
                                             int quality, OutputStream stream,
@@ -1742,4 +1722,5 @@ public final class Bitmap implements Parcelable {
     private static native boolean nativeSameAs(long nativeBitmap0, long nativeBitmap1);
     private static native long nativeRefPixelRef(long nativeBitmap);
     private static native void nativePrepareToDraw(long nativeBitmap);
+    private static native int nativeGetAllocationByteCount(long nativeBitmap);
 }

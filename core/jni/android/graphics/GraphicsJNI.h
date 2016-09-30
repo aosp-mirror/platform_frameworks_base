@@ -93,8 +93,7 @@ public:
 
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
-    static android::Bitmap* allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
-            SkColorTable* ctable);
+    static android::Bitmap* allocateHeapPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
 
     static android::Bitmap* allocateAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
             SkColorTable* ctable);
@@ -119,15 +118,10 @@ public:
             const SkBitmap& dstBitmap);
 };
 
-/** Allocator which allocates the backing buffer in the Java heap.
- *  Instances can only be used to perform a single allocation, which helps
- *  ensure that the allocated buffer is properly accounted for with a
- *  reference in the heap (or a JNI global reference).
- */
-class JavaPixelAllocator : public SkBRDAllocator {
+class HeapAllocator : public SkBRDAllocator {
 public:
-    explicit JavaPixelAllocator(JNIEnv* env);
-    ~JavaPixelAllocator();
+   HeapAllocator();
+    ~HeapAllocator();
 
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) override;
 
@@ -140,14 +134,8 @@ public:
         return result;
     };
 
-    /**
-     *  Indicates that this allocator allocates zero initialized
-     *  memory.
-     */
     SkCodec::ZeroInitialized zeroInit() const override { return SkCodec::kYes_ZeroInitialized; }
-
 private:
-    JavaVM* mJavaVM;
     android::Bitmap* mStorage = nullptr;
 };
 

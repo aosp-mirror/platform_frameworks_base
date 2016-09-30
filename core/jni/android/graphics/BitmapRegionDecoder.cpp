@@ -161,13 +161,13 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     // Set up the pixel allocator
     SkBRDAllocator* allocator = nullptr;
     RecyclingClippingPixelAllocator recycleAlloc(recycledBitmap, recycledBytes);
-    JavaPixelAllocator javaAlloc(env);
+    HeapAllocator heapAlloc;
     if (javaBitmap) {
         allocator = &recycleAlloc;
         // We are required to match the color type of the recycled bitmap.
         colorType = recycledBitmap->info().colorType();
     } else {
-        allocator = &javaAlloc;
+        allocator = &heapAlloc;
     }
 
     // Decode the region.
@@ -200,7 +200,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     if (!requireUnpremul) {
         bitmapCreateFlags |= GraphicsJNI::kBitmapCreateFlag_Premultiplied;
     }
-    return GraphicsJNI::createBitmap(env, javaAlloc.getStorageObjAndReset(), bitmapCreateFlags);
+    return GraphicsJNI::createBitmap(env, heapAlloc.getStorageObjAndReset(), bitmapCreateFlags);
 }
 
 static jint nativeGetHeight(JNIEnv* env, jobject, jlong brdHandle) {

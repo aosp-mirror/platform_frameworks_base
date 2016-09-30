@@ -193,7 +193,7 @@ public:
         bitmap->setPixelRef(mBitmap->refPixelRef())->unref();
 
         // since we're already allocated, we lockPixels right away
-        // HeapAllocator/JavaPixelAllocator behaves this way too
+        // HeapAllocator behaves this way too
         bitmap->lockPixels();
         return true;
     }
@@ -339,7 +339,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         }
     }
 
-    JavaPixelAllocator javaAllocator(env);
+    HeapAllocator defaultAllocator;
     RecyclingPixelAllocator recyclingAllocator(reuseBitmap, existingBufferSize);
     ScaleCheckingAllocator scaleCheckingAllocator(scale, existingBufferSize);
     SkBitmap::HeapAllocator heapAllocator;
@@ -353,10 +353,10 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         decodeAllocator = &recyclingAllocator;
     } else if (willScale) {
         // This will allocate pixels using a HeapAllocator, since there will be an extra
-        // scaling step that copies these pixels into Java memory.
+        // scaling step.
         decodeAllocator = &heapAllocator;
     } else {
-        decodeAllocator = &javaAllocator;
+        decodeAllocator = &defaultAllocator;
     }
 
     // Set the decode colorType.  This is necessary because we can't always support
@@ -412,7 +412,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     // Use SkAndroidCodec to perform the decode.
     SkAndroidCodec::AndroidOptions codecOptions;
-    codecOptions.fZeroInitialized = (decodeAllocator == &javaAllocator) ?
+    codecOptions.fZeroInitialized =  decodeAllocator == &defaultAllocator ?
             SkCodec::kYes_ZeroInitialized : SkCodec::kNo_ZeroInitialized;
     codecOptions.fColorPtr = colorPtr;
     codecOptions.fColorCount = colorCount;
@@ -477,7 +477,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         if (javaBitmap != nullptr) {
             outputAllocator = &recyclingAllocator;
         } else {
-            outputAllocator = &javaAllocator;
+            outputAllocator = &defaultAllocator;
         }
 
         SkColorType scaledColorType = colorTypeForScaledOutput(decodingBitmap.colorType());
@@ -540,7 +540,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     if (isPremultiplied) bitmapCreateFlags |= GraphicsJNI::kBitmapCreateFlag_Premultiplied;
 
     // now create the java bitmap
-    return GraphicsJNI::createBitmap(env, javaAllocator.getStorageObjAndReset(),
+    return GraphicsJNI::createBitmap(env, defaultAllocator.getStorageObjAndReset(),
             bitmapCreateFlags, ninePatchChunk, ninePatchInsets, -1);
 }
 
