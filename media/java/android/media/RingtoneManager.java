@@ -678,7 +678,29 @@ public class RingtoneManager {
 
         return null;
     }
-    
+
+    /**
+     * Look up the path for a given {@link Uri} referring to a ringtone sound (TYPE_RINGTONE,
+     * TYPE_NOTIFICATION, or TYPE_ALARM). This is saved in {@link MediaStore.Audio.Media#DATA}.
+     *
+     * @return a {@link File} pointing at the location of the {@param uri} on disk, or {@code null}
+     * if there is no such file.
+     */
+    private File getRingtonePathFromUri(Uri uri) {
+        // Query cursor to get ringtone path
+        final String[] projection = {MediaStore.Audio.Media.DATA};
+        setFilterColumnsList(TYPE_RINGTONE | TYPE_NOTIFICATION | TYPE_ALARM);
+
+        String path = null;
+        try (Cursor cursor = query(uri, projection, constructBooleanTrueWhereClause(mFilterColumns),
+                null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+            }
+        }
+        return path != null ? new File(path) : null;
+    }
+
     /**
      * Disables Settings.System.SYNC_PARENT_SOUNDS, copying the parent's ringtones to the current
      * profile
@@ -785,9 +807,43 @@ public class RingtoneManager {
     }
 
     private static boolean isInternalRingtoneUri(Uri uri) {
-        Uri uriWithoutUserId = ContentProvider.getUriWithoutUserId(uri);
-        return uriWithoutUserId == null ? false : uriWithoutUserId.toString()
-                        .startsWith(MediaStore.Audio.Media.INTERNAL_CONTENT_URI.toString());
+        return isRingtoneUriInStorage(uri, MediaStore.Audio.Media.INTERNAL_CONTENT_URI);
+    }
+
+    private static boolean isExternalRingtoneUri(Uri uri) {
+        return isRingtoneUriInStorage(uri, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+    }
+
+    private static boolean isRingtoneUriInStorage(Uri ringtone, Uri storage) {
+        Uri uriWithoutUserId = ContentProvider.getUriWithoutUserId(ringtone);
+        return uriWithoutUserId == null ? false
+                : uriWithoutUserId.toString().startsWith(storage.toString());
+    }
+
+    /** @hide */
+    public boolean isCustomRingtone(Uri uri) {
+        if(!isExternalRingtoneUri(uri)) {
+            // A custom ringtone would be in the external storage
+            return false;
+        }
+
+        final File ringtoneFile = (uri == null ? null : getRingtonePathFromUri(uri));
+        final File parent = (ringtoneFile == null ? null : ringtoneFile.getParentFile());
+        if (parent == null) {
+            return false;
+        }
+
+        final String[] directories = {
+            Environment.DIRECTORY_RINGTONES,
+            Environment.DIRECTORY_NOTIFICATIONS,
+            Environment.DIRECTORY_ALARMS
+        };
+        for (final String directory : directories) {
+            if (parent.equals(Environment.getExternalStoragePublicDirectory(directory))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -869,6 +925,39 @@ public class RingtoneManager {
             default:
                 throw new IllegalArgumentException("Unsupported ringtone type: " + type);
         }
+    }
+
+    /**
+     * Deletes the actual file in the Uri and its ringtone database entry if the Uri's actual path
+     * is in one of the following directories: {@link android.is.Environment#DIRECTORY_RINGTONES},
+     * {@link android.is.Environment#DIRECTORY_NOTIFICATIONS} or
+     * {@link android.is.Environment#DIRECTORY_ALARMS}.
+     *
+     * The given Uri must be a ringtone Content Uri.
+     *
+     * Keep in mind that if the ringtone deleted is a default ringtone, it will still live in the
+     * ringtone cache file so it will be playable from there. However, if an app uses the ringtone
+     * as its own ringtone, it won't be played, which is the same behavior observed for 3rd party
+     * custom ringtones.
+     *
+     * @hide
+     */
+    public boolean deleteExternalRingtone(Uri uri) {
+        if(!isCustomRingtone(uri)) {
+            // We can only delete custom ringtones in the default ringtone storages
+            return false;
+        }
+
+        // Save the path of the ringtone before deleting from our content resolver.
+        final File ringtoneFile = getRingtonePathFromUri(uri);
+        try {
+            if (ringtoneFile != null && mContext.getContentResolver().delete(uri, null, null) > 0) {
+                return ringtoneFile.delete();
+            }
+        } catch (SecurityException e) {
+            Log.d(TAG, "Unable to delete custom ringtone", e);
+        }
+        return false;
     }
 
     /**
