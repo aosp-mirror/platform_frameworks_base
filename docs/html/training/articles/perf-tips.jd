@@ -28,7 +28,8 @@ when combined, but it's unlikely that these changes will result in dramatic
 performance effects. Choosing the right algorithms and data structures should always be your
 priority, but is outside the scope of this document. You should use the tips in this document
 as general coding practices that you can incorporate into your habits for general code
-efficiency.</p>
+efficiency.
+</p>
 
 <p>There are two basic rules for writing efficient code:</p>
 <ul>
@@ -49,8 +50,7 @@ code for a device with a JIT is not always the best code for a device
 without.</p>
 
 <p>To ensure your app performs well across a wide variety of devices, ensure
-your code is efficient at all levels and agressively optimize your performance.</p>
-
+your code is efficient at all levels and aggressively optimize your performance.</p>
 
 <h2 id="ObjectCreation">Avoid Creating Unnecessary Objects</h2>
 
