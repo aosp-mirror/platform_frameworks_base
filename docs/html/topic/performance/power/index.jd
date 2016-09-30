@@ -1,0 +1,125 @@
+page.title=Optimizing for Battery Life
+page.metaDescription=Learn how to help your app go easier on the battery.
+
+meta.tags="performance"
+page.tags="performance"
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>
+      In this document
+    </h2>
+    <ol>
+      <li>
+        <a href="#lazy">Lazy First</a>
+      </li>
+      <li>
+        <a href="#features">Platform Features</a>
+      </li>
+      <li>
+        <a href="#toolery">Tooling</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>Battery life is the single most important aspect of the mobile user
+experience. A device without power offers no functionality at all.
+For this reason, it is critically important that apps be as respectful of
+battery life as possible.</p>
+
+<p>There are three important things to keep in mind in keeping your app
+power-thrifty:</p>
+<ul>
+<li>Make your apps <em>Lazy First</em>.</li>
+<li>Take advantage of platform features that can help manage your app's battery
+consumption.</li>
+<li>Use tools that can help you identify battery-draining culprits.</li>
+</ul>
+
+<h2 id="lazy">Lazy First</h2>
+
+<p>Making your app Lazy First means looking for ways to reduce and optimize
+operations that are particularly battery-intensive. The core questions
+underpinning Lazy First design are:
+
+<ul>
+
+   <li><strong>Reduce:</strong> Are there redundant operations your app can cut
+out? For example, can it cache downloaded data instead of repeatedly waking
+   up the radio to re-download the data?</li>
+
+   <li><strong>Defer:</strong> Does an app need to perform an action right
+   away? For example,
+    can it wait until the device is charging before it backs data up to the
+    cloud?</li>
+
+   <li><strong>Coalesce:</strong> Can work be batched, instead of putting the
+   device
+   into an active state many times? For example, is it really necessary for
+   several dozen apps to each turn on the radio at separate times to send
+   their messages? Can the messages instead be transmitted during a
+   single awakening of the radio?</li>
+</ul>
+
+<p>
+You should ask these questions when it comes to using the CPU,
+the radio, and the screen. Lazy First design is often a good way
+to tame these battery killers.
+</p>
+
+<p>
+To help you achieve these and other efficiencies, the Android platform
+provides a number of features to help maximize battery life.
+</p>
+
+<h2 id="features">Platform Features</h2>
+
+<p>
+Broadly speaking, the Android platform provides two categories of help
+for you to optimize your app's battery use. First, it provides several
+APIs that you can implement in your app. You can learn more about these APIs in
+<a href="/topic/performance/scheduling.html">Intelligent Job Scheduling</a>
+and <a href="/performance/power/network/index.html">
+Network Use and Battery Consumption</a>.
+</p>
+
+<p>
+There are also internal mechanisms in the platform to help conserve
+battery life. While they are not APIs that you implement programmatically,
+you should still be aware of them so that your app can leverage them
+successfully. For more information, see
+<a href="/training/monitoring-device-state/doze-standby.html">Doze and
+App Standby</a>.</p>
+
+<p>
+You can get even more benefit out of these features by using the tools
+available for the platform to discover the parts of your app that consume
+the most power. Finding what to target is a big step toward
+successful optimization.
+</p>
+
+<h2 id ="toolery">Tooling</h2>
+
+<p>There are tools for Android, including
+<a href="/studio/profile/dev-options-rendering.html">Profile GPU Rendering</a>
+and <a class="external-link"
+href="https://github.com/google/battery-historian">Battery Historian</a>
+to help you identify areas that you can optimize for better battery life.
+Take advantage of these tools to target areas where you can apply the
+principles of Lazy First.
+</p>
+
+<section class="dac-section dac-small" id="latest-games"><div class="wrap">
+  <h2 class="norule" style="margin:0 0">More resources</h2>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/performance/landing"
+       data-sortOrder="random"
+       data-cardSizes="6x6"
+       data-maxResults="24"
+       data-items-per-page="24"
+       data-initial-results="3"></div>
+  </div>
+</section>
