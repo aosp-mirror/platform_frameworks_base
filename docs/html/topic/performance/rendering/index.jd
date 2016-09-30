@@ -38,8 +38,8 @@ page.metaDescription=Learn how to optimize your app's rendering performance.
   </dd>
 
   <dt>
-    <strong><a href="profile-gpu.html">
-        Optimizing View Hierarchies</a></strong>
+    <strong><a href="optimizing-view-hierarchies.html">
+        Performance and View Hierarchies</a></strong>
   </dt>
   <dd>
     Make sure your layout and measurement are executing efficiently, and
@@ -49,7 +49,7 @@ page.metaDescription=Learn how to optimize your app's rendering performance.
 
   <dt>
     <strong><a href="profile-gpu.html">
-        Using the Profile GPU Tool</a></strong>
+        Analyzing with Profile GPU Rendering</a></strong>
   </dt>
   <dd>
     Take advantage of this on-device tool to identify bottlenecks that
