@@ -598,7 +598,9 @@ public class SurfaceView extends View {
                             // surfaceDestroyed and surfaceCreated, we force a disconnect,
                             // so the next connect will always work if we end up reusing
                             // the surface.
-                            mSurface.forceScopedDisconnect();
+                            if (mSurface.isValid()) {
+                                mSurface.forceScopedDisconnect();
+                            }
                         }
                     }
 
