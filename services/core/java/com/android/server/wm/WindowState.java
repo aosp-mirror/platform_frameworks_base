@@ -226,14 +226,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     int mLayoutSeq = -1;
 
-    private final Configuration mTmpConfig = new Configuration();
-    // Represents the changes from our override configuration applied
-    // to the global configuration. This is the only form of configuration
-    // which is suitable for delivery to the client.
-    private Configuration mMergedConfiguration = new Configuration();
-    // Sticky answer to isConfigChanged(), remains true until new Configuration is assigned.
-    // Used only on {@link #TYPE_KEYGUARD}.
-    private boolean mConfigHasChanged;
+    /**
+     * Used to store last reported to client configuration and check if we have newer available.
+     * We'll send configuration to client only if it is different from the last applied one and
+     * client won't perform unnecessary updates.
+     */
+    private final Configuration mLastReportedConfiguration = new Configuration();
 
     /**
      * Actual position of the surface shown on-screen (may be modified by animation). These are
@@ -1745,21 +1743,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && mFrame.right >= displayInfo.appWidth && mFrame.bottom >= displayInfo.appHeight;
     }
 
+    /** Returns true if last applied config was not yet requested by client. */
     boolean isConfigChanged() {
-        getMergedConfig(mTmpConfig);
-
-        // If the merged configuration is still empty, it means that we haven't issued the
-        // configuration to the client yet and we need to return true so the configuration updates.
-        boolean configChanged = mMergedConfiguration.equals(Configuration.EMPTY)
-                || mTmpConfig.diff(mMergedConfiguration) != 0;
-
-        if ((mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
-            // Retain configuration changed status until resetConfiguration called.
-            mConfigHasChanged |= configChanged;
-            configChanged = mConfigHasChanged;
-        }
-
-        return configChanged;
+        return !mLastReportedConfiguration.equals(getConfiguration());
     }
 
     boolean isAdjustedForMinimizedDock() {
@@ -2294,10 +2280,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mTurnOnScreen = true;
         }
         if (isConfigChanged()) {
-            final Configuration newConfig = updateConfiguration();
+            outConfig.setTo(getConfiguration());
             if (DEBUG_CONFIGURATION) Slog.i(TAG, "Window " + this + " visible with new config: "
-                    + newConfig);
-            outConfig.setTo(newConfig);
+                    + outConfig);
+            mLastReportedConfiguration.setTo(outConfig);
         }
     }
 
@@ -3029,29 +3015,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    /**
-     * Update our current configurations, based on task configuration.
-     *
-     * @return A configuration suitable for sending to the client.
-     */
-    private Configuration updateConfiguration() {
-        final boolean configChanged = isConfigChanged();
-        getMergedConfig(mMergedConfiguration);
-        mConfigHasChanged = false;
-        if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION) && configChanged) {
-            Slog.i(TAG, "Sending new config to window " + this + ": " +
-                    " / mergedConfig=" + mMergedConfiguration);
-        }
-        return mMergedConfiguration;
-    }
-
-    private void getMergedConfig(Configuration outConfig) {
+    @Override
+    public Configuration getConfiguration() {
         if (mAppToken != null && mAppToken.mFrozenMergedConfig.size() > 0) {
-            outConfig.setTo(mAppToken.mFrozenMergedConfig.peek());
-            return;
+            return mAppToken.mFrozenMergedConfig.peek();
         }
-        outConfig.setTo(
-                mAppToken != null ? getConfiguration() : mDisplayContent.getConfiguration());
+
+        // TODO: Remove when all windows' hierarchies will start from same root.
+        return mAppToken != null
+                ? super.getConfiguration() : getDisplayContent().getConfiguration();
     }
 
     void reportResized() {
@@ -3059,7 +3031,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         try {
             if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG, "Reporting new frame to " + this
                     + ": " + mCompatFrame);
-            final Configuration newConfig = isConfigChanged() ? updateConfiguration() : null;
+            final Configuration newConfig;
+            if (isConfigChanged()) {
+                newConfig = new Configuration(getConfiguration());
+                mLastReportedConfiguration.setTo(newConfig);
+            } else {
+                newConfig = null;
+            }
             if (DEBUG_ORIENTATION && mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING)
                 Slog.i(TAG, "Resizing " + this + " WITH DRAW PENDING");
 
@@ -3381,7 +3359,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 getTouchableRegion(region);
                 pw.print(prefix); pw.print("touchable region="); pw.println(region);
             }
-            pw.print(prefix); pw.print("mMergedConfiguration="); pw.println(mMergedConfiguration);
+            pw.print(prefix); pw.print("mFullConfiguration="); pw.println(getConfiguration());
+            pw.print(prefix); pw.print("mLastReportedConfiguration=");
+                    pw.println(mLastReportedConfiguration);
         }
         pw.print(prefix); pw.print("mHasSurface="); pw.print(mHasSurface);
                 pw.print(" mShownPosition="); mShownPosition.printShortString(pw);
@@ -4086,7 +4066,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     public boolean isRtl() {
-        return mMergedConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+        return getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
     }
 
     void hideWallpaperWindow(boolean wasDeferred, String reason) {
