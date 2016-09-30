@@ -839,7 +839,8 @@ extern "C" void get_malloc_leak_info(uint8_t** info, size_t* overallSize,
     size_t* infoSize, size_t* totalMemory, size_t* backtraceSize);
 extern "C" void free_malloc_leak_info(uint8_t* info);
 #define SIZE_FLAG_ZYGOTE_CHILD  (1<<31)
-#define BACKTRACE_SIZE          32
+
+static size_t gNumBacktraceElements;
 
 /*
  * This is a qsort() callback.
@@ -859,11 +860,11 @@ static int compareHeapRecords(const void* vrec1, const void* vrec2)
         return -1;
     }
 
-    intptr_t* bt1 = (intptr_t*)(rec1 + 2);
-    intptr_t* bt2 = (intptr_t*)(rec2 + 2);
-    for (size_t idx = 0; idx < BACKTRACE_SIZE; idx++) {
-        intptr_t addr1 = bt1[idx];
-        intptr_t addr2 = bt2[idx];
+    uintptr_t* bt1 = (uintptr_t*)(rec1 + 2);
+    uintptr_t* bt2 = (uintptr_t*)(rec2 + 2);
+    for (size_t idx = 0; idx < gNumBacktraceElements; idx++) {
+        uintptr_t addr1 = bt1[idx];
+        uintptr_t addr2 = bt2[idx];
         if (addr1 == addr2) {
             if (addr1 == 0)
                 break;
@@ -907,9 +908,10 @@ static void dumpNativeHeap(FILE* fp)
     if (info == NULL) {
         fprintf(fp, "Native heap dump not available. To enable, run these"
                     " commands (requires root):\n");
-        fprintf(fp, "$ adb shell setprop libc.debug.malloc 1\n");
-        fprintf(fp, "$ adb shell stop\n");
-        fprintf(fp, "$ adb shell start\n");
+        fprintf(fp, "# adb shell stop\n");
+        fprintf(fp, "# adb shell setprop libc.debug.malloc.options "
+                    "backtrace\n");
+        fprintf(fp, "# adb shell start\n");
         return;
     }
     assert(infoSize != 0);
@@ -920,13 +922,11 @@ static void dumpNativeHeap(FILE* fp)
     size_t recordCount = overallSize / infoSize;
     fprintf(fp, "Total memory: %zu\n", totalMemory);
     fprintf(fp, "Allocation records: %zd\n", recordCount);
-    if (backtraceSize != BACKTRACE_SIZE) {
-        fprintf(fp, "WARNING: mismatched backtrace sizes (%zu vs. %d)\n",
-            backtraceSize, BACKTRACE_SIZE);
-    }
+    fprintf(fp, "Backtrace size: %zd\n", backtraceSize);
     fprintf(fp, "\n");
 
     /* re-sort the entries */
+    gNumBacktraceElements = backtraceSize;
     qsort(info, recordCount, infoSize, compareHeapRecords);
 
     /* dump the entries to the file */
@@ -934,7 +934,7 @@ static void dumpNativeHeap(FILE* fp)
     for (size_t idx = 0; idx < recordCount; idx++) {
         size_t size = *(size_t*) ptr;
         size_t allocations = *(size_t*) (ptr + sizeof(size_t));
-        intptr_t* backtrace = (intptr_t*) (ptr + sizeof(size_t) * 2);
+        uintptr_t* backtrace = (uintptr_t*) (ptr + sizeof(size_t) * 2);
 
         fprintf(fp, "z %d  sz %8zu  num %4zu  bt",
                 (size & SIZE_FLAG_ZYGOTE_CHILD) != 0,
