@@ -465,6 +465,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final String PACKAGE_SCHEME = "package";
 
     private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
+    /**
+     * If VENDOR_OVERLAY_SKU_PROPERTY is set, search for runtime resource overlay APKs in
+     * VENDOR_OVERLAY_DIR/<value of VENDOR_OVERLAY_SKU_PROPERTY> rather than in
+     * VENDOR_OVERLAY_DIR.
+     */
+    private static final String VENDOR_OVERLAY_SKU_PROPERTY = "ro.boot.vendor.overlay.sku";
 
     private static int DEFAULT_EPHEMERAL_HASH_PREFIX_MASK = 0xFFFFF000;
     private static int DEFAULT_EPHEMERAL_HASH_PREFIX_COUNT = 5;
@@ -2282,8 +2288,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Collect vendor overlay packages.
             // (Do this before scanning any apps.)
             // For security and version matching reason, only consider
-            // overlay packages if they reside in VENDOR_OVERLAY_DIR.
-            File vendorOverlayDir = new File(VENDOR_OVERLAY_DIR);
+            // overlay packages if they reside in the right directory.
+            File vendorOverlayDir;
+            String overlaySkuDir = SystemProperties.get(VENDOR_OVERLAY_SKU_PROPERTY);
+            if (!overlaySkuDir.isEmpty()) {
+                vendorOverlayDir = new File(VENDOR_OVERLAY_DIR, overlaySkuDir);
+            } else {
+                vendorOverlayDir = new File(VENDOR_OVERLAY_DIR);
+            }
             scanDirTracedLI(vendorOverlayDir, mDefParseFlags
                     | PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR
