@@ -1,0 +1,197 @@
+page.title=Reducing Overdraw
+page.metaDescription=Improve performance by reducing unnecessary rendering.
+
+meta.tags="performance"
+page.tags="performance"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+    <ol>
+
+      <li>
+        <a href="#understanding">Understanding Overdraw</a>
+      </li>
+      <li>
+        <a href="#finding">Finding Overdraw Problems</a>
+      </li>
+      <li>
+        <a href="#fixing">Fixing Overdraw</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+An app may draw the same pixel more than once within a single frame, an event
+called <em>overdraw</em>. Overdraw is usually unnecessary, and best
+eliminated. It manifests itself as a performance problem by wasting GPU time to
+render pixels that don't contribute to what the user sees on the screen.
+</p>
+
+<p>
+This document explains overdraw: what it is, how to diagnose it, and actions you
+can take to eliminate or mitigate it.
+</p>
+
+<h2 name="understanding">Understanding Overdraw</h2>
+
+<p>
+Overdraw refers to the system's drawing a pixel on the screen multiple times
+in a single frame of rendering. For example, if we have a bunch of stacked UI
+cards, each card hides a portion of the one below it.
+</p>
+
+<p>
+However, the system still needs to draw even the hidden portions of the cards
+in the stack. This is because stacked cards are rendered according to the
+<a class="external-link"
+href="https://en.wikipedia.org/wiki/Painter%27s_algorithm">painter's
+algorithm</a>: that is, in back-to-front order.
+This sequence of rendering allows the system to apply proper alpha blending to
+translucent objects such as shadows.
+</p>
+
+<h2 name="finding">Finding Overdraw Problems</h2>
+
+<p>
+The platform offers several tools to help you determine if overdraw is
+affecting your app's performance. These tools are available right on the device,
+and accessible by turning on <strong>Developer Settings</strong></a> under
+<em>Settings</em>. For more information about device developer settings, see
+<a href="/studio/run/device.html#developer-device-options">Run Apps on a
+Hardware Device</a>.
+</p>
+
+<h3 id="dgot">Debug GPU overdraw tool</h3>
+
+<p>
+The Debug GPU Overdraw tool uses color-coding to show the number of times your
+app draws each pixel on the screen. The higher this count, the
+more likely it is that overdraw affects your app's performance.
+</p>
+
+<p>
+For more information on how to use the tool, refer to the related
+<a href="/studio/profile/dev-options-overdraw.html">walkthrough</a>
+and
+<a href="https://io2015codelabs.appspot.com/codelabs/android-performance-debug-gpu-overdraw#1">
+codelab</a>.
+</p>
+
+<h3 id="pgrt">Profile GPU rendering tool</h3>
+
+<p>
+The Profile GPU Rendering tool displays, as a scrolling histogram, the time
+each stage of the rendering pipeline takes to display a single frame. The
+<em>Process</em> part of each bar, indicated in orange, shows when the system
+is swapping buffers; this metric provides important clues about overdraw.
+</p>
+
+<p>
+On less performant GPUs, available fill-rate (the speed at which the GPU can
+fill the frame buffer) can be quite low. As the number of
+pixels required to draw a frame increases, the GPU may take longer to process
+new commands, and ask the rest of the system to wait until it can catch up.
+The <em>Process</em> bar shows that this spike happens as the GPU gets
+overwhelmed trying to draw pixels as fast as possible. Issues other than
+raw numbers of pixels may also cause this metric to spike. For example,
+if the Debug GPU Overdraw tool shows heavy overdraw and <em>Process</em> spikes,
+there's likely an issue with overdraw.
+</p>
+
+<p class="note"><strong>Note: </strong>The
+<a href="https://developer.android.com/studio/profile/dev-options-rendering.html">
+Profile GPU Rendering</a> tool does not
+work with apps that use the NDK. This is because the system pushes framework
+messages to the background whenever OpenGL takes a full-screen context. In
+such cases, you may find a profiling tool provided by the GPU manufacturer
+helpful.</p>
+
+<h2 name="fixing">Fixing Overdraw</h2>
+
+<p>
+There are several strategies you can pursue to reduce or eliminate overdraw:
+</p>
+
+<ul>
+   <li>Removing unneeded backgrounds in layouts.</li>
+   <li>Flattening the view hierarchy.</li>
+   <li>Reducing transparency.</li>
+</ul>
+
+<p>
+This section provides information about each of these approaches.
+</p>
+
+<h3 id="rubil">Removing unneeded backgrounds in layouts</h3>
+
+<p>
+By default, a layout does not have a background, which means it does not render
+anything directly by itself. When layouts do have backgrounds, however, they may
+contribute to overdraw.
+</p>
+
+<p>
+Removing unnecessary backgrounds is a quick way of improving rendering
+performance. An unnecessary background may never be visible because it's
+completely covered by everything else the app is drawing on top of that
+view. For example, the system may entirely cover up a parent's
+background when it draws child views on top of it.
+</p>
+
+<p>
+To find out why you're overdrawing, walk through the hierarchy in
+the <a href="/studio/profile/hierarchy-viewer.html">Hierarchy Viewer</a> tool.
+As you do so, look out for any backgrounds you can eliminate because
+they are not visible to the user. Cases where many containers share a
+common background color offer another opportunity to eliminate unneeded
+backgrounds: You can set the window background to the main background color
+of your app, and leave all of the containers above it with no background values
+defined.
+</p>
+
+<h3 id="fvh">Flattening view hierarchy</h3>
+
+<p>
+Modern layouts make it easy to stack and layer views to produce beautiful
+design. However, doing so can degrade performance by resulting in overdraw,
+especially in scenarios where each stacked view object is opaque, requiring the
+drawing of both seen and unseen pixels to the screen.
+</p>
+
+<p>
+If you encounter this sort of issue, you may be able to improve performance by
+optimizing your view hierarchy to reduce the number of overlapping UI objects.
+For more information about how to accomplish this, see
+<a href="/topic/performance/optimizing-view-hierarchies.html">Optimizing View
+Hierarchies</a>.
+</p>
+
+<h3 id="rt">Reducing transparency</h3>
+
+<p>
+Rendering of transparent pixels on screen, known as alpha rendering, is a key
+contributor to overdraw. Unlike standard overdraw,
+in which the system completely hides existing drawn pixels by drawing
+opaque pixels on top of them, transparent
+objects require existing pixels to be drawn first, so that the right blending
+equation can occur.  Visual effects like transparent animations, fade-outs, and
+drop shadows all involve some sort of transparency, and can therefore contribute
+significantly to overdraw. You can improve overdraw in these situations by
+reducing the number of transparent objects you render. For example, you can get
+gray text by drawing black text in a {@link android.widget.TextView} with a
+translucent alpha value set on it. But you can get the same effect with far
+better performance by simply drawing the text in gray.
+</p>
+
+<p>
+To learn more about performance costs that transparency imposes throughout the
+entire drawing pipeline, watch the video
+<a href="https://www.youtube.com/watch?v=wIy8g8yNhNk&index=46&list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">
+Hidden Costs of Transparency</a>.
+</p>
+
