@@ -191,9 +191,14 @@ public final class StrictMode {
      */
     public static final int DETECT_RESOURCE_MISMATCH = 0x10;  // for ThreadPolicy
 
+    /**
+     * @hide
+     */
+    public static final int DETECT_UNBUFFERED_IO = 0x20;  // for ThreadPolicy
+
     private static final int ALL_THREAD_DETECT_BITS =
             DETECT_DISK_WRITE | DETECT_DISK_READ | DETECT_NETWORK | DETECT_CUSTOM |
-            DETECT_RESOURCE_MISMATCH;
+            DETECT_RESOURCE_MISMATCH | DETECT_UNBUFFERED_IO;
 
     // Byte 2: Process-policy
 
@@ -462,6 +467,20 @@ public final class StrictMode {
              */
             public Builder permitResourceMismatches() {
                 return disable(DETECT_RESOURCE_MISMATCH);
+            }
+
+            /**
+             * Detect unbuffered input/output operations.
+             */
+            public Builder detectUnbufferedIo() {
+                return enable(DETECT_UNBUFFERED_IO);
+            }
+
+            /**
+             * Detect unbuffered input/output operations.
+             */
+            public Builder permitUnbufferedIo() {
+                return disable(DETECT_UNBUFFERED_IO);
             }
 
             /**
@@ -974,6 +993,15 @@ public final class StrictMode {
     }
 
     /**
+     * @hide
+     */
+    private static class StrictModeUnbufferedIOViolation extends StrictModeViolation {
+        public StrictModeUnbufferedIOViolation(int policyMask) {
+            super(policyMask, DETECT_UNBUFFERED_IO, null);
+        }
+    }
+
+    /**
      * Returns the bitmask of the current thread's policy.
      *
      * @return the bitmask of all the DETECT_* and PENALTY_* bits currently enabled
@@ -1277,6 +1305,20 @@ public final class StrictMode {
             }
             BlockGuard.BlockGuardPolicyException e =
                     new StrictModeResourceMismatchViolation(mPolicyMask, tag);
+            e.fillInStackTrace();
+            startHandlingViolationException(e);
+        }
+
+        // Part of BlockGuard.Policy; just part of StrictMode:
+        public void onUnbufferedIO() {
+            if ((mPolicyMask & DETECT_UNBUFFERED_IO) == 0) {
+                return;
+            }
+            if (tooManyViolationsThisLoop()) {
+                return;
+            }
+            BlockGuard.BlockGuardPolicyException e =
+                    new StrictModeUnbufferedIOViolation(mPolicyMask);
             e.fillInStackTrace();
             startHandlingViolationException(e);
         }
@@ -2203,6 +2245,18 @@ public final class StrictMode {
             return;
         }
         ((AndroidBlockGuardPolicy) policy).onResourceMismatch(tag);
+    }
+
+    /**
+     * @hide
+     */
+    public static void noteUnbufferedIO() {
+        BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
+        if (!(policy instanceof AndroidBlockGuardPolicy)) {
+            // StrictMode not enabled.
+            return;
+        }
+        ((AndroidBlockGuardPolicy) policy).onUnbufferedIO();
     }
 
     /**
