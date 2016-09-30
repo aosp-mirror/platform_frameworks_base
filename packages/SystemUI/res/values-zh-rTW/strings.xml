@@ -238,8 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"已暫停 4G 數據連線"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"已暫停行動數據連線"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"已暫停數據連線"</string>
-    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"你的數據用量已達設定的用量上限，因此系統已停止使用行動數據連線。\n\n如果你繼續使用行動數據連線，可能需要支付相關的數據傳輸費用。"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"恢復連線"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"沒有網際網路連線"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 已連線"</string>

@@ -238,8 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"‏داده 4G موقتاً متوقف شده است"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"داده شبکه همراه موقتاً متوقف شده است"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"داده موقتاً متوقف شده است"</string>
-    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"به حداکثر محدودیت داده‌ای که تنظیم کردید رسیدید. دیگر از داده شبکه تلفن همراه استفاده نمی‌کنید.\n\nدر صورت ازسرگیری، ممکن است مصرف داده هزینه‌هایی دربرداشته باشد."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"از سر‌گیری"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"اتصال اینترنتی ندارید"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"‏Wi-Fi متصل شد"</string>
@@ -485,7 +484,7 @@
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"نمایه کاری"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"برای بعضی افراد سرگرم‌کننده است اما نه برای همه"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"‏«تنظیم‌کننده واسط کاربری سیستم» روش‌های بیشتری برای تنظیم دقیق و سفارشی کردن واسط کاربری Android در اختیار شما قرار می‌دهد. ممکن است این ویژگی‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده جود نداشته باشند. با احتیاط ادامه دهید."</string>
-    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ممکن است این ویژگی‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده وجود نداشته باشند. با احتیاط ادامه دهید."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ممکن است این قابلیت‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده وجود نداشته باشد. بااحتیاط ادامه دهید."</string>
     <string name="got_it" msgid="2239653834387972602">"متوجه شدم"</string>
     <string name="tuner_toast" msgid="603429811084428439">"تبریک می‌گوییم! «تنظیم‌کننده واسط کاربری سیستم» به «تنظیمات» اضافه شد"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"حذف از تنظیمات"</string>

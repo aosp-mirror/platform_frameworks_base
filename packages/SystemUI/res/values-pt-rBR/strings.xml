@@ -240,8 +240,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Os dados 4G foram pausados"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Os dados da rede celular foram pausados"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Os dados foram pausados"</string>
-    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"O limite de dados que você definiu foi atingido. Você não está mais usando os dados da rede celular.\n\nSe retomar o uso de dados, cobranças poderão ser aplicadas."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Retomar"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sem conexão à Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectado"</string>
