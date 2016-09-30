@@ -87,7 +87,7 @@ public final class UserState {
         state = newState;
     }
 
-    private static String stateToString(int state) {
+    static String stateToString(int state) {
         switch (state) {
             case STATE_BOOTING: return "BOOTING";
             case STATE_RUNNING_LOCKED: return "RUNNING_LOCKED";

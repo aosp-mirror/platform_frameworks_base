@@ -1372,12 +1372,9 @@ public final class SystemServer {
         mmsService = mSystemServiceManager.startService(MmsServiceBroker.class);
         traceEnd();
 
-        if (Settings.Global.getInt(mContentResolver, Settings.Global.DEVICE_PROVISIONED, 0) == 0 ||
-                UserManager.isDeviceInDemoMode(mSystemContext)) {
-            traceBeginAndSlog("StartRetailDemoModeService");
-            mSystemServiceManager.startService(RetailDemoModeService.class);
-            traceEnd();
-        }
+        traceBeginAndSlog("StartRetailDemoModeService");
+        mSystemServiceManager.startService(RetailDemoModeService.class);
+        traceEnd();
 
         // It is now time to start up the app processes...
 
