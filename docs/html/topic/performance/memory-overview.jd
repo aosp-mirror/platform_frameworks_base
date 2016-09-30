@@ -1,11 +1,10 @@
 page.title=Overview of Android Memory Management
 page.tags=ram,memory,paging,mmap
-page.article=true
+
 @jd:body
 
-
-<div id="tb-wrapper">
-<div id="tb">
+<div id="qv-wrapper">
+<div id="qv">
 
 <h2>In this document</h2>
 <ol class="nolist">
