@@ -2886,14 +2886,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             outConfig.setTo(mAppToken.mFrozenMergedConfig.peek());
             return;
         }
-        final Task task = getTask();
-        final Configuration overrideConfig = task != null
-                ? task.mOverrideConfig
-                : Configuration.EMPTY;
-        outConfig.setTo(mService.mGlobalConfiguration);
-        if (overrideConfig != Configuration.EMPTY) {
-            outConfig.updateFrom(overrideConfig);
-        }
+        outConfig.setTo(
+                mAppToken != null ? getConfiguration() : mDisplayContent.getConfiguration());
     }
 
     void reportResized() {

@@ -70,12 +70,6 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     // Whether mBounds is fullscreen
     private boolean mFillsParent = true;
 
-    /**
-     * Contains configurations settings that are different from the parent configuration due to
-     * stack specific operations. E.g. {@link #setBounds}.
-     */
-    Configuration mOverrideConfig = Configuration.EMPTY;
-
     // For comparison with DisplayContent bounds.
     private Rect mTmpRect = new Rect();
     // For handling display rotations.
@@ -120,8 +114,9 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
             }
         }
 
-        if (wtoken.mParent != null) {
-            wtoken.mParent.removeChild(wtoken);
+        final WindowContainer parent = wtoken.getParent();
+        if (parent != null) {
+            parent.removeChild(wtoken);
         }
         addChild(wtoken, addPos);
         wtoken.mTask = this;
@@ -153,7 +148,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         if (content != null) {
             content.mDimLayerController.removeDimLayerUser(this);
         }
-        mParent.removeChild(this);
+        getParent().removeChild(this);
         mService.mTaskIdToTask.delete(mTaskId);
     }
 
@@ -165,7 +160,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         if (DEBUG_STACK) Slog.i(TAG, "moveTaskToStack: removing taskId=" + mTaskId
                 + " from stack=" + mStack);
         EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "moveTask");
-        mParent.removeChild(this);
+        getParent().removeChild(this);
         stack.addTask(this, toTop);
     }
 
@@ -254,7 +249,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         if (displayContent != null) {
             displayContent.mDimLayerController.updateDimLayer(this);
         }
-        mOverrideConfig = mFillsParent ? Configuration.EMPTY : overrideConfig;
+        onOverrideConfigurationChanged(mFillsParent ? Configuration.EMPTY : overrideConfig);
         return boundsChange;
     }
 
@@ -321,8 +316,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
      */
     void prepareFreezingBounds() {
         mPreparedFrozenBounds.set(mBounds);
-        mPreparedFrozenMergedConfig.setTo(mService.mGlobalConfiguration);
-        mPreparedFrozenMergedConfig.updateFrom(mOverrideConfig);
+        mPreparedFrozenMergedConfig.setTo(getConfiguration());
     }
 
     /**
@@ -334,9 +328,9 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
      *                    bounds's bottom; false if the task's top should be aligned
      *                    the adjusted bounds's top.
      */
-    void alignToAdjustedBounds(
-            Rect adjustedBounds, Rect tempInsetBounds, boolean alignBottom) {
-        if (!isResizeable() || mOverrideConfig == Configuration.EMPTY) {
+    void alignToAdjustedBounds(Rect adjustedBounds, Rect tempInsetBounds, boolean alignBottom) {
+        final Configuration overrideConfig = getOverrideConfiguration();
+        if (!isResizeable() || Configuration.EMPTY.equals(overrideConfig)) {
             return;
         }
 
@@ -348,7 +342,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
             mTmpRect2.offsetTo(adjustedBounds.left, adjustedBounds.top);
         }
         setTempInsetBounds(tempInsetBounds);
-        resizeLocked(mTmpRect2, mOverrideConfig, false /* forced */);
+        resizeLocked(mTmpRect2, overrideConfig, false /* forced */);
     }
 
     /** Return true if the current bound can get outputted to the rest of the system as-is. */
@@ -500,12 +494,12 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         mTmpRect2.set(mBounds);
 
         if (!StackId.isTaskResizeAllowed(mStack.mStackId)) {
-            setBounds(mTmpRect2, mOverrideConfig);
+            setBounds(mTmpRect2, getOverrideConfiguration());
             return;
         }
 
         displayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
-        if (setBounds(mTmpRect2, mOverrideConfig) != BOUNDS_CHANGE_NONE) {
+        if (setBounds(mTmpRect2, getOverrideConfiguration()) != BOUNDS_CHANGE_NONE) {
             // Post message to inform activity manager of the bounds change simulating a one-way
             // call. We do this to prevent a deadlock between window manager lock and activity
             // manager lock been held.

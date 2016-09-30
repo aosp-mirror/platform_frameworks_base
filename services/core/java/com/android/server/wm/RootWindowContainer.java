@@ -346,18 +346,35 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
     }
 
-    int[] onConfigurationChanged(Configuration config) {
+    /** Set new config and return array of ids of stacks that were changed during update. */
+    int[] setGlobalConfigurationIfNeeded(Configuration newConfiguration) {
+        final boolean configChanged = getConfiguration().diff(newConfiguration) != 0;
+        if (!configChanged) {
+            return null;
+        }
+        onConfigurationChanged(newConfiguration);
+        return updateStackBoundsAfterConfigChange();
+    }
+
+    @Override
+    void onConfigurationChanged(Configuration newParentConfig) {
         prepareFreezingTaskBounds();
-        mService.mGlobalConfiguration = new Configuration(config);
+        super.onConfigurationChanged(newParentConfig);
 
         mService.mPolicy.onConfigurationChanged();
+    }
 
+    /**
+     * Callback used to trigger bounds update after configuration change and get ids of stacks whose
+     * bounds were updated.
+     */
+    int[] updateStackBoundsAfterConfigChange() {
         mChangedStackList.clear();
 
         final int numDisplays = mChildren.size();
         for (int i = 0; i < numDisplays; ++i) {
             final DisplayContent dc = mChildren.get(i);
-            dc.onConfigurationChanged(mChangedStackList);
+            dc.updateStackBoundsAfterConfigChange(mChangedStackList);
         }
 
         return mChangedStackList.isEmpty() ? null : ArrayUtils.convertToIntArray(mChangedStackList);

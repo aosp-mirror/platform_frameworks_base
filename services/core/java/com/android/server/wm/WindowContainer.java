@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.annotation.CallSuper;
+import android.content.res.Configuration;
 import android.view.animation.Animation;
 
 import java.util.Comparator;
@@ -34,18 +35,46 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
  */
 class WindowContainer<E extends WindowContainer> implements Comparable<WindowContainer> {
 
-    // The parent of this window container.
-    protected WindowContainer mParent = null;
+    /**
+     * The parent of this window container.
+     * For removing or setting new parent {@link #setParent} should be used, because it also
+     * performs configuration updates based on new parent's settings.
+     */
+    private WindowContainer mParent = null;
 
     // List of children for this window container. List is in z-order as the children appear on
     // screen with the top-most window container at the tail of the list.
     protected final LinkedList<E> mChildren = new LinkedList();
+
+    /** Contains override configuration settings applied to this window container. */
+    private Configuration mOverrideConfiguration = new Configuration();
+
+    /**
+     * Contains full configuration applied to this window container. Corresponds to full parent's
+     * config with applied {@link #mOverrideConfiguration}.
+     */
+    private Configuration mFullConfiguration = new Configuration();
+
+    /**
+     * Contains merged override configuration settings from the top of the hierarchy down to this
+     * particular instance. It is different from {@link #mFullConfiguration} because it starts from
+     * topmost container's override config instead of global config.
+     */
+    private Configuration mMergedOverrideConfiguration = new Configuration();
 
     // The specified orientation for this window container.
     protected int mOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
     final protected WindowContainer getParent() {
         return mParent;
+    }
+
+    final protected void setParent(WindowContainer parent) {
+        mParent = parent;
+        // Update full configuration of this container and all its children.
+        onConfigurationChanged(mParent != null ? mParent.mFullConfiguration : Configuration.EMPTY);
+        // Update merged override configuration of this container and all its children.
+        onMergedOverrideConfigurationChanged();
     }
 
     // Temp. holders for a chain of containers we are currently processing.
@@ -61,12 +90,12 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
      */
     @CallSuper
     protected void addChild(E child, Comparator<E> comparator) {
-        if (child.mParent != null) {
+        if (child.getParent() != null) {
             throw new IllegalArgumentException("addChild: container=" + child.getName()
-                    + " is already a child of container=" + child.mParent.getName()
+                    + " is already a child of container=" + child.getParent().getName()
                     + " can't add to container=" + getName());
         }
-        child.mParent = this;
+        child.setParent(this);
 
         if (mChildren.isEmpty() || comparator == null) {
             mChildren.add(child);
@@ -87,12 +116,12 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
     /** Adds the input window container has a child of this container at the input index. */
     @CallSuper
     protected void addChild(E child, int index) {
-        if (child.mParent != null) {
+        if (child.getParent() != null) {
             throw new IllegalArgumentException("addChild: container=" + child.getName()
-                    + " is already a child of container=" + child.mParent.getName()
+                    + " is already a child of container=" + child.getParent().getName()
                     + " can't add to container=" + getName());
         }
-        child.mParent = this;
+        child.setParent(this);
         mChildren.add(index, child);
     }
 
@@ -104,7 +133,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
     @CallSuper
     void removeChild(E child) {
         if (mChildren.remove(child)) {
-            child.mParent = null;
+            child.setParent(null);
         } else {
             throw new IllegalArgumentException("removeChild: container=" + child.getName()
                     + " is not a child of container=" + getName());
@@ -156,6 +185,73 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
             }
         }
         return false;
+    }
+
+    /**
+     * Returns full configuration applied to this window container.
+     * This method should be used for getting settings applied in each particular level of the
+     * hierarchy.
+     */
+    Configuration getConfiguration() {
+        return mFullConfiguration;
+    }
+
+    /**
+     * Notify that parent config changed and we need to update full configuration.
+     * @see #mFullConfiguration
+     */
+    void onConfigurationChanged(Configuration newParentConfig) {
+        mFullConfiguration.setTo(newParentConfig);
+        mFullConfiguration.updateFrom(mOverrideConfiguration);
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer child = mChildren.get(i);
+            child.onConfigurationChanged(mFullConfiguration);
+        }
+    }
+
+    /** Returns override configuration applied to this window container. */
+    Configuration getOverrideConfiguration() {
+        return mOverrideConfiguration;
+    }
+
+    /**
+     * Update override configuration and recalculate full config.
+     * @see #mOverrideConfiguration
+     * @see #mFullConfiguration
+     */
+    void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        mOverrideConfiguration.setTo(overrideConfiguration);
+        // Update full configuration of this container and all its children.
+        onConfigurationChanged(mParent != null ? mParent.getConfiguration() : Configuration.EMPTY);
+        // Update merged override config of this container and all its children.
+        onMergedOverrideConfigurationChanged();
+    }
+
+    /**
+     * Get merged override configuration from the top of the hierarchy down to this
+     * particular instance. This should be reported to client as override config.
+     */
+    Configuration getMergedOverrideConfiguration() {
+        return mMergedOverrideConfiguration;
+    }
+
+    /**
+     * Update merged override configuration based on corresponding parent's config and notify all
+     * its children. If there is no parent, merged override configuration will set equal to current
+     * override config.
+     * @see #mMergedOverrideConfiguration
+     */
+    private void onMergedOverrideConfigurationChanged() {
+        if (mParent != null) {
+            mMergedOverrideConfiguration.setTo(mParent.getMergedOverrideConfiguration());
+            mMergedOverrideConfiguration.updateFrom(mOverrideConfiguration);
+        } else {
+            mMergedOverrideConfiguration.setTo(mOverrideConfiguration);
+        }
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer child = mChildren.get(i);
+            child.onMergedOverrideConfigurationChanged();
+        }
     }
 
     void setWaitingForDrawnIfResizingChanged() {

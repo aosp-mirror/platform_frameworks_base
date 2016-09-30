@@ -354,11 +354,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         // If the rotation or density didn't match, we'll update it in onConfigurationChanged.
     }
 
-    boolean onConfigurationChanged() {
-        return updateBoundsAfterConfigChange();
-    }
-
-    private boolean updateBoundsAfterConfigChange() {
+    /** @return true if bounds were updated to some non-empty value. */
+    boolean updateBoundsAfterConfigChange() {
         if (mDisplayContent == null) {
             // If the stack is already detached we're not updating anything,
             // as it's going away soon anyway.
@@ -459,7 +456,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
         // Snap the position to a target.
         final int rotation = displayInfo.rotation;
-        final int orientation = mService.mGlobalConfiguration.orientation;
+        final int orientation = mDisplayContent.getConfiguration().orientation;
         mService.mPolicy.getStableInsetsLw(rotation, displayWidth, displayHeight, outBounds);
         final DividerSnapAlgorithm algorithm = new DividerSnapAlgorithm(
                 mService.mContext.getResources(), displayWidth, displayHeight,
@@ -713,7 +710,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                     di.logicalWidth,
                     di.logicalHeight,
                     dockDividerWidth,
-                    mService.mGlobalConfiguration.orientation == ORIENTATION_PORTRAIT,
+                    mDisplayContent.getConfiguration().orientation == ORIENTATION_PORTRAIT,
                     mTmpRect2).getMiddleTarget().position;
 
             if (dockOnTopOrLeft) {
@@ -1182,7 +1179,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             return DOCKED_INVALID;
         }
         mDisplayContent.getLogicalDisplayRect(mTmpRect);
-        final int orientation = mService.mGlobalConfiguration.orientation;
+        final int orientation = mDisplayContent.getConfiguration().orientation;
         return getDockSideUnchecked(bounds, mTmpRect, orientation);
     }
 

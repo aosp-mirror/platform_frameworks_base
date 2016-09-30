@@ -19,6 +19,7 @@ package com.android.server.wm;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.content.res.Configuration;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -28,6 +29,8 @@ import java.util.Comparator;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static org.junit.Assert.assertEquals;
@@ -375,6 +378,160 @@ public class WindowContainerTests {
         assertEquals(1, child2221.compareTo(child11));
         assertEquals(-1, child2222.compareTo(child223));
         assertEquals(1, child2223.compareTo(child21));
+    }
+
+    @Test
+    public void testConfigurationInit() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+
+        // Check root container initial config.
+        final TestWindowContainer root = builder.setLayer(0).build();
+        assertEquals(Configuration.EMPTY, root.getOverrideConfiguration());
+        assertEquals(Configuration.EMPTY, root.getMergedOverrideConfiguration());
+        assertEquals(Configuration.EMPTY, root.getConfiguration());
+
+        // Check child initial config.
+        final TestWindowContainer child1 = root.addChildWindow();
+        assertEquals(Configuration.EMPTY, child1.getOverrideConfiguration());
+        assertEquals(Configuration.EMPTY, child1.getMergedOverrideConfiguration());
+        assertEquals(Configuration.EMPTY, child1.getConfiguration());
+
+        // Check child initial config if root has overrides.
+        final Configuration rootOverrideConfig = new Configuration();
+        rootOverrideConfig.fontScale = 1.3f;
+        root.onOverrideConfigurationChanged(rootOverrideConfig);
+        final TestWindowContainer child2 = root.addChildWindow();
+        assertEquals(Configuration.EMPTY, child2.getOverrideConfiguration());
+        assertEquals(rootOverrideConfig, child2.getMergedOverrideConfiguration());
+        assertEquals(rootOverrideConfig, child2.getConfiguration());
+
+        // Check child initial config if root has parent config set.
+        final Configuration rootParentConfig = new Configuration();
+        rootParentConfig.fontScale = 0.8f;
+        rootParentConfig.orientation = SCREEN_ORIENTATION_LANDSCAPE;
+        root.onConfigurationChanged(rootParentConfig);
+        final Configuration rootFullConfig = new Configuration(rootParentConfig);
+        rootFullConfig.updateFrom(rootOverrideConfig);
+
+        final TestWindowContainer child3 = root.addChildWindow();
+        assertEquals(Configuration.EMPTY, child3.getOverrideConfiguration());
+        assertEquals(rootOverrideConfig, child3.getMergedOverrideConfiguration());
+        assertEquals(rootFullConfig, child3.getConfiguration());
+    }
+
+    @Test
+    public void testConfigurationChangeOnAddRemove() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+
+        // Init root's config.
+        final TestWindowContainer root = builder.setLayer(0).build();
+        final Configuration rootOverrideConfig = new Configuration();
+        rootOverrideConfig.fontScale = 1.3f;
+        root.onOverrideConfigurationChanged(rootOverrideConfig);
+
+        // Init child's config.
+        final TestWindowContainer child = root.addChildWindow();
+        final Configuration childOverrideConfig = new Configuration();
+        childOverrideConfig.densityDpi = 320;
+        child.onOverrideConfigurationChanged(childOverrideConfig);
+
+        // Check configuration update when child is removed from parent.
+        root.removeChild(child);
+        assertEquals(childOverrideConfig, child.getOverrideConfiguration());
+        assertEquals(childOverrideConfig, child.getMergedOverrideConfiguration());
+        assertEquals(childOverrideConfig, child.getConfiguration());
+
+        // It may be paranoia... but let's check if parent's config didn't change after removal.
+        assertEquals(rootOverrideConfig, root.getOverrideConfiguration());
+        assertEquals(rootOverrideConfig, root.getMergedOverrideConfiguration());
+        assertEquals(rootOverrideConfig, root.getConfiguration());
+
+        // Check configuration update when child is added to parent.
+        final Configuration mergedOverrideConfig = new Configuration(root.getConfiguration());
+        mergedOverrideConfig.updateFrom(childOverrideConfig);
+        root.addChildWindow(child);
+        assertEquals(childOverrideConfig, child.getOverrideConfiguration());
+        assertEquals(mergedOverrideConfig, child.getMergedOverrideConfiguration());
+        assertEquals(mergedOverrideConfig, child.getConfiguration());
+    }
+
+    @Test
+    public void testConfigurationChangePropagation() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+
+        // Builds 3-level vertical hierarchy with one window container on each level.
+        // In addition to different overrides on each level, everyone in hierarchy will have one
+        // common overridden value - orientation;
+
+        // Init root's config.
+        final TestWindowContainer root = builder.setLayer(0).build();
+        final Configuration rootOverrideConfig = new Configuration();
+        rootOverrideConfig.fontScale = 1.3f;
+        rootOverrideConfig.orientation = SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+        root.onOverrideConfigurationChanged(rootOverrideConfig);
+
+        // Init children.
+        final TestWindowContainer child1 = root.addChildWindow();
+        final Configuration childOverrideConfig1 = new Configuration();
+        childOverrideConfig1.densityDpi = 320;
+        childOverrideConfig1.orientation = SCREEN_ORIENTATION_LANDSCAPE;
+        child1.onOverrideConfigurationChanged(childOverrideConfig1);
+
+        final TestWindowContainer child2 = child1.addChildWindow();
+        final Configuration childOverrideConfig2 = new Configuration();
+        childOverrideConfig2.screenWidthDp = 150;
+        childOverrideConfig2.orientation = SCREEN_ORIENTATION_PORTRAIT;
+        child2.onOverrideConfigurationChanged(childOverrideConfig2);
+
+        // Check configuration on all levels when root override is updated.
+        rootOverrideConfig.smallestScreenWidthDp = 200;
+        root.onOverrideConfigurationChanged(rootOverrideConfig);
+
+        final Configuration mergedOverrideConfig1 = new Configuration(rootOverrideConfig);
+        mergedOverrideConfig1.updateFrom(childOverrideConfig1);
+        final Configuration mergedConfig1 = new Configuration(mergedOverrideConfig1);
+
+        final Configuration mergedOverrideConfig2 = new Configuration(mergedOverrideConfig1);
+        mergedOverrideConfig2.updateFrom(childOverrideConfig2);
+        final Configuration mergedConfig2 = new Configuration(mergedOverrideConfig2);
+
+        assertEquals(rootOverrideConfig, root.getOverrideConfiguration());
+        assertEquals(rootOverrideConfig, root.getMergedOverrideConfiguration());
+        assertEquals(rootOverrideConfig, root.getConfiguration());
+
+        assertEquals(childOverrideConfig1, child1.getOverrideConfiguration());
+        assertEquals(mergedOverrideConfig1, child1.getMergedOverrideConfiguration());
+        assertEquals(mergedConfig1, child1.getConfiguration());
+
+        assertEquals(childOverrideConfig2, child2.getOverrideConfiguration());
+        assertEquals(mergedOverrideConfig2, child2.getMergedOverrideConfiguration());
+        assertEquals(mergedConfig2, child2.getConfiguration());
+
+        // Check configuration on all levels when root parent config is updated.
+        final Configuration rootParentConfig = new Configuration();
+        rootParentConfig.screenHeightDp = 100;
+        rootParentConfig.orientation = SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+        root.onConfigurationChanged(rootParentConfig);
+        final Configuration mergedRootConfig = new Configuration(rootParentConfig);
+        mergedRootConfig.updateFrom(rootOverrideConfig);
+
+        mergedConfig1.setTo(mergedRootConfig);
+        mergedConfig1.updateFrom(mergedOverrideConfig1);
+
+        mergedConfig2.setTo(mergedConfig1);
+        mergedConfig2.updateFrom(mergedOverrideConfig2);
+
+        assertEquals(rootOverrideConfig, root.getOverrideConfiguration());
+        assertEquals(rootOverrideConfig, root.getMergedOverrideConfiguration());
+        assertEquals(mergedRootConfig, root.getConfiguration());
+
+        assertEquals(childOverrideConfig1, child1.getOverrideConfiguration());
+        assertEquals(mergedOverrideConfig1, child1.getMergedOverrideConfiguration());
+        assertEquals(mergedConfig1, child1.getConfiguration());
+
+        assertEquals(childOverrideConfig2, child2.getOverrideConfiguration());
+        assertEquals(mergedOverrideConfig2, child2.getMergedOverrideConfiguration());
+        assertEquals(mergedConfig2, child2.getConfiguration());
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
