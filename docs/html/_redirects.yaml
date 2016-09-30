@@ -842,6 +842,10 @@ redirects:
   to: /topic/performance/power/network/gather-data.html
 - from: /training/performance/battery/network/index.html
   to: /topic/performance/power/network/index.html
+- from: /training/articles/memory.html
+  to: /topic/performance/memory.html
+- from: /topic/performance/optimizing-view-hierarchies.html
+  to: /topic/performance/rendering/optimizing-view-hierarchies.html
 
 # Redirects for the new [dac]/topic/libraries/ area
 
