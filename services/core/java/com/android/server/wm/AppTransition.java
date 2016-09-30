@@ -374,6 +374,7 @@ public class AppTransition implements Dump {
 
     void goodToGo(AppWindowAnimator topOpeningAppAnimator, AppWindowAnimator topClosingAppAnimator,
             ArraySet<AppWindowToken> openingApps, ArraySet<AppWindowToken> closingApps) {
+        int appTransition = mNextAppTransition;
         mNextAppTransition = TRANSIT_UNSET;
         mAppTransitionState = APP_STATE_RUNNING;
         notifyAppTransitionStartingLocked(
@@ -382,7 +383,7 @@ public class AppTransition implements Dump {
                 topOpeningAppAnimator != null ? topOpeningAppAnimator.animation : null,
                 topClosingAppAnimator != null ? topClosingAppAnimator.animation : null);
         mService.getDefaultDisplayContentLocked().getDockedDividerController()
-                .notifyAppTransitionStarting(openingApps);
+                .notifyAppTransitionStarting(openingApps, appTransition);
 
         // Prolong the start for the transition when docking a task from recents, unless recents
         // ended it already then we don't need to wait.
