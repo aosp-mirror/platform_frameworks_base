@@ -109,6 +109,9 @@ import java.util.Collection;
  *     <li> <b>Nine Patch</b>: an extension to the PNG format allows it to
  *     specify information about how to stretch it and place things inside of
  *     it.
+ *     <li><b>Vector</b>: a drawable defined in an XML file as a set of points,
+ *     lines, and curves along with its associated color information. This type
+ *     of drawable can be scaled without loss of display quality.
  *     <li> <b>Shape</b>: contains simple drawing commands instead of a raw
  *     bitmap, allowing it to resize better in some cases.
  *     <li> <b>Layers</b>: a compound drawable, which draws multiple underlying
