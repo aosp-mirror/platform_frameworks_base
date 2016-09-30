@@ -1262,7 +1262,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (!isScrollingEnabled()) {
             return false;
         }
-        if (isInsideQsContainer(ev)) {
+        if (isInsideQsContainer(ev) && !mIsBeingDragged) {
             return false;
         }
         mForcedScroll = null;
