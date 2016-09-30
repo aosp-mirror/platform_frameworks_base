@@ -1,0 +1,884 @@
+page.title=Key/Value Backup
+page.tags=backup, marshmallow, androidm
+page.keywords=backup, kvbackup
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#Comparison">Comparison to Auto Backup</a></li>
+    <li><a href="#ImplementingBackup">Implementing Key/Value Backup</a></li>
+
+    <li><a href="#BackupManifest">Declaring the backup agent in your manifest</a></li>
+    <li><a href="#BackupKey">Registering for Android Backup Service</a></li>
+    <li><a href="#BackupAgent">Extending BackupAgent</a>
+      <ol>
+        <li><a href="#RequiredMethods">Required methods</a></li>
+        <li><a href="#PerformingBackup">Performing backup</a></li>
+        <li><a href="#PerformingRestore">Performing restore</a></li>
+      </ol>
+    </li>
+    <li><a href="#BackupAgentHelper">Extending BackupAgentHelper</a>
+      <ol>
+        <li><a href="#SharedPreferences">Backing up SharedPreferences</a></li>
+        <li><a href="#Files">Backing up private files</a></li>
+      </ol>
+    </li>
+    <li><a href="#RestoreVersion">Checking the restore data version</a></li>
+    <li><a href="#RequestingBackup">Requesting backup</a></li>
+    <li><a href="#RequestingRestore">Requesting restore</a></li>
+    <li><a href="#Migrating">Migrating to Auto Backup</a></li>
+  </ol>
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.app.backup.BackupManager}</li>
+    <li>{@link android.app.backup.BackupAgent}</li>
+    <li>{@link android.app.backup.BackupAgentHelper}</li>
+  </ol>
+
+</div>
+</div>
+
+
+<p>Since Android 2.2 (API 8), Android has offered the <em>Key/Value Backup</em>
+feature as a way for developers to backup app data to the cloud. The Key/Value
+Backup feature (formerly known as the Backup API and the Android Backup Service)
+preserves app data by uploading it to
+<a href="{@docRoot}google/backup/index.html">Android Backup Service</a>.
+The amount of data is limited to 5MB per user of your app and there is
+no charge for storing backup data.
+
+<p class="note"><strong>Note:</strong> If your app implements Key/Value Backup
+and targets API 23 or higher, you should set
+<a href="{@docRoot}reference/android/R.attr.html#fullBackupOnly">android:fullBackupOnly</a>.
+This attribute indicates whether or not to use Auto Backup on devices where it is available.
+
+<h2 id="Comparison">Comparison to Auto Backup</h2>
+<p>Like Auto Backup, Key/Value Backups are restored automatically whenever the app
+is installed. The following table describes some of the key differences between Key/Value Backup and Auto Backup:
+
+<table>
+  <tr>
+   <th>Key/Value Backup</th>
+   <th>Auto Backup</th>
+  </tr>
+  <tr>
+   <td>Available in API 8, Android 2.2</td>
+   <td>Available in API 23, Android 6.0</td>
+  </tr>
+  <tr>
+   <td>Apps must implement a {@link android.app.backup.BackupAgent}. The backup agent defines what data to backup and how to
+restore data.</td>
+   <td>By default, Auto Backup includes almost all of the app's files. You can
+use XML to include and exclude files. Under the hood, Auto Backup relies on a
+backup agent that is built into the framework.</td>
+  </tr>
+  <tr>
+   <td>Apps must issue a request when there is data
+that is ready to be backed up. Requests
+from multiple apps are batched and executed every few hours.</td>
+   <td>Backups happen automatically roughly once a day.</td>
+  </tr>
+  <tr>
+   <td>Backup data can be transmitted via wifi or cellular data.</td>
+   <td>Backup data is tranmitted only via wifi. If the device is never connected to a
+wifi network, then Auto Backup never occurs.</td>
+  </tr>
+  <tr>
+   <td>Apps are not shut down during backup.</td>
+   <td>The system shuts down the app during backup.</td>
+  </tr>
+  <tr>
+   <td>Backup data is stored in <a href="{@docRoot}google/backup/index.html">Android Backup Service</a> limited to 5MB per app.</td>
+   <td>Backup data is stored in the user's Google Drive limited to 25MB per app.</td>
+  </tr>
+  <tr>
+   <td>Related API methods are not filed based:<ul>
+      <li>{@link android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor) onBackup()}
+      <li>{@link android.app.backup.BackupAgent#onRestore(BackupDataInput, int, ParcelFileDescriptor) onRestore()}</ul></td>
+   <td>Related API methods are filed based:<ul>
+<li>{@link android.app.backup.BackupAgent#onFullBackup(FullBackupDataOutput) onFullBackup()}
+<li>{@link android.app.backup.BackupAgent#onRestoreFile(ParcelFileDescriptor,long,File,int,long,long) onRestoreFile()}</ul></td>
+  </tr>
+</table>
+
+<h2 id="ImplementingBackup">Implementing Key/Value Backup</h2>
+<p>To backup your application data, you need to implement a backup agent. Your backup
+agent is called by the Backup Manager both during backup and restore.</p>
+
+<p>To implement a backup agent, you must:</p>
+
+<ol>
+  <li>Declare your backup agent in your manifest file with the <a
+href="{@docRoot}guide/topics/manifest/application-element.html#agent">{@code
+android:backupAgent}</a> attribute.</li>
+  <li>Register your application with <a href="{@docRoot}google/backup/index.html">Android
+   Backup Service</a></li>
+  <li>Define a backup agent by either:</p>
+    <ol type="a">
+      <li><a href="#BackupAgent">Extending BackupAgent</a>
+        <p>The {@link android.app.backup.BackupAgent} class provides the central interface with
+which your application communicates with the Backup Manager. If you extend this class
+directly, you must override {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} and {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+onRestore()} to handle the backup and restore operations for your data.</p>
+        <p><em>Or</em></p>
+      <li><a href="#BackupAgentHelper">Extending BackupAgentHelper</a>
+        <p>The {@link android.app.backup.BackupAgentHelper} class provides a convenient
+wrapper around the {@link android.app.backup.BackupAgent} class, which minimizes the amount of code
+you need to write. In your {@link android.app.backup.BackupAgentHelper}, you must use one or more
+"helper" objects, which automatically backup and restore certain types of data, so that you do not
+need to implement {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} and {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+onRestore()}.</p>
+        <p>Android currently provides backup helpers that will backup and restore complete files
+from {@link android.content.SharedPreferences} and <a
+href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">internal storage</a>.</p>
+      </li>
+    </ol>
+  </li>
+</ol>
+
+<h2 id="BackupManifest">Declaring the backup agent in your manifest</h2>
+
+<p>This is the easiest step, so once you've decided on the class name for your backup agent, declare
+it in your manifest with the <a
+href="{@docRoot}guide/topics/manifest/application-element.html#agent">{@code
+android:backupAgent}</a> attribute in the <a
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code
+<application>}</a> tag.</p>
+
+<p>For example:</p>
+
+<pre>
+&lt;manifest ... &gt;
+    ...
+    &lt;application android:label="MyApplication"
+                 <b>android:backupAgent="MyBackupAgent"</b>&gt;
+        &lt;activity ... &gt;
+            ...
+        &lt;/activity&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p>Another attribute you might want to use is <a
+href="{@docRoot}guide/topics/manifest/application-element.html#restoreany">{@code
+android:restoreAnyVersion}</a>. This attribute takes a boolean value to indicate whether you
+want to restore the application data regardless of the current application version compared to the
+version that produced the backup data. (The default value is "{@code false}".) See <a
+href="#RestoreVersion">Checking the Restore Data Version</a> for more information.</p>
+
+<p class="note"><strong>Note:</strong> The backup service and the APIs you must use are
+available only on devices running API Level 8 (Android 2.2) or greater, so you should also
+set your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
+attribute to "8".</p>
+
+
+
+
+<h2 id="BackupKey">Registering for Android Backup Service</h2>
+
+<p>Google provides a backup transport with <a
+href="{@docRoot}google/backup/index.html">Android Backup Service</a> for most
+Android-powered devices running Android 2.2 or greater.</p>
+
+<p>In order for your application to perform backup using Android Backup Service, you must
+register your application with the service to receive a Backup Service Key, then
+declare the Backup Service Key in your Android manifest.</p>
+
+<p>To get your Backup Service Key, <a
+href="{@docRoot}google/backup/signup.html">register for Android Backup Service</a>.
+When you register, you will be provided a Backup Service Key and the appropriate {@code
+<meta-data>} XML code for your Android manifest file, which you must include as a child of the
+{@code <application>} element. For example:</p>
+
+<pre>
+&lt;application android:label="MyApplication"
+             android:backupAgent="MyBackupAgent"&gt;
+    ...
+    &lt;meta-data android:name="com.google.android.backup.api_key"
+        android:value="AEdPqrEAAAAIDaYEVgU6DJnyJdBmU7KLH3kszDXLv_4DIsEIyQ" /&gt;
+&lt;/application&gt;
+</pre>
+
+<p>The <code>android:name</code> must be <code>"com.google.android.backup.api_key"</code> and
+the <code>android:value</code> must be the Backup Service Key received from the Android Backup
+Service registration.</p>
+
+<p>If you have multiple applications, you must register each one, using the respective package
+name.</p>
+
+<p class="note"><strong>Note:</strong> The backup transport provided by Android Backup Service is
+not guaranteed to be available
+on all Android-powered devices that support backup. Some devices might support backup
+using a different transport, some devices might not support backup at all, and there is no way for
+your application to know what transport is used on the device. However, if you implement backup for
+your application, you should always include a Backup Service Key for Android Backup Service so
+your application can perform backup when the device uses the Android Backup Service transport. If
+the device does not use Android Backup Service, then the {@code <meta-data>} element with the
+Backup Service Key is ignored.</p>
+
+
+
+
+<h2 id="BackupAgent">Extending BackupAgent</h2>
+
+<p>Most applications shouldn't need to extend the {@link android.app.backup.BackupAgent} class
+directly, but should instead <a href="#BackupAgentHelper">extend BackupAgentHelper</a> to take
+advantage of the built-in helper classes that automatically backup and restore your files. However,
+you might want to extend {@link android.app.backup.BackupAgent} directly if you need to:</p>
+<ul>
+  <li>Version your data format. For instance, if you anticipate the need to revise the
+format in which you write your application data, you can build a backup agent to cross-check your
+application version during a restore operation and perform any necessary compatibility work if the
+version on the device is different than that of the backup data. For more information, see <a
+href="#RestoreVersion">Checking the Restore Data Version</a>.</li>
+  <li>Instead of backing up an entire file, you can specify the portions of data the should be
+backed up and how each portion is then restored to the device. (This can also help you manage
+different versions, because you read and write your data as unique entities, rather than
+complete files.)</li>
+  <li>Back up data in a database. If you have an SQLite database that you want to restore when
+the user re-installs your application, you need to build a custom {@link
+android.app.backup.BackupAgent} that reads the appropriate data during a backup operation, then
+create your table and insert the data during a restore operation.</li>
+</ul>
+
+<p>If you don't need to perform any of the tasks above and want to back up complete files from
+{@link android.content.SharedPreferences} or <a
+href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">internal storage</a>, you
+should skip to <a href="#BackupAgentHelper">Extending BackupAgentHelper</a>.</p>
+
+
+
+<h3 id="RequiredMethods">Required methods</h3>
+
+<p>When you create a backup agent by extending {@link android.app.backup.BackupAgent}, you
+must implement the following callback methods:</p>
+
+<dl>
+  <dt>{@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()}</dt>
+    <dd>The Backup Manager calls this method after you <a href="#RequestingBackup">request a
+backup</a>. In this method, you read your application data from the device and pass the data you
+want to back up to the Backup Manager, as described below in <a href="#PerformingBackup">Performing
+backup</a>.</dd>
+
+  <dt>{@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+onRestore()}</dt>
+    <dd>The Backup Manager calls this method during a restore operation (you can <a
+href="#RequestingRestore">request a restore</a>, but the system automatically performs restore when
+the user re-installs your application). When it calls this method, the Backup Manager delivers your
+backup data, which you then restore to the device, as described below in <a
+href="#PerformingRestore">Performing restore</a>.</dd>
+</dl>
+
+
+
+<h3 id="PerformingBackup">Performing backup</h3>
+
+
+<p>When it's time to back up your application data, the Backup Manager calls your {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} method. This is where you must provide your application data to the Backup Manager so
+it can be saved to cloud storage.</p>
+
+<p>Only the Backup Manager can call your backup agent's {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} method. Each time that your application data changes and you want to perform a backup,
+you must request a backup operation by calling {@link
+android.app.backup.BackupManager#dataChanged()} (see <a href="#RequestingBackup">Requesting
+Backup</a> for more information). A backup request does not result in an immediate call to your
+{@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} method. Instead, the Backup Manager waits for an appropriate time, then performs
+backup for all applications that have requested a backup since the last backup was performed.</p>
+
+<p class="note"><strong>Tip:</strong> While developing your application, you can initiate an
+immediate backup operation from the Backup Manager with the <a
+href="{@docRoot}tools/help/bmgr.html">{@code bmgr} tool</a>.</p>
+
+<p>When the Backup Manager calls your {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} method, it passes three parameters:</p>
+
+<dl>
+  <dt>{@code oldState}</dt>
+    <dd>An open, read-only {@link android.os.ParcelFileDescriptor} pointing to the last backup
+state provided by your application. This is not the backup data from cloud storage, but a
+local representation of the data that was backed up the last time {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} was called (as defined by {@code newState}, below, or from {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+onRestore()}&mdash;more about this in the next section). Because {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} does not allow you to read existing backup data in
+the cloud storage, you can use this local representation to determine whether your data has changed
+since the last backup.</dd>
+  <dt>{@code data}</dt>
+    <dd>A {@link android.app.backup.BackupDataOutput} object, which you use to deliver your backup
+data to the Backup Manager.</dd>
+  <dt>{@code newState}</dt>
+    <dd>An open, read/write {@link android.os.ParcelFileDescriptor} pointing to a file in which
+you must write a representation of the data that you delivered to {@code data} (a representation
+can be as simple as the last-modified timestamp for your file). This object is
+returned as {@code oldState} the next time the Backup Manager calls your {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} method. If you do not write your backup data to {@code newState}, then {@code oldState}
+will point to an empty file next time Backup Manager calls {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()}.</dd>
+</dl>
+
+<p>Using these parameters, you should implement your {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} method to do the following:</p>
+
+<ol>
+  <li>Check whether your data has changed since the last backup by comparing {@code oldState} to
+your current data. How you read data in {@code oldState} depends on how you originally wrote it to
+{@code newState} (see step 3). The easiest way to record the state of a file is with its
+last-modified timestamp. For example, here's how you can read and compare a timestamp from {@code
+oldState}:
+    <pre>
+// Get the oldState input stream
+FileInputStream instream = new FileInputStream(oldState.getFileDescriptor());
+DataInputStream in = new DataInputStream(instream);
+
+try {
+    // Get the last modified timestamp from the state file and data file
+    long stateModified = in.readLong();
+    long fileModified = mDataFile.lastModified();
+
+    if (stateModified != fileModified) {
+        // The file has been modified, so do a backup
+        // Or the time on the device changed, so be safe and do a backup
+    } else {
+        // Don't back up because the file hasn't changed
+        return;
+    }
+} catch (IOException e) {
+    // Unable to read state file... be safe and do a backup
+}
+</pre>
+    <p>If nothing has changed and you don't need to back up, skip to step 3.</p>
+  </li>
+  <li>If your data has changed, compared to {@code oldState}, write the current data to
+{@code data} to back it up to the cloud storage.
+    <p>You must write each chunk of data as an "entity" in the {@link
+android.app.backup.BackupDataOutput}. An entity is a flattened binary data
+record that is identified by a unique key string. Thus, the data set that you back up is
+conceptually a set of key-value pairs.</p>
+    <p>To add an entity to your backup data set, you must:</p>
+    <ol>
+      <li>Call {@link android.app.backup.BackupDataOutput#writeEntityHeader(String,int)
+writeEntityHeader()}, passing a unique string key for the data you're about to write and the data
+size.</li>
+      <li>Call {@link android.app.backup.BackupDataOutput#writeEntityData(byte[],int)
+writeEntityData()}, passing a byte buffer that contains your data and the number of bytes to write
+from the buffer (which should match the size passed to {@link
+android.app.backup.BackupDataOutput#writeEntityHeader(String,int) writeEntityHeader()}).</li>
+    </ol>
+    <p>For example, the following code flattens some data into a byte stream and writes it into a
+single entity:</p>
+    <pre>
+// Create buffer stream and data output stream for our data
+ByteArrayOutputStream bufStream = new ByteArrayOutputStream();
+DataOutputStream outWriter = new DataOutputStream(bufStream);
+// Write structured data
+outWriter.writeUTF(mPlayerName);
+outWriter.writeInt(mPlayerScore);
+// Send the data to the Backup Manager via the BackupDataOutput
+byte[] buffer = bufStream.toByteArray();
+int len = buffer.length;
+data.writeEntityHeader(TOPSCORE_BACKUP_KEY, len);
+data.writeEntityData(buffer, len);
+</pre>
+    <p>Perform this for each piece of data that you want to back up. How you divide your data into
+entities is up to you (and you might use just one entity).</p>
+  </li>
+  <li>Whether or not you perform a backup (in step 2), write a representation of the current data to
+the {@code newState} {@link android.os.ParcelFileDescriptor}. The Backup Manager retains this object
+locally as a representation of the data that is currently backed up. It passes this back to you as
+{@code oldState} the next time it calls {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} so you can determine whether another backup is necessary (as handled in step 1). If you
+do not write the current data state to this file, then
+{@code oldState} will be empty during the next callback.
+    <p>The following example saves a representation of the current data into {@code newState} using
+the file's last-modified timestamp:</p>
+    <pre>
+FileOutputStream outstream = new FileOutputStream(newState.getFileDescriptor());
+DataOutputStream out = new DataOutputStream(outstream);
+
+long modified = mDataFile.lastModified();
+out.writeLong(modified);
+</pre>
+  </li>
+</ol>
+
+<p class="caution"><strong>Caution:</strong> If your application data is saved to a file, make sure
+that you use synchronized statements while accessing the file so that your backup agent does not
+read the file while an Activity in your application is also writing the file.</p>
+
+
+
+
+<h3 id="PerformingRestore">Performing restore</h3>
+
+<p>When it's time to restore your application data, the Backup Manager calls your backup
+agent's {@link android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+onRestore()} method. When it calls this method, the Backup Manager delivers your backup data so
+you can restore it onto the device.</p>
+
+<p>Only the Backup Manager can call {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+onRestore()}, which happens automatically when the system installs your application and
+finds existing backup data. However, you can request a restore operation for
+your application by calling {@link
+android.app.backup.BackupManager#requestRestore(RestoreObserver) requestRestore()} (see <a
+href="#RequestingRestore">Requesting restore</a> for more information).</p>
+
+<p class="note"><strong>Note:</strong> While developing your application, you can also request a
+restore operation with the <a href="{@docRoot}tools/help/bmgr.html">{@code bmgr}
+tool</a>.</p>
+
+<p>When the Backup Manager calls your {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+onRestore()} method, it passes three parameters:</p>
+
+<dl>
+  <dt>{@code data}</dt>
+    <dd>A {@link android.app.backup.BackupDataInput}, which allows you to read your backup
+data.</dd>
+  <dt>{@code appVersionCode}</dt>
+    <dd>An integer representing the value of your application's <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code android:versionCode}</a>
+manifest attribute, as it was when this data was backed up. You can use this to cross-check the
+current application version and determine if the data format is compatible. For more
+information about using this to handle different versions of restore data, see the section
+below about <a href="#RestoreVersion">Checking the Restore Data Version</a>.</dd>
+  <dt>{@code newState}</dt>
+    <dd>An open, read/write {@link android.os.ParcelFileDescriptor} pointing to a file in which
+you must write the final backup state that was provided with {@code data}. This object is
+returned as {@code oldState} the next time {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} is called. Recall that you must also write the same {@code newState} object in the
+{@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} callback&mdash;also doing it here ensures that the {@code oldState} object given to
+{@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} is valid even the first time {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} is called after the device is restored.</dd>
+</dl>
+
+<p>In your implementation of {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+onRestore()}, you should call {@link android.app.backup.BackupDataInput#readNextHeader()} on the
+{@code data} to iterate
+through all entities in the data set. For each entity found, do the following:</p>
+
+<ol>
+  <li>Get the entity key with {@link android.app.backup.BackupDataInput#getKey()}.</li>
+  <li>Compare the entity key to a list of known key values that you should have declared as static
+final strings inside your {@link android.app.backup.BackupAgent} class. When the key matches one of
+your known key strings, enter into a statement to extract the entity data and save it to the device:
+    <ol>
+      <li>Get the entity data size with {@link
+android.app.backup.BackupDataInput#getDataSize()} and create a byte array of that size.</li>
+      <li>Call {@link android.app.backup.BackupDataInput#readEntityData(byte[],int,int)
+readEntityData()} and pass it the byte array, which is where the data will go, and specify the
+start offset and the size to read.</li>
+      <li>Your byte array is now full and you can read the data and write it to the device
+however you like.</li>
+    </ol>
+  </li>
+  <li>After you read and write your data back to the device, write the state of your data to the
+{@code newState} parameter the same as you do during {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()}.
+</ol>
+
+<p>For example, here's how you can restore the data backed up by the example in the previous
+section:</p>
+
+<pre>
+&#64;Override
+public void onRestore(BackupDataInput data, int appVersionCode,
+                      ParcelFileDescriptor newState) throws IOException {
+    // There should be only one entity, but the safest
+    // way to consume it is using a while loop
+    while (data.readNextHeader()) {
+        String key = data.getKey();
+        int dataSize = data.getDataSize();
+
+        // If the key is ours (for saving top score). Note this key was used when
+        // we wrote the backup entity header
+        if (TOPSCORE_BACKUP_KEY.equals(key)) {
+            // Create an input stream for the BackupDataInput
+            byte[] dataBuf = new byte[dataSize];
+            data.readEntityData(dataBuf, 0, dataSize);
+            ByteArrayInputStream baStream = new ByteArrayInputStream(dataBuf);
+            DataInputStream in = new DataInputStream(baStream);
+
+            // Read the player name and score from the backup data
+            mPlayerName = in.readUTF();
+            mPlayerScore = in.readInt();
+
+            // Record the score on the device (to a file or something)
+            recordScore(mPlayerName, mPlayerScore);
+        } else {
+            // We don't know this entity key. Skip it. (Shouldn't happen.)
+            data.skipEntityData();
+        }
+    }
+
+    // Finally, write to the state blob (newState) that describes the restored data
+    FileOutputStream outstream = new FileOutputStream(newState.getFileDescriptor());
+    DataOutputStream out = new DataOutputStream(outstream);
+    out.writeUTF(mPlayerName);
+    out.writeInt(mPlayerScore);
+}
+</pre>
+
+<p>In this example, the {@code appVersionCode} parameter passed to {@link
+android.app.backup.BackupAgent#onRestore onRestore()} is not used. However, you might want to use
+it if you've chosen to perform backup when the user's version of the application has actually moved
+backward (for example, the user went from version 1.5 of your app to 1.0). For more information, see
+the section about <a href="#RestoreVersion">Checking the Restore Data Version</a>.</p>
+
+<div class="special">
+<p>For an example implementation of {@link android.app.backup.BackupAgent}, see the <a
+href="{@docRoot}resources/samples/BackupRestore/src/com/example/android/backuprestore/ExampleAgent.html">{@code
+ExampleAgent}</a> class in the <a
+href="{@docRoot}resources/samples/BackupRestore/index.html">Backup and Restore</a> sample
+application.</p>
+</div>
+
+
+
+
+
+
+<h2 id="BackupAgentHelper">Extending BackupAgentHelper</h2>
+
+<p>You should build your backup agent using {@link android.app.backup.BackupAgentHelper} if you want
+to back up complete files (from either {@link android.content.SharedPreferences} or <a
+href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">internal storage</a>).
+Building your backup agent with {@link android.app.backup.BackupAgentHelper} requires far less
+code than extending {@link android.app.backup.BackupAgent}, because you don't have to implement
+{@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} and {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+onRestore()}.</p>
+
+<p>Your implementation of {@link android.app.backup.BackupAgentHelper} must
+use one or more backup helpers. A backup helper is a specialized
+component that {@link android.app.backup.BackupAgentHelper} summons to perform backup and
+restore operations for a particular type of data. The Android framework currently provides two
+different helpers:</p>
+<ul>
+  <li>{@link android.app.backup.SharedPreferencesBackupHelper} to backup {@link
+android.content.SharedPreferences} files.</li>
+  <li>{@link android.app.backup.FileBackupHelper} to backup files from <a
+href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">internal storage</a>.</li>
+</ul>
+
+<p>You can include multiple helpers in your {@link android.app.backup.BackupAgentHelper}, but only
+one helper is needed for each data type. That is, if you have multiple {@link
+android.content.SharedPreferences} files, then you need only one {@link
+android.app.backup.SharedPreferencesBackupHelper}.</p>
+
+<p>For each helper you want to add to your {@link android.app.backup.BackupAgentHelper}, you must do
+the following during your {@link android.app.backup.BackupAgent#onCreate()} method:</p>
+<ol>
+  <li>Instantiate in instance of the desired helper class. In the class constructor, you must
+specify the appropriate file(s) you want to backup.</li>
+  <li>Call {@link android.app.backup.BackupAgentHelper#addHelper(String,BackupHelper) addHelper()}
+to add the helper to your {@link android.app.backup.BackupAgentHelper}.</li>
+</ol>
+
+<p>The following sections describe how to create a backup agent using each of the available
+helpers.</p>
+
+
+
+<h3 id="SharedPreferences">Backing up SharedPreferences</h3>
+
+<p>When you instantiate a {@link android.app.backup.SharedPreferencesBackupHelper}, you must
+include the name of one or more {@link android.content.SharedPreferences} files.</p>
+
+<p>For example, to back up a {@link android.content.SharedPreferences} file named
+"user_preferences", a complete backup agent using {@link android.app.backup.BackupAgentHelper} looks
+like this:</p>
+
+<pre>
+public class MyPrefsBackupAgent extends BackupAgentHelper {
+    // The name of the SharedPreferences file
+    static final String PREFS = "user_preferences";
+
+    // A key to uniquely identify the set of backup data
+    static final String PREFS_BACKUP_KEY = "prefs";
+
+    // Allocate a helper and add it to the backup agent
+    &#64;Override
+    public void onCreate() {
+        SharedPreferencesBackupHelper helper =
+                new SharedPreferencesBackupHelper(this, PREFS);
+        addHelper(PREFS_BACKUP_KEY, helper);
+    }
+}
+</pre>
+
+<p>That's it! That's your entire backup agent. The {@link
+android.app.backup.SharedPreferencesBackupHelper} includes all the code
+needed to backup and restore a {@link android.content.SharedPreferences} file.</p>
+
+<p>When the Backup Manager calls {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} and {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+onRestore()}, {@link android.app.backup.BackupAgentHelper} calls your backup helpers to perform
+backup and restore for your specified files.</p>
+
+<p class="note"><strong>Note:</strong> The methods of {@link android.content.SharedPreferences}
+are threadsafe, so
+you can safely read and write the shared preferences file from your backup agent and
+other activities.</p>
+
+
+
+<h3 id="Files">Backing up other files</h3>
+
+<p>When you instantiate a {@link android.app.backup.FileBackupHelper}, you must include the name of
+one or more files that are saved to your application's <a
+href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">internal storage</a>
+(as specified by {@link android.content.ContextWrapper#getFilesDir()}, which is the same
+location where {@link android.content.Context#openFileOutput(String,int) openFileOutput()} writes
+files).</p>
+
+<p>For example, to backup two files named "scores" and "stats," a backup agent using {@link
+android.app.backup.BackupAgentHelper} looks like this:</p>
+
+<pre>
+public class MyFileBackupAgent extends BackupAgentHelper {
+    // The name of the file
+    static final String TOP_SCORES = "scores";
+    static final String PLAYER_STATS = "stats";
+
+    // A key to uniquely identify the set of backup data
+    static final String FILES_BACKUP_KEY = "myfiles";
+
+    // Allocate a helper and add it to the backup agent
+    &#64;Override
+    public void onCreate() {
+        FileBackupHelper helper = new FileBackupHelper(this,
+                TOP_SCORES, PLAYER_STATS);
+        addHelper(FILES_BACKUP_KEY, helper);
+    }
+}
+</pre>
+
+<p>The {@link android.app.backup.FileBackupHelper} includes all the code necessary to backup and
+restore files that are saved to your application's <a
+href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">internal storage</a>..</p>
+
+<p>However, reading and writing to files on internal storage is <strong>not threadsafe</strong>. To
+ensure that your backup agent does not read or write your files at the same time as your activities,
+you must use synchronized statements each time you perform a read or write. For example,
+in any Activity where you read and write the file, you need an object to use as the intrinsic
+lock for the synchronized statements:</p>
+
+<pre>
+// Object for intrinsic lock
+static final Object sDataLock = new Object();
+</pre>
+
+<p>Then create a synchronized statement with this lock each time you read or write the files. For
+example, here's a synchronized statement for writing the latest score in a game to a file:</p>
+
+<pre>
+try {
+    synchronized (MyActivity.sDataLock) {
+        File dataFile = new File({@link android.content.Context#getFilesDir()}, TOP_SCORES);
+        RandomAccessFile raFile = new RandomAccessFile(dataFile, "rw");
+        raFile.writeInt(score);
+    }
+} catch (IOException e) {
+    Log.e(TAG, "Unable to write to file");
+}
+</pre>
+
+<p>You should synchronize your read statements with the same lock.</p>
+
+<p>Then, in your {@link android.app.backup.BackupAgentHelper}, you must override {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} and {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+onRestore()} to synchronize the backup and restore operations with the same
+intrinsic lock. For example, the {@code MyFileBackupAgent} example from above needs the following
+methods:</p>
+
+<pre>
+&#64;Override
+public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
+          ParcelFileDescriptor newState) throws IOException {
+    // Hold the lock while the FileBackupHelper performs backup
+    synchronized (MyActivity.sDataLock) {
+        super.onBackup(oldState, data, newState);
+    }
+}
+
+&#64;Override
+public void onRestore(BackupDataInput data, int appVersionCode,
+        ParcelFileDescriptor newState) throws IOException {
+    // Hold the lock while the FileBackupHelper restores the file
+    synchronized (MyActivity.sDataLock) {
+        super.onRestore(data, appVersionCode, newState);
+    }
+}
+</pre>
+
+<p>That's it. All you need to do is add your {@link android.app.backup.FileBackupHelper} in the
+{@link android.app.backup.BackupAgent#onCreate()} method and override {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} and {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor)
+onRestore()} to synchronize read and write operations.</p>
+
+<div class="special">
+<p>For an example implementation of {@link
+android.app.backup.BackupAgentHelper} with {@link android.app.backup.FileBackupHelper}, see the
+{@code FileHelperExampleAgent} class in the <a
+href="{@docRoot}resources/samples/BackupRestore/index.html">Backup and Restore</a> sample
+application.</p>
+</div>
+
+
+
+
+
+
+<h2 id="RestoreVersion">Checking the restore data version</h2>
+
+<p>When the Backup Manager saves your data to cloud storage, it automatically includes the version
+of your application, as defined by your manifest file's <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code android:versionCode}</a>
+attribute. Before the Backup Manager calls your backup agent to restore your data, it
+looks at the <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code
+android:versionCode}</a> of the installed application and compares it to the value
+recorded in the restore data set. If the version recorded in the restore data set is
+<em>newer</em> than the application version on the device, then the user has downgraded their
+application. In this case, the Backup Manager will abort the restore operation for your application
+and not call your {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor) onRestore()}
+method, because the restore set is considered meaningless to an older version.</p>
+
+<p>You can override this behavior with the <a
+href="{@docRoot}guide/topics/manifest/application-element.html#restoreany">{@code
+android:restoreAnyVersion}</a> attribute. This attribute is either "{@code true}" or "{@code
+false}" to indicate whether you want to restore the application regardless of the restore set
+version. The default value is "{@code false}". If you define this to be "{@code true}" then the
+Backup Manager will ignore the <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code android:versionCode}</a>
+and call your {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor) onRestore()}
+method in all cases. In doing so, you can manually check for the version difference in your {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor) onRestore()}
+method and take any steps necessary to make the data compatible if the versions conflict.</p>
+
+<p>To help you handle different versions during a restore operation, the {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor) onRestore()}
+method passes you the version code included with the restore data set as the {@code appVersionCode}
+parameter. You can then query the current application's version code with the {@link
+android.content.pm.PackageInfo#versionCode PackageInfo.versionCode} field. For example:</p>
+
+<pre>
+PackageInfo info;
+try {
+    String name = {@link android.content.ContextWrapper#getPackageName() getPackageName}();
+    info = {@link android.content.ContextWrapper#getPackageManager
+getPackageManager}().{@link android.content.pm.PackageManager#getPackageInfo(String,int)
+getPackageInfo}(name,0);
+} catch (NameNotFoundException nnfe) {
+    info = null;
+}
+
+int version;
+if (info != null) {
+    version = info.versionCode;
+}
+</pre>
+
+<p>Then simply compare the {@code version} acquired from {@link android.content.pm.PackageInfo}
+to the {@code appVersionCode} passed into {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor) onRestore()}.
+</p>
+
+<p class="caution"><strong>Caution:</strong> Be certain you understand the consequences of setting
+<a href="{@docRoot}guide/topics/manifest/application-element.html#restoreany">{@code
+android:restoreAnyVersion}</a> to "{@code true}" for your application. If each version of your
+application that supports backup does not properly account for variations in your data format during
+{@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor) onRestore()},
+then the data on the device could be saved in a format incompatible with the version currently
+installed on the device.</p>
+
+
+
+<h2 id="RequestingBackup">Requesting backup</h2>
+
+<p>You can request a backup operation at any time by calling {@link
+android.app.backup.BackupManager#dataChanged()}. This method notifies the Backup Manager that you'd
+like to backup your data using your backup agent. The Backup Manager then calls your backup
+agent's {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()} method at an opportune time in the future. Typically, you should
+request a backup each time your data changes (such as when the user changes an application
+preference that you'd like to back up). If you call {@link
+android.app.backup.BackupManager#dataChanged()} several times consecutively, before the Backup
+Manager requests a backup from your agent, your agent still receives just one call to {@link
+android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
+onBackup()}.</p>
+
+<p class="note"><strong>Note:</strong> While developing your application, you can request a
+backup and initiate an immediate backup operation with the <a
+href="{@docRoot}tools/help/bmgr.html">{@code bmgr}
+tool</a>.</p>
+
+
+<h2 id="RequestingRestore">Requesting restore</h2>
+
+<p>During the normal life of your application, you shouldn't need to request a restore operation.
+They system automatically checks for backup data and performs a restore when your application is
+installed. However, you can manually request a restore operation by calling {@link
+android.app.backup.BackupManager#requestRestore(RestoreObserver) requestRestore()}, if necessary. In
+which case, the Backup Manager calls your {@link
+android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor) onRestore()}
+implementation, passing the data from the current set of backup data.</p>
+
+<p class="note"><strong>Note:</strong> While developing your application, you can request a
+restore operation with the <a href="{@docRoot}tools/help/bmgr.html">{@code bmgr}
+tool</a>.</p>
+
+
+<h2 id="Migrating">Migrating to Auto Backup</h2>
+<p>You can transition your app to full-data backups by setting <a href="{@docRoot}reference/android/R.attr.html#fullBackupOnly">android:fullBackupOnly</a> to <code>true</code> in the <code>&lt;application></code> element in the manifest file. When
+running on a device with Android 5.1 (API level 22) or lower, your app ignores
+this value in the manifest, and continues performing Key/Value Backups. When
+running on a device with Android 6.0 (API level 23) or higher, your app performs
+Auto Backup instead of Key/Value Backup.
