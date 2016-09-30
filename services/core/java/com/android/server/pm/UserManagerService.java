@@ -1706,14 +1706,13 @@ public class UserManagerService extends IUserManager.Stub {
                                         UserRestrictionsUtils
                                                 .readRestrictions(parser, mGuestRestrictions);
                                     }
-                                } else if (parser.getName().equals(TAG_DEVICE_POLICY_RESTRICTIONS)
-                                        ) {
-                                    UserRestrictionsUtils.readRestrictions(parser,
-                                            newDevicePolicyGlobalUserRestrictions);
                                 }
                                 break;
                             }
                         }
+                    } else if (name.equals(TAG_DEVICE_POLICY_RESTRICTIONS)) {
+                        UserRestrictionsUtils.readRestrictions(parser,
+                                newDevicePolicyGlobalUserRestrictions);
                     } else if (name.equals(TAG_GLOBAL_RESTRICTION_OWNER_ID)) {
                         String ownerUserId = parser.getAttributeValue(null, ATTR_ID);
                         if (ownerUserId != null) {
