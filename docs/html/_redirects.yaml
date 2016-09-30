@@ -430,7 +430,13 @@ redirects:
 - from: /training/cloudsync/aesync.html
   to: /google/gcm/index.html
 - from: /training/cloudsync/index.html
-  to: /training/backup/index.html
+  to: /guide/topics/data/backup.html
+- from: /training/backup/index.html
+  to: /guide/topics/data/backup.html
+- from: /training/backup/autosyncapi.html
+  to: /guide/topics/data/autobackup.html
+- from: /training/backup/backupapi.html
+  to: /guide/topics/data/keyvaluebackup.html
 - from: /training/basics/location/...
   to: /training/location/...
 - from: /training/monetization/index.html
@@ -796,7 +802,7 @@ redirects:
 - from: /preview/features/app-linking.html
   to: /training/app-links/index.html
 - from: /preview/backup/index.html
-  to: /training/backup/autosyncapi.html
+  to: /guide/topics/data/backup/autobackup.html
 - from: /preview/features/power-mgmt.html
   to: /training/monitoring-device-state/doze-standby.html
 - from: /preview/dev-community
