@@ -722,6 +722,36 @@ public abstract class CameraCaptureSession implements AutoCloseable {
         }
 
         /**
+         * This method is called when camera device's input capture queue becomes empty,
+         * and is ready to accept the next request.
+         *
+         * <p>Pending capture requests exist in one of two queues: the in-flight queue where requests
+         * are already in different stages of processing pipeline, and an input queue where requests
+         * wait to enter the in-flight queue. The input queue is needed because more requests may be
+         * submitted than the current camera device pipeline depth.</p>
+         *
+         * <p>This callback is fired when the input queue becomes empty, and the camera device may
+         * have to fall back to the repeating request if set, or completely skip the next frame from
+         * the sensor. This can cause glitches to camera preview output, for example. This callback
+         * will only fire after requests queued by capture() or captureBurst(), not after a
+         * repeating request or burst enters the in-flight queue. For example, in the common case
+         * of a repeating request and a single-shot JPEG capture, this callback only fires when the
+         * JPEG request has entered the in-flight queue for capture.</p>
+         *
+         * <p>By only sending a new {@link #capture} or {@link #captureBurst} when the input
+         * queue is empty, pipeline latency can be minimized.</p>
+         *
+         * <p>This callback is not fired when the session is first created. It is different from
+         * {@link #onReady}, which is fired when all requests in both queues have been processed.</p>
+         *
+         * @param session
+         *            The session returned by {@link CameraDevice#createCaptureSession}
+         */
+        public void onCaptureQueueEmpty(@NonNull CameraCaptureSession session) {
+            // default empty implementation
+        }
+
+        /**
          * This method is called when the session is closed.
          *
          * <p>A session is closed when a new session is created by the parent camera device,

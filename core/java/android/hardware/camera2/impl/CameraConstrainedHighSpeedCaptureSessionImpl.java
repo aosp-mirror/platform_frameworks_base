@@ -291,6 +291,11 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
         }
 
         @Override
+        public void onCaptureQueueEmpty(CameraCaptureSession session) {
+            mCallback.onCaptureQueueEmpty(CameraConstrainedHighSpeedCaptureSessionImpl.this);
+        }
+
+        @Override
         public void onClosed(CameraCaptureSession session) {
             mCallback.onClosed(CameraConstrainedHighSpeedCaptureSessionImpl.this);
         }
@@ -300,7 +305,5 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
             mCallback.onSurfacePrepared(CameraConstrainedHighSpeedCaptureSessionImpl.this,
                     surface);
         }
-
-
     }
 }

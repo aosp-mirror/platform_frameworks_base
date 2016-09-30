@@ -148,6 +148,16 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
         /*
          * (non-Javadoc)
+         * @see android.hardware.camera2.ICameraDeviceCallbacks#onRequestQueueEmpty()
+         */
+        @Override
+        public void onRequestQueueEmpty() throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
          * @see android.hardware.camera2.ICameraDeviceCallbacks#onRepeatingRequestError()
          */
         @Override
