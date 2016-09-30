@@ -365,8 +365,8 @@ private ActivityManager.MemoryInfo getAvailableMemory() {
   You should generally avoid use of persistent services because of
   the on-going demands they place on available memory. Instead, we
   recommend that you use an alternative implementation
-  such as {@llink android.app.job.JobScheduler}. For more information about
-  how to use {@llink android.app.job.JobScheduler} to schedule background
+  such as {@link android.app.job.JobScheduler}. For more information about
+  how to use {@link android.app.job.JobScheduler} to schedule background
   processes, see
   <a href="/topic/performance/background-optimization.html">Background Optimizations</a>.
 <p>
