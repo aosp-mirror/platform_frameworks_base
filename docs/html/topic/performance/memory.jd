@@ -1,36 +1,35 @@
 page.title=Manage Your App's Memory
 page.tags=ram,low memory,OutOfMemoryError,onTrimMemory
-page.article=true
+
 @jd:body
 
-
-<div id="tb-wrapper">
-<div id="tb">
+<div id="qv-wrapper">
+<div id="qv">
 
 <h2>In this document</h2>
-<ol class="nolist">
+<ol>
   <li><a href="#monitor">Monitor Available Memory and Memory Usage</a>
-    <ol>
+    <ul>
       <li><a href="#AnalyzeRam">Tools for analyzing RAM usage</a></li>
       <li><a href="#release">Release memory in response to events</a></li>
       <li><a href="#CheckHowMuchMemory">Check how much memory you should use</a></li>
-    </ol>
+    </ul>
   </li>
-  <li><a href="#code">Use More Efficient Code Constructst</a>
-    <ol>
+  <li><a href="#code">Use More Efficient Code Constructs</a>
+    <ul>
       <li><a href="#Services">Use services sparingly</a></li>
       <li><a href="#DataContainers">Use optimized data containers</a></li>
       <li><a href="#Abstractions">Be careful with code abstractions</a></li>
       <li><a href="#NanoProto">Use nano protobufs for serialized data</a></li>
       <li><a href="#churn">Avoid memory churn</a></li>
-    </ol>
+    </ul>
   </li>
   <li><a href="#remove">Remove Memory-Intensive Resources and Libraries</a>
-    <ol>
+    <ul>
       <li><a href="#reduce">Reduce overall APK size</a></li>
       <li><a href="#DependencyInjection">Avoid dependency injection frameworks</a></li>
       <li><a href="#ExternalLibs">Be careful about using external libraries</a></li>
-    </ol>
+    </ul>
   </li>
 </ol>
 <h2>See Also</h2>
@@ -365,8 +364,8 @@ private ActivityManager.MemoryInfo getAvailableMemory() {
   You should generally avoid use of persistent services because of
   the on-going demands they place on available memory. Instead, we
   recommend that you use an alternative implementation
-  such as {@llink android.app.job.JobScheduler}. For more information about
-  how to use {@llink android.app.job.JobScheduler} to schedule background
+  such as {@link android.app.job.JobScheduler}. For more information about
+  how to use {@link android.app.job.JobScheduler} to schedule background
   processes, see
   <a href="/topic/performance/background-optimization.html">Background Optimizations</a>.
 <p>
