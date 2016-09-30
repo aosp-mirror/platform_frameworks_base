@@ -76,10 +76,9 @@ static volatile int32_t gCount = 0;
 const char* AssetManager::RESOURCES_FILENAME = "resources.arsc";
 const char* AssetManager::IDMAP_BIN = "/system/bin/idmap";
 const char* AssetManager::OVERLAY_DIR = "/vendor/overlay";
+const char* AssetManager::OVERLAY_SKU_DIR_PROPERTY = "ro.boot.vendor.overlay.sku";
 const char* AssetManager::TARGET_PACKAGE_NAME = "android";
 const char* AssetManager::TARGET_APK_PATH = "/system/framework/framework-res.apk";
-const char* AssetManager::OVERLAY_SUBDIR = "/system/vendor/overlay-subdir";
-const char* AssetManager::OVERLAY_SUBDIR_PROPERTY = "ro.boot.vendor.overlay.subdir";
 const char* AssetManager::IDMAP_DIR = "/data/resource-cache";
 
 namespace {
