@@ -46,6 +46,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
@@ -97,6 +98,7 @@ public class RetailDemoModeServiceTest {
     private @Mock NotificationManager mNm;
     private @Mock ActivityManagerInternal mAmi;
     private @Mock AudioManager mAudioManager;
+    private @Mock WifiManager mWifiManager;
     private @Mock LockPatternUtils mLockPatternUtils;
     private MockPreloadAppsInstaller mPreloadAppsInstaller;
     private MockContentResolver mContentResolver;
@@ -227,6 +229,7 @@ public class RetailDemoModeServiceTest {
         final UserInfo userInfo = new UserInfo(TEST_DEMO_USER, "demo_user",
                 UserInfo.FLAG_DEMO | UserInfo.FLAG_EPHEMERAL);
         when(mUm.getUserInfo(TEST_DEMO_USER)).thenReturn(userInfo);
+        when(mWifiManager.isWifiEnabled()).thenReturn(false);
         final int minVolume = -111;
         for (int stream : RetailDemoModeService.VOLUME_STREAMS_TO_MUTE) {
             when(mAudioManager.getStreamMinVolume(stream)).thenReturn(minVolume);
@@ -238,6 +241,7 @@ public class RetailDemoModeServiceTest {
             verify(mAudioManager).setStreamVolume(stream, minVolume, 0);
         }
         verify(mLockPatternUtils).setLockScreenDisabled(true, TEST_DEMO_USER);
+        verify(mWifiManager).setWifiEnabled(true);
     }
 
     private void setCameraPackage(String pkgName) {
@@ -318,6 +322,11 @@ public class RetailDemoModeServiceTest {
         @Override
         UserManager getUserManager() {
             return mUm;
+        }
+
+        @Override
+        WifiManager getWifiManager() {
+            return mWifiManager;
         }
 
         @Override
