@@ -185,6 +185,7 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#ProgressBar_indeterminateDuration
  * @attr ref android.R.styleable#ProgressBar_indeterminateOnly
  * @attr ref android.R.styleable#ProgressBar_interpolator
+ * @attr ref android.R.styleable#ProgressBar_min
  * @attr ref android.R.styleable#ProgressBar_max
  * @attr ref android.R.styleable#ProgressBar_maxHeight
  * @attr ref android.R.styleable#ProgressBar_maxWidth
@@ -215,7 +216,10 @@ public class ProgressBar extends View {
 
     private int mProgress;
     private int mSecondaryProgress;
+    private int mMin;
+    private boolean mMinInitialized;
     private int mMax;
+    private boolean mMaxInitialized;
 
     private int mBehavior;
     private int mDuration;
@@ -308,6 +312,7 @@ public class ProgressBar extends View {
             setInterpolator(context, resID);
         }
 
+        setMin(a.getInt(R.styleable.ProgressBar_min, mMin));
         setMax(a.getInt(R.styleable.ProgressBar_max, mMax));
 
         setProgress(a.getInt(R.styleable.ProgressBar_progress, mProgress));
@@ -565,6 +570,7 @@ public class ProgressBar extends View {
      * </ul>
      */
     private void initProgressBar() {
+        mMin = 0;
         mMax = 100;
         mProgress = 0;
         mSecondaryProgress = 0;
@@ -1310,7 +1316,8 @@ public class ProgressBar extends View {
 
     private synchronized void doRefreshProgress(int id, int progress, boolean fromUser,
             boolean callBackToApp, boolean animate) {
-        final float scale = mMax > 0 ? progress / (float) mMax : 0;
+        int range = mMax - mMin;
+        final float scale = range > 0 ? (progress - mMin) / (float) range : 0;
         final boolean isPrimary = id == R.id.progress;
 
         if (isPrimary && animate) {
@@ -1436,7 +1443,7 @@ public class ProgressBar extends View {
             return false;
         }
 
-        progress = MathUtils.constrain(progress, 0, mMax);
+        progress = MathUtils.constrain(progress, mMin, mMax);
 
         if (progress == mProgress) {
             // No change from current.
@@ -1466,8 +1473,8 @@ public class ProgressBar extends View {
             return;
         }
 
-        if (secondaryProgress < 0) {
-            secondaryProgress = 0;
+        if (secondaryProgress < mMin) {
+            secondaryProgress = mMin;
         }
 
         if (secondaryProgress > mMax) {
@@ -1515,6 +1522,20 @@ public class ProgressBar extends View {
     }
 
     /**
+     * <p>Return the lower limit of this progress bar's range.</p>
+     *
+     * @return a positive integer
+     *
+     * @see #setMin(int)
+     * @see #getProgress()
+     * @see #getSecondaryProgress()
+     */
+    @ViewDebug.ExportedProperty(category = "progress")
+    public synchronized int getMin() {
+        return mMin;
+    }
+
+    /**
      * <p>Return the upper limit of this progress bar's range.</p>
      *
      * @return a positive integer
@@ -1529,7 +1550,37 @@ public class ProgressBar extends View {
     }
 
     /**
-     * <p>Set the range of the progress bar to 0...<tt>max</tt>.</p>
+     * <p>Set the lower range of the progress bar to <tt>min</tt>.</p>
+     *
+     * @param min the lower range of this progress bar
+     *
+     * @see #getMin()
+     * @see #setProgress(int)
+     * @see #setSecondaryProgress(int)
+     */
+    @android.view.RemotableViewMethod
+    public synchronized void setMin(int min) {
+        if (mMaxInitialized) {
+            if (min > mMax) {
+                min = mMax;
+            }
+        }
+        mMinInitialized = true;
+        if (mMaxInitialized && min != mMin) {
+            mMin = min;
+            postInvalidate();
+
+            if (mProgress < min) {
+                mProgress = min;
+            }
+            refreshProgress(R.id.progress, mProgress, false, false);
+        } else {
+            mMin = min;
+        }
+    }
+
+    /**
+     * <p>Set the upper range of the progress bar <tt>max</tt>.</p>
      *
      * @param max the upper range of this progress bar
      *
@@ -1539,10 +1590,13 @@ public class ProgressBar extends View {
      */
     @android.view.RemotableViewMethod
     public synchronized void setMax(int max) {
-        if (max < 0) {
-            max = 0;
+        if (mMinInitialized) {
+            if (max < mMin) {
+                max = mMin;
+            }
         }
-        if (max != mMax) {
+        mMaxInitialized = true;
+        if (mMinInitialized && max != mMax) {
             mMax = max;
             postInvalidate();
 
@@ -1550,6 +1604,8 @@ public class ProgressBar extends View {
                 mProgress = max;
             }
             refreshProgress(R.id.progress, mProgress, false, false);
+        } else {
+            mMax = max;
         }
     }
 
@@ -1959,7 +2015,7 @@ public class ProgressBar extends View {
     @Override
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
-        event.setItemCount(mMax);
+        event.setItemCount(mMax - mMin);
         event.setCurrentItemIndex(mProgress);
     }
 

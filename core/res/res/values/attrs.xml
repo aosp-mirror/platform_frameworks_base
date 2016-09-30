@@ -3965,6 +3965,7 @@ i
     </declare-styleable>
 
     <declare-styleable name="ProgressBar">
+        <attr name="min" format="integer" />
         <!-- Defines the maximum value the progress can take. -->
         <attr name="max" format="integer" />
         <!-- Defines the default progress value, between 0 and max. -->
@@ -7931,6 +7932,14 @@ i
 
     <declare-styleable name="SeekBarPreference">
         <attr name="layout" />
+        <!-- Attribute indicating whether the slider within this preference can be adjusted, that is
+        pressing left/right keys when this preference is focused will move the slider accordingly (e.g.
+        inline adjustable preferences). False, if the slider within the preference is read-only and
+        cannot be adjusted. By default, the seekbar is adjustable. -->
+        <attr name="adjustable" format="boolean" />
+        <!-- Flag indicating whether the TextView next to the seekbar that shows the current seekbar value will be
+        displayed. If true, the view is VISIBLE; if false, the view will be GONE. By default, this view is VISIBLE. -->
+        <attr name="showSeekBarValue" format="boolean" />
     </declare-styleable>
 
     <!-- Base attributes available to PreferenceFragment. -->
