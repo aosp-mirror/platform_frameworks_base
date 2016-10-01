@@ -214,8 +214,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"தொலைபேசி விருப்பங்கள்"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"திரைப் பூட்டு"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"முடக்கு"</string>
-    <!-- no translation found for global_action_emergency (7112311161137421166) -->
-    <skip />
+    <string name="global_action_emergency" msgid="7112311161137421166">"அவசர அழைப்பு"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"பிழை அறிக்கை"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"பிழை அறிக்கையை எடு"</string>
     <string name="bugreport_message" msgid="398447048750350456">"உங்கள் நடப்புச் சாதன நிலையை மின்னஞ்சல் செய்தியாக அனுப்ப, அது குறித்த தகவலை இது சேகரிக்கும். பிழை அறிக்கையைத் தொடங்குவதில் இருந்து, அது அனுப்புவதற்குத் தயாராகும் வரை, இதற்குச் சிறிது நேரம் ஆகும்; பொறுமையாகக் காத்திருக்கவும்."</string>
@@ -1330,8 +1329,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB டிரைவ்"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB சேமிப்பிடம்"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"திருத்து"</string>
-    <!-- no translation found for data_usage_warning_title (3620440638180218181) -->
-    <skip />
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"தரவுப் பயன்பாடு குறித்த எச்சரிக்கை"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"தரவு உபயோகம், அமைப்புகளைப் பார்க்க, தட்டவும்."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G தரவு வரம்பைக் கடந்தது"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G தரவு வரம்பைக் கடந்தது"</string>

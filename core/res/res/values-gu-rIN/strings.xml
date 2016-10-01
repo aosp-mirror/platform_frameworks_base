@@ -214,8 +214,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"ફોન વિકલ્પો"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"સ્ક્રીન લૉક"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"પાવર બંધ"</string>
-    <!-- no translation found for global_action_emergency (7112311161137421166) -->
-    <skip />
+    <string name="global_action_emergency" msgid="7112311161137421166">"કટોકટી"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"બગ રિપોર્ટ"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"બગ રિપોર્ટ લો"</string>
     <string name="bugreport_message" msgid="398447048750350456">"આ, એક ઇ-મેઇલ સંદેશ તરીકે મોકલવા માટે, તમારા વર્તમાન ઉપકરણ સ્થિતિ વિશેની માહિતી એકત્રિત કરશે. એક બગ રિપોર્ટ પ્રારંભ કરીને તે મોકલવા માટે તૈયાર ન થઈ જાય ત્યાં સુધી તેમાં થોડો સમય લાગશે; કૃપા કરીને ધીરજ રાખો."</string>
@@ -1330,8 +1329,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ડ્રાઇવ"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB સંગ્રહ"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"સંપાદિત કરો"</string>
-    <!-- no translation found for data_usage_warning_title (3620440638180218181) -->
-    <skip />
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"ડેટા વપરાશ ચેતવણી"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"વપરાશ અને સેટિંગ્સ જોવા ટૅપ કરો."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ડેટા મર્યાદા પર પહોંચ્યાં"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ડેટા મર્યાદા સુધી પહોંચ્યાં"</string>
