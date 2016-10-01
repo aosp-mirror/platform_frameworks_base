@@ -214,8 +214,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"දුරකථන විකල්ප"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"තිර අගුල"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"බලය අක්‍රිය කරන්න"</string>
-    <!-- no translation found for global_action_emergency (7112311161137421166) -->
-    <skip />
+    <string name="global_action_emergency" msgid="7112311161137421166">"හදිසි"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"දෝෂ වර්තාව"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"දෝෂ වාර්තාවක් ගන්න"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ඊ-තැපැල් පණිවිඩයක් ලෙස යැවීමට මෙය ඔබගේ වත්මන් උපාංග තත්වය ගැන තොරතුරු එකතු කරනු ඇත. දෝෂ වාර්තාව ආරම්භ කර එය යැවීමට සූදානම් කරන තෙක් එයට කිසියම් කාලයක් ගතවනු ඇත; කරුණාකර ඉවසන්න."</string>
@@ -1332,8 +1331,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ධාවකය"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB ආචයනය"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"සංස්කරණය කරන්න"</string>
-    <!-- no translation found for data_usage_warning_title (3620440638180218181) -->
-    <skip />
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"දත්ත භාවිතය ගැන ඇඟවීම"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"භාවිතය සහ සැකසීම් බැලීමට තට්ටු කරන්න."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G දත්ත සීමාවට ළඟාවී ඇත"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G දත්ත සීමාවට ළඟාවී ඇත"</string>
