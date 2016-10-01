@@ -194,6 +194,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     @Override
     public void binderDied() {
         Slog.v(TAG, "fingerprintd died");
+        MetricsLogger.count(mContext, "fingerprintd_died", 1);
         mDaemon = null;
         mCurrentUserId = UserHandle.USER_CURRENT;
         handleError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
@@ -211,6 +212,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                         updateActiveGroup(ActivityManager.getCurrentUser(), null);
                     } else {
                         Slog.w(TAG, "Failed to open Fingerprint HAL!");
+                        MetricsLogger.count(mContext, "fingerprintd_openhal_error", 1);
                         mDaemon = null;
                     }
                 } catch (RemoteException e) {
