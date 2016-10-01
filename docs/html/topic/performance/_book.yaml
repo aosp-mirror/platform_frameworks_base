@@ -35,9 +35,9 @@ toc:
   section:
   - title: Reducing Overdraw
     path: /topic/performance/rendering/overdraw.html
-  - title: Optimizing View Hierarchies
+  - title: Performance and View Hierarchies
     path: /topic/performance/rendering/optimizing-view-hierarchies.html
-  - title: Using the Profile GPU Tool
+  - title: Analyzing with Profile GPU Rendering
     path: /topic/performance/rendering/profile-gpu.html
 - title: Intelligent Job-Scheduling
   path: /topic/performance/scheduling.html
