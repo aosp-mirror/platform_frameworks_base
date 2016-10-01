@@ -806,7 +806,7 @@ redirects:
 - from: /preview/features/power-mgmt.html
   to: /training/monitoring-device-state/doze-standby.html
 - from: /preview/dev-community
-  to: https://plus.google.com/communities/103655397235276743411
+  to: https://plus.google.com/communities/105153134372062985968
 - from: /preview/bug
   to: https://source.android.com/source/report-bugs.html
 - from: /preview/bug/...
