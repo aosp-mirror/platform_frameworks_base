@@ -237,8 +237,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Të dhënat 4G janë ndërprerë"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Të dhënat celulare janë ndërprerë"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Të dhënat janë ndërprerë"</string>
-    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Kufiri i të dhënave që ke caktuar është arritur. Nuk po përdor më të dhënat celulare.\n\nNëse vazhdon, mund të zbatohen tarifa për përdorimin e të dhënave."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Rifillo"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nuk ka lidhje interneti"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi është i lidhur"</string>

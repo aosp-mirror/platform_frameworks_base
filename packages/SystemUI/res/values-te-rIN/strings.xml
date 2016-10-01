@@ -237,8 +237,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G డేటా పాజ్ చేయబడింది"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"సెల్యులార్ డేటా పాజ్ చేయబడింది"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"డేటా పాజ్ చేయబడింది"</string>
-    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"మీరు సెట్ చేసిన డేటా పరిమితిని చేరుకున్నారు. మీరు ఇప్పుడు సెల్యులార్ డేటాను ఉపయోగించడం లేదు.\n\nమీరు పునఃప్రారంభిస్తే, డేటా వినియోగానికి ఛార్జీలు వర్తించవచ్చు."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"పునఃప్రారంభించు"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ఇంటర్నెట్ కనెక్షన్ లేదు"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi కనెక్ట్ చేయబడింది"</string>
