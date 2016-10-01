@@ -20,6 +20,8 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import android.util.Log;
+
 /**
  * This class contains information to describe a MIDI device.
  * For now we only have information that can be retrieved easily for USB devices,
@@ -352,9 +354,15 @@ public final class MidiDeviceInfo implements Parcelable {
     private Bundle getBasicProperties(String[] keys) {
         Bundle basicProperties = new Bundle();
         for (String key : keys) {
-            String val = mProperties.getString(key);
+            Object val = mProperties.get(key);
             if (val != null) {
-                basicProperties.putString(key, val);
+                if (val instanceof String) {
+                    basicProperties.putString(key, (String) val);
+                } else if (val instanceof Integer) {
+                    basicProperties.putInt(key, (Integer) val);
+                } else {
+                    Log.w(TAG, "Unsupported property type: " + val.getClass().getName());
+                }
             }
         }
         return basicProperties;
