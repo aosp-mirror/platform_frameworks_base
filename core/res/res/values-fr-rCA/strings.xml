@@ -214,8 +214,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Options du téléphone"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Verrouillage de l\'écran"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Éteindre"</string>
-    <!-- no translation found for global_action_emergency (7112311161137421166) -->
-    <skip />
+    <string name="global_action_emergency" msgid="7112311161137421166">"Urgence"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Rapport de bogue"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Créer un rapport de bogue"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Cela permet de recueillir des informations concernant l\'état actuel de votre appareil. Ces informations sont ensuite envoyées sous forme de courriel. Merci de patienter pendant la préparation du rapport de bogue. Cette opération peut prendre quelques instants."</string>
@@ -1330,8 +1329,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Clé USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Mémoire de stockage USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Modifier"</string>
-    <!-- no translation found for data_usage_warning_title (3620440638180218181) -->
-    <skip />
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Alerte d\'utilisation des données"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Touch. pour aff. util. et param."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Limite de données 2G-3G atteinte"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Limite de données 4G atteinte"</string>
