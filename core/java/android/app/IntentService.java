@@ -46,7 +46,8 @@ import android.os.Message;
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For a detailed discussion about how to create services, read the
- * <a href="{@docRoot}guide/topics/fundamentals/services.html">Services</a> developer guide.</p>
+ * <a href="{@docRoot}guide/components/services.html">Services</a> developer
+ * guide.</p>
  * </div>
  *
  * @see android.os.AsyncTask
