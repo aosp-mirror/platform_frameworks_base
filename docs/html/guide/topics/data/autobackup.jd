@@ -1,0 +1,257 @@
+page.title=Auto Backup for Apps
+page.tags=backup, marshmallow, androidm
+page.keywords=backup, autobackup
+page.image=images/cards/card-auto-backup_2x.png
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#Files">Files that are backed up</a></li>
+    <li><a href="#BackupLocation">Backup location</a></li>
+    <li><a href="#BackupSchedule">Backup schedule</a></li>
+    <li><a href="#RestoreSchedule">Restore schedule</a></li>
+    <li><a href="#EnablingAutoBackup">Enabling and disabling Auto Backup</a></li>
+    <li><a href="#IncludingFiles">Including and excluding files</a><ul>
+      <li><a href="#XMLSyntax">XML config syntax</a></li>
+    </ul></li>
+    <li><a href="#ImplementingBackupAgent">Implementing BackupAgent</a></li>
+  </ol>
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.app.backup.BackupAgent}</li>
+    <li><a href="{@docRoot}reference/android/R.attr.html">R.attr</a></li>
+  </ol>
+
+</div>
+</div>
+
+Since Android 6.0 (API 23), Android has offered the <em>Auto Backup for Apps</em> feature as
+a way for developers to quickly add backup functionality to their apps. Auto
+Backup preserves app data by uploading it to the user’s Google Drive account.
+The amount of data is limited to 25MB per user of your app and there is no
+charge for storing backup data.
+
+<h2 id="Files">Files that are backed up</h2>
+<p>By default, Auto Backup includes files in most of the directories that are
+assigned to your app by the system:
+<ul>
+  <li>Shared preferences files.
+  <li>Files in the directory returned by {@link android.content.Context#getFilesDir()}.
+  <li>Files in the directory returned by {@link android.content.Context#getDatabasePath(String)},
+    which also includes files created with the
+    {@link android.database.sqlite.SQLiteOpenHelper} class.
+  <li>Files in directories created with {@link android.content.Context#getDir(String,int)}.
+  <li>Files on external storage in the directory returned by
+    {@link android.content.Context#getExternalFilesDir(String)}.</li></ul>
+
+<p>Auto Backup excludes files in directories returned by
+  {@link android.content.Context#getCacheDir()},
+  {@link android.content.Context#getCodeCacheDir()}, or
+  {@link android.content.Context#getNoBackupFilesDir()}. The files saved
+  in these locations are only needed temporarily, or are intentionally
+  excluded from backup operations.
+
+<p>You can configure your app to include and exclude particular files.
+For more information, see the <a href="#IncludingFiles">Include and exclude files</a>
+section.
+
+<h2 id="BackupLocation">Backup location</h2>
+<p>Backup data is stored in a private folder in the user's Google Drive account,
+limited to 25MB per app. The saved data does not count towards the user's
+personal Google Drive quota. Only the most recent backup is stored. When a
+backup is made, the previous backup (if one exists) is deleted.
+
+<p>Users can see a list of apps that have been backed up in the Google Drive app under
+<strong>Settings -> Auto Backup for apps -> Manage backup</strong>. The
+backup data cannot be read by the user or other applications on the device.
+
+<p>Backups from each device-setup-lifetime are stored in separate datasets
+as shown in the following examples:
+<ul>
+  <li>If the user owns two devices, then a backup dataset exists for each device.
+  <li>If the user factory resets a device and then sets up the device with the
+    same account, the backup is stored in a new dataset. Obsolete datasets are
+    automatically deleted after a period of inactivity.</li></ul>
+
+<p class="caution"><strong>Caution:</strong> Once the amount of data reaches
+25MB, the app is banned from sending data to the
+cloud, even if the amount of data later falls under the 25MB threshold. The ban
+affects only the offending device (not other devices that the user owns) and
+lasts for the entire device-setup-lifetime. For example, if the user removes and
+reinstalls the application, the ban is still in effect. The ban is lifted when
+the user performs factory reset on the device.
+
+<h2 id="BackupSchedule">Backup schedule</h2>
+<p>Backups occur automatically when all of the following conditions are met:
+<ul>
+  <li>The user has enabled backup on the device in <strong>Settings</strong> >
+    <strong>Backup &amp; Reset</strong>.
+  <li>At least 24 hours have elapsed since the last backup.
+  <li>The device is idle and charging.
+  <li>The device is connected to a Wi-Fi network. If the device is never connected
+    to a wifi network, then Auto Backup never occurs.</li></ul>
+
+<p>In practice, these conditions occur roughly every night. To conserve network
+bandwidth, upload takes place only if app data has changed.
+
+<p>During Auto Backup, the system shuts down the app to make sure it is no longer
+writing to the file system. By default, the backup system ignores apps that are
+running in the foreground because users would notice their apps being shut down.
+You can override the default behavior by setting the
+<a href="{@docRoot}reference/android/R.attr.html#backupInForeground">backupInForeground</a>
+attribute to true.
+
+<p>To simplify testing, Android includes tools that let you manually initiate
+a backup of your app. For more information, see
+<a href="{@docRoot}guide/topics/data/testingbackup.html">Testing Backup and Restore</a>.
+
+<h2 id="RestoreSchedule">Restore schedule</h2>
+<p>Data is restored whenever the app is installed, either from the Play store,
+during device setup (when the system installs previously installed apps), or
+from running adb install. The restore operation occurs after the APK is
+installed, but before the app is available to be launched by the user.
+
+<p>During the initial device setup wizard, the user is shown a list of available backup
+datasets and is asked which one to restore the data from. Whichever backup
+dataset is selected becomes the ancestral dataset for the device. The device can
+restore from either its own backups or the ancestral dataset. The device
+prioritize its own backup if backups from both sources are available. If the
+user didn't go through the device setup wizard, then the device can restore only from
+its own backups.
+
+<p>To simplify testing, Android includes tools that let you manually initiate
+a restore of your app. For more information, see
+<a href="{@docRoot}guide/topics/data/testingbackup.html">Testing Backup and Restore</a>.
+
+<h2 id="EnablingAutoBackup">Enabling and disabling backup</h2>
+<p>Apps that target Android 6.0 (API level 23) or higher automatically participate
+in Auto Backup. This is because the
+<a href="{@docRoot}reference/android/R.attr.html#allowBackup">android:allowBackup</a>
+attribute, which enables/disables backup, defaults to <code>true</code> if omitted.
+To avoid confusion, we recommend you explicitly set the attribute in the <code>&lt;application></code>
+element of your <code>AndroidManifest.xml</code>. For example:
+
+<pre class="prettyprint">&lt;application ...
+    android:allowBackup="true">
+&lt;/app></pre>
+
+<p>To disable Auto Backup, add either of the following attributes to the
+application element in your manifest file:
+
+<ul>
+  <li>set <code>android:allowBackup</code> to <code>false</code>. This completely disables data
+    backup. You may want to disable backups when your app can recreate its state
+    through some other mechanism or when your app deals with sensitive
+    information that should not be backed up.</li>
+  <li>set <code>android:allowBackup</code> to <code>true</code> and
+    <code>android:fullBackupOnly</code> to <code>false</code>. With these settings,
+    your app always participates in Key/Value Backup, even when running on devices that
+    support Auto Backup.</li></ul>
+
+<h2 id="IncludingFiles">Including and excluding files</h2>
+<p>By default, the system backs up almost all app data. For more information,
+see <a href="#Files">Files that are backed up</a>. This section shows you how to
+define custom XML rules to control what gets backed up.
+
+<ol>
+  <li>In <code>AndroidManifest.xml</code>, add the <a href="{@docRoot}reference/android/R.attr.html#fullBackupContent">android:fullBackupContent</a> attribute to the
+  <code>&lt;application></code> element. This attribute points to an XML file that contains backup
+  rules. For example:
+  <pre class="prettyprint">&lt;application ...
+    android:fullBackupContent="@xml/my_backup_rules">
+  &lt;/app></pre></li>
+  <li>Create an XML file called <code>my_backup_rules.xml</code> in the <code>res/xml/</code> directory. Inside the file, add rules with the <code>&lt;include></code> and <code>&lt;exclude></code> elements. The following sample backs up all shared preferences except <code>device.xml</code>:
+  <pre>&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;full-backup-content>
+    &lt;include domain="sharedpref" path="."/>
+    &lt;exclude domain="sharedpref" path="device.xml"/>
+&lt;/full-backup-content></pre></li>
+
+<h3 id="XMLSyntax">XML Config Syntax</h3>
+<p>The XML syntax for the configuration file is shown below:
+
+<pre class="prettyprint">&lt;full-backup-content>
+    &lt;include domain=["file" | "database" | "sharedpref" | "external" | "root"]
+    path="string" />
+    &lt;exclude domain=["file" | "database" | "sharedpref" | "external" | "root"]
+    path="string" />
+&lt;/full-backup-content></pre>
+
+<p>Inside the <code>&lt;full-backup-content></code> tag, you can define <code>&lt;include></code> and <code>&lt;exclude></code>
+elements:
+
+<ul>
+  <li><code>&lt;include></code> - Specifies a file or folder to backup. By default, Auto Backup
+includes almost all app files. If you specify an &lt;include> element, the system
+no longer includes any files by default and backs up <em>only the files
+specified</em>. To include multiple files, use multiple &lt;include> elements.
+  <p>note: Files in directories returned by <code>getCacheDir()</code>, <code>getCodeCacheDir()</code>, or
+<code>getNoBackupFilesDir()</code> are always excluded even if you try to include them.</li>
+
+  <li><code>&lt;exclude></code> - Specifies a file or folder to exclude during backup. Here are
+some files that are typically excluded from backup: <ul>
+    <li>Files that have device specific identifiers, either issued by a server or
+generated on the device. For example, <a href="https://developers.google.com/cloud-messaging/android/start">Google Cloud Messaging (GCM)</a> needs to
+generate a registration token every time a user installs your app on a new
+device. If the old registration token is restored, the app may behave
+unexpectedly.
+    <li>Account credentials or other sensitive information. Consider asking the
+user to reauthenticate the first time they launch a restored app rather than
+allowing for storage of such information in the backup.
+    <li>Files related to app debugging, such as <a href="{@docRoot}studio/run/index.html#instant-run">instant run files</a>. To exclude instant run files, add the rule <code>&lt;exclude
+domain="file" path="instant-run"/></code>
+    <li>Large files that cause the app to exceed the 25MB backup quota.</li> </ul>
+  </li> </ul>
+
+<p class="note"><strong>Note:</strong> If your configuration file specifies both elements, then the
+backup contains everything captured by the <code>&lt;include></code> elements minus the
+resources named in the <code>&lt;exclude></code> elements. In other words,
+<code>&lt;exclude></code> takes precedence.
+
+<p>Each element must include the following two attributes:
+<ul>
+  <li><code>domain</code> - specifies the location of resource. Valid values for this attribute
+include the following: <ul>
+    <li><code>root</code> - the directory on the filesystem where all private files belonging to
+this app are stored.
+    <li><code>file</code> - directories returned by {@link android.content.Context#getFilesDir()}.
+    <li><code>database</code> - directories returned by {@link android.content.Context#getDatabasePath(String) getDatabasePath()}.
+Databases created with {@link android.database.sqlite.SQLiteOpenHelper}
+are stored here.
+    <li><code>sharedpref</code> - the directory where {@link android.content.SharedPreferences}
+are stored.
+    <li><code>external</code> the directory returned by {@link android.content.Context#getExternalFilesDir(String) getExternalFilesDir()}
+    <p>Note: You cannot backup files outside of these locations.</li></ul>
+  <li><code>path</code>: Specifies a file or folder to include in or exclude from backup. Note
+that: <ul>
+    <li>This attribute does not support wildcard or regex syntax.
+    <li>You can use <code>.</code> to reference the current directory, however, you cannot
+reference the parent directory <code>..</code> for security reasons.
+    <li>If you specify a directory, then the rule applies to all files in the
+directory and recursive sub-directories.</li></ul></li></ul>
+
+<h2 id="ImplementingBackupAgent">Implementing BackupAgent</h2>
+<p>Apps that implement Auto Backup do not need to implement {@link android.app.backup.BackupAgent}. However, you can optionally implement a custom {@link android.app.backup.BackupAgent}. Typically, there are two reasons for doing this:
+<ul>
+  <li>You want to receive notification of backup events such as,
+{@link android.app.backup.BackupAgent#onRestoreFinished()} or {@link android.app.backup.BackupAgent#onQuotaExceeded(long,long)}. These callback methods are executed
+even if the app is not running.
+<li>You can't easily express the set of files you want to backup with XML rules.
+In these very rare cases, you can implement a BackupAgent that overrides {@link android.app.backup.BackupAgent#onFullBackup(FullBackupDataOutput)} to
+store what you want. To retain the system's default implementation, call the
+corresponding method on the superclass with <code>super.onFullBackup()</code>.</li></ul>
+
+<p class="note"><strong>Note:</strong> Your <code>BackupAgent</code> must
+implement the abstract methods
+{@link android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor) onBackup()}
+and {@link android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescriptor) onRestore()}.
+Those methods are used for Key/Value Backup. So if
+you are not using Key/Value Backup, implement those methods and leave them blank.
+
+<p>For more information, see
+<a href="{@docRoot}guide/topics/data/keyvaluebackup.html#BackupAgent">Extending
+BackupAgent</a>.
