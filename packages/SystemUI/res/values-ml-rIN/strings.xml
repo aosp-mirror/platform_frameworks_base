@@ -238,8 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"സെല്ലുലാർ ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
-    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"നിങ്ങൾ സജ്ജമാക്കിയ ഡാറ്റ പരിധി എത്തിക്കഴിഞ്ഞു. ഇനിയങ്ങോട്ട് നിങ്ങൾ സെല്ലുലാർ ഡാറ്റ ഉപയോഗിക്കില്ല.\n\nതുടരുകയാണെങ്കിൽ, ഡാറ്റാ ഉപയോഗത്തിന് നിരക്കുകൾ ബാധകമായേക്കാം."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"പുനരാരംഭിക്കുക"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ഇന്റർനെറ്റ് കണക്ഷൻ ഇല്ല"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"വൈഫൈ കണക്‌റ്റുചെയ്‌തു"</string>
