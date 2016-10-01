@@ -237,8 +237,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-data is laat wag"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Sellulêre data is onderbreek"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data is onderbreek"</string>
-    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Jy het die datalimiet wat jy gestel het, bereik. Jy gebruik nie meer sellulêre data nie.\n\nAs jy voortgaan, kan heffings vir datagebruik geld."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Hervat"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Geen internetverbinding nie"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi gekoppel"</string>

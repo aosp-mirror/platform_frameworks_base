@@ -237,8 +237,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Naka-pause ang 4G data"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Naka-pause ang cellular data"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Naka-pause ang data"</string>
-    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
-    <skip />
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Naabot na ang limitasyon sa data na itinakda mo. Hindi ka na gumagamit ng cellular data.\n\nKung magpapatuloy ka, maaari kang masingil para sa paggamit ng data."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Ipagpatuloy"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Walang koneksyon sa Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"nakakonekta ang Wi-Fi"</string>
