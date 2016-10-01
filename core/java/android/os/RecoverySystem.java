@@ -700,28 +700,22 @@ public class RecoverySystem {
      * @throws IOException if something goes wrong.
      */
     private static void bootCommand(Context context, String... args) throws IOException {
-        synchronized (sRequestLock) {
-            LOG_FILE.delete();
+        LOG_FILE.delete();
 
-            StringBuilder command = new StringBuilder();
-            for (String arg : args) {
-                if (!TextUtils.isEmpty(arg)) {
-                    command.append(arg);
-                    command.append("\n");
-                }
+        StringBuilder command = new StringBuilder();
+        for (String arg : args) {
+            if (!TextUtils.isEmpty(arg)) {
+                command.append(arg);
+                command.append("\n");
             }
-
-            // Write the command into BCB (bootloader control block).
-            RecoverySystem rs = (RecoverySystem) context.getSystemService(
-                    Context.RECOVERY_SERVICE);
-            rs.setupBcb(command.toString());
-
-            // Having set up the BCB, go ahead and reboot.
-            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            pm.reboot(PowerManager.REBOOT_RECOVERY);
-
-            throw new IOException("Reboot failed (no permissions?)");
         }
+
+        // Write the command into BCB (bootloader control block) and boot from
+        // there. Will not return unless failed.
+        RecoverySystem rs = (RecoverySystem) context.getSystemService(Context.RECOVERY_SERVICE);
+        rs.rebootRecoveryWithCommand(command.toString());
+
+        throw new IOException("Reboot failed (no permissions?)");
     }
 
     // Read last_install; then report time (in seconds) and I/O (in MiB) for
@@ -913,6 +907,17 @@ public class RecoverySystem {
         } catch (RemoteException unused) {
         }
         return false;
+    }
+
+    /**
+     * Talks to RecoverySystemService via Binder to set up the BCB command and
+     * reboot into recovery accordingly.
+     */
+    private void rebootRecoveryWithCommand(String command) {
+        try {
+            mService.rebootRecoveryWithCommand(command);
+        } catch (RemoteException ignored) {
+        }
     }
 
     /**

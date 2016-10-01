@@ -21,6 +21,7 @@ import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.IRecoverySystem;
 import android.os.IRecoverySystemProgressListener;
+import android.os.PowerManager;
 import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -50,7 +51,14 @@ public final class RecoverySystemService extends SystemService {
     // The socket at /dev/socket/uncrypt to communicate with uncrypt.
     private static final String UNCRYPT_SOCKET = "uncrypt";
 
+    // The init services that communicate with /system/bin/uncrypt.
+    private static final String INIT_SERVICE_UNCRYPT = "init.svc.uncrypt";
+    private static final String INIT_SERVICE_SETUP_BCB = "init.svc.setup-bcb";
+    private static final String INIT_SERVICE_CLEAR_BCB = "init.svc.clear-bcb";
+
     private static final int SOCKET_CONNECTION_MAX_RETRY = 30;
+
+    private static final Object sRequestLock = new Object();
 
     private Context mContext;
 
@@ -69,95 +77,155 @@ public final class RecoverySystemService extends SystemService {
         public boolean uncrypt(String filename, IRecoverySystemProgressListener listener) {
             if (DEBUG) Slog.d(TAG, "uncrypt: " + filename);
 
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
+            synchronized (sRequestLock) {
+                mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
 
-            // Write the filename into UNCRYPT_PACKAGE_FILE to be read by
-            // uncrypt.
-            RecoverySystem.UNCRYPT_PACKAGE_FILE.delete();
-
-            try (FileWriter uncryptFile = new FileWriter(RecoverySystem.UNCRYPT_PACKAGE_FILE)) {
-                uncryptFile.write(filename + "\n");
-            } catch (IOException e) {
-                Slog.e(TAG, "IOException when writing \"" + RecoverySystem.UNCRYPT_PACKAGE_FILE +
-                        "\": ", e);
-                return false;
-            }
-
-            // Trigger uncrypt via init.
-            SystemProperties.set("ctl.start", "uncrypt");
-
-            // Connect to the uncrypt service socket.
-            LocalSocket socket = connectService();
-            if (socket == null) {
-                Slog.e(TAG, "Failed to connect to uncrypt socket");
-                return false;
-            }
-
-            // Read the status from the socket.
-            DataInputStream dis = null;
-            DataOutputStream dos = null;
-            try {
-                dis = new DataInputStream(socket.getInputStream());
-                dos = new DataOutputStream(socket.getOutputStream());
-                int lastStatus = Integer.MIN_VALUE;
-                while (true) {
-                    int status = dis.readInt();
-                    // Avoid flooding the log with the same message.
-                    if (status == lastStatus && lastStatus != Integer.MIN_VALUE) {
-                        continue;
-                    }
-                    lastStatus = status;
-
-                    if (status >= 0 && status <= 100) {
-                        // Update status
-                        Slog.i(TAG, "uncrypt read status: " + status);
-                        if (listener != null) {
-                            try {
-                                listener.onProgress(status);
-                            } catch (RemoteException ignored) {
-                                Slog.w(TAG, "RemoteException when posting progress");
-                            }
-                        }
-                        if (status == 100) {
-                            Slog.i(TAG, "uncrypt successfully finished.");
-                            // Ack receipt of the final status code. uncrypt
-                            // waits for the ack so the socket won't be
-                            // destroyed before we receive the code.
-                            dos.writeInt(0);
-                            break;
-                        }
-                    } else {
-                        // Error in /system/bin/uncrypt.
-                        Slog.e(TAG, "uncrypt failed with status: " + status);
-                        // Ack receipt of the final status code. uncrypt waits
-                        // for the ack so the socket won't be destroyed before
-                        // we receive the code.
-                        dos.writeInt(0);
-                        return false;
-                    }
+                final boolean available = checkAndWaitForUncryptService();
+                if (!available) {
+                    Slog.e(TAG, "uncrypt service is unavailable.");
+                    return false;
                 }
-            } catch (IOException e) {
-                Slog.e(TAG, "IOException when reading status: ", e);
-                return false;
-            } finally {
-                IoUtils.closeQuietly(dis);
-                IoUtils.closeQuietly(dos);
-                IoUtils.closeQuietly(socket);
-            }
 
-            return true;
+                // Write the filename into UNCRYPT_PACKAGE_FILE to be read by
+                // uncrypt.
+                RecoverySystem.UNCRYPT_PACKAGE_FILE.delete();
+
+                try (FileWriter uncryptFile = new FileWriter(RecoverySystem.UNCRYPT_PACKAGE_FILE)) {
+                    uncryptFile.write(filename + "\n");
+                } catch (IOException e) {
+                    Slog.e(TAG, "IOException when writing \"" +
+                            RecoverySystem.UNCRYPT_PACKAGE_FILE + "\":", e);
+                    return false;
+                }
+
+                // Trigger uncrypt via init.
+                SystemProperties.set("ctl.start", "uncrypt");
+
+                // Connect to the uncrypt service socket.
+                LocalSocket socket = connectService();
+                if (socket == null) {
+                    Slog.e(TAG, "Failed to connect to uncrypt socket");
+                    return false;
+                }
+
+                // Read the status from the socket.
+                DataInputStream dis = null;
+                DataOutputStream dos = null;
+                try {
+                    dis = new DataInputStream(socket.getInputStream());
+                    dos = new DataOutputStream(socket.getOutputStream());
+                    int lastStatus = Integer.MIN_VALUE;
+                    while (true) {
+                        int status = dis.readInt();
+                        // Avoid flooding the log with the same message.
+                        if (status == lastStatus && lastStatus != Integer.MIN_VALUE) {
+                            continue;
+                        }
+                        lastStatus = status;
+
+                        if (status >= 0 && status <= 100) {
+                            // Update status
+                            Slog.i(TAG, "uncrypt read status: " + status);
+                            if (listener != null) {
+                                try {
+                                    listener.onProgress(status);
+                                } catch (RemoteException ignored) {
+                                    Slog.w(TAG, "RemoteException when posting progress");
+                                }
+                            }
+                            if (status == 100) {
+                                Slog.i(TAG, "uncrypt successfully finished.");
+                                // Ack receipt of the final status code. uncrypt
+                                // waits for the ack so the socket won't be
+                                // destroyed before we receive the code.
+                                dos.writeInt(0);
+                                break;
+                            }
+                        } else {
+                            // Error in /system/bin/uncrypt.
+                            Slog.e(TAG, "uncrypt failed with status: " + status);
+                            // Ack receipt of the final status code. uncrypt waits
+                            // for the ack so the socket won't be destroyed before
+                            // we receive the code.
+                            dos.writeInt(0);
+                            return false;
+                        }
+                    }
+                } catch (IOException e) {
+                    Slog.e(TAG, "IOException when reading status: ", e);
+                    return false;
+                } finally {
+                    IoUtils.closeQuietly(dis);
+                    IoUtils.closeQuietly(dos);
+                    IoUtils.closeQuietly(socket);
+                }
+
+                return true;
+            }
         }
 
         @Override // Binder call
         public boolean clearBcb() {
             if (DEBUG) Slog.d(TAG, "clearBcb");
-            return setupOrClearBcb(false, null);
+            synchronized (sRequestLock) {
+                return setupOrClearBcb(false, null);
+            }
         }
 
         @Override // Binder call
         public boolean setupBcb(String command) {
             if (DEBUG) Slog.d(TAG, "setupBcb: [" + command + "]");
-            return setupOrClearBcb(true, command);
+            synchronized (sRequestLock) {
+                return setupOrClearBcb(true, command);
+            }
+        }
+
+        @Override // Binder call
+        public void rebootRecoveryWithCommand(String command) {
+            if (DEBUG) Slog.d(TAG, "rebootRecoveryWithCommand: [" + command + "]");
+            synchronized (sRequestLock) {
+                if (!setupOrClearBcb(true, command)) {
+                    return;
+                }
+
+                // Having set up the BCB, go ahead and reboot.
+                PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+                pm.reboot(PowerManager.REBOOT_RECOVERY);
+            }
+        }
+
+        /**
+         * Check if any of the init services is still running. If so, we cannot
+         * start a new uncrypt/setup-bcb/clear-bcb service right away; otherwise
+         * it may break the socket communication since init creates / deletes
+         * the socket (/dev/socket/uncrypt) on service start / exit.
+         */
+        private boolean checkAndWaitForUncryptService() {
+            for (int retry = 0; retry < SOCKET_CONNECTION_MAX_RETRY; retry++) {
+                final String uncryptService = SystemProperties.get(INIT_SERVICE_UNCRYPT);
+                final String setupBcbService = SystemProperties.get(INIT_SERVICE_SETUP_BCB);
+                final String clearBcbService = SystemProperties.get(INIT_SERVICE_CLEAR_BCB);
+                final boolean busy = "running".equals(uncryptService) ||
+                        "running".equals(setupBcbService) || "running".equals(clearBcbService);
+                if (DEBUG) {
+                    Slog.i(TAG, "retry: " + retry + " busy: " + busy +
+                            " uncrypt: [" + uncryptService + "]" +
+                            " setupBcb: [" + setupBcbService + "]" +
+                            " clearBcb: [" + clearBcbService + "]");
+                }
+
+                if (!busy) {
+                    return true;
+                }
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Slog.w(TAG, "Interrupted:", e);
+                }
+            }
+
+            return false;
         }
 
         private LocalSocket connectService() {
@@ -176,7 +244,7 @@ public final class RecoverySystemService extends SystemService {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
-                        Slog.w(TAG, "Interrupted: ", e);
+                        Slog.w(TAG, "Interrupted:", e);
                     }
                 }
             }
@@ -189,6 +257,12 @@ public final class RecoverySystemService extends SystemService {
 
         private boolean setupOrClearBcb(boolean isSetup, String command) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
+
+            final boolean available = checkAndWaitForUncryptService();
+            if (!available) {
+                Slog.e(TAG, "uncrypt service is unavailable.");
+                return false;
+            }
 
             if (isSetup) {
                 SystemProperties.set("ctl.start", "setup-bcb");
@@ -232,7 +306,7 @@ public final class RecoverySystemService extends SystemService {
                     return false;
                 }
             } catch (IOException e) {
-                Slog.e(TAG, "IOException when communicating with uncrypt: ", e);
+                Slog.e(TAG, "IOException when communicating with uncrypt:", e);
                 return false;
             } finally {
                 IoUtils.closeQuietly(dis);
