@@ -644,7 +644,7 @@ final class AccessibilityController {
                 final int windowCount = windowList.size();
                 for (int i = 0; i < windowCount; i++) {
                     WindowState windowState = windowList.get(i);
-                    if (windowState.isOnScreen() &&
+                    if (windowState.isOnScreen() && windowState.isVisibleLw() &&
                             !windowState.mWinAnimator.mEnterAnimationPending) {
                         outWindows.put(windowState.mLayer, windowState);
                     }
