@@ -29,6 +29,7 @@ import android.animation.LayoutTransition;
 import android.annotation.NonNull;
 import android.app.ActivityManagerNative;
 import android.app.ResourcesManager;
+import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ComponentCallbacks;
 import android.content.Context;
@@ -5657,9 +5658,11 @@ public final class ViewRootImpl implements ViewParent,
             final float tx = event.mX;
             final float ty = event.mY;
             final int action = event.mAction;
+            final ClipData td = event.mClipData;
             // Position should not be available for ACTION_DRAG_ENTERED and ACTION_DRAG_EXITED.
             event.mX = 0;
             event.mY = 0;
+            event.mClipData = null;
 
             if (mCurrentDragView != null) {
                 event.mAction = DragEvent.ACTION_DRAG_EXITED;
@@ -5674,6 +5677,7 @@ public final class ViewRootImpl implements ViewParent,
             event.mAction = action;
             event.mX = tx;
             event.mY = ty;
+            event.mClipData = td;
         }
 
         mCurrentDragView = newDragTarget;

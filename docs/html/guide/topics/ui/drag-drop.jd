@@ -408,8 +408,8 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
         <td>{@link android.view.DragEvent#ACTION_DRAG_ENTERED}</td>
         <td style="text-align: center;">X</td>
         <td style="text-align: center;">X</td>
-        <td style="text-align: center;">X</td>
-        <td style="text-align: center;">X</td>
+        <td style="text-align: center;">&nbsp;</td>
+        <td style="text-align: center;">&nbsp;</td>
         <td style="text-align: center;">&nbsp;</td>
         <td style="text-align: center;">&nbsp;</td>
     </tr>
@@ -442,7 +442,7 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
     </tr>
     <tr>
         <td>{@link android.view.DragEvent#ACTION_DRAG_ENDED}</td>
-        <td style="text-align: center;">X</td>
+        <td style="text-align: center;">&nbsp;</td>
         <td style="text-align: center;">X</td>
         <td style="text-align: center;">&nbsp;</td>
         <td style="text-align: center;">&nbsp;</td>
