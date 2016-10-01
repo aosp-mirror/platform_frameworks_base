@@ -214,8 +214,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Foonopsies"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skermslot"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Sit af"</string>
-    <!-- no translation found for global_action_emergency (7112311161137421166) -->
-    <skip />
+    <string name="global_action_emergency" msgid="7112311161137421166">"Noodgeval"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Foutverslag"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Neem foutverslag"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Dit sal inligting oor die huidige toestand van jou toestel insamel om as \'n e-posboodskap te stuur. Dit sal \'n tydjie neem vandat die foutverslag begin is totdat dit reg is om gestuur te word; wees asseblief geduldig."</string>
@@ -1330,8 +1329,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g>-USB-datastokkie"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-berging"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Redigeer"</string>
-    <!-- no translation found for data_usage_warning_title (3620440638180218181) -->
-    <skip />
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Datagebruik-opletberig"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Tik om gebruik en instellings te bekyk."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G-datalimiet bereik"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G-datalimiet bereik"</string>

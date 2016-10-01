@@ -218,8 +218,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Параметри телеф."</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Заблок. екран"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Вимкнути"</string>
-    <!-- no translation found for global_action_emergency (7112311161137421166) -->
-    <skip />
+    <string name="global_action_emergency" msgid="7112311161137421166">"Екстрений виклик"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Звіт про помилки"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Звіт про помилку"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Інформація про поточний стан вашого пристрою буде зібрана й надіслана електронною поштою. Підготовка звіту триватиме певний час."</string>
@@ -1382,8 +1381,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Носій USB (<xliff:g id="MANUFACTURER">%s</xliff:g>)"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Носій USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Редагувати"</string>
-    <!-- no translation found for data_usage_warning_title (3620440638180218181) -->
-    <skip />
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Сповіщення про використ. трафіку"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Переглянути дані та параметри."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Досягнуто ліміту даних 2G–3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Досягнуто ліміту даних 4G"</string>

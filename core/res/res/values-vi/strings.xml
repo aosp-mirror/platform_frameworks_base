@@ -214,8 +214,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Tùy chọn điện thoại"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Khoá màn hình"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Tắt nguồn"</string>
-    <!-- no translation found for global_action_emergency (7112311161137421166) -->
-    <skip />
+    <string name="global_action_emergency" msgid="7112311161137421166">"Khẩn cấp"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Báo cáo lỗi"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Nhận báo cáo lỗi"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Báo cáo này sẽ thu thập thông tin về tình trạng thiết bị hiện tại của bạn, để gửi dưới dạng thông báo qua email. Sẽ mất một chút thời gian kể từ khi bắt đầu báo cáo lỗi cho tới khi báo cáo sẵn sàng để gửi; xin vui lòng kiên nhẫn."</string>
@@ -1330,8 +1329,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Ổ USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Bộ lưu trữ USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Chỉnh sửa"</string>
-    <!-- no translation found for data_usage_warning_title (3620440638180218181) -->
-    <skip />
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Thông báo về sử dụng dữ liệu"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Nhấn để xem sử dụng và cài đặt."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Đã đạt tới giới hạn dữ liệu 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Đã đạt tới giới hạn dữ liệu 4G"</string>
