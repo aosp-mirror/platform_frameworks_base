@@ -33,6 +33,7 @@ import android.net.StaticIpConfiguration;
 import android.net.dhcp.DhcpClient;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
+import android.net.util.AvoidBadWifiTracker;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
@@ -393,6 +394,7 @@ public class IpManager extends StateMachine {
     private final NetlinkTracker mNetlinkTracker;
     private final WakeupMessage mProvisioningTimeoutAlarm;
     private final WakeupMessage mDhcpActionTimeoutAlarm;
+    private final AvoidBadWifiTracker mAvoidBadWifiTracker;
     private final LocalLog mLocalLog;
     private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
 
@@ -465,6 +467,8 @@ public class IpManager extends StateMachine {
         } catch (RemoteException e) {
             Log.e(mTag, "Couldn't register NetlinkTracker: " + e.toString());
         }
+
+        mAvoidBadWifiTracker = new AvoidBadWifiTracker(mContext, getHandler());
 
         resetLinkProperties();
 
