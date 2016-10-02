@@ -77,6 +77,7 @@ import android.net.Uri;
 import android.net.metrics.DefaultNetworkEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
+import android.net.util.AvoidBadWifiTracker;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -397,11 +398,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final int EVENT_REQUEST_LINKPROPERTIES  = 32;
     private static final int EVENT_REQUEST_NETCAPABILITIES = 33;
 
-    /**
-     * Used internally to (re)configure avoid bad wifi setting.
-     */
-    private static final int EVENT_CONFIGURE_NETWORK_AVOID_BAD_WIFI = 34;
-
     /** Handler thread used for both of the handlers below. */
     @VisibleForTesting
     protected final HandlerThread mHandlerThread;
@@ -494,6 +490,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private final IpConnectivityLog mMetricsLog;
+
+    @VisibleForTesting
+    final AvoidBadWifiTracker mAvoidBadWifiTracker;
 
     /**
      * Implements support for the legacy "one network per network type" model.
@@ -857,14 +856,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 LingerMonitor.DEFAULT_NOTIFICATION_RATE_LIMIT_MILLIS);
         mLingerMonitor = new LingerMonitor(mContext, mNotifier, dailyLimit, rateLimit);
 
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        mContext.registerReceiverAsUser(new BroadcastReceiver() {
-            public void onReceive(Context context, Intent intent) {
-                mHandler.sendEmptyMessage(EVENT_CONFIGURE_NETWORK_AVOID_BAD_WIFI);
-            }
-        }, UserHandle.ALL, intentFilter, null, null);
-        updateAvoidBadWifi();
+        mAvoidBadWifiTracker = createAvoidBadWifiTracker(
+                mContext, mHandler, () -> rematchForAvoidBadWifiUpdate());
     }
 
     private NetworkRequest createInternetRequestForTransport(int transportType) {
@@ -915,12 +908,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mSettingsObserver.observe(
                 Settings.Global.getUriFor(Settings.Global.MOBILE_DATA_ALWAYS_ON),
                 EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON);
-
-        // Watch for whether to automatically switch away from wifi networks that lose Internet
-        // access.
-        mSettingsObserver.observe(
-                Settings.Global.getUriFor(Settings.Global.NETWORK_AVOID_BAD_WIFI),
-                EVENT_CONFIGURE_NETWORK_AVOID_BAD_WIFI);
     }
 
     private synchronized int nextNetworkRequestId() {
@@ -2755,36 +2742,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 PROMPT_UNVALIDATED_DELAY_MS);
     }
 
-    private boolean mAvoidBadWifi = true;
-
     public boolean avoidBadWifi() {
-        return mAvoidBadWifi;
+        return mAvoidBadWifiTracker.currentValue();
     }
 
-    @VisibleForTesting
-    /** Whether the device or carrier configuration disables avoiding bad wifi by default. */
-    public boolean configRestrictsAvoidBadWifi() {
-        return mContext.getResources().getInteger(R.integer.config_networkAvoidBadWifi) == 0;
+    private void rematchForAvoidBadWifiUpdate() {
+        rematchAllNetworksAndRequests(null, 0);
+        for (NetworkAgentInfo nai: mNetworkAgentInfos.values()) {
+            if (nai.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                sendUpdatedScoreToFactories(nai);
+            }
+        }
     }
 
-    /** Whether we should display a notification when wifi becomes unvalidated. */
-    public boolean shouldNotifyWifiUnvalidated() {
-        return configRestrictsAvoidBadWifi() &&
-                Settings.Global.getString(mContext.getContentResolver(),
-                        Settings.Global.NETWORK_AVOID_BAD_WIFI) == null;
-    }
-
-    private boolean updateAvoidBadWifi() {
-        boolean settingAvoidBadWifi = "1".equals(Settings.Global.getString(
-                mContext.getContentResolver(), Settings.Global.NETWORK_AVOID_BAD_WIFI));
-
-        boolean prev = mAvoidBadWifi;
-        mAvoidBadWifi = settingAvoidBadWifi || !configRestrictsAvoidBadWifi();
-        return mAvoidBadWifi != prev;
-    }
-
+    // TODO: Evaluate whether this is of interest to other consumers of
+    // AvoidBadWifiTracker and worth moving out of here.
     private void dumpAvoidBadWifiSettings(IndentingPrintWriter pw) {
-        boolean configRestrict = configRestrictsAvoidBadWifi();
+        final boolean configRestrict = mAvoidBadWifiTracker.configRestrictsAvoidBadWifi();
         if (!configRestrict) {
             pw.println("Bad Wi-Fi avoidance: unrestricted");
             return;
@@ -2794,8 +2768,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         pw.increaseIndent();
         pw.println("Config restrict:   " + configRestrict);
 
-        String value = Settings.Global.getString(
-                mContext.getContentResolver(), Settings.Global.NETWORK_AVOID_BAD_WIFI);
+        final String value = mAvoidBadWifiTracker.getSettingsValue();
         String description;
         // Can't use a switch statement because strings are legal case labels, but null is not.
         if ("0".equals(value)) {
@@ -2858,17 +2831,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         showValidationNotification(nai, NotificationType.NO_INTERNET);
     }
 
-    // TODO: Delete this like updateMobileDataAlwaysOn above.
-    @VisibleForTesting
-    void updateNetworkAvoidBadWifi() {
-        mHandler.sendEmptyMessage(EVENT_CONFIGURE_NETWORK_AVOID_BAD_WIFI);
-    }
-
     private void handleNetworkUnvalidated(NetworkAgentInfo nai) {
         NetworkCapabilities nc = nai.networkCapabilities;
         if (DBG) log("handleNetworkUnvalidated " + nai.name() + " cap=" + nc);
 
-        if (nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) && shouldNotifyWifiUnvalidated()) {
+        if (nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) &&
+            mAvoidBadWifiTracker.shouldNotifyWifiUnvalidated()) {
             showValidationNotification(nai, NotificationType.LOST_INTERNET);
         }
     }
@@ -2956,18 +2924,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 case EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON: {
                     handleMobileDataAlwaysOn();
-                    break;
-                }
-                case EVENT_CONFIGURE_NETWORK_AVOID_BAD_WIFI: {
-                    if (updateAvoidBadWifi()) {
-                        rematchAllNetworksAndRequests(null, 0);
-                        for (NetworkAgentInfo nai: mNetworkAgentInfos.values()) {
-                            if (nai.networkCapabilities.hasTransport(
-                                    NetworkCapabilities.TRANSPORT_WIFI)) {
-                                sendUpdatedScoreToFactories(nai);
-                            }
-                        }
-                    }
                     break;
                 }
                 case EVENT_REQUEST_LINKPROPERTIES:
@@ -5440,6 +5396,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public NetworkMonitor createNetworkMonitor(Context context, Handler handler,
             NetworkAgentInfo nai, NetworkRequest defaultRequest) {
         return new NetworkMonitor(context, handler, nai, defaultRequest);
+    }
+
+    @VisibleForTesting
+    AvoidBadWifiTracker createAvoidBadWifiTracker(Context c, Handler h, Runnable r) {
+        return new AvoidBadWifiTracker(c, h, r);
     }
 
     @VisibleForTesting
