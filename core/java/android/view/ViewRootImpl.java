@@ -5552,8 +5552,8 @@ public final class ViewRootImpl implements ViewParent,
                 // Remember who the current drag target is pre-dispatch
                 final View prevDragView = mCurrentDragView;
 
-                if (what == DragEvent.ACTION_DROP) {
-                    event.getClipData().prepareToEnterProcess();
+                if (what == DragEvent.ACTION_DROP && event.mClipData != null) {
+                    event.mClipData.prepareToEnterProcess();
                 }
 
                 // Now dispatch the drag/drop event

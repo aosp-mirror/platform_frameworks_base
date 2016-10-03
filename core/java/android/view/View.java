@@ -20661,7 +20661,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return false;
         }
 
-        data.prepareToLeaveProcess((flags & View.DRAG_FLAG_GLOBAL) != 0);
+        if (data != null) {
+            data.prepareToLeaveProcess((flags & View.DRAG_FLAG_GLOBAL) != 0);
+        }
 
         boolean okay = false;
 
