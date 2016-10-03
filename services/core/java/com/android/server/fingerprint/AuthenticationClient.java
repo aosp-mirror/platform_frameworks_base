@@ -115,6 +115,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             final int result = daemon.authenticate(mOpId, getGroupId());
             if (result != 0) {
                 Slog.w(TAG, "startAuthentication failed, result=" + result);
+                MetricsLogger.histogram(getContext(), "fingeprintd_auth_start_error", result);
                 onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
                 return result;
             }
