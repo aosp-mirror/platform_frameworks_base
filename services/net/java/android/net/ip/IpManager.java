@@ -1068,7 +1068,8 @@ public class IpManager extends StateMachine {
                             public void notifyLost(InetAddress ip, String logMsg) {
                                 mCallback.onReachabilityLost(logMsg);
                             }
-                        });
+                        },
+                        mAvoidBadWifiTracker);
             }
         }
 
