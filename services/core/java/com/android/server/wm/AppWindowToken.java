@@ -35,6 +35,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_ACTIVITY_DRAWN;
+import static com.android.server.wm.WindowManagerService.H.NOTIFY_STARTING_WINDOW_DRAWN;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.logWithStack;
@@ -91,19 +92,22 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     // an activity have been drawn, so they can be made visible together
     // at the same time.
     // initialize so that it doesn't match mTransactionSequence which is an int.
-    long lastTransactionSequence = Long.MIN_VALUE;
-    int numInterestingWindows;
-    int numDrawnWindows;
+    private long mLastTransactionSequence = Long.MIN_VALUE;
+    private int mNumInterestingWindows;
+    private int mNumDrawnWindows;
     boolean inPendingTransaction;
     boolean allDrawn;
     // Set to true when this app creates a surface while in the middle of an animation. In that
     // case do not clear allDrawn until the animation completes.
     boolean deferClearAllDrawn;
 
-    // These are to track the app's real drawing status if there were no saved surfaces.
+    /**
+     * These are to track the app's real drawing status if there were no saved surfaces.
+     * @see #updateDrawnWindowStates
+     */
     boolean allDrawnExcludingSaved;
-    int numInterestingWindowsExcludingSaved;
-    int numDrawnWindowsExcludingSaved;
+    private int mNumInterestingWindowsExcludingSaved;
+    private int mNumDrawnWindowsExcludingSaved;
 
     // Is this window's surface needed?  This is almost like hidden, except
     // it will sometimes be true a little earlier: when the token has
@@ -118,7 +122,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     boolean reportedVisible;
 
     // Last drawn state we reported to the app token.
-    boolean reportedDrawn;
+    private boolean reportedDrawn;
 
     // Set to true when the token has been removed from the window mgr.
     boolean removed;
@@ -146,7 +150,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     boolean mAppStopped;
     int mRotationAnimationHint;
-    int mPendingRelaunchCount;
+    private int mPendingRelaunchCount;
 
     private ArrayList<WindowSurfaceController.SurfaceControlWithBackground> mSurfaceViewBackgrounds =
         new ArrayList<>();
@@ -1040,7 +1044,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             stopFreezingScreen(false, true);
             if (DEBUG_ORIENTATION) Slog.i(TAG,
                     "Setting mOrientationChangeComplete=true because wtoken " + this
-                    + " numInteresting=" + numInterestingWindows + " numDrawn=" + numDrawnWindows);
+                    + " numInteresting=" + mNumInterestingWindows + " numDrawn=" + mNumDrawnWindows);
             // This will set mOrientationChangeComplete and cause a pass through layout.
             setAppLayoutChanges(FINISH_LAYOUT_REDO_WALLPAPER,
                     "checkAppWindowsReadyToShow: freezingScreen", displayId);
@@ -1054,36 +1058,115 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
-    @Override
-    void updateAllDrawn(int displayId) {
-        final DisplayContent displayContent = mService.mRoot.getDisplayContentOrCreate(displayId);
-
+    void updateAllDrawn(DisplayContent dc) {
         if (!allDrawn) {
-            final int numInteresting = numInterestingWindows;
-            if (numInteresting > 0 && numDrawnWindows >= numInteresting) {
+            final int numInteresting = mNumInterestingWindows;
+            if (numInteresting > 0 && mNumDrawnWindows >= numInteresting) {
                 if (DEBUG_VISIBILITY) Slog.v(TAG, "allDrawn: " + this
-                        + " interesting=" + numInteresting + " drawn=" + numDrawnWindows);
+                        + " interesting=" + numInteresting + " drawn=" + mNumDrawnWindows);
                 allDrawn = true;
                 // Force an additional layout pass where
                 // WindowStateAnimator#commitFinishDrawingLocked() will call performShowLocked().
-                displayContent.setLayoutNeeded();
+                dc.setLayoutNeeded();
                 mService.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
             }
         }
+
         if (!allDrawnExcludingSaved) {
-            int numInteresting = numInterestingWindowsExcludingSaved;
-            if (numInteresting > 0 && numDrawnWindowsExcludingSaved >= numInteresting) {
+            int numInteresting = mNumInterestingWindowsExcludingSaved;
+            if (numInteresting > 0 && mNumDrawnWindowsExcludingSaved >= numInteresting) {
                 if (DEBUG_VISIBILITY) Slog.v(TAG, "allDrawnExcludingSaved: " + this
                         + " interesting=" + numInteresting
-                        + " drawn=" + numDrawnWindowsExcludingSaved);
+                        + " drawn=" + mNumDrawnWindowsExcludingSaved);
                 allDrawnExcludingSaved = true;
-                displayContent.setLayoutNeeded();
+                dc.setLayoutNeeded();
                 if (isAnimatingInvisibleWithSavedSurface()
                         && !mService.mFinishedEarlyAnim.contains(this)) {
                     mService.mFinishedEarlyAnim.add(this);
                 }
             }
         }
+    }
+
+    /**
+     * Updated this app token tracking states for interesting and drawn windows based on the window.
+     *
+     * @return Returns true if the input window is considered interesting and drawn while all the
+     *         windows in this app token where not considered drawn as of the last pass.
+     */
+    boolean updateDrawnWindowStates(WindowState w) {
+        if (DEBUG_STARTING_WINDOW && w == startingWindow) {
+            Slog.d(TAG, "updateWindows: starting " + w + " isOnScreen=" + w.isOnScreen()
+                    + " allDrawn=" + allDrawn + " freezingScreen=" + mAppAnimator.freezingScreen);
+        }
+
+        if (allDrawn && allDrawnExcludingSaved && !mAppAnimator.freezingScreen) {
+            return false;
+        }
+
+        if (mLastTransactionSequence != mService.mTransactionSequence) {
+            mLastTransactionSequence = mService.mTransactionSequence;
+            mNumInterestingWindows = mNumDrawnWindows = 0;
+            mNumInterestingWindowsExcludingSaved = 0;
+            mNumDrawnWindowsExcludingSaved = 0;
+            startingDisplayed = false;
+        }
+
+        final WindowStateAnimator winAnimator = w.mWinAnimator;
+
+        boolean isInterestingAndDrawn = false;
+
+        if (!allDrawn && w.mightAffectAllDrawn(false /* visibleOnly */)) {
+            if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
+                Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
+                        + ", isAnimationSet=" + winAnimator.isAnimationSet());
+                if (!w.isDrawnLw()) {
+                    Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceController
+                            + " pv=" + w.mPolicyVisibility
+                            + " mDrawState=" + winAnimator.drawStateToString()
+                            + " ph=" + w.isParentWindowHidden() + " th=" + hiddenRequested
+                            + " a=" + winAnimator.mAnimating);
+                }
+            }
+
+            if (w != startingWindow) {
+                if (w.isInteresting()) {
+                    mNumInterestingWindows++;
+                    if (w.isDrawnLw()) {
+                        mNumDrawnWindows++;
+
+                        if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) Slog.v(TAG, "tokenMayBeDrawn: "
+                                + this + " w=" + w + " numInteresting=" + mNumInterestingWindows
+                                + " freezingScreen=" + mAppAnimator.freezingScreen
+                                + " mAppFreezing=" + w.mAppFreezing);
+
+                        isInterestingAndDrawn = true;
+                    }
+                }
+            } else if (w.isDrawnLw()) {
+                mService.mH.sendEmptyMessage(NOTIFY_STARTING_WINDOW_DRAWN);
+                startingDisplayed = true;
+            }
+        }
+
+        if (!allDrawnExcludingSaved && w.mightAffectAllDrawn(true /* visibleOnly */)) {
+            if (w != startingWindow && w.isInteresting()) {
+                mNumInterestingWindowsExcludingSaved++;
+                if (w.isDrawnLw() && !w.isAnimatingWithSavedSurface()) {
+                    mNumDrawnWindowsExcludingSaved++;
+
+                    if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) Slog.v(TAG,
+                            "tokenMayBeDrawnExcludingSaved: " + this + " w=" + w
+                            + " numInteresting=" + mNumInterestingWindowsExcludingSaved
+                            + " freezingScreen=" + mAppAnimator.freezingScreen
+                            + " mAppFreezing=" + w.mAppFreezing);
+
+                    isInterestingAndDrawn = true;
+                }
+            }
+        }
+
+        return isInterestingAndDrawn;
     }
 
     @Override
@@ -1147,11 +1230,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (mAppStopped) {
             pw.print(prefix); pw.print("mAppStopped="); pw.println(mAppStopped);
         }
-        if (numInterestingWindows != 0 || numDrawnWindows != 0
+        if (mNumInterestingWindows != 0 || mNumDrawnWindows != 0
                 || allDrawn || mAppAnimator.allDrawn) {
-            pw.print(prefix); pw.print("numInterestingWindows=");
-                    pw.print(numInterestingWindows);
-                    pw.print(" numDrawnWindows="); pw.print(numDrawnWindows);
+            pw.print(prefix); pw.print("mNumInterestingWindows=");
+                    pw.print(mNumInterestingWindows);
+                    pw.print(" mNumDrawnWindows="); pw.print(mNumDrawnWindows);
                     pw.print(" inPendingTransaction="); pw.print(inPendingTransaction);
                     pw.print(" allDrawn="); pw.print(allDrawn);
                     pw.print(" (animator="); pw.print(mAppAnimator.allDrawn);

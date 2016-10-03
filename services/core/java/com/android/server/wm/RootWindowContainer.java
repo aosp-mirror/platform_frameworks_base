@@ -41,12 +41,12 @@ import com.android.server.input.InputWindowHandle;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
@@ -65,7 +65,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEAT
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
@@ -76,7 +75,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.H.NOTIFY_STARTING_WINDOW_DRAWN;
 import static com.android.server.wm.WindowManagerService.H.REPORT_LOSING_FOCUS;
 import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
@@ -135,6 +133,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     boolean mWallpaperActionPending = false;
 
     private final ArrayList<Integer> mChangedStackList = new ArrayList();
+
+    private final LinkedList<AppWindowToken> mTmpUpdateAllDrawn = new LinkedList();
 
     // State for the RemoteSurfaceTrace system used in testing. If this is enabled SurfaceControl
     // instances will be replaced with an instance that writes a binary representation of all
@@ -707,7 +707,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
         mService.openSurfaceTransaction();
         try {
-            mService.mRoot.applySurfaceChangesTransaction(recoveringMemory, defaultDw, defaultDh);
+            applySurfaceChangesTransaction(recoveringMemory, defaultDw, defaultDh);
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
@@ -990,7 +990,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         final int count = mChildren.size();
         for (int j = 0; j < count; ++j) {
             final DisplayContent dc = mChildren.get(j);
-            boolean updateAllDrawn = false;
             WindowList windows = dc.getWindowList();
             DisplayInfo displayInfo = dc.getDisplayInfo();
             final int displayId = dc.getDisplayId();
@@ -1003,6 +1002,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             mDisplayHasContent = false;
             mPreferredRefreshRate = 0;
             mPreferredModeId = 0;
+            mTmpUpdateAllDrawn.clear();
 
             int repeats = 0;
             do {
@@ -1086,44 +1086,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 if (isDefaultDisplay && obscuredChanged && w.isVisibleLw()
                         && mService.mWallpaperControllerLocked.isWallpaperTarget(w)) {
                     // This is the wallpaper target and its obscured state changed... make sure the
-                    // current wallaper's visibility has been updated accordingly.
+                    // current wallpaper's visibility has been updated accordingly.
                     mService.mWallpaperControllerLocked.updateWallpaperVisibility();
                 }
 
+                w.handleWindowMovedIfNeeded();
+
                 final WindowStateAnimator winAnimator = w.mWinAnimator;
-
-                // If the window has moved due to its containing content frame changing, then
-                // notify the listeners and optionally animate it. Simply checking a change of
-                // position is not enough, because being move due to dock divider is not a trigger
-                // for animation.
-                if (w.hasMoved()) {
-                    // Frame has moved, containing content frame has also moved, and we're not
-                    // currently animating... let's do something.
-                    final int left = w.mFrame.left;
-                    final int top = w.mFrame.top;
-                    final boolean adjustedForMinimizedDockOrIme = task != null
-                            && (task.mStack.isAdjustedForMinimizedDockedStack()
-                            || task.mStack.isAdjustedForIme());
-                    if (mService.okToDisplay()
-                            && (w.mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
-                            && !w.isDragResizing() && !adjustedForMinimizedDockOrIme
-                            && (task == null || w.getTask().mStack.hasMovementAnimations())
-                            && !w.mWinAnimator.mLastHidden) {
-                        winAnimator.setMoveAnimation(left, top);
-                    }
-
-                    //TODO (multidisplay): Accessibility supported only for the default display.
-                    if (mService.mAccessibilityController != null
-                            && displayId == Display.DEFAULT_DISPLAY) {
-                        mService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
-                    }
-
-                    try {
-                        w.mClient.moved(left, top);
-                    } catch (RemoteException e) {
-                    }
-                    w.mMovedByResize = false;
-                }
 
                 //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
                 w.mContentChanged = false;
@@ -1171,71 +1140,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 }
 
                 final AppWindowToken atoken = w.mAppToken;
-                if (DEBUG_STARTING_WINDOW && atoken != null && w == atoken.startingWindow) {
-                    Slog.d(TAG, "updateWindows: starting " + w
-                            + " isOnScreen=" + w.isOnScreen() + " allDrawn=" + atoken.allDrawn
-                            + " freezingScreen=" + atoken.mAppAnimator.freezingScreen);
-                }
-                if (atoken != null && (!atoken.allDrawn || !atoken.allDrawnExcludingSaved
-                        || atoken.mAppAnimator.freezingScreen)) {
-                    if (atoken.lastTransactionSequence != mService.mTransactionSequence) {
-                        atoken.lastTransactionSequence = mService.mTransactionSequence;
-                        atoken.numInterestingWindows = atoken.numDrawnWindows = 0;
-                        atoken.numInterestingWindowsExcludingSaved = 0;
-                        atoken.numDrawnWindowsExcludingSaved = 0;
-                        atoken.startingDisplayed = false;
-                    }
-                    if (!atoken.allDrawn && w.mightAffectAllDrawn(false /* visibleOnly */)) {
-                        if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
-                            Slog.v(TAG, "Eval win " + w + ": isDrawn="
-                                    + w.isDrawnLw()
-                                    + ", isAnimationSet=" + winAnimator.isAnimationSet());
-                            if (!w.isDrawnLw()) {
-                                Slog.v(TAG, "Not displayed: s="
-                                        + winAnimator.mSurfaceController
-                                        + " pv=" + w.mPolicyVisibility
-                                        + " mDrawState=" + winAnimator.drawStateToString()
-                                        + " ph=" + w.isParentWindowHidden()
-                                        + " th=" + atoken.hiddenRequested
-                                        + " a=" + winAnimator.mAnimating);
-                            }
-                        }
-                        if (w != atoken.startingWindow) {
-                            if (w.isInteresting()) {
-                                atoken.numInterestingWindows++;
-                                if (w.isDrawnLw()) {
-                                    atoken.numDrawnWindows++;
-                                    if (DEBUG_VISIBILITY || DEBUG_ORIENTATION)
-                                        Slog.v(TAG, "tokenMayBeDrawn: " + atoken
-                                                + " w=" + w + " numInteresting="
-                                                + atoken.numInterestingWindows
-                                                + " freezingScreen="
-                                                + atoken.mAppAnimator.freezingScreen
-                                                + " mAppFreezing=" + w.mAppFreezing);
-                                    updateAllDrawn = true;
-                                }
-                            }
-                        } else if (w.isDrawnLw()) {
-                            mService.mH.sendEmptyMessage(NOTIFY_STARTING_WINDOW_DRAWN);
-                            atoken.startingDisplayed = true;
-                        }
-                    }
-                    if (!atoken.allDrawnExcludingSaved
-                            && w.mightAffectAllDrawn(true /* visibleOnly */)) {
-                        if (w != atoken.startingWindow && w.isInteresting()) {
-                            atoken.numInterestingWindowsExcludingSaved++;
-                            if (w.isDrawnLw() && !w.isAnimatingWithSavedSurface()) {
-                                atoken.numDrawnWindowsExcludingSaved++;
-                                if (DEBUG_VISIBILITY || DEBUG_ORIENTATION)
-                                    Slog.v(TAG, "tokenMayBeDrawnExcludingSaved: " + atoken
-                                            + " w=" + w + " numInteresting="
-                                            + atoken.numInterestingWindowsExcludingSaved
-                                            + " freezingScreen="
-                                            + atoken.mAppAnimator.freezingScreen
-                                            + " mAppFreezing=" + w.mAppFreezing);
-                                updateAllDrawn = true;
-                            }
-                        }
+                if (atoken != null) {
+                    final boolean updateAllDrawn = atoken.updateDrawnWindowStates(w);
+                    if (updateAllDrawn && !mTmpUpdateAllDrawn.contains(atoken)) {
+                        mTmpUpdateAllDrawn.add(atoken);
                     }
                 }
 
@@ -1244,7 +1152,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     focusDisplayed = true;
                 }
 
-                mService.updateResizingWindows(w);
+                w.updateResizingWindowIfNeeded();
             }
 
             mService.mDisplayManagerInternal.setDisplayProperties(displayId,
@@ -1255,10 +1163,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
             dc.stopDimmingIfNeeded();
 
-            if (updateAllDrawn) {
+            while (!mTmpUpdateAllDrawn.isEmpty()) {
+                final AppWindowToken atoken = mTmpUpdateAllDrawn.removeLast();
                 // See if any windows have been drawn, so they (and others associated with them)
                 // can now be shown.
-                dc.updateAllDrawn();
+                atoken.updateAllDrawn(dc);
             }
         }
 

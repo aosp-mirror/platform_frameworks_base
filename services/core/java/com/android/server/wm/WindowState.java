@@ -87,6 +87,7 @@ import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
@@ -131,6 +132,7 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.localLOGV;
 import static com.android.server.wm.WindowStateAnimator.COMMIT_DRAW_PENDING;
+import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 
@@ -1081,6 +1083,112 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || mOutsetsChanged || mFrameSizeChanged;
     }
 
+    /**
+     * Adds the window to the resizing list if any of the parameters we use to track the window
+     * dimensions or insets have changed.
+     */
+    void updateResizingWindowIfNeeded() {
+        final WindowStateAnimator winAnimator = mWinAnimator;
+        if (!mHasSurface || mService.mLayoutSeq != mLayoutSeq || isGoneForLayoutLw()) {
+            return;
+        }
+
+        final Task task = getTask();
+        // In the case of stack bound animations, the window frames will update (unlike other
+        // animations which just modify various transformation properties). We don't want to
+        // notify the client of frame changes in this case. Not only is it a lot of churn, but
+        // the frame may not correspond to the surface size or the onscreen area at various
+        // phases in the animation, and the client will become sad and confused.
+        if (task != null && task.mStack.getBoundsAnimating()) {
+            return;
+        }
+
+        setReportResizeHints();
+        boolean configChanged = isConfigChanged();
+        if (DEBUG_CONFIGURATION && configChanged) {
+            Slog.v(TAG_WM, "Win " + this + " config changed: " + getConfiguration());
+        }
+
+        final boolean dragResizingChanged = isDragResizeChanged()
+                && !isDragResizingChangeReported();
+
+        if (localLOGV) Slog.v(TAG_WM, "Resizing " + this + ": configChanged=" + configChanged
+                + " dragResizingChanged=" + dragResizingChanged + " last=" + mLastFrame
+                + " frame=" + mFrame);
+
+        // We update mLastFrame always rather than in the conditional with the last inset
+        // variables, because mFrameSizeChanged only tracks the width and height changing.
+        mLastFrame.set(mFrame);
+
+        if (mContentInsetsChanged
+                || mVisibleInsetsChanged
+                || winAnimator.mSurfaceResized
+                || mOutsetsChanged
+                || mFrameSizeChanged
+                || configChanged
+                || dragResizingChanged
+                || !isResizedWhileNotDragResizingReported()) {
+            if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
+                Slog.v(TAG_WM, "Resize reasons for w=" + this + ": "
+                        + " contentInsetsChanged=" + mContentInsetsChanged
+                        + " " + mContentInsets.toShortString()
+                        + " visibleInsetsChanged=" + mVisibleInsetsChanged
+                        + " " + mVisibleInsets.toShortString()
+                        + " stableInsetsChanged=" + mStableInsetsChanged
+                        + " " + mStableInsets.toShortString()
+                        + " outsetsChanged=" + mOutsetsChanged
+                        + " " + mOutsets.toShortString()
+                        + " surfaceResized=" + winAnimator.mSurfaceResized
+                        + " configChanged=" + configChanged
+                        + " dragResizingChanged=" + dragResizingChanged
+                        + " resizedWhileNotDragResizingReported="
+                        + isResizedWhileNotDragResizingReported());
+            }
+
+            // If it's a dead window left on screen, and the configuration changed, there is nothing
+            // we can do about it. Remove the window now.
+            if (mAppToken != null && mAppDied) {
+                mAppToken.removeDeadWindows();
+                return;
+            }
+
+            mLastOverscanInsets.set(mOverscanInsets);
+            mLastContentInsets.set(mContentInsets);
+            mLastVisibleInsets.set(mVisibleInsets);
+            mLastStableInsets.set(mStableInsets);
+            mLastOutsets.set(mOutsets);
+            mService.makeWindowFreezingScreenIfNeededLocked(this);
+
+            // If the orientation is changing, or we're starting or ending a drag resizing action,
+            // then we need to hold off on unfreezing the display until this window has been
+            // redrawn; to do that, we need to go through the process of getting informed by the
+            // application when it has finished drawing.
+            if (mOrientationChanging || dragResizingChanged || isResizedWhileNotDragResizing()) {
+                if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || DEBUG_ORIENTATION || DEBUG_RESIZE) {
+                    Slog.v(TAG_WM, "Orientation or resize start waiting for draw"
+                            + ", mDrawState=DRAW_PENDING in " + this
+                            + ", surfaceController " + winAnimator.mSurfaceController);
+                }
+                winAnimator.mDrawState = DRAW_PENDING;
+                if (mAppToken != null) {
+                    mAppToken.clearAllDrawn();
+                }
+            }
+            if (!mService.mResizingWindows.contains(this)) {
+                if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG_WM, "Resizing window " + this);
+                mService.mResizingWindows.add(this);
+            }
+        } else if (mOrientationChanging) {
+            if (isDrawnLw()) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Orientation not waiting for draw in "
+                        + this + ", surfaceController " + winAnimator.mSurfaceController);
+                mOrientationChanging = false;
+                mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
+                        - mService.mDisplayFreezeTime);
+            }
+        }
+    }
+
     public DisplayContent getDisplayContent() {
         if (mAppToken == null || mNotOnAppsDisplay) {
             return mDisplayContent;
@@ -1426,7 +1534,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Return true if the window is opaque and fully drawn.  This indicates
      * it may obscure windows behind it.
      */
-    boolean isOpaqueDrawn() {
+    private boolean isOpaqueDrawn() {
         // When there is keyguard, wallpaper could be placed over the secure app
         // window but invisible. We need to check wallpaper visibility explicitly
         // to determine if it's occluding apps.
@@ -1557,10 +1665,49 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
+     * If the window has moved due to its containing content frame changing, then notify the
+     * listeners and optionally animate it. Simply checking a change of position is not enough,
+     * because being move due to dock divider is not a trigger for animation.
+     */
+    void handleWindowMovedIfNeeded() {
+        if (!hasMoved()) {
+            return;
+        }
+
+        // Frame has moved, containing content frame has also moved, and we're not currently
+        // animating... let's do something.
+        final int left = mFrame.left;
+        final int top = mFrame.top;
+        final Task task = getTask();
+        final boolean adjustedForMinimizedDockOrIme = task != null
+                && (task.mStack.isAdjustedForMinimizedDockedStack()
+                || task.mStack.isAdjustedForIme());
+        if (mService.okToDisplay()
+                && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
+                && !isDragResizing() && !adjustedForMinimizedDockOrIme
+                && (task == null || getTask().mStack.hasMovementAnimations())
+                && !mWinAnimator.mLastHidden) {
+            mWinAnimator.setMoveAnimation(left, top);
+        }
+
+        //TODO (multidisplay): Accessibility supported only for the default display.
+        if (mService.mAccessibilityController != null
+                && getDisplayContent().getDisplayId() == Display.DEFAULT_DISPLAY) {
+            mService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
+        }
+
+        try {
+            mClient.moved(left, top);
+        } catch (RemoteException e) {
+        }
+        mMovedByResize = false;
+    }
+
+    /**
      * Return whether this window has moved. (Only makes
      * sense to call from performLayoutAndPlaceSurfacesLockedInner().)
      */
-    boolean hasMoved() {
+    private boolean hasMoved() {
         return mHasSurface && (mContentChanged || mMovedByResize)
                 && !mAnimatingExit
                 && (mFrame.top != mLastFrame.top || mFrame.left != mLastFrame.left)

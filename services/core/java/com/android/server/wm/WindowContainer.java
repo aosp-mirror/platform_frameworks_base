@@ -381,19 +381,6 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         }
     }
 
-    /**
-     * Updates the current all drawn status for this container. That is all its children
-     * that should draw something have done so.
-     */
-    // TODO: The displayId shouldn't be needed as there shouldn't be a container on more than one
-    // display. Remove once we migrate DisplayContent to use WindowContainer.
-    void updateAllDrawn(int displayId) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowContainer wc = mChildren.get(i);
-            wc.updateAllDrawn(displayId);
-        }
-    }
-
     /** Step currently ongoing animation for App window containers. */
     // TODO: The displayId shouldn't be needed as there shouldn't be a container on more than one
     // display. Remove once we migrate DisplayContent to use WindowContainer.
