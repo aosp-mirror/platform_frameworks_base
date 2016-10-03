@@ -653,6 +653,12 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       "{@docRoot}studio/intro/update.html#sdk-manager">SDK Manager</a>.
     </p>
 
+    <p>
+      After you create a virtual device as described below, follow the steps for
+      <a href="#set_up_a_phone">setting up a phone</a> with the beta version of
+      the Android Wear companion app.
+    </p>
+
     <p>Create a new virtual device in Android Studio as follows:
     </p>
 
@@ -696,7 +702,9 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </p>
 
     <ol>
-      <li>On the phone, install the Android Wear app from Google Play.
+      <li>Follow the steps for
+      <a href="#set_up_a_phone">setting up a phone</a> with the beta version of
+      the Android Wear companion app.
       </li>
 
       <li>On the phone, enable Developer Options and USB Debugging.
@@ -740,7 +748,7 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       in the <a href=
       "{@docRoot}tools/devices/emulator.html">Android Emulator</a>. For more
       information about using virtual devices, see <a href=
-      "{@docRoot}tools/devices/managing-avds.html">
+      "{@docRoot}studio/run/managing-avds.html">
       Create and Manage Virtual Devices</a>.
     </p>
 
