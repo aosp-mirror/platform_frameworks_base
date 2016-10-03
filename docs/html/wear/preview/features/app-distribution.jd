@@ -132,6 +132,9 @@ page.image=images/cards/card-n-sdk_2x.png
 
 <pre>
 android {
+    // Allows you to reference product flavors in your
+    // phone module's build.gradle file
+    publishNonDefault true
     ...
     defaultConfig
     {
@@ -148,6 +151,7 @@ android {
             minSdkVersion 24
         }
     }
+}
 </pre>
 
     <p>
@@ -158,7 +162,7 @@ android {
 <pre>
 dependencies {
     ...
-    wearApp project(path: ':wearable', configuration: 'wear1Release')
+    wearApp project(path: ':wear', configuration: 'wear1Release')
 }
 </pre>
 
