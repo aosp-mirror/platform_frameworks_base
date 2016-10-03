@@ -684,6 +684,10 @@ public class IpManager extends StateMachine {
             delta = ProvisioningChange.LOST_PROVISIONING;
         }
 
+        final boolean lostIPv6 = oldLp.isIPv6Provisioned() && !newLp.isIPv6Provisioned();
+        final boolean lostIPv4Address = oldLp.hasIPv4Address() && !newLp.hasIPv4Address();
+        final boolean lostIPv6Router = oldLp.hasIPv6DefaultRoute() && !newLp.hasIPv6DefaultRoute();
+
         // Additionally:
         //
         // Partial configurations (e.g., only an IPv4 address with no DNS
@@ -696,8 +700,7 @@ public class IpManager extends StateMachine {
         // Because on such a network isProvisioned() will always return false,
         // delta will never be LOST_PROVISIONING. So check for loss of
         // provisioning here too.
-        if ((oldLp.hasIPv4Address() && !newLp.hasIPv4Address()) ||
-                (oldLp.isIPv6Provisioned() && !newLp.isIPv6Provisioned())) {
+        if (lostIPv4Address || lostIPv6) {
             delta = ProvisioningChange.LOST_PROVISIONING;
         }
 
@@ -706,8 +709,7 @@ public class IpManager extends StateMachine {
         // If the previous link properties had a global IPv6 address and an
         // IPv6 default route then also consider the loss of that default route
         // to be a loss of provisioning. See b/27962810.
-        if (oldLp.hasGlobalIPv6Address() && oldLp.hasIPv6DefaultRoute() &&
-                !newLp.hasIPv6DefaultRoute()) {
+        if (oldLp.hasGlobalIPv6Address() && lostIPv6Router) {
             delta = ProvisioningChange.LOST_PROVISIONING;
         }
 
