@@ -260,16 +260,13 @@ class FileDescriptorInfo {
 
     // Whitelist files needed for Runtime Resource Overlay, like these:
     // /system/vendor/overlay/framework-res.apk
-    // /system/vendor/overlay-subdir/pg/framework-res.apk
+    // /system/vendor/overlay/PG/android-framework-runtime-resource-overlay.apk
     // /data/resource-cache/system@vendor@overlay@framework-res.apk@idmap
-    // /data/resource-cache/system@vendor@overlay-subdir@pg@framework-res.apk@idmap
-    // See AssetManager.cpp for more details on overlay-subdir.
+    // /data/resource-cache/system@vendor@overlay@PG@framework-res.apk@idmap
     static const char* kOverlayDir = "/system/vendor/overlay/";
-    static const char* kOverlaySubdir = "/system/vendor/overlay-subdir/";
     static const char* kApkSuffix = ".apk";
 
-    if ((android::base::StartsWith(path, kOverlayDir)
-            || android::base::StartsWith(path, kOverlaySubdir))
+    if (android::base::StartsWith(path, kOverlayDir)
         && android::base::EndsWith(path, kApkSuffix)
         && path.find("/../") == std::string::npos) {
       return true;

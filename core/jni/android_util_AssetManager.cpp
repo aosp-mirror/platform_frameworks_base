@@ -186,18 +186,19 @@ static void verifySystemIdmaps()
                 argv[argc++] = AssetManager::TARGET_APK_PATH;
                 argv[argc++] = AssetManager::IDMAP_DIR;
 
-                // Directories to scan for overlays: if OVERLAY_SUBDIR_PROPERTY is defined,
-                // use OVERLAY_SUBDIR/<value of OVERLAY_SUBDIR_PROPERTY>/ if exists, otherwise
+                // Directories to scan for overlays: if OVERLAY_SKU_DIR_PROPERTY is defined,
+                // use OVERLAY_DIR/<value of OVERLAY_SKU_DIR_PROPERTY> if exists, otherwise
                 // use OVERLAY_DIR if exists.
                 char subdir[PROP_VALUE_MAX];
-                int len = __system_property_get(AssetManager::OVERLAY_SUBDIR_PROPERTY, subdir);
+                int len = __system_property_get(AssetManager::OVERLAY_SKU_DIR_PROPERTY, subdir);
+                String8 overlayPath;
                 if (len > 0) {
-                    String8 subdirPath = String8(AssetManager::OVERLAY_SUBDIR) + "/" + subdir;
-                    if (stat(subdirPath.string(), &st) == 0) {
-                        argv[argc++] = subdirPath.string();
-                    }
-                } else if (stat(AssetManager::OVERLAY_DIR, &st) == 0) {
-                    argv[argc++] = AssetManager::OVERLAY_DIR;
+                    overlayPath = String8(AssetManager::OVERLAY_DIR) + "/" + subdir;
+                } else {
+                    overlayPath = String8(AssetManager::OVERLAY_DIR);
+                }
+                if (stat(overlayPath.string(), &st) == 0) {
+                    argv[argc++] = overlayPath.string();
                 }
 
                 // Finally, invoke idmap (if any overlay directory exists)
