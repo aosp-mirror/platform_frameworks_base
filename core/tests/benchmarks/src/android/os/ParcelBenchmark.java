@@ -20,12 +20,15 @@ import com.google.caliper.AfterExperiment;
 import com.google.caliper.BeforeExperiment;
 
 public class ParcelBenchmark {
+    private static final int INNER_REPS = 1000;
 
     private Parcel mParcel;
 
     @BeforeExperiment
     protected void setUp() {
         mParcel = Parcel.obtain();
+        mParcel.setDataPosition(0);
+        mParcel.setDataCapacity(INNER_REPS * 8);
     }
 
     @AfterExperiment
@@ -36,43 +39,58 @@ public class ParcelBenchmark {
 
     public void timeWriteByte(int reps) {
         final byte val = 0xF;
-        for (int i = 0; i < reps; i++) {
-            mParcel.writeByte(val);
+        for (int i = 0; i < (reps / INNER_REPS); i++) {
+            mParcel.setDataPosition(0);
+            for (int j = 0; j < INNER_REPS; j++) {
+                mParcel.writeByte(val);
+            }
         }
     }
 
     public void timeReadByte(int reps) {
-        mParcel.setDataCapacity(reps);
-        for (int i = 0; i < reps; i++) {
-            mParcel.readByte();
+        for (int i = 0; i < (reps / INNER_REPS); i++) {
+            mParcel.setDataPosition(0);
+            for (int j = 0; j < INNER_REPS; j++) {
+                mParcel.readByte();
+            }
         }
     }
 
     public void timeWriteInt(int reps) {
         final int val = 0xF;
-        for (int i = 0; i < reps; i++) {
-            mParcel.writeInt(val);
+        for (int i = 0; i < (reps / INNER_REPS); i++) {
+            mParcel.setDataPosition(0);
+            for (int j = 0; j < INNER_REPS; j++) {
+                mParcel.writeInt(val);
+            }
         }
     }
 
     public void timeReadInt(int reps) {
-        mParcel.setDataCapacity(reps << 2);
-        for (int i = 0; i < reps; i++) {
-            mParcel.readInt();
+        for (int i = 0; i < (reps / INNER_REPS); i++) {
+            mParcel.setDataPosition(0);
+            for (int j = 0; j < INNER_REPS; j++) {
+                mParcel.readInt();
+            }
         }
     }
 
     public void timeWriteLong(int reps) {
         final long val = 0xF;
-        for (int i = 0; i < reps; i++) {
-            mParcel.writeLong(val);
+        for (int i = 0; i < (reps / INNER_REPS); i++) {
+            mParcel.setDataPosition(0);
+            for (int j = 0; j < INNER_REPS; j++) {
+                mParcel.writeLong(val);
+            }
         }
     }
 
     public void timeReadLong(int reps) {
-        mParcel.setDataCapacity(reps << 3);
-        for (int i = 0; i < reps; i++) {
-            mParcel.readLong();
+        for (int i = 0; i < (reps / INNER_REPS); i++) {
+            mParcel.setDataPosition(0);
+            for (int j = 0; j < INNER_REPS; j++) {
+                mParcel.readLong();
+            }
         }
     }
 }
