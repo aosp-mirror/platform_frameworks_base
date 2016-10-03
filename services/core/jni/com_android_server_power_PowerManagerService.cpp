@@ -18,6 +18,7 @@
 
 //#define LOG_NDEBUG 0
 
+#include <android/hardware/power/1.0/IPower.h>
 #include "JNIHelp.h"
 #include "jni.h"
 
@@ -37,6 +38,13 @@
 
 #include "com_android_server_power_PowerManagerService.h"
 
+using android::hardware::Return;
+using android::hardware::Void;
+using android::hardware::power::V1_0::IPower;
+using android::hardware::power::V1_0::PowerHint;
+using android::hardware::power::V1_0::Feature;
+using android::hardware::hidl_vec;
+
 namespace android {
 
 // ----------------------------------------------------------------------------
@@ -48,8 +56,7 @@ static struct {
 // ----------------------------------------------------------------------------
 
 static jobject gPowerManagerServiceObj;
-struct power_module* gPowerModule;
-
+sp<IPower> gPowerHal;
 static nsecs_t gLastEventTime[USER_ACTIVITY_EVENT_LAST + 1];
 
 // Throttling interval for user activity calls.
@@ -69,8 +76,8 @@ static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodNa
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType) {
     // Tell the power HAL when user activity occurs.
-    if (gPowerModule && gPowerModule->powerHint) {
-        gPowerModule->powerHint(gPowerModule, POWER_HINT_INTERACTION, NULL);
+    if (gPowerHal != nullptr) {
+        gPowerHal->powerHint(PowerHint::INTERACTION, 0);
     }
 
     if (gPowerManagerServiceObj) {
@@ -99,16 +106,13 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
 }
 
 // ----------------------------------------------------------------------------
-
+//TODO(b/31632518)
 static void nativeInit(JNIEnv* env, jobject obj) {
     gPowerManagerServiceObj = env->NewGlobalRef(obj);
 
-    status_t err = hw_get_module(POWER_HARDWARE_MODULE_ID,
-            (hw_module_t const**)&gPowerModule);
-    if (!err) {
-        gPowerModule->init(gPowerModule);
-    } else {
-        ALOGE("Couldn't load %s module (%s)", POWER_HARDWARE_MODULE_ID, strerror(-err));
+    gPowerHal = IPower::getService("power");
+    if (gPowerHal == nullptr) {
+        ALOGE("Couldn't load PowerHAL module");
     }
 }
 
@@ -123,13 +127,13 @@ static void nativeReleaseSuspendBlocker(JNIEnv *env, jclass /* clazz */, jstring
 }
 
 static void nativeSetInteractive(JNIEnv* /* env */, jclass /* clazz */, jboolean enable) {
-    if (gPowerModule) {
+    if (gPowerHal != nullptr) {
         if (enable) {
             ALOGD_IF_SLOW(20, "Excessive delay in setInteractive(true) while turning screen on");
-            gPowerModule->setInteractive(gPowerModule, true);
+            gPowerHal->setInteractive(true);
         } else {
             ALOGD_IF_SLOW(20, "Excessive delay in setInteractive(false) while turning screen off");
-            gPowerModule->setInteractive(gPowerModule, false);
+            gPowerHal->setInteractive(false);
         }
     }
 }
@@ -145,13 +149,11 @@ static void nativeSetAutoSuspend(JNIEnv* /* env */, jclass /* clazz */, jboolean
 }
 
 static void nativeSendPowerHint(JNIEnv *env, jclass clazz, jint hintId, jint data) {
-    int data_param = data;
-
-    if (gPowerModule && gPowerModule->powerHint) {
+    if (gPowerHal != nullptr) {
         if(data)
-            gPowerModule->powerHint(gPowerModule, (power_hint_t)hintId, &data_param);
+            gPowerHal->powerHint((PowerHint)hintId, data);
         else {
-            gPowerModule->powerHint(gPowerModule, (power_hint_t)hintId, NULL);
+            gPowerHal->powerHint((PowerHint)hintId, 0);
         }
     }
 }
@@ -159,8 +161,8 @@ static void nativeSendPowerHint(JNIEnv *env, jclass clazz, jint hintId, jint dat
 static void nativeSetFeature(JNIEnv *env, jclass clazz, jint featureId, jint data) {
     int data_param = data;
 
-    if (gPowerModule && gPowerModule->setFeature) {
-        gPowerModule->setFeature(gPowerModule, (feature_t)featureId, data_param);
+    if (gPowerHal != nullptr) {
+        gPowerHal->setFeature((Feature)featureId, data_param ? true : false);
     }
 }
 
@@ -215,7 +217,7 @@ int register_android_server_PowerManagerService(JNIEnv* env) {
         gLastEventTime[i] = LLONG_MIN;
     }
     gPowerManagerServiceObj = NULL;
-    gPowerModule = NULL;
+    gPowerHal = NULL;
     return 0;
 }
 

@@ -72,6 +72,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
 import android.hardware.input.InputManagerInternal;
+import android.hardware.power.V1_0.PowerHint;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -900,7 +901,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             @Override
             public void run() {
                 // send interaction hint to improve redraw performance
-                mPowerManagerInternal.powerHint(PowerManagerInternal.POWER_HINT_INTERACTION, 0);
+                mPowerManagerInternal.powerHint(PowerHint.INTERACTION, 0);
                 updateRotation(false);
             }
         };
@@ -1831,7 +1832,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     public void onFling(int duration) {
                         if (mPowerManagerInternal != null) {
                             mPowerManagerInternal.powerHint(
-                                    PowerManagerInternal.POWER_HINT_INTERACTION, duration);
+                                    PowerHint.INTERACTION, duration);
                         }
                     }
                     @Override
