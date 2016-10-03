@@ -32,10 +32,5 @@
     -->
     <integer name="config_LTE_RSRP_threshold_type">0</integer>
 
-    <string-array translatable="false" name="config_sms_convert_destination_number_support">
-        <item>true;BAE0000000000000</item>
-        <item>false</item>
-    </string-array>
-
     <string translatable="false" name="prohibit_manual_network_selection_in_gobal_mode">true;BAE0000000000000</string>
 </resources>
