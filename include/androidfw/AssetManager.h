@@ -59,10 +59,7 @@ struct ResTable_config;
  * single instance may be shared across multiple threads, and a single
  * thread may have more than one instance (the latter is discouraged).
  *
- * The purpose of the AssetManager is to create Asset objects.  To do
- * this efficiently it may cache information about the locations of
- * files it has seen.  This can be controlled with the "cacheMode"
- * argument.
+ * The purpose of the AssetManager is to create Asset objects.
  *
  * The asset hierarchy may be examined like a filesystem, using
  * AssetDir objects to peruse a single directory.
@@ -82,14 +79,7 @@ public:
     static const char* TARGET_APK_PATH;
     static const char* IDMAP_DIR;
 
-    typedef enum CacheMode {
-        CACHE_UNKNOWN = 0,
-        CACHE_OFF,          // don't try to cache file locations
-        CACHE_DEFER,        // construct cache as pieces are needed
-        //CACHE_SCAN,         // scan full(!) asset hierarchy at init() time
-    } CacheMode;
-
-    AssetManager(CacheMode cacheMode = CACHE_OFF);
+    AssetManager();
     virtual ~AssetManager(void);
 
     static int32_t getGlobalCount();
@@ -126,23 +116,16 @@ public:
     int32_t nextAssetPath(const int32_t cookie) const;
 
     /*
-     * Return an asset path in the manager.  'which' must be between 0 and
-     * countAssetPaths().
+     * Return an asset path in the manager.  'cookie' must be a non-negative value
+     * previously returned from addAssetPath() or nextAssetPath().
      */
     String8 getAssetPath(const int32_t cookie) const;
 
     /*
-     * Set the current locale and vendor.  The locale can change during
-     * the lifetime of an AssetManager if the user updates the device's
-     * language setting.  The vendor is less likely to change.
-     *
-     * Pass in NULL to indicate no preference.
-     */
-    void setLocale(const char* locale);
-    void setVendor(const char* vendor);
-
-    /*
-     * Choose screen orientation for resources values returned.
+     * Sets various device configuration parameters, like screen orientation, layout,
+     * size, locale, etc.
+     * The optional 'locale' string takes precedence over the locale within 'config'
+     * and must be in bcp47 format.
      */
     void setConfiguration(const ResTable_config& config, const char* locale = NULL);
 
@@ -215,13 +198,6 @@ public:
     const ResTable& getResources(bool required = true) const;
 
     /*
-     * Discard cached filename information.  This only needs to be called
-     * if somebody has updated the set of "loose" files, and we want to
-     * discard our cached notion of what's where.
-     */
-    void purge(void) { purgeFileNameCacheLocked(); }
-
-    /*
      * Return true if the files this AssetManager references are all
      * up-to-date (have not been changed since it was created).  If false
      * is returned, you will need to create a new AssetManager to get
@@ -253,12 +229,8 @@ private:
         bool isSystemAsset;
     };
 
-    Asset* openInPathLocked(const char* fileName, AccessMode mode,
-        const asset_path& path);
     Asset* openNonAssetInPathLocked(const char* fileName, AccessMode mode,
         const asset_path& path);
-    Asset* openInLocaleVendorLocked(const char* fileName, AccessMode mode,
-        const asset_path& path, const char* locale, const char* vendor);
     String8 createPathNameLocked(const asset_path& path, const char* locale,
         const char* vendor);
     String8 createPathNameLocked(const asset_path& path, const char* rootDir);
@@ -277,15 +249,6 @@ private:
         const asset_path& path, const char* rootDir, const char* dirName);
     void mergeInfoLocked(SortedVector<AssetDir::FileInfo>* pMergedInfo,
         const SortedVector<AssetDir::FileInfo>* pContents);
-
-    void loadFileNameCacheLocked(void);
-    void fncScanLocked(SortedVector<AssetDir::FileInfo>* pMergedInfo,
-        const char* dirName);
-    bool fncScanAndMergeDirLocked(
-        SortedVector<AssetDir::FileInfo>* pMergedInfo,
-        const asset_path& path, const char* locale, const char* vendor,
-        const char* dirName);
-    void purgeFileNameCacheLocked(void);
 
     const ResTable* getResTable(bool required = true) const;
     void setLocaleLocked(const char* locale);
@@ -381,23 +344,9 @@ private:
 
     Vector<asset_path> mAssetPaths;
     char*           mLocale;
-    char*           mVendor;
 
     mutable ResTable* mResources;
     ResTable_config* mConfig;
-
-    /*
-     * Cached data for "loose" files.  This lets us avoid poking at the
-     * filesystem when searching for loose assets.  Each entry is the
-     * "extended partial" path, e.g. "default/default/foo/bar.txt".  The
-     * full set of files is present, including ".EXCLUDE" entries.
-     *
-     * We do not cache directory names.  We don't retain the ".gz",
-     * because to our clients "foo" and "foo.gz" both look like "foo".
-     */
-    CacheMode       mCacheMode;         // is the cache enabled?
-    bool            mCacheValid;        // clear when locale or vendor changes
-    SortedVector<AssetDir::FileInfo> mCache;
 };
 
 }; // namespace android
