@@ -368,11 +368,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     @Override
     boolean isVisible() {
-        if (hidden) {
-            // TODO: Should this be checking hiddenRequested instead of hidden?
-            return false;
-        }
-        return super.isVisible();
+        // If the app token isn't hidden then it is considered visible and there is no need to check
+        // its children windows to see if they are visible.
+        return !hidden;
     }
 
     @Override
