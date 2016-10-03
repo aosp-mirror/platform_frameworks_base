@@ -434,7 +434,7 @@ public class SettingsDrawerActivity extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            mCategoryManager.reloadAllCategoriesForConfigChange(SettingsDrawerActivity.this);
+            mCategoryManager.reloadAllCategories(SettingsDrawerActivity.this);
             return null;
         }
 
