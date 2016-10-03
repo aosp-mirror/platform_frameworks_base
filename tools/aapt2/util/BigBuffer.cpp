@@ -49,4 +49,29 @@ void* BigBuffer::nextBlockImpl(size_t size) {
     return mBlocks.back().buffer.get();
 }
 
+void* BigBuffer::nextBlock(size_t* outSize) {
+    if (!mBlocks.empty()) {
+        Block& block = mBlocks.back();
+        if (block.size != block.mBlockSize) {
+            void* outBuffer = block.buffer.get() + block.size;
+            size_t size = block.mBlockSize - block.size;
+            block.size = block.mBlockSize;
+            mSize += size;
+            *outSize = size;
+            return outBuffer;
+        }
+    }
+
+    // Zero-allocate the block's buffer.
+    Block block = {};
+    block.buffer = std::unique_ptr<uint8_t[]>(new uint8_t[mBlockSize]());
+    assert(block.buffer);
+    block.size = mBlockSize;
+    block.mBlockSize = mBlockSize;
+    mBlocks.push_back(std::move(block));
+    mSize += mBlockSize;
+    *outSize = mBlockSize;
+    return mBlocks.back().buffer.get();
+}
+
 } // namespace aapt

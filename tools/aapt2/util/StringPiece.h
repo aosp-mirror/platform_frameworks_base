@@ -39,6 +39,9 @@ public:
     using const_iterator = const TChar*;
     using difference_type = size_t;
 
+    // End of string marker.
+    constexpr static const size_t npos = static_cast<size_t>(-1);
+
     BasicStringPiece();
     BasicStringPiece(const BasicStringPiece<TChar>& str);
     BasicStringPiece(const std::basic_string<TChar>& str);  // NOLINT(implicit)
@@ -48,7 +51,7 @@ public:
     BasicStringPiece<TChar>& operator=(const BasicStringPiece<TChar>& rhs);
     BasicStringPiece<TChar>& assign(const TChar* str, size_t len);
 
-    BasicStringPiece<TChar> substr(size_t start, size_t len) const;
+    BasicStringPiece<TChar> substr(size_t start, size_t len = npos) const;
     BasicStringPiece<TChar> substr(BasicStringPiece<TChar>::const_iterator begin,
                                    BasicStringPiece<TChar>::const_iterator end) const;
 
@@ -79,6 +82,9 @@ using StringPiece16 = BasicStringPiece<char16_t>;
 //
 // BasicStringPiece implementation.
 //
+
+template <typename TChar>
+constexpr const size_t BasicStringPiece<TChar>::npos;
 
 template <typename TChar>
 inline BasicStringPiece<TChar>::BasicStringPiece() : mData(nullptr) , mLength(0) {
@@ -127,7 +133,11 @@ inline BasicStringPiece<TChar>& BasicStringPiece<TChar>::assign(const TChar* str
 
 template <typename TChar>
 inline BasicStringPiece<TChar> BasicStringPiece<TChar>::substr(size_t start, size_t len) const {
-    if (start + len > mLength) {
+    if (len == npos) {
+        len = mLength - start;
+    }
+
+    if (start > mLength || start + len > mLength) {
         return BasicStringPiece<TChar>();
     }
     return BasicStringPiece<TChar>(mData + start, len);

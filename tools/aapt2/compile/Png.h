@@ -17,10 +17,14 @@
 #ifndef AAPT_PNG_H
 #define AAPT_PNG_H
 
-#include "util/BigBuffer.h"
 #include "Diagnostics.h"
 #include "Source.h"
+#include "compile/Image.h"
+#include "io/Io.h"
+#include "process/IResourceTableConsumer.h"
+#include "util/BigBuffer.h"
 
+#include <android-base/macros.h>
 #include <iostream>
 #include <string>
 
@@ -40,7 +44,50 @@ public:
 
 private:
     IDiagnostics* mDiag;
+
+    DISALLOW_COPY_AND_ASSIGN(Png);
 };
+
+/**
+ * An InputStream that filters out unimportant PNG chunks.
+ */
+class PngChunkFilter : public io::InputStream {
+public:
+    explicit PngChunkFilter(const StringPiece& data);
+
+    bool Next(const void** buffer, int* len) override;
+    void BackUp(int count) override;
+    bool Skip(int count) override;
+
+    int64_t ByteCount() const override {
+        return static_cast<int64_t>(mWindowStart);
+    }
+
+    bool HadError() const override {
+        return mError;
+    }
+
+private:
+    bool consumeWindow(const void** buffer, int* len);
+
+    StringPiece mData;
+    size_t mWindowStart = 0;
+    size_t mWindowEnd = 0;
+    bool mError = false;
+
+    DISALLOW_COPY_AND_ASSIGN(PngChunkFilter);
+};
+
+/**
+ * Reads a PNG from the InputStream into memory as an RGBA Image.
+ */
+std::unique_ptr<Image> readPng(IAaptContext* context, io::InputStream* in);
+
+/**
+ * Writes the RGBA Image, with optional 9-patch meta-data, into the OutputStream as a PNG.
+ */
+bool writePng(IAaptContext* context, const Image* image, const NinePatch* ninePatch,
+              io::OutputStream* out, const PngOptions& options);
 
 } // namespace aapt
 

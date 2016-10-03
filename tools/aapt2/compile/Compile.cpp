@@ -36,6 +36,8 @@
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/io/coded_stream.h>
 
+#include <android-base/errors.h>
+#include <android-base/file.h>
 #include <dirent.h>
 #include <fstream>
 #include <string>
@@ -359,6 +361,9 @@ static bool flattenXmlToOutStream(IAaptContext* context, const StringPiece& outp
 static bool compileXml(IAaptContext* context, const CompileOptions& options,
                        const ResourcePathData& pathData, IArchiveWriter* writer,
                        const std::string& outputPath) {
+    if (context->verbose()) {
+        context->getDiagnostics()->note(DiagMessage(pathData.source) << "compiling XML");
+    }
 
     std::unique_ptr<xml::XmlResource> xmlRes;
     {
@@ -431,9 +436,43 @@ static bool compileXml(IAaptContext* context, const CompileOptions& options,
     return true;
 }
 
+class BigBufferOutputStream : public io::OutputStream {
+public:
+    explicit BigBufferOutputStream(BigBuffer* buffer) : mBuffer(buffer) {
+    }
+
+    bool Next(void** data, int* len) override {
+        size_t count;
+        *data = mBuffer->nextBlock(&count);
+        *len = static_cast<int>(count);
+        return true;
+    }
+
+    void BackUp(int count) override {
+        mBuffer->backUp(count);
+    }
+
+    int64_t ByteCount() const override {
+        return mBuffer->size();
+    }
+
+    bool HadError() const override {
+        return false;
+    }
+
+private:
+    BigBuffer* mBuffer;
+
+    DISALLOW_COPY_AND_ASSIGN(BigBufferOutputStream);
+};
+
 static bool compilePng(IAaptContext* context, const CompileOptions& options,
                        const ResourcePathData& pathData, IArchiveWriter* writer,
                        const std::string& outputPath) {
+    if (context->verbose()) {
+        context->getDiagnostics()->note(DiagMessage(pathData.source) << "compiling PNG");
+    }
+
     BigBuffer buffer(4096);
     ResourceFile resFile;
     resFile.name = ResourceName({}, *parseResourceType(pathData.resourceDir), pathData.name);
@@ -441,15 +480,89 @@ static bool compilePng(IAaptContext* context, const CompileOptions& options,
     resFile.source = pathData.source;
 
     {
-        std::ifstream fin(pathData.source.path, std::ifstream::binary);
-        if (!fin) {
-            context->getDiagnostics()->error(DiagMessage(pathData.source) << strerror(errno));
+        std::string content;
+        if (!android::base::ReadFileToString(pathData.source.path, &content)) {
+            context->getDiagnostics()->error(DiagMessage(pathData.source)
+                                             << android::base::SystemErrorCodeToString(errno));
             return false;
         }
 
-        Png png(context->getDiagnostics());
-        if (!png.process(pathData.source, &fin, &buffer, {})) {
+        BigBuffer crunchedPngBuffer(4096);
+        BigBufferOutputStream crunchedPngBufferOut(&crunchedPngBuffer);
+
+        // Ensure that we only keep the chunks we care about if we end up
+        // using the original PNG instead of the crunched one.
+        PngChunkFilter pngChunkFilter(content);
+        std::unique_ptr<Image> image = readPng(context, &pngChunkFilter);
+        if (!image) {
             return false;
+        }
+
+        std::unique_ptr<NinePatch> ninePatch;
+        if (pathData.extension == "9.png") {
+            std::string err;
+            ninePatch = NinePatch::create(image->rows.get(), image->width, image->height, &err);
+            if (!ninePatch) {
+                context->getDiagnostics()->error(DiagMessage() << err);
+                return false;
+            }
+
+            // Remove the 1px border around the NinePatch.
+            // Basically the row array is shifted up by 1, and the length is treated
+            // as height - 2.
+            // For each row, shift the array to the left by 1, and treat the length as width - 2.
+            image->width -= 2;
+            image->height -= 2;
+            memmove(image->rows.get(), image->rows.get() + 1, image->height * sizeof(uint8_t**));
+            for (int32_t h = 0; h < image->height; h++) {
+                memmove(image->rows[h], image->rows[h] + 4, image->width * 4);
+            }
+
+            if (context->verbose()) {
+                context->getDiagnostics()->note(DiagMessage(pathData.source)
+                                                << "9-patch: " << *ninePatch);
+            }
+        }
+
+        // Write the crunched PNG.
+        if (!writePng(context, image.get(), ninePatch.get(), &crunchedPngBufferOut, {})) {
+            return false;
+        }
+
+        if (ninePatch != nullptr
+                || crunchedPngBufferOut.ByteCount() <= pngChunkFilter.ByteCount()) {
+            // No matter what, we must use the re-encoded PNG, even if it is larger.
+            // 9-patch images must be re-encoded since their borders are stripped.
+            buffer.appendBuffer(std::move(crunchedPngBuffer));
+        } else {
+            // The re-encoded PNG is larger than the original, and there is
+            // no mandatory transformation. Use the original.
+            if (context->verbose()) {
+                context->getDiagnostics()->note(DiagMessage(pathData.source)
+                                                << "original PNG is smaller than crunched PNG"
+                                                << ", using original");
+            }
+
+            PngChunkFilter pngChunkFilterAgain(content);
+            BigBuffer filteredPngBuffer(4096);
+            BigBufferOutputStream filteredPngBufferOut(&filteredPngBuffer);
+            io::copy(&filteredPngBufferOut, &pngChunkFilterAgain);
+            buffer.appendBuffer(std::move(filteredPngBuffer));
+        }
+
+        if (context->verbose()) {
+            // For debugging only, use the legacy PNG cruncher and compare the resulting file sizes.
+            // This will help catch exotic cases where the new code may generate larger PNGs.
+            std::stringstream legacyStream(content);
+            BigBuffer legacyBuffer(4096);
+            Png png(context->getDiagnostics());
+            if (!png.process(pathData.source, &legacyStream, &legacyBuffer, {})) {
+                return false;
+            }
+
+            context->getDiagnostics()->note(DiagMessage(pathData.source)
+                                            << "legacy=" << legacyBuffer.size()
+                                            << " new=" << buffer.size());
         }
     }
 
@@ -463,6 +576,10 @@ static bool compilePng(IAaptContext* context, const CompileOptions& options,
 static bool compileFile(IAaptContext* context, const CompileOptions& options,
                         const ResourcePathData& pathData, IArchiveWriter* writer,
                         const std::string& outputPath) {
+    if (context->verbose()) {
+        context->getDiagnostics()->note(DiagMessage(pathData.source) << "compiling file");
+    }
+
     BigBuffer buffer(256);
     ResourceFile resFile;
     resFile.name = ResourceName({}, *parseResourceType(pathData.resourceDir), pathData.name);
