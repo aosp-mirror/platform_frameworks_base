@@ -2328,9 +2328,6 @@
          provisioning, availability etc -->
     <bool name="config_carrier_volte_available">false</bool>
 
-    <!-- Flag specifying whether VoLTE availability is based on provisioning -->
-    <bool name="config_carrier_volte_provisioned">false</bool>
-
     <!-- Flag specifying whether VoLTE TTY is supported -->
     <bool name="config_carrier_volte_tty_supported">true</bool>
 
