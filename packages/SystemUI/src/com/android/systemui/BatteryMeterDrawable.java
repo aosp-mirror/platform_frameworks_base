@@ -31,10 +31,9 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
-
 import com.android.systemui.statusbar.policy.BatteryController;
 
 public class BatteryMeterDrawable extends Drawable implements
@@ -92,18 +91,17 @@ public class BatteryMeterDrawable extends Drawable implements
     private int mLightModeBackgroundColor;
     private int mLightModeFillColor;
 
-    private final SettingObserver mSettingObserver = new SettingObserver();
+    private final SettingObserver mSettingObserver;
 
     private final Context mContext;
-    private final Handler mHandler;
 
     private int mLevel = -1;
     private boolean mPluggedIn;
     private boolean mListening;
 
-    public BatteryMeterDrawable(Context context, Handler handler, int frameColor) {
+    public BatteryMeterDrawable(Context context, int frameColor) {
         mContext = context;
-        mHandler = handler;
+        mSettingObserver = new SettingObserver(new Handler(mContext.getMainLooper()));
         final Resources res = context.getResources();
         TypedArray levels = res.obtainTypedArray(R.array.batterymeter_color_levels);
         TypedArray colors = res.obtainTypedArray(R.array.batterymeter_color_values);
@@ -199,12 +197,7 @@ public class BatteryMeterDrawable extends Drawable implements
     }
 
     private void postInvalidate() {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                invalidateSelf();
-            }
-        });
+        scheduleSelf(this::invalidateSelf, 0);
     }
 
     public void setBatteryController(BatteryController batteryController) {
@@ -506,8 +499,8 @@ public class BatteryMeterDrawable extends Drawable implements
     }
 
     private final class SettingObserver extends ContentObserver {
-        public SettingObserver() {
-            super(new Handler());
+        public SettingObserver(Handler handler) {
+            super(handler);
         }
 
         @Override
