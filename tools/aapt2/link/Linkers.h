@@ -60,6 +60,14 @@ public:
 };
 
 /**
+ * Removes duplicated key-value entries from dominated resources.
+ */
+class ResourceDeduper : public IResourceTableConsumer {
+public:
+    bool consume(IAaptContext* context, ResourceTable* table) override;
+};
+
+/**
  * If any attribute resource values are defined as public, this consumer will move all private
  * attribute resource values to a private ^private-attr type, avoiding backwards compatibility
  * issues with new apps running on old platforms.

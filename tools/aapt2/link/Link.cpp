@@ -72,6 +72,7 @@ struct LinkOptions {
 
     bool noAutoVersion = false;
     bool noVersionVectors = false;
+    bool noResourceDeduping = false;
     bool staticLib = false;
     bool noStaticLibPackages = false;
     bool generateNonFinalIds = false;
@@ -1505,6 +1506,14 @@ public:
             }
         }
 
+        if (!mOptions.noResourceDeduping) {
+            ResourceDeduper deduper;
+            if (!deduper.consume(mContext, &mFinalTable)) {
+                mContext->getDiagnostics()->error(DiagMessage() << "failed deduping resources");
+                return 1;
+            }
+        }
+
         proguard::KeepSet proguardKeepSet;
         proguard::KeepSet proguardMainDexKeepSet;
 
@@ -1743,6 +1752,9 @@ int link(const std::vector<StringPiece>& args) {
                             "Disables automatic versioning of vector drawables. Use this only\n"
                             "when building with vector drawable support library",
                             &options.noVersionVectors)
+            .optionalSwitch("--no-resource-deduping", "Disables automatic deduping of resources with\n"
+                            "identical values across compatible configurations.",
+                            &options.noResourceDeduping)
             .optionalSwitch("-x", "Legacy flag that specifies to use the package identifier 0x01",
                             &legacyXFlag)
             .optionalSwitch("-z", "Require localization of strings marked 'suggested'",

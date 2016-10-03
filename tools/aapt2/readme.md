@@ -4,6 +4,10 @@
 ### `aapt2 compile ...`
 - Added support for inline complex XML resources. See
   https://developer.android.com/guide/topics/resources/complex-xml-resources.html
+### `aapt link ...`
+- Duplicate resource filtering: removes duplicate resources in dominated configurations
+  that are always identical when selected at runtime. This can be disabled with
+  `--no-resource-deduping`.
 
 ## Version 2.1
 ### `aapt2 link ...`

@@ -789,4 +789,96 @@ ConfigDescription ConfigDescription::copyWithoutSdkVersion() const {
     return copy;
 }
 
+bool ConfigDescription::dominates(const ConfigDescription& o) const {
+    if (*this == defaultConfig() || *this == o) {
+        return true;
+    }
+    return matchWithDensity(o)
+            && !o.matchWithDensity(*this)
+            && !isMoreSpecificThan(o)
+            && !o.hasHigherPrecedenceThan(*this);
+}
+
+bool ConfigDescription::hasHigherPrecedenceThan(const ConfigDescription& o) const {
+    // The order of the following tests defines the importance of one
+    // configuration parameter over another. Those tests first are more
+    // important, trumping any values in those following them.
+    // The ordering should be the same as ResTable_config#isBetterThan.
+    if (mcc || o.mcc) return (!o.mcc);
+    if (mnc || o.mnc) return (!o.mnc);
+    if (language[0] || o.language[0]) return (!o.language[0]);
+    if (country[0] || o.country[0]) return (!o.country[0]);
+    // Script and variant require either a language or country, both of which
+    // have higher precedence.
+    if ((screenLayout | o.screenLayout) & MASK_LAYOUTDIR) {
+        return !(o.screenLayout & MASK_LAYOUTDIR);
+    }
+    if (smallestScreenWidthDp || o.smallestScreenWidthDp) return (!o.smallestScreenWidthDp);
+    if (screenWidthDp || o.screenWidthDp) return (!o.screenWidthDp);
+    if (screenHeightDp || o.screenHeightDp) return (!o.screenHeightDp);
+    if ((screenLayout | o.screenLayout) & MASK_SCREENSIZE) {
+        return !(o.screenLayout & MASK_SCREENSIZE);
+    }
+    if ((screenLayout | o.screenLayout) & MASK_SCREENLONG) {
+        return !(o.screenLayout & MASK_SCREENLONG);
+    }
+    if ((screenLayout2 | o.screenLayout2) & MASK_SCREENROUND) {
+        return !(o.screenLayout2 & MASK_SCREENROUND);
+    }
+    if (orientation || o.orientation) return (!o.orientation);
+    if ((uiMode | o.uiMode) & MASK_UI_MODE_TYPE) {
+        return !(o.uiMode & MASK_UI_MODE_TYPE);
+    }
+    if ((uiMode | o.uiMode) & MASK_UI_MODE_NIGHT) {
+        return !(o.uiMode & MASK_UI_MODE_NIGHT);
+    }
+    if (density || o.density) return (!o.density);
+    if (touchscreen || o.touchscreen) return (!o.touchscreen);
+    if ((inputFlags | o.inputFlags) & MASK_KEYSHIDDEN) {
+        return !(o.inputFlags & MASK_KEYSHIDDEN);
+    }
+    if ((inputFlags | o.inputFlags) & MASK_NAVHIDDEN) {
+        return !(o.inputFlags & MASK_NAVHIDDEN);
+    }
+    if (keyboard || o.keyboard) return (!o.keyboard);
+    if (navigation || o.navigation) return (!o.navigation);
+    if (screenWidth || o.screenWidth) return (!o.screenWidth);
+    if (screenHeight || o.screenHeight) return (!o.screenHeight);
+    if (sdkVersion || o.sdkVersion) return (!o.sdkVersion);
+    if (minorVersion || o.minorVersion) return (!o.minorVersion);
+    // Both configurations have nothing defined except some possible future
+    // value. Returning the comparison of the two configurations is a
+    // "best effort" at this point to protect against incorrect dominations.
+    return *this != o;
+}
+
+bool ConfigDescription::conflictsWith(const ConfigDescription& o) const {
+    // This method should be updated as new configuration parameters are
+    // introduced (e.g. screenConfig2).
+    auto pred = [](const uint32_t a, const uint32_t b) -> bool {
+        return a == 0 || b == 0 || a == b;
+    };
+    // The values here can be found in ResTable_config#match. Density and range
+    // values can't lead to conflicts, and are ignored.
+    return !pred(mcc, o.mcc)
+            || !pred(mnc, o.mnc)
+            || !pred(locale, o.locale)
+            || !pred(screenLayout & MASK_LAYOUTDIR, o.screenLayout & MASK_LAYOUTDIR)
+            || !pred(screenLayout & MASK_SCREENLONG, o.screenLayout & MASK_SCREENLONG)
+            || !pred(screenLayout & MASK_UI_MODE_TYPE, o.screenLayout & MASK_UI_MODE_TYPE)
+            || !pred(uiMode & MASK_UI_MODE_TYPE, o.uiMode & MASK_UI_MODE_TYPE)
+            || !pred(uiMode & MASK_UI_MODE_NIGHT, o.uiMode & MASK_UI_MODE_NIGHT)
+            || !pred(screenLayout2 & MASK_SCREENROUND, o.screenLayout2 & MASK_SCREENROUND)
+            || !pred(orientation, o.orientation)
+            || !pred(touchscreen, o.touchscreen)
+            || !pred(inputFlags & MASK_KEYSHIDDEN, o.inputFlags & MASK_KEYSHIDDEN)
+            || !pred(inputFlags & MASK_NAVHIDDEN, o.inputFlags & MASK_NAVHIDDEN)
+            || !pred(keyboard, o.keyboard)
+            || !pred(navigation, o.navigation);
+}
+
+bool ConfigDescription::isCompatibleWith(const ConfigDescription& o) const {
+    return !conflictsWith(o) && !dominates(o) && !o.dominates(*this);
+}
+
 } // namespace aapt
