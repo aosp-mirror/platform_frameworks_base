@@ -48,6 +48,12 @@
     <!-- Whether or not we show the number in the bar. -->
     <bool name="config_statusBarShowNumber">false</bool>
 
+    <!-- Vibrator pattern for camera gesture launch. -->
+    <integer-array translatable="false" name="config_cameraLaunchGestureVibePattern">
+        <item>0</item>
+        <item>400</item>
+    </integer-array>
+
     <!-- How many icons may be shown at once in the system bar. Includes any
          slots that may be reused for things like IME control. -->
     <integer name="config_maxNotificationIcons">5</integer>
