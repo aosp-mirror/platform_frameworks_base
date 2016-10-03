@@ -954,7 +954,7 @@ static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, job
 const char* const kClassPathName = "android/view/ThreadedRenderer";
 
 static const JNINativeMethod gMethods[] = {
-    { "nSupportsOpenGL", "!()Z", (void*) android_view_ThreadedRenderer_supportsOpenGL },
+    { "nSupportsOpenGL", "()Z", (void*) android_view_ThreadedRenderer_supportsOpenGL },
     { "nSetAtlas", "(JLandroid/view/GraphicBuffer;[J)V",   (void*) android_view_ThreadedRenderer_setAtlas },
     { "nSetProcessStatsBuffer", "(JI)V", (void*) android_view_ThreadedRenderer_setProcessStatsBuffer },
     { "nGetRenderThreadTid", "(J)I", (void*) android_view_ThreadedRenderer_getRenderThreadTid },
