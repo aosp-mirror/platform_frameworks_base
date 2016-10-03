@@ -6807,6 +6807,13 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, animation in progress.");
             return false;
         }
+        if (mDisplayFrozen) {
+            // Even if the screen rotation animation has finished (e.g. isAnimating
+            // returns false), there is still some time where we haven't yet unfrozen
+            // the display. We also need to abort rotation here.
+            if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, still finishing previous rotation");
+            return false;
+        }
 
         if (!mDisplayEnabled) {
             // No point choosing a rotation if the display is not enabled.
