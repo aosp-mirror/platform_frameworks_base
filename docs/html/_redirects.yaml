@@ -1290,6 +1290,8 @@ redirects:
   to: /studio/write/draw9patch.html?utm_source=android-studio
 - from: /r/studio-ui/firebase-assistant.html
   to: /studio/write/firebase.html?utm_source=android-studio
+- from: /r/studio-ui/ir-flight-recorder.html
+  to: /studio/run/index.html?utm_source=android-studio#submit-feedback
 
 # Redirects from (removed) N Preview documentation
 - from: /preview/features/afw.html
