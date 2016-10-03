@@ -147,6 +147,7 @@ public class RetailDemoModeServiceTest {
         userInfo.id = TEST_DEMO_USER;
         when(mUm.createUser(anyString(), anyInt())).thenReturn(userInfo);
 
+        setCameraPackage(TEST_CAMERA_PKG);
         mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         assertEquals(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED + " property not set",
                 "1", mInjector.systemPropertiesGet(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED));
@@ -157,7 +158,6 @@ public class RetailDemoModeServiceTest {
         assertTrue("Not registered for " + Intent.ACTION_SCREEN_OFF,
                 intentFilter.getValue().hasAction(Intent.ACTION_SCREEN_OFF));
 
-        setCameraPackage(TEST_CAMERA_PKG);
         // Wait for the setup to complete.
         mLatch.await(SETUP_COMPLETE_TIMEOUT_MS, TimeUnit.MILLISECONDS);
         ArgumentCaptor<Integer> flags = ArgumentCaptor.forClass(Integer.class);
