@@ -113,6 +113,8 @@ public class WifiNanSession {
      *      An application must use the {@link WifiNanDiscoveryBaseSession#destroy()} to
      *      terminate the publish discovery session once it isn't needed. This will free
      *      resources as well terminate any on-air transmissions.
+     * <p>The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
+     * permission to start a publish discovery session.
      *
      * @param handler The Handler on whose thread to execute the callbacks of the {@code
      * callback} object. If a null is provided then the application's main thread will be used.
@@ -156,6 +158,8 @@ public class WifiNanSession {
      *      An application must use the {@link WifiNanDiscoveryBaseSession#destroy()} to
      *      terminate the subscribe discovery session once it isn't needed. This will free
      *      resources as well terminate any on-air transmissions.
+     * <p>The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
+     * permission to start a subscribe discovery session.
      *
      * @param handler The Handler on whose thread to execute the callbacks of the {@code
      * callback} object. If a null is provided then the application's main thread will be used.
