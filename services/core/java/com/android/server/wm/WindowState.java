@@ -1302,7 +1302,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean isVisible() {
-        if ((mAppToken == null || !mAppToken.hiddenRequested) && isVisibleUnchecked()) {
+        // TODO: The check for hiddenRequested is commented out below, because the window can still
+        // be visible on screen when the flag is true. We would like the isVisible() method to
+        // return an answer closer to if the window is truly visible (can't be an exact answer
+        // without checking the surface state), so comment out the check for now so we can test to
+        // see what problem it causes.
+        // If it doesn't cause any issues, then we can remove just before we lock down the current
+        // release (O) and also consolidate this method with #isVisibleUnchecked() and possibly
+        // other methods like isVisibleNow().
+        // If it does cause problems, then we can look if there are other ways to solve the problem.
+        // If there isn't then uncomment and document here why it is needed.
+        if (/*(mAppToken == null || !mAppToken.hiddenRequested) && */isVisibleUnchecked()
+            // TODO: The window isn't considered visible when the token is hidden, however
+            // uncommenting the check below breaks the visual transition from an app to the launcher
+            // if the home buttons is pressed. Need to investigate an fix that issue before
+            // uncommenting.
+            /* && !mToken.hidden*/) {
             // Is this window visible?  It is not visible if there is no surface, or we are in the
             // process of running an exit animation that will remove the surface, or its app token
             // has been hidden.
