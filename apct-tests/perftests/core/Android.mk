@@ -12,5 +12,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 LOCAL_PACKAGE_NAME := CorePerfTests
 
+# Use google-fonts/dancing-script for the performance metrics
+LOCAL_ASSET_DIR := $(TOP)/external/google-fonts/dancing-script
+
 include $(BUILD_PACKAGE)
 
