@@ -31,7 +31,7 @@ struct ALooper;
 struct AMessage;
 struct AString;
 struct ICrypto;
-struct IGraphicBufferProducer;
+class IGraphicBufferProducer;
 struct MediaCodec;
 struct PersistentSurface;
 class Surface;
