@@ -34,6 +34,7 @@ import android.net.netlink.RtNetlinkNeighborMessage;
 import android.net.netlink.StructNdaCacheInfo;
 import android.net.netlink.StructNdMsg;
 import android.net.netlink.StructNlMsgHdr;
+import android.net.util.AvoidBadWifiTracker;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.system.ErrnoException;
@@ -42,6 +43,7 @@ import android.system.OsConstants;
 import android.util.Log;
 
 import java.io.InterruptedIOException;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -149,6 +151,7 @@ public class IpReachabilityMonitor {
     private final String mInterfaceName;
     private final int mInterfaceIndex;
     private final Callback mCallback;
+    private final AvoidBadWifiTracker mAvoidBadWifiTracker;
     private final NetlinkSocketObserver mNetlinkSocketObserver;
     private final Thread mObserverThread;
     private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
@@ -219,8 +222,12 @@ public class IpReachabilityMonitor {
         return errno;
     }
 
-    public IpReachabilityMonitor(Context context, String ifName, Callback callback)
-                throws IllegalArgumentException {
+    public IpReachabilityMonitor(Context context, String ifName, Callback callback) {
+        this(context, ifName, callback, null);
+    }
+
+    public IpReachabilityMonitor(Context context, String ifName, Callback callback,
+            AvoidBadWifiTracker tracker) throws IllegalArgumentException {
         mInterfaceName = ifName;
         int ifIndex = -1;
         try {
@@ -232,6 +239,7 @@ public class IpReachabilityMonitor {
         mWakeLock = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, TAG + "." + mInterfaceName);
         mCallback = callback;
+        mAvoidBadWifiTracker = tracker;
         mNetlinkSocketObserver = new NetlinkSocketObserver();
         mObserverThread = new Thread(mNetlinkSocketObserver);
         mObserverThread.start();
@@ -355,7 +363,11 @@ public class IpReachabilityMonitor {
                         whatIfLp.removeRoute(route);
                     }
                 }
-                whatIfLp.removeDnsServer(ip);
+
+                if (avoidingBadLinks() || !(ip instanceof Inet6Address)) {
+                    // We should do this unconditionally, but alas we cannot: b/31827713.
+                    whatIfLp.removeDnsServer(ip);
+                }
             }
 
             delta = LinkProperties.compareProvisioning(mLinkProperties, whatIfLp);
@@ -371,6 +383,10 @@ public class IpReachabilityMonitor {
             }
         }
         logNudFailed(delta);
+    }
+
+    private boolean avoidingBadLinks() {
+        return (mAvoidBadWifiTracker != null) ? mAvoidBadWifiTracker.currentValue() : true;
     }
 
     public void probeAll() {
