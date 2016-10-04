@@ -913,6 +913,9 @@ class AccountsDb implements AutoCloseable {
         ) > 0;
     }
 
+    /**
+     * Returns list of all grants as {@link Pair pairs} of account name and UID.
+     */
     List<Pair<String, Integer>> findAllAccountGrants() {
         SQLiteDatabase db = mDeDatabase.getReadableDatabase();
         try (Cursor cursor = db.rawQuery(ACCOUNT_ACCESS_GRANTS, null)) {
