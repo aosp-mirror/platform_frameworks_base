@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,8 +21,6 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 
-import com.android.settingslib.applications.InterestingConfigChanges;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,8 +30,6 @@ public class CategoryManager {
     private static final String TAG = "CategoryManager";
 
     private static CategoryManager sInstance;
-
-    private final InterestingConfigChanges mInterestingConfigChanges;
 
     // Tile cache (key: <packageName, activityName>, value: tile)
     private final Map<Pair<String, String>, Tile> mTileByComponentCache;
@@ -51,12 +47,11 @@ public class CategoryManager {
     }
 
     CategoryManager() {
-        mInterestingConfigChanges = new InterestingConfigChanges();
         mTileByComponentCache = new ArrayMap<>();
         mCategoryByKeyMap = new ArrayMap<>();
     }
 
-    public DashboardCategory getTilesByCategory(Context context, String categoryKey) {
+    public synchronized DashboardCategory getTilesByCategory(Context context, String categoryKey) {
         tryInitCategories(context);
 
         final DashboardCategory category = mCategoryByKeyMap.get(categoryKey);
@@ -66,19 +61,17 @@ public class CategoryManager {
         return category;
     }
 
-    public List<DashboardCategory> getCategories(Context context) {
+    public synchronized List<DashboardCategory> getCategories(Context context) {
         tryInitCategories(context);
         return mCategories;
     }
 
-    public void reloadAllCategoriesForConfigChange(Context context) {
-        if (mInterestingConfigChanges.applyNewConfig(context.getResources())) {
-            mCategories = null;
-            tryInitCategories(context);
-        }
+    public synchronized void reloadAllCategories(Context context) {
+        mCategories = null;
+        tryInitCategories(context);
     }
 
-    public void updateCategoryFromBlacklist(Set<ComponentName> tileBlacklist) {
+    public synchronized void updateCategoryFromBlacklist(Set<ComponentName> tileBlacklist) {
         if (mCategories == null) {
             Log.w(TAG, "Category is null, skipping blacklist update");
         }
@@ -93,7 +86,7 @@ public class CategoryManager {
         }
     }
 
-    private void tryInitCategories(Context context) {
+    private synchronized void tryInitCategories(Context context) {
         if (mCategories == null) {
             mTileByComponentCache.clear();
             mCategoryByKeyMap.clear();
