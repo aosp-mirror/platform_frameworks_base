@@ -67,6 +67,8 @@ public:
             LayerUpdateQueue* layerUpdateQueue, bool opaque,
             const BakedOpRenderer::LightInfo& lightInfo) = 0;
     virtual TaskManager* getTaskManager() = 0;
+    virtual bool createOrUpdateLayer(RenderNode* node,
+            const DamageAccumulator& damageAccumulator) = 0;
 
     virtual ~IRenderPipeline() {}
 };

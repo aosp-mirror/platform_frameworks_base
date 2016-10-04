@@ -56,6 +56,9 @@ public:
             LayerUpdateQueue* layerUpdateQueue, bool opaque,
             const BakedOpRenderer::LightInfo& lightInfo) override;
     TaskManager* getTaskManager() override;
+    bool createOrUpdateLayer(RenderNode* node,
+            const DamageAccumulator& damageAccumulator) override;
+    static void destroyLayer(RenderNode* node);
 
 private:
     EglManager& mEglManager;

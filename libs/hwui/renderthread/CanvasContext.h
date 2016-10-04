@@ -68,6 +68,23 @@ public:
             RenderNode* rootRenderNode, IContextFactory* contextFactory);
     virtual ~CanvasContext();
 
+    /**
+     * Update or create a layer specific for the provided RenderNode. The layer
+     * attached to the node will be specific to the RenderPipeline used by this
+     * context
+     *
+     *  @return true if the layer has been created or updated
+     */
+    bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& dmgAccumulator) {
+        return mRenderPipeline->createOrUpdateLayer(node, dmgAccumulator);
+    }
+
+    /**
+     * Destroy any layers that have been attached to the provided RenderNode removing
+     * any state that may have been set during createOrUpdateLayer().
+     */
+    static void destroyLayer(RenderNode* node);
+
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
 

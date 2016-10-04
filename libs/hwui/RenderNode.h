@@ -199,6 +199,7 @@ public:
     }
     OffscreenBuffer* getLayer() const { return mLayer; }
     OffscreenBuffer** getLayerHandle() { return &mLayer; } // ugh...
+    void setLayer(OffscreenBuffer* layer) { mLayer = layer; }
 
     // Note: The position callbacks are relying on the listener using
     // the frameNumber to appropriately batch/synchronize these transactions.
