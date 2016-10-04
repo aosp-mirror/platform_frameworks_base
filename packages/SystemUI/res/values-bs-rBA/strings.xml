@@ -238,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G prijenos podataka je pauzirano"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobilni podaci su pauzirani"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Prijenos podataka je pauziran"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Dostigli ste ograničenje za podatke koje ste postavili. Više ne koristite mobilne podatke.\n\nUkoliko nastavite koristiti mobilne podatke, mogući su troškovi za korištenje podataka."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Dostigli ste ograničenje za prijenos podataka koje ste postavili. Više ne koristite mobilne podatke.\n\nUkoliko nastavite koristiti mobilne podatke, mogući su troškovi za prijenos podataka."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Nastavi"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nema internet veze"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi veza aktivna"</string>
@@ -313,7 +313,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Obavještenja"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Svjetiljka"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobilni podaci"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Korištenje podataka"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Prijenos podataka"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Preostala količina podataka"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Prekoračeno"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Iskorišteno <xliff:g id="DATA_USED">%s</xliff:g>"</string>
