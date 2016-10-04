@@ -20,8 +20,10 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,16 +89,23 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     protected void handleClick() {
-        if (!mController.canConfigBluetooth()) {
-            mHost.startActivityDismissingKeyguard(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
-            return;
+        boolean easyToggle = isBtEasyToggleEnabled();
+            if (easyToggle) {
+                final boolean isEnabled = (Boolean)mState.value;
+                MetricsLogger.action(mContext, getMetricsCategory(), !isEnabled);
+	        mController.setBluetoothEnabled(!isEnabled);
+            } else {
+                if (!mController.canConfigBluetooth()) {
+	            mHost.startActivityDismissingKeyguard(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
+    	            return;
+    	        }
+                if (!mState.value) {
+                    mState.value = true;
+	            mController.setBluetoothEnabled(true);
+                }
+            showDetail(true);
+            }
         }
-        showDetail(true);
-        if (!mState.value) {
-            mState.value = true;
-            mController.setBluetoothEnabled(true);
-        }
-    }
 
     @Override
     public CharSequence getTileLabel() {
@@ -156,6 +165,11 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
         state.expandedAccessibilityClassName = Button.class.getName();
         state.minimalAccessibilityClassName = Switch.class.getName();
+    }
+
+    public boolean isBtEasyToggleEnabled() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+            Settings.Secure.QS_BT_EASY_TOGGLE, 0) == 1;
     }
 
     @Override
