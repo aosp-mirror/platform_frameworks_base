@@ -185,7 +185,7 @@ public class SettingsDrawerActivity extends Activity {
             return false;
         }
         if (isDashboardFeatureEnabled()) {
-            final DashboardCategory homepageCategories = CategoryManager.get()
+            final DashboardCategory homepageCategories = CategoryManager.get(this)
                     .getTilesByCategory(this, CategoryKey.CATEGORY_HOMEPAGE);
             return homepageCategories.containsComponent(componentName);
         } else {
@@ -429,7 +429,7 @@ public class SettingsDrawerActivity extends Activity {
         private final CategoryManager mCategoryManager;
 
         public CategoriesUpdateTask() {
-            mCategoryManager = CategoryManager.get();
+            mCategoryManager = CategoryManager.get(SettingsDrawerActivity.this);
         }
 
         @Override

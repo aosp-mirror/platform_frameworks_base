@@ -21,6 +21,8 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.settingslib.applications.InterestingConfigChanges;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +32,7 @@ public class CategoryManager {
     private static final String TAG = "CategoryManager";
 
     private static CategoryManager sInstance;
+    private final InterestingConfigChanges mInterestingConfigChanges;
 
     // Tile cache (key: <packageName, activityName>, value: tile)
     private final Map<Pair<String, String>, Tile> mTileByComponentCache;
@@ -39,16 +42,18 @@ public class CategoryManager {
 
     private List<DashboardCategory> mCategories;
 
-    public static CategoryManager get() {
+    public static CategoryManager get(Context context) {
         if (sInstance == null) {
-            sInstance = new CategoryManager();
+            sInstance = new CategoryManager(context);
         }
         return sInstance;
     }
 
-    CategoryManager() {
+    CategoryManager(Context context) {
         mTileByComponentCache = new ArrayMap<>();
         mCategoryByKeyMap = new ArrayMap<>();
+        mInterestingConfigChanges = new InterestingConfigChanges();
+        mInterestingConfigChanges.applyNewConfig(context.getResources());
     }
 
     public synchronized DashboardCategory getTilesByCategory(Context context, String categoryKey) {
@@ -67,8 +72,10 @@ public class CategoryManager {
     }
 
     public synchronized void reloadAllCategories(Context context) {
+        final boolean forceClearCache = mInterestingConfigChanges.applyNewConfig(
+                context.getResources());
         mCategories = null;
-        tryInitCategories(context);
+        tryInitCategories(context, forceClearCache);
     }
 
     public synchronized void updateCategoryFromBlacklist(Set<ComponentName> tileBlacklist) {
@@ -87,8 +94,16 @@ public class CategoryManager {
     }
 
     private synchronized void tryInitCategories(Context context) {
+        // Keep cached tiles by default. The cache is only invalidated when InterestingConfigChange
+        // happens.
+        tryInitCategories(context, false /* forceClearCache */);
+    }
+
+    private synchronized void tryInitCategories(Context context, boolean forceClearCache) {
         if (mCategories == null) {
-            mTileByComponentCache.clear();
+            if (forceClearCache) {
+                mTileByComponentCache.clear();
+            }
             mCategoryByKeyMap.clear();
             mCategories = TileUtils.getCategories(context, mTileByComponentCache,
                     false /* categoryDefinedInManifest */);
