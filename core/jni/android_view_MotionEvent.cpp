@@ -383,17 +383,6 @@ Error:
     return 0;
 }
 
-static jlong android_view_MotionEvent_nativeCopy(JNIEnv* env, jclass clazz,
-        jlong destNativePtr, jlong sourceNativePtr, jboolean keepHistory) {
-    MotionEvent* destEvent = reinterpret_cast<MotionEvent*>(destNativePtr);
-    if (!destEvent) {
-        destEvent = new MotionEvent();
-    }
-    MotionEvent* sourceEvent = reinterpret_cast<MotionEvent*>(sourceNativePtr);
-    destEvent->copyFrom(sourceEvent, keepHistory);
-    return reinterpret_cast<jlong>(destEvent);
-}
-
 static void android_view_MotionEvent_nativeDispose(JNIEnv* env, jclass clazz,
         jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
@@ -424,228 +413,6 @@ static void android_view_MotionEvent_nativeAddBatch(JNIEnv* env, jclass clazz,
 
     event->addSample(eventTimeNanos, rawPointerCoords);
     event->setMetaState(event->getMetaState() | metaState);
-}
-
-static jint android_view_MotionEvent_nativeGetDeviceId(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getDeviceId();
-}
-
-static jint android_view_MotionEvent_nativeGetSource(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getSource();
-}
-
-static void android_view_MotionEvent_nativeSetSource(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jint source) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    event->setSource(source);
-}
-
-static jint android_view_MotionEvent_nativeGetAction(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getAction();
-}
-
-static void android_view_MotionEvent_nativeSetAction(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jint action) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    event->setAction(action);
-}
-
-static int android_view_MotionEvent_nativeGetActionButton(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getActionButton();
-}
-
-static void android_view_MotionEvent_nativeSetActionButton(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jint button) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    event->setActionButton(button);
-}
-
-static jboolean android_view_MotionEvent_nativeIsTouchEvent(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->isTouchEvent();
-}
-
-static jint android_view_MotionEvent_nativeGetFlags(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getFlags();
-}
-
-static void android_view_MotionEvent_nativeSetFlags(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jint flags) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    event->setFlags(flags);
-}
-
-static jint android_view_MotionEvent_nativeGetEdgeFlags(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getEdgeFlags();
-}
-
-static void android_view_MotionEvent_nativeSetEdgeFlags(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jint edgeFlags) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    event->setEdgeFlags(edgeFlags);
-}
-
-static jint android_view_MotionEvent_nativeGetMetaState(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getMetaState();
-}
-
-static jint android_view_MotionEvent_nativeGetButtonState(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getButtonState();
-}
-
-static void android_view_MotionEvent_nativeSetButtonState(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jint buttonState) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    event->setButtonState(buttonState);
-}
-
-static void android_view_MotionEvent_nativeOffsetLocation(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jfloat deltaX, jfloat deltaY) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->offsetLocation(deltaX, deltaY);
-}
-
-static jfloat android_view_MotionEvent_nativeGetXOffset(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getXOffset();
-}
-
-static jfloat android_view_MotionEvent_nativeGetYOffset(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getYOffset();
-}
-
-static jfloat android_view_MotionEvent_nativeGetXPrecision(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getXPrecision();
-}
-
-static jfloat android_view_MotionEvent_nativeGetYPrecision(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getYPrecision();
-}
-
-static jlong android_view_MotionEvent_nativeGetDownTimeNanos(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getDownTime();
-}
-
-static void android_view_MotionEvent_nativeSetDownTimeNanos(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jlong downTimeNanos) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    event->setDownTime(downTimeNanos);
-}
-
-static jint android_view_MotionEvent_nativeGetPointerCount(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return jint(event->getPointerCount());
-}
-
-static jint android_view_MotionEvent_nativeGetPointerId(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jint pointerIndex) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    size_t pointerCount = event->getPointerCount();
-    if (!validatePointerIndex(env, pointerIndex, pointerCount)) {
-        return -1;
-    }
-    return event->getPointerId(pointerIndex);
-}
-
-static jint android_view_MotionEvent_nativeGetToolType(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jint pointerIndex) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    size_t pointerCount = event->getPointerCount();
-    if (!validatePointerIndex(env, pointerIndex, pointerCount)) {
-        return -1;
-    }
-    return event->getToolType(pointerIndex);
-}
-
-static jint android_view_MotionEvent_nativeFindPointerIndex(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jint pointerId) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return jint(event->findPointerIndex(pointerId));
-}
-
-static jint android_view_MotionEvent_nativeGetHistorySize(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return jint(event->getHistorySize());
-}
-
-static jlong android_view_MotionEvent_nativeGetEventTimeNanos(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jint historyPos) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    if (historyPos == HISTORY_CURRENT) {
-        return event->getEventTime();
-    } else {
-        size_t historySize = event->getHistorySize();
-        if (!validateHistoryPos(env, historyPos, historySize)) {
-            return 0;
-        }
-        return event->getHistoricalEventTime(historyPos);
-    }
-}
-
-static jfloat android_view_MotionEvent_nativeGetRawAxisValue(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jint axis, jint pointerIndex, jint historyPos) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    size_t pointerCount = event->getPointerCount();
-    if (!validatePointerIndex(env, pointerIndex, pointerCount)) {
-        return 0;
-    }
-
-    if (historyPos == HISTORY_CURRENT) {
-        return event->getRawAxisValue(axis, pointerIndex);
-    } else {
-        size_t historySize = event->getHistorySize();
-        if (!validateHistoryPos(env, historyPos, historySize)) {
-            return 0;
-        }
-        return event->getHistoricalRawAxisValue(axis, pointerIndex, historyPos);
-    }
-}
-
-static jfloat android_view_MotionEvent_nativeGetAxisValue(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jint axis, jint pointerIndex, jint historyPos) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    size_t pointerCount = event->getPointerCount();
-    if (!validatePointerIndex(env, pointerIndex, pointerCount)) {
-        return 0;
-    }
-
-    if (historyPos == HISTORY_CURRENT) {
-        return event->getAxisValue(axis, pointerIndex);
-    } else {
-        size_t historySize = event->getHistorySize();
-        if (!validateHistoryPos(env, historyPos, historySize)) {
-            return 0;
-        }
-        return event->getHistoricalAxisValue(axis, pointerIndex, historyPos);
-    }
 }
 
 static void android_view_MotionEvent_nativeGetPointerCoords(JNIEnv* env, jclass clazz,
@@ -682,30 +449,6 @@ static void android_view_MotionEvent_nativeGetPointerProperties(JNIEnv* env, jcl
 
     const PointerProperties* pointerProperties = event->getPointerProperties(pointerIndex);
     pointerPropertiesFromNative(env, pointerProperties, outPointerPropertiesObj);
-}
-
-static void android_view_MotionEvent_nativeScale(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jfloat scale) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    event->scale(scale);
-}
-
-static void android_view_MotionEvent_nativeTransform(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jobject matrixObj) {
-    SkMatrix* matrix = android_graphics_Matrix_getSkMatrix(env, matrixObj);
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-
-    float m[9];
-    m[0] = SkScalarToFloat(matrix->get(SkMatrix::kMScaleX));
-    m[1] = SkScalarToFloat(matrix->get(SkMatrix::kMSkewX));
-    m[2] = SkScalarToFloat(matrix->get(SkMatrix::kMTransX));
-    m[3] = SkScalarToFloat(matrix->get(SkMatrix::kMSkewY));
-    m[4] = SkScalarToFloat(matrix->get(SkMatrix::kMScaleY));
-    m[5] = SkScalarToFloat(matrix->get(SkMatrix::kMTransY));
-    m[6] = SkScalarToFloat(matrix->get(SkMatrix::kMPersp0));
-    m[7] = SkScalarToFloat(matrix->get(SkMatrix::kMPersp1));
-    m[8] = SkScalarToFloat(matrix->get(SkMatrix::kMPersp2));
-    event->transform(m);
 }
 
 static jlong android_view_MotionEvent_nativeReadFromParcel(JNIEnv* env, jclass clazz,
@@ -750,6 +493,243 @@ static jint android_view_MotionEvent_nativeAxisFromString(JNIEnv* env, jclass cl
     return static_cast<jint>(MotionEvent::getAxisFromLabel(axisLabel.c_str()));
 }
 
+// ---------------- @FastNative ----------------------------------
+
+static jint android_view_MotionEvent_nativeGetPointerId(JNIEnv* env, jclass clazz,
+        jlong nativePtr, jint pointerIndex) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    size_t pointerCount = event->getPointerCount();
+    if (!validatePointerIndex(env, pointerIndex, pointerCount)) {
+        return -1;
+    }
+    return event->getPointerId(pointerIndex);
+}
+
+static jint android_view_MotionEvent_nativeGetToolType(JNIEnv* env, jclass clazz,
+        jlong nativePtr, jint pointerIndex) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    size_t pointerCount = event->getPointerCount();
+    if (!validatePointerIndex(env, pointerIndex, pointerCount)) {
+        return -1;
+    }
+    return event->getToolType(pointerIndex);
+}
+
+static jlong android_view_MotionEvent_nativeGetEventTimeNanos(JNIEnv* env, jclass clazz,
+        jlong nativePtr, jint historyPos) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    if (historyPos == HISTORY_CURRENT) {
+        return event->getEventTime();
+    } else {
+        size_t historySize = event->getHistorySize();
+        if (!validateHistoryPos(env, historyPos, historySize)) {
+            return 0;
+        }
+        return event->getHistoricalEventTime(historyPos);
+    }
+}
+
+static jfloat android_view_MotionEvent_nativeGetRawAxisValue(JNIEnv* env, jclass clazz,
+        jlong nativePtr, jint axis,
+        jint pointerIndex, jint historyPos) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    size_t pointerCount = event->getPointerCount();
+    if (!validatePointerIndex(env, pointerIndex, pointerCount)) {
+        return 0;
+    }
+
+    if (historyPos == HISTORY_CURRENT) {
+        return event->getRawAxisValue(axis, pointerIndex);
+    } else {
+        size_t historySize = event->getHistorySize();
+        if (!validateHistoryPos(env, historyPos, historySize)) {
+            return 0;
+        }
+        return event->getHistoricalRawAxisValue(axis, pointerIndex, historyPos);
+    }
+}
+
+static jfloat android_view_MotionEvent_nativeGetAxisValue(JNIEnv* env, jclass clazz,
+        jlong nativePtr, jint axis, jint pointerIndex, jint historyPos) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    size_t pointerCount = event->getPointerCount();
+    if (!validatePointerIndex(env, pointerIndex, pointerCount)) {
+        return 0;
+    }
+
+    if (historyPos == HISTORY_CURRENT) {
+        return event->getAxisValue(axis, pointerIndex);
+    } else {
+        size_t historySize = event->getHistorySize();
+        if (!validateHistoryPos(env, historyPos, historySize)) {
+            return 0;
+        }
+        return event->getHistoricalAxisValue(axis, pointerIndex, historyPos);
+    }
+}
+
+// ----------------- @CriticalNative ------------------------------
+
+static jlong android_view_MotionEvent_nativeCopy(jlong destNativePtr, jlong sourceNativePtr,
+        jboolean keepHistory) {
+    MotionEvent* destEvent = reinterpret_cast<MotionEvent*>(destNativePtr);
+    if (!destEvent) {
+        destEvent = new MotionEvent();
+    }
+    MotionEvent* sourceEvent = reinterpret_cast<MotionEvent*>(sourceNativePtr);
+    destEvent->copyFrom(sourceEvent, keepHistory);
+    return reinterpret_cast<jlong>(destEvent);
+}
+
+static jint android_view_MotionEvent_nativeGetDeviceId(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getDeviceId();
+}
+
+static jint android_view_MotionEvent_nativeGetSource(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getSource();
+}
+
+static void android_view_MotionEvent_nativeSetSource(jlong nativePtr, jint source) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    event->setSource(source);
+}
+
+static jint android_view_MotionEvent_nativeGetAction(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getAction();
+}
+
+static void android_view_MotionEvent_nativeSetAction(jlong nativePtr, jint action) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    event->setAction(action);
+}
+
+static int android_view_MotionEvent_nativeGetActionButton(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getActionButton();
+}
+
+static void android_view_MotionEvent_nativeSetActionButton(jlong nativePtr, jint button) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    event->setActionButton(button);
+}
+
+static jboolean android_view_MotionEvent_nativeIsTouchEvent(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->isTouchEvent();
+}
+
+static jint android_view_MotionEvent_nativeGetFlags(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getFlags();
+}
+
+static void android_view_MotionEvent_nativeSetFlags(jlong nativePtr, jint flags) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    event->setFlags(flags);
+}
+
+static jint android_view_MotionEvent_nativeGetEdgeFlags(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getEdgeFlags();
+}
+
+static void android_view_MotionEvent_nativeSetEdgeFlags(jlong nativePtr, jint edgeFlags) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    event->setEdgeFlags(edgeFlags);
+}
+
+static jint android_view_MotionEvent_nativeGetMetaState(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getMetaState();
+}
+
+static jint android_view_MotionEvent_nativeGetButtonState(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getButtonState();
+}
+
+static void android_view_MotionEvent_nativeSetButtonState(jlong nativePtr, jint buttonState) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    event->setButtonState(buttonState);
+}
+
+static void android_view_MotionEvent_nativeOffsetLocation(jlong nativePtr, jfloat deltaX,
+        jfloat deltaY) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->offsetLocation(deltaX, deltaY);
+}
+
+static jfloat android_view_MotionEvent_nativeGetXOffset(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getXOffset();
+}
+
+static jfloat android_view_MotionEvent_nativeGetYOffset(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getYOffset();
+}
+
+static jfloat android_view_MotionEvent_nativeGetXPrecision(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getXPrecision();
+}
+
+static jfloat android_view_MotionEvent_nativeGetYPrecision(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getYPrecision();
+}
+
+static jlong android_view_MotionEvent_nativeGetDownTimeNanos(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getDownTime();
+}
+
+static void android_view_MotionEvent_nativeSetDownTimeNanos(jlong nativePtr, jlong downTimeNanos) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    event->setDownTime(downTimeNanos);
+}
+
+static jint android_view_MotionEvent_nativeGetPointerCount(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return jint(event->getPointerCount());
+}
+
+static jint android_view_MotionEvent_nativeFindPointerIndex(jlong nativePtr, jint pointerId) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return jint(event->findPointerIndex(pointerId));
+}
+
+static jint android_view_MotionEvent_nativeGetHistorySize(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return jint(event->getHistorySize());
+}
+
+static void android_view_MotionEvent_nativeScale(jlong nativePtr, jfloat scale) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    event->scale(scale);
+}
+
+static void android_view_MotionEvent_nativeTransform(jlong nativePtr, jlong matrixPtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
+
+    static_assert(SkMatrix::kMScaleX == 0, "SkMatrix unexpected index");
+    static_assert(SkMatrix::kMSkewX == 1, "SkMatrix unexpected index");
+    static_assert(SkMatrix::kMTransX == 2, "SkMatrix unexpected index");
+    static_assert(SkMatrix::kMSkewY == 3, "SkMatrix unexpected index");
+    static_assert(SkMatrix::kMScaleY == 4, "SkMatrix unexpected index");
+    static_assert(SkMatrix::kMTransY == 5, "SkMatrix unexpected index");
+    static_assert(SkMatrix::kMPersp0 == 6, "SkMatrix unexpected index");
+    static_assert(SkMatrix::kMPersp1 == 7, "SkMatrix unexpected index");
+    static_assert(SkMatrix::kMPersp2 == 8, "SkMatrix unexpected index");
+    float m[9];
+    matrix->get9(m);
+    event->transform(m);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMotionEventMethods[] = {
@@ -758,117 +738,12 @@ static const JNINativeMethod gMotionEventMethods[] = {
             "(JIIIIIIIFFFFJJI[Landroid/view/MotionEvent$PointerProperties;"
                     "[Landroid/view/MotionEvent$PointerCoords;)J",
             (void*)android_view_MotionEvent_nativeInitialize },
-    { "nativeCopy",
-            "(JJZ)J",
-            (void*)android_view_MotionEvent_nativeCopy },
     { "nativeDispose",
             "(J)V",
             (void*)android_view_MotionEvent_nativeDispose },
     { "nativeAddBatch",
             "(JJ[Landroid/view/MotionEvent$PointerCoords;I)V",
             (void*)android_view_MotionEvent_nativeAddBatch },
-    { "nativeGetDeviceId",
-            "!(J)I",
-            (void*)android_view_MotionEvent_nativeGetDeviceId },
-    { "nativeGetSource",
-            "!(J)I",
-            (void*)android_view_MotionEvent_nativeGetSource },
-    { "nativeSetSource",
-            "!(JI)I",
-            (void*)android_view_MotionEvent_nativeSetSource },
-    { "nativeGetAction",
-            "!(J)I",
-            (void*)android_view_MotionEvent_nativeGetAction },
-    { "nativeSetAction",
-            "!(JI)V",
-            (void*)android_view_MotionEvent_nativeSetAction },
-    { "nativeGetActionButton",
-            "!(J)I",
-            (void*)android_view_MotionEvent_nativeGetActionButton},
-    { "nativeSetActionButton",
-            "!(JI)V",
-            (void*)android_view_MotionEvent_nativeSetActionButton},
-    { "nativeIsTouchEvent",
-            "!(J)Z",
-            (void*)android_view_MotionEvent_nativeIsTouchEvent },
-    { "nativeGetFlags",
-            "!(J)I",
-            (void*)android_view_MotionEvent_nativeGetFlags },
-    { "nativeSetFlags",
-            "!(JI)V",
-            (void*)android_view_MotionEvent_nativeSetFlags },
-    { "nativeGetEdgeFlags",
-            "!(J)I",
-            (void*)android_view_MotionEvent_nativeGetEdgeFlags },
-    { "nativeSetEdgeFlags",
-            "!(JI)V",
-            (void*)android_view_MotionEvent_nativeSetEdgeFlags },
-    { "nativeGetMetaState",
-            "!(J)I",
-            (void*)android_view_MotionEvent_nativeGetMetaState },
-    { "nativeGetButtonState",
-            "!(J)I",
-            (void*)android_view_MotionEvent_nativeGetButtonState },
-    { "nativeSetButtonState",
-            "!(JI)V",
-            (void*)android_view_MotionEvent_nativeSetButtonState },
-    { "nativeOffsetLocation",
-            "!(JFF)V",
-            (void*)android_view_MotionEvent_nativeOffsetLocation },
-    { "nativeGetXOffset",
-            "!(J)F",
-            (void*)android_view_MotionEvent_nativeGetXOffset },
-    { "nativeGetYOffset",
-            "!(J)F",
-            (void*)android_view_MotionEvent_nativeGetYOffset },
-    { "nativeGetXPrecision",
-            "!(J)F",
-            (void*)android_view_MotionEvent_nativeGetXPrecision },
-    { "nativeGetYPrecision",
-            "!(J)F",
-            (void*)android_view_MotionEvent_nativeGetYPrecision },
-    { "nativeGetDownTimeNanos",
-            "!(J)J",
-            (void*)android_view_MotionEvent_nativeGetDownTimeNanos },
-    { "nativeSetDownTimeNanos",
-            "!(JJ)V",
-            (void*)android_view_MotionEvent_nativeSetDownTimeNanos },
-    { "nativeGetPointerCount",
-            "!(J)I",
-            (void*)android_view_MotionEvent_nativeGetPointerCount },
-    { "nativeGetPointerId",
-            "!(JI)I",
-            (void*)android_view_MotionEvent_nativeGetPointerId },
-    { "nativeGetToolType",
-            "!(JI)I",
-            (void*)android_view_MotionEvent_nativeGetToolType },
-    { "nativeFindPointerIndex",
-            "!(JI)I",
-            (void*)android_view_MotionEvent_nativeFindPointerIndex },
-    { "nativeGetHistorySize",
-            "!(J)I",
-            (void*)android_view_MotionEvent_nativeGetHistorySize },
-    { "nativeGetEventTimeNanos",
-            "!(JI)J",
-            (void*)android_view_MotionEvent_nativeGetEventTimeNanos },
-    { "nativeGetRawAxisValue",
-            "!(JIII)F",
-            (void*)android_view_MotionEvent_nativeGetRawAxisValue },
-    { "nativeGetAxisValue",
-            "!(JIII)F",
-            (void*)android_view_MotionEvent_nativeGetAxisValue },
-    { "nativeGetPointerCoords",
-            "(JIILandroid/view/MotionEvent$PointerCoords;)V",
-            (void*)android_view_MotionEvent_nativeGetPointerCoords },
-    { "nativeGetPointerProperties",
-            "(JILandroid/view/MotionEvent$PointerProperties;)V",
-            (void*)android_view_MotionEvent_nativeGetPointerProperties },
-    { "nativeScale",
-            "!(JF)V",
-            (void*)android_view_MotionEvent_nativeScale },
-    { "nativeTransform",
-            "(JLandroid/graphics/Matrix;)V",
-            (void*)android_view_MotionEvent_nativeTransform },
     { "nativeReadFromParcel",
             "(JLandroid/os/Parcel;)J",
             (void*)android_view_MotionEvent_nativeReadFromParcel },
@@ -879,6 +754,116 @@ static const JNINativeMethod gMotionEventMethods[] = {
             (void*)android_view_MotionEvent_nativeAxisToString },
     { "nativeAxisFromString", "(Ljava/lang/String;)I",
             (void*)android_view_MotionEvent_nativeAxisFromString },
+    { "nativeGetPointerProperties",
+            "(JILandroid/view/MotionEvent$PointerProperties;)V",
+            (void*)android_view_MotionEvent_nativeGetPointerProperties },
+    { "nativeGetPointerCoords",
+            "(JIILandroid/view/MotionEvent$PointerCoords;)V",
+            (void*)android_view_MotionEvent_nativeGetPointerCoords },
+
+    // --------------- @FastNative ----------------------
+    { "nativeGetPointerId",
+            "(JI)I",
+            (void*)android_view_MotionEvent_nativeGetPointerId },
+    { "nativeGetToolType",
+            "(JI)I",
+            (void*)android_view_MotionEvent_nativeGetToolType },
+    { "nativeGetEventTimeNanos",
+            "(JI)J",
+            (void*)android_view_MotionEvent_nativeGetEventTimeNanos },
+    { "nativeGetRawAxisValue",
+            "(JIII)F",
+            (void*)android_view_MotionEvent_nativeGetRawAxisValue },
+    { "nativeGetAxisValue",
+            "(JIII)F",
+            (void*)android_view_MotionEvent_nativeGetAxisValue },
+
+    // --------------- @CriticalNative ------------------
+
+    { "nativeCopy",
+            "(JJZ)J",
+            (void*)android_view_MotionEvent_nativeCopy },
+    { "nativeGetDeviceId",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetDeviceId },
+    { "nativeGetSource",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetSource },
+    { "nativeSetSource",
+            "(JI)I",
+            (void*)android_view_MotionEvent_nativeSetSource },
+    { "nativeGetAction",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetAction },
+    { "nativeSetAction",
+            "(JI)V",
+            (void*)android_view_MotionEvent_nativeSetAction },
+    { "nativeGetActionButton",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetActionButton},
+    { "nativeSetActionButton",
+            "(JI)V",
+            (void*)android_view_MotionEvent_nativeSetActionButton},
+    { "nativeIsTouchEvent",
+            "(J)Z",
+            (void*)android_view_MotionEvent_nativeIsTouchEvent },
+    { "nativeGetFlags",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetFlags },
+    { "nativeSetFlags",
+            "(JI)V",
+            (void*)android_view_MotionEvent_nativeSetFlags },
+    { "nativeGetEdgeFlags",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetEdgeFlags },
+    { "nativeSetEdgeFlags",
+            "(JI)V",
+            (void*)android_view_MotionEvent_nativeSetEdgeFlags },
+    { "nativeGetMetaState",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetMetaState },
+    { "nativeGetButtonState",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetButtonState },
+    { "nativeSetButtonState",
+            "(JI)V",
+            (void*)android_view_MotionEvent_nativeSetButtonState },
+    { "nativeOffsetLocation",
+            "(JFF)V",
+            (void*)android_view_MotionEvent_nativeOffsetLocation },
+    { "nativeGetXOffset",
+            "(J)F",
+            (void*)android_view_MotionEvent_nativeGetXOffset },
+    { "nativeGetYOffset",
+            "(J)F",
+            (void*)android_view_MotionEvent_nativeGetYOffset },
+    { "nativeGetXPrecision",
+            "(J)F",
+            (void*)android_view_MotionEvent_nativeGetXPrecision },
+    { "nativeGetYPrecision",
+            "(J)F",
+            (void*)android_view_MotionEvent_nativeGetYPrecision },
+    { "nativeGetDownTimeNanos",
+            "(J)J",
+            (void*)android_view_MotionEvent_nativeGetDownTimeNanos },
+    { "nativeSetDownTimeNanos",
+            "(JJ)V",
+            (void*)android_view_MotionEvent_nativeSetDownTimeNanos },
+    { "nativeGetPointerCount",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetPointerCount },
+    { "nativeFindPointerIndex",
+            "(JI)I",
+            (void*)android_view_MotionEvent_nativeFindPointerIndex },
+    { "nativeGetHistorySize",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetHistorySize },
+    { "nativeScale",
+            "(JF)V",
+            (void*)android_view_MotionEvent_nativeScale },
+    { "nativeTransform",
+            "(JJ)V",
+            (void*)android_view_MotionEvent_nativeTransform },
 };
 
 int register_android_view_MotionEvent(JNIEnv* env) {

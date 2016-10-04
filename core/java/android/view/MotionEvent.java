@@ -23,6 +23,9 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.SparseArray;
 
+import dalvik.annotation.optimization.CriticalNative;
+import dalvik.annotation.optimization.FastNative;
+
 /**
  * Object used to report movement (mouse, pen, finger, trackball) events.
  * Motion events may hold either absolute or relative movements and other data,
@@ -1445,59 +1448,97 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             float xOffset, float yOffset, float xPrecision, float yPrecision,
             long downTimeNanos, long eventTimeNanos,
             int pointerCount, PointerProperties[] pointerIds, PointerCoords[] pointerCoords);
-    private static native long nativeCopy(long destNativePtr, long sourceNativePtr,
-            boolean keepHistory);
     private static native void nativeDispose(long nativePtr);
     private static native void nativeAddBatch(long nativePtr, long eventTimeNanos,
             PointerCoords[] pointerCoords, int metaState);
-
-    private static native int nativeGetDeviceId(long nativePtr);
-    private static native int nativeGetSource(long nativePtr);
-    private static native int nativeSetSource(long nativePtr, int source);
-    private static native int nativeGetAction(long nativePtr);
-    private static native void nativeSetAction(long nativePtr, int action);
-    private static native boolean nativeIsTouchEvent(long nativePtr);
-    private static native int nativeGetFlags(long nativePtr);
-    private static native void nativeSetFlags(long nativePtr, int flags);
-    private static native int nativeGetEdgeFlags(long nativePtr);
-    private static native void nativeSetEdgeFlags(long nativePtr, int action);
-    private static native int nativeGetMetaState(long nativePtr);
-    private static native int nativeGetButtonState(long nativePtr);
-    private static native void nativeSetButtonState(long nativePtr, int buttonState);
-    private static native int nativeGetActionButton(long nativePtr);
-    private static native void nativeSetActionButton(long nativePtr, int actionButton);
-    private static native void nativeOffsetLocation(long nativePtr, float deltaX, float deltaY);
-    private static native float nativeGetXOffset(long nativePtr);
-    private static native float nativeGetYOffset(long nativePtr);
-    private static native float nativeGetXPrecision(long nativePtr);
-    private static native float nativeGetYPrecision(long nativePtr);
-    private static native long nativeGetDownTimeNanos(long nativePtr);
-    private static native void nativeSetDownTimeNanos(long nativePtr, long downTime);
-
-    private static native int nativeGetPointerCount(long nativePtr);
-    private static native int nativeGetPointerId(long nativePtr, int pointerIndex);
-    private static native int nativeGetToolType(long nativePtr, int pointerIndex);
-    private static native int nativeFindPointerIndex(long nativePtr, int pointerId);
-
-    private static native int nativeGetHistorySize(long nativePtr);
-    private static native long nativeGetEventTimeNanos(long nativePtr, int historyPos);
-    private static native float nativeGetRawAxisValue(long nativePtr,
-            int axis, int pointerIndex, int historyPos);
-    private static native float nativeGetAxisValue(long nativePtr,
-            int axis, int pointerIndex, int historyPos);
     private static native void nativeGetPointerCoords(long nativePtr,
             int pointerIndex, int historyPos, PointerCoords outPointerCoords);
     private static native void nativeGetPointerProperties(long nativePtr,
             int pointerIndex, PointerProperties outPointerProperties);
-
-    private static native void nativeScale(long nativePtr, float scale);
-    private static native void nativeTransform(long nativePtr, Matrix matrix);
 
     private static native long nativeReadFromParcel(long nativePtr, Parcel parcel);
     private static native void nativeWriteToParcel(long nativePtr, Parcel parcel);
 
     private static native String nativeAxisToString(int axis);
     private static native int nativeAxisFromString(String label);
+
+    // -------------- @FastNative -------------------------
+
+    @FastNative
+    private static native int nativeGetPointerId(long nativePtr, int pointerIndex);
+    @FastNative
+    private static native int nativeGetToolType(long nativePtr, int pointerIndex);
+    @FastNative
+    private static native long nativeGetEventTimeNanos(long nativePtr, int historyPos);
+    @FastNative
+    private static native float nativeGetRawAxisValue(long nativePtr,
+            int axis, int pointerIndex, int historyPos);
+    @FastNative
+    private static native float nativeGetAxisValue(long nativePtr,
+            int axis, int pointerIndex, int historyPos);
+
+    // -------------- @CriticalNative ----------------------
+
+    @CriticalNative
+    private static native long nativeCopy(long destNativePtr, long sourceNativePtr,
+            boolean keepHistory);
+    @CriticalNative
+    private static native int nativeGetDeviceId(long nativePtr);
+    @CriticalNative
+    private static native int nativeGetSource(long nativePtr);
+    @CriticalNative
+    private static native int nativeSetSource(long nativePtr, int source);
+    @CriticalNative
+    private static native int nativeGetAction(long nativePtr);
+    @CriticalNative
+    private static native void nativeSetAction(long nativePtr, int action);
+    @CriticalNative
+    private static native boolean nativeIsTouchEvent(long nativePtr);
+    @CriticalNative
+    private static native int nativeGetFlags(long nativePtr);
+    @CriticalNative
+    private static native void nativeSetFlags(long nativePtr, int flags);
+    @CriticalNative
+    private static native int nativeGetEdgeFlags(long nativePtr);
+    @CriticalNative
+    private static native void nativeSetEdgeFlags(long nativePtr, int action);
+    @CriticalNative
+    private static native int nativeGetMetaState(long nativePtr);
+    @CriticalNative
+    private static native int nativeGetButtonState(long nativePtr);
+    @CriticalNative
+    private static native void nativeSetButtonState(long nativePtr, int buttonState);
+    @CriticalNative
+    private static native int nativeGetActionButton(long nativePtr);
+    @CriticalNative
+    private static native void nativeSetActionButton(long nativePtr, int actionButton);
+    @CriticalNative
+    private static native void nativeOffsetLocation(long nativePtr, float deltaX, float deltaY);
+    @CriticalNative
+    private static native float nativeGetXOffset(long nativePtr);
+    @CriticalNative
+    private static native float nativeGetYOffset(long nativePtr);
+    @CriticalNative
+    private static native float nativeGetXPrecision(long nativePtr);
+    @CriticalNative
+    private static native float nativeGetYPrecision(long nativePtr);
+    @CriticalNative
+    private static native long nativeGetDownTimeNanos(long nativePtr);
+    @CriticalNative
+    private static native void nativeSetDownTimeNanos(long nativePtr, long downTime);
+
+    @CriticalNative
+    private static native int nativeGetPointerCount(long nativePtr);
+    @CriticalNative
+    private static native int nativeFindPointerIndex(long nativePtr, int pointerId);
+
+    @CriticalNative
+    private static native int nativeGetHistorySize(long nativePtr);
+
+    @CriticalNative
+    private static native void nativeScale(long nativePtr, float scale);
+    @CriticalNative
+    private static native void nativeTransform(long nativePtr, long matrix);
 
     private MotionEvent() {
     }
@@ -2065,7 +2106,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public final int getPointerCount() {
         return nativeGetPointerCount(mNativePtr);
     }
-    
+
     /**
      * Return the pointer identifier associated with a particular pointer
      * data index in this event.  The identifier tells you the actual pointer
@@ -2891,7 +2932,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             throw new IllegalArgumentException("matrix must not be null");
         }
 
-        nativeTransform(mNativePtr, matrix);
+        nativeTransform(mNativePtr, matrix.native_instance);
     }
 
     /**
