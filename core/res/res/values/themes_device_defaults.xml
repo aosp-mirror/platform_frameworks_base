@@ -203,45 +203,42 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
-
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
+        <item name="colorButtonNormal">@color/button_normal_device_default_dark</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar -->
-    <style name="Theme.DeviceDefault.NoActionBar" parent="Theme.Material.NoActionBar">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
+    <style name="Theme.DeviceDefault.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar.  This theme
          sets {@link android.R.attr#windowFullscreen} to true.  -->
-    <style name="Theme.DeviceDefault.NoActionBar.Fullscreen" parent="Theme.Material.NoActionBar.Fullscreen">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
+    <style name="Theme.DeviceDefault.NoActionBar.Fullscreen">
+        <item name="windowFullscreen">true</item>
+        <item name="windowContentOverlay">@null</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar and
     extending in to overscan region.  This theme
     sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
     to true. -->
-    <style name="Theme.DeviceDefault.NoActionBar.Overscan" parent="Theme.Material.NoActionBar.Overscan">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
+    <style name="Theme.DeviceDefault.NoActionBar.Overscan">
+        <item name="windowFullscreen">true</item>
+        <item name="windowOverscan">true</item>
+        <item name="windowContentOverlay">@null</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} that has no title bar and translucent
          system decor.  This theme sets {@link android.R.attr#windowTranslucentStatus} and
          {@link android.R.attr#windowTranslucentNavigation} to true. -->
-    <style name="Theme.DeviceDefault.NoActionBar.TranslucentDecor" parent="Theme.Material.NoActionBar.TranslucentDecor">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
+    <style name="Theme.DeviceDefault.NoActionBar.TranslucentDecor">
+        <item name="windowTranslucentStatus">true</item>
+        <item name="windowTranslucentNavigation">true</item>
+        <item name="windowContentOverlay">@null</item>
     </style>
 
     <!-- DeviceDefault theme for dialog windows and activities. This changes the window to be
@@ -261,32 +258,29 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorBackground">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} that has a nice minimum width for a
     regular dialog. -->
-    <style name="Theme.DeviceDefault.Dialog.MinWidth" parent="Theme.Material.Dialog.MinWidth">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
+    <style name="Theme.DeviceDefault.Dialog.MinWidth">
+        <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
+        <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} without an action bar -->
-    <style name="Theme.DeviceDefault.Dialog.NoActionBar" parent="Theme.Material.Dialog.NoActionBar">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
+    <style name="Theme.DeviceDefault.Dialog.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog_NoActionBar} that has a nice minimum width
     for a regular dialog. -->
-    <style name="Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" parent="Theme.Material.Dialog.NoActionBar.MinWidth">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
+    <style name="Theme.DeviceDefault.Dialog.NoActionBar.MinWidth">
+        <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
+        <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
     </style>
 
     <!-- Variant of Theme.DeviceDefault.Dialog that has a fixed size. -->
@@ -307,66 +301,52 @@ easier.
 
     <!-- DeviceDefault theme for a window that will be displayed either full-screen on smaller
     screens (small, normal) or as a dialog on larger screens (large, xlarge). -->
-    <style name="Theme.DeviceDefault.DialogWhenLarge" parent="Theme.Material.DialogWhenLarge">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
-    </style>
+    <style name="Theme.DeviceDefault.DialogWhenLarge" parent="@style/Theme.DeviceDefault" />
 
     <!-- DeviceDefault theme for a window without an action bar that will be displayed either
     full-screen on smaller screens (small, normal) or as a dialog on larger screens (large,
     xlarge). -->
-    <style name="Theme.DeviceDefault.DialogWhenLarge.NoActionBar" parent="Theme.Material.DialogWhenLarge.NoActionBar">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
-    </style>
+    <style name="Theme.DeviceDefault.DialogWhenLarge.NoActionBar" parent="@style/Theme.DeviceDefault.NoActionBar" />
 
     <!-- DeviceDefault theme for a presentation window on a secondary display. -->
-    <style name="Theme.DeviceDefault.Dialog.Presentation" parent="Theme.Material.Dialog.Presentation">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
-    </style>
+    <style name="Theme.DeviceDefault.Dialog.Presentation" parent="@style/Theme.DeviceDefault.NoActionBar.Fullscreen" />
 
     <!-- DeviceDefault theme for panel windows. This removes all extraneous window
     decorations, so you basically have an empty rectangle in which to place your content. It makes
     the window floating, with a transparent background, and turns off dimming behind the window. -->
-    <style name="Theme.DeviceDefault.Panel" parent="Theme.Material.Panel">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
+    <style name="Theme.DeviceDefault.Panel">
+        <item name="windowBackground">@color/transparent</item>
+        <item name="colorBackgroundCacheHint">@null</item>
+        <item name="windowFrame">@null</item>
+        <item name="windowContentOverlay">@null</item>
+        <item name="windowAnimationStyle">@null</item>
+        <item name="windowIsFloating">true</item>
+        <item name="backgroundDimEnabled">false</item>
+        <item name="windowIsTranslucent">true</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <!-- DeviceDefault theme for windows that want to have the user's selected wallpaper appear
     behind them. -->
-    <style name="Theme.DeviceDefault.Wallpaper" parent="Theme.Material.Wallpaper">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
+    <style name="Theme.DeviceDefault.Wallpaper">
+        <item name="windowBackground">@color/transparent</item>
+        <item name="colorBackgroundCacheHint">@null</item>
+        <item name="windowShowWallpaper">true</item>
     </style>
 
     <!-- DeviceDefault theme for windows that want to have the user's selected wallpaper appear
     behind them and without an action bar. -->
-    <style name="Theme.DeviceDefault.Wallpaper.NoTitleBar" parent="Theme.Material.Wallpaper.NoTitleBar">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
+    <style name="Theme.DeviceDefault.Wallpaper.NoTitleBar">
+        <item name="windowNoTitle">true</item>
     </style>
 
     <!-- DeviceDefault style for input methods, which is used by the
          {@link android.inputmethodservice.InputMethodService} class.-->
-    <style name="Theme.DeviceDefault.InputMethod" parent="Theme.Material.InputMethod">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
+    <style name="Theme.DeviceDefault.InputMethod">
+        <item name="windowAnimationStyle">@style/Animation.InputMethod</item>
+        <item name="imeFullscreenBackground">@drawable/screen_background_selector_light</item>
+        <item name="imeExtractEnterAnimation">@anim/input_method_extract_enter</item>
+        <item name="imeExtractExitAnimation">@anim/input_method_extract_exit</item>
     </style>
 
     <!-- DeviceDefault style for input methods, which is used by the
@@ -551,53 +531,58 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
+        <item name="colorButtonNormal">@color/button_normal_device_default_light</item>
     </style>
 
     <!-- Variant of the DeviceDefault (light) theme that has a solid (opaque) action bar with an
     inverse color profile. -->
-    <style name="Theme.DeviceDefault.Light.DarkActionBar" parent="Theme.Material.Light.DarkActionBar">
+    <style name="Theme.DeviceDefault.Light.DarkActionBar">
+        <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.Material.Dark.ActionBar</item>
+        <item name="popupTheme">@style/ThemeOverlay.Material.Light</item>
+
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar -->
-    <style name="Theme.DeviceDefault.Light.NoActionBar" parent="Theme.Material.Light.NoActionBar">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
+    <style name="Theme.DeviceDefault.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar and no status bar.
          This theme sets {@link android.R.attr#windowFullscreen} to true.  -->
-    <style name="Theme.DeviceDefault.Light.NoActionBar.Fullscreen" parent="Theme.Material.Light.NoActionBar.Fullscreen">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
+    <style name="Theme.DeviceDefault.Light.NoActionBar.Fullscreen">
+        <item name="windowFullscreen">true</item>
+        <item name="windowContentOverlay">@null</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar and no status bar
     and extending in to overscan region.  This theme
     sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
     to true. -->
-    <style name="Theme.DeviceDefault.Light.NoActionBar.Overscan" parent="Theme.Material.Light.NoActionBar.Overscan">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
+    <style name="Theme.DeviceDefault.Light.NoActionBar.Overscan">
+        <item name="windowFullscreen">true</item>
+        <item name="windowOverscan">true</item>
+        <item name="windowContentOverlay">@null</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} that has no title bar and translucent
          system decor.  This theme sets {@link android.R.attr#windowTranslucentStatus} and
          {@link android.R.attr#windowTranslucentNavigation} to true. -->
-    <style name="Theme.DeviceDefault.Light.NoActionBar.TranslucentDecor" parent="Theme.Material.Light.NoActionBar.TranslucentDecor">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
+    <style name="Theme.DeviceDefault.Light.NoActionBar.TranslucentDecor">
+        <item name="windowTranslucentStatus">true</item>
+        <item name="windowTranslucentNavigation">true</item>
+        <item name="windowContentOverlay">@null</item>
     </style>
 
     <!-- DeviceDefault light theme for dialog windows and activities. This changes the window to be
@@ -617,32 +602,29 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog} that has a nice minimum width for a
     regular dialog. -->
-    <style name="Theme.DeviceDefault.Light.Dialog.MinWidth" parent="Theme.Material.Light.Dialog.MinWidth">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
+    <style name="Theme.DeviceDefault.Light.Dialog.MinWidth">
+        <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
+        <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
     </style>
 
      <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog} without an action bar -->
-    <style name="Theme.DeviceDefault.Light.Dialog.NoActionBar" parent="Theme.Material.Light.Dialog.NoActionBar">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
+    <style name="Theme.DeviceDefault.Light.Dialog.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog_NoActionBar} that has a nice minimum
     width for a regular dialog. -->
-    <style name="Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth" parent="Theme.Material.Light.Dialog.NoActionBar.MinWidth">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
+    <style name="Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth">
+        <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
+        <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
     </style>
 
     <!-- Variant of Theme.DeviceDefault.Dialog that has a fixed size. -->
@@ -651,11 +633,6 @@ easier.
         <item name="windowFixedWidthMinor">@dimen/dialog_fixed_width_minor</item>
         <item name="windowFixedHeightMajor">@dimen/dialog_fixed_height_major</item>
         <item name="windowFixedHeightMinor">@dimen/dialog_fixed_height_minor</item>
-
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
     </style>
 
     <!-- Variant of Theme.DeviceDefault.Dialog.NoActionBar that has a fixed size. -->
@@ -664,39 +641,19 @@ easier.
         <item name="windowFixedWidthMinor">@dimen/dialog_fixed_width_minor</item>
         <item name="windowFixedHeightMajor">@dimen/dialog_fixed_height_major</item>
         <item name="windowFixedHeightMinor">@dimen/dialog_fixed_height_minor</item>
-
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
     </style>
 
     <!-- DeviceDefault light theme for a window that will be displayed either full-screen on smaller
     screens (small, normal) or as a dialog on larger screens (large, xlarge). -->
-    <style name="Theme.DeviceDefault.Light.DialogWhenLarge" parent="Theme.Material.Light.DialogWhenLarge">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
-    </style>
+    <style name="Theme.DeviceDefault.Light.DialogWhenLarge" parent="@style/Theme.DeviceDefault.Light" />
 
     <!-- DeviceDefault light theme for a window without an action bar that will be displayed either
     full-screen on smaller screens (small, normal) or as a dialog on larger screens (large,
     xlarge). -->
-    <style name="Theme.DeviceDefault.Light.DialogWhenLarge.NoActionBar" parent="Theme.Material.Light.DialogWhenLarge.NoActionBar">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
-    </style>
+    <style name="Theme.DeviceDefault.Light.DialogWhenLarge.NoActionBar" parent="@style/Theme.DeviceDefault.Light.NoActionBar" />
 
     <!-- DeviceDefault light theme for a presentation window on a secondary display. -->
-    <style name="Theme.DeviceDefault.Light.Dialog.Presentation" parent="Theme.Material.Light.Dialog.Presentation">
-        <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_light</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
-        <item name="colorAccent">@color/accent_device_default_light</item>
-    </style>
+    <style name="Theme.DeviceDefault.Light.Dialog.Presentation" parent="@style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen" />
 
     <!-- DeviceDefault light theme for panel windows. This removes all extraneous window
     decorations, so you basically have an empty rectangle in which to place your content. It makes
@@ -706,6 +663,9 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Material.Light.Dialog.Alert">
@@ -715,6 +675,9 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <style name="Theme.DeviceDefault.Light.SearchBar" parent="Theme.Material.Light.SearchBar">
@@ -722,6 +685,9 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <style name="Theme.DeviceDefault.Light.Voice" parent="Theme.Material.Light.Voice">
@@ -729,6 +695,9 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <!-- DeviceDefault theme for a window that should look like the Settings app.  -->
@@ -738,6 +707,9 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <!-- DeviceDefault theme for a window that should use Settings theme colors but has
@@ -749,6 +721,9 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Settings_Dark} with no action bar -->
@@ -758,6 +733,9 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <style name="Theme.DeviceDefault.Settings.Dialog" parent="Theme.Material.Settings.Dialog">
@@ -766,6 +744,9 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <style name="Theme.DeviceDefault.Settings.DialogWhenLarge" parent="Theme.Material.Settings.DialogWhenLarge">
@@ -774,6 +755,9 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <style name="Theme.DeviceDefault.Settings.Dialog.Alert" parent="Theme.Material.Settings.Dialog.Alert">
@@ -782,6 +766,9 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <!-- Theme used for the intent picker activity. -->
@@ -800,6 +787,9 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
     </style>
 
     <!-- DeviceDefault theme for the default system theme.  -->
