@@ -32,12 +32,12 @@ easier.
  -->
 <resources>
     <!-- Theme used for the intent picker activity. -->
-    <style name="Theme.DeviceDefault.Resolver" parent="Theme.Material">
+    <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault">
         <item name="colorControlActivated">?attr/colorControlHighlight</item>
         <item name="listPreferredItemPaddingStart">?attr/dialogPreferredPadding</item>
         <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
     </style>
 
     <!-- Use a dark theme for watches. -->
-    <style name="Theme.DeviceDefault.System" parent="Theme.Material" />
+    <style name="Theme.DeviceDefault.System" />
 </resources>
