@@ -82,51 +82,51 @@ const char* AssetManager::TARGET_APK_PATH = "/system/framework/framework-res.apk
 const char* AssetManager::IDMAP_DIR = "/data/resource-cache";
 
 namespace {
-    String8 idmapPathForPackagePath(const String8& pkgPath)
-    {
-        const char* root = getenv("ANDROID_DATA");
-        LOG_ALWAYS_FATAL_IF(root == NULL, "ANDROID_DATA not set");
-        String8 path(root);
-        path.appendPath(kResourceCache);
 
-        char buf[256]; // 256 chars should be enough for anyone...
-        strncpy(buf, pkgPath.string(), 255);
-        buf[255] = '\0';
-        char* filename = buf;
-        while (*filename && *filename == '/') {
-            ++filename;
-        }
-        char* p = filename;
-        while (*p) {
-            if (*p == '/') {
-                *p = '@';
-            }
-            ++p;
-        }
-        path.appendPath(filename);
-        path.append("@idmap");
+String8 idmapPathForPackagePath(const String8& pkgPath) {
+    const char* root = getenv("ANDROID_DATA");
+    LOG_ALWAYS_FATAL_IF(root == NULL, "ANDROID_DATA not set");
+    String8 path(root);
+    path.appendPath(kResourceCache);
 
-        return path;
+    char buf[256]; // 256 chars should be enough for anyone...
+    strncpy(buf, pkgPath.string(), 255);
+    buf[255] = '\0';
+    char* filename = buf;
+    while (*filename && *filename == '/') {
+        ++filename;
     }
-
-    /*
-     * Like strdup(), but uses C++ "new" operator instead of malloc.
-     */
-    static char* strdupNew(const char* str)
-    {
-        char* newStr;
-        int len;
-
-        if (str == NULL)
-            return NULL;
-
-        len = strlen(str);
-        newStr = new char[len+1];
-        memcpy(newStr, str, len+1);
-
-        return newStr;
+    char* p = filename;
+    while (*p) {
+        if (*p == '/') {
+            *p = '@';
+        }
+        ++p;
     }
+    path.appendPath(filename);
+    path.append("@idmap");
+
+    return path;
 }
+
+/*
+ * Like strdup(), but uses C++ "new" operator instead of malloc.
+ */
+static char* strdupNew(const char* str) {
+    char* newStr;
+    int len;
+
+    if (str == NULL)
+        return NULL;
+
+    len = strlen(str);
+    newStr = new char[len+1];
+    memcpy(newStr, str, len+1);
+
+    return newStr;
+}
+
+} // namespace
 
 /*
  * ===========================================================================
@@ -134,16 +134,12 @@ namespace {
  * ===========================================================================
  */
 
-int32_t AssetManager::getGlobalCount()
-{
+int32_t AssetManager::getGlobalCount() {
     return gCount;
 }
 
-AssetManager::AssetManager(CacheMode cacheMode)
-    : mLocale(NULL), mVendor(NULL),
-      mResources(NULL), mConfig(new ResTable_config),
-      mCacheMode(cacheMode), mCacheValid(false)
-{
+AssetManager::AssetManager() :
+        mLocale(NULL), mResources(NULL), mConfig(new ResTable_config) {
     int count = android_atomic_inc(&gCount) + 1;
     if (kIsDebug) {
         ALOGI("Creating AssetManager %p #%d\n", this, count);
@@ -151,8 +147,7 @@ AssetManager::AssetManager(CacheMode cacheMode)
     memset(mConfig, 0, sizeof(ResTable_config));
 }
 
-AssetManager::~AssetManager(void)
-{
+AssetManager::~AssetManager() {
     int count = android_atomic_dec(&gCount);
     if (kIsDebug) {
         ALOGI("Destroying AssetManager in %p #%d\n", this, count);
@@ -163,12 +158,10 @@ AssetManager::~AssetManager(void)
 
     // don't have a String class yet, so make sure we clean up
     delete[] mLocale;
-    delete[] mVendor;
 }
 
 bool AssetManager::addAssetPath(
-        const String8& path, int32_t* cookie, bool appAsLib, bool isSystemAsset)
-{
+        const String8& path, int32_t* cookie, bool appAsLib, bool isSystemAsset) {
     AutoMutex _l(mLock);
 
     asset_path ap;
@@ -343,49 +336,14 @@ String8 AssetManager::getAssetPath(const int32_t cookie) const
     return String8();
 }
 
-/*
- * Set the current locale.  Use NULL to indicate no locale.
- *
- * Close and reopen Zip archives as appropriate, and reset cached
- * information in the locale-specific sections of the tree.
- */
-void AssetManager::setLocale(const char* locale)
-{
-    AutoMutex _l(mLock);
-    setLocaleLocked(locale);
-}
-
-
 void AssetManager::setLocaleLocked(const char* locale)
 {
     if (mLocale != NULL) {
-        /* previously set, purge cached data */
-        purgeFileNameCacheLocked();
-        //mZipSet.purgeLocale();
         delete[] mLocale;
     }
 
     mLocale = strdupNew(locale);
     updateResourceParamsLocked();
-}
-
-/*
- * Set the current vendor.  Use NULL to indicate no vendor.
- *
- * Close and reopen Zip archives as appropriate, and reset cached
- * information in the vendor-specific sections of the tree.
- */
-void AssetManager::setVendor(const char* vendor)
-{
-    AutoMutex _l(mLock);
-
-    if (mVendor != NULL) {
-        /* previously set, purge cached data */
-        purgeFileNameCacheLocked();
-        //mZipSet.purgeVendor();
-        delete[] mVendor;
-    }
-    mVendor = strdupNew(vendor);
 }
 
 void AssetManager::setConfiguration(const ResTable_config& config, const char* locale)
@@ -439,10 +397,6 @@ Asset* AssetManager::open(const char* fileName, AccessMode mode)
 
     LOG_FATAL_IF(mAssetPaths.size() == 0, "No assets added to AssetManager");
 
-
-    if (mCacheMode != CACHE_OFF && !mCacheValid)
-        loadFileNameCacheLocked();
-
     String8 assetName(kAssetsRoot);
     assetName.appendPath(fileName);
 
@@ -476,10 +430,6 @@ Asset* AssetManager::openNonAsset(const char* fileName, AccessMode mode, int32_t
 
     LOG_FATAL_IF(mAssetPaths.size() == 0, "No assets added to AssetManager");
 
-
-    if (mCacheMode != CACHE_OFF && !mCacheValid)
-        loadFileNameCacheLocked();
-
     /*
      * For each top-level asset path, search for the asset.
      */
@@ -506,9 +456,6 @@ Asset* AssetManager::openNonAsset(const int32_t cookie, const char* fileName, Ac
     AutoMutex _l(mLock);
 
     LOG_FATAL_IF(mAssetPaths.size() == 0, "No assets added to AssetManager");
-
-    if (mCacheMode != CACHE_OFF && !mCacheValid)
-        loadFileNameCacheLocked();
 
     if (which < mAssetPaths.size()) {
         ALOGV("Looking for non-asset '%s' in '%s'\n", fileName,
@@ -657,10 +604,6 @@ const ResTable* AssetManager::getResTable(bool required) const
 
     if (required) {
         LOG_FATAL_IF(mAssetPaths.size() == 0, "No assets added to AssetManager");
-    }
-
-    if (mCacheMode != CACHE_OFF && !mCacheValid) {
-        const_cast<AssetManager*>(this)->loadFileNameCacheLocked();
     }
 
     mResources = new ResTable();
@@ -833,158 +776,6 @@ Asset* AssetManager::openNonAssetInPathLocked(const char* fileName, AccessMode m
 }
 
 /*
- * Open an asset, searching for it in the directory hierarchy for the
- * specified app.
- *
- * Pass in a NULL values for "appName" if the common app directory should
- * be used.
- */
-Asset* AssetManager::openInPathLocked(const char* fileName, AccessMode mode,
-    const asset_path& ap)
-{
-    Asset* pAsset = NULL;
-
-    /*
-     * Try various combinations of locale and vendor.
-     */
-    if (mLocale != NULL && mVendor != NULL)
-        pAsset = openInLocaleVendorLocked(fileName, mode, ap, mLocale, mVendor);
-    if (pAsset == NULL && mVendor != NULL)
-        pAsset = openInLocaleVendorLocked(fileName, mode, ap, NULL, mVendor);
-    if (pAsset == NULL && mLocale != NULL)
-        pAsset = openInLocaleVendorLocked(fileName, mode, ap, mLocale, NULL);
-    if (pAsset == NULL)
-        pAsset = openInLocaleVendorLocked(fileName, mode, ap, NULL, NULL);
-
-    return pAsset;
-}
-
-/*
- * Open an asset, searching for it in the directory hierarchy for the
- * specified locale and vendor.
- *
- * We also search in "app.jar".
- *
- * Pass in NULL values for "appName", "locale", and "vendor" if the
- * defaults should be used.
- */
-Asset* AssetManager::openInLocaleVendorLocked(const char* fileName, AccessMode mode,
-    const asset_path& ap, const char* locale, const char* vendor)
-{
-    Asset* pAsset = NULL;
-
-    if (ap.type == kFileTypeDirectory) {
-        if (mCacheMode == CACHE_OFF) {
-            /* look at the filesystem on disk */
-            String8 path(createPathNameLocked(ap, locale, vendor));
-            path.appendPath(fileName);
-    
-            String8 excludeName(path);
-            excludeName.append(kExcludeExtension);
-            if (::getFileType(excludeName.string()) != kFileTypeNonexistent) {
-                /* say no more */
-                //printf("+++ excluding '%s'\n", (const char*) excludeName);
-                return kExcludedAsset;
-            }
-    
-            pAsset = openAssetFromFileLocked(path, mode);
-    
-            if (pAsset == NULL) {
-                /* try again, this time with ".gz" */
-                path.append(".gz");
-                pAsset = openAssetFromFileLocked(path, mode);
-            }
-    
-            if (pAsset != NULL)
-                pAsset->setAssetSource(path);
-        } else {
-            /* find in cache */
-            String8 path(createPathNameLocked(ap, locale, vendor));
-            path.appendPath(fileName);
-    
-            AssetDir::FileInfo tmpInfo;
-            bool found = false;
-    
-            String8 excludeName(path);
-            excludeName.append(kExcludeExtension);
-    
-            if (mCache.indexOf(excludeName) != NAME_NOT_FOUND) {
-                /* go no farther */
-                //printf("+++ Excluding '%s'\n", (const char*) excludeName);
-                return kExcludedAsset;
-            }
-
-            /*
-             * File compression extensions (".gz") don't get stored in the
-             * name cache, so we have to try both here.
-             */
-            if (mCache.indexOf(path) != NAME_NOT_FOUND) {
-                found = true;
-                pAsset = openAssetFromFileLocked(path, mode);
-                if (pAsset == NULL) {
-                    /* try again, this time with ".gz" */
-                    path.append(".gz");
-                    pAsset = openAssetFromFileLocked(path, mode);
-                }
-            }
-
-            if (pAsset != NULL)
-                pAsset->setAssetSource(path);
-
-            /*
-             * Don't continue the search into the Zip files.  Our cached info
-             * said it was a file on disk; to be consistent with openDir()
-             * we want to return the loose asset.  If the cached file gets
-             * removed, we fail.
-             *
-             * The alternative is to update our cache when files get deleted,
-             * or make some sort of "best effort" promise, but for now I'm
-             * taking the hard line.
-             */
-            if (found) {
-                if (pAsset == NULL)
-                    ALOGD("Expected file not found: '%s'\n", path.string());
-                return pAsset;
-            }
-        }
-    }
-
-    /*
-     * Either it wasn't found on disk or on the cached view of the disk.
-     * Dig through the currently-opened set of Zip files.  If caching
-     * is disabled, the Zip file may get reopened.
-     */
-    if (pAsset == NULL && ap.type == kFileTypeRegular) {
-        String8 path;
-
-        path.appendPath((locale != NULL) ? locale : kDefaultLocale);
-        path.appendPath((vendor != NULL) ? vendor : kDefaultVendor);
-        path.appendPath(fileName);
-
-        /* check the appropriate Zip file */
-        ZipFileRO* pZip = getZipFileLocked(ap);
-        if (pZip != NULL) {
-            //printf("GOT zip, checking '%s'\n", (const char*) path);
-            ZipEntryRO entry = pZip->findEntryByName(path.string());
-            if (entry != NULL) {
-                //printf("FOUND in Zip file for %s/%s-%s\n",
-                //    appName, locale, vendor);
-                pAsset = openAssetFromZipLocked(pZip, entry, mode, path);
-                pZip->releaseEntry(entry);
-            }
-        }
-
-        if (pAsset != NULL) {
-            /* create a "source" name, for debug/display */
-            pAsset->setAssetSource(createZipSourceNameLocked(ZipSet::getPathName(ap.path.string()),
-                                                             String8(""), String8(fileName)));
-        }
-    }
-
-    return pAsset;
-}
-
-/*
  * Create a "source name" for a file from a Zip archive.
  */
 String8 AssetManager::createZipSourceNameLocked(const String8& zipFileName,
@@ -1141,9 +932,6 @@ AssetDir* AssetManager::openDir(const char* dirName)
 
     //printf("+++ openDir(%s) in '%s'\n", dirName, (const char*) mAssetBase);
 
-    if (mCacheMode != CACHE_OFF && !mCacheValid)
-        loadFileNameCacheLocked();
-
     pDir = new AssetDir;
 
     /*
@@ -1204,9 +992,6 @@ AssetDir* AssetManager::openNonAssetDir(const int32_t cookie, const char* dirNam
 
     //printf("+++ openDir(%s) in '%s'\n", dirName, (const char*) mAssetBase);
 
-    if (mCacheMode != CACHE_OFF && !mCacheValid)
-        loadFileNameCacheLocked();
-
     pDir = new AssetDir;
 
     pMergedInfo = new SortedVector<AssetDir::FileInfo>;
@@ -1247,74 +1032,17 @@ AssetDir* AssetManager::openNonAssetDir(const int32_t cookie, const char* dirNam
 bool AssetManager::scanAndMergeDirLocked(SortedVector<AssetDir::FileInfo>* pMergedInfo,
     const asset_path& ap, const char* rootDir, const char* dirName)
 {
-    SortedVector<AssetDir::FileInfo>* pContents;
-    String8 path;
-
     assert(pMergedInfo != NULL);
 
-    //printf("scanAndMergeDir: %s %s %s %s\n", appName, locale, vendor,dirName);
+    //printf("scanAndMergeDir: %s %s %s\n", ap.path.string(), rootDir, dirName);
 
-    if (mCacheValid) {
-        int i, start, count;
+    String8 path = createPathNameLocked(ap, rootDir);
+    if (dirName[0] != '\0')
+        path.appendPath(dirName);
 
-        pContents = new SortedVector<AssetDir::FileInfo>;
-
-        /*
-         * Get the basic partial path and find it in the cache.  That's
-         * the start point for the search.
-         */
-        path = createPathNameLocked(ap, rootDir);
-        if (dirName[0] != '\0')
-            path.appendPath(dirName);
-
-        start = mCache.indexOf(path);
-        if (start == NAME_NOT_FOUND) {
-            //printf("+++ not found in cache: dir '%s'\n", (const char*) path);
-            delete pContents;
-            return false;
-        }
-
-        /*
-         * The match string looks like "common/default/default/foo/bar/".
-         * The '/' on the end ensures that we don't match on the directory
-         * itself or on ".../foo/barfy/".
-         */
-        path.append("/");
-
-        count = mCache.size();
-
-        /*
-         * Pick out the stuff in the current dir by examining the pathname.
-         * It needs to match the partial pathname prefix, and not have a '/'
-         * (fssep) anywhere after the prefix.
-         */
-        for (i = start+1; i < count; i++) {
-            if (mCache[i].getFileName().length() > path.length() &&
-                strncmp(mCache[i].getFileName().string(), path.string(), path.length()) == 0)
-            {
-                const char* name = mCache[i].getFileName().string();
-                // XXX THIS IS BROKEN!  Looks like we need to store the full
-                // path prefix separately from the file path.
-                if (strchr(name + path.length(), '/') == NULL) {
-                    /* grab it, reducing path to just the filename component */
-                    AssetDir::FileInfo tmp = mCache[i];
-                    tmp.setFileName(tmp.getFileName().getPathLeaf());
-                    pContents->add(tmp);
-                }
-            } else {
-                /* no longer in the dir or its subdirs */
-                break;
-            }
-
-        }
-    } else {
-        path = createPathNameLocked(ap, rootDir);
-        if (dirName[0] != '\0')
-            path.appendPath(dirName);
-        pContents = scanDirLocked(path);
-        if (pContents == NULL)
-            return false;
-    }
+    SortedVector<AssetDir::FileInfo>* pContents = scanDirLocked(path);
+    if (pContents == NULL)
+        return false;
 
     // if we wanted to do an incremental cache fill, we would do it here
 
@@ -1639,153 +1367,6 @@ void AssetManager::mergeInfoLocked(SortedVector<AssetDir::FileInfo>* pMergedInfo
             pMergedInfo->add(pContents->itemAt(i));
     }
 #endif
-}
-
-
-/*
- * Load all files into the file name cache.  We want to do this across
- * all combinations of { appname, locale, vendor }, performing a recursive
- * directory traversal.
- *
- * This is not the most efficient data structure.  Also, gathering the
- * information as we needed it (file-by-file or directory-by-directory)
- * would be faster.  However, on the actual device, 99% of the files will
- * live in Zip archives, so this list will be very small.  The trouble
- * is that we have to check the "loose" files first, so it's important
- * that we don't beat the filesystem silly looking for files that aren't
- * there.
- *
- * Note on thread safety: this is the only function that causes updates
- * to mCache, and anybody who tries to use it will call here if !mCacheValid,
- * so we need to employ a mutex here.
- */
-void AssetManager::loadFileNameCacheLocked(void)
-{
-    assert(!mCacheValid);
-    assert(mCache.size() == 0);
-
-#ifdef DO_TIMINGS   // need to link against -lrt for this now
-    DurationTimer timer;
-    timer.start();
-#endif
-
-    fncScanLocked(&mCache, "");
-
-#ifdef DO_TIMINGS
-    timer.stop();
-    ALOGD("Cache scan took %.3fms\n",
-        timer.durationUsecs() / 1000.0);
-#endif
-
-#if 0
-    int i;
-    printf("CACHED FILE LIST (%d entries):\n", mCache.size());
-    for (i = 0; i < (int) mCache.size(); i++) {
-        printf(" %d: (%d) '%s'\n", i,
-            mCache.itemAt(i).getFileType(),
-            (const char*) mCache.itemAt(i).getFileName());
-    }
-#endif
-
-    mCacheValid = true;
-}
-
-/*
- * Scan up to 8 versions of the specified directory.
- */
-void AssetManager::fncScanLocked(SortedVector<AssetDir::FileInfo>* pMergedInfo,
-    const char* dirName)
-{
-    size_t i = mAssetPaths.size();
-    while (i > 0) {
-        i--;
-        const asset_path& ap = mAssetPaths.itemAt(i);
-        fncScanAndMergeDirLocked(pMergedInfo, ap, NULL, NULL, dirName);
-        if (mLocale != NULL)
-            fncScanAndMergeDirLocked(pMergedInfo, ap, mLocale, NULL, dirName);
-        if (mVendor != NULL)
-            fncScanAndMergeDirLocked(pMergedInfo, ap, NULL, mVendor, dirName);
-        if (mLocale != NULL && mVendor != NULL)
-            fncScanAndMergeDirLocked(pMergedInfo, ap, mLocale, mVendor, dirName);
-    }
-}
-
-/*
- * Recursively scan this directory and all subdirs.
- *
- * This is similar to scanAndMergeDir, but we don't remove the .EXCLUDE
- * files, and we prepend the extended partial path to the filenames.
- */
-bool AssetManager::fncScanAndMergeDirLocked(
-    SortedVector<AssetDir::FileInfo>* pMergedInfo,
-    const asset_path& ap, const char* locale, const char* vendor,
-    const char* dirName)
-{
-    SortedVector<AssetDir::FileInfo>* pContents;
-    String8 partialPath;
-    String8 fullPath;
-
-    // XXX This is broken -- the filename cache needs to hold the base
-    // asset path separately from its filename.
-    
-    partialPath = createPathNameLocked(ap, locale, vendor);
-    if (dirName[0] != '\0') {
-        partialPath.appendPath(dirName);
-    }
-
-    fullPath = partialPath;
-    pContents = scanDirLocked(fullPath);
-    if (pContents == NULL) {
-        return false;       // directory did not exist
-    }
-
-    /*
-     * Scan all subdirectories of the current dir, merging what we find
-     * into "pMergedInfo".
-     */
-    for (int i = 0; i < (int) pContents->size(); i++) {
-        if (pContents->itemAt(i).getFileType() == kFileTypeDirectory) {
-            String8 subdir(dirName);
-            subdir.appendPath(pContents->itemAt(i).getFileName());
-
-            fncScanAndMergeDirLocked(pMergedInfo, ap, locale, vendor, subdir.string());
-        }
-    }
-
-    /*
-     * To be consistent, we want entries for the root directory.  If
-     * we're the root, add one now.
-     */
-    if (dirName[0] == '\0') {
-        AssetDir::FileInfo tmpInfo;
-
-        tmpInfo.set(String8(""), kFileTypeDirectory);
-        tmpInfo.setSourceName(createPathNameLocked(ap, locale, vendor));
-        pContents->add(tmpInfo);
-    }
-
-    /*
-     * We want to prepend the extended partial path to every entry in
-     * "pContents".  It's the same value for each entry, so this will
-     * not change the sorting order of the vector contents.
-     */
-    for (int i = 0; i < (int) pContents->size(); i++) {
-        const AssetDir::FileInfo& info = pContents->itemAt(i);
-        pContents->editItemAt(i).setFileName(partialPath.appendPathCopy(info.getFileName()));
-    }
-
-    mergeInfoLocked(pMergedInfo, pContents);
-    delete pContents;
-    return true;
-}
-
-/*
- * Trash the cache.
- */
-void AssetManager::purgeFileNameCacheLocked(void)
-{
-    mCacheValid = false;
-    mCache.clear();
 }
 
 /*

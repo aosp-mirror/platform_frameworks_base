@@ -1281,7 +1281,7 @@ int doDump(Bundle* bundle)
                         const size_t NL = locales.size();
                         for (size_t i=0; i<NL; i++) {
                             const char* localeStr =  locales[i].string();
-                            assets.setLocale(localeStr != NULL ? localeStr : "");
+                            assets.setConfiguration(config, localeStr != NULL ? localeStr : "");
                             String8 llabel = AaptXml::getResolvedAttribute(res, tree, LABEL_ATTR,
                                     &error);
                             if (llabel != "") {
