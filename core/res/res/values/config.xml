@@ -1178,6 +1178,38 @@
     <integer-array name="config_dynamicHysteresisLuxLevels">
     </integer-array>
 
+    <!-- This flag requires config_dozeSensorLuxLevels to have one or more entries and only affects
+         the screen brightness while dozing. The screen brightness of a device is based off of a
+         ring buffer of the last n seconds of ambient light sensor sample readings.
+
+         If this flag is true, then this buffer is cleared and the screen brightness is based off of
+         ambient light sensor readings that are obtained while the device is dozing.  This mode may
+         be better suited for watches.
+
+         If this flag is false, then this buffer is untouched. -->
+    <bool name="config_useNewSensorSamplesForDoze">false</bool>
+
+    <!-- Array of ambient light sensor lux threshold values for determining screen brightness for
+         devices that have both an ambient light sensor and the screen on while dozing. This is
+         used to determine the screen brightness while dozing by calculating the index to use for
+         lookup and then setting the screen brightness value to the corresponding value of
+         config_dozeBrightnessBacklightValues.
+
+         The (zero-based) index is calculated as follows: (MAX is the largest index of the array)
+         condition                      calculated index
+         value < lux[0]                 0
+         lux[n] <= value < lux[n+1]     n+1
+         lux[MAX] <= value              MAX+1 -->
+    <integer-array name="config_dozeSensorLuxLevels">
+    </integer-array>
+
+    <!-- Array of values for determining screen brightness for devices that have both an ambient
+         light sensor and the screen on while dozing. The length of this array is assumed to be one
+         greater than config_dozeModeSensorLuxLevels if they are not both empty. See the
+         config_dozeModeSensorLuxLevels description for how the backlight value is chosen. -->
+    <integer-array name="config_dozeBrightnessBacklightValues">
+    </integer-array>
+
     <!-- Amount of time it takes for the light sensor to warm up in milliseconds.
          For this time after the screen turns on, the Power Manager
          will not debounce light sensor readings -->
