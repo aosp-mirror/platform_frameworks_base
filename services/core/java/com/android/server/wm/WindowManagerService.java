@@ -654,6 +654,12 @@ public class WindowManagerService extends IWindowManager.Stub
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
     SettingsObserver mSettingsObserver;
 
+    // A count of the windows which are 'seamlessly rotated', e.g. a surface
+    // at an old orientation is being transformed. We freeze orientation updates
+    // while any windows are seamlessly rotated, so we need to track when this
+    // hits zero so we can apply deferred orientation updates.
+    int mSeamlessRotationCount = 0;
+
     private final class SettingsObserver extends ContentObserver {
         private final Uri mDisplayInversionEnabledUri =
                 Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
@@ -6807,11 +6813,50 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, animation in progress.");
             return false;
         }
+        if (mDisplayFrozen) {
+            // Even if the screen rotation animation has finished (e.g. isAnimating
+            // returns false), there is still some time where we haven't yet unfrozen
+            // the display. We also need to abort rotation here.
+            if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, still finishing previous rotation");
+            return false;
+        }
 
         if (!mDisplayEnabled) {
             // No point choosing a rotation if the display is not enabled.
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, display is not enabled.");
             return false;
+        }
+
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+        final WindowList windows = displayContent.getWindowList();
+
+        final int oldRotation = mRotation;
+        boolean rotateSeamlessly = mPolicy.shouldRotateSeamlessly(oldRotation, mRotation);
+
+        if (rotateSeamlessly) {
+            for (int i = windows.size() - 1; i >= 0; i--) {
+                WindowState w = windows.get(i);
+                // We can't rotate (seamlessly or not) while waiting for the last seamless rotation
+                // to complete (that is, waiting for windows to redraw). It's tempting to check
+                // w.mSeamlessRotationCount but that could be incorrect in the case of window-removal.
+                if (w.mSeamlesslyRotated) {
+                    return false;
+                }
+                // In what can only be called an unfortunate workaround we require
+                // seamlessly rotated child windows to have the TRANSFORM_TO_DISPLAY_INVERSE
+                // flag. Due to limitations in the client API, there is no way for
+                // the client to set this flag in a race free fashion. If we seamlessly rotate
+                // a window which does not have this flag, but then gains it, we will get
+                // an incorrect visual result (rotated viewfinder). This means if we want to
+                // support seamlessly rotating windows which could gain this flag, we can't
+                // rotate windows without it. This limits seamless rotation in N to camera framework
+                // users, windows without children, and native code. This is unfortunate but
+                // having the camera work is our primary goal.
+                if (w.isChildWindow() & w.isVisibleNow() &&
+                        !w.mWinAnimator.mSurfaceController.getTransformToDisplayInverse()) {
+                    rotateSeamlessly = false;
+                }
+            }
         }
 
         // TODO: Implement forced rotation changes.
@@ -6832,7 +6877,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (mRotation == rotation && mAltOrientation == altOrientation) {
             // No change.
-            return false;
+             return false;
         }
 
         if (DEBUG_ORIENTATION) {
@@ -6842,8 +6887,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 + ", lastOrientation=" + mLastOrientation);
         }
 
-        int oldRotation = mRotation;
-
         mRotation = rotation;
         mAltOrientation = altOrientation;
         mPolicy.setRotationLw(mRotation);
@@ -6852,40 +6895,12 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
         mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT, WINDOW_FREEZE_TIMEOUT_DURATION);
         mWaitingForConfig = true;
-        final DisplayContent displayContent = getDefaultDisplayContentLocked();
         displayContent.layoutNeeded = true;
         final int[] anim = new int[2];
         if (displayContent.isDimming()) {
             anim[0] = anim[1] = 0;
         } else {
             mPolicy.selectRotationAnimationLw(anim);
-        }
-        boolean rotateSeamlessly = mPolicy.shouldRotateSeamlessly(oldRotation, mRotation);
-        final WindowList windows = displayContent.getWindowList();
-        // We can't rotate seamlessly while an existing seamless rotation is still
-        // waiting on windows to finish drawing.
-        if (rotateSeamlessly) {
-            for (int i = windows.size() - 1; i >= 0; i--) {
-                WindowState w = windows.get(i);
-                if (w.mSeamlesslyRotated) {
-                    rotateSeamlessly = false;
-                    break;
-                }
-                // In what can only be called an unfortunate workaround we require
-                // seamlessly rotated child windows to have the TRANSFORM_TO_DISPLAY_INVERSE
-                // flag. Due to limitations in the client API, there is no way for
-                // the client to set this flag in a race free fashion. If we seamlessly rotate
-                // a window which does not have this flag, but then gains it, we will get
-                // an incorrect visual result (rotated viewfinder). This means if we want to
-                // support seamlessly rotating windows which could gain this flag, we can't
-                // rotate windows without it. This limits seamless rotation in N to camera framework
-                // users, windows without children, and native code. This is unfortunate but
-                // having the camera work is our primary goal.
-                if (w.isChildWindow() & w.isVisibleNow() &&
-                        !w.mWinAnimator.mSurfaceController.getTransformToDisplayInverse()) {
-                    rotateSeamlessly = false;
-                }
-            }
         }
 
         if (!rotateSeamlessly) {
@@ -6899,6 +6914,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // When we are rotating seamlessly, we allow the elements to transition
             // to their rotated state independently and without a freeze required.
             screenRotationAnimation = null;
+
+            // We have to reset this in case a window was removed before it
+            // finished seamless rotation.
+            mSeamlessRotationCount = 0;
         }
 
         // We need to update our screen size information to match the new rotation. If the rotation
@@ -8914,8 +8933,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             if (w.mSeamlesslyRotated) {
                                 layoutNeeded = true;
                                 w.setDisplayLayoutNeeded();
+                                markForSeamlessRotation(w, false);
                             }
-                            w.mSeamlesslyRotated = false;
                         }
                         if (layoutNeeded) {
                             mWindowPlacerLocked.performSurfacePlacement();
@@ -11499,6 +11518,26 @@ public class WindowManagerService extends IWindowManager.Stub
                     "Requires REGISTER_WINDOW_MANAGER_LISTENERS permission");
         }
         mPolicy.registerShortcutKey(shortcutCode, shortcutKeyReceiver);
+    }
+
+    void markForSeamlessRotation(WindowState w, boolean seamlesslyRotated) {
+        if (seamlesslyRotated == w.mSeamlesslyRotated) {
+            return;
+        }
+        w.mSeamlesslyRotated = seamlesslyRotated;
+        if (seamlesslyRotated) {
+            mSeamlessRotationCount++;
+        } else {
+            mSeamlessRotationCount--;
+        }
+        if (mSeamlessRotationCount == 0) {
+            if (DEBUG_ORIENTATION) {
+                Slog.i(TAG, "Performing post-rotate rotation after seamless rotation");
+            }
+            if (updateRotationUncheckedLocked(false)) {
+                mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
+            }
+        }
     }
 
     private final class LocalService extends WindowManagerInternal {
