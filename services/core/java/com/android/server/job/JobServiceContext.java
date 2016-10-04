@@ -230,6 +230,15 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
         return job == null ? null : new JobStatus(job);
     }
 
+    /**
+     * Internal non-cloning inspection of the currently running job, if any.  The lock
+     * must be held when calling this *and* for the entire lifetime of using its returned
+     * JobStatus object!
+     */
+    JobStatus getRunningJobUnsafeLocked() {
+        return mRunningJob;
+    }
+
     /** Called externally when a job that was scheduled for execution should be cancelled. */
     void cancelExecutingJob(int reason) {
         mCallbackHandler.obtainMessage(MSG_CANCEL, reason, 0 /* unused */).sendToTarget();
