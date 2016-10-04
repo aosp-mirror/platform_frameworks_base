@@ -136,9 +136,6 @@ public:
     /*
      * Open an asset.
      *
-     * This will search through locale-specific and vendor-specific
-     * directories and packages to find the file.
-     *
      * The object returned does not depend on the AssetManager.  It should
      * be freed by calling Asset::close().
      */
@@ -148,9 +145,8 @@ public:
      * Open a non-asset file as an asset.
      *
      * This is for opening files that are included in an asset package
-     * but aren't assets.  These sit outside the usual "locale/vendor"
-     * path hierarchy, and will not be seen by "AssetDir" or included
-     * in our filename cache.
+     * but aren't assets.  These sit outside the usual "assets/"
+     * path hierarchy, and will not be seen by "AssetDir".
      */
     Asset* openNonAsset(const char* fileName, AccessMode mode, int32_t* outCookie = NULL);
 
@@ -163,22 +159,12 @@ public:
     /*
      * Open a directory within the asset hierarchy.
      *
-     * The contents of the directory are an amalgam of vendor-specific,
-     * locale-specific, and generic assets stored loosely or in asset
-     * packages.  Depending on the cache setting and previous accesses,
-     * this call may incur significant disk overhead.
-     *
      * To open the top-level directory, pass in "".
      */
     AssetDir* openDir(const char* dirName);
 
     /*
      * Open a directory within a particular path of the asset manager.
-     *
-     * The contents of the directory are an amalgam of vendor-specific,
-     * locale-specific, and generic assets stored loosely or in asset
-     * packages.  Depending on the cache setting and previous accesses,
-     * this call may incur significant disk overhead.
      *
      * To open the top-level directory, pass in "".
      */
@@ -231,8 +217,6 @@ private:
 
     Asset* openNonAssetInPathLocked(const char* fileName, AccessMode mode,
         const asset_path& path);
-    String8 createPathNameLocked(const asset_path& path, const char* locale,
-        const char* vendor);
     String8 createPathNameLocked(const asset_path& path, const char* rootDir);
     String8 createZipSourceNameLocked(const String8& zipFileName,
         const String8& dirName, const String8& fileName);
@@ -306,8 +290,8 @@ private:
      */
     class ZipSet {
     public:
-        ZipSet(void);
-        ~ZipSet(void);
+        ZipSet() = default;
+        ~ZipSet();
 
         /*
          * Return a ZipFileRO structure for a ZipFileRO with the specified
