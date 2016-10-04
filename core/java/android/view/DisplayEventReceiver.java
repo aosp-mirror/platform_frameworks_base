@@ -16,6 +16,7 @@
 
 package android.view;
 
+import dalvik.annotation.optimization.FastNative;
 import dalvik.system.CloseGuard;
 
 import android.os.Looper;
@@ -47,6 +48,7 @@ public abstract class DisplayEventReceiver {
     private static native long nativeInit(WeakReference<DisplayEventReceiver> receiver,
             MessageQueue messageQueue);
     private static native void nativeDispose(long receiverPtr);
+    @FastNative
     private static native void nativeScheduleVsync(long receiverPtr);
 
     /**
