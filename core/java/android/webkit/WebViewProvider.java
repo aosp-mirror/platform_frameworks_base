@@ -229,9 +229,13 @@ public interface WebViewProvider {
 
     public void setWebViewClient(WebViewClient client);
 
+    public WebViewClient getWebViewClient();
+
     public void setDownloadListener(DownloadListener listener);
 
     public void setWebChromeClient(WebChromeClient client);
+
+    public WebChromeClient getWebChromeClient();
 
     public void setPictureListener(PictureListener listener);
 
