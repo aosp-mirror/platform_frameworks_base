@@ -586,8 +586,6 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @param key The option key.
      * @return Whether the option is present.
-     *
-     * @hide
      */
     public boolean hasAdvancedOption(String key) {
         return mAdvancedOptions != null && mAdvancedOptions.containsKey(key);
@@ -598,8 +596,6 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @param key The option key.
      * @return The option value.
-     *
-     * @hide
      */
     public String getAdvancedStringOption(String key) {
         if (mAdvancedOptions != null) {
@@ -613,8 +609,6 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @param key The option key.
      * @return The option value.
-     *
-     * @hide
      */
     public int getAdvancedIntOption(String key) {
         if (mAdvancedOptions != null) {
