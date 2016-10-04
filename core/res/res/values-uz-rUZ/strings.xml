@@ -1099,7 +1099,7 @@
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct yoniq"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Sozlamalarni ochish uchun bosing"</string>
     <string name="accept" msgid="1645267259272829559">"Qabul qilish"</string>
-    <string name="decline" msgid="2112225451706137894">"Rad qilish"</string>
+    <string name="decline" msgid="2112225451706137894">"Rad etish"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"taklif jo‘natildi"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"ulanish taklifi"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"Kimdan:"</string>
@@ -1113,7 +1113,7 @@
     <string name="sms_control_title" msgid="7296612781128917719">"SMS xabarlar yuborilmoqda"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; katta miqdordagi SMS xabarlarini jo‘natmoqda. Ushbu ilovaga xabarlar jo‘natishni davom ettirishga ruxsat berasizmi?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Ruxsat berish"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"Rad qilish"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Rad etish"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;ga xabar jo‘natishni xohlaydi."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"Bunda, mobil hisobingizdan "<b>"to‘lov olinishi mumkin"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Bunda, mobil hisobingizdan to‘lov olinishi mumkin."</b></string>
@@ -1223,7 +1223,7 @@
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Ushbu so‘rovga ruxsat berishni xohlaysizmi?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Ruxsat so‘rovi"</string>
     <string name="allow" msgid="7225948811296386551">"Ruxsat berish"</string>
-    <string name="deny" msgid="2081879885755434506">"Rad qilish"</string>
+    <string name="deny" msgid="2081879885755434506">"Rad etish"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Ruxsat so‘raldi"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> hisobi uchun\nruxsat so‘raldi"</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Siz ushbu ilovadan ishchi profilingizdan tashqarida foydalanmoqdasiz"</string>
