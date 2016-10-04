@@ -21,7 +21,6 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.ComponentName;
-import android.content.pm.ParceledListSlice;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
@@ -30,7 +29,7 @@ import android.view.IWindow;
 
 /**
  * Interface implemented by the AccessibilityManagerService called by
- * the AccessibilityMasngers.
+ * the AccessibilityManagers.
  *
  * @hide
  */
@@ -39,8 +38,6 @@ interface IAccessibilityManager {
     int addClient(IAccessibilityManagerClient client, int userId);
 
     void sendAccessibilityEvent(in AccessibilityEvent uiEvent, int userId);
-
-    void sendAccessibilityEvents(in ParceledListSlice events, int userId);
 
     List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId);
 
