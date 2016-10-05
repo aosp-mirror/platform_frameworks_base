@@ -220,6 +220,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_SHARED_LIBRARIES := \
     libmemtrack \
     libandroidfw \
+    libbase \
     libexpat \
     libnativehelper \
     liblog \
