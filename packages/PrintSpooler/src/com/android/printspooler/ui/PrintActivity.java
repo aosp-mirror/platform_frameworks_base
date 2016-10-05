@@ -46,7 +46,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.print.IPrintDocumentAdapter;
 import android.print.PageRange;
@@ -760,8 +759,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 mPrintJob.setPrinterId(printerInfo.getId());
                 mPrintJob.setPrinterName(printerInfo.getName());
 
-                if (printerInfo.getCapabilities() != null) {
+                if (canPrint(printerInfo)) {
                     updatePrintAttributesFromCapabilities(printerInfo.getCapabilities());
+                    onPrinterAvailable(printerInfo);
+                } else {
+                    onPrinterUnavailable(printerInfo);
                 }
 
                 mDestinationSpinnerAdapter.ensurePrinterInVisibleAdapterPosition(printerInfo);
@@ -2050,7 +2052,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     public void onPrinterUnavailable(PrinterInfo printer) {
-        if (mCurrentPrinter.getId().equals(printer.getId())) {
+        if (mCurrentPrinter == null || mCurrentPrinter.getId().equals(printer.getId())) {
             setState(STATE_PRINTER_UNAVAILABLE);
             mPrintedDocument.cancel(false);
             ensureErrorUiShown(getString(R.string.print_error_printer_unavailable),
@@ -2309,8 +2311,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         public int getPrinterIndex(PrinterId printerId) {
             for (int i = 0; i < getCount(); i++) {
                 PrinterHolder printerHolder = (PrinterHolder) getItem(i);
-                if (printerHolder != null && !printerHolder.removed
-                        && printerHolder.printer.getId().equals(printerId)) {
+                if (printerHolder != null && printerHolder.printer.getId().equals(printerId)) {
                     return i;
                 }
             }
@@ -2539,7 +2540,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (updatedPrinter != null) {
                     printerHolder.printer = updatedPrinter;
                     printerHolder.removed = false;
-                    onPrinterAvailable(printerHolder.printer);
+                    if (canPrint(printerHolder.printer)) {
+                        onPrinterAvailable(printerHolder.printer);
+                    } else {
+                        onPrinterUnavailable(printerHolder.printer);
+                    }
                     newPrinterHolders.add(printerHolder);
                 } else if (mCurrentPrinter != null && mCurrentPrinter.getId().equals(oldPrinterId)){
                     printerHolder.removed = true;
