@@ -598,6 +598,9 @@ std::unique_ptr<uint8_t[]> NinePatch::serializeBase(size_t* outLen) const {
                                        (const int32_t*) verticalStretchRegions.data(),
                                        regionColors.data(),
                                        buffer.get());
+    // Convert to file endianness.
+    reinterpret_cast<android::Res_png_9patch*>(buffer.get())->deviceToFile();
+
     *outLen = data.serializedSize();
     return buffer;
 }
@@ -661,7 +664,9 @@ std::unique_ptr<uint8_t[]> NinePatch::serializeRoundedRectOutline(size_t* outLen
 }
 
 ::std::ostream& operator<<(::std::ostream& out, const NinePatch& ninePatch) {
-    return out << "padding: " << ninePatch.padding
+    return out << "horizontalStretch:" << util::joiner(ninePatch.horizontalStretchRegions, " ")
+            << " verticalStretch:" << util::joiner(ninePatch.verticalStretchRegions, " ")
+            << " padding: " << ninePatch.padding
             << ", bounds: " << ninePatch.layoutBounds
             << ", outline: " << ninePatch.outline
             << " rad=" << ninePatch.outlineRadius
