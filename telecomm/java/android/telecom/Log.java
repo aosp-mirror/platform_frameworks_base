@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.telecom.Logging.EventManager;
@@ -175,6 +176,10 @@ public class Log {
      * loggers.
      */
 
+    public static void setSessionContext(Context context) {
+        getSessionManager().setContext(context);
+    }
+
     public static void startSession(String shortMethodName) {
         getSessionManager().startSession(shortMethodName, null);
     }
@@ -300,7 +305,7 @@ public class Log {
 
     private static MessageDigest sMessageDigest;
 
-    static void initMd5Sum() {
+    public static void initMd5Sum() {
         new AsyncTask<Void, Void, Void>() {
             @Override
             public Void doInBackground(Void... args) {
@@ -426,7 +431,7 @@ public class Log {
             msg = (args == null || args.length == 0) ? format
                     : String.format(Locale.US, format, args);
         } catch (IllegalFormatException ife) {
-            e("Log", ife, "IllegalFormatException: formatString='%s' numArgs=%d", format,
+            e(TAG, ife, "Log: IllegalFormatException: formatString='%s' numArgs=%d", format,
                     args.length);
             msg = format + " (An error occurred while formatting the message.)";
         }

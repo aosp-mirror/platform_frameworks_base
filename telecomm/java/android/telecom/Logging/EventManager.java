@@ -289,7 +289,7 @@ public class EventManager {
             msg = (args == null || args.length == 0) ? format
                     : String.format(Locale.US, format, args);
         } catch (IllegalFormatException ife) {
-            Log.e("Log", ife, "IllegalFormatException: formatString='%s' numArgs=%d", format,
+            Log.e(this, ife, "IllegalFormatException: formatString='%s' numArgs=%d", format,
                     args.length);
             msg = format + " (An error occurred while formatting the message.)";
         }
