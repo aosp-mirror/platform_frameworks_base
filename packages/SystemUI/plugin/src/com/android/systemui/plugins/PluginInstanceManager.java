@@ -14,12 +14,10 @@
 
 package com.android.systemui.plugins;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -33,12 +31,10 @@ import android.view.LayoutInflater;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import dalvik.system.PathClassLoader;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class PluginInstanceManager<T extends Plugin> extends BroadcastReceiver {
+public class PluginInstanceManager<T extends Plugin> {
 
     private static final boolean DEBUG = false;
 
@@ -57,20 +53,21 @@ public class PluginInstanceManager<T extends Plugin> extends BroadcastReceiver {
     final PluginHandler mPluginHandler;
     private final boolean isDebuggable;
     private final PackageManager mPm;
-    private final ClassLoaderFactory mClassLoaderFactory;
+    private final PluginManager mManager;
 
     PluginInstanceManager(Context context, String action, PluginListener<T> listener,
-            boolean allowMultiple, Looper looper, int version) {
+            boolean allowMultiple, Looper looper, int version, PluginManager manager) {
         this(context, context.getPackageManager(), action, listener, allowMultiple, looper, version,
-                Build.IS_DEBUGGABLE, new ClassLoaderFactory());
+                manager, Build.IS_DEBUGGABLE);
     }
 
     @VisibleForTesting
     PluginInstanceManager(Context context, PackageManager pm, String action,
             PluginListener<T> listener, boolean allowMultiple, Looper looper, int version,
-            boolean debuggable, ClassLoaderFactory classLoaderFactory) {
+            PluginManager manager, boolean debuggable) {
         mMainHandler = new MainHandler(Looper.getMainLooper());
         mPluginHandler = new PluginHandler(looper);
+        mManager = manager;
         mContext = context;
         mPm = pm;
         mAction = action;
@@ -78,44 +75,29 @@ public class PluginInstanceManager<T extends Plugin> extends BroadcastReceiver {
         mAllowMultiple = allowMultiple;
         mVersion = version;
         isDebuggable = debuggable;
-        mClassLoaderFactory = classLoaderFactory;
     }
 
-    public void startListening() {
+    public void loadAll() {
         if (DEBUG) Log.d(TAG, "startListening");
         mPluginHandler.sendEmptyMessage(PluginHandler.QUERY_ALL);
-        IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
-        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        filter.addDataScheme("package");
-        mContext.registerReceiver(this, filter);
-        filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
-        mContext.registerReceiver(this, filter);
     }
 
-    public void stopListening() {
+    public void destroy() {
         if (DEBUG) Log.d(TAG, "stopListening");
         ArrayList<PluginInfo> plugins = new ArrayList<>(mPluginHandler.mPlugins);
         for (PluginInfo plugin : plugins) {
             mMainHandler.obtainMessage(MainHandler.PLUGIN_DISCONNECTED,
                     plugin.mPlugin).sendToTarget();
         }
-        mContext.unregisterReceiver(this);
     }
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        if (DEBUG) Log.d(TAG, "onReceive " + intent);
-        if (Intent.ACTION_USER_UNLOCKED.equals(intent.getAction())) {
-            mPluginHandler.sendEmptyMessage(PluginHandler.QUERY_ALL);
-        } else {
-            Uri data = intent.getData();
-            String pkgName = data.getEncodedSchemeSpecificPart();
-            mPluginHandler.obtainMessage(PluginHandler.REMOVE_PKG, pkgName).sendToTarget();
-            if (!Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
-                mPluginHandler.obtainMessage(PluginHandler.QUERY_PKG, pkgName).sendToTarget();
-            }
-        }
+    public void onPackageRemoved(String pkg) {
+        mPluginHandler.obtainMessage(PluginHandler.REMOVE_PKG, pkg).sendToTarget();
+    }
+
+    public void onPackageChange(String pkg) {
+        mPluginHandler.obtainMessage(PluginHandler.REMOVE_PKG, pkg).sendToTarget();
+        mPluginHandler.obtainMessage(PluginHandler.QUERY_PKG, pkg).sendToTarget();
     }
 
     public boolean checkAndDisable(String className) {
@@ -176,12 +158,6 @@ public class PluginInstanceManager<T extends Plugin> extends BroadcastReceiver {
                     super.handleMessage(msg);
                     break;
             }
-        }
-    }
-
-    static class ClassLoaderFactory {
-        public ClassLoader createClassLoader(String path, ClassLoader base) {
-            return new PathClassLoader(path, base);
         }
     }
 
@@ -279,8 +255,7 @@ public class PluginInstanceManager<T extends Plugin> extends BroadcastReceiver {
                     return null;
                 }
                 // Create our own ClassLoader so we can use our own code as the parent.
-                ClassLoader classLoader = mClassLoaderFactory.createClassLoader(info.sourceDir,
-                        getClass().getClassLoader());
+                ClassLoader classLoader = mManager.getClassLoader(info.sourceDir, info.packageName);
                 Context pluginContext = new PluginContextWrapper(
                         mContext.createApplicationContext(info, 0), classLoader);
                 Class<?> pluginClass = Class.forName(cls, true, classLoader);
