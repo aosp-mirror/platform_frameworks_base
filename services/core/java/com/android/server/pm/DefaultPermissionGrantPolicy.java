@@ -150,6 +150,8 @@ final class DefaultPermissionGrantPolicy {
 
     private static final int MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS = 1;
 
+    private static final String ACTION_TRACK = "com.android.fitness.TRACK";
+
     private final PackageManagerService mService;
     private final Handler mHandler;
 
@@ -603,8 +605,9 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(musicPackage, STORAGE_PERMISSIONS, userId);
             }
 
-            // Android Wear Home
+            // Watches
             if (mService.hasSystemFeature(PackageManager.FEATURE_WATCH, 0)) {
+                // Home application on watches
                 Intent homeIntent = new Intent(Intent.ACTION_MAIN);
                 homeIntent.addCategory(Intent.CATEGORY_HOME_MAIN);
 
@@ -620,6 +623,16 @@ final class DefaultPermissionGrantPolicy {
                             userId);
                     grantRuntimePermissionsLPw(wearHomePackage, LOCATION_PERMISSIONS, false,
                             userId);
+                }
+
+                // Fitness tracking on watches
+                Intent trackIntent = new Intent(ACTION_TRACK);
+                PackageParser.Package trackPackage = getDefaultSystemHandlerActivityPackageLPr(
+                        trackIntent, userId);
+                if (trackPackage != null
+                        && doesPackageSupportRuntimePermissions(trackPackage)) {
+                    grantRuntimePermissionsLPw(trackPackage, SENSORS_PERMISSIONS, false, userId);
+                    grantRuntimePermissionsLPw(trackPackage, LOCATION_PERMISSIONS, false, userId);
                 }
             }
 
