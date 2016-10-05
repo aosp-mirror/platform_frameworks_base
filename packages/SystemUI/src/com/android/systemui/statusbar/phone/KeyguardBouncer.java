@@ -96,9 +96,10 @@ public class KeyguardBouncer {
         }
 
         final int activeUserId = ActivityManager.getCurrentUser();
-        final boolean allowDismissKeyguard =
-                !UserManager.isSplitSystemUser()
-                && activeUserId == keyguardUserId;
+        final boolean isSystemUser =
+                UserManager.isSplitSystemUser() && activeUserId == UserHandle.USER_SYSTEM;
+        final boolean allowDismissKeyguard = !isSystemUser && activeUserId == keyguardUserId;
+
         // If allowed, try to dismiss the Keyguard. If no security auth (password/pin/pattern) is
         // set, this will dismiss the whole Keyguard. Otherwise, show the bouncer.
         if (allowDismissKeyguard && mKeyguardView.dismiss(activeUserId)) {
