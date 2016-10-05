@@ -244,40 +244,40 @@ METADATA['zh-cn'].collections = {
   "overview/zhcn/1": {
     "title": "",
     "resources": [
-      "intl/zh-cn/distribute/essentials/quality/core.html",
-      "intl/zh-cn/distribute/essentials/quality/tablets.html",
-      "intl/zh-cn/distribute/tools/launch-checklist.html",
-      "intl/zh-cn/tools/publishing/publishing_overview.html",
-      "intl/zh-cn/distribute/tools/localization-checklist.html"
+      "distribute/essentials/quality/core.html",
+      "distribute/essentials/quality/tablets.html",
+      "distribute/tools/launch-checklist.html",
+      "tools/publishing/publishing_overview.html",
+      "distribute/tools/localization-checklist.html"
     ]
   },
   "overview/zhcn/2": {
     "title": "",
     "resources": [
-      "intl/zh-cn/google/play/billing/index.html",
-      "intl/zh-cn/google/play/billing/api.html",
-      "intl/zh-cn/google/play/billing/billing_admin.html",
-      "intl/zh-cn/google/play/billing/billing_testing.html",
-      "intl/zh-cn/google/play/billing/billing_best_practices.html"
+      "google/play/billing/index.html",
+      "google/play/billing/api.html",
+      "google/play/billing/billing_admin.html",
+      "google/play/billing/billing_testing.html",
+      "google/play/billing/billing_best_practices.html"
     ]
   },
   "overview/zhcn/3": {
     "title": "",
     "resources": [
       "https://play.google.com/intl/en_us/badges/",
-      "intl/zh-cn/distribute/tools/promote/device-art.html",
-      "intl/zh-cn/distribute/tools/promote/linking.html",
-      "intl/zh-cn/distribute/tools/promote/brand.html",
-      "intl/zh-cn/tools/help/proguard.html"
+      "distribute/tools/promote/device-art.html",
+      "distribute/tools/promote/linking.html",
+      "distribute/tools/promote/brand.html",
+      "tools/help/proguard.html"
     ]
   },
   "overview/zhcn/4": {
     "title": "",
     "resources": [
-      "intl/zh-cn/design/style/writing.html",
-      "intl/zh-cn/training/basics/fragments/fragment-ui.html",
-      "intl/zh-cn/training/multiscreen/index.html",
-      "intl/zh-cn/training/monitoring-device-state/index.html"
+      "design/style/writing.html",
+      "training/basics/fragments/fragment-ui.html",
+      "training/multiscreen/index.html",
+      "training/monitoring-device-state/index.html"
     ]
   },
   "overview/carousel/zhcn": {
