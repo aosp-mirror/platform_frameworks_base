@@ -209,7 +209,7 @@ public final class SubscribeConfig implements Parcelable {
      *
      * @hide
      */
-    public void validate() throws IllegalArgumentException {
+    public void assertValid(WifiNanCharacteristics characteristics) throws IllegalArgumentException {
         WifiNanUtils.validateServiceName(mServiceName);
 
         if (!LvBufferUtils.isValid(mMatchFilter, 1)) {
@@ -228,6 +228,26 @@ public final class SubscribeConfig implements Parcelable {
         if (mMatchStyle != MATCH_STYLE_FIRST_ONLY && mMatchStyle != MATCH_STYLE_ALL) {
             throw new IllegalArgumentException(
                     "Invalid matchType - must be MATCH_FIRST_ONLY or MATCH_ALL");
+        }
+
+        if (characteristics != null) {
+            int maxServiceNameLength = characteristics.getMaxServiceNameLength();
+            if (maxServiceNameLength != 0 && mServiceName.length > maxServiceNameLength) {
+                throw new IllegalArgumentException(
+                        "Service name longer than supported by device characteristics");
+            }
+            int maxServiceSpecificInfoLength = characteristics.getMaxServiceSpecificInfoLength();
+            if (maxServiceSpecificInfoLength != 0 && mServiceSpecificInfo != null
+                    && mServiceSpecificInfo.length > maxServiceSpecificInfoLength) {
+                throw new IllegalArgumentException(
+                        "Service specific info longer than supported by device characteristics");
+            }
+            int maxMatchFilterLength = characteristics.getMaxMatchFilterLength();
+            if (maxMatchFilterLength != 0 && mMatchFilter != null
+                    && mMatchFilter.length > maxMatchFilterLength) {
+                throw new IllegalArgumentException(
+                        "Match filter longer than supported by device characteristics");
+            }
         }
     }
 
