@@ -872,6 +872,11 @@ public class TrustManagerService extends SystemService {
                         } catch (RemoteException e) {
                         }
                     }
+                    final Intent lockIntent = new Intent(Intent.ACTION_DEVICE_LOCKED_CHANGED);
+                    lockIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    lockIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+                    mContext.sendBroadcastAsUser(lockIntent, UserHandle.SYSTEM,
+                            Manifest.permission.TRUST_LISTENER, /* options */ null);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);

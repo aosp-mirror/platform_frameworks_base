@@ -3037,6 +3037,18 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.MANAGED_PROFILE_UNAVAILABLE";
 
     /**
+     * Broadcast sent to the system user when the 'device locked' state changes for any user.
+     * Carries an extra {@link #EXTRA_USER_HANDLE} that specifies the ID of the user for which
+     * the device was locked or unlocked.
+     *
+     * This is only sent to registered receivers.
+     *
+     * @hide
+     */
+    public static final String ACTION_DEVICE_LOCKED_CHANGED =
+            "android.intent.action.DEVICE_LOCKED_CHANGED";
+
+    /**
      * Sent when the user taps on the clock widget in the system's "quick settings" area.
      */
     public static final String ACTION_QUICK_CLOCK =
