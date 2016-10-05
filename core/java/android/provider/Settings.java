@@ -3628,7 +3628,7 @@ public final class Settings {
         };
 
         /**
-         * Beginning of Flash System Settings Additions
+         * Beginning of SiX System Settings Additions
          * @hide
          */
 
@@ -7474,7 +7474,7 @@ public final class Settings {
         public static final String DEVICE_PAIRED = "device_paired";
 
         /**
-         * Beginning of Flash Secure Settings Additions
+         * Beginning of SiX Secure Settings Additions
          * @hide
          */
 
@@ -7563,6 +7563,12 @@ public final class Settings {
          * @hide
          */
         public static final String TEXT_CHARGING_SYMBOL = "text_charging_symbol";
+
+        /**
+         * Count of small QS tiles.
+         * @hide
+         */
+        public static final String QQS_COUNT = "sysui_qqs_count";
 
         /**
          * This are the settings to be backed up.
@@ -10142,7 +10148,7 @@ public final class Settings {
         public static final String DATABASE_DOWNGRADE_REASON = "database_downgrade_reason";
 
         /**
-         * Beginning of Flash Global Settings Additions
+         * Beginning of SiX Global Settings Additions
          * @hide
          */
 
