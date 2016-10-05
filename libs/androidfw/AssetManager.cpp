@@ -56,12 +56,6 @@ using namespace android;
 
 static const bool kIsDebug = false;
 
-/*
- * Names for default app, locale, and vendor.  We might want to change
- * these to be an actual locale, e.g. always use en-US as the default.
- */
-static const char* kDefaultLocale = "default";
-static const char* kDefaultVendor = "default";
 static const char* kAssetsRoot = "assets";
 static const char* kAppZipName = NULL; //"classes.jar";
 static const char* kSystemAssets = "framework/framework-res.apk";
@@ -370,23 +364,11 @@ void AssetManager::getConfiguration(ResTable_config* outConfig) const
 /*
  * Open an asset.
  *
- * The data could be;
- *  - In a file on disk (assetBase + fileName).
- *  - In a compressed file on disk (assetBase + fileName.gz).
- *  - In a Zip archive, uncompressed or compressed.
+ * The data could be in any asset path. Each asset path could be:
+ *  - A directory on disk.
+ *  - A Zip archive, uncompressed or compressed.
  *
- * It can be in a number of different directories and Zip archives.
- * The search order is:
- *  - [appname]
- *    - locale + vendor
- *    - "default" + vendor
- *    - locale + "default"
- *    - "default + "default"
- *  - "common"
- *    - (same as above)
- *
- * To find a particular file, we have to try up to eight paths with
- * all three forms of data.
+ * If the file is in a directory, it could have a .gz suffix, meaning it is compressed.
  *
  * We should probably reject requests for "illegal" filenames, e.g. those
  * with illegal characters or "../" backward relative paths.
@@ -421,8 +403,7 @@ Asset* AssetManager::open(const char* fileName, AccessMode mode)
 /*
  * Open a non-asset file as if it were an asset.
  *
- * The "fileName" is the partial path starting from the application
- * name.
+ * The "fileName" is the partial path starting from the application name.
  */
 Asset* AssetManager::openNonAsset(const char* fileName, AccessMode mode, int32_t* outCookie)
 {
@@ -488,10 +469,11 @@ FileType AssetManager::getFileType(const char* fileName)
     pAsset = open(fileName, Asset::ACCESS_STREAMING);
     delete pAsset;
 
-    if (pAsset == NULL)
+    if (pAsset == NULL) {
         return kFileTypeNonexistent;
-    else
+    } else {
         return kFileTypeRegular;
+    }
 }
 
 bool AssetManager::appendPathToResTable(const asset_path& ap, bool appAsLib) const {
@@ -792,18 +774,6 @@ String8 AssetManager::createZipSourceNameLocked(const String8& zipFileName,
 }
 
 /*
- * Create a path to a loose asset (asset-base/app/locale/vendor).
- */
-String8 AssetManager::createPathNameLocked(const asset_path& ap, const char* locale,
-    const char* vendor)
-{
-    String8 path(ap.path);
-    path.appendPath((locale != NULL) ? locale : kDefaultLocale);
-    path.appendPath((vendor != NULL) ? vendor : kDefaultVendor);
-    return path;
-}
-
-/*
  * Create a path to a loose asset (asset-base/app/rootDir).
  */
 String8 AssetManager::createPathNameLocked(const asset_path& ap, const char* rootDir)
@@ -816,15 +786,6 @@ String8 AssetManager::createPathNameLocked(const asset_path& ap, const char* roo
 /*
  * Return a pointer to one of our open Zip archives.  Returns NULL if no
  * matching Zip file exists.
- *
- * Right now we have 2 possible Zip files (1 each in app/"common").
- *
- * If caching is set to CACHE_OFF, to get the expected behavior we
- * need to reopen the Zip file on every request.  That would be silly
- * and expensive, so instead we just check the file modification date.
- *
- * Pass in NULL values for "appName", "locale", and "vendor" if the
- * generics should be used.
  */
 ZipFileRO* AssetManager::getZipFileLocked(const asset_path& ap)
 {
@@ -909,14 +870,10 @@ Asset* AssetManager::openAssetFromZipLocked(const ZipFileRO* pZipFile,
     return pAsset;
 }
 
-
-
 /*
  * Open a directory in the asset namespace.
  *
- * An "asset directory" is simply the combination of all files in all
- * locations, with ".gz" stripped for loose files.  With app, locale, and
- * vendor defined, we have 8 directories and 2 Zip archives to scan.
+ * An "asset directory" is simply the combination of all asset paths' "assets/" directories.
  *
  * Pass in "" for the root dir.
  */
@@ -974,9 +931,7 @@ AssetDir* AssetManager::openDir(const char* dirName)
 /*
  * Open a directory in the non-asset namespace.
  *
- * An "asset directory" is simply the combination of all files in all
- * locations, with ".gz" stripped for loose files.  With app, locale, and
- * vendor defined, we have 8 directories and 2 Zip archives to scan.
+ * An "asset directory" is simply the combination of all asset paths' "assets/" directories.
  *
  * Pass in "" for the root dir.
  */
@@ -1500,13 +1455,6 @@ AssetManager::SharedZip::~SharedZip()
  *      AssetManager::ZipSet
  * ===========================================================================
  */
-
-/*
- * Constructor.
- */
-AssetManager::ZipSet::ZipSet(void)
-{
-}
 
 /*
  * Destructor.  Close any open archives.
