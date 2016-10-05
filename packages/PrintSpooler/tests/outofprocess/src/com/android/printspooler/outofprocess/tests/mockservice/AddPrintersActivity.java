@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package android.print.mockservice;
+package com.android.printspooler.outofprocess.tests.mockservice;
 
 import android.app.Activity;
 import android.os.Bundle;
