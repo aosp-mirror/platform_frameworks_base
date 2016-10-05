@@ -430,6 +430,8 @@ static void load_maps(int pid, stats_t* stats, bool* foundSwapPss)
     char tmp[128];
     FILE *fp;
 
+    *foundSwapPss = false;
+
     sprintf(tmp, "/proc/%d/smaps", pid);
     fp = fopen(tmp, "r");
     if (fp == 0) return;
