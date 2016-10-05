@@ -38,4 +38,10 @@
     <!-- QS edit page background color -->
     <color name="qs_edit_item_decoration_bg">@*android:color/secondary_device_default_settings</color>
 
+    <!-- QS alarm status text color -->
+    <color name="qs_alarm_status_text_color">#64ffffff</color>
+
+    <!-- QS edit page toolbar text color -->
+    <color name="qs_edit_toolbar_text_color">#FFFFFF</color>
+
 </resources>

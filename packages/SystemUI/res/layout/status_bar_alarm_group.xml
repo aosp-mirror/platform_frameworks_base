@@ -72,7 +72,7 @@
         android:paddingTop="3dp"
         android:drawablePadding="8dp"
         android:drawableStart="@drawable/ic_access_alarms_small"
-        android:textColor="#64ffffff"
+        android:textColor="@color/qs_alarm_status_text_color"
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
         android:gravity="top"
         android:background="@drawable/ripple_drawable"
