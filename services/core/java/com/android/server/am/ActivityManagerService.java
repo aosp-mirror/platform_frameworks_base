@@ -1136,6 +1136,20 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     private Configuration mTempGlobalConfig = new Configuration();
 
+    private final UpdateConfigurationResult mTmpUpdateConfigurationResult =
+            new UpdateConfigurationResult();
+    private static final class UpdateConfigurationResult {
+        // Configuration changes that were updated.
+        int changes;
+        // If the activity was relaunched to match the new configuration.
+        boolean activityRelaunched;
+
+        void reset() {
+            changes = 0;
+            activityRelaunched = false;
+        }
+    }
+
     boolean mSuppressResizeConfigChanges;
 
     /**
@@ -18872,7 +18886,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void updateConfiguration(Configuration values) {
+    public boolean updateConfiguration(Configuration values) {
         enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
                 "updateConfiguration()");
 
@@ -18887,11 +18901,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             final long origId = Binder.clearCallingIdentity();
-            if (values != null) {
-                Settings.System.clearConfiguration(values);
+
+            try {
+                if (values != null) {
+                    Settings.System.clearConfiguration(values);
+                }
+                updateConfigurationLocked(values, null, false, false /* persistent */,
+                        UserHandle.USER_NULL, false /* deferResume */,
+                        mTmpUpdateConfigurationResult);
+                return mTmpUpdateConfigurationResult.changes != 0;
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
-            updateConfigurationLocked(values, null, false);
-            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -18919,6 +18940,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     // To cache the list of supported system locales
     private String[] mSupportedSystemLocales = null;
 
+    private boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
+            boolean initLocale, boolean persistent, int userId, boolean deferResume) {
+        return updateConfigurationLocked(values, starting, initLocale, persistent, userId,
+                deferResume, null /* result */);
+    }
+
     /**
      * Do either or both things: (1) change the current configuration, and (2)
      * make sure the given activity is running with the (now) current
@@ -18930,7 +18957,8 @@ public final class ActivityManagerService extends ActivityManagerNative
      *               for that particular user
      */
     private boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
-            boolean initLocale, boolean persistent, int userId, boolean deferResume) {
+            boolean initLocale, boolean persistent, int userId, boolean deferResume,
+            UpdateConfigurationResult result) {
         int changes = 0;
         boolean kept = true;
 
@@ -18948,6 +18976,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (mWindowManager != null) {
                 mWindowManager.continueSurfaceLayout();
             }
+        }
+
+        if (result != null) {
+            result.changes = changes;
+            result.activityRelaunched = !kept;
         }
         return kept;
     }

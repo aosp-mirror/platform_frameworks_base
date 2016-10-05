@@ -213,7 +213,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
@@ -222,12 +221,10 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEYGUARD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
@@ -5441,25 +5438,30 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void updateRotationUnchecked(boolean alwaysSendConfiguration, boolean forceRelayout) {
-        if(DEBUG_ORIENTATION) Slog.v(TAG_WM, "updateRotationUnchecked("
-                   + "alwaysSendConfiguration=" + alwaysSendConfiguration + ")");
+    private void updateRotationUnchecked(boolean alwaysSendConfiguration,
+            boolean forceRelayout) {
+        if(DEBUG_ORIENTATION) Slog.v(TAG_WM, "updateRotationUnchecked:"
+                + " alwaysSendConfiguration=" + alwaysSendConfiguration
+                + " forceRelayout=" + forceRelayout);
 
         long origId = Binder.clearCallingIdentity();
-        boolean changed;
-        synchronized(mWindowMap) {
-            changed = updateRotationUncheckedLocked(false);
-            if (!changed || forceRelayout) {
-                getDefaultDisplayContentLocked().setLayoutNeeded();
-                mWindowPlacerLocked.performSurfacePlacement();
+
+        try {
+            final boolean rotationChanged;
+            synchronized (mWindowMap) {
+                rotationChanged = updateRotationUncheckedLocked(false);
+                if (!rotationChanged || forceRelayout) {
+                    getDefaultDisplayContentLocked().setLayoutNeeded();
+                    mWindowPlacerLocked.performSurfacePlacement();
+                }
             }
-        }
 
-        if (changed || alwaysSendConfiguration) {
-            sendNewConfiguration();
+            if (rotationChanged || alwaysSendConfiguration) {
+                sendNewConfiguration();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
-
-        Binder.restoreCallingIdentity(origId);
     }
 
 
@@ -5470,7 +5472,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Returns true if the rotation has been changed.  In this case YOU
      * MUST CALL sendNewConfiguration() TO UNFREEZE THE SCREEN.
      */
-    public boolean updateRotationUncheckedLocked(boolean inTransaction) {
+    boolean updateRotationUncheckedLocked(boolean inTransaction) {
         if (mDeferredRotationPauseCount > 0) {
             // Rotation updates have been paused temporarily.  Defer the update until
             // updates have been resumed.
@@ -6121,10 +6123,25 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Instruct the Activity Manager to fetch new configurations, update global configuration
      * and broadcast changes to config-changed listeners if appropriate.
+     * NOTE: Can't be called with the window manager lock held since it call into activity manager.
      */
     void sendNewConfiguration() {
         try {
-            mActivityManager.updateConfiguration(null);
+            final boolean configUpdated = mActivityManager.updateConfiguration(null);
+            if (!configUpdated) {
+                // Something changed (E.g. device rotation), but no configuration update is needed.
+                // E.g. changing device rotation by 180 degrees. Go ahead and perform surface
+                // placement to unfreeze the display since we froze it when the rotation was updated
+                // in updateRotationUncheckedLocked.
+                synchronized (mWindowMap) {
+                    if (mWaitingForConfig) {
+                        mWaitingForConfig = false;
+                        mLastFinishedFreezeSource = "config-unchanged";
+                        getDefaultDisplayContentLocked().setLayoutNeeded();
+                        mWindowPlacerLocked.performSurfacePlacement();
+                    }
+                }
+            }
         } catch (RemoteException e) {
         }
     }
