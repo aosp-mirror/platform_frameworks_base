@@ -429,7 +429,18 @@ public final class JobSchedulerService extends com.android.server.SystemService
                                         }
                                         cancelJobsForUid(pkgUid, true);
                                     }
-                                } catch (RemoteException e) { /* cannot happen */ }
+                                } catch (RemoteException|IllegalArgumentException e) {
+                                    /*
+                                     * IllegalArgumentException means that the package doesn't exist.
+                                     * This arises when PACKAGE_CHANGED broadcast delivery has lagged
+                                     * behind outright uninstall, so by the time we try to act it's gone.
+                                     * We don't need to act on this PACKAGE_CHANGED when this happens;
+                                     * we'll get a PACKAGE_REMOVED later and clean up then.
+                                     *
+                                     * RemoteException can't actually happen; the package manager is
+                                     * running in this same process.
+                                     */
+                                }
                                 break;
                             }
                         }
