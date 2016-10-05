@@ -27,7 +27,6 @@ import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 import junit.framework.TestCase;
 
 import static android.net.dhcp.DhcpPacket.*;
@@ -431,7 +430,7 @@ public class DhcpPacketTest extends TestCase {
         try {
             DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, packet.length, ENCAP_L3);
         } catch (DhcpPacket.ParseException expected) {
-            assertDhcpErrorCodes(DhcpErrorEvent.DHCP_NO_COOKIE, expected.errorCode);
+            assertDhcpErrorCodes(DhcpErrorEvent.PARSING_ERROR, expected.errorCode);
             return;
         }
         fail("Dhcp packet parsing should have failed");
@@ -471,55 +470,6 @@ public class DhcpPacketTest extends TestCase {
 
     private void assertDhcpErrorCodes(int expected, int got) {
         assertEquals(Integer.toHexString(expected), Integer.toHexString(got));
-    }
-
-    public void testTruncatedOfferPackets() throws Exception {
-        final byte[] packet = HexDump.hexStringToByteArray(
-            // IP header.
-            "450001518d0600004011144dc0a82b01c0a82bf7" +
-            // UDP header.
-            "00430044013d9ac7" +
-            // BOOTP header.
-            "02010600dfc23d1f0002000000000000c0a82bf7c0a82b0100000000" +
-            // MAC address.
-            "30766ff2a90c00000000000000000000" +
-            // Server name.
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            // File.
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            // Options
-            "638253633501023604c0a82b01330400000e103a04000007083b0400000c4e0104ffffff00" +
-            "1c04c0a82bff0304c0a82b010604c0a82b012b0f414e44524f49445f4d455445524544ff");
-
-        for (int len = 0; len < packet.length; len++) {
-            try {
-                DhcpPacket.decodeFullPacket(packet, len, ENCAP_L3);
-            } catch (ParseException e) {
-                if (e.errorCode == DhcpErrorEvent.PARSING_ERROR) {
-                    fail(String.format("bad truncated packet of length %d", len));
-                }
-            }
-        }
-    }
-
-    public void testRandomPackets() throws Exception {
-        final int maxRandomPacketSize = 512;
-        final Random r = new Random();
-        for (int i = 0; i < 10000; i++) {
-            byte[] packet = new byte[r.nextInt(maxRandomPacketSize + 1)];
-            r.nextBytes(packet);
-            try {
-                DhcpPacket.decodeFullPacket(packet, packet.length, ENCAP_L3);
-            } catch (ParseException e) {
-                if (e.errorCode == DhcpErrorEvent.PARSING_ERROR) {
-                    fail("bad packet: " + HexDump.toHexString(packet));
-                }
-            }
-        }
     }
 
     private byte[] mtuBytes(int mtu) {
