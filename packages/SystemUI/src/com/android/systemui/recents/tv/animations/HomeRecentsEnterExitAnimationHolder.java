@@ -47,12 +47,13 @@ public class HomeRecentsEnterExitAnimationHolder {
     public void startEnterAnimation(boolean isPipShown) {
         for(int i = 0; i < mGridView.getChildCount(); i++) {
             TaskCardView view = (TaskCardView) mGridView.getChildAt(i);
+            long delay = Math.max(mDelay * i, 0);
             view.setTranslationX(-mTranslationX);
             view.animate()
                     .alpha(isPipShown ? mDimAlpha : 1.0f)
                     .translationX(0)
                     .setDuration(mDuration)
-                    .setStartDelay(mDelay * i)
+                    .setStartDelay(delay)
                     .setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         }
     }
@@ -60,11 +61,12 @@ public class HomeRecentsEnterExitAnimationHolder {
     public void startExitAnimation(DismissRecentsToHomeAnimationStarted dismissEvent) {
         for(int i = mGridView.getChildCount() - 1; i >= 0; i--) {
             TaskCardView view = (TaskCardView) mGridView.getChildAt(i);
+            long delay = Math.max(mDelay * (mGridView.getChildCount() - 1 - i), 0);
             view.animate()
                     .alpha(0.0f)
                     .translationXBy(-mTranslationX)
                     .setDuration(mDuration)
-                    .setStartDelay(mDelay * (mGridView.getChildCount() - 1 - i))
+                    .setStartDelay(delay)
                     .setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
             if(i == 0) {
                 view.animate().setListener(dismissEvent.getAnimationTrigger()
