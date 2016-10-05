@@ -498,20 +498,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     @Override
-    public void sendAccessibilityEvents(ParceledListSlice events, int userId) {
-        List<AccessibilityEvent> a11yEvents = events.getList();
-        // Grab the lock once for the entire batch
-        synchronized (mLock) {
-            int numEventsToProcess = Math.min(a11yEvents.size(),
-                    AccessibilityManager.MAX_A11Y_EVENTS_PER_SERVICE_CALL);
-            for (int i = 0; i < numEventsToProcess; i++) {
-                AccessibilityEvent event = a11yEvents.get(i);
-                sendAccessibilityEvent(event, userId);
-            }
-        }
-    }
-
-    @Override
     public List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId) {
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
