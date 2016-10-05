@@ -168,6 +168,14 @@ static uint8_t* kOutlineRadius5x5[] = {
         (uint8_t*) WHITE WHITE WHITE WHITE WHITE,
 };
 
+static uint8_t* kStretchAndPadding5x5[] = {
+        (uint8_t*) WHITE WHITE BLACK WHITE WHITE,
+        (uint8_t*) WHITE RED   RED   RED   WHITE,
+        (uint8_t*) BLACK RED   RED   RED   BLACK,
+        (uint8_t*) WHITE RED   RED   RED   WHITE,
+        (uint8_t*) WHITE WHITE BLACK WHITE WHITE,
+};
+
 TEST(NinePatchTest, Minimum3x3) {
     std::string err;
     EXPECT_EQ(nullptr, NinePatch::create(k2x2, 2, 2, &err));
@@ -317,6 +325,34 @@ TEST(NinePatchTest, OutlineRadius) {
     ASSERT_NE(nullptr, ninePatch);
     EXPECT_EQ(Bounds(0, 0, 0, 0), ninePatch->outline);
     EXPECT_EQ(3.4142f, ninePatch->outlineRadius);
+}
+
+::testing::AssertionResult bigEndianOne(uint8_t* cursor) {
+    if (cursor[0] == 0 && cursor[1] == 0 && cursor[2] == 0 && cursor[3] == 1) {
+        return ::testing::AssertionSuccess();
+    }
+    return ::testing::AssertionFailure() << "Not BigEndian 1";
+}
+
+TEST(NinePatchTest, SerializePngEndianness) {
+    std::string err;
+    std::unique_ptr<NinePatch> ninePatch = NinePatch::create(kStretchAndPadding5x5, 5, 5, &err);
+    ASSERT_NE(nullptr, ninePatch);
+
+    size_t len;
+    std::unique_ptr<uint8_t[]> data = ninePatch->serializeBase(&len);
+    ASSERT_NE(nullptr, data);
+    ASSERT_NE(0u, len);
+
+    // Skip past wasDeserialized + numXDivs + numYDivs + numColors + xDivsOffset + yDivsOffset
+    // (12 bytes)
+    uint8_t* cursor = data.get() + 12;
+
+    // Check that padding is big-endian. Expecting value 1.
+    EXPECT_TRUE(bigEndianOne(cursor));
+    EXPECT_TRUE(bigEndianOne(cursor + 4));
+    EXPECT_TRUE(bigEndianOne(cursor + 8));
+    EXPECT_TRUE(bigEndianOne(cursor + 12));
 }
 
 } // namespace aapt
