@@ -266,6 +266,9 @@ static jobject JHwBinder_native_getService(
         return NULL;
     }
 
+    LOG(INFO) << "Starting thread pool.";
+    ::android::hardware::ProcessState::self()->startThreadPool();
+
     return JHwRemoteBinder::NewObject(env, service);
 }
 
