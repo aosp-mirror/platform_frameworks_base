@@ -182,7 +182,7 @@ public final class PublishConfig implements Parcelable {
      *
      * @hide
      */
-    public void validate() throws IllegalArgumentException {
+    public void assertValid(WifiNanCharacteristics characteristics) throws IllegalArgumentException {
         WifiNanUtils.validateServiceName(mServiceName);
 
         if (!LvBufferUtils.isValid(mMatchFilter, 1)) {
@@ -197,6 +197,26 @@ public final class PublishConfig implements Parcelable {
         }
         if (mTtlSec < 0) {
             throw new IllegalArgumentException("Invalid ttlSec - must be non-negative");
+        }
+
+        if (characteristics != null) {
+            int maxServiceNameLength = characteristics.getMaxServiceNameLength();
+            if (maxServiceNameLength != 0 && mServiceName.length > maxServiceNameLength) {
+                throw new IllegalArgumentException(
+                        "Service name longer than supported by device characteristics");
+            }
+            int maxServiceSpecificInfoLength = characteristics.getMaxServiceSpecificInfoLength();
+            if (maxServiceSpecificInfoLength != 0 && mServiceSpecificInfo != null
+                    && mServiceSpecificInfo.length > maxServiceSpecificInfoLength) {
+                throw new IllegalArgumentException(
+                        "Service specific info longer than supported by device characteristics");
+            }
+            int maxMatchFilterLength = characteristics.getMaxMatchFilterLength();
+            if (maxMatchFilterLength != 0 && mMatchFilter != null
+                    && mMatchFilter.length > maxMatchFilterLength) {
+                throw new IllegalArgumentException(
+                        "Match filter longer than supported by device characteristics");
+            }
         }
     }
 
