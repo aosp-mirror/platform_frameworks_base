@@ -157,19 +157,22 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
 </p>
 <p>
     Your application tells the system to start a drag by calling the
-    {@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()}
+    {@link android.view.View#startDragAndDrop(ClipData,View.DragShadowBuilder,Object,int)
+    startDragAndDrop()}
     method. This tells the system to start sending drag events. The method also sends the data that
     you are dragging.
 </p>
 <p>
     You can call
-    {@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()}
+    {@link android.view.View#startDragAndDrop(ClipData,View.DragShadowBuilder,Object,int)
+    startDragAndDrop()}
     for any attached View in the current layout. The system only uses the View object to get access
     to global settings in your layout.
 </p>
 <p>
     Once your application calls
-    {@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()},
+    {@link android.view.View#startDragAndDrop(ClipData,View.DragShadowBuilder,Object,int)
+    startDragAndDrop()},
     the rest of the process uses events that the system sends to the View objects in your current
     layout.
 </p>
@@ -183,11 +186,13 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
     </dt>
     <dd>
         In response to the user's gesture to begin a drag, your application calls
-        {@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()}
-        to tell the system to start a drag. The arguments
-        {@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()}
-        provide the data to be dragged, metadata for this data, and a callback for drawing the
-        drag shadow.
+        {@link android.view.View#startDragAndDrop(ClipData,View.DragShadowBuilder,Object,int)
+        startDragAndDrop()}
+        to tell the system to start a drag. The
+        {@link android.view.View#startDragAndDrop(ClipData,View.DragShadowBuilder,Object,int)
+        startDragAndDrop()}
+        arguments provide the data to be dragged, metadata for this data, and a callback for drawing
+        the drag shadow.
         <p>
             The system first responds by calling back to your application to get a drag shadow. It
             then displays the drag shadow on the device.
@@ -199,12 +204,13 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
             including a possible drop event, a drag event listener must return <code>true</code>.
             This registers the listener with the system. Only registered listeners continue to
             receive drag events. At this point, listeners can also change the appearance of their
-            View object to show that the listener can accept a drop event.
+            View object to show that the listener can accept the dragged data.
         </p>
         <p>
             If the drag event listener returns <code>false</code>, then it will not receive drag
-            events for the current operation until the system sends a drag event with action type
-            {@link android.view.DragEvent#ACTION_DRAG_ENDED}. By sending <code>false</code>, the
+            events for the current operation, including the drag event with action type
+            {@link android.view.DragEvent#ACTION_DRAG_ENDED} that will conclude the
+            operation. By sending <code>false</code>, the
             listener tells the system that it is not interested in the drag operation and
             does not want to accept the dragged data.
         </p>
@@ -230,7 +236,8 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
         object's listener a drag event with action type
         {@link android.view.DragEvent#ACTION_DROP}. The drag event contains the data that was
         passed to the system in the call to
-        {@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()}
+        {@link android.view.View#startDragAndDrop(ClipData,View.DragShadowBuilder,Object,int)
+        startDragAndDrop()}
         that started the operation. The listener is expected to return boolean <code>true</code> to
         the system if code for accepting the drop succeeds.
         <p>
@@ -297,7 +304,8 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
 <p>
     The {@link android.view.DragEvent} object also contains the data that your application provided
     to the system in the call to
-    {@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()}.
+    {@link android.view.View#startDragAndDrop(ClipData,View.DragShadowBuilder,Object,int)
+    startDragAndDrop()}.
     Some of the data is valid only for certain action types. The data that is valid for each action
     type is summarized in <a href="#table2">table 2</a>. It is also described in detail with
     the event for which it is valid in the section
@@ -316,8 +324,9 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
         <td>
             A View object's drag event listener receives this event action type just after the
             application calls
-{@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()} and
-            gets a drag shadow.
+            {@link android.view.View#startDragAndDrop(ClipData,View.DragShadowBuilder,Object,int)
+            startDragAndDrop()}
+            and gets a drag shadow.
             <p>
                 If the listener wants to continue receiving drag events for this operation, it must
                 return boolean <code>true</code> to the system.
@@ -345,8 +354,7 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
         <td>{@link android.view.DragEvent#ACTION_DRAG_EXITED}</td>
         <td>
             A View object's drag event listener receives this event action type after it receives a
-            {@link android.view.DragEvent#ACTION_DRAG_ENTERED} and at least one
-            {@link android.view.DragEvent#ACTION_DRAG_LOCATION} event, and after the user has moved
+            {@link android.view.DragEvent#ACTION_DRAG_ENTERED} event, and after the user has moved
             the drag shadow outside the bounding box of the View or into a descendant view that can
             accept the data.
         </td>
@@ -355,7 +363,8 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
         <td>{@link android.view.DragEvent#ACTION_DROP}</td>
         <td>
             A View object's drag event listener receives this event action type when the user
-            releases the drag shadow over the View object. This action type is only sent to a View
+            releases the drag shadow over the View object and not over its descendant view that can
+            accept the drag data. This action type is only sent to a View
             object's listener if the listener returned boolean <code>true</code> in response to the
             {@link android.view.DragEvent#ACTION_DRAG_STARTED} drag event. This action type is not
             sent if the user releases the drag shadow on a View whose listener is not registered,
@@ -472,9 +481,11 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
     The image is called a drag shadow. You create it with methods you declare for a
     {@link android.view.View.DragShadowBuilder} object, and then pass it to the system when you
     start a drag using
-    {@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()}.
+    {@link android.view.View#startDragAndDrop(ClipData,View.DragShadowBuilder,Object,int)
+    startDragAndDrop()}.
     As part of its response to
-    {@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()},
+    {@link android.view.View#startDragAndDrop(ClipData,View.DragShadowBuilder,Object,int)
+    startDragAndDrop()},
     the system invokes the callback methods you've defined in
     {@link android.view.View.DragShadowBuilder} to obtain a drag shadow.
 </p>
@@ -516,7 +527,8 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
     </dt>
     <dd>
         The system calls this method immediately after you call
-{@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()}. Use it
+        {@link android.view.View#startDragAndDrop(ClipData,View.DragShadowBuilder,Object,int)
+        startDragAndDrop()}. Use it
         to send to the system the dimensions and touch point of the drag shadow. The method has two
         arguments:
         <dl>
@@ -616,10 +628,10 @@ imageView.setOnLongClickListener(new View.OnLongClickListener() {
 
     // Starts the drag
 
-            v.startDrag(dragData,  // the data to be dragged
-                        myShadow,  // the drag shadow builder
-                        null,      // no need to use local data
-                        0          // flags (not currently used, set to 0)
+            v.startDragAndDrop(dragData,  // the data to be dragged
+                               myShadow,  // the drag shadow builder
+                               null,      // no need to use local data
+                               0          // flags (not currently used, set to 0)
             );
 
     }
@@ -722,8 +734,7 @@ imageView.setOnLongClickListener(new View.OnLongClickListener() {
 <p>
     Note that for an {@link android.view.DragEvent#ACTION_DRAG_STARTED} event, these
     the following {@link android.view.DragEvent} methods are not valid:
-    {@link android.view.DragEvent#getClipData()}, {@link android.view.DragEvent#getX()},
-    {@link android.view.DragEvent#getY()}, and {@link android.view.DragEvent#getResult()}.
+    {@link android.view.DragEvent#getClipData()} and {@link android.view.DragEvent#getResult()}.
 </p>
 <h3 id="HandleDuring">Handling events during the drag</h3>
 <p>
@@ -751,7 +762,9 @@ imageView.setOnLongClickListener(new View.OnLongClickListener() {
         {@link android.view.DragEvent#ACTION_DRAG_LOCATION}: Once the listener receives an
         {@link android.view.DragEvent#ACTION_DRAG_ENTERED} event, and before it receives an
         A{@link android.view.DragEvent#ACTION_DRAG_EXITED} event, it receives a new
-        {@link android.view.DragEvent#ACTION_DRAG_LOCATION} event every time the touch point moves.
+        {@link android.view.DragEvent#ACTION_DRAG_LOCATION} event immediately after the
+        {@link android.view.DragEvent#ACTION_DRAG_ENTERED} event, and then every time the touch
+        point moves.
         The {@link android.view.DragEvent#getX()} and {@link android.view.DragEvent#getY()} methods
         return the X and Y coordinates of the touch point.
     </li>
@@ -769,9 +782,9 @@ imageView.setOnLongClickListener(new View.OnLongClickListener() {
 </p>
 <ul>
     <li>
-        In response to {@link android.view.DragEvent#ACTION_DRAG_ENTERED} or
-        {@link android.view.DragEvent#ACTION_DRAG_LOCATION}, the listener can change the appearance
-        of the View to indicate that it is about to receive a drop.
+        In response to {@link android.view.DragEvent#ACTION_DRAG_ENTERED}, the listener can change
+        the appearance
+        of the View to indicate that it is ready to receive a drop.
     </li>
     <li>
         An event with the action type {@link android.view.DragEvent#ACTION_DRAG_LOCATION} contains
@@ -784,14 +797,14 @@ imageView.setOnLongClickListener(new View.OnLongClickListener() {
     <li>
         In response to {@link android.view.DragEvent#ACTION_DRAG_EXITED}, the listener should reset
         any appearance changes it applied in response to
-        {@link android.view.DragEvent#ACTION_DRAG_ENTERED} or
-        {@link android.view.DragEvent#ACTION_DRAG_LOCATION}. This indicates to the user that
+        {@link android.view.DragEvent#ACTION_DRAG_ENTERED}. This indicates to the user that
         the View is no longer an imminent drop target.
     </li>
 </ul>
 <h3 id="HandleDrop">Responding to a drop</h3>
 <p>
-    When the user releases the drag shadow on a View in the application, and that View previously
+    When the user releases the drag shadow on a View in the application, but not on its descendant
+    view that can accept the data, and that View previously
     reported that it could accept the content being dragged, the system dispatches a drag event
     to that View with the action type {@link android.view.DragEvent#ACTION_DROP}. The listener
     should do the following:
@@ -800,8 +813,8 @@ imageView.setOnLongClickListener(new View.OnLongClickListener() {
     <li>
         Call {@link android.view.DragEvent#getClipData()} to get the
         {@link android.content.ClipData} object that was originally supplied in the call
-        to
-{@link android.view.View#startDrag(ClipData, View.DragShadowBuilder, Object, int) startDrag()}
+        to {@link android.view.View#startDragAndDrop(ClipData, View.DragShadowBuilder, Object, int)
+        startDragAndDrop()}
         and store it. If the drag and drop operation does not represent data movement,
         this may not be necessary.
     </li>
@@ -855,9 +868,6 @@ imageView.setOnLongClickListener(new View.OnLongClickListener() {
         other cases, {@link android.view.DragEvent#getResult()} returns boolean <code>false</code>,
         including any case in which the system did not send out a
         {@link android.view.DragEvent#ACTION_DROP} event.
-    </li>
-    <li>
-        The listener should return boolean <code>true</code> to the system.
     </li>
 </ol>
 <p>

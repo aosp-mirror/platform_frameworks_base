@@ -20832,6 +20832,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *  {@link android.view.DragEvent#ACTION_DROP} if it consumed the drop, or
      *  {@code false} if it didn't.
      * </p>
+     * <p>
+     *  For all other events, the return value is ignored.
+     * </p>
      */
     public boolean onDragEvent(DragEvent event) {
         return false;
