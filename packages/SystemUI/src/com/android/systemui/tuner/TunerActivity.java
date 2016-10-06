@@ -30,6 +30,8 @@ public class TunerActivity extends SettingsDrawerActivity implements
         PreferenceFragment.OnPreferenceStartFragmentCallback,
         PreferenceFragment.OnPreferenceStartScreenCallback {
 
+    static final String ACTIVITY_ALIAS_NAME = "com.android.systemui.tuner.TunerSettingLink";
+
     private static final String TAG_TUNER = "tuner";
 
     protected void onCreate(Bundle savedInstanceState) {
