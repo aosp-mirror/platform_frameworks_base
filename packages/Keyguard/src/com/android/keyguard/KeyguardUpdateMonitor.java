@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static android.content.Intent.ACTION_USER_UNLOCKED;
 import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
 import static android.os.BatteryManager.BATTERY_STATUS_FULL;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
@@ -136,6 +137,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_SCREEN_TURNED_ON = 331;
     private static final int MSG_SCREEN_TURNED_OFF = 332;
     private static final int MSG_DREAMING_STATE_CHANGED = 333;
+    private static final int MSG_USER_UNLOCKED = 334;
 
     /** Fingerprint state: Not listening to fingerprint. */
     private static final int FINGERPRINT_STATE_STOPPED = 0;
@@ -290,6 +292,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     break;
                 case MSG_DREAMING_STATE_CHANGED:
                     handleDreamingStateChanged(msg.arg1);
+                    break;
+                case MSG_USER_UNLOCKED:
+                    handleUserUnlocked();
                     break;
             }
         }
@@ -723,6 +728,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
                     .equals(action)) {
                 mHandler.sendEmptyMessage(MSG_DPM_STATE_CHANGED);
+            } else if (ACTION_USER_UNLOCKED.equals(action)) {
+                mHandler.sendEmptyMessage(MSG_USER_UNLOCKED);
             }
         }
     };
@@ -1025,6 +1032,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
+    private void handleUserUnlocked() {
+        mNeedsSlowUnlockTransition = resolveNeedsSlowUnlockTransition();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onUserUnlocked();
+            }
+        }
+    }
+
     private KeyguardUpdateMonitor(Context context) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
@@ -1065,6 +1082,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         allUserFilter.addAction(ACTION_FACE_UNLOCK_STARTED);
         allUserFilter.addAction(ACTION_FACE_UNLOCK_STOPPED);
         allUserFilter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+        allUserFilter.addAction(ACTION_USER_UNLOCKED);
         context.registerReceiverAsUser(mBroadcastAllReceiver, UserHandle.ALL, allUserFilter,
                 null, null);
 
