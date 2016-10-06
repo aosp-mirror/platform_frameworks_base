@@ -14,17 +14,23 @@
  *  limitations under the License.
  */
 
-package android.print;
+package com.android.printspooler.outofprocess.tests;
 
 import android.graphics.pdf.PdfDocument;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
-import android.print.mockservice.AddPrintersActivity;
-import android.print.mockservice.MockPrintService;
-
-import android.print.mockservice.PrinterDiscoverySessionCallbacks;
-import android.print.mockservice.StubbablePrinterDiscoverySession;
+import android.print.PageRange;
+import android.print.PrintAttributes;
+import android.print.PrintDocumentAdapter;
+import android.print.PrintDocumentInfo;
+import android.print.PrinterCapabilitiesInfo;
+import android.print.PrinterId;
+import android.print.PrinterInfo;
+import com.android.printspooler.outofprocess.tests.mockservice.AddPrintersActivity;
+import com.android.printspooler.outofprocess.tests.mockservice.MockPrintService;
+import com.android.printspooler.outofprocess.tests.mockservice.PrinterDiscoverySessionCallbacks;
+import com.android.printspooler.outofprocess.tests.mockservice.StubbablePrinterDiscoverySession;
 import android.print.pdf.PrintedPdfDocument;
 import android.support.test.filters.LargeTest;
 import android.support.test.uiautomator.By;

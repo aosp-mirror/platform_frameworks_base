@@ -1323,17 +1323,6 @@
             </meta-data>
         </service>
 
-        <activity
-            android:name="android.print.mockservice.SettingsActivity"
-            android:permission="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"
-            android:exported="true">
-        </activity>
-
-        <activity
-                android:name="android.print.mockservice.AddPrintersActivity"
-                android:exported="true">
-        </activity>
-
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
