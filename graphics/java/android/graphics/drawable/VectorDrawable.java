@@ -76,27 +76,36 @@ import dalvik.system.VMRuntime;
  * <dl>
  * <dt><code>android:name</code></dt>
  * <dd>Defines the name of this vector drawable.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:width</code></dt>
  * <dd>Used to define the intrinsic width of the drawable.
  * This support all the dimension units, normally specified with dp.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:height</code></dt>
  * <dd>Used to define the intrinsic height the drawable.
  * This support all the dimension units, normally specified with dp.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:viewportWidth</code></dt>
  * <dd>Used to define the width of the viewport space. Viewport is basically
  * the virtual canvas where the paths are drawn on.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:viewportHeight</code></dt>
  * <dd>Used to define the height of the viewport space. Viewport is basically
  * the virtual canvas where the paths are drawn on.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:tint</code></dt>
  * <dd>The color to apply to the drawable as a tint. By default, no tint is applied.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:tintMode</code></dt>
  * <dd>The Porter-Duff blending mode for the tint color. The default value is src_in.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:autoMirrored</code></dt>
  * <dd>Indicates if the drawable needs to be mirrored when its layout direction is
  * RTL (right-to-left).</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:alpha</code></dt>
  * <dd>The opacity of this drawable.</dd>
+ * <dd>Animatable : Yes.</dd>
  * </dl></dd>
  * </dl>
  *
@@ -108,24 +117,32 @@ import dalvik.system.VMRuntime;
  * <dl>
  * <dt><code>android:name</code></dt>
  * <dd>Defines the name of the group.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:rotation</code></dt>
  * <dd>The degrees of rotation of the group.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:pivotX</code></dt>
  * <dd>The X coordinate of the pivot for the scale and rotation of the group.
  * This is defined in the viewport space.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:pivotY</code></dt>
  * <dd>The Y coordinate of the pivot for the scale and rotation of the group.
  * This is defined in the viewport space.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:scaleX</code></dt>
  * <dd>The amount of scale on the X Coordinate.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:scaleY</code></dt>
  * <dd>The amount of scale on the Y coordinate.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:translateX</code></dt>
  * <dd>The amount of translation on the X coordinate.
  * This is defined in the viewport space.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:translateY</code></dt>
  * <dd>The amount of translation on the Y coordinate.
  * This is defined in the viewport space.</dd>
+ * <dd>Animatable : Yes.</dd>
  * </dl></dd>
  * </dl>
  *
@@ -135,45 +152,60 @@ import dalvik.system.VMRuntime;
  * <dl>
  * <dt><code>android:name</code></dt>
  * <dd>Defines the name of the path.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:pathData</code></dt>
  * <dd>Defines path data using exactly same format as "d" attribute
  * in the SVG's path data. This is defined in the viewport space.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:fillColor</code></dt>
  * <dd>Specifies the color used to fill the path. May be a color or, for SDK 24+, a color state list
  * or a gradient color (See {@link android.R.styleable#GradientColor}
  * and {@link android.R.styleable#GradientColorItem}).
  * If this property is animated, any value set by the animation will override the original value.
  * No path fill is drawn if this property is not specified.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:strokeColor</code></dt>
  * <dd>Specifies the color used to draw the path outline. May be a color or, for SDK 24+, a color
  * state list or a gradient color (See {@link android.R.styleable#GradientColor}
  * and {@link android.R.styleable#GradientColorItem}).
  * If this property is animated, any value set by the animation will override the original value.
  * No path outline is drawn if this property is not specified.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:strokeWidth</code></dt>
  * <dd>The width a path stroke.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:strokeAlpha</code></dt>
  * <dd>The opacity of a path stroke.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:fillAlpha</code></dt>
  * <dd>The opacity to fill the path with.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:trimPathStart</code></dt>
  * <dd>The fraction of the path to trim from the start, in the range from 0 to 1.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:trimPathEnd</code></dt>
  * <dd>The fraction of the path to trim from the end, in the range from 0 to 1.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:trimPathOffset</code></dt>
  * <dd>Shift trim region (allows showed region to include the start and end), in the range
  * from 0 to 1.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:strokeLineCap</code></dt>
  * <dd>Sets the linecap for a stroked path: butt, round, square.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:strokeLineJoin</code></dt>
  * <dd>Sets the lineJoin for a stroked path: miter,round,bevel.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:strokeMiterLimit</code></dt>
  * <dd>Sets the Miter limit for a stroked path.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:fillType</code></dt>
  * <dd>Sets the fillType for a path. The types can be either "evenOdd" or "nonZero". They behave the
  * same as SVG's "fill-rule" properties. For more details, see
  * <a href="https://www.w3.org/TR/SVG/painting.html#FillRuleProperty">FillRuleProperty</a></dd>
+ * <dd>Animatable : No.</dd>
  * </dl></dd>
+ *
  * </dl>
  *
  * <dl>
@@ -183,9 +215,11 @@ import dalvik.system.VMRuntime;
  * <dl>
  * <dt><code>android:name</code></dt>
  * <dd>Defines the name of the clip path.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:pathData</code></dt>
  * <dd>Defines clip path using the same format as "d" attribute
  * in the SVG's path data.</dd>
+ * <dd>Animatable : Yes.</dd>
  * </dl></dd>
  * </dl>
  * <li>Here is a simple VectorDrawable in this vectordrawable.xml file.
