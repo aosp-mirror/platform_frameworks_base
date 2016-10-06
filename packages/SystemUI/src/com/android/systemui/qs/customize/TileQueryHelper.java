@@ -64,7 +64,10 @@ public class TileQueryHelper {
         for (int i = 0; i < possibleTiles.length; i++) {
             final String spec = possibleTiles[i];
             final QSTile<?> tile = host.createTile(spec);
-            if (tile == null || !tile.isAvailable()) {
+            if (tile == null) {
+                continue;
+            } else if (!tile.isAvailable()) {
+                tile.destroy();
                 continue;
             }
             tile.setListening(this, true);
@@ -78,6 +81,7 @@ public class TileQueryHelper {
                     tile.getState().copyTo(state);
                     // Ignore the current state and get the generic label instead.
                     state.label = tile.getTileLabel();
+                    tile.destroy();
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
