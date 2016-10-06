@@ -228,7 +228,8 @@ public final class BroadcastQueue {
     public final boolean replaceParallelBroadcastLocked(BroadcastRecord r) {
         final Intent intent = r.intent;
         for (int i = mParallelBroadcasts.size() - 1; i >= 0; i--) {
-            if (intent.filterEquals(mParallelBroadcasts.get(i).intent)) {
+            final Intent curIntent = mParallelBroadcasts.get(i).intent;
+            if (intent.filterEquals(curIntent)) {
                 if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
                         "***** DROPPING PARALLEL ["
                 + mQueueName + "]: " + intent);
