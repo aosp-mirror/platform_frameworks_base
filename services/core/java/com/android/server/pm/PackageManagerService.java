@@ -6899,11 +6899,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (pkg.mOriginalPackages != null && pkg.mOriginalPackages.contains(oldName)) {
                 // This package has been renamed to its original name.  Let's
                 // use that.
-                ps = mSettings.peekPackageLPr(oldName);
+                ps = mSettings.getPackageLPr(oldName);
             }
             // If there was no original package, see one for the real package name.
             if (ps == null) {
-                ps = mSettings.peekPackageLPr(pkg.packageName);
+                ps = mSettings.getPackageLPr(pkg.packageName);
             }
             // Check to see if this package could be hiding/updating a system
             // package.  Must look for it either under the original or real
@@ -8096,7 +8096,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 } else {
                     for (int i=pkg.mOriginalPackages.size()-1; i>=0; i--) {
-                        if ((origPackage = mSettings.peekPackageLPr(
+                        if ((origPackage = mSettings.getPackageLPr(
                                 pkg.mOriginalPackages.get(i))) != null) {
                             // We do have the package already installed under its
                             // original name...  should we use it?
@@ -8132,7 +8132,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // See comments in nonMutatedPs declaration
             if ((scanFlags & SCAN_CHECK_ONLY) != 0) {
-                PackageSetting foundPs = mSettings.peekPackageLPr(pkg.packageName);
+                PackageSetting foundPs = mSettings.getPackageLPr(pkg.packageName);
                 if (foundPs != null) {
                     nonMutatedPs = new PackageSetting(foundPs);
                 }
@@ -8284,7 +8284,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // another package.
                 for (int i = pkg.mAdoptPermissions.size() - 1; i >= 0; i--) {
                     final String origName = pkg.mAdoptPermissions.get(i);
-                    final PackageSetting orig = mSettings.peekPackageLPr(origName);
+                    final PackageSetting orig = mSettings.getPackageLPr(origName);
                     if (orig != null) {
                         if (verifyPackageUpdateLPr(orig, pkg)) {
                             Slog.i(TAG, "Adopting permissions from " + origName + " to "
@@ -8561,7 +8561,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     logCriticalInfo(Log.WARN,
                             "Relax SCAN_REQUIRE_KNOWN requirement for package " + pkg.packageName);
                 } else {
-                    PackageSetting known = mSettings.peekPackageLPr(pkg.packageName);
+                    PackageSetting known = mSettings.getPackageLPr(pkg.packageName);
                     if (known != null) {
                         if (DEBUG_PACKAGE_SCANNING) {
                             Log.d(TAG, "Examining " + pkg.codePath
@@ -14502,7 +14502,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 childRemovedRes.isUpdate = false;
                 childRemovedRes.dataRemoved = true;
                 synchronized (mPackages) {
-                    PackageSetting childPs = mSettings.peekPackageLPr(childPkg.packageName);
+                    PackageSetting childPs = mSettings.getPackageLPr(childPkg.packageName);
                     if (childPs != null) {
                         childRemovedRes.origUsers = childPs.queryInstalledUsers(allUsers, true);
                     }
@@ -14657,7 +14657,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         } else {
             synchronized (mPackages) {
-                PackageSetting ps = mSettings.peekPackageLPr(pkg.packageName);
+                PackageSetting ps = mSettings.getPackageLPr(pkg.packageName);
                 if (ps != null) {
                     res.removedInfo.removedForAllUsers = mPackages.get(ps.name) == null;
                     if (res.removedInfo.removedChildPackages != null) {
@@ -14835,7 +14835,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (int i = 0; i < childCount; i++) {
                 PackageSetting childPs = null;
                 synchronized (mPackages) {
-                    childPs = mSettings.peekPackageLPr(ps.childPackageNames.get(i));
+                    childPs = mSettings.getPackageLPr(ps.childPackageNames.get(i));
                 }
                 if (childPs != null) {
                     NativeLibraryHelper.removeNativeBinariesLI(childPs
@@ -15108,7 +15108,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     childRes.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
                     childRes.pkg = childPkg;
                     childRes.name = childPkg.packageName;
-                    PackageSetting childPs = mSettings.peekPackageLPr(childPkg.packageName);
+                    PackageSetting childPs = mSettings.getPackageLPr(childPkg.packageName);
                     if (childPs != null) {
                         childRes.origUsers = childPs.queryInstalledUsers(
                                 sUserManager.getUserIds(), true);
@@ -15389,7 +15389,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (int i = 0; i < childCount; i++) {
                 PackageParser.Package childPkg = pkg.childPackages.get(i);
                 PackageInstalledInfo childRes = res.addedChildPackages.get(childPkg.packageName);
-                PackageSetting childPs = mSettings.peekPackageLPr(childPkg.packageName);
+                PackageSetting childPs = mSettings.getPackageLPr(childPkg.packageName);
                 if (childPs != null) {
                     childRes.newUsers = childPs.queryInstalledUsers(
                             sUserManager.getUserIds(), true);
@@ -16266,7 +16266,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         for (int i = 0; i < childCount; i++) {
             PackageSetting childPs;
             synchronized (mPackages) {
-                childPs = mSettings.peekPackageLPr(ps.childPackageNames.get(i));
+                childPs = mSettings.getPackageLPr(ps.childPackageNames.get(i));
             }
             if (childPs != null) {
                 PackageRemovedInfo childOutInfo = (outInfo != null
@@ -16443,7 +16443,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     PackageRemovedInfo childInfo = new PackageRemovedInfo();
                     childInfo.removedPackage = childPackageName;
                     outInfo.removedChildPackages.put(childPackageName, childInfo);
-                    PackageSetting childPs = mSettings.peekPackageLPr(childPackageName);
+                    PackageSetting childPs = mSettings.getPackageLPr(childPackageName);
                     if (childPs != null) {
                         childInfo.origUsers = childPs.queryInstalledUsers(allUserHandles, true);
                     }
@@ -16483,14 +16483,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             // app but were not declared in the update.
             if (isSystemApp(ps)) {
                 synchronized (mPackages) {
-                    PackageSetting updatedPs = mSettings.peekPackageLPr(ps.name);
+                    PackageSetting updatedPs = mSettings.getPackageLPr(ps.name);
                     final int childCount = (updatedPs.childPackageNames != null)
                             ? updatedPs.childPackageNames.size() : 0;
                     for (int i = 0; i < childCount; i++) {
                         String childPackageName = updatedPs.childPackageNames.get(i);
                         if (outInfo.removedChildPackages == null
                                 || outInfo.removedChildPackages.indexOfKey(childPackageName) < 0) {
-                            PackageSetting childPs = mSettings.peekPackageLPr(childPackageName);
+                            PackageSetting childPs = mSettings.getPackageLPr(childPackageName);
                             if (childPs == null) {
                                 continue;
                             }
