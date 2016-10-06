@@ -128,6 +128,11 @@ public class KeyguardUpdateMonitorCallback {
     public void onUserInfoChanged(int userId) { }
 
     /**
+     * Called when a user got unlocked.
+     */
+    public void onUserUnlocked() { }
+
+    /**
      * Called when boot completed.
      *
      * Note, this callback will only be received if boot complete occurs after registering with

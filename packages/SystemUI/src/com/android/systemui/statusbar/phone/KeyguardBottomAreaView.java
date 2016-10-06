@@ -111,6 +111,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private KeyguardIndicationController mIndicationController;
     private AccessibilityController mAccessibilityController;
     private PhoneStatusBar mPhoneStatusBar;
+    private KeyguardAffordanceHelper mAffordanceHelper;
 
     private boolean mUserSetupComplete;
     private boolean mPrewarmBound;
@@ -269,6 +270,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public void setPhoneStatusBar(PhoneStatusBar phoneStatusBar) {
         mPhoneStatusBar = phoneStatusBar;
         updateCameraVisibility(); // in case onFinishInflate() was called too early
+    }
+
+    public void setAffordanceHelper(KeyguardAffordanceHelper affordanceHelper) {
+        mAffordanceHelper = affordanceHelper;
     }
 
     public void setUserSetupComplete(boolean userSetupComplete) {
@@ -601,6 +606,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             mPreviewContainer.addView(mCameraPreview);
             mCameraPreview.setVisibility(visibleBefore ? View.VISIBLE : View.INVISIBLE);
         }
+        if (mAffordanceHelper != null) {
+            mAffordanceHelper.updatePreviews();
+        }
     }
 
     private void updateLeftPreview() {
@@ -617,6 +625,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         if (mLeftPreview != null) {
             mPreviewContainer.addView(mLeftPreview);
             mLeftPreview.setVisibility(View.INVISIBLE);
+        }
+        if (mAffordanceHelper != null) {
+            mAffordanceHelper.updatePreviews();
         }
     }
 
@@ -701,6 +712,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         @Override
         public void onStrongAuthStateChanged(int userId) {
             mLockIcon.update();
+        }
+
+        @Override
+        public void onUserUnlocked() {
+            inflateCameraPreview();
+            updateCameraVisibility();
+            updateLeftAffordance();
         }
     };
 
