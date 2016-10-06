@@ -626,12 +626,9 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     }
 
     public void untetherAll() {
-        synchronized (mPublicSync) {
-            if (DBG) Log.d(TAG, "Untethering " + mTetherStates.keySet());
-            for (int i = 0; i < mTetherStates.size(); i++) {
-                untether(mTetherStates.keyAt(i));
-            }
-        }
+        stopTethering(ConnectivityManager.TETHERING_WIFI);
+        stopTethering(ConnectivityManager.TETHERING_USB);
+        stopTethering(ConnectivityManager.TETHERING_BLUETOOTH);
     }
 
     public int getLastTetherError(String iface) {
