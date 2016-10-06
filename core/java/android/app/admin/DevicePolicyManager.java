@@ -2352,18 +2352,23 @@ public class DevicePolicyManager {
      * <p>The calling device admin must be a device or profile owner. If it is not,
      * a {@link SecurityException} will be thrown.
      *
+     * <p>The calling device admin can verify the value it has set by calling
+     * {@link #getRequiredStrongAuthTimeout(ComponentName)} and passing in its instance.
+     *
      * <p>This method can be called on the {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param timeoutMs The new timeout, after which the user will have to unlock with strong
-     *         authentication method. If the timeout is lower than 1 hour (minimum) or higher than
-     *         72 hours (default and maximum) an {@link IllegalArgumentException} is thrown.
+     *         authentication method. A value of 0 means the admin is not participating in
+     *         controlling the timeout.
+     *         The minimum and maximum timeouts are platform-defined and are typically 1 hour and
+     *         72 hours, respectively. Though discouraged, the admin may choose to require strong
+     *         auth at all times using {@link #KEYGUARD_DISABLE_FINGERPRINT} and/or
+     *         {@link #KEYGUARD_DISABLE_TRUST_AGENTS}.
      *
      * @throws SecurityException if {@code admin} is not a device or profile owner.
-     * @throws IllegalArgumentException if the timeout is lower than 1 hour (minimum) or higher than
-     *         72 hours (default and maximum)
      *
      * @hide
      */
@@ -2389,7 +2394,7 @@ public class DevicePolicyManager {
      *
      * @param admin The name of the admin component to check, or {@code null} to aggregate
      *         accross all participating admins.
-     * @return The timeout or default timeout if not configured
+     * @return The timeout or 0 if not configured for the provided admin.
      *
      * @hide
      */
