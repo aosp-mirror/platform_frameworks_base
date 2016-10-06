@@ -73,6 +73,37 @@ public class FakeKeys {
             "-----END CERTIFICATE-----\n";
     public static final X509Certificate CA_CERT1 = loadCertificate(CA_CERT1_STRING);
 
+    private static final String CLIENT_CERT_STR = "-----BEGIN CERTIFICATE-----\n" +
+            "MIIE/DCCAuQCAQEwDQYJKoZIhvcNAQELBQAwRDELMAkGA1UEBhMCVVMxCzAJBgNV\n" +
+            "BAgMAkNBMRYwFAYDVQQHDA1Nb3VudGFpbiBWaWV3MRAwDgYDVQQKDAdUZXN0aW5n\n" +
+            "MB4XDTE2MDkzMDIwNTQyOFoXDTE3MDkzMDIwNTQyOFowRDELMAkGA1UEBhMCVVMx\n" +
+            "CzAJBgNVBAgMAkNBMRYwFAYDVQQHDA1Nb3VudGFpbiBWaWV3MRAwDgYDVQQKDAdU\n" +
+            "ZXN0aW5nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAnpmcbuaeHfnJ\n" +
+            "k+2QNvxmdVFTawyFMNk0USCq5sexscwmxbewG/Rb8YnixwJWS44v2XkSujB67z5C\n" +
+            "s2qudFEhRXKdEuC6idbAuA97KjipHh0AAniWMsyv61fvbgsUC0b0canx3LiDq81p\n" +
+            "y28NNGmAvoazLZUZ4AhBRiwYZY6FKk723gmZoGbEIeG7J1dlXPusc1662rIjz4eU\n" +
+            "zlmmlvqyHfNqnNk8L14Vug6Xh+lOEGN85xhu1YHAEKGrS89kZxs5rum/cZU8KH2V\n" +
+            "v6eKnY03kxjiVLQtnLpm/7VUEoCMGHyruRj+p3my4+DgqMsmsH52RZCBsjyGlpbU\n" +
+            "NOwOTIX6xh+Rqloduz4AnrMYYIiIw2s8g+2zJM7VbcVKx0fGS26BKdrxgrXWfmNE\n" +
+            "nR0/REQ5AxDGw0jfTUvtdTkXAf+K4MDjcNLEZ+MA4rHfAfQWZtUR5BkHCQYxNpJk\n" +
+            "pA0gyk+BpKdC4WdzI14NSWsu5sRCmBCFqH6BTOSEq/V1cNorBxNwLSSTwFFqUDqx\n" +
+            "Y5nQLXygkJf9WHZWtSKeSjtOYgilz7UKzC2s3CsjmIyGFe+SwpuHJnuE4Uc8Z5Cb\n" +
+            "bjNGHPzqL6XnmzZHJp7RF8kBdKdjGC7dCUltzOfICZeKlzOOq+Kw42T/nXjuXvpb\n" +
+            "nkXNxg741Nwd6RecykXJbseFwm3EYxkCAwEAATANBgkqhkiG9w0BAQsFAAOCAgEA\n" +
+            "Ga1mGwI9aXkL2fTPXO9YkAPzoGeX8aeuVYSQaSkNq+5vnogYCyAt3YDHjRG+ewTT\n" +
+            "WbnPA991xRAPac+biJeXWmwvgGj0YuT7e79phAiGkTTnbAjFHGfYnBy/tI/v7btO\n" +
+            "hRNElA5yTJ1m2fVbBEKXzMR83jrT9iyI+YLRN86zUZIaC86xxSbqnrdWN2jOK6MX\n" +
+            "dS8Arp9tPQjC/4gW+2Ilxv68jiYh+5auWHQZVjppWVY//iu4mAbkq1pTwQEhZ8F8\n" +
+            "Zrmh9DHh60hLFcfSuhIAwf/NMzppwdkjy1ruKVrpijhGKGp4OWu8nvOUgHSzxc7F\n" +
+            "PwpVZ5N2Ku4L8MLO6BG2VasRJK7l17TzDXlfLZHJjkuryOFxVaQKt8ZNFgTOaCXS\n" +
+            "E+gpTLksKU7riYckoiP4+H1sn9qcis0e8s4o/uf1UVc8GSdDw61ReGM5oZEDm1u8\n" +
+            "H9x20QU6igLqzyBpqvCKv7JNgU1uB2PAODHH78zJiUfnKd1y+o+J1iWzaGj3EFji\n" +
+            "T8AXksbTP733FeFXfggXju2dyBH+Z1S5BBTEOd1brWgXlHSAZGm97MKZ94r6/tkX\n" +
+            "qfv3fCos0DKz0oV7qBxYS8wiYhzrRVxG6ITAoH8uuUVVQaZF+G4nJ2jEqNbfuKyX\n" +
+            "ATQsVNjNNlDA0J33GobPMjT326wa4YAWMx8PI5PJZ3g=\n" +
+            "-----END CERTIFICATE-----\n";
+    public static final X509Certificate CLIENT_CERT = loadCertificate(CLIENT_CERT_STR);
+
     private static final byte[] FAKE_RSA_KEY_1 = new byte[] {
             (byte) 0x30, (byte) 0x82, (byte) 0x02, (byte) 0x78, (byte) 0x02, (byte) 0x01,
             (byte) 0x00, (byte) 0x30, (byte) 0x0d, (byte) 0x06, (byte) 0x09, (byte) 0x2a,
