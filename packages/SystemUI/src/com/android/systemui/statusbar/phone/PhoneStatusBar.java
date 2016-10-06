@@ -4456,6 +4456,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             animateCollapsePanels();
             return true;
         }
+        if (mKeyguardUserSwitcher.hideIfNotSimple(true)) {
+            return true;
+        }
         return false;
     }
 

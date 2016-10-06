@@ -128,7 +128,7 @@ public class KeyguardUserSwitcher {
         }
     }
 
-    private void hide(boolean animate) {
+    private boolean hide(boolean animate) {
         if (mUserSwitcher != null && mUserSwitcherContainer.getVisibility() == View.VISIBLE) {
             cancelAnimations();
             if (animate) {
@@ -137,7 +137,9 @@ public class KeyguardUserSwitcher {
                 mUserSwitcherContainer.setVisibility(View.GONE);
             }
             mStatusBarView.setKeyguardUserSwitcherShowing(false, animate);
+            return true;
         }
+        return false;
     }
 
     private void cancelAnimations() {
@@ -223,10 +225,11 @@ public class KeyguardUserSwitcher {
         }
     }
 
-    public void hideIfNotSimple(boolean animate) {
+    public boolean hideIfNotSimple(boolean animate) {
         if (mUserSwitcherContainer != null && !mUserSwitcherController.isSimpleUserSwitcher()) {
-            hide(animate);
+            return hide(animate);
         }
+        return false;
     }
 
     boolean isAnimating() {
