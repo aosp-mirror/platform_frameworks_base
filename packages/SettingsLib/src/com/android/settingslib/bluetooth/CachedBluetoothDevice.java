@@ -102,9 +102,6 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
     private static final long MAX_UUID_DELAY_FOR_AUTO_CONNECT = 5000;
     private static final long MAX_HOGP_DELAY_FOR_AUTO_CONNECT = 30000;
 
-    /** Auto-connect after pairing only if locally initiated. */
-    private boolean mConnectAfterPairing;
-
     /**
      * Describes the current device and profile for logging.
      *
@@ -300,7 +297,6 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
             return false;
         }
 
-        mConnectAfterPairing = true;  // auto-connect after pairing
         return true;
     }
 
@@ -309,7 +305,7 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
      * slightly different for local vs. remote initiated pairing dialogs.
      */
     boolean isUserInitiatedPairing() {
-        return mConnectAfterPairing;
+        return mDevice.isBondingInitiatedLocally();
     }
 
     public void unpair() {
@@ -549,7 +545,6 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
     void onBondingStateChanged(int bondState) {
         if (bondState == BluetoothDevice.BOND_NONE) {
             mProfiles.clear();
-            mConnectAfterPairing = false;  // cancel auto-connect
             setPhonebookPermissionChoice(ACCESS_UNKNOWN);
             setMessagePermissionChoice(ACCESS_UNKNOWN);
             setSimPermissionChoice(ACCESS_UNKNOWN);
@@ -562,10 +557,9 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
         if (bondState == BluetoothDevice.BOND_BONDED) {
             if (mDevice.isBluetoothDock()) {
                 onBondingDockConnect();
-            } else if (mConnectAfterPairing) {
+            } else if (mDevice.isBondingInitiatedLocally()) {
                 connect(false);
             }
-            mConnectAfterPairing = false;
         }
     }
 
