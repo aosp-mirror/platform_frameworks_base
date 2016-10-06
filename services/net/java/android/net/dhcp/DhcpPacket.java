@@ -7,6 +7,7 @@ import android.net.metrics.DhcpErrorEvent;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.system.OsConstants;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.UnsupportedEncodingException;
 import java.net.Inet4Address;
@@ -14,9 +15,8 @@ import java.net.UnknownHostException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.nio.ShortBuffer;
-
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -725,7 +725,8 @@ abstract class DhcpPacket {
      * A subset of the optional parameters are parsed and are stored
      * in object fields.
      */
-    public static DhcpPacket decodeFullPacket(ByteBuffer packet, int pktType) throws ParseException
+    @VisibleForTesting
+    static DhcpPacket decodeFullPacket(ByteBuffer packet, int pktType) throws ParseException
     {
         // bootp parameters
         int transactionId;
@@ -1090,7 +1091,13 @@ abstract class DhcpPacket {
     public static DhcpPacket decodeFullPacket(byte[] packet, int length, int pktType)
             throws ParseException {
         ByteBuffer buffer = ByteBuffer.wrap(packet, 0, length).order(ByteOrder.BIG_ENDIAN);
-        return decodeFullPacket(buffer, pktType);
+        try {
+            return decodeFullPacket(buffer, pktType);
+        } catch (ParseException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ParseException(DhcpErrorEvent.PARSING_ERROR, e.getMessage());
+        }
     }
 
     /**
