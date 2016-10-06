@@ -53,6 +53,8 @@ public final class DhcpErrorEvent implements Parcelable {
 
     public static final int BUFFER_UNDERFLOW           = makeErrorCode(MISC_ERROR, 1);
     public static final int RECEIVE_ERROR              = makeErrorCode(MISC_ERROR, 2);
+    /** {@hide} */
+    public static final int PARSING_ERROR              = makeErrorCode(MISC_ERROR, 3);
 
     public final String ifName;
     // error code byte format (MSB to LSB):
@@ -115,8 +117,9 @@ public final class DhcpErrorEvent implements Parcelable {
     }
 
     final static class Decoder {
-        static final SparseArray<String> constants =
-                MessageUtils.findMessageNames(new Class[]{DhcpErrorEvent.class},
-                new String[]{"L2_", "L3_", "L4_", "BOOTP_", "DHCP_", "BUFFER_", "RECEIVE_"});
+        static final SparseArray<String> constants = MessageUtils.findMessageNames(
+                new Class[]{DhcpErrorEvent.class},
+                new String[]{"L2_", "L3_", "L4_", "BOOTP_", "DHCP_", "BUFFER_", "RECEIVE_",
+                "PARSING_"});
     }
 }
