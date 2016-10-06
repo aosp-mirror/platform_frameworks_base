@@ -1431,7 +1431,7 @@ class WindowStateAnimator {
         // If we are undergoing seamless rotation, the surface has already
         // been set up to persist at it's old location. We need to freeze
         // updates until a resize occurs.
-        w.mSeamlesslyRotated = w.mSeamlesslyRotated && !mSurfaceResized;
+        mService.markForSeamlessRotation(w, w.mSeamlesslyRotated && !mSurfaceResized);
 
         calculateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect);
 
@@ -2156,7 +2156,7 @@ class WindowStateAnimator {
             cropRect.set(0, 0, w.mRequestedWidth, w.mRequestedWidth + w.mRequestedHeight);
             mSurfaceController.setCropInTransaction(cropRect, false);
         } else {
-            w.mSeamlesslyRotated = true;
+            mService.markForSeamlessRotation(w, true);
             transform.getValues(mService.mTmpFloats);
 
             float DsDx = mService.mTmpFloats[Matrix.MSCALE_X];
