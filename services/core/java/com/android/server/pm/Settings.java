@@ -502,23 +502,20 @@ final class Settings {
     }
 
     /** Gets and optionally creates a new shared user id. */
-    SharedUserSetting getSharedUserLPw(String name,
-            int pkgFlags, int pkgPrivateFlags, boolean create) {
+    SharedUserSetting getSharedUserLPw(String name, int pkgFlags, int pkgPrivateFlags,
+            boolean create) throws PackageManagerException {
         SharedUserSetting s = mSharedUsers.get(name);
-        if (s == null) {
-            if (!create) {
-                return null;
-            }
+        if (s == null && create) {
             s = new SharedUserSetting(name, pkgFlags, pkgPrivateFlags);
             s.userId = newUserIdLPw(s);
-            Log.i(PackageManagerService.TAG, "New shared user " + name + ": id=" + s.userId);
-            // < 0 means we couldn't assign a userid; fall out and return
-            // s, which is currently null
-            if (s.userId >= 0) {
-                mSharedUsers.put(name, s);
+            if (s.userId < 0) {
+                // < 0 means we couldn't assign a userid; throw exception
+                throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
+                        "Creating shared user " + name + " failed");
             }
+            Log.i(PackageManagerService.TAG, "New shared user " + name + ": id=" + s.userId);
+            mSharedUsers.put(name, s);
         }
-
         return s;
     }
 
@@ -875,7 +872,7 @@ final class Settings {
      * Writes per-user package restrictions if the user state has changed. If the user
      * state has not changed, this does nothing.
      */
-    void writeUserRestrictions(PackageSetting newPackage, PackageSetting oldPackage) {
+    void writeUserRestrictionsLPw(PackageSetting newPackage, PackageSetting oldPackage) {
         // package doesn't exist; do nothing
         if (peekPackageLPr(newPackage.name) == null) {
             return;
@@ -4088,7 +4085,7 @@ final class Settings {
         return mVerifierDeviceIdentity;
     }
 
-    public boolean hasOtherDisabledSystemPkgWithChildLPr(String parentPackageName,
+    boolean hasOtherDisabledSystemPkgWithChildLPr(String parentPackageName,
             String childPackageName) {
         final int packageCount = mDisabledSysPackages.size();
         for (int i = 0; i < packageCount; i++) {
