@@ -219,6 +219,9 @@ final class BroadcastRecord extends Binder {
             int _resultCode, String _resultData, Bundle _resultExtras, boolean _serialized,
             boolean _sticky, boolean _initialSticky,
             int _userId) {
+        if (_intent == null) {
+            throw new NullPointerException("Can't construct with a null intent");
+        }
         queue = _queue;
         intent = _intent;
         targetComp = _intent.getComponent();
