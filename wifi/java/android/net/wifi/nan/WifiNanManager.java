@@ -293,6 +293,20 @@ public class WifiNanManager {
     }
 
     /**
+     * Returns the characteristics of the Wi-Fi NAN interface: a set of parameters which specify
+     * limitations on configurations, e.g. the maximum service name length.
+     *
+     * @return An object specifying configuration limitations of NAN.
+     */
+    public WifiNanCharacteristics getCharacteristics() {
+        try {
+            return mService.getCharacteristics();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Attach to the Wi-Fi NAN service - enabling the application to create discovery sessions or
      * create connections to peers. The device will attach to an existing cluster if it can find
      * one or create a new cluster (if it is the first to enable NAN in its vicinity). Results

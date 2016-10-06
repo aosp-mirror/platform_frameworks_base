@@ -23,6 +23,7 @@ import android.net.wifi.nan.IWifiNanDiscoverySessionCallback;
 import android.net.wifi.nan.IWifiNanEventCallback;
 import android.net.wifi.nan.PublishConfig;
 import android.net.wifi.nan.SubscribeConfig;
+import android.net.wifi.nan.WifiNanCharacteristics;
 import android.net.wifi.RttManager;
 
 /**
@@ -36,6 +37,7 @@ interface IWifiNanManager
     void enableUsage();
     void disableUsage();
     boolean isUsageEnabled();
+    WifiNanCharacteristics getCharacteristics();
 
     // client API
     void connect(in IBinder binder, in String callingPackage, in IWifiNanEventCallback callback,
