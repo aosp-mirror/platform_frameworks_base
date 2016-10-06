@@ -60,6 +60,11 @@ public class DozeService extends DreamService {
     private static final String ACTION_BASE = "com.android.systemui.doze";
     private static final String PULSE_ACTION = ACTION_BASE + ".pulse";
 
+    /**
+     * If true, reregisters all trigger sensors when the screen turns off.
+     */
+    private static final boolean REREGISTER_ALL_SENSORS_ON_SCREEN_OFF = true;
+
     private final String mTag = String.format(TAG + ".%08x", hashCode());
     private final Context mContext = this;
     private final DozeParameters mDozeParameters = new DozeParameters(mContext);
@@ -272,6 +277,9 @@ public class DozeService extends DreamService {
             public void onPulseFinished() {
                 if (mPulsing && mDreaming) {
                     mPulsing = false;
+                    if (REREGISTER_ALL_SENSORS_ON_SCREEN_OFF) {
+                        reregisterAllSensors();
+                    }
                     turnDisplayOff();
                 }
                 mWakeLock.release(); // needs to be unconditional to balance acquire
@@ -306,6 +314,15 @@ public class DozeService extends DreamService {
         }
         listenForBroadcasts(listen);
         listenForNotifications(listen);
+    }
+
+    private void reregisterAllSensors() {
+        for (TriggerSensor s : mSensors) {
+            s.setListening(false);
+        }
+        for (TriggerSensor s : mSensors) {
+            s.setListening(true);
+        }
     }
 
     private void listenForBroadcasts(boolean listen) {
