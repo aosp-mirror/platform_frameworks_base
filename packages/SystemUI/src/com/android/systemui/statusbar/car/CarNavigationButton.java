@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.car;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.android.keyguard.AlphaOptimizedImageButton;
@@ -41,6 +42,7 @@ public class CarNavigationButton extends RelativeLayout {
     public void onFinishInflate() {
         super.onFinishInflate();
         mIcon = (AlphaOptimizedImageButton) findViewById(R.id.car_nav_button_icon);
+        mIcon.setScaleType(ImageView.ScaleType.CENTER);
         mIcon.setClickable(false);
         mIcon.setBackgroundColor(android.R.color.transparent);
         mIcon.setAlpha(UNSELECTED_ALPHA);
