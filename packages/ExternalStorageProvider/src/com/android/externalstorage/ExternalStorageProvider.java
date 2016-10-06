@@ -41,6 +41,7 @@ import android.os.storage.VolumeInfo;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
+import android.provider.DocumentsContract.Path;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -48,6 +49,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.webkit.MimeTypeMap;
 
 import com.android.internal.annotations.GuardedBy;
@@ -183,7 +185,8 @@ public class ExternalStorageProvider extends DocumentsProvider {
             root.rootId = rootId;
             root.volumeId = volume.id;
             root.flags = Root.FLAG_LOCAL_ONLY
-                    | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_SUPPORTS_IS_CHILD;
+                    | Root.FLAG_SUPPORTS_SEARCH
+                    | Root.FLAG_SUPPORTS_IS_CHILD;
 
             final DiskInfo disk = volume.getDisk();
             if (DEBUG) Log.d(TAG, "Disk for root " + rootId + " is " + disk);
@@ -270,7 +273,6 @@ public class ExternalStorageProvider extends DocumentsProvider {
         return projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION;
     }
 
-
     private String getDocIdForFile(File file) throws FileNotFoundException {
         return getDocIdForFileMaybeCreate(file, false);
     }
@@ -323,6 +325,11 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     private File getFileForDocId(String docId, boolean visible) throws FileNotFoundException {
+        return resolveDocId(docId, visible).second;
+    }
+
+    private Pair<RootInfo, File> resolveDocId(String docId, boolean visible)
+            throws FileNotFoundException {
         final int splitIndex = docId.indexOf(':', 1);
         final String tag = docId.substring(0, splitIndex);
         final String path = docId.substring(splitIndex + 1);
@@ -346,7 +353,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
         if (!target.exists()) {
             throw new FileNotFoundException("Missing file for " + docId + " at " + target);
         }
-        return target;
+        return Pair.create(root, target);
     }
 
     private void includeFile(MatrixCursor result, String docId, File file)
@@ -420,6 +427,28 @@ public class ExternalStorageProvider extends DocumentsProvider {
             throw new IllegalArgumentException(
                     "Failed to determine if " + docId + " is child of " + parentDocId + ": " + e);
         }
+    }
+
+    @Override
+    public Path findPath(String documentId)
+            throws FileNotFoundException {
+        LinkedList<String> path = new LinkedList<>();
+
+        final Pair<RootInfo, File> resolvedDocId = resolveDocId(documentId, false);
+        RootInfo root = resolvedDocId.first;
+        File file = resolvedDocId.second;
+
+        if (!file.exists()) {
+            throw new FileNotFoundException();
+        }
+
+        while (file != null && file.getAbsolutePath().startsWith(root.path.getAbsolutePath())) {
+            path.addFirst(getDocIdForFile(file));
+
+            file = file.getParentFile();
+        }
+
+        return new Path(root.rootId, path);
     }
 
     @Override
