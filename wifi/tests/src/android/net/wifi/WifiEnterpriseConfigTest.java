@@ -16,10 +16,12 @@
 
 package android.net.wifi;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import android.net.wifi.WifiEnterpriseConfig.Eap;
 import android.net.wifi.WifiEnterpriseConfig.Phase2;
@@ -30,6 +32,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
 
@@ -257,6 +260,45 @@ public class WifiEnterpriseConfigTest {
         mEnterpriseConfig = WifiEnterpriseConfig.CREATOR.createFromParcel(parcel);
         assertEquals("TTLS", getSupplicantEapMethod());
         assertEquals("\"autheap=GTC\"", getSupplicantPhase2Method());
+    }
+
+    /**
+     * Verifies that parceling a WifiEnterpriseConfig preserves the key
+     * and certificates information.
+     */
+    @Test
+    public void parcelConfigWithKeyAndCerts() throws Exception {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        PrivateKey clientKey = FakeKeys.RSA_KEY1;
+        X509Certificate clientCert = FakeKeys.CLIENT_CERT;
+        X509Certificate[] caCerts = new X509Certificate[] {FakeKeys.CA_CERT0, FakeKeys.CA_CERT1};
+        enterpriseConfig.setClientKeyEntry(clientKey, clientCert);
+        enterpriseConfig.setCaCertificates(caCerts);
+        Parcel parcel = Parcel.obtain();
+        enterpriseConfig.writeToParcel(parcel, 0);
+
+        parcel.setDataPosition(0);  // Allow parcel to be read from the beginning.
+        mEnterpriseConfig = WifiEnterpriseConfig.CREATOR.createFromParcel(parcel);
+        PrivateKey actualClientKey = mEnterpriseConfig.getClientPrivateKey();
+        X509Certificate actualClientCert = mEnterpriseConfig.getClientCertificate();
+        X509Certificate[] actualCaCerts = mEnterpriseConfig.getCaCertificates();
+
+        /* Verify client private key. */
+        assertNotNull(actualClientKey);
+        assertEquals(clientKey.getAlgorithm(), actualClientKey.getAlgorithm());
+        assertArrayEquals(clientKey.getEncoded(), actualClientKey.getEncoded());
+
+        /* Verify client certificate. */
+        assertNotNull(actualClientCert);
+        assertArrayEquals(clientCert.getEncoded(), actualClientCert.getEncoded());
+
+        /* Verify CA certificates. */
+        assertNotNull(actualCaCerts);
+        assertEquals(caCerts.length, actualCaCerts.length);
+        for (int i = 0; i < caCerts.length; i++) {
+            assertNotNull(actualCaCerts[i]);
+            assertArrayEquals(caCerts[i].getEncoded(), actualCaCerts[i].getEncoded());
+        }
     }
 
     /** Verifies proper operation of the getKeyId() method. */
