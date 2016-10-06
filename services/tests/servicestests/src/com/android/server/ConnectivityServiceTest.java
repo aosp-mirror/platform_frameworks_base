@@ -53,6 +53,7 @@ import android.net.NetworkMisc;
 import android.net.NetworkRequest;
 import android.net.RouteInfo;
 import android.net.metrics.IpConnectivityLog;
+import android.net.util.AvoidBadWifiTracker;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -600,9 +601,22 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
     }
 
-    private class WrappedConnectivityService extends ConnectivityService {
-        private WrappedNetworkMonitor mLastCreatedNetworkMonitor;
+    private class WrappedAvoidBadWifiTracker extends AvoidBadWifiTracker {
         public boolean configRestrictsAvoidBadWifi;
+
+        public WrappedAvoidBadWifiTracker(Context c, Handler h, Runnable r) {
+            super(c, h, r);
+        }
+
+        @Override
+        public boolean configRestrictsAvoidBadWifi() {
+            return configRestrictsAvoidBadWifi;
+        }
+    }
+
+    private class WrappedConnectivityService extends ConnectivityService {
+        public WrappedAvoidBadWifiTracker wrappedAvoidBadWifiTracker;
+        private WrappedNetworkMonitor mLastCreatedNetworkMonitor;
 
         public WrappedConnectivityService(Context context, INetworkManagementService netManager,
                 INetworkStatsService statsService, INetworkPolicyManager policyManager,
@@ -653,14 +667,20 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
 
         @Override
-        public WakeupMessage makeWakeupMessage(
-                Context context, Handler handler, String cmdName, int cmd, Object obj) {
-            return new FakeWakeupMessage(context, handler, cmdName, cmd, 0, 0, obj);
+        public AvoidBadWifiTracker createAvoidBadWifiTracker(
+                Context c, Handler h, Runnable r) {
+            final WrappedAvoidBadWifiTracker tracker = new WrappedAvoidBadWifiTracker(c, h, r);
+            return tracker;
+        }
+
+        public WrappedAvoidBadWifiTracker getAvoidBadWifiTracker() {
+            return (WrappedAvoidBadWifiTracker) mAvoidBadWifiTracker;
         }
 
         @Override
-        public boolean configRestrictsAvoidBadWifi() {
-            return configRestrictsAvoidBadWifi;
+        public WakeupMessage makeWakeupMessage(
+                Context context, Handler handler, String cmdName, int cmd, Object obj) {
+            return new FakeWakeupMessage(context, handler, cmdName, cmd, 0, 0, obj);
         }
 
         public WrappedNetworkMonitor getLastCreatedWrappedNetworkMonitor() {
@@ -2043,46 +2063,48 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     @SmallTest
     public void testAvoidBadWifiSetting() throws Exception {
         final ContentResolver cr = mServiceContext.getContentResolver();
+        final WrappedAvoidBadWifiTracker tracker = mService.getAvoidBadWifiTracker();
         final String settingName = Settings.Global.NETWORK_AVOID_BAD_WIFI;
 
-        mService.configRestrictsAvoidBadWifi = false;
+        tracker.configRestrictsAvoidBadWifi = false;
         String[] values = new String[] {null, "0", "1"};
         for (int i = 0; i < values.length; i++) {
             Settings.Global.putInt(cr, settingName, 1);
-            mService.updateNetworkAvoidBadWifi();
+            tracker.reevaluate();
             mService.waitForIdle();
             String msg = String.format("config=false, setting=%s", values[i]);
             assertTrue(msg, mService.avoidBadWifi());
-            assertFalse(msg, mService.shouldNotifyWifiUnvalidated());
+            assertFalse(msg, tracker.shouldNotifyWifiUnvalidated());
         }
 
-        mService.configRestrictsAvoidBadWifi = true;
+        tracker.configRestrictsAvoidBadWifi = true;
 
         Settings.Global.putInt(cr, settingName, 0);
-        mService.updateNetworkAvoidBadWifi();
+        tracker.reevaluate();
         mService.waitForIdle();
         assertFalse(mService.avoidBadWifi());
-        assertFalse(mService.shouldNotifyWifiUnvalidated());
+        assertFalse(tracker.shouldNotifyWifiUnvalidated());
 
         Settings.Global.putInt(cr, settingName, 1);
-        mService.updateNetworkAvoidBadWifi();
+        tracker.reevaluate();
         mService.waitForIdle();
         assertTrue(mService.avoidBadWifi());
-        assertFalse(mService.shouldNotifyWifiUnvalidated());
+        assertFalse(tracker.shouldNotifyWifiUnvalidated());
 
         Settings.Global.putString(cr, settingName, null);
-        mService.updateNetworkAvoidBadWifi();
+        tracker.reevaluate();
         mService.waitForIdle();
         assertFalse(mService.avoidBadWifi());
-        assertTrue(mService.shouldNotifyWifiUnvalidated());
+        assertTrue(tracker.shouldNotifyWifiUnvalidated());
     }
 
     @SmallTest
     public void testAvoidBadWifi() throws Exception {
-        ContentResolver cr = mServiceContext.getContentResolver();
+        final ContentResolver cr = mServiceContext.getContentResolver();
+        final WrappedAvoidBadWifiTracker tracker = mService.getAvoidBadWifiTracker();
 
         // Pretend we're on a carrier that restricts switching away from bad wifi.
-        mService.configRestrictsAvoidBadWifi = true;
+        tracker.configRestrictsAvoidBadWifi = true;
 
         // File a request for cell to ensure it doesn't go down.
         final TestNetworkCallback cellNetworkCallback = new TestNetworkCallback();
@@ -2101,7 +2123,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mCm.registerNetworkCallback(validatedWifiRequest, validatedWifiCallback);
 
         Settings.Global.putInt(cr, Settings.Global.NETWORK_AVOID_BAD_WIFI, 0);
-        mService.updateNetworkAvoidBadWifi();
+        tracker.reevaluate();
 
         // Bring up validated cell.
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
@@ -2132,14 +2154,14 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         // Simulate switching to a carrier that does not restrict avoiding bad wifi, and expect
         // that we switch back to cell.
-        mService.configRestrictsAvoidBadWifi = false;
-        mService.updateNetworkAvoidBadWifi();
+        tracker.configRestrictsAvoidBadWifi = false;
+        tracker.reevaluate();
         defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
         assertEquals(mCm.getActiveNetwork(), cellNetwork);
 
         // Switch back to a restrictive carrier.
-        mService.configRestrictsAvoidBadWifi = true;
-        mService.updateNetworkAvoidBadWifi();
+        tracker.configRestrictsAvoidBadWifi = true;
+        tracker.reevaluate();
         defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
         assertEquals(mCm.getActiveNetwork(), wifiNetwork);
 
@@ -2167,7 +2189,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         // Simulate the user selecting "switch" and checking the don't ask again checkbox.
         Settings.Global.putInt(cr, Settings.Global.NETWORK_AVOID_BAD_WIFI, 1);
-        mService.updateNetworkAvoidBadWifi();
+        tracker.reevaluate();
 
         // We now switch to cell.
         defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
@@ -2180,11 +2202,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // Simulate the user turning the cellular fallback setting off and then on.
         // We switch to wifi and then to cell.
         Settings.Global.putString(cr, Settings.Global.NETWORK_AVOID_BAD_WIFI, null);
-        mService.updateNetworkAvoidBadWifi();
+        tracker.reevaluate();
         defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
         assertEquals(mCm.getActiveNetwork(), wifiNetwork);
         Settings.Global.putInt(cr, Settings.Global.NETWORK_AVOID_BAD_WIFI, 1);
-        mService.updateNetworkAvoidBadWifi();
+        tracker.reevaluate();
         defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
         assertEquals(mCm.getActiveNetwork(), cellNetwork);
 
