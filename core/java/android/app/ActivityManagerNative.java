@@ -1229,8 +1229,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case UPDATE_CONFIGURATION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             Configuration config = Configuration.CREATOR.createFromParcel(data);
-            updateConfiguration(config);
+            final boolean updated = updateConfiguration(config);
             reply.writeNoException();
+            reply.writeInt(updated ? 1 : 0);
             return true;
         }
 
@@ -4593,7 +4594,7 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return res;
     }
-    public void updateConfiguration(Configuration values) throws RemoteException
+    public boolean updateConfiguration(Configuration values) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -4601,8 +4602,10 @@ class ActivityManagerProxy implements IActivityManager
         values.writeToParcel(data, 0);
         mRemote.transact(UPDATE_CONFIGURATION_TRANSACTION, data, reply, 0);
         reply.readException();
+        boolean updated = reply.readInt() == 1;
         data.recycle();
         reply.recycle();
+        return updated;
     }
     public void setRequestedOrientation(IBinder token, int requestedOrientation)
             throws RemoteException {

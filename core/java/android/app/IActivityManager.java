@@ -276,8 +276,9 @@ public interface IActivityManager extends IInterface {
      * Updates global configuration and applies changes to the entire system.
      * @param values Update values for global configuration.
      * @throws RemoteException
+     * @return Returns true if the configuration was updated.
      */
-    public void updateConfiguration(Configuration values) throws RemoteException;
+    public boolean updateConfiguration(Configuration values) throws RemoteException;
 
     public void setRequestedOrientation(IBinder token,
             int requestedOrientation) throws RemoteException;
