@@ -115,14 +115,14 @@ public class PackageManagerSettingsTests {
         Settings settings =
                 new Settings(InstrumentationRegistry.getContext().getFilesDir(), new Object());
         assertThat(settings.readLPw(createFakeUsers()), is(true));
-        assertThat(settings.peekPackageLPr(PACKAGE_NAME_3), is(notNullValue()));
-        assertThat(settings.peekPackageLPr(PACKAGE_NAME_1), is(notNullValue()));
+        assertThat(settings.getPackageLPr(PACKAGE_NAME_3), is(notNullValue()));
+        assertThat(settings.getPackageLPr(PACKAGE_NAME_1), is(notNullValue()));
 
-        PackageSetting ps = settings.peekPackageLPr(PACKAGE_NAME_1);
+        PackageSetting ps = settings.getPackageLPr(PACKAGE_NAME_1);
         assertThat(ps.getEnabled(0), is(COMPONENT_ENABLED_STATE_DEFAULT));
         assertThat(ps.getNotLaunched(0), is(true));
 
-        ps = settings.peekPackageLPr(PACKAGE_NAME_2);
+        ps = settings.getPackageLPr(PACKAGE_NAME_2);
         assertThat(ps.getStopped(0), is(false));
         assertThat(ps.getEnabled(0), is(COMPONENT_ENABLED_STATE_DISABLED_USER));
         assertThat(ps.getEnabled(1), is(COMPONENT_ENABLED_STATE_DEFAULT));
@@ -141,7 +141,7 @@ public class PackageManagerSettingsTests {
         settings = new Settings(InstrumentationRegistry.getContext().getFilesDir(), new Object());
         assertThat(settings.readLPw(createFakeUsers()), is(true));
 
-        PackageSetting ps = settings.peekPackageLPr(PACKAGE_NAME_2);
+        PackageSetting ps = settings.getPackageLPr(PACKAGE_NAME_2);
         assertThat(ps.getEnabled(0), is(COMPONENT_ENABLED_STATE_DISABLED_USER));
         assertThat(ps.getEnabled(1), is(COMPONENT_ENABLED_STATE_DEFAULT));
     }
@@ -155,7 +155,7 @@ public class PackageManagerSettingsTests {
         assertThat(settings.readLPw(createFakeUsers()), is(true));
 
         // Enable/Disable a package
-        PackageSetting ps = settings.peekPackageLPr(PACKAGE_NAME_1);
+        PackageSetting ps = settings.getPackageLPr(PACKAGE_NAME_1);
         ps.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, 0, null);
         ps.setEnabled(COMPONENT_ENABLED_STATE_ENABLED, 1, null);
         assertThat(ps.getEnabled(0), is(COMPONENT_ENABLED_STATE_DISABLED));

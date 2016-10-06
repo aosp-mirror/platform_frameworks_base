@@ -430,10 +430,6 @@ final class Settings {
     }
 
     PackageSetting getPackageLPr(String pkgName) {
-        return peekPackageLPr(pkgName);
-    }
-
-    PackageSetting peekPackageLPr(String pkgName) {
         return mPackages.get(pkgName);
     }
 
@@ -874,7 +870,7 @@ final class Settings {
      */
     void writeUserRestrictionsLPw(PackageSetting newPackage, PackageSetting oldPackage) {
         // package doesn't exist; do nothing
-        if (peekPackageLPr(newPackage.name) == null) {
+        if (getPackageLPr(newPackage.name) == null) {
             return;
         }
         // no users defined; do nothing
