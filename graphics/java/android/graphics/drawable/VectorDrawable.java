@@ -744,7 +744,11 @@ public class VectorDrawable extends Drawable {
         groupStack.push(state.mRootGroup);
 
         int eventType = parser.getEventType();
-        while (eventType != XmlPullParser.END_DOCUMENT) {
+        final int innerDepth = parser.getDepth() + 1;
+
+        // Parse everything until the end of the vector element.
+        while (eventType != XmlPullParser.END_DOCUMENT
+                && (parser.getDepth() >= innerDepth || eventType != XmlPullParser.END_TAG)) {
             if (eventType == XmlPullParser.START_TAG) {
                 final String tagName = parser.getName();
                 final VGroup currentGroup = groupStack.peek();
