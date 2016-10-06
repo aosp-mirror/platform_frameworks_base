@@ -23,7 +23,7 @@ import android.os.Parcelable;
 /**
  * The characteristics of the Wi-Fi NAN implementation.
  *
- * @hide
+ * @hide PROPOSED_NAN_API
  */
 public class WifiNanCharacteristics implements Parcelable {
     /** @hide */
