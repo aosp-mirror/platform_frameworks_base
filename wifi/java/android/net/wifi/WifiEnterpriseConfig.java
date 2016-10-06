@@ -183,48 +183,14 @@ public class WifiEnterpriseConfig implements Parcelable {
 
         dest.writeInt(mEapMethod);
         dest.writeInt(mPhase2Method);
-        writeCertificates(dest, mCaCerts);
-
-        if (mClientPrivateKey != null) {
-            String algorithm = mClientPrivateKey.getAlgorithm();
-            byte[] userKeyBytes = mClientPrivateKey.getEncoded();
-            dest.writeInt(userKeyBytes.length);
-            dest.writeByteArray(userKeyBytes);
-            dest.writeString(algorithm);
-        } else {
-            dest.writeInt(0);
-        }
-
-        writeCertificate(dest, mClientCertificate);
-    }
-
-    private void writeCertificates(Parcel dest, X509Certificate[] cert) {
-        if (cert != null && cert.length != 0) {
-            dest.writeInt(cert.length);
-            for (int i = 0; i < cert.length; i++) {
-                writeCertificate(dest, cert[i]);
-            }
-        } else {
-            dest.writeInt(0);
-        }
-    }
-
-    private void writeCertificate(Parcel dest, X509Certificate cert) {
-        if (cert != null) {
-            try {
-                byte[] certBytes = cert.getEncoded();
-                dest.writeInt(certBytes.length);
-                dest.writeByteArray(certBytes);
-            } catch (CertificateEncodingException e) {
-                dest.writeInt(0);
-            }
-        } else {
-            dest.writeInt(0);
-        }
+        ParcelUtil.writeCertificates(dest, mCaCerts);
+        ParcelUtil.writePrivateKey(dest, mClientPrivateKey);
+        ParcelUtil.writeCertificate(dest, mClientCertificate);
     }
 
     public static final Creator<WifiEnterpriseConfig> CREATOR =
             new Creator<WifiEnterpriseConfig>() {
+                @Override
                 public WifiEnterpriseConfig createFromParcel(Parcel in) {
                     WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
                     int count = in.readInt();
@@ -236,58 +202,13 @@ public class WifiEnterpriseConfig implements Parcelable {
 
                     enterpriseConfig.mEapMethod = in.readInt();
                     enterpriseConfig.mPhase2Method = in.readInt();
-                    enterpriseConfig.mCaCerts = readCertificates(in);
-
-                    PrivateKey userKey = null;
-                    int len = in.readInt();
-                    if (len > 0) {
-                        try {
-                            byte[] bytes = new byte[len];
-                            in.readByteArray(bytes);
-                            String algorithm = in.readString();
-                            KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
-                            userKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
-                        } catch (NoSuchAlgorithmException e) {
-                            userKey = null;
-                        } catch (InvalidKeySpecException e) {
-                            userKey = null;
-                        }
-                    }
-
-                    enterpriseConfig.mClientPrivateKey = userKey;
-                    enterpriseConfig.mClientCertificate = readCertificate(in);
+                    enterpriseConfig.mCaCerts = ParcelUtil.readCertificates(in);
+                    enterpriseConfig.mClientPrivateKey = ParcelUtil.readPrivateKey(in);
+                    enterpriseConfig.mClientCertificate = ParcelUtil.readCertificate(in);
                     return enterpriseConfig;
                 }
 
-                private X509Certificate[] readCertificates(Parcel in) {
-                    X509Certificate[] certs = null;
-                    int len = in.readInt();
-                    if (len > 0) {
-                        certs = new X509Certificate[len];
-                        for (int i = 0; i < len; i++) {
-                            certs[i] = readCertificate(in);
-                        }
-                    }
-                    return certs;
-                }
-
-                private X509Certificate readCertificate(Parcel in) {
-                    X509Certificate cert = null;
-                    int len = in.readInt();
-                    if (len > 0) {
-                        try {
-                            byte[] bytes = new byte[len];
-                            in.readByteArray(bytes);
-                            CertificateFactory cFactory = CertificateFactory.getInstance("X.509");
-                            cert = (X509Certificate) cFactory
-                                    .generateCertificate(new ByteArrayInputStream(bytes));
-                        } catch (CertificateException e) {
-                            cert = null;
-                        }
-                    }
-                    return cert;
-                }
-
+                @Override
                 public WifiEnterpriseConfig[] newArray(int size) {
                     return new WifiEnterpriseConfig[size];
                 }
