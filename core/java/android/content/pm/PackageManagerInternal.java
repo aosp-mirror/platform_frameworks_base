@@ -168,4 +168,25 @@ public abstract class PackageManagerInternal {
      * @return Whether was launched.
      */
     public abstract boolean wasPackageEverLaunched(String packageName, int userId);
+
+    /**
+     * Grants a runtime permission
+     * @param packageName The package name.
+     * @param name The name of the permission.
+     * @param userId The userId for which to grant the permission.
+     * @param overridePolicy If true, grant this permission even if it is fixed by policy.
+     */
+    public abstract void grantRuntimePermission(String packageName, String name, int userId,
+            boolean overridePolicy);
+
+    /**
+     * Revokes a runtime permission
+     * @param packageName The package name.
+     * @param name The name of the permission.
+     * @param userId The userId for which to revoke the permission.
+     * @param overridePolicy If true, revoke this permission even if it is fixed by policy.
+     */
+    public abstract void revokeRuntimePermission(String packageName, String name, int userId,
+            boolean overridePolicy);
+
 }

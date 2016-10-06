@@ -4013,6 +4013,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void grantRuntimePermission(String packageName, String name, final int userId) {
+        grantRuntimePermission(packageName, name, userId, false /* Only if not fixed by policy */);
+    }
+
+    private void grantRuntimePermission(String packageName, String name, final int userId,
+            boolean overridePolicy) {
         if (!sUserManager.exists(userId)) {
             Log.e(TAG, "No such user:" + userId);
             return;
@@ -4063,6 +4068,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             final int flags = permissionsState.getPermissionFlags(name, userId);
             if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
                 throw new SecurityException("Cannot grant system fixed permission "
+                        + name + " for package " + packageName);
+            }
+            if (!overridePolicy && (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0) {
+                throw new SecurityException("Cannot grant policy fixed permission "
                         + name + " for package " + packageName);
             }
 
@@ -4125,6 +4134,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void revokeRuntimePermission(String packageName, String name, int userId) {
+        revokeRuntimePermission(packageName, name, userId, false /* Only if not fixed by policy */);
+    }
+
+    private void revokeRuntimePermission(String packageName, String name, int userId,
+            boolean overridePolicy) {
         if (!sUserManager.exists(userId)) {
             Log.e(TAG, "No such user:" + userId);
             return;
@@ -4173,6 +4187,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             final int flags = permissionsState.getPermissionFlags(name, userId);
             if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
                 throw new SecurityException("Cannot revoke system fixed permission "
+                        + name + " for package " + packageName);
+            }
+            if (!overridePolicy && (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0) {
+                throw new SecurityException("Cannot revoke policy fixed permission "
                         + name + " for package " + packageName);
             }
 
@@ -21140,6 +21158,20 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             synchronized (mPackages) {
                 return mSettings.wasPackageEverLaunchedLPr(packageName, userId);
             }
+        }
+
+        @Override
+        public void grantRuntimePermission(String packageName, String name, int userId,
+                boolean overridePolicy) {
+            PackageManagerService.this.grantRuntimePermission(packageName, name, userId,
+                    overridePolicy);
+        }
+
+        @Override
+        public void revokeRuntimePermission(String packageName, String name, int userId,
+                boolean overridePolicy) {
+            PackageManagerService.this.revokeRuntimePermission(packageName, name, userId,
+                    overridePolicy);
         }
     }
 
