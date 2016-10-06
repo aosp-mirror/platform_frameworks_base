@@ -16,10 +16,6 @@
 
 package android.net.apf;
 
-import static android.system.OsConstants.*;
-
-import com.android.frameworks.servicestests.R;
-
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkUtils;
@@ -37,6 +33,10 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
+import static android.system.OsConstants.*;
+
+import com.android.frameworks.servicestests.R;
+import com.android.internal.util.HexDump;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -54,6 +54,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Random;
 
 import libcore.io.IoUtils;
 import libcore.io.Streams;
@@ -1144,6 +1145,39 @@ public class ApfTest extends AndroidTestCase {
         buffer.position(position);
         buffer.put(bytes);
         buffer.position(original);
+    }
+
+    public void testRaParsing() throws Exception {
+        final int maxRandomPacketSize = 512;
+        final Random r = new Random();
+        MockIpManagerCallback cb = new MockIpManagerCallback();
+        TestApfFilter apfFilter = new TestApfFilter(cb, DROP_MULTICAST, mLog);
+        for (int i = 0; i < 1000; i++) {
+            byte[] packet = new byte[r.nextInt(maxRandomPacketSize + 1)];
+            r.nextBytes(packet);
+            try {
+                apfFilter.new Ra(packet, packet.length);
+            } catch (ApfFilter.InvalidRaException e) {
+            } catch (Exception e) {
+                throw new Exception("bad packet: " + HexDump.toHexString(packet), e);
+            }
+        }
+    }
+
+    public void testRaProcessing() throws Exception {
+        final int maxRandomPacketSize = 512;
+        final Random r = new Random();
+        MockIpManagerCallback cb = new MockIpManagerCallback();
+        TestApfFilter apfFilter = new TestApfFilter(cb, DROP_MULTICAST, mLog);
+        for (int i = 0; i < 1000; i++) {
+            byte[] packet = new byte[r.nextInt(maxRandomPacketSize + 1)];
+            r.nextBytes(packet);
+            try {
+                apfFilter.processRa(packet, packet.length);
+            } catch (Exception e) {
+                throw new Exception("bad packet: " + HexDump.toHexString(packet), e);
+            }
+        }
     }
 
     /**
