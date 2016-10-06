@@ -141,6 +141,14 @@
                 <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".RenderingJitter"
+            android:label="Rendering/Jitter" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
 
         <!-- Inflation -->
         <activity
