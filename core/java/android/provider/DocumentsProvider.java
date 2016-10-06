@@ -20,7 +20,6 @@ import static android.provider.DocumentsContract.METHOD_COPY_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_CREATE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_DELETE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_EJECT_ROOT;
-import static android.provider.DocumentsContract.METHOD_FIND_PATH;
 import static android.provider.DocumentsContract.METHOD_IS_CHILD_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_MOVE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_REMOVE_DOCUMENT;
@@ -34,7 +33,6 @@ import static android.provider.DocumentsContract.getSearchDocumentsQuery;
 import static android.provider.DocumentsContract.getTreeDocumentId;
 import static android.provider.DocumentsContract.isTreeUri;
 
-import android.Manifest;
 import android.annotation.CallSuper;
 import android.content.ClipDescription;
 import android.content.ContentProvider;
@@ -55,7 +53,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
-import android.provider.DocumentsContract.Path;
 import android.util.Log;
 
 import libcore.io.IoUtils;
@@ -323,26 +320,6 @@ public abstract class DocumentsProvider extends ContentProvider {
     public void removeDocument(String documentId, String parentDocumentId)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("Remove not supported");
-    }
-
-    /**
-     * Finds the canonical path to the root for the requested document. If there are
-     * more than one path to this document, return the most typical one.
-     *
-     * <p>This API assumes that document id has enough info to infer the root.
-     * Different roots should use different document id to refer to the same
-     * document.
-     *
-     * @param documentId the document which path is requested.
-     * @return the path of the requested document to the root, or null if
-     *      such operation is not supported.
-     *
-     * @hide
-     */
-    public Path findPath(String documentId)
-            throws FileNotFoundException {
-        Log.w(TAG, "findPath is called on an unsupported provider.");
-        return null;
     }
 
     /**
@@ -896,12 +873,6 @@ public abstract class DocumentsProvider extends ContentProvider {
 
             // It's responsibility of the provider to revoke any grants, as the document may be
             // still attached to another parents.
-        } else if (METHOD_FIND_PATH.equals(method)) {
-            getContext().enforceCallingPermission(Manifest.permission.MANAGE_DOCUMENTS, null);
-
-            final Path path = findPath(documentId);
-
-            out.putParcelable(DocumentsContract.EXTRA_RESULT, path);
         } else {
             throw new UnsupportedOperationException("Method not supported " + method);
         }
