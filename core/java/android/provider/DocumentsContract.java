@@ -36,10 +36,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
-import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.storage.StorageVolume;
 import android.system.ErrnoException;
@@ -646,8 +644,6 @@ public final class DocumentsContract {
     public static final String METHOD_REMOVE_DOCUMENT = "android:removeDocument";
     /** {@hide} */
     public static final String METHOD_EJECT_ROOT = "android:ejectRoot";
-    /** {@hide} */
-    public static final String METHOD_FIND_PATH = "android:findPath";
 
     /** {@hide} */
     public static final String EXTRA_PARENT_URI = "parentUri";
@@ -1311,41 +1307,6 @@ public final class DocumentsContract {
     }
 
     /**
-     * Finds the canonical path to the root. Document id should be unique across
-     * roots.
-     *
-     * @param documentUri uri of the document which path is requested.
-     * @return the path to the root of the document, or {@code null} if failed.
-     * @see DocumentsProvider#findPath(String)
-     *
-     * {@hide}
-     */
-    public static Path findPath(ContentResolver resolver, Uri documentUri)
-            throws RemoteException {
-        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
-                documentUri.getAuthority());
-        try {
-            return findPath(client, documentUri);
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to find path", e);
-            return null;
-        } finally {
-            ContentProviderClient.releaseQuietly(client);
-        }
-    }
-
-    /** {@hide} */
-    public static Path findPath(ContentProviderClient client, Uri documentUri)
-            throws RemoteException {
-        final Bundle in = new Bundle();
-        in.putParcelable(DocumentsContract.EXTRA_URI, documentUri);
-
-        final Bundle out = client.call(METHOD_FIND_PATH, null, in);
-
-        return out.getParcelable(DocumentsContract.EXTRA_RESULT);
-    }
-
-    /**
      * Open the given image for thumbnail purposes, using any embedded EXIF
      * thumbnail if available, and providing orientation hints from the parent
      * image.
@@ -1383,52 +1344,5 @@ public final class DocumentsContract {
         }
 
         return new AssetFileDescriptor(pfd, 0, AssetFileDescriptor.UNKNOWN_LENGTH, extras);
-    }
-
-    /**
-     * Holds a path from a root to a particular document under it.
-     *
-     * @hide
-     */
-    public static final class Path implements Parcelable {
-
-        public final String mRootId;
-        public final List<String> mPath;
-
-        /**
-         * Creates a Path.
-         * @param rootId the id of the root
-         * @param path the list of document ids from the root document
-         *             at position 0 to the target document
-         */
-        public Path(String rootId, List<String> path) {
-            mRootId = rootId;
-            mPath = path;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(mRootId);
-            dest.writeStringList(mPath);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        public static final Creator<Path> CREATOR = new Creator<Path>() {
-            @Override
-            public Path createFromParcel(Parcel in) {
-                final String rootId = in.readString();
-                final List<String> path = in.createStringArrayList();
-                return new Path(rootId, path);
-            }
-
-            @Override
-            public Path[] newArray(int size) {
-                return new Path[size];
-            }
-        };
     }
 }
