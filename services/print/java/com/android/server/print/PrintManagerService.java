@@ -728,7 +728,8 @@ public final class PrintManagerService extends SystemService {
                 @Override
                 public void onPackageModified(String packageName) {
                     if (!mUserManager.isUserUnlockingOrUnlocked(getChangingUserId())) return;
-                    UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false);
+                    UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false,
+                            false /* enforceUserUnlockingOrUnlocked */);
 
                     synchronized (mLock) {
                         if (hadPrintService(userState, packageName)
@@ -743,7 +744,8 @@ public final class PrintManagerService extends SystemService {
                 @Override
                 public void onPackageRemoved(String packageName, int uid) {
                     if (!mUserManager.isUserUnlockingOrUnlocked(getChangingUserId())) return;
-                    UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false);
+                    UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false,
+                            false /* enforceUserUnlockingOrUnlocked */);
 
                     synchronized (mLock) {
                         if (hadPrintService(userState, packageName)) {
@@ -762,8 +764,8 @@ public final class PrintManagerService extends SystemService {
                         // A background user/profile's print jobs are running but there is
                         // no UI shown. Hence, if the packages of such a user change we need
                         // to handle it as the change may affect ongoing print jobs.
-                        UserState userState = getOrCreateUserStateLocked(getChangingUserId(),
-                                false);
+                        UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false,
+                                false /* enforceUserUnlockingOrUnlocked */);
                         boolean stoppedSomePackages = false;
 
                         List<PrintServiceInfo> enabledServices = userState
@@ -799,7 +801,7 @@ public final class PrintManagerService extends SystemService {
                     synchronized (mLock) {
                         if (hasPrintService(packageName)) {
                             UserState userState = getOrCreateUserStateLocked(getChangingUserId(),
-                                    false);
+                                    false, false /* enforceUserUnlockingOrUnlocked */);
                             userState.updateIfNeededLocked();
                         }
                     }
@@ -810,9 +812,14 @@ public final class PrintManagerService extends SystemService {
             monitor.register(mContext, BackgroundThread.getHandler().getLooper(),
                     UserHandle.ALL, true);
         }
-
         private UserState getOrCreateUserStateLocked(int userId, boolean lowPriority) {
-            if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            return getOrCreateUserStateLocked(userId, lowPriority,
+                    true /* enforceUserUnlockingOrUnlocked */);
+        }
+
+        private UserState getOrCreateUserStateLocked(int userId, boolean lowPriority,
+                boolean enforceUserUnlockingOrUnlocked) {
+            if (enforceUserUnlockingOrUnlocked && !mUserManager.isUserUnlockingOrUnlocked(userId)) {
                 throw new IllegalStateException(
                         "User " + userId + " must be unlocked for printing to be available");
             }
@@ -840,7 +847,8 @@ public final class PrintManagerService extends SystemService {
 
                     UserState userState;
                     synchronized (mLock) {
-                        userState = getOrCreateUserStateLocked(userId, true);
+                        userState = getOrCreateUserStateLocked(userId, true,
+                                false /*enforceUserUnlockingOrUnlocked */);
                         userState.updateIfNeededLocked();
                     }
                     // This is the first time we switch to this user after boot, so
