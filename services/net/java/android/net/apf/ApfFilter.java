@@ -291,8 +291,15 @@ public class ApfFilter {
         return System.currentTimeMillis() / DateUtils.SECOND_IN_MILLIS;
     }
 
+    public static class InvalidRaException extends Exception {
+        public InvalidRaException(String m) {
+            super(m);
+        }
+    }
+
     // A class to hold information about an RA.
-    private class Ra {
+    @VisibleForTesting
+    class Ra {
         // From RFC4861:
         private static final int ICMP6_RA_HEADER_LEN = 16;
         private static final int ICMP6_RA_CHECKSUM_OFFSET =
@@ -364,7 +371,7 @@ public class ApfFilter {
             } catch (UnsupportedOperationException e) {
                 // array() failed. Cannot happen, mPacket is array-backed and read-write.
                 return "???";
-            } catch (ClassCastException | UnknownHostException e) {
+            } catch (ClassCastException|UnknownHostException e) {
                 // Cannot happen.
                 return "???";
             }
@@ -405,7 +412,7 @@ public class ApfFilter {
                     rdnssOptionToString(sb, i);
                 }
                 return sb.toString();
-            } catch (BufferUnderflowException | IndexOutOfBoundsException e) {
+            } catch (BufferUnderflowException|IndexOutOfBoundsException e) {
                 return "<Malformed RA>";
             }
         }
@@ -438,7 +445,11 @@ public class ApfFilter {
         // Buffer.position(int) or due to an invalid-length option) or IndexOutOfBoundsException
         // (from ByteBuffer.get(int) ) if parsing encounters something non-compliant with
         // specifications.
-        Ra(byte[] packet, int length) {
+        Ra(byte[] packet, int length) throws InvalidRaException {
+            if (length < ICMP6_RA_OPTION_OFFSET) {
+                throw new InvalidRaException("Not an ICMP6 router advertisement");
+            }
+
             mPacket = ByteBuffer.wrap(Arrays.copyOf(packet, length));
             mLastSeen = curTime();
 
@@ -447,7 +458,7 @@ public class ApfFilter {
             if (getUint16(mPacket, ETH_ETHERTYPE_OFFSET) != ETH_P_IPV6 ||
                     uint8(mPacket.get(IPV6_NEXT_HEADER_OFFSET)) != IPPROTO_ICMPV6 ||
                     uint8(mPacket.get(ICMP6_TYPE_OFFSET)) != ICMP6_ROUTER_ADVERTISEMENT) {
-                throw new IllegalArgumentException("Not an ICMP6 router advertisement");
+                throw new InvalidRaException("Not an ICMP6 router advertisement");
             }
 
 
@@ -513,7 +524,7 @@ public class ApfFilter {
                         break;
                 }
                 if (optionLength <= 0) {
-                    throw new IllegalArgumentException(String.format(
+                    throw new InvalidRaException(String.format(
                         "Invalid option length opt=%d len=%d", optionType, optionLength));
                 }
                 mPacket.position(position + optionLength);
@@ -932,8 +943,8 @@ public class ApfFilter {
             // Execution will reach the end of the program if no filters match, which will pass the
             // packet to the AP.
             program = gen.generate();
-        } catch (IllegalInstructionException e) {
-            Log.e(TAG, "Program failed to generate: ", e);
+        } catch (IllegalInstructionException|IllegalStateException e) {
+            Log.e(TAG, "Failed to generate APF program.", e);
             return;
         }
         mLastTimeInstalledProgram = curTime();
@@ -979,7 +990,8 @@ public class ApfFilter {
      * if the current APF program should be updated.
      * @return a ProcessRaResult enum describing what action was performed.
      */
-    private synchronized ProcessRaResult processRa(byte[] packet, int length) {
+    @VisibleForTesting
+    synchronized ProcessRaResult processRa(byte[] packet, int length) {
         if (VDBG) hexDump("Read packet = ", packet, length);
 
         // Have we seen this RA before?
@@ -1018,7 +1030,7 @@ public class ApfFilter {
         try {
             ra = new Ra(packet, length);
         } catch (Exception e) {
-            Log.e(TAG, "Error parsing RA: " + e);
+            Log.e(TAG, "Error parsing RA", e);
             return ProcessRaResult.PARSE_ERROR;
         }
         // Ignore 0 lifetime RAs.
