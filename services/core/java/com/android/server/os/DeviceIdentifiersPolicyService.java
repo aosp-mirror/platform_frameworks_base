@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IDeviceIdentifiersPolicyService;
@@ -53,9 +54,15 @@ public final class DeviceIdentifiersPolicyService extends SystemService {
 
         @Override
         public @Nullable String getSerial() throws RemoteException {
-            if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
-                mContext.enforceCallingOrSelfPermission(
-                        Manifest.permission.READ_PHONE_STATE, "getSerial");
+            if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID
+                    && mContext.checkCallingOrSelfPermission(
+                            Manifest.permission.READ_PHONE_STATE)
+                                    != PackageManager.PERMISSION_GRANTED
+                    && mContext.checkCallingOrSelfPermission(
+                            Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+                                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("getSerial requires READ_PHONE_STATE"
+                        + " or READ_PRIVILEGED_PHONE_STATE permission");
             }
             return SystemProperties.get("ro.serialno", Build.UNKNOWN);
         }
