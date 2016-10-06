@@ -238,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G дайындары тындырылды"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Уюлдук дайындар тындырылды"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Дайындар тындырылды"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Сиз койгон дайындардын чегине жетти. Сиз мобилдик дайындарды колдонгон жоксуз.\n\nЭгер улантсаңыз, мобилдик дайындарды колдонгонуңуз үчүн акы алынышы мүмкүн."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Трафик сиз койгон чекке жетти. Эми мобилдик дайындарды колдоно албайсыз.\n\nЭгер улантсаңыз, мобилдик дайындарды колдонгонуңуз үчүн акы алынышы мүмкүн."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Улантуу"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Интернет байланыш жок"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi байланышта"</string>
