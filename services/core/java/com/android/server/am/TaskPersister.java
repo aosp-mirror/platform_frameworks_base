@@ -639,8 +639,9 @@ public class TaskPersister {
                             final TaskRecord task = mRecentTasks.get(taskNdx);
                             if (DEBUG) Slog.d(TAG, "LazyTaskWriter: task=" + task +
                                     " persistable=" + task.isPersistable);
+                            final ActivityStack stack = task.getStack();
                             if ((task.isPersistable || task.inRecents)
-                                    && (task.stack == null || !task.stack.isHomeStack())) {
+                                    && (stack == null || !stack.isHomeStack())) {
                                 if (DEBUG) Slog.d(TAG, "adding to persistentTaskIds task=" + task);
                                 persistentTaskIds.add(task.taskId);
                             } else {
