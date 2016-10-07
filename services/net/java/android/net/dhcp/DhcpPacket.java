@@ -895,8 +895,12 @@ abstract class DhcpPacket {
                         + 64    // skip server host name (64 chars)
                         + 128); // skip boot file name (128 chars)
 
-        int dhcpMagicCookie = packet.getInt();
+        // Ensure this is a DHCP packet with a magic cookie, and not BOOTP. http://b/31850211
+        if (packet.remaining() < 4) {
+            throw new ParseException(DhcpErrorEvent.DHCP_NO_COOKIE, "not a DHCP message");
+        }
 
+        int dhcpMagicCookie = packet.getInt();
         if (dhcpMagicCookie != DHCP_MAGIC_COOKIE) {
             throw new ParseException(DhcpErrorEvent.DHCP_BAD_MAGIC_COOKIE,
                     "Bad magic cookie 0x%08x, should be 0x%08x",
