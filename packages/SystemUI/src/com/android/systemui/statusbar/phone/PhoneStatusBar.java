@@ -514,6 +514,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.DOUBLE_TAP_VIBRATE), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.LOCK_QS_DISABLED),
+                    false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -541,6 +544,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Settings.System.STATUS_BAR_SHOW_CARRIER, 1, UserHandle.USER_CURRENT);
             mDoubleTapVib = Settings.System.getIntForUser(mContext.getContentResolver(),
                     Settings.System.DOUBLE_TAP_VIBRATE, 1, UserHandle.USER_CURRENT) == 1;
+
+            if (mNotificationPanel != null) {
+                mNotificationPanel.updateSettings();
+            }
         }
     }
 
