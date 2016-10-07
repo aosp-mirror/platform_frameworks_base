@@ -19,7 +19,7 @@
 #include "JNIHelp.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
-#include "log/logger.h"
+#include <private/android_logger.h>
 
 // The size of the tag number comes out of the payload size.
 #define MAX_EVENT_PAYLOAD (LOGGER_ENTRY_MAX_PAYLOAD - sizeof(int32_t))
