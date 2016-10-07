@@ -2,6 +2,8 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
+LOCAL_SDK_VERSION := 24
+LOCAL_MIN_SDK_VERSION := 21
 
 # omit gradle 'build' dir
 LOCAL_SRC_FILES := $(call all-java-files-under,src)
