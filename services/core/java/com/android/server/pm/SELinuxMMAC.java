@@ -65,8 +65,8 @@ public final class SELinuxMMAC {
     // Append privapp to existing seinfo label
     private static final String PRIVILEGED_APP_STR = ":privapp";
 
-    // Append autoplay to existing seinfo label
-    private static final String AUTOPLAY_APP_STR = ":autoplayapp";
+    // Append ephemeral to existing seinfo label
+    private static final String EPHEMERAL_APP_STR = ":ephemeralapp";
 
     /**
      * Load the mac_permissions.xml file containing all seinfo assignments used to
@@ -281,8 +281,8 @@ public final class SELinuxMMAC {
             }
         }
 
-        if (pkg.applicationInfo.isAutoPlayApp())
-            pkg.applicationInfo.seinfo += AUTOPLAY_APP_STR;
+        if (pkg.applicationInfo.isEphemeralApp())
+            pkg.applicationInfo.seinfo += EPHEMERAL_APP_STR;
 
         if (pkg.applicationInfo.isPrivilegedApp())
             pkg.applicationInfo.seinfo += PRIVILEGED_APP_STR;
