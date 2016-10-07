@@ -101,14 +101,17 @@ static void setSkPathFromPathData(JNIEnv*, jobject, jlong outPathPtr, jlong path
 
 static const JNINativeMethod gMethods[] = {
     {"nParseStringForPath", "(JLjava/lang/String;I)V", (void*)parseStringForPath},
-    {"nCreateEmptyPathData", "!()J", (void*)createEmptyPathData},
-    {"nCreatePathData", "!(J)J", (void*)createPathData},
     {"nCreatePathDataFromString", "(Ljava/lang/String;I)J", (void*)createPathDataFromStringPath},
-    {"nInterpolatePathData", "!(JJJF)Z", (void*)interpolatePathData},
-    {"nFinalize", "!(J)V", (void*)deletePathData},
-    {"nCanMorph", "!(JJ)Z", (void*)canMorphPathData},
-    {"nSetPathData", "!(JJ)V", (void*)setPathData},
-    {"nCreatePathFromPathData", "!(JJ)V", (void*)setSkPathFromPathData},
+
+    // ---------------- @FastNative -----------------
+
+    {"nCreateEmptyPathData", "()J", (void*)createEmptyPathData},
+    {"nCreatePathData", "(J)J", (void*)createPathData},
+    {"nInterpolatePathData", "(JJJF)Z", (void*)interpolatePathData},
+    {"nFinalize", "(J)V", (void*)deletePathData},
+    {"nCanMorph", "(JJ)Z", (void*)canMorphPathData},
+    {"nSetPathData", "(JJ)V", (void*)setPathData},
+    {"nCreatePathFromPathData", "(JJ)V", (void*)setSkPathFromPathData},
 };
 
 int register_android_util_PathParser(JNIEnv* env) {

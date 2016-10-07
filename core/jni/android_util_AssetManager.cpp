@@ -2161,9 +2161,11 @@ static const JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_readAsset },
     { "seekAsset",      "(JJI)J",
         (void*) android_content_AssetManager_seekAsset },
-    { "getAssetLength", "!(J)J",
+    // @FastNative
+    { "getAssetLength", "(J)J",
         (void*) android_content_AssetManager_getAssetLength },
-    { "getAssetRemainingLength", "!(J)J",
+    // @FastNative
+    { "getAssetRemainingLength", "(J)J",
         (void*) android_content_AssetManager_getAssetRemainingLength },
     { "addAssetPathNative", "(Ljava/lang/String;Z)I",
         (void*) android_content_AssetManager_addAssetPath },
@@ -2179,25 +2181,35 @@ static const JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_getNonSystemLocales },
     { "getSizeConfigurations", "()[Landroid/content/res/Configuration;",
         (void*) android_content_AssetManager_getSizeConfigurations },
-    { "setConfiguration", "!(IILjava/lang/String;IIIIIIIIIIIIII)V",
+    // @FastNative
+    { "setConfiguration", "(IILjava/lang/String;IIIIIIIIIIIIII)V",
         (void*) android_content_AssetManager_setConfiguration },
-    { "getResourceIdentifier","!(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
+    // @FastNative
+    { "getResourceIdentifier","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
         (void*) android_content_AssetManager_getResourceIdentifier },
-    { "getResourceName","!(I)Ljava/lang/String;",
+    // @FastNative
+    { "getResourceName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getResourceName },
-    { "getResourcePackageName","!(I)Ljava/lang/String;",
+    // @FastNative
+    { "getResourcePackageName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getResourcePackageName },
-    { "getResourceTypeName","!(I)Ljava/lang/String;",
+    // @FastNative
+    { "getResourceTypeName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getResourceTypeName },
-    { "getResourceEntryName","!(I)Ljava/lang/String;",
+    // @FastNative
+    { "getResourceEntryName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getResourceEntryName },
-    { "loadResourceValue","!(ISLandroid/util/TypedValue;Z)I",
+    // @FastNative
+    { "loadResourceValue","(ISLandroid/util/TypedValue;Z)I",
         (void*) android_content_AssetManager_loadResourceValue },
-    { "loadResourceBagValue","!(IILandroid/util/TypedValue;Z)I",
+    // @FastNative
+    { "loadResourceBagValue","(IILandroid/util/TypedValue;Z)I",
         (void*) android_content_AssetManager_loadResourceBagValue },
-    { "getStringBlockCount","!()I",
+    // @FastNative
+    { "getStringBlockCount","()I",
         (void*) android_content_AssetManager_getStringBlockCount },
-    { "getNativeStringBlock","!(I)J",
+    // @FastNative
+    { "getNativeStringBlock","(I)J",
         (void*) android_content_AssetManager_getNativeStringBlock },
     { "getCookieName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getCookieName },
@@ -2215,21 +2227,28 @@ static const JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_copyTheme },
     { "clearTheme", "(J)V",
         (void*) android_content_AssetManager_clearTheme },
-    { "loadThemeAttributeValue", "!(JILandroid/util/TypedValue;Z)I",
+    // @FastNative
+    { "loadThemeAttributeValue", "(JILandroid/util/TypedValue;Z)I",
         (void*) android_content_AssetManager_loadThemeAttributeValue },
-    { "getThemeChangingConfigurations", "!(J)I",
+    // @FastNative
+    { "getThemeChangingConfigurations", "(J)I",
         (void*) android_content_AssetManager_getThemeChangingConfigurations },
     { "dumpTheme", "(JILjava/lang/String;Ljava/lang/String;)V",
         (void*) android_content_AssetManager_dumpTheme },
-    { "applyStyle","!(JIIJ[I[I[I)Z",
+    // @FastNative
+    { "applyStyle","(JIIJ[I[I[I)Z",
         (void*) android_content_AssetManager_applyStyle },
-    { "resolveAttrs","!(JII[I[I[I[I)Z",
+    // @FastNative
+    { "resolveAttrs","(JII[I[I[I[I)Z",
         (void*) android_content_AssetManager_resolveAttrs },
-    { "retrieveAttributes","!(J[I[I[I)Z",
+    // @FastNative
+    { "retrieveAttributes","(J[I[I[I)Z",
         (void*) android_content_AssetManager_retrieveAttributes },
-    { "getArraySize","!(I)I",
+    // @FastNative
+    { "getArraySize","(I)I",
         (void*) android_content_AssetManager_getArraySize },
-    { "retrieveArray","!(I[I)I",
+    // @FastNative
+    { "retrieveArray","(I[I)I",
         (void*) android_content_AssetManager_retrieveArray },
 
     // XML files.
@@ -2239,11 +2258,14 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     // Arrays.
     { "getArrayStringResource","(I)[Ljava/lang/String;",
         (void*) android_content_AssetManager_getArrayStringResource },
-    { "getArrayStringInfo","!(I)[I",
+    // @FastNative
+    { "getArrayStringInfo","(I)[I",
         (void*) android_content_AssetManager_getArrayStringInfo },
-    { "getArrayIntResource","!(I)[I",
+    // @FastNative
+    { "getArrayIntResource","(I)[I",
         (void*) android_content_AssetManager_getArrayIntResource },
-    { "getStyleAttributes","!(I)[I",
+    // @FastNative
+    { "getStyleAttributes","(I)[I",
         (void*) android_content_AssetManager_getStyleAttributes },
 
     // Bookkeeping.
