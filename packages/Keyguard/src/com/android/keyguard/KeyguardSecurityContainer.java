@@ -173,6 +173,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         final AlertDialog dialog = new AlertDialog.Builder(mContext)
             .setTitle(title)
             .setMessage(message)
+            .setCancelable(false)
             .setNeutralButton(R.string.ok, null)
             .create();
         if (!(mContext instanceof Activity)) {
