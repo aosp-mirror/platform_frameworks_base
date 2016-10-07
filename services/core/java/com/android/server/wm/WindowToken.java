@@ -24,6 +24,7 @@ import android.util.Slog;
 
 import java.io.PrintWriter;
 
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM;
@@ -215,6 +216,18 @@ class WindowToken extends WindowContainer<WindowState> {
             }
         }
         return null;
+    }
+
+    /** Return true if this token has a window that wants the wallpaper displayed behind it. */
+    boolean windowsCanBeWallpaperTarget() {
+        for (int j = mChildren.size() - 1; j >= 0; j--) {
+            final WindowState w = mChildren.get(j);
+            if ((w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     void hideWallpaperToken(boolean wasDeferred, String reason) {
