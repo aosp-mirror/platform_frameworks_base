@@ -17,6 +17,7 @@
 package com.android.test.uibench;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -28,6 +29,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.util.AttributeSet;
 import android.view.FrameMetrics;
 import android.view.View;
 import android.view.Window;
@@ -41,6 +43,7 @@ public class RenderingJitter extends Activity {
     private TextView mRenderThreadTimeReport;
     private TextView mTotalFrameTimeReport;
     private TextView mMostlyTotalFrameTimeReport;
+    private PointGraphView mGraph;
 
     private static Handler sMetricsHandler;
     static {
@@ -68,6 +71,9 @@ public class RenderingJitter extends Activity {
                 case R.id.total_mma:
                     mTotalFrameTimeReport.setText((CharSequence) msg.obj);
                     break;
+                case R.id.graph:
+                    mGraph.addJitterSample(msg.arg1, msg.arg2);
+                    break;
             }
         }
     };
@@ -84,11 +90,118 @@ public class RenderingJitter extends Activity {
         mUiFrameTimeReport = (TextView) findViewById(R.id.ui_frametime_mma);
         mRenderThreadTimeReport = (TextView) findViewById(R.id.rt_frametime_mma);
         mTotalFrameTimeReport = (TextView) findViewById(R.id.total_mma);
+        mGraph = (PointGraphView) findViewById(R.id.graph);
         mJitterReport.setText("abcdefghijklmnopqrstuvwxyz");
         mMostlyTotalFrameTimeReport.setText("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         mUiFrameTimeReport.setText("0123456789");
         mRenderThreadTimeReport.setText(",.!()[]{};");
         getWindow().addOnFrameMetricsAvailableListener(mMetricsListener, sMetricsHandler);
+    }
+
+    public static final class PointGraphView extends View {
+        private static final float[] JITTER_LINES_MS = {
+                .5f, 1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 5.0f
+        };
+        private static final String[] JITTER_LINES_LABELS = makeLabels(JITTER_LINES_MS);
+        private static final int[] JITTER_LINES_COLORS = new int[] {
+                0xFF00E676, 0xFFFFF176, 0xFFFDD835, 0xFFFBC02D, 0xFFF9A825,
+                0xFFF57F17, 0xFFDD2C00
+        };
+        private Paint mPaint = new Paint();
+        private float[] mJitterYs = new float[JITTER_LINES_MS.length];
+        private float mLabelWidth;
+        private float mLabelHeight;
+        private float mDensity;
+        private float mGraphScale;
+        private float mGraphMaxMs;
+
+        private float[] mJitterPoints;
+        private float[] mJitterAvgPoints;
+
+        public PointGraphView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+            setWillNotDraw(false);
+            mDensity = context.getResources().getDisplayMetrics().density;
+            mPaint.setTextSize(dp(10));
+            Rect textBounds = new Rect();
+            mPaint.getTextBounds("8.8", 0, 3, textBounds);
+            mLabelWidth = textBounds.width() + dp(2);
+            mLabelHeight = textBounds.height();
+        }
+
+        public void addJitterSample(int jitterUs, int jitterUsAvg) {
+            for (int i = 1; i < mJitterPoints.length - 2; i += 2) {
+                mJitterPoints[i] = mJitterPoints[i + 2];
+                mJitterAvgPoints[i] = mJitterAvgPoints[i + 2];
+            }
+            mJitterPoints[mJitterPoints.length - 1] =
+                    getHeight() - mGraphScale * (jitterUs / 1000.0f);
+            mJitterAvgPoints[mJitterAvgPoints.length - 1] =
+                    getHeight() - mGraphScale * (jitterUsAvg / 1000.0f);
+            invalidate();
+        }
+
+        private float dp(float dp) {
+            return mDensity * dp;
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            canvas.drawColor(0x90000000);
+            int h = getHeight();
+            int w = getWidth();
+            mPaint.setColor(Color.WHITE);
+            mPaint.setStrokeWidth(dp(1));
+            canvas.drawLine(mLabelWidth, 0, mLabelWidth, h, mPaint);
+            for (int i = 0; i < JITTER_LINES_LABELS.length; i++) {
+                canvas.drawText(JITTER_LINES_LABELS[i],
+                        0, (float) Math.floor(mJitterYs[i] + mLabelHeight * .5f), mPaint);
+            }
+            for (int i = 0; i < JITTER_LINES_LABELS.length; i++) {
+                mPaint.setColor(JITTER_LINES_COLORS[i]);
+                canvas.drawLine(mLabelWidth, mJitterYs[i], w, mJitterYs[i], mPaint);
+            }
+            mPaint.setStrokeWidth(dp(2));
+            mPaint.setColor(Color.WHITE);
+            canvas.drawPoints(mJitterPoints, mPaint);
+            mPaint.setColor(0xFF2196F3);
+            canvas.drawPoints(mJitterAvgPoints, mPaint);
+        }
+
+        @Override
+        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+            super.onSizeChanged(w, h, oldw, oldh);
+            int graphWidth = (int) ((w - mLabelWidth - dp(1)) / mDensity);
+            float[] oldJitterPoints = mJitterPoints;
+            float[] oldJitterAvgPoints = mJitterAvgPoints;
+            mJitterPoints = new float[graphWidth * 2];
+            mJitterAvgPoints = new float[graphWidth * 2];
+            for (int i = 0; i < mJitterPoints.length; i += 2) {
+                mJitterPoints[i] = mLabelWidth + (i / 2 + 1) * mDensity;
+                mJitterAvgPoints[i] = mJitterPoints[i];
+            }
+            if (oldJitterPoints != null) {
+                int newIndexShift = Math.max(mJitterPoints.length - oldJitterPoints.length, 0);
+                int oldIndexShift = oldJitterPoints.length - mJitterPoints.length;
+                for (int i = 1 + newIndexShift; i < mJitterPoints.length; i += 2) {
+                    mJitterPoints[i] = oldJitterPoints[i + oldIndexShift];
+                    mJitterAvgPoints[i] = oldJitterAvgPoints[i + oldIndexShift];
+                }
+            }
+            mGraphMaxMs = JITTER_LINES_MS[JITTER_LINES_MS.length - 1] + .5f;
+            mGraphScale = (h / mGraphMaxMs);
+            for (int i = 0; i < JITTER_LINES_MS.length; i++) {
+                mJitterYs[i] = (float) Math.floor(h - mGraphScale * JITTER_LINES_MS[i]);
+            }
+        }
+
+        private static String[] makeLabels(float[] divisions) {
+            String[] ret = new String[divisions.length];
+            for (int i = 0; i < divisions.length; i++) {
+                ret[i] = Float.toString(divisions[i]);
+            }
+            return ret;
+        }
     }
 
     private final OnFrameMetricsAvailableListener mMetricsListener = new OnFrameMetricsAvailableListener() {
@@ -141,6 +254,8 @@ public class RenderingJitter extends Activity {
                     String.format("RT duration: %.3fms", toMs(mRtFrametimeMma))).sendToTarget();
             mUpdateHandler.obtainMessage(R.id.total_mma,
                     String.format("Total duration: %.3fms", toMs(mTotalFrametimeMma))).sendToTarget();
+            mUpdateHandler.obtainMessage(R.id.graph, (int) (jitter / 1000),
+                    (int) (mJitterMma / 1000)).sendToTarget();
         }
 
         double add(double previous, double today) {

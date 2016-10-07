@@ -44,4 +44,13 @@
         android:layout_height="wrap_content"
         android:singleLine="true" />
 
+    <View android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1" />
+
+    <view class="com.android.test.uibench.RenderingJitter$PointGraphView"
+        android:id="@+id/graph"
+        android:layout_height="200dp"
+        android:layout_width="match_parent" />
+
 </LinearLayout>
