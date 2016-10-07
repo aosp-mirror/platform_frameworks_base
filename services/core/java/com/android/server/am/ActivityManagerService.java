@@ -21831,4 +21831,29 @@ public final class ActivityManagerService extends ActivityManagerNative
             Binder.restoreCallingIdentity(callingId);
         }
     }
+
+    /**
+     * Attach an agent to the specified process (proces name or PID)
+     */
+    public void attachAgent(String process, String path) {
+        try {
+            synchronized (this) {
+                ProcessRecord proc = findProcessLocked(process, UserHandle.USER_SYSTEM, "attachAgent");
+                if (proc == null || proc.thread == null) {
+                    throw new IllegalArgumentException("Unknown process: " + process);
+                }
+
+                boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
+                if (!isDebuggable) {
+                    if ((proc.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+                        throw new SecurityException("Process not debuggable: " + proc);
+                    }
+                }
+
+                proc.thread.attachAgent(path);
+            }
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Process disappeared");
+        }
+    }
 }
