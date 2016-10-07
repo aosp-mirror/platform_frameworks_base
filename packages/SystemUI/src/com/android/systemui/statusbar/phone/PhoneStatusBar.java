@@ -3431,6 +3431,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (KeyguardUpdateMonitor.getInstance(mContext) != null) {
             KeyguardUpdateMonitor.getInstance(mContext).dump(fd, pw, args);
         }
+        if (mFlashlightController != null) {
+            mFlashlightController.dump(fd, pw, args);
+        }
 
         FalsingManager.getInstance(mContext).dump(pw);
         FalsingLog.dump(pw);
