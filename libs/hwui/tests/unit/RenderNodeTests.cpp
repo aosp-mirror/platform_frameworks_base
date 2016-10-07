@@ -41,7 +41,7 @@ public:
 TEST(RenderNode, hasParents) {
     auto child = TestUtils::createNode(0, 0, 200, 400,
             [](RenderProperties& props, Canvas& canvas) {
-        canvas.drawColor(Color::Red_500, SkXfermode::kSrcOver_Mode);
+        canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
     });
     auto parent = TestUtils::createNode(0, 0, 200, 400,
             [&child](RenderProperties& props, Canvas& canvas) {
@@ -54,7 +54,7 @@ TEST(RenderNode, hasParents) {
     EXPECT_FALSE(parent->hasParents()) << "Root node shouldn't have any parents";
 
     TestUtils::recordNode(*parent, [](Canvas& canvas) {
-        canvas.drawColor(Color::Amber_500, SkXfermode::kSrcOver_Mode);
+        canvas.drawColor(Color::Amber_500, SkBlendMode::kSrcOver);
     });
 
     EXPECT_TRUE(child->hasParents()) << "Child should still have a parent";
@@ -117,7 +117,7 @@ RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
     {
         auto nonNullDLNode = TestUtils::createNode(0, 0, 200, 400,
                 [](RenderProperties& props, Canvas& canvas) {
-            canvas.drawColor(Color::Red_500, SkXfermode::kSrcOver_Mode);
+            canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
         });
         TestUtils::syncHierarchyPropertiesAndDisplayList(nonNullDLNode);
         EXPECT_TRUE(nonNullDLNode->getDisplayList());

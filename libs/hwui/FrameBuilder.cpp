@@ -608,7 +608,7 @@ void FrameBuilder::deferBitmapOp(const BitmapOp& op) {
     // MergingDrawBatch::canMergeWith()
     if (bakedState->computedState.transform.isSimple()
             && bakedState->computedState.transform.positiveScale()
-            && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode
+            && PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver
             && op.bitmap->colorType() != kAlpha_8_SkColorType
             && hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.bitmap->getGenerationID());
@@ -683,7 +683,7 @@ void FrameBuilder::deferPatchOp(const PatchOp& op) {
     if (!bakedState) return; // quick rejected
 
     if (bakedState->computedState.transform.isPureTranslate()
-            && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode
+            && PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver
             && hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.bitmap->getGenerationID());
 
@@ -750,7 +750,7 @@ void FrameBuilder::deferTextOp(const TextOp& op) {
 
     batchid_t batchId = textBatchId(*(op.paint));
     if (bakedState->computedState.transform.isPureTranslate()
-            && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode
+            && PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver
             && hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.paint->getColor());
         currentLayer().deferMergeableOp(mAllocator, bakedState, batchId, mergeId);

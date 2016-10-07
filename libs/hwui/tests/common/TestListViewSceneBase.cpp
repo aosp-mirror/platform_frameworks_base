@@ -47,7 +47,7 @@ void TestListViewSceneBase::createContent(int width, int height, Canvas& canvas)
         }
     });
 
-    canvas.drawColor(Color::Grey_500, SkXfermode::kSrcOver_Mode);
+    canvas.drawColor(Color::Grey_500, SkBlendMode::kSrcOver);
     canvas.drawRenderNode(mListView.get());
 }
 

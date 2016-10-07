@@ -163,7 +163,7 @@ BENCHMARK(BM_CanvasState_translate);
 void BM_DisplayListCanvas_basicViewGroupDraw(benchmark::State& benchState) {
     sp<RenderNode> child = TestUtils::createNode(50, 50, 100, 100,
             [](auto& props, auto& canvas) {
-        canvas.drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+        canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
     });
 
     std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));

@@ -17,6 +17,8 @@
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
+#include <SkColorFilter.h>
+#include <SkMaskFilter.h>
 #include <SkPaint.h>
 #include <SkPath.h>
 #include <SkPathEffect.h>
@@ -149,8 +151,7 @@ static void initPaint(SkPaint& paint) {
     paint.setColorFilter(nullptr);
     paint.setMaskFilter(nullptr);
     paint.setShader(nullptr);
-    SkXfermode* mode = SkXfermode::Create(SkXfermode::kSrc_Mode);
-    SkSafeUnref(paint.setXfermode(mode));
+    paint.setBlendMode(SkBlendMode::kSrc);
 }
 
 static SkBitmap* drawPath(const SkPath* path, const SkPaint* paint, PathTexture* texture,

@@ -29,7 +29,7 @@ class ClippingAnimation : public TestScene {
 public:
     sp<RenderNode> card;
     void createContent(int width, int height, Canvas& canvas) override {
-        canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
+        canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
         card = TestUtils::createNode(0, 0, 200, 400,
                 [](RenderProperties& props, Canvas& canvas) {
             canvas.save(SaveFlags::MatrixClip);
@@ -39,7 +39,7 @@ public:
                 canvas.rotate(45);
                 canvas.translate(-100, -100);
                 canvas.clipRect(0, 0, 200, 200, SkRegion::kIntersect_Op);
-                canvas.drawColor(Color::Blue_500, SkXfermode::kSrcOver_Mode);
+                canvas.drawColor(Color::Blue_500, SkBlendMode::kSrcOver);
             }
             canvas.restore();
 
@@ -48,7 +48,7 @@ public:
                 SkPath clipCircle;
                 clipCircle.addCircle(100, 300, 100);
                 canvas.clipPath(&clipCircle, SkRegion::kIntersect_Op);
-                canvas.drawColor(Color::Red_500, SkXfermode::kSrcOver_Mode);
+                canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
             }
             canvas.restore();
 

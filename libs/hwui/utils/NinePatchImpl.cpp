@@ -134,7 +134,7 @@ void NinePatch::Draw(SkCanvas* canvas, const SkRect& bounds,
 
     if (bounds.isEmpty() ||
         bitmap.width() == 0 || bitmap.height() == 0 ||
-        (paint && paint->getXfermode() == NULL && paint->getAlpha() == 0))
+        (paint && paint->isSrcOver() && paint->getAlpha() == 0))
     {
         if (kUseTrace) {
             ALOGV("======== abort ninepatch draw\n");
@@ -149,7 +149,7 @@ void NinePatch::Draw(SkCanvas* canvas, const SkRect& bounds,
     if (bitmap.getPixels() == NULL)
         return;
 
-    const bool hasXfer = paint->getXfermode() != NULL;
+    const bool hasXfer = !paint->isSrcOver();
     SkRect      dst;
     SkIRect     src;
 

@@ -58,7 +58,7 @@ public:
             const BakedOpState* bakedState,
             const ClipBase* clip,
             float x, float y, bool pureTranslate,
-            int alpha, SkXfermode::Mode mode, const SkPaint* paint)
+            int alpha, SkBlendMode mode, const SkPaint* paint)
         : renderer(renderer)
         , bakedState(bakedState)
         , clip(clip)
@@ -79,7 +79,7 @@ public:
     float y;
     bool pureTranslate;
     int alpha;
-    SkXfermode::Mode mode;
+    SkBlendMode mode;
     const SkPaint* paint;
 };
 

@@ -29,7 +29,7 @@ class OvalAnimation : public TestScene {
 public:
     sp<RenderNode> card;
     void createContent(int width, int height, Canvas& canvas) override {
-        canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
+        canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
         card = TestUtils::createNode(0, 0, 200, 200,
                 [](RenderProperties& props, Canvas& canvas) {
             SkPaint paint;

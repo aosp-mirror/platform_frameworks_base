@@ -28,7 +28,7 @@
 #include <ui/Region.h>
 
 #include <SkPaint.h>
-#include <SkXfermode.h>
+#include <SkBlendMode.h>
 
 #include "Matrix.h"
 #include "Rect.h"
@@ -98,7 +98,7 @@ public:
         this->alpha = alpha;
     }
 
-    inline void setAlpha(int alpha, SkXfermode::Mode mode) {
+    inline void setAlpha(int alpha, SkBlendMode mode) {
         this->alpha = alpha;
         this->mode = mode;
     }
@@ -107,7 +107,7 @@ public:
         return alpha;
     }
 
-    inline SkXfermode::Mode getMode() const {
+    inline SkBlendMode getMode() const {
         return mode;
     }
 
@@ -208,7 +208,7 @@ private:
     /**
      * Blending mode of the layer.
      */
-    SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode;
+    SkBlendMode mode = SkBlendMode::kSrcOver;
 
     /**
      * Optional texture coordinates transform.

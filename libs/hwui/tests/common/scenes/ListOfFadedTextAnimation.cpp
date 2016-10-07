@@ -31,7 +31,7 @@ static TestScene::Registrar _ListOfFadedTextAnimation(TestScene::Info{
 class ListOfFadedTextAnimation : public TestListViewSceneBase {
     void createListItem(RenderProperties& props, Canvas& canvas, int id,
             int itemWidth, int itemHeight)  override {
-        canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
+        canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
         int length = dp(100);
         canvas.saveLayer(0, 0, length, itemHeight, nullptr, SaveFlags::HasAlphaLayer);
         SkPaint textPaint;
@@ -44,16 +44,15 @@ class ListOfFadedTextAnimation : public TestListViewSceneBase {
         pts[1].set(0, 1);
 
         SkColor colors[2] = {Color::Black, Color::Transparent};
-        SkAutoTUnref<SkShader> s(SkGradientShader::CreateLinear(pts, colors, NULL, 2,
+        sk_sp<SkShader> s(SkGradientShader::MakeLinear(pts, colors, NULL, 2,
                 SkShader::kClamp_TileMode));
 
         SkMatrix matrix;
         matrix.setScale(1, length);
         matrix.postRotate(-90);
         SkPaint fadingPaint;
-        fadingPaint.setShader(s->newWithLocalMatrix(matrix))->unref();
-        SkXfermode* mode = SkXfermode::Create(SkXfermode::kDstOut_Mode);
-        fadingPaint.setXfermode(mode);
+        fadingPaint.setShader(s->makeWithLocalMatrix(matrix));
+        fadingPaint.setBlendMode(SkBlendMode::kDstOut);
         canvas.drawRect(0, 0, length, itemHeight, fadingPaint);
         canvas.restore();
     }

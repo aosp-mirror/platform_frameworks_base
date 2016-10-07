@@ -39,7 +39,7 @@ public:
         thumbnailSize = std::min(std::min(width, height) / 2, 720);
         int cardsize = std::min(width, height) - dp(64);
 
-        renderer.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
+        renderer.drawColor(Color::White, SkBlendMode::kSrcOver);
         renderer.insertReorderBarrier(true);
 
         int x = dp(32);
@@ -76,7 +76,7 @@ private:
             props.mutableOutline().setRoundRect(0, 0, width, height, dp(10), 1);
             props.mutableOutline().setShouldClip(true);
 
-            canvas.drawColor(Color::Grey_200, SkXfermode::kSrcOver_Mode);
+            canvas.drawColor(Color::Grey_200, SkBlendMode::kSrcOver);
             canvas.drawBitmap(thumb, 0, 0, thumb.width(), thumb.height(),
                     0, 0, width, height, nullptr);
         });

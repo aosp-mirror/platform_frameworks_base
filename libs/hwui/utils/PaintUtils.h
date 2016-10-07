@@ -33,18 +33,6 @@ namespace uirenderer {
 class PaintUtils {
 public:
 
-   /**
-     * Safely retrieves the mode from the specified xfermode. If the specified
-     * xfermode is null, the mode is assumed to be SkXfermode::kSrcOver_Mode.
-     */
-    static inline SkXfermode::Mode getXfermode(SkXfermode* mode) {
-        SkXfermode::Mode resultMode;
-        if (!SkXfermode::AsMode(mode, &resultMode)) {
-            resultMode = SkXfermode::kSrcOver_Mode;
-        }
-        return resultMode;
-    }
-
     static inline GLenum getFilter(const SkPaint* paint) {
         if (!paint || paint->getFilterQuality() != kNone_SkFilterQuality) {
             return GL_LINEAR;
@@ -56,7 +44,7 @@ public:
     static inline bool paintWillNotDraw(const SkPaint& paint) {
         return paint.getAlpha() == 0
                 && !paint.getColorFilter()
-                && getXfermode(paint.getXfermode()) == SkXfermode::kSrcOver_Mode;
+                && paint.getBlendMode() == SkBlendMode::kSrcOver;
     }
 
     // TODO: move to a method on android:Paint? replace with SkPaint::nothingToDraw()?
@@ -64,7 +52,7 @@ public:
         return paint.getAlpha() == 0
                 && paint.getLooper() == nullptr
                 && !paint.getColorFilter()
-                && getXfermode(paint.getXfermode()) == SkXfermode::kSrcOver_Mode;
+                && paint.getBlendMode() == SkBlendMode::kSrcOver;
     }
 
     static bool isOpaquePaint(const SkPaint* paint) {
@@ -77,9 +65,9 @@ public:
         }
 
         // Only let simple srcOver / src blending modes declare opaque, since behavior is clear.
-        SkXfermode::Mode mode = getXfermode(paint->getXfermode());
-        return mode == SkXfermode::Mode::kSrcOver_Mode
-                || mode == SkXfermode::Mode::kSrc_Mode;
+        SkBlendMode mode = paint->getBlendMode();
+        return mode == SkBlendMode::kSrcOver
+                || mode == SkBlendMode::kSrc;
     }
 
     static bool isBlendedShader(const SkShader* shader) {
@@ -121,8 +109,8 @@ public:
         return getTextShadow(paint, nullptr);
     }
 
-    static inline SkXfermode::Mode getXfermodeDirect(const SkPaint* paint) {
-        return paint ? getXfermode(paint->getXfermode()) : SkXfermode::kSrcOver_Mode;
+    static inline SkBlendMode getBlendModeDirect(const SkPaint* paint) {
+        return paint ? paint->getBlendMode() : SkBlendMode::kSrcOver;
     }
 
     static inline int getAlphaDirect(const SkPaint* paint) {

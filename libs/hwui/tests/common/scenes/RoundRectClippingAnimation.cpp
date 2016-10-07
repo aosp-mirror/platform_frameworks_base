@@ -28,7 +28,7 @@ public:
 
     std::vector< sp<RenderNode> > cards;
     void createContent(int width, int height, Canvas& canvas) override {
-        canvas.drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+        canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
         canvas.insertReorderBarrier(true);
         int ci = 0;
 
@@ -37,7 +37,7 @@ public:
                 auto color = BrightColors[ci++ % BrightColorsCount];
                 auto card = TestUtils::createNode(x, y, x + mSize, y + mSize,
                         [&](RenderProperties& props, Canvas& canvas) {
-                    canvas.drawColor(color, SkXfermode::kSrcOver_Mode);
+                    canvas.drawColor(color, SkBlendMode::kSrcOver);
                     props.mutableOutline().setRoundRect(0, 0,
                             props.getWidth(), props.getHeight(), mSize * .25, 1);
                     props.mutableOutline().setShouldClip(true);

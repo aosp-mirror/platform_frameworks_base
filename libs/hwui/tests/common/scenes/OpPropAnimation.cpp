@@ -53,7 +53,7 @@ public:
             mCircleX->value = width * 0.75;
             mCircleY->value = height * 0.75;
 
-            canvas.drawColor(Color::White, SkXfermode::Mode::kSrcOver_Mode);
+            canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
             canvas.drawRoundRect(mRoundRectLeft.get(), mRoundRectTop.get(),
                     mRoundRectRight.get(), mRoundRectBottom.get(),
                     mRoundRectRx.get(), mRoundRectRy.get(), mPaint.get());

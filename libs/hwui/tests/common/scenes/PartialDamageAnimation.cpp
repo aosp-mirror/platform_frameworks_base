@@ -37,7 +37,7 @@ public:
                 0xFF4CAF50,
         };
 
-        canvas.drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+        canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
 
         for (int x = dp(16); x < (width - dp(116)); x += dp(116)) {
             for (int y = dp(16); y < (height - dp(116)); y += dp(116)) {
@@ -45,7 +45,7 @@ public:
                 sp<RenderNode> card = TestUtils::createNode(x, y,
                         x + dp(100), y + dp(100),
                         [color](RenderProperties& props, Canvas& canvas) {
-                    canvas.drawColor(color, SkXfermode::kSrcOver_Mode);
+                    canvas.drawColor(color, SkBlendMode::kSrcOver);
                 });
                 canvas.drawRenderNode(card.get());
                 cards.push_back(card);
@@ -61,7 +61,7 @@ public:
         TestUtils::recordNode(*cards[0], [curFrame](Canvas& canvas) {
             SkColor color = TestUtils::interpolateColor(
                     curFrame / 150.0f, 0xFFF44336, 0xFFF8BBD0);
-            canvas.drawColor(color, SkXfermode::kSrcOver_Mode);
+            canvas.drawColor(color, SkBlendMode::kSrcOver);
         });
     }
 };

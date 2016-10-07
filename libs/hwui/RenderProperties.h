@@ -24,10 +24,10 @@
 #include "utils/MathUtils.h"
 #include "utils/PaintUtils.h"
 
+#include <SkBlendMode.h>
 #include <SkCamera.h>
 #include <SkMatrix.h>
 #include <SkRegion.h>
-#include <SkXfermode.h>
 
 #include <algorithm>
 #include <stddef.h>
@@ -93,11 +93,11 @@ public:
         return mAlpha;
     }
 
-    bool setXferMode(SkXfermode::Mode mode) {
+    bool setXferMode(SkBlendMode mode) {
         return RP_SET(mMode, mode);
     }
 
-    SkXfermode::Mode xferMode() const {
+    SkBlendMode xferMode() const {
         return mMode;
     }
 
@@ -133,7 +133,7 @@ private:
     // Whether or not that Layer's content is opaque, doesn't include alpha
     bool mOpaque;
     uint8_t mAlpha;
-    SkXfermode::Mode mMode;
+    SkBlendMode mMode;
     SkColorFilter* mColorFilter = nullptr;
 };
 

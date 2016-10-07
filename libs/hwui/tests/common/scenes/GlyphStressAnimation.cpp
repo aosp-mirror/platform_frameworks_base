@@ -37,7 +37,7 @@ public:
         container = TestUtils::createNode(0, 0, width, height, nullptr);
         doFrame(0); // update container
 
-        canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
+        canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
         canvas.drawRenderNode(container.get());
     }
 

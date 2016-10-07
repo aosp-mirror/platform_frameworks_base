@@ -292,7 +292,7 @@ static void renderText(BakedOpRenderer& renderer, const TextOp& op, const BakedO
     Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     int alpha = PaintUtils::getAlphaDirect(op.paint) * state.alpha;
-    SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(op.paint);
+    SkBlendMode mode = PaintUtils::getBlendModeDirect(op.paint);
     TextDrawFunctor functor(&renderer, &state, renderClip,
             x, y, pureTranslate, alpha, mode, op.paint);
 
@@ -528,7 +528,7 @@ void BakedOpDispatcher::onBitmapRectOp(BakedOpRenderer& renderer, const BitmapRe
 void BakedOpDispatcher::onColorOp(BakedOpRenderer& renderer, const ColorOp& op, const BakedOpState& state) {
     SkPaint paint;
     paint.setColor(op.color);
-    paint.setXfermodeMode(op.mode);
+    paint.setBlendMode(op.mode);
 
     Glop glop;
     GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
@@ -744,7 +744,7 @@ void BakedOpDispatcher::onTextOnPathOp(BakedOpRenderer& renderer, const TextOnPa
     Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     int alpha = PaintUtils::getAlphaDirect(op.paint) * state.alpha;
-    SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(op.paint);
+    SkBlendMode mode = PaintUtils::getBlendModeDirect(op.paint);
     TextDrawFunctor functor(&renderer, &state, renderTargetClip,
             0.0f, 0.0f, false, alpha, mode, op.paint);
 
@@ -776,11 +776,11 @@ void BakedOpDispatcher::onTextureLayerOp(BakedOpRenderer& renderer, const Textur
 }
 
 void renderRectForLayer(BakedOpRenderer& renderer, const LayerOp& op, const BakedOpState& state,
-        int color, SkXfermode::Mode mode, SkColorFilter* colorFilter) {
+        int color, SkBlendMode mode, SkColorFilter* colorFilter) {
     SkPaint paint;
     paint.setColor(color);
-    paint.setXfermodeMode(mode);
-    paint.setColorFilter(colorFilter);
+    paint.setBlendMode(mode);
+    paint.setColorFilter(sk_ref_sp(colorFilter));
     RectOp rectOp(op.unmappedBounds, op.localMatrix, op.localClip, &paint);
     BakedOpDispatcher::onRectOp(renderer, rectOp, state);
 }
@@ -808,11 +808,11 @@ void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, 
         if (CC_UNLIKELY(Properties::debugLayersUpdates)) {
             // render debug layer highlight
             renderRectForLayer(renderer, op, state,
-                    0x7f00ff00, SkXfermode::Mode::kSrcOver_Mode, nullptr);
+                    0x7f00ff00, SkBlendMode::kSrcOver, nullptr);
         } else if (CC_UNLIKELY(Properties::debugOverdraw)) {
             // render transparent to increment overdraw for repaint area
             renderRectForLayer(renderer, op, state,
-                    SK_ColorTRANSPARENT, SkXfermode::Mode::kSrcOver_Mode, nullptr);
+                    SK_ColorTRANSPARENT, SkBlendMode::kSrcOver, nullptr);
         }
     }
 }
@@ -829,14 +829,14 @@ void BakedOpDispatcher::onCopyFromLayerOp(BakedOpRenderer& renderer, const CopyF
         if (op.paint && op.paint->getAlpha() < 255) {
             SkPaint layerPaint;
             layerPaint.setAlpha(op.paint->getAlpha());
-            layerPaint.setXfermodeMode(SkXfermode::kDstIn_Mode);
-            layerPaint.setColorFilter(op.paint->getColorFilter());
+            layerPaint.setBlendMode(SkBlendMode::kDstIn);
+            layerPaint.setColorFilter(sk_ref_sp(op.paint->getColorFilter()));
             RectOp rectOp(state.computedState.clippedBounds, Matrix4::identity(), nullptr, &layerPaint);
             BakedOpDispatcher::onRectOp(renderer, rectOp, state);
         }
 
         OffscreenBuffer& layer = **(op.layerHandle);
-        auto mode = PaintUtils::getXfermodeDirect(op.paint);
+        auto mode = PaintUtils::getBlendModeDirect(op.paint);
         Glop glop;
         GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
                 .setRoundRectClipState(state.roundRectClipState)

@@ -174,7 +174,7 @@ public:
 // ----------------------------------------------------------------------------
 // Canvas draw operations
 // ----------------------------------------------------------------------------
-    virtual void drawColor(int color, SkXfermode::Mode mode) = 0;
+    virtual void drawColor(int color, SkBlendMode mode) = 0;
     virtual void drawPaint(const SkPaint& paint) = 0;
 
     // Geometry

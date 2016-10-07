@@ -30,12 +30,12 @@ class RectGridAnimation : public TestScene {
 public:
     sp<RenderNode> card;
     void createContent(int width, int height, Canvas& canvas) override {
-        canvas.drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+        canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
         canvas.insertReorderBarrier(true);
 
         card = TestUtils::createNode(50, 50, 250, 250,
                 [](RenderProperties& props, Canvas& canvas) {
-            canvas.drawColor(0xFFFF00FF, SkXfermode::kSrcOver_Mode);
+            canvas.drawColor(0xFFFF00FF, SkBlendMode::kSrcOver);
 
             SkRegion region;
             for (int xOffset = 0; xOffset < 200; xOffset+=2) {

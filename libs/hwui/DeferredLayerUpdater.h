@@ -101,7 +101,7 @@ private:
     bool mBlend;
     SkColorFilter* mColorFilter;
     int mAlpha;
-    SkXfermode::Mode mMode;
+    SkBlendMode mMode;
     sp<GLConsumer> mSurfaceTexture;
     SkMatrix* mTransform;
     bool mNeedsGLContextAttach;

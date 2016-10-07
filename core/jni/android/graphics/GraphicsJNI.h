@@ -53,7 +53,7 @@ public:
 
     // Given the 'native' long held by the Rasterizer.java object, return a
     // ref to its SkRasterizer* (or NULL).
-    static SkRasterizer* refNativeRasterizer(jlong rasterizerHandle);
+    static sk_sp<SkRasterizer> refNativeRasterizer(jlong rasterizerHandle);
 
     /*
      *  LegacyBitmapConfig is the old enum in Skia that matched the enum int values

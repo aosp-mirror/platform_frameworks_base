@@ -83,7 +83,7 @@ public:
                     for (auto op : ops) {
                         int innerCount = canvas.save(SaveFlags::MatrixClip);
                         canvas.clipRect(0, 0, cellSize, cellSize, SkRegion::kIntersect_Op);
-                        canvas.drawColor(Color::White, SkXfermode::Mode::kSrcOver_Mode);
+                        canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
                         op(canvas, cellSize, paint);
                         canvas.restoreToCount(innerCount);
                         canvas.translate(cellSize + cellSpace, 0);
@@ -94,7 +94,7 @@ public:
             }
             canvas.restoreToCount(outerCount);
         });
-        canvas.drawColor(Color::Grey_500, SkXfermode::Mode::kSrcOver_Mode);
+        canvas.drawColor(Color::Grey_500, SkBlendMode::kSrcOver);
         canvas.drawRenderNode(card.get());
     }
 

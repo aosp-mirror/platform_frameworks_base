@@ -207,7 +207,7 @@ static jboolean clipRegion(JNIEnv* env, jobject, jlong canvasHandle, jlong devic
 }
 
 static void drawColor(JNIEnv* env, jobject, jlong canvasHandle, jint color, jint modeHandle) {
-    SkXfermode::Mode mode = static_cast<SkXfermode::Mode>(modeHandle);
+    SkBlendMode mode = static_cast<SkBlendMode>(modeHandle);
     get_canvas(canvasHandle)->drawColor(color, mode);
 }
 

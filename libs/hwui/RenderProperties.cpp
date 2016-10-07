@@ -52,7 +52,7 @@ bool LayerProperties::setColorFilter(SkColorFilter* filter) {
 bool LayerProperties::setFromPaint(const SkPaint* paint) {
     bool changed = false;
     changed |= setAlpha(static_cast<uint8_t>(PaintUtils::getAlphaDirect(paint)));
-    changed |= setXferMode(PaintUtils::getXfermodeDirect(paint));
+    changed |= setXferMode(PaintUtils::getBlendModeDirect(paint));
     changed |= setColorFilter(paint ? paint->getColorFilter() : nullptr);
     return changed;
 }
