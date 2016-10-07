@@ -560,11 +560,11 @@ public class ZygoteInit {
      */
     private static PathClassLoader createSystemServerClassLoader(String systemServerClasspath,
                                                                  int targetSdkVersion) {
-      String librarySearchPath = System.getProperty("java.library.path");
+      String libraryPath = System.getProperty("java.library.path");
 
       return PathClassLoaderFactory.createClassLoader(systemServerClasspath,
-                                                      librarySearchPath,
-                                                      null /* libraryPermittedPath */,
+                                                      libraryPath,
+                                                      libraryPath,
                                                       ClassLoader.getSystemClassLoader(),
                                                       targetSdkVersion,
                                                       true /* isNamespaceShared */);
