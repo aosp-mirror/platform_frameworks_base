@@ -5376,6 +5376,39 @@ METADATA['en'].collections = {
       "https://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.pdf"
     ]
   },
+  "distribute/stories/games/docs": {
+    "title": "",
+    "resources": [
+      "distribute/stories/games/upbeat-games.html",
+      "distribute/stories/games/tapps.html",
+      "distribute/stories/games/noodlecake-super-stickman.html",
+      "distribute/stories/games/glu-tap-baseball.html",
+      "distribute/stories/games/doctor-who-legacy.html",
+      "distribute/stories/games/glu-dh.html",
+      "distribute/stories/games/dots.html",
+      "distribute/stories/games/kongregate-adv-cap.html",
+      "distribute/stories/games/kongregate-global-assault.html",
+      "distribute/stories/games/leos-fortune.html",
+      "distribute/stories/games/tiny-co.html",
+      "distribute/stories/games/g4a-indian-rummy.html",
+      "distribute/stories/games/rvappstudios-zombie.html",
+      "distribute/stories/games/glu-eternity-warriors.html",
+      "distribute/stories/games/hotheadgames-firefight.html",
+      "distribute/stories/games/concrete-bowling.html",
+      "distribute/stories/games/gameloft-asphalt8.html"
+    ]
+  },
+  "distribute/stories/apps/docs": {
+    "title": "",
+    "resources": [
+      "distribute/stories/apps/aftenposten.html",
+      "distribute/stories/apps/el-mundo.html",
+      "distribute/stories/apps/segundamano.html",
+      "distribute/stories/apps/remember-the-milk.html",
+      "distribute/stories/apps/intuit-mint.html",
+      "distribute/stories/apps/sayhi.html",
+    ]
+  },
   "training/testing/overview": {
     "title": "",
     "resources": [
