@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.DrawableRes;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.AttributeSet;
@@ -28,7 +29,7 @@ public class ImageSwitcher extends ViewSwitcher
     {
         super(context);
     }
-    
+
     public ImageSwitcher(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -50,7 +51,16 @@ public class ImageSwitcher extends ViewSwitcher
     public void setImageDrawable(Drawable drawable)
     {
         ImageView image = (ImageView)this.getNextView();
+        image.setImageTintList(null);
         image.setImageDrawable(drawable);
+        showNext();
+    }
+
+    public void setColoredImageDrawable(Drawable drawable, ColorStateList tint)
+    {
+        ImageView image = (ImageView)this.getNextView();
+        image.setImageDrawable(drawable);
+        image.setImageTintList(tint);
         showNext();
     }
 

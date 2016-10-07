@@ -100,6 +100,14 @@
         android:layout="@layout/emergency_cryptkeeper_text"
     />
 
+    <ViewStub
+        android:id="@+id/ticker_stub"
+        android:inflatedId="@+id/ticker"
+        android:layout="@layout/status_bar_ticker"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+    />
+
     <com.android.keyguard.AlphaOptimizedLinearLayout
         android:id="@+id/center_clock_layout"
         android:gravity="center"

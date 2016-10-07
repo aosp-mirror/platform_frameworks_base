@@ -99,11 +99,19 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
+    protected void haltTicker() {
+    }
+
+    @Override
     protected void setAreThereNotifications() {
     }
 
     @Override
     protected void updateNotifications() {
+    }
+
+    @Override
+    protected void tick(StatusBarNotification n, boolean firstTime) {
     }
 
     @Override

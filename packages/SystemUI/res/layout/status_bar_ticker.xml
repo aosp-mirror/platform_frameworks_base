@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  - Copyright 2014, The Android Open Source Project
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+<com.android.keyguard.AlphaOptimizedLinearLayout
+    android:id="@+id/ticker"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="@dimen/ticker_start_padding"
+    android:animationCache="false"
+    android:orientation="horizontal">
+
+    <ImageSwitcher android:id="@+id/tickerIcon"
+        android:layout_width="@dimen/status_bar_icon_size"
+        android:layout_height="@dimen/status_bar_icon_size"
+        android:layout_marginEnd="@dimen/ticker_icon_end_margin"
+        >
+        <com.android.systemui.statusbar.AnimatedImageView
+            android:layout_width="@dimen/status_bar_icon_size"
+            android:layout_height="@dimen/status_bar_icon_size"
+            android:scaleType="center"
+            />
+        <com.android.systemui.statusbar.AnimatedImageView
+            android:layout_width="@dimen/status_bar_icon_size"
+            android:layout_height="@dimen/status_bar_icon_size"
+            android:scaleType="center"
+            />
+    </ImageSwitcher>
+    <com.android.systemui.statusbar.phone.TickerView android:id="@+id/tickerText"
+        android:layout_width="0dip"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/ticker_text_top_padding"
+        android:paddingEnd="@dimen/ticker_text_end_padding">
+        <TextView
+            android:textAppearance="@style/TextAppearance.StatusBar.PhoneTicker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            />
+        <TextView
+            android:textAppearance="@style/TextAppearance.StatusBar.PhoneTicker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            />
+    </com.android.systemui.statusbar.phone.TickerView>
+</com.android.keyguard.AlphaOptimizedLinearLayout>
