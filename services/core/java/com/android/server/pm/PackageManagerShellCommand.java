@@ -1147,14 +1147,15 @@ class PackageManagerShellCommand extends ShellCommand {
     private int doWriteSplit(int sessionId, String inPath, long sizeBytes, String splitName,
             boolean logSuccess) throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        if ("-".equals(inPath)) {
-            inPath = null;
-        } else if (inPath != null) {
-            final File file = new File(inPath);
-            if (file.isFile()) {
-                sizeBytes = file.length();
-            }
+        if (sizeBytes <= 0) {
+            pw.println("Error: must specify a APK size");
+            return 1;
         }
+        if (inPath != null && !"-".equals(inPath)) {
+            pw.println("Error: APK content must be streamed");
+            return 1;
+        }
+        inPath = null;
 
         final SessionInfo info = mInterface.getPackageInstaller().getSessionInfo(sessionId);
 
