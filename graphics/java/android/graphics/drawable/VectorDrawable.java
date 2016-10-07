@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
+import dalvik.annotation.optimization.FastNative;
 import dalvik.system.VMRuntime;
 
 /**
@@ -2150,41 +2151,61 @@ public class VectorDrawable extends Drawable {
         abstract Property getProperty(String propertyName);
     }
 
-    private static native long nCreateTree(long rootGroupPtr);
-    private static native long nCreateTreeFromCopy(long treeToCopy, long rootGroupPtr);
-    private static native void nSetRendererViewportSize(long rendererPtr, float viewportWidth,
-            float viewportHeight);
-    private static native boolean nSetRootAlpha(long rendererPtr, float alpha);
-    private static native float nGetRootAlpha(long rendererPtr);
-    private static native void nSetAllowCaching(long rendererPtr, boolean allowCaching);
-
     private static native int nDraw(long rendererPtr, long canvasWrapperPtr,
             long colorFilterPtr, Rect bounds, boolean needsMirroring, boolean canReuseCache);
-    private static native long nCreateFullPath();
-    private static native long nCreateFullPath(long nativeFullPathPtr);
     private static native boolean nGetFullPathProperties(long pathPtr, byte[] properties,
             int length);
+    private static native void nSetName(long nodePtr, String name);
+    private static native boolean nGetGroupProperties(long groupPtr, float[] properties,
+            int length);
+    private static native void nSetPathString(long pathPtr, String pathString, int length);
 
+    // ------------- @FastNative ------------------
+
+    @FastNative
+    private static native long nCreateTree(long rootGroupPtr);
+    @FastNative
+    private static native long nCreateTreeFromCopy(long treeToCopy, long rootGroupPtr);
+    @FastNative
+    private static native void nSetRendererViewportSize(long rendererPtr, float viewportWidth,
+            float viewportHeight);
+    @FastNative
+    private static native boolean nSetRootAlpha(long rendererPtr, float alpha);
+    @FastNative
+    private static native float nGetRootAlpha(long rendererPtr);
+    @FastNative
+    private static native void nSetAllowCaching(long rendererPtr, boolean allowCaching);
+
+    @FastNative
+    private static native long nCreateFullPath();
+    @FastNative
+    private static native long nCreateFullPath(long nativeFullPathPtr);
+
+    @FastNative
     private static native void nUpdateFullPathProperties(long pathPtr, float strokeWidth,
             int strokeColor, float strokeAlpha, int fillColor, float fillAlpha, float trimPathStart,
             float trimPathEnd, float trimPathOffset, float strokeMiterLimit, int strokeLineCap,
             int strokeLineJoin, int fillType);
+    @FastNative
     private static native void nUpdateFullPathFillGradient(long pathPtr, long fillGradientPtr);
+    @FastNative
     private static native void nUpdateFullPathStrokeGradient(long pathPtr, long strokeGradientPtr);
 
+    @FastNative
     private static native long nCreateClipPath();
+    @FastNative
     private static native long nCreateClipPath(long clipPathPtr);
 
+    @FastNative
     private static native long nCreateGroup();
+    @FastNative
     private static native long nCreateGroup(long groupPtr);
-    private static native void nSetName(long nodePtr, String name);
-    private static native boolean nGetGroupProperties(long groupPtr, float[] properties,
-            int length);
+    @FastNative
     private static native void nUpdateGroupProperties(long groupPtr, float rotate, float pivotX,
             float pivotY, float scaleX, float scaleY, float translateX, float translateY);
 
+    @FastNative
     private static native void nAddChild(long groupPtr, long nodePtr);
-    private static native void nSetPathString(long pathPtr, String pathString, int length);
 
     /**
      * The setters and getters below for paths and groups are here temporarily, and will be
@@ -2193,37 +2214,68 @@ public class VectorDrawable extends Drawable {
      * for VD during animation, and these setters and getters will be obsolete.
      */
     // Setters and getters during animation.
+    @FastNative
     private static native float nGetRotation(long groupPtr);
+    @FastNative
     private static native void nSetRotation(long groupPtr, float rotation);
+    @FastNative
     private static native float nGetPivotX(long groupPtr);
+    @FastNative
     private static native void nSetPivotX(long groupPtr, float pivotX);
+    @FastNative
     private static native float nGetPivotY(long groupPtr);
+    @FastNative
     private static native void nSetPivotY(long groupPtr, float pivotY);
+    @FastNative
     private static native float nGetScaleX(long groupPtr);
+    @FastNative
     private static native void nSetScaleX(long groupPtr, float scaleX);
+    @FastNative
     private static native float nGetScaleY(long groupPtr);
+    @FastNative
     private static native void nSetScaleY(long groupPtr, float scaleY);
+    @FastNative
     private static native float nGetTranslateX(long groupPtr);
+    @FastNative
     private static native void nSetTranslateX(long groupPtr, float translateX);
+    @FastNative
     private static native float nGetTranslateY(long groupPtr);
+    @FastNative
     private static native void nSetTranslateY(long groupPtr, float translateY);
 
     // Setters and getters for VPath during animation.
+    @FastNative
     private static native void nSetPathData(long pathPtr, long pathDataPtr);
+    @FastNative
     private static native float nGetStrokeWidth(long pathPtr);
+    @FastNative
     private static native void nSetStrokeWidth(long pathPtr, float width);
+    @FastNative
     private static native int nGetStrokeColor(long pathPtr);
+    @FastNative
     private static native void nSetStrokeColor(long pathPtr, int strokeColor);
+    @FastNative
     private static native float nGetStrokeAlpha(long pathPtr);
+    @FastNative
     private static native void nSetStrokeAlpha(long pathPtr, float alpha);
+    @FastNative
     private static native int nGetFillColor(long pathPtr);
+    @FastNative
     private static native void nSetFillColor(long pathPtr, int fillColor);
+    @FastNative
     private static native float nGetFillAlpha(long pathPtr);
+    @FastNative
     private static native void nSetFillAlpha(long pathPtr, float fillAlpha);
+    @FastNative
     private static native float nGetTrimPathStart(long pathPtr);
+    @FastNative
     private static native void nSetTrimPathStart(long pathPtr, float trimPathStart);
+    @FastNative
     private static native float nGetTrimPathEnd(long pathPtr);
+    @FastNative
     private static native void nSetTrimPathEnd(long pathPtr, float trimPathEnd);
+    @FastNative
     private static native float nGetTrimPathOffset(long pathPtr);
+    @FastNative
     private static native void nSetTrimPathOffset(long pathPtr, float trimPathOffset);
 }
