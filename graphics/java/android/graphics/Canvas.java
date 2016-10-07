@@ -26,12 +26,14 @@ import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
 
+import dalvik.annotation.optimization.FastNative;
+
+import libcore.util.NativeAllocationRegistry;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import javax.microedition.khronos.opengles.GL;
-
-import libcore.util.NativeAllocationRegistry;
 
 /**
  * The Canvas class holds the "draw" calls. To draw something, you need
@@ -2008,155 +2010,201 @@ public class Canvas {
     public static native void freeTextLayoutCaches();
 
     private static native long initRaster(Bitmap bitmap);
-    private static native void native_setBitmap(long canvasHandle,
-                                                Bitmap bitmap);
-    private static native boolean native_isOpaque(long canvasHandle);
-    private static native void native_setHighContrastText(long renderer, boolean highContrastText);
-    private static native int native_getWidth(long canvasHandle);
-    private static native int native_getHeight(long canvasHandle);
+    private static native long getNativeFinalizer();
 
-    private static native int native_save(long canvasHandle, int saveFlags);
-    private static native int native_saveLayer(long nativeCanvas, float l,
-                                               float t, float r, float b,
-                                               long nativePaint,
-                                               int layerFlags);
-    private static native int native_saveLayerAlpha(long nativeCanvas, float l,
-                                                    float t, float r, float b,
-                                                    int alpha, int layerFlags);
-    private static native void native_restore(long canvasHandle, boolean tolerateUnderflow);
-    private static native void native_restoreToCount(long canvasHandle,
-                                                     int saveCount,
-                                                     boolean tolerateUnderflow);
-    private static native int native_getSaveCount(long canvasHandle);
-
-    private static native void native_translate(long canvasHandle,
-                                                float dx, float dy);
-    private static native void native_scale(long canvasHandle,
-                                            float sx, float sy);
-    private static native void native_rotate(long canvasHandle, float degrees);
-    private static native void native_skew(long canvasHandle,
-                                           float sx, float sy);
-    private static native void native_concat(long nativeCanvas,
-                                             long nativeMatrix);
-    private static native void native_setMatrix(long nativeCanvas,
-                                                long nativeMatrix);
-    private static native boolean native_clipRect(long nativeCanvas,
-                                                  float left, float top,
-                                                  float right, float bottom,
-                                                  int regionOp);
-    private static native boolean native_clipPath(long nativeCanvas,
-                                                  long nativePath,
-                                                  int regionOp);
-    private static native boolean native_clipRegion(long nativeCanvas,
-                                                    long nativeRegion,
-                                                    int regionOp);
-    private static native void nativeSetDrawFilter(long nativeCanvas,
-                                                   long nativeFilter);
-    private static native boolean native_getClipBounds(long nativeCanvas,
-                                                       Rect bounds);
-    private static native void native_getCTM(long nativeCanvas,
-                                             long nativeMatrix);
-    private static native boolean native_quickReject(long nativeCanvas,
-                                                     long nativePath);
-    private static native boolean native_quickReject(long nativeCanvas,
-                                                     float left, float top,
-                                                     float right, float bottom);
-    private static native void native_drawColor(long nativeCanvas, int color,
-                                                int mode);
-    private static native void native_drawPaint(long nativeCanvas,
-                                                long nativePaint);
-    private static native void native_drawPoint(long canvasHandle, float x, float y,
-                                                long paintHandle);
-    private static native void native_drawPoints(long canvasHandle, float[] pts,
-                                                 int offset, int count,
-                                                 long paintHandle);
-    private static native void native_drawLine(long nativeCanvas, float startX,
-                                               float startY, float stopX,
-                                               float stopY, long nativePaint);
-    private static native void native_drawLines(long canvasHandle, float[] pts,
-                                                int offset, int count,
-                                                long paintHandle);
-    private static native void native_drawRect(long nativeCanvas, float left,
-                                               float top, float right,
-                                               float bottom,
-                                               long nativePaint);
-    private static native void native_drawOval(long nativeCanvas, float left, float top,
-                                               float right, float bottom, long nativePaint);
-    private static native void native_drawCircle(long nativeCanvas, float cx,
-                                                 float cy, float radius,
-                                                 long nativePaint);
-    private static native void native_drawArc(long nativeCanvas, float left, float top,
-                                              float right, float bottom,
-                                              float startAngle, float sweep, boolean useCenter,
-                                              long nativePaint);
-    private static native void native_drawRoundRect(long nativeCanvas,
-            float left, float top, float right, float bottom,
-            float rx, float ry, long nativePaint);
-    private static native void native_drawPath(long nativeCanvas,
-                                               long nativePath,
-                                               long nativePaint);
-    private static native void native_drawRegion(long nativeCanvas,
-            long nativeRegion, long nativePaint);
-    private native void native_drawNinePatch(long nativeCanvas, long nativeBitmap,
-            long ninePatch, float dstLeft, float dstTop, float dstRight, float dstBottom,
-            long nativePaintOrZero, int screenDensity, int bitmapDensity);
-    private native void native_drawBitmap(long nativeCanvas, Bitmap bitmap,
-                                                 float left, float top,
-                                                 long nativePaintOrZero,
-                                                 int canvasDensity,
-                                                 int screenDensity,
-                                                 int bitmapDensity);
+    private native void native_drawBitmap(long nativeCanvas, Bitmap bitmap, float left, float top,
+            long nativePaintOrZero, int canvasDensity, int screenDensity, int bitmapDensity);
     private native void native_drawBitmap(long nativeCanvas, Bitmap bitmap,
             float srcLeft, float srcTop, float srcRight, float srcBottom,
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             long nativePaintOrZero, int screenDensity, int bitmapDensity);
     private static native void native_drawBitmap(long nativeCanvas, int[] colors,
-                                                int offset, int stride, float x,
-                                                 float y, int width, int height,
-                                                 boolean hasAlpha,
-                                                 long nativePaintOrZero);
+            int offset, int stride, float x, float y, int width, int height,
+            boolean hasAlpha, long nativePaintOrZero);
+
+    // ---------------- @FastNative -------------------
+
+    @FastNative
+    private static native void native_setBitmap(long canvasHandle,
+                                                Bitmap bitmap);
+    @FastNative
+    private static native boolean native_isOpaque(long canvasHandle);
+    @FastNative
+    private static native void native_setHighContrastText(long renderer, boolean highContrastText);
+    @FastNative
+    private static native int native_getWidth(long canvasHandle);
+    @FastNative
+    private static native int native_getHeight(long canvasHandle);
+
+    @FastNative
+    private static native int native_save(long canvasHandle, int saveFlags);
+    @FastNative
+    private static native int native_saveLayer(long nativeCanvas, float l,
+                                               float t, float r, float b,
+                                               long nativePaint,
+                                               int layerFlags);
+    @FastNative
+    private static native int native_saveLayerAlpha(long nativeCanvas, float l,
+                                                    float t, float r, float b,
+                                                    int alpha, int layerFlags);
+    @FastNative
+    private static native void native_restore(long canvasHandle, boolean tolerateUnderflow);
+    @FastNative
+    private static native void native_restoreToCount(long canvasHandle,
+                                                     int saveCount,
+                                                     boolean tolerateUnderflow);
+    @FastNative
+    private static native int native_getSaveCount(long canvasHandle);
+
+    @FastNative
+    private static native void native_translate(long canvasHandle,
+                                                float dx, float dy);
+    @FastNative
+    private static native void native_scale(long canvasHandle,
+                                            float sx, float sy);
+    @FastNative
+    private static native void native_rotate(long canvasHandle, float degrees);
+    @FastNative
+    private static native void native_skew(long canvasHandle,
+                                           float sx, float sy);
+    @FastNative
+    private static native void native_concat(long nativeCanvas,
+                                             long nativeMatrix);
+    @FastNative
+    private static native void native_setMatrix(long nativeCanvas,
+                                                long nativeMatrix);
+    @FastNative
+    private static native boolean native_clipRect(long nativeCanvas,
+                                                  float left, float top,
+                                                  float right, float bottom,
+                                                  int regionOp);
+    @FastNative
+    private static native boolean native_clipPath(long nativeCanvas,
+                                                  long nativePath,
+                                                  int regionOp);
+    @FastNative
+    private static native boolean native_clipRegion(long nativeCanvas,
+                                                    long nativeRegion,
+                                                    int regionOp);
+    @FastNative
+    private static native void nativeSetDrawFilter(long nativeCanvas,
+                                                   long nativeFilter);
+    @FastNative
+    private static native boolean native_getClipBounds(long nativeCanvas,
+                                                       Rect bounds);
+    @FastNative
+    private static native void native_getCTM(long nativeCanvas,
+                                             long nativeMatrix);
+    @FastNative
+    private static native boolean native_quickReject(long nativeCanvas,
+                                                     long nativePath);
+    @FastNative
+    private static native boolean native_quickReject(long nativeCanvas,
+                                                     float left, float top,
+                                                     float right, float bottom);
+    @FastNative
+    private static native void native_drawColor(long nativeCanvas, int color,
+                                                int mode);
+    @FastNative
+    private static native void native_drawPaint(long nativeCanvas,
+                                                long nativePaint);
+    @FastNative
+    private static native void native_drawPoint(long canvasHandle, float x, float y,
+                                                long paintHandle);
+    @FastNative
+    private static native void native_drawPoints(long canvasHandle, float[] pts,
+                                                 int offset, int count,
+                                                 long paintHandle);
+    @FastNative
+    private static native void native_drawLine(long nativeCanvas, float startX,
+                                               float startY, float stopX,
+                                               float stopY, long nativePaint);
+    @FastNative
+    private static native void native_drawLines(long canvasHandle, float[] pts,
+                                                int offset, int count,
+                                                long paintHandle);
+    @FastNative
+    private static native void native_drawRect(long nativeCanvas, float left,
+                                               float top, float right,
+                                               float bottom,
+                                               long nativePaint);
+    @FastNative
+    private static native void native_drawOval(long nativeCanvas, float left, float top,
+                                               float right, float bottom, long nativePaint);
+    @FastNative
+    private static native void native_drawCircle(long nativeCanvas, float cx,
+                                                 float cy, float radius,
+                                                 long nativePaint);
+    @FastNative
+    private static native void native_drawArc(long nativeCanvas, float left, float top,
+                                              float right, float bottom,
+                                              float startAngle, float sweep, boolean useCenter,
+                                              long nativePaint);
+    @FastNative
+    private static native void native_drawRoundRect(long nativeCanvas,
+            float left, float top, float right, float bottom,
+            float rx, float ry, long nativePaint);
+    @FastNative
+    private static native void native_drawPath(long nativeCanvas,
+                                               long nativePath,
+                                               long nativePaint);
+    @FastNative
+    private static native void native_drawRegion(long nativeCanvas,
+            long nativeRegion, long nativePaint);
+    @FastNative
+    private static native void native_drawNinePatch(long nativeCanvas, long nativeBitmap,
+            long ninePatch, float dstLeft, float dstTop, float dstRight, float dstBottom,
+            long nativePaintOrZero, int screenDensity, int bitmapDensity);
+    @FastNative
     private static native void nativeDrawBitmapMatrix(long nativeCanvas,
                                                       Bitmap bitmap,
                                                       long nativeMatrix,
                                                       long nativePaint);
+    @FastNative
     private static native void nativeDrawBitmapMesh(long nativeCanvas,
                                                     Bitmap bitmap,
                                                     int meshWidth, int meshHeight,
                                                     float[] verts, int vertOffset,
                                                     int[] colors, int colorOffset,
                                                     long nativePaint);
+    @FastNative
     private static native void nativeDrawVertices(long nativeCanvas, int mode, int n,
                    float[] verts, int vertOffset, float[] texs, int texOffset,
                    int[] colors, int colorOffset, short[] indices,
                    int indexOffset, int indexCount, long nativePaint);
 
+    @FastNative
     private static native void native_drawText(long nativeCanvas, char[] text,
                                                int index, int count, float x,
                                                float y, int flags, long nativePaint,
                                                long nativeTypeface);
+    @FastNative
     private static native void native_drawText(long nativeCanvas, String text,
                                                int start, int end, float x,
                                                float y, int flags, long nativePaint,
                                                long nativeTypeface);
 
+    @FastNative
     private static native void native_drawTextRun(long nativeCanvas, String text,
             int start, int end, int contextStart, int contextEnd,
             float x, float y, boolean isRtl, long nativePaint, long nativeTypeface);
 
+    @FastNative
     private static native void native_drawTextRun(long nativeCanvas, char[] text,
             int start, int count, int contextStart, int contextCount,
             float x, float y, boolean isRtl, long nativePaint, long nativeTypeface);
 
+    @FastNative
     private static native void native_drawTextOnPath(long nativeCanvas,
                                                      char[] text, int index,
                                                      int count, long nativePath,
                                                      float hOffset,
                                                      float vOffset, int bidiFlags,
                                                      long nativePaint, long nativeTypeface);
+    @FastNative
     private static native void native_drawTextOnPath(long nativeCanvas,
                                                      String text, long nativePath,
                                                      float hOffset,
                                                      float vOffset,
                                                      int flags, long nativePaint, long nativeTypeface);
-    private static native long getNativeFinalizer();
 }

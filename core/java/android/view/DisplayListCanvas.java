@@ -24,6 +24,8 @@ import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.util.Pools.SynchronizedPool;
 
+import dalvik.annotation.optimization.FastNative;
+
 /**
  * A Canvas implementation that records view system drawing operations for deferred rendering.
  * This is intended for use with a DisplayList. This class keeps a list of all the Paint and
@@ -83,9 +85,6 @@ public class DisplayListCanvas extends Canvas {
         mDensity = 0; // disable bitmap density scaling
     }
 
-    private static native long nCreateDisplayListCanvas(int width, int height);
-    private static native void nResetDisplayListCanvas(long canvas, int width, int height);
-
     ///////////////////////////////////////////////////////////////////////////
     // Canvas management
     ///////////////////////////////////////////////////////////////////////////
@@ -131,9 +130,6 @@ public class DisplayListCanvas extends Canvas {
         return nGetMaximumTextureHeight();
     }
 
-    private static native int nGetMaximumTextureWidth();
-    private static native int nGetMaximumTextureHeight();
-
     ///////////////////////////////////////////////////////////////////////////
     // Setup
     ///////////////////////////////////////////////////////////////////////////
@@ -147,8 +143,6 @@ public class DisplayListCanvas extends Canvas {
     public void insertInorderBarrier() {
         nInsertReorderBarrier(mNativeCanvasWrapper, false);
     }
-
-    private static native void nInsertReorderBarrier(long renderer, boolean enableReorder);
 
     ///////////////////////////////////////////////////////////////////////////
     // Functor
@@ -180,14 +174,9 @@ public class DisplayListCanvas extends Canvas {
         nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunctor, releasedCallback);
     }
 
-    private static native void nCallDrawGLFunction(long renderer,
-            long drawGLFunction, Runnable releasedCallback);
-
     ///////////////////////////////////////////////////////////////////////////
     // Display list
     ///////////////////////////////////////////////////////////////////////////
-
-    protected static native long nFinishRecording(long renderer);
 
     /**
      * Draws the specified display list onto this canvas. The display list can only
@@ -198,8 +187,6 @@ public class DisplayListCanvas extends Canvas {
     public void drawRenderNode(RenderNode renderNode) {
         nDrawRenderNode(mNativeCanvasWrapper, renderNode.getNativeDisplayList());
     }
-
-    private static native void nDrawRenderNode(long renderer, long renderNode);
 
     ///////////////////////////////////////////////////////////////////////////
     // Hardware layer
@@ -214,8 +201,6 @@ public class DisplayListCanvas extends Canvas {
         nDrawLayer(mNativeCanvasWrapper, layer.getLayerHandle());
     }
 
-    private static native void nDrawLayer(long renderer, long layer);
-
     ///////////////////////////////////////////////////////////////////////////
     // Drawing
     ///////////////////////////////////////////////////////////////////////////
@@ -226,9 +211,6 @@ public class DisplayListCanvas extends Canvas {
                 radius.getNativeContainer(), paint.getNativeContainer());
     }
 
-    private static native void nDrawCircle(long renderer, long propCx,
-            long propCy, long propRadius, long propPaint);
-
     public void drawRoundRect(CanvasProperty<Float> left, CanvasProperty<Float> top,
             CanvasProperty<Float> right, CanvasProperty<Float> bottom, CanvasProperty<Float> rx,
             CanvasProperty<Float> ry, CanvasProperty<Paint> paint) {
@@ -237,9 +219,6 @@ public class DisplayListCanvas extends Canvas {
                 rx.getNativeContainer(), ry.getNativeContainer(),
                 paint.getNativeContainer());
     }
-
-    private static native void nDrawRoundRect(long renderer, long propLeft, long propTop,
-            long propRight, long propBottom, long propRx, long propRy, long propPaint);
 
     @Override
     protected void throwIfCannotDraw(Bitmap bitmap) {
@@ -250,4 +229,30 @@ public class DisplayListCanvas extends Canvas {
                     "Canvas: trying to draw too large(" + bitmapSize + "bytes) bitmap.");
         }
     }
+
+    @FastNative
+    private static native long nCreateDisplayListCanvas(int width, int height);
+    @FastNative
+    private static native void nResetDisplayListCanvas(long canvas, int width, int height);
+    @FastNative
+    private static native int nGetMaximumTextureWidth();
+    @FastNative
+    private static native int nGetMaximumTextureHeight();
+    @FastNative
+    private static native void nInsertReorderBarrier(long renderer, boolean enableReorder);
+    @FastNative
+    private static native void nCallDrawGLFunction(long renderer,
+            long drawGLFunction, Runnable releasedCallback);
+    @FastNative
+    private static native long nFinishRecording(long renderer);
+    @FastNative
+    private static native void nDrawRenderNode(long renderer, long renderNode);
+    @FastNative
+    private static native void nDrawLayer(long renderer, long layer);
+    @FastNative
+    private static native void nDrawCircle(long renderer, long propCx,
+            long propCy, long propRadius, long propPaint);
+    @FastNative
+    private static native void nDrawRoundRect(long renderer, long propLeft, long propTop,
+            long propRight, long propBottom, long propRx, long propRy, long propPaint);
 }

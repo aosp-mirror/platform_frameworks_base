@@ -215,24 +215,27 @@ android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject java
 const char* const kClassPathName = "android/view/DisplayListCanvas";
 
 static JNINativeMethod gMethods[] = {
-    { "nInsertReorderBarrier","!(JZ)V",         (void*) android_view_DisplayListCanvas_insertReorderBarrier },
 
-    { "nCallDrawGLFunction", "!(JJLjava/lang/Runnable;)V",
+    // ------------ @FastNative ------------------
+
+    { "nInsertReorderBarrier","(JZ)V",         (void*) android_view_DisplayListCanvas_insertReorderBarrier },
+
+    { "nCallDrawGLFunction", "(JJLjava/lang/Runnable;)V",
             (void*) android_view_DisplayListCanvas_callDrawGLFunction },
 
-    { "nDrawRoundRect",     "!(JJJJJJJJ)V",     (void*) android_view_DisplayListCanvas_drawRoundRectProps },
-    { "nDrawCircle",        "!(JJJJJ)V",        (void*) android_view_DisplayListCanvas_drawCircleProps },
+    { "nDrawRoundRect",     "(JJJJJJJJ)V",     (void*) android_view_DisplayListCanvas_drawRoundRectProps },
+    { "nDrawCircle",        "(JJJJJ)V",        (void*) android_view_DisplayListCanvas_drawCircleProps },
 
-    { "nFinishRecording",   "!(J)J",            (void*) android_view_DisplayListCanvas_finishRecording },
-    { "nDrawRenderNode",    "!(JJ)V",           (void*) android_view_DisplayListCanvas_drawRenderNode },
+    { "nFinishRecording",   "(J)J",            (void*) android_view_DisplayListCanvas_finishRecording },
+    { "nDrawRenderNode",    "(JJ)V",           (void*) android_view_DisplayListCanvas_drawRenderNode },
 
-    { "nCreateDisplayListCanvas", "!(II)J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
-    { "nResetDisplayListCanvas", "!(JII)V",     (void*) android_view_DisplayListCanvas_resetDisplayListCanvas },
+    { "nCreateDisplayListCanvas", "(II)J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
+    { "nResetDisplayListCanvas", "(JII)V",     (void*) android_view_DisplayListCanvas_resetDisplayListCanvas },
 
-    { "nDrawLayer",               "!(JJ)V",     (void*) android_view_DisplayListCanvas_drawLayer },
+    { "nDrawLayer",               "(JJ)V",     (void*) android_view_DisplayListCanvas_drawLayer },
 
-    { "nGetMaximumTextureWidth",  "!()I",       (void*) android_view_DisplayListCanvas_getMaxTextureWidth },
-    { "nGetMaximumTextureHeight", "!()I",       (void*) android_view_DisplayListCanvas_getMaxTextureHeight },
+    { "nGetMaximumTextureWidth",  "()I",       (void*) android_view_DisplayListCanvas_getMaxTextureWidth },
+    { "nGetMaximumTextureHeight", "()I",       (void*) android_view_DisplayListCanvas_getMaxTextureHeight },
 };
 
 static JNINativeMethod gActivityThreadMethods[] = {
