@@ -73,8 +73,8 @@ public final class Bitmap implements Parcelable {
     private int mHeight;
     private boolean mRecycled;
 
-    // Package-scoped for fast access.
-    int mDensity = getDefaultDensity();
+    /** @hide */
+    public int mDensity = getDefaultDensity();
 
     private static volatile Matrix sScaleMatrix;
 
@@ -130,8 +130,9 @@ public final class Bitmap implements Parcelable {
 
     /**
      * Return the pointer to the native object.
+     * @hide
      */
-    long getNativeInstance() {
+    public long getNativeInstance() {
         return mNativePtr;
     }
 

@@ -41,6 +41,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.graphics.BaseCanvas;
 import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Paint;
@@ -10222,12 +10223,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             System.arraycopy(mChars, start + mStart, buf, off, end - start);
         }
 
-        public void drawText(Canvas c, int start, int end,
+        @Override
+        public void drawText(BaseCanvas c, int start, int end,
                              float x, float y, Paint p) {
             c.drawText(mChars, start + mStart, end - start, x, y, p);
         }
 
-        public void drawTextRun(Canvas c, int start, int end,
+        @Override
+        public void drawTextRun(BaseCanvas c, int start, int end,
                 int contextStart, int contextEnd, float x, float y, boolean isRtl, Paint p) {
             int count = end - start;
             int contextCount = contextEnd - contextStart;

@@ -368,7 +368,7 @@ static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmap
     }
 }
 
-static void drawBitmap(JNIEnv* env, jobject jcanvas, jlong canvasHandle, jobject jbitmap,
+static void drawBitmap(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap,
                        jfloat left, jfloat top, jlong paintHandle, jint canvasDensity,
                        jint screenDensity, jint bitmapDensity) {
     Canvas* canvas = get_canvas(canvasHandle);
@@ -571,67 +571,77 @@ static void freeTextLayoutCaches(JNIEnv* env, jobject) {
 }; // namespace CanvasJNI
 
 static const JNINativeMethod gMethods[] = {
-    {"getNativeFinalizer", "()J", (void*) CanvasJNI::getNativeFinalizer},
-    {"initRaster", "(Landroid/graphics/Bitmap;)J", (void*) CanvasJNI::initRaster},
-    {"freeCaches", "()V", (void*) CanvasJNI::freeCaches},
-    {"freeTextLayoutCaches", "()V", (void*) CanvasJNI::freeTextLayoutCaches},
-    {"native_drawBitmap","(JLandroid/graphics/Bitmap;FFJIII)V", (void*) CanvasJNI::drawBitmap},
-    {"native_drawBitmap","(JLandroid/graphics/Bitmap;FFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
-    {"native_drawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
+    {"nGetNativeFinalizer", "()J", (void*) CanvasJNI::getNativeFinalizer},
+    {"nInitRaster", "(Landroid/graphics/Bitmap;)J", (void*) CanvasJNI::initRaster},
+    {"nFreeCaches", "()V", (void*) CanvasJNI::freeCaches},
+    {"nFreeTextLayoutCaches", "()V", (void*) CanvasJNI::freeTextLayoutCaches},
 
     // ------------ @FastNative ----------------
-    {"native_setBitmap", "(JLandroid/graphics/Bitmap;)V", (void*) CanvasJNI::setBitmap},
-    {"native_isOpaque","(J)Z", (void*) CanvasJNI::isOpaque},
-    {"native_getWidth","(J)I", (void*) CanvasJNI::getWidth},
-    {"native_getHeight","(J)I", (void*) CanvasJNI::getHeight},
-    {"native_setHighContrastText","(JZ)V", (void*) CanvasJNI::setHighContrastText},
-    {"native_save","(JI)I", (void*) CanvasJNI::save},
-    {"native_saveLayer","(JFFFFJI)I", (void*) CanvasJNI::saveLayer},
-    {"native_saveLayerAlpha","(JFFFFII)I", (void*) CanvasJNI::saveLayerAlpha},
-    {"native_getSaveCount","(J)I", (void*) CanvasJNI::getSaveCount},
-    {"native_restore","(JZ)V", (void*) CanvasJNI::restore},
-    {"native_restoreToCount","(JIZ)V", (void*) CanvasJNI::restoreToCount},
-    {"native_getCTM", "(JJ)V", (void*)CanvasJNI::getCTM},
-    {"native_setMatrix","(JJ)V", (void*) CanvasJNI::setMatrix},
-    {"native_concat","(JJ)V", (void*) CanvasJNI::concat},
-    {"native_rotate","(JF)V", (void*) CanvasJNI::rotate},
-    {"native_scale","(JFF)V", (void*) CanvasJNI::scale},
-    {"native_skew","(JFF)V", (void*) CanvasJNI::skew},
-    {"native_translate","(JFF)V", (void*) CanvasJNI::translate},
-    {"native_getClipBounds","(JLandroid/graphics/Rect;)Z", (void*) CanvasJNI::getClipBounds},
-    {"native_quickReject","(JJ)Z", (void*) CanvasJNI::quickRejectPath},
-    {"native_quickReject","(JFFFF)Z", (void*)CanvasJNI::quickRejectRect},
-    {"native_clipRect","(JFFFFI)Z", (void*) CanvasJNI::clipRect},
-    {"native_clipPath","(JJI)Z", (void*) CanvasJNI::clipPath},
-    {"native_clipRegion","(JJI)Z", (void*) CanvasJNI::clipRegion},
-    {"native_drawColor","(JII)V", (void*) CanvasJNI::drawColor},
-    {"native_drawPaint","(JJ)V", (void*) CanvasJNI::drawPaint},
-    {"native_drawPoint", "(JFFJ)V", (void*) CanvasJNI::drawPoint},
-    {"native_drawPoints", "(J[FIIJ)V", (void*) CanvasJNI::drawPoints},
-    {"native_drawLine", "(JFFFFJ)V", (void*) CanvasJNI::drawLine},
-    {"native_drawLines", "(J[FIIJ)V", (void*) CanvasJNI::drawLines},
-    {"native_drawRect","(JFFFFJ)V", (void*) CanvasJNI::drawRect},
-    {"native_drawRegion", "(JJJ)V", (void*) CanvasJNI::drawRegion },
-    {"native_drawRoundRect","(JFFFFFFJ)V", (void*) CanvasJNI::drawRoundRect},
-    {"native_drawCircle","(JFFFJ)V", (void*) CanvasJNI::drawCircle},
-    {"native_drawOval","(JFFFFJ)V", (void*) CanvasJNI::drawOval},
-    {"native_drawArc","(JFFFFFFZJ)V", (void*) CanvasJNI::drawArc},
-    {"native_drawPath","(JJJ)V", (void*) CanvasJNI::drawPath},
-    {"nativeDrawVertices", "(JII[FI[FI[II[SIIJ)V", (void*)CanvasJNI::drawVertices},
-    {"native_drawNinePatch", "(JJJFFFFJII)V", (void*)CanvasJNI::drawNinePatch},
-    {"nativeDrawBitmapMatrix", "(JLandroid/graphics/Bitmap;JJ)V", (void*)CanvasJNI::drawBitmapMatrix},
-    {"nativeDrawBitmapMesh", "(JLandroid/graphics/Bitmap;II[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
-    {"native_drawText","(J[CIIFFIJJ)V", (void*) CanvasJNI::drawTextChars},
-    {"native_drawText","(JLjava/lang/String;IIFFIJJ)V", (void*) CanvasJNI::drawTextString},
-    {"native_drawTextRun","(J[CIIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunChars},
-    {"native_drawTextRun","(JLjava/lang/String;IIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunString},
-    {"native_drawTextOnPath","(J[CIIJFFIJJ)V", (void*) CanvasJNI::drawTextOnPathChars},
-    {"native_drawTextOnPath","(JLjava/lang/String;JFFIJJ)V", (void*) CanvasJNI::drawTextOnPathString},
-    {"nativeSetDrawFilter", "(JJ)V", (void*) CanvasJNI::setDrawFilter},
+    {"nSetBitmap", "(JLandroid/graphics/Bitmap;)V", (void*) CanvasJNI::setBitmap},
+    {"nIsOpaque","(J)Z", (void*) CanvasJNI::isOpaque},
+    {"nGetWidth","(J)I", (void*) CanvasJNI::getWidth},
+    {"nGetHeight","(J)I", (void*) CanvasJNI::getHeight},
+    {"nSetHighContrastText","(JZ)V", (void*) CanvasJNI::setHighContrastText},
+    {"nSave","(JI)I", (void*) CanvasJNI::save},
+    {"nSaveLayer","(JFFFFJI)I", (void*) CanvasJNI::saveLayer},
+    {"nSaveLayerAlpha","(JFFFFII)I", (void*) CanvasJNI::saveLayerAlpha},
+    {"nGetSaveCount","(J)I", (void*) CanvasJNI::getSaveCount},
+    {"nRestore","(JZ)V", (void*) CanvasJNI::restore},
+    {"nRestoreToCount","(JIZ)V", (void*) CanvasJNI::restoreToCount},
+    {"nGetCTM", "(JJ)V", (void*)CanvasJNI::getCTM},
+    {"nSetMatrix","(JJ)V", (void*) CanvasJNI::setMatrix},
+    {"nConcat","(JJ)V", (void*) CanvasJNI::concat},
+    {"nRotate","(JF)V", (void*) CanvasJNI::rotate},
+    {"nScale","(JFF)V", (void*) CanvasJNI::scale},
+    {"nSkew","(JFF)V", (void*) CanvasJNI::skew},
+    {"nTranslate","(JFF)V", (void*) CanvasJNI::translate},
+    {"nGetClipBounds","(JLandroid/graphics/Rect;)Z", (void*) CanvasJNI::getClipBounds},
+    {"nQuickReject","(JJ)Z", (void*) CanvasJNI::quickRejectPath},
+    {"nQuickReject","(JFFFF)Z", (void*)CanvasJNI::quickRejectRect},
+    {"nClipRect","(JFFFFI)Z", (void*) CanvasJNI::clipRect},
+    {"nClipPath","(JJI)Z", (void*) CanvasJNI::clipPath},
+    {"nClipRegion","(JJI)Z", (void*) CanvasJNI::clipRegion},
+    {"nSetDrawFilter", "(JJ)V", (void*) CanvasJNI::setDrawFilter},
+};
+
+// If called from Canvas these are regular JNI
+// If called from DisplayListCanvas they are @FastNative
+static const JNINativeMethod gDrawMethods[] = {
+    {"nDrawColor","(JII)V", (void*) CanvasJNI::drawColor},
+    {"nDrawPaint","(JJ)V", (void*) CanvasJNI::drawPaint},
+    {"nDrawPoint", "(JFFJ)V", (void*) CanvasJNI::drawPoint},
+    {"nDrawPoints", "(J[FIIJ)V", (void*) CanvasJNI::drawPoints},
+    {"nDrawLine", "(JFFFFJ)V", (void*) CanvasJNI::drawLine},
+    {"nDrawLines", "(J[FIIJ)V", (void*) CanvasJNI::drawLines},
+    {"nDrawRect","(JFFFFJ)V", (void*) CanvasJNI::drawRect},
+    {"nDrawRegion", "(JJJ)V", (void*) CanvasJNI::drawRegion },
+    {"nDrawRoundRect","(JFFFFFFJ)V", (void*) CanvasJNI::drawRoundRect},
+    {"nDrawCircle","(JFFFJ)V", (void*) CanvasJNI::drawCircle},
+    {"nDrawOval","(JFFFFJ)V", (void*) CanvasJNI::drawOval},
+    {"nDrawArc","(JFFFFFFZJ)V", (void*) CanvasJNI::drawArc},
+    {"nDrawPath","(JJJ)V", (void*) CanvasJNI::drawPath},
+    {"nDrawVertices", "(JII[FI[FI[II[SIIJ)V", (void*)CanvasJNI::drawVertices},
+    {"nDrawNinePatch", "(JJJFFFFJII)V", (void*)CanvasJNI::drawNinePatch},
+    {"nDrawBitmapMatrix", "(JLandroid/graphics/Bitmap;JJ)V", (void*)CanvasJNI::drawBitmapMatrix},
+    {"nDrawBitmapMesh", "(JLandroid/graphics/Bitmap;II[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
+    {"nDrawBitmap","(JLandroid/graphics/Bitmap;FFJIII)V", (void*) CanvasJNI::drawBitmap},
+    {"nDrawBitmap","(JLandroid/graphics/Bitmap;FFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
+    {"nDrawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
+    {"nDrawText","(J[CIIFFIJJ)V", (void*) CanvasJNI::drawTextChars},
+    {"nDrawText","(JLjava/lang/String;IIFFIJJ)V", (void*) CanvasJNI::drawTextString},
+    {"nDrawTextRun","(J[CIIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunChars},
+    {"nDrawTextRun","(JLjava/lang/String;IIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunString},
+    {"nDrawTextOnPath","(J[CIIJFFIJJ)V", (void*) CanvasJNI::drawTextOnPathChars},
+    {"nDrawTextOnPath","(JLjava/lang/String;JFFIJJ)V", (void*) CanvasJNI::drawTextOnPathString},
 };
 
 int register_android_graphics_Canvas(JNIEnv* env) {
-    return RegisterMethodsOrDie(env, "android/graphics/Canvas", gMethods, NELEM(gMethods));
+    int ret = 0;
+    ret |= RegisterMethodsOrDie(env, "android/graphics/Canvas", gMethods, NELEM(gMethods));
+    ret |= RegisterMethodsOrDie(env, "android/graphics/BaseCanvas", gDrawMethods, NELEM(gDrawMethods));
+    ret |= RegisterMethodsOrDie(env, "android/view/RecordingCanvas", gDrawMethods, NELEM(gDrawMethods));
+    return ret;
+
 }
 
 }; // namespace android
