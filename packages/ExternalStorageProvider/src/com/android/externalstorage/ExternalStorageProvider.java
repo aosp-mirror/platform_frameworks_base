@@ -16,6 +16,7 @@
 
 package com.android.externalstorage;
 
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -40,8 +41,8 @@ import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
-import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract.Path;
+import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -325,14 +326,19 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     private File getFileForDocId(String docId, boolean visible) throws FileNotFoundException {
-        return resolveDocId(docId, visible).second;
+        RootInfo root = getRootFromDocId(docId);
+        return buildFile(root, docId, visible);
     }
 
     private Pair<RootInfo, File> resolveDocId(String docId, boolean visible)
             throws FileNotFoundException {
+        RootInfo root = getRootFromDocId(docId);
+        return Pair.create(root, buildFile(root, docId, visible));
+    }
+
+    private RootInfo getRootFromDocId(String docId) throws FileNotFoundException {
         final int splitIndex = docId.indexOf(':', 1);
         final String tag = docId.substring(0, splitIndex);
-        final String path = docId.substring(splitIndex + 1);
 
         RootInfo root;
         synchronized (mRootsLock) {
@@ -341,6 +347,14 @@ public class ExternalStorageProvider extends DocumentsProvider {
         if (root == null) {
             throw new FileNotFoundException("No root for " + tag);
         }
+
+        return root;
+    }
+
+    private File buildFile(RootInfo root, String docId, boolean visible)
+            throws FileNotFoundException {
+        final int splitIndex = docId.indexOf(':', 1);
+        final String path = docId.substring(splitIndex + 1);
 
         File target = visible ? root.visiblePath : root.path;
         if (target == null) {
@@ -353,7 +367,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
         if (!target.exists()) {
             throw new FileNotFoundException("Missing file for " + docId + " at " + target);
         }
-        return Pair.create(root, target);
+        return target;
     }
 
     private void includeFile(MatrixCursor result, String docId, File file)
@@ -430,25 +444,33 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     @Override
-    public Path findPath(String documentId)
+    public Path findPath(String childDocId, @Nullable String parentDocId)
             throws FileNotFoundException {
         LinkedList<String> path = new LinkedList<>();
 
-        final Pair<RootInfo, File> resolvedDocId = resolveDocId(documentId, false);
-        RootInfo root = resolvedDocId.first;
-        File file = resolvedDocId.second;
+        final Pair<RootInfo, File> resolvedDocId = resolveDocId(childDocId, false);
+        final RootInfo root = resolvedDocId.first;
+        File child = resolvedDocId.second;
 
-        if (!file.exists()) {
-            throw new FileNotFoundException();
+        final File parent = TextUtils.isEmpty(parentDocId)
+                        ? root.path
+                        : getFileForDocId(parentDocId);
+
+        if (!child.exists()) {
+            throw new FileNotFoundException(childDocId + " is not found.");
         }
 
-        while (file != null && file.getAbsolutePath().startsWith(root.path.getAbsolutePath())) {
-            path.addFirst(getDocIdForFile(file));
-
-            file = file.getParentFile();
+        if (!child.getAbsolutePath().startsWith(parent.getAbsolutePath())) {
+            throw new FileNotFoundException(childDocId + " is not found under " + parentDocId);
         }
 
-        return new Path(root.rootId, path);
+        while (child != null && child.getAbsolutePath().startsWith(parent.getAbsolutePath())) {
+            path.addFirst(getDocIdForFile(child));
+
+            child = child.getParentFile();
+        }
+
+        return new Path(parentDocId == null ? root.rootId : null, path);
     }
 
     @Override
