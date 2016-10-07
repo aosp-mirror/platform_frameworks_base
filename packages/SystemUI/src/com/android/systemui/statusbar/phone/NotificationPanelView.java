@@ -1002,8 +1002,8 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardShowing = keyguardShowing;
         mQsContainer.setKeyguardShowing(mKeyguardShowing);
 
-        if (goingToFullShade || (oldState == StatusBarState.KEYGUARD
-                && statusBarState == StatusBarState.SHADE_LOCKED)) {
+        if (oldState == StatusBarState.KEYGUARD
+                && (goingToFullShade || statusBarState == StatusBarState.SHADE_LOCKED)) {
             animateKeyguardStatusBarOut();
             long delay = mStatusBarState == StatusBarState.SHADE_LOCKED
                     ? 0 : mStatusBar.calculateGoingToFullShadeDelay();
@@ -1017,6 +1017,7 @@ public class NotificationPanelView extends PanelView implements
             mKeyguardStatusBar.setVisibility(keyguardShowing ? View.VISIBLE : View.INVISIBLE);
             if (keyguardShowing && oldState != mStatusBarState) {
                 mKeyguardBottomArea.onKeyguardShowingChanged();
+                mQsContainer.hideImmediately();
             }
         }
         if (keyguardShowing) {
