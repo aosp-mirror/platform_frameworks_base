@@ -19,7 +19,7 @@
 #include "JNIHelp.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
-#include "log/logger.h"
+#include <log/logger.h>
 
 #define UNUSED  __attribute__((__unused__))
 
