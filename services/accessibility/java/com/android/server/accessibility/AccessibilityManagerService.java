@@ -64,6 +64,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
@@ -1301,14 +1302,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private void updateServicesLocked(UserState userState) {
         Map<ComponentName, Service> componentNameToServiceMap =
                 userState.mComponentNameToServiceMap;
-        boolean isUnlockingOrUnlocked;
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            isUnlockingOrUnlocked = mContext.getSystemService(UserManager.class)
+        boolean isUnlockingOrUnlocked = LocalServices.getService(UserManagerInternal.class)
                     .isUserUnlockingOrUnlocked(userState.mUserId);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
 
         for (int i = 0, count = userState.mInstalledServices.size(); i < count; i++) {
             AccessibilityServiceInfo installedService = userState.mInstalledServices.get(i);
