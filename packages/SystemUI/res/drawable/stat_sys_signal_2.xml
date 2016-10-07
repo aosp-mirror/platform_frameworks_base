@@ -1,7 +1,7 @@
 <!--
-Copyright (C) 2014 The Android Open Source Project
+    Copyright (C) 2016 The Android Open Source Project
 
-   Licensed under the Apache License, Version 2.0 (the "License");
+    Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
 
@@ -15,20 +15,17 @@ Copyright (C) 2014 The Android Open Source Project
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:autoMirrored="true"
-        android:width="17dp"
-        android:height="17dp"
+        android:width="17.0dp"
+        android:height="17.0dp"
         android:viewportWidth="24.0"
         android:viewportHeight="24.0">
     <path
-        android:fillColor="?attr/singleToneColor"
-        android:pathData="M19.700001,20.000000l2.000000,0.000000l0.000000,2.000000l-2.000000,0.000000z"/>
+        android:pathData="M14.0,10.6l-12.0,12.0l12.0,0.0L14.0,10.6z"
+        android:fillColor="?attr/fillColor"/>
     <path
-        android:fillColor="?attr/singleToneColor"
-        android:pathData="M19.700001,10.000000l2.000000,0.000000l0.000000,8.100000l-2.000000,0.000000z"/>
-    <path
-        android:fillColor="?attr/fillColor"
-        android:pathData="M13.900000,10.000000l-11.900000,12.000000 11.900000,0.000000z"/>
-    <path
-        android:pathData="M17.700001,8.000000l4.299999,0.000000 0.000000,-6.000000 -20.000000,20.000000 15.700001,0.000000z"
+        android:pathData="M14.1,14.1l7.9,0.0 0.0,-11.5 -20.0,20.0 12.1,0.0z"
         android:fillColor="?attr/backgroundColor"/>
+    <path
+        android:pathData="M21.9,17.0l-1.1,-1.1 -1.9,1.9 -1.9,-1.9 -1.1,1.1 1.9,1.9 -1.9,1.9 1.1,1.1 1.9,-1.9 1.9,1.9 1.1,-1.1 -1.9,-1.9z"
+        android:fillColor="?attr/fillColor"/>
 </vector>
