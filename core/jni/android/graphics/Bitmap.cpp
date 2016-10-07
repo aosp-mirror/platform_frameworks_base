@@ -31,152 +31,160 @@
 #define DEBUG_PARCEL 0
 #define ASHMEM_BITMAP_MIN_SIZE (128 * (1 << 10))
 
+static jclass   gBitmap_class;
+static jfieldID gBitmap_nativePtr;
+static jmethodID gBitmap_constructorMethodID;
+static jmethodID gBitmap_reinitMethodID;
+static jmethodID gBitmap_getAllocationByteCountMethodID;
+
 namespace android {
 
-class WrappedPixelRef : public SkPixelRef {
+class Bitmap {
 public:
-    WrappedPixelRef(Bitmap* wrapper, void* storage,
-            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
-            : SkPixelRef(info)
-            , mBitmap(*wrapper)
-            , mStorage(storage) {
-        reconfigure(info, rowBytes, ctable);
+    Bitmap(PixelRef* pixelRef)
+        : mPixelRef(pixelRef) { }
+
+    void freePixels() {
+        mInfo = mPixelRef->info();
+        mHasHardwareMipMap = mPixelRef->hasHardwareMipMap();
+        mAllocationSize = mPixelRef->getAllocationByteCount();
+        mRowBytes = mPixelRef->rowBytes();
+        mGenerationId = mPixelRef->getGenerationID();
+        mPixelRef.reset();
     }
 
-    ~WrappedPixelRef() {
-        // Tell SkRefCnt that everything is as it expects by forcing
-        // the refcnt to 1
-        internal_dispose_restore_refcnt_to_1();
-        SkSafeUnref(mColorTable);
+    bool valid() {
+        return !!mPixelRef;
     }
 
-    void reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTable* ctable) {
-        if (kIndex_8_SkColorType != newInfo.colorType()) {
-            ctable = nullptr;
+    PixelRef* pixelRef() { return mPixelRef.get(); }
+
+    void assertValid() {
+        LOG_ALWAYS_FATAL_IF(!valid(), "Error, cannot access an invalid/free'd bitmap here!");
+    }
+
+    void getSkBitmap(SkBitmap* outBitmap) {
+        assertValid();
+        mPixelRef->getSkBitmap(outBitmap);
+    }
+
+    bool hasHardwareMipMap() {
+        if (mPixelRef) {
+            return mPixelRef->hasHardwareMipMap();
         }
-        mRowBytes = rowBytes;
-        if (mColorTable != ctable) {
-            SkSafeUnref(mColorTable);
-            mColorTable = ctable;
-            SkSafeRef(mColorTable);
-        }
-
-        // Need to validate the alpha type to filter against the color type
-        // to prevent things like a non-opaque RGB565 bitmap
-        SkAlphaType alphaType;
-        LOG_ALWAYS_FATAL_IF(!SkColorTypeValidateAlphaType(
-                newInfo.colorType(), newInfo.alphaType(), &alphaType),
-                "Failed to validate alpha type!");
-
-        // Dirty hack is dirty
-        // TODO: Figure something out here, Skia's current design makes this
-        // really hard to work with. Skia really, really wants immutable objects,
-        // but with the nested-ref-count hackery going on that's just not
-        // feasible without going insane trying to figure it out
-        SkImageInfo* myInfo = const_cast<SkImageInfo*>(&this->info());
-        *myInfo = newInfo;
-        changeAlphaType(alphaType);
-
-        // Docs say to only call this in the ctor, but we're going to call
-        // it anyway even if this isn't always the ctor.
-        // TODO: Fix this too as part of the above TODO
-        setPreLocked(mStorage, mRowBytes, mColorTable);
-    }
-
-    // Can't mark as override since SkPixelRef::rowBytes isn't virtual
-    // but that's OK since we just want BitmapWrapper to be able to rely
-    // on calling rowBytes() on an unlocked pixelref, which it will be
-    // doing on a WrappedPixelRef type, not a SkPixelRef, so static
-    // dispatching will do what we want.
-    size_t rowBytes() const { return mRowBytes; }
-    SkColorTable* colorTable() const { return mColorTable; }
-
-    bool hasHardwareMipMap() const {
         return mHasHardwareMipMap;
     }
 
     void setHasHardwareMipMap(bool hasMipMap) {
-        mHasHardwareMipMap = hasMipMap;
+        assertValid();
+        mPixelRef->setHasHardwareMipMap(hasMipMap);
     }
 
-protected:
-    virtual bool onNewLockPixels(LockRec* rec) override {
-        rec->fPixels = mStorage;
-        rec->fRowBytes = mRowBytes;
-        rec->fColorTable = mColorTable;
-        return true;
+    void setAlphaType(SkAlphaType alphaType) {
+        assertValid();
+        mPixelRef->setAlphaType(alphaType);
     }
 
-    virtual void onUnlockPixels() override {
-        // nothing
+    const SkImageInfo& info() {
+        if (mPixelRef) {
+            return mPixelRef->info();
+        }
+        return mInfo;
     }
 
-    virtual size_t getAllocatedSizeInBytes() const override {
-        return info().getSafeSize(mRowBytes);
+    size_t getAllocationByteCount() const {
+        if (mPixelRef) {
+            return mPixelRef->getAllocationByteCount();
+        }
+        return mAllocationSize;
     }
+
+    size_t rowBytes() const {
+        if (mPixelRef) {
+            return mPixelRef->rowBytes();
+        }
+        return mRowBytes;
+    }
+
+    uint32_t getGenerationID() const {
+        if (mPixelRef) {
+            return mPixelRef->getGenerationID();
+        }
+        return mGenerationId;
+    }
+
+    ~Bitmap() { }
 
 private:
-    Bitmap& mBitmap;
-    void* mStorage;
-    size_t mRowBytes = 0;
-    SkColorTable* mColorTable = nullptr;
-    bool mHasHardwareMipMap = false;
-
-    virtual void internal_dispose() const override {
-        mBitmap.onStrongRefDestroyed();
-    }
+    sk_sp<PixelRef> mPixelRef;
+    SkImageInfo mInfo;
+    bool mHasHardwareMipMap;
+    size_t mAllocationSize;
+    size_t mRowBytes;
+    uint32_t mGenerationId;
 };
 
-Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
-        : mPixelStorageType(PixelStorageType::Heap) {
-    mPixelStorage.heap.address = address;
-    mPixelStorage.heap.size = size;
-    mPixelRef.reset(new WrappedPixelRef(this, address, info, rowBytes, ctable));
-    // Note: this will trigger a call to onStrongRefDestroyed(), but
-    // we want the pixel ref to have a ref count of 0 at this point
-    mPixelRef->unref();
+void PixelRef::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTable* ctable) {
+    if (kIndex_8_SkColorType != newInfo.colorType()) {
+        ctable = nullptr;
+    }
+    mRowBytes = rowBytes;
+    if (mColorTable.get() != ctable) {
+        mColorTable.reset(ctable);
+    }
+
+    // Need to validate the alpha type to filter against the color type
+    // to prevent things like a non-opaque RGB565 bitmap
+    SkAlphaType alphaType;
+    LOG_ALWAYS_FATAL_IF(!SkColorTypeValidateAlphaType(
+            newInfo.colorType(), newInfo.alphaType(), &alphaType),
+            "Failed to validate alpha type!");
+
+    // Dirty hack is dirty
+    // TODO: Figure something out here, Skia's current design makes this
+    // really hard to work with. Skia really, really wants immutable objects,
+    // but with the nested-ref-count hackery going on that's just not
+    // feasible without going insane trying to figure it out
+    SkImageInfo* myInfo = const_cast<SkImageInfo*>(&this->info());
+    *myInfo = newInfo;
+    changeAlphaType(alphaType);
+
+    // Docs say to only call this in the ctor, but we're going to call
+    // it anyway even if this isn't always the ctor.
+    // TODO: Fix this too as part of the above TODO
+    setPreLocked(getStorage(), mRowBytes, mColorTable.get());
 }
 
-Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc,
-            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
-        : mPixelStorageType(PixelStorageType::External) {
+PixelRef::PixelRef(void* address, size_t size, const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
+            : SkPixelRef(info)
+            , mPixelStorageType(PixelStorageType::Heap) {
+    mPixelStorage.heap.address = address;
+    mPixelStorage.heap.size = size;
+    reconfigure(info, rowBytes, ctable);
+}
+
+PixelRef::PixelRef(void* address, void* context, FreeFunc freeFunc,
+                const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
+            : SkPixelRef(info)
+            , mPixelStorageType(PixelStorageType::External) {
     mPixelStorage.external.address = address;
     mPixelStorage.external.context = context;
     mPixelStorage.external.freeFunc = freeFunc;
-    mPixelRef.reset(new WrappedPixelRef(this, address, info, rowBytes, ctable));
-    // Note: this will trigger a call to onStrongRefDestroyed(), but
-    // we want the pixel ref to have a ref count of 0 at this point
-    mPixelRef->unref();
+    reconfigure(info, rowBytes, ctable);
 }
 
-Bitmap::Bitmap(void* address, int fd, size_t mappedSize,
-            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
-        : mPixelStorageType(PixelStorageType::Ashmem) {
+PixelRef::PixelRef(void* address, int fd, size_t mappedSize,
+                const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
+            : SkPixelRef(info)
+            , mPixelStorageType(PixelStorageType::Ashmem) {
     mPixelStorage.ashmem.address = address;
     mPixelStorage.ashmem.fd = fd;
     mPixelStorage.ashmem.size = mappedSize;
-    mPixelRef.reset(new WrappedPixelRef(this, address, info, rowBytes, ctable));
-    // Note: this will trigger a call to onStrongRefDestroyed(), but
-    // we want the pixel ref to have a ref count of 0 at this point
-    mPixelRef->unref();
-}
-Bitmap::~Bitmap() {
-    doFreePixels();
+    reconfigure(info, rowBytes, ctable);
 }
 
-void Bitmap::freePixels() {
-    AutoMutex _lock(mLock);
-    if (mPinnedRefCount == 0) {
-        doFreePixels();
-        mPixelStorageType = PixelStorageType::Invalid;
-    }
-}
-
-void Bitmap::doFreePixels() {
+PixelRef::~PixelRef() {
     switch (mPixelStorageType) {
-    case PixelStorageType::Invalid:
-        // already free'd, nothing to do
-        break;
     case PixelStorageType::External:
         mPixelStorage.external.freeFunc(mPixelStorage.external.address,
                 mPixelStorage.external.context);
@@ -191,20 +199,41 @@ void Bitmap::doFreePixels() {
     }
 
     if (android::uirenderer::Caches::hasInstance()) {
-        android::uirenderer::Caches::getInstance().textureCache.releaseTexture(
-                mPixelRef->getStableID());
+        android::uirenderer::Caches::getInstance().textureCache.releaseTexture(getStableID());
     }
 }
 
-bool Bitmap::hasHardwareMipMap() {
-    return mPixelRef->hasHardwareMipMap();
+bool PixelRef::hasHardwareMipMap() const {
+    return mHasHardwareMipMap;
 }
 
-void Bitmap::setHasHardwareMipMap(bool hasMipMap) {
-    mPixelRef->setHasHardwareMipMap(hasMipMap);
+void PixelRef::setHasHardwareMipMap(bool hasMipMap) {
+    mHasHardwareMipMap = hasMipMap;
 }
 
-int Bitmap::getAshmemFd() const {
+void* PixelRef::getStorage() const {
+    switch (mPixelStorageType) {
+    case PixelStorageType::External:
+        return mPixelStorage.external.address;
+    case PixelStorageType::Ashmem:
+        return mPixelStorage.ashmem.address;
+    case PixelStorageType::Heap:
+        return mPixelStorage.heap.address;
+    }
+}
+
+bool PixelRef::onNewLockPixels(LockRec* rec) {
+    rec->fPixels = getStorage();
+    rec->fRowBytes = mRowBytes;
+    rec->fColorTable = mColorTable.get();
+    return true;
+}
+
+size_t PixelRef::getAllocatedSizeInBytes() const {
+    return info().getSafeSize(mRowBytes);
+}
+
+int PixelRef::getAshmemFd() const {
     switch (mPixelStorageType) {
     case PixelStorageType::Ashmem:
         return mPixelStorage.ashmem.fd;
@@ -213,7 +242,7 @@ int Bitmap::getAshmemFd() const {
     }
 }
 
-size_t Bitmap::getAllocationByteCount() const {
+size_t PixelRef::getAllocationByteCount() const {
     switch (mPixelStorageType) {
     case PixelStorageType::Heap:
         return mPixelStorage.heap.size;
@@ -222,104 +251,24 @@ size_t Bitmap::getAllocationByteCount() const {
     }
 }
 
-const SkImageInfo& Bitmap::info() const {
-    return mPixelRef->info();
-}
-
-size_t Bitmap::rowBytes() const {
-    return mPixelRef->rowBytes();
-}
-
-SkPixelRef* Bitmap::peekAtPixelRef() const {
-    assertValid();
-    return mPixelRef.get();
-}
-
-SkPixelRef* Bitmap::refPixelRef() {
-    assertValid();
-    android::AutoMutex _lock(mLock);
-    return refPixelRefLocked();
-}
-
-SkPixelRef* Bitmap::refPixelRefLocked() {
-    mPixelRef->ref();
-    if (mPixelRef->unique()) {
-        // We just restored this from 0, pin the pixels and inc the strong count
-        // Note that there *might be* an incoming onStrongRefDestroyed from whatever
-        // last unref'd
-        mPinnedRefCount++;
-    }
-    return mPixelRef.get();
-}
-
-void Bitmap::reconfigure(const SkImageInfo& info, size_t rowBytes,
-        SkColorTable* ctable) {
-    mPixelRef->reconfigure(info, rowBytes, ctable);
-}
-
-void Bitmap::reconfigure(const SkImageInfo& info) {
+void PixelRef::reconfigure(const SkImageInfo& info) {
     reconfigure(info, info.minRowBytes(), nullptr);
 }
 
-void Bitmap::setAlphaType(SkAlphaType alphaType) {
+void PixelRef::setAlphaType(SkAlphaType alphaType) {
     if (!SkColorTypeValidateAlphaType(info().colorType(), alphaType, &alphaType)) {
         return;
     }
 
-    mPixelRef->changeAlphaType(alphaType);
+    changeAlphaType(alphaType);
 }
 
-void Bitmap::detachFromJava() {
-    bool disposeSelf;
-    {
-        android::AutoMutex _lock(mLock);
-        mAttachedToJava = false;
-        disposeSelf = shouldDisposeSelfLocked();
-    }
-    if (disposeSelf) {
-        delete this;
-    }
+void PixelRef::getSkBitmap(SkBitmap* outBitmap) {
+    outBitmap->setInfo(info(), rowBytes());
+    outBitmap->setPixelRef(this);
+    outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
 }
 
-bool Bitmap::shouldDisposeSelfLocked() {
-    return mPinnedRefCount == 0 && !mAttachedToJava;
-}
-
-
-void Bitmap::onStrongRefDestroyed() {
-    bool disposeSelf = false;
-    {
-        android::AutoMutex _lock(mLock);
-        if (mPinnedRefCount > 0) {
-            mPinnedRefCount--;
-            if (mPinnedRefCount == 0) {
-                disposeSelf = shouldDisposeSelfLocked();
-            }
-        }
-    }
-    if (disposeSelf) {
-        delete this;
-    }
-}
-
-void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
-    assertValid();
-    android::AutoMutex _lock(mLock);
-    // Safe because mPixelRef is a WrappedPixelRef type, otherwise rowBytes()
-    // would require locking the pixels first.
-    outBitmap->setInfo(mPixelRef->info(), mPixelRef->rowBytes());
-    outBitmap->setPixelRef(refPixelRefLocked())->unref();
-    outBitmap->setHasHardwareMipMap(hasHardwareMipMap());
-}
-
-void Bitmap::assertValid() const {
-    LOG_ALWAYS_FATAL_IF(mPixelStorageType == PixelStorageType::Invalid,
-            "Error, cannot access an invalid/free'd bitmap here!");
-}
-
-} // namespace android
-
-using namespace android;
 
 // Convenience class that does not take a global ref on the pixels, relying
 // on the caller already having a local JNI ref
@@ -333,7 +282,7 @@ public:
     }
 
     void* pixels() {
-        return mBitmap->peekAtPixelRef()->pixels();
+        return mBitmap->pixelRef()->pixels();
     }
 
     bool valid() {
@@ -343,6 +292,78 @@ public:
 private:
     Bitmap* mBitmap;
 };
+
+namespace bitmap {
+
+// Assert that bitmap's SkAlphaType is consistent with isPremultiplied.
+static void assert_premultiplied(const SkImageInfo& info, bool isPremultiplied) {
+    // kOpaque_SkAlphaType and kIgnore_SkAlphaType mean that isPremultiplied is
+    // irrelevant. This just tests to ensure that the SkAlphaType is not
+    // opposite of isPremultiplied.
+    if (isPremultiplied) {
+        SkASSERT(info.alphaType() != kUnpremul_SkAlphaType);
+    } else {
+        SkASSERT(info.alphaType() != kPremul_SkAlphaType);
+    }
+}
+
+void reinitBitmap(JNIEnv* env, jobject javaBitmap, const SkImageInfo& info,
+        bool isPremultiplied)
+{
+    // The caller needs to have already set the alpha type properly, so the
+    // native SkBitmap stays in sync with the Java Bitmap.
+    assert_premultiplied(info, isPremultiplied);
+
+    env->CallVoidMethod(javaBitmap, gBitmap_reinitMethodID,
+            info.width(), info.height(), isPremultiplied);
+}
+
+int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap)
+{
+    return env->CallIntMethod(javaBitmap, gBitmap_getAllocationByteCountMethodID);
+}
+
+jobject createBitmap(JNIEnv* env, PixelRef* pixelRef,
+        int bitmapCreateFlags, jbyteArray ninePatchChunk, jobject ninePatchInsets,
+        int density) {
+    bool isMutable = bitmapCreateFlags & kBitmapCreateFlag_Mutable;
+    bool isPremultiplied = bitmapCreateFlags & kBitmapCreateFlag_Premultiplied;
+    // The caller needs to have already set the alpha type properly, so the
+    // native SkBitmap stays in sync with the Java Bitmap.
+    assert_premultiplied(pixelRef->info(), isPremultiplied);
+    Bitmap* bitmap = new Bitmap(pixelRef);
+    jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
+            reinterpret_cast<jlong>(bitmap), pixelRef->width(), pixelRef->height(), density, isMutable,
+            isPremultiplied, ninePatchChunk, ninePatchInsets);
+
+    if (env->ExceptionCheck() != 0) {
+        ALOGE("*** Uncaught exception returned from Java call!\n");
+        env->ExceptionDescribe();
+    }
+    return obj;
+}
+
+void toSkBitmap(jlong bitmapHandle, SkBitmap* outBitmap) {
+    LocalScopedBitmap bitmap(bitmapHandle);
+    bitmap->getSkBitmap(outBitmap);
+}
+
+PixelRef* toPixelRef(JNIEnv* env, jobject bitmap) {
+    SkASSERT(env);
+    SkASSERT(bitmap);
+    SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
+    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
+    LocalScopedBitmap localBitmap(bitmapHandle);
+    localBitmap->assertValid();
+    return localBitmap->pixelRef();
+}
+
+} // namespace bitmap
+
+} // namespace android
+
+using namespace android;
+using namespace android::bitmap;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Conversions to/from SkColor, for get/setPixels, and the create method, which
@@ -649,8 +670,8 @@ static ToColorProc ChooseToColorProc(const SkBitmap& src) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static int getPremulBitmapCreateFlags(bool isMutable) {
-    int flags = GraphicsJNI::kBitmapCreateFlag_Premultiplied;
-    if (isMutable) flags |= GraphicsJNI::kBitmapCreateFlag_Mutable;
+    int flags = android::bitmap::kBitmapCreateFlag_Premultiplied;
+    if (isMutable) flags |= android::bitmap::kBitmapCreateFlag_Mutable;
     return flags;
 }
 
@@ -674,7 +695,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     SkBitmap bitmap;
     bitmap.setInfo(SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType));
 
-    Bitmap* nativeBitmap = GraphicsJNI::allocateHeapPixelRef(&bitmap, NULL);
+    PixelRef* nativeBitmap = GraphicsJNI::allocateHeapPixelRef(&bitmap, NULL);
     if (!nativeBitmap) {
         return NULL;
     }
@@ -684,7 +705,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
                 0, 0, width, height, bitmap);
     }
 
-    return GraphicsJNI::createBitmap(env, nativeBitmap,
+    return createBitmap(env, nativeBitmap,
             getPremulBitmapCreateFlags(isMutable));
 }
 
@@ -699,29 +720,28 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
     if (!src.copyTo(&result, dstCT, &allocator)) {
         return NULL;
     }
-    Bitmap* bitmap = allocator.getStorageObjAndReset();
-    return GraphicsJNI::createBitmap(env, bitmap,
-            getPremulBitmapCreateFlags(isMutable));
+    auto pixelRef = allocator.getStorageObjAndReset();
+    return createBitmap(env, pixelRef, getPremulBitmapCreateFlags(isMutable));
 }
 
-static Bitmap* Bitmap_copyAshmemImpl(JNIEnv* env, SkBitmap& src, SkColorType& dstCT) {
+static PixelRef* Bitmap_copyAshmemImpl(JNIEnv* env, SkBitmap& src, SkColorType& dstCT) {
     SkBitmap result;
 
     AshmemPixelAllocator allocator(env);
     if (!src.copyTo(&result, dstCT, &allocator)) {
         return NULL;
     }
-    Bitmap* bitmap = allocator.getStorageObjAndReset();
-    bitmap->peekAtPixelRef()->setImmutable();
-    return bitmap;
+    auto pixelRef = allocator.getStorageObjAndReset();
+    pixelRef->setImmutable();
+    return pixelRef;
 }
 
 static jobject Bitmap_copyAshmem(JNIEnv* env, jobject, jlong srcHandle) {
     SkBitmap src;
     reinterpret_cast<Bitmap*>(srcHandle)->getSkBitmap(&src);
     SkColorType dstCT = src.colorType();
-    Bitmap* bitmap = Bitmap_copyAshmemImpl(env, src, dstCT);
-    jobject ret = GraphicsJNI::createBitmap(env, bitmap, getPremulBitmapCreateFlags(false));
+    auto pixelRef = Bitmap_copyAshmemImpl(env, src, dstCT);
+    jobject ret = createBitmap(env, pixelRef, getPremulBitmapCreateFlags(false));
     return ret;
 }
 
@@ -729,13 +749,13 @@ static jobject Bitmap_copyAshmemConfig(JNIEnv* env, jobject, jlong srcHandle, ji
     SkBitmap src;
     reinterpret_cast<Bitmap*>(srcHandle)->getSkBitmap(&src);
     SkColorType dstCT = GraphicsJNI::legacyBitmapConfigToColorType(dstConfigHandle);
-    Bitmap* bitmap = Bitmap_copyAshmemImpl(env, src, dstCT);
-    jobject ret = GraphicsJNI::createBitmap(env, bitmap, getPremulBitmapCreateFlags(false));
+    auto pixelRef = Bitmap_copyAshmemImpl(env, src, dstCT);
+    jobject ret = createBitmap(env, pixelRef, getPremulBitmapCreateFlags(false));
     return ret;
 }
 
 static void Bitmap_destruct(Bitmap* bitmap) {
-    bitmap->detachFromJava();
+    delete bitmap;
 }
 
 static jlong Bitmap_getNativeFinalizer(JNIEnv*, jobject) {
@@ -751,6 +771,7 @@ static jboolean Bitmap_recycle(JNIEnv* env, jobject, jlong bitmapHandle) {
 static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         jint width, jint height, jint configHandle, jboolean requestPremul) {
     LocalScopedBitmap bitmap(bitmapHandle);
+    bitmap->assertValid();
     SkColorType colorType = GraphicsJNI::legacyBitmapConfigToColorType(configHandle);
 
     // ARGB_4444 is a deprecated format, convert automatically to 8888
@@ -773,7 +794,7 @@ static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         // Otherwise respect the premultiplied request.
         alphaType = requestPremul ? kPremul_SkAlphaType : kUnpremul_SkAlphaType;
     }
-    bitmap->reconfigure(SkImageInfo::Make(width, height, colorType, alphaType));
+    bitmap->pixelRef()->reconfigure(SkImageInfo::Make(width, height, colorType, alphaType));
 }
 
 // These must match the int values in Bitmap.java
@@ -843,7 +864,7 @@ static jint Bitmap_config(JNIEnv* env, jobject, jlong bitmapHandle) {
 
 static jint Bitmap_getGenerationId(JNIEnv* env, jobject, jlong bitmapHandle) {
     LocalScopedBitmap bitmap(bitmapHandle);
-    return static_cast<jint>(bitmap->peekAtPixelRef()->getGenerationID());
+    return static_cast<jint>(bitmap->getGenerationID());
 }
 
 static jboolean Bitmap_isPremultiplied(JNIEnv* env, jobject, jlong bitmapHandle) {
@@ -955,7 +976,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     }
 
     // Map the bitmap in place from the ashmem region if possible otherwise copy.
-    Bitmap* nativeBitmap;
+    PixelRef* nativeBitmap;
     if (blob.fd() >= 0 && (blob.isMutable() || !isMutable) && (size >= ASHMEM_BITMAP_MIN_SIZE)) {
 #if DEBUG_PARCEL
         ALOGD("Bitmap.createFromParcel: mapped contents of %s bitmap from %s blob "
@@ -1018,7 +1039,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         blob.release();
     }
 
-    return GraphicsJNI::createBitmap(env, nativeBitmap,
+    return createBitmap(env, nativeBitmap,
             getPremulBitmapCreateFlags(isMutable), NULL, NULL, density);
 }
 
@@ -1034,7 +1055,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
     SkBitmap bitmap;
 
-    android::Bitmap* androidBitmap = reinterpret_cast<Bitmap*>(bitmapHandle);
+    auto androidBitmap = reinterpret_cast<Bitmap*>(bitmapHandle);
     androidBitmap->getSkBitmap(&bitmap);
 
     p->writeInt32(isMutable);
@@ -1061,7 +1082,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
 
     // Transfer the underlying ashmem region if we have one and it's immutable.
     android::status_t status;
-    int fd = androidBitmap->getAshmemFd();
+    int fd = androidBitmap->pixelRef()->getAshmemFd();
     if (fd >= 0 && !isMutable && p->allowFds()) {
 #if DEBUG_PARCEL
         ALOGD("Bitmap.writeToParcel: transferring immutable bitmap's ashmem fd as "
@@ -1131,7 +1152,7 @@ static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
         env->ReleaseIntArrayElements(offsetXY, array, 0);
     }
 
-    return GraphicsJNI::createBitmap(env, allocator.getStorageObjAndReset(),
+    return createBitmap(env, allocator.getStorageObjAndReset(),
             getPremulBitmapCreateFlags(true));
 }
 
@@ -1307,7 +1328,7 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
 
 static jlong Bitmap_refPixelRef(JNIEnv* env, jobject, jlong bitmapHandle) {
     LocalScopedBitmap bitmap(bitmapHandle);
-    SkPixelRef* pixelRef = bitmap.valid() ? bitmap->peekAtPixelRef() : nullptr;
+    SkPixelRef* pixelRef = bitmap->pixelRef();
     SkSafeRef(pixelRef);
     return reinterpret_cast<jlong>(pixelRef);
 }
@@ -1326,6 +1347,20 @@ static jint Bitmap_getAllocationByteCount(JNIEnv* env, jobject, jlong bitmapPtr)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+static jclass make_globalref(JNIEnv* env, const char classname[])
+{
+    jclass c = env->FindClass(classname);
+    SkASSERT(c);
+    return (jclass) env->NewGlobalRef(c);
+}
+
+static jfieldID getFieldIDCheck(JNIEnv* env, jclass clazz,
+                                const char fieldname[], const char type[])
+{
+    jfieldID id = env->GetFieldID(clazz, fieldname, type);
+    SkASSERT(id);
+    return id;
+}
 
 static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeCreate",             "([IIIIIIZ)Landroid/graphics/Bitmap;",
@@ -1374,6 +1409,11 @@ static const JNINativeMethod gBitmapMethods[] = {
 
 int register_android_graphics_Bitmap(JNIEnv* env)
 {
+    gBitmap_class = make_globalref(env, "android/graphics/Bitmap");
+    gBitmap_nativePtr = getFieldIDCheck(env, gBitmap_class, "mNativePtr", "J");
+    gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>", "(JIIIZZ[BLandroid/graphics/NinePatch$InsetStruct;)V");
+    gBitmap_reinitMethodID = env->GetMethodID(gBitmap_class, "reinit", "(IIZ)V");
+    gBitmap_getAllocationByteCountMethodID = env->GetMethodID(gBitmap_class, "getAllocationByteCount", "()I");
     return android::RegisterMethodsOrDie(env, "android/graphics/Bitmap", gBitmapMethods,
                                          NELEM(gBitmapMethods));
 }

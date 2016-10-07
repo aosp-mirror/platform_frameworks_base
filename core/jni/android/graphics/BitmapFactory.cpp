@@ -162,7 +162,7 @@ private:
 
 class RecyclingPixelAllocator : public SkBitmap::Allocator {
 public:
-    RecyclingPixelAllocator(android::Bitmap* bitmap, unsigned int size)
+    RecyclingPixelAllocator(android::PixelRef* bitmap, unsigned int size)
             : mBitmap(bitmap), mSize(size) {
     }
 
@@ -190,7 +190,8 @@ public:
         }
 
         mBitmap->reconfigure(info, bitmap->rowBytes(), ctable);
-        bitmap->setPixelRef(mBitmap->refPixelRef())->unref();
+        mBitmap->ref();
+        bitmap->setPixelRef(mBitmap)->unref();
 
         // since we're already allocated, we lockPixels right away
         // HeapAllocator behaves this way too
@@ -199,7 +200,7 @@ public:
     }
 
 private:
-    android::Bitmap* const mBitmap;
+    android::PixelRef* const mBitmap;
     const unsigned int mSize;
 };
 
@@ -326,16 +327,16 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         scaledHeight = static_cast<int>(scaledHeight * scale + 0.5f);
     }
 
-    android::Bitmap* reuseBitmap = nullptr;
+    android::PixelRef* reuseBitmap = nullptr;
     unsigned int existingBufferSize = 0;
     if (javaBitmap != NULL) {
-        reuseBitmap = GraphicsJNI::getBitmap(env, javaBitmap);
-        if (reuseBitmap->peekAtPixelRef()->isImmutable()) {
+        reuseBitmap = bitmap::toPixelRef(env, javaBitmap);
+        if (reuseBitmap->isImmutable()) {
             ALOGW("Unable to reuse an immutable bitmap as an image decoder target.");
             javaBitmap = NULL;
             reuseBitmap = nullptr;
         } else {
-            existingBufferSize = GraphicsJNI::getBitmapAllocationByteCount(env, javaBitmap);
+            existingBufferSize = bitmap::getBitmapAllocationByteCount(env, javaBitmap);
         }
     }
 
@@ -529,18 +530,18 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     bool isPremultiplied = !requireUnpremultiplied;
     if (javaBitmap != nullptr) {
-        GraphicsJNI::reinitBitmap(env, javaBitmap, outputBitmap.info(), isPremultiplied);
+        bitmap::reinitBitmap(env, javaBitmap, outputBitmap.info(), isPremultiplied);
         outputBitmap.notifyPixelsChanged();
         // If a java bitmap was passed in for reuse, pass it back
         return javaBitmap;
     }
 
     int bitmapCreateFlags = 0x0;
-    if (isMutable) bitmapCreateFlags |= GraphicsJNI::kBitmapCreateFlag_Mutable;
-    if (isPremultiplied) bitmapCreateFlags |= GraphicsJNI::kBitmapCreateFlag_Premultiplied;
+    if (isMutable) bitmapCreateFlags |= android::bitmap::kBitmapCreateFlag_Mutable;
+    if (isPremultiplied) bitmapCreateFlags |= android::bitmap::kBitmapCreateFlag_Premultiplied;
 
     // now create the java bitmap
-    return GraphicsJNI::createBitmap(env, defaultAllocator.getStorageObjAndReset(),
+    return bitmap::createBitmap(env, defaultAllocator.getStorageObjAndReset(),
             bitmapCreateFlags, ninePatchChunk, ninePatchInsets, -1);
 }
 

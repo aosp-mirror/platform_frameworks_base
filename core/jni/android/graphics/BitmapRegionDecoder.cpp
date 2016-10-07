@@ -148,14 +148,14 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     }
 
     // Recycle a bitmap if possible.
-    android::Bitmap* recycledBitmap = nullptr;
+    android::PixelRef* recycledBitmap = nullptr;
     size_t recycledBytes = 0;
     if (javaBitmap) {
-        recycledBitmap = GraphicsJNI::getBitmap(env, javaBitmap);
-        if (recycledBitmap->peekAtPixelRef()->isImmutable()) {
+        recycledBitmap = bitmap::toPixelRef(env, javaBitmap);
+        if (recycledBitmap->isImmutable()) {
             ALOGW("Warning: Reusing an immutable bitmap as an image decoder target.");
         }
-        recycledBytes = GraphicsJNI::getBitmapAllocationByteCount(env, javaBitmap);
+        recycledBytes = bitmap::getBitmapAllocationByteCount(env, javaBitmap);
     }
 
     // Set up the pixel allocator
@@ -198,9 +198,9 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
 
     int bitmapCreateFlags = 0;
     if (!requireUnpremul) {
-        bitmapCreateFlags |= GraphicsJNI::kBitmapCreateFlag_Premultiplied;
+        bitmapCreateFlags |= android::bitmap::kBitmapCreateFlag_Premultiplied;
     }
-    return GraphicsJNI::createBitmap(env, heapAlloc.getStorageObjAndReset(), bitmapCreateFlags);
+    return android::bitmap::createBitmap(env, heapAlloc.getStorageObjAndReset(), bitmapCreateFlags);
 }
 
 static jint nativeGetHeight(JNIEnv* env, jobject, jlong brdHandle) {

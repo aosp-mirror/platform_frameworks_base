@@ -184,14 +184,14 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         return NULL;
     }
 
-    Bitmap* bitmap = new Bitmap(
+    auto pixelRef = new PixelRef(
             (void*) screenshot->getPixels(), (void*) screenshot.get(), DeleteScreenshot,
             screenshotInfo, rowBytes, nullptr);
     screenshot.release();
-    bitmap->peekAtPixelRef()->setImmutable();
+    pixelRef->setImmutable();
 
-    return GraphicsJNI::createBitmap(env, bitmap,
-            GraphicsJNI::kBitmapCreateFlag_Premultiplied, NULL);
+    return bitmap::createBitmap(env, pixelRef,
+            bitmap::kBitmapCreateFlag_Premultiplied, NULL);
 }
 
 static void nativeScreenshot(JNIEnv* env, jclass clazz, jobject displayTokenObj,

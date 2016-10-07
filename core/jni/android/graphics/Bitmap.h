@@ -20,80 +20,91 @@
 #include <SkBitmap.h>
 #include <SkColorTable.h>
 #include <SkImageInfo.h>
-#include <utils/Mutex.h>
-#include <memory>
+#include <SkPixelRef.h>
 
 namespace android {
 
 enum class PixelStorageType {
-    Invalid,
     External,
     Heap,
     Ashmem,
 };
 
-class WrappedPixelRef;
-
 typedef void (*FreeFunc)(void* addr, void* context);
 
-/**
- * Glue-thingy that deals with managing the interaction between the Java
- * Bitmap object & SkBitmap along with trying to map a notion of strong/weak
- * lifecycles onto SkPixelRef which only has strong counts to avoid requiring
- * two GC passes to free the byte[] that backs a Bitmap.
- *
- * Since not all Bitmaps are byte[]-backed it also supports external allocations,
- * which currently is used by screenshots to wrap a gralloc buffer.
- */
-class Bitmap {
-public:
-    Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes,
-            SkColorTable* ctable);
-    Bitmap(void* address, void* context, FreeFunc freeFunc,
-            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
-    Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
-            size_t rowBytes, SkColorTable* ctable);
+class PixelRef;
 
-    const SkImageInfo& info() const;
+namespace bitmap {
+
+enum BitmapCreateFlags {
+    kBitmapCreateFlag_None = 0x0,
+    kBitmapCreateFlag_Mutable = 0x1,
+    kBitmapCreateFlag_Premultiplied = 0x2,
+};
+
+jobject createBitmap(JNIEnv* env, PixelRef* bitmap,
+            int bitmapCreateFlags, jbyteArray ninePatchChunk = NULL,
+            jobject ninePatchInsets = NULL, int density = -1);
+
+
+void toSkBitmap(jlong bitmapHandle, SkBitmap* outBitmap);
+
+PixelRef* toPixelRef(JNIEnv* env, jobject bitmap);
+
+/** Reinitialize a bitmap. bitmap must already have its SkAlphaType set in
+    sync with isPremultiplied
+*/
+void reinitBitmap(JNIEnv* env, jobject javaBitmap, const SkImageInfo& info,
+        bool isPremultiplied);
+
+int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap);
+
+} // namespace bitmap
+
+class PixelRef : public SkPixelRef {
+public:
+    PixelRef(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes,
+            SkColorTable* ctable);
+    PixelRef(void* address, void* context, FreeFunc freeFunc,
+            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
+    PixelRef(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
+            size_t rowBytes, SkColorTable* ctable);
 
     int width() const { return info().width(); }
     int height() const { return info().height(); }
-    size_t rowBytes() const;
-    SkPixelRef* peekAtPixelRef() const;
-    SkPixelRef* refPixelRef();
-    bool valid() const { return mPixelStorageType != PixelStorageType::Invalid; }
 
+    // Can't mark as override since SkPixelRef::rowBytes isn't virtual
+    // but that's OK since we just want Bitmap to be able to rely
+    // on calling rowBytes() on an unlocked pixelref, which it will be
+    // doing on a PixelRef type, not a SkPixelRef, so static
+    // dispatching will do what we want.
+    size_t rowBytes() const { return mRowBytes; }
     void reconfigure(const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
     void reconfigure(const SkImageInfo& info);
     void setAlphaType(SkAlphaType alphaType);
 
     void getSkBitmap(SkBitmap* outBitmap);
-    void detachFromJava();
 
-    void freePixels();
-
-    bool hasHardwareMipMap();
-    void setHasHardwareMipMap(bool hasMipMap);
     int getAshmemFd() const;
     size_t getAllocationByteCount() const;
 
+protected:
+    virtual bool onNewLockPixels(LockRec* rec) override;
+    virtual void onUnlockPixels() override { };
+    virtual size_t getAllocatedSizeInBytes() const override;
 private:
-    friend class WrappedPixelRef;
-
-    ~Bitmap();
+    friend class Bitmap;
+    virtual ~PixelRef();
     void doFreePixels();
-    void onStrongRefDestroyed();
+    void* getStorage() const;
+    void setHasHardwareMipMap(bool hasMipMap);
+    bool hasHardwareMipMap() const;
 
-    void pinPixelsLocked();
-    bool shouldDisposeSelfLocked();
-    void assertValid() const;
-    SkPixelRef* refPixelRefLocked();
-
-    android::Mutex mLock;
-    int mPinnedRefCount = 0;
-    std::unique_ptr<WrappedPixelRef> mPixelRef;
     PixelStorageType mPixelStorageType;
-    bool mAttachedToJava = true;
+
+    size_t mRowBytes = 0;
+    sk_sp<SkColorTable> mColorTable;
+    bool mHasHardwareMipMap = false;
 
     union {
         struct {

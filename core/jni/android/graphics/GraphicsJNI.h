@@ -23,12 +23,6 @@ struct Typeface;
 
 class GraphicsJNI {
 public:
-    enum BitmapCreateFlags {
-        kBitmapCreateFlag_None = 0x0,
-        kBitmapCreateFlag_Mutable = 0x1,
-        kBitmapCreateFlag_Premultiplied = 0x2,
-    };
-
     // returns true if an exception is set (and dumps it out to the Log)
     static bool hasException(JNIEnv*);
 
@@ -51,7 +45,6 @@ public:
     static void point_to_jpointf(const SkPoint& point, JNIEnv*, jobject jpointf);
 
     static android::Canvas* getNativeCanvas(JNIEnv*, jobject canvas);
-    static android::Bitmap* getBitmap(JNIEnv*, jobject bitmap);
     static void getSkBitmap(JNIEnv*, jobject bitmap, SkBitmap* outBitmap);
     static SkPixelRef* refSkPixelRef(JNIEnv*, jobject bitmap);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
@@ -73,32 +66,16 @@ public:
     */
     static SkColorType getNativeBitmapColorType(JNIEnv*, jobject jconfig);
 
-    /*
-     * Create a java Bitmap object given the native bitmap
-     * bitmap's SkAlphaType must already be in sync with bitmapCreateFlags.
-    */
-    static jobject createBitmap(JNIEnv* env, android::Bitmap* bitmap,
-            int bitmapCreateFlags, jbyteArray ninePatchChunk = NULL,
-            jobject ninePatchInsets = NULL, int density = -1);
-
-    /** Reinitialize a bitmap. bitmap must already have its SkAlphaType set in
-        sync with isPremultiplied
-    */
-    static void reinitBitmap(JNIEnv* env, jobject javaBitmap, const SkImageInfo& info,
-            bool isPremultiplied);
-
-    static int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap);
-
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
-    static android::Bitmap* allocateHeapPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
+    static android::PixelRef* allocateHeapPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
 
-    static android::Bitmap* allocateAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
+    static android::PixelRef* allocateAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
             SkColorTable* ctable);
 
-    static android::Bitmap* mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
+    static android::PixelRef* mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
             SkColorTable* ctable, int fd, void* addr, size_t size, bool readOnly);
 
     /**
@@ -120,23 +97,21 @@ public:
 
 class HeapAllocator : public SkBRDAllocator {
 public:
-   HeapAllocator();
-    ~HeapAllocator();
+   HeapAllocator() { };
+    ~HeapAllocator() { };
 
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) override;
 
     /**
      * Fetches the backing allocation object. Must be called!
      */
-    android::Bitmap* getStorageObjAndReset() {
-        android::Bitmap* result = mStorage;
-        mStorage = NULL;
-        return result;
+    android::PixelRef* getStorageObjAndReset() {
+        return mStorage.release();
     };
 
     SkCodec::ZeroInitialized zeroInit() const override { return SkCodec::kYes_ZeroInitialized; }
 private:
-    android::Bitmap* mStorage = nullptr;
+    sk_sp<android::PixelRef> mStorage;
 };
 
 /**
@@ -169,7 +144,7 @@ private:
 class RecyclingClippingPixelAllocator : public SkBRDAllocator {
 public:
 
-    RecyclingClippingPixelAllocator(android::Bitmap* recycledBitmap,
+    RecyclingClippingPixelAllocator(android::PixelRef* recycledBitmap,
             size_t recycledBytes);
 
     ~RecyclingClippingPixelAllocator();
@@ -194,7 +169,7 @@ public:
     SkCodec::ZeroInitialized zeroInit() const override { return SkCodec::kNo_ZeroInitialized; }
 
 private:
-    android::Bitmap* mRecycledBitmap;
+    android::PixelRef* mRecycledBitmap;
     const size_t     mRecycledBytes;
     SkBitmap*        mSkiaBitmap;
     bool             mNeedsCopy;
@@ -203,17 +178,15 @@ private:
 class AshmemPixelAllocator : public SkBitmap::Allocator {
 public:
     explicit AshmemPixelAllocator(JNIEnv* env);
-    ~AshmemPixelAllocator();
+    ~AshmemPixelAllocator() { };
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
-    android::Bitmap* getStorageObjAndReset() {
-        android::Bitmap* result = mStorage;
-        mStorage = NULL;
-        return result;
+    android::PixelRef* getStorageObjAndReset() {
+        return mStorage.release();
     };
 
 private:
     JavaVM* mJavaVM;
-    android::Bitmap* mStorage = nullptr;
+    sk_sp<android::PixelRef> mStorage;
 };
 
 
