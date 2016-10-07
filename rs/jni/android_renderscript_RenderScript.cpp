@@ -632,7 +632,7 @@ nScriptIntrinsicBLAS_Single(JNIEnv *_env, jobject _this, jlong con, jlong id, ji
     in_allocs[2] = (RsAllocation)C;
 
     rsScriptForEachMulti((RsContext)con, (RsScript)id, 0,
-                         in_allocs, sizeof(in_allocs), nullptr,
+                         in_allocs, NELEM(in_allocs), nullptr,
                          &call, sizeof(call), nullptr, 0);
 }
 
