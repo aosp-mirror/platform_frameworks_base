@@ -274,7 +274,7 @@ public abstract class ShellCommand {
     /**
      * Implement parsing and execution of a command.  If it isn't a command you understand,
      * call {@link #handleDefaultCommands(String)} and return its result as a last resort.
-     * User {@link #getNextOption()}, {@link #getNextArg()}, and {@link #getNextArgRequired()}
+     * Use {@link #getNextOption()}, {@link #getNextArg()}, and {@link #getNextArgRequired()}
      * to process additional command line arguments.  Command output can be written to
      * {@link #getOutPrintWriter()} and errors to {@link #getErrPrintWriter()}.
      *
