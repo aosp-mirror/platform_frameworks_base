@@ -895,6 +895,14 @@ public final class BluetoothDevice implements Parcelable {
         return false;
     }
 
+    /** @hide */
+    public boolean isBondingInitiatedLocally() {
+        try {
+            return sService.isBondingInitiatedLocally(this);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
     /**
      * Set the Out Of Band data for a remote device to be used later
      * in the pairing mechanism. Users can obtain this data through other
