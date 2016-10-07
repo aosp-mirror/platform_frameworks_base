@@ -44,4 +44,13 @@
     <!-- QS edit page toolbar text color -->
     <color name="qs_edit_toolbar_text_color">#FFFFFF</color>
 
+    <!-- QS battery % text color -->
+    <color name="qs_battery_text_color">@*android:color/accent_device_default_light</color>
+
+    <!-- QS battery graph text color -->
+    <color name="qs_battery_graph_text_color">#66FFFFFF</color>
+
+    <!-- QS battery accent color -->
+    <color name="qs_battery_accent">@*android:color/accent_device_default_light</color>
+
 </resources>
