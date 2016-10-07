@@ -1012,6 +1012,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             for (String filename : sPerUserFiles) {
                 new File(wallpaperDir, filename).delete();
             }
+            mUserRestorecon.remove(userId);
         }
     }
 
