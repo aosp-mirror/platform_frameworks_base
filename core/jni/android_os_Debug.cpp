@@ -116,8 +116,6 @@ static stat_field_names stat_field_names[_NUM_CORE_HEAP] = {
 jfieldID otherStats_field;
 jfieldID hasSwappedOutPss_field;
 
-static bool memtrackLoaded;
-
 struct stats_t {
     int pss;
     int swappablePss;
@@ -199,10 +197,6 @@ static int read_memtrack_memory(struct memtrack_proc* p, int pid,
  */
 static int read_memtrack_memory(int pid, struct graphics_memory_pss* graphics_mem)
 {
-    if (!memtrackLoaded) {
-        return -1;
-    }
-
     struct memtrack_proc* p = memtrack_proc_new();
     if (p == NULL) {
         ALOGW("failed to create memtrack_proc");
@@ -1093,14 +1087,6 @@ static const JNINativeMethod gMethods[] = {
 
 int register_android_os_Debug(JNIEnv *env)
 {
-    int err = memtrack_init();
-    if (err != 0) {
-        memtrackLoaded = false;
-        ALOGE("failed to load memtrack module: %d", err);
-    } else {
-        memtrackLoaded = true;
-    }
-
     jclass clazz = env->FindClass("android/os/Debug$MemoryInfo");
 
     // Sanity check the number of other statistics expected in Java matches here.
