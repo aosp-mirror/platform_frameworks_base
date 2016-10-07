@@ -57,6 +57,9 @@ import android.view.View;
 import com.android.internal.R;
 
 import com.android.internal.util.VirtualRefBasePtr;
+
+import dalvik.annotation.optimization.FastNative;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -1723,22 +1726,30 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     private static native void nAddAnimator(long setPtr, long propertyValuesHolder,
             long nativeInterpolator, long startDelay, long duration, int repeatCount,
             int repeatMode);
-
-    private static native long nCreateGroupPropertyHolder(long nativePtr, int propertyId,
-            float startValue, float endValue);
-
-    private static native long nCreatePathDataPropertyHolder(long nativePtr, long startValuePtr,
-            long endValuePtr);
-    private static native long nCreatePathColorPropertyHolder(long nativePtr, int propertyId,
-            int startValue, int endValue);
-    private static native long nCreatePathPropertyHolder(long nativePtr, int propertyId,
-            float startValue, float endValue);
-    private static native long nCreateRootAlphaPropertyHolder(long nativePtr, float startValue,
-            float endValue);
     private static native void nSetPropertyHolderData(long nativePtr, float[] data, int length);
     private static native void nSetPropertyHolderData(long nativePtr, int[] data, int length);
     private static native void nStart(long animatorSetPtr, VectorDrawableAnimatorRT set, int id);
     private static native void nReverse(long animatorSetPtr, VectorDrawableAnimatorRT set, int id);
+
+    // ------------- @FastNative -------------------
+
+    @FastNative
+    private static native long nCreateGroupPropertyHolder(long nativePtr, int propertyId,
+            float startValue, float endValue);
+    @FastNative
+    private static native long nCreatePathDataPropertyHolder(long nativePtr, long startValuePtr,
+            long endValuePtr);
+    @FastNative
+    private static native long nCreatePathColorPropertyHolder(long nativePtr, int propertyId,
+            int startValue, int endValue);
+    @FastNative
+    private static native long nCreatePathPropertyHolder(long nativePtr, int propertyId,
+            float startValue, float endValue);
+    @FastNative
+    private static native long nCreateRootAlphaPropertyHolder(long nativePtr, float startValue,
+            float endValue);
+    @FastNative
     private static native void nEnd(long animatorSetPtr);
+    @FastNative
     private static native void nReset(long animatorSetPtr);
 }
