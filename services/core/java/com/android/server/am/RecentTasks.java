@@ -129,7 +129,8 @@ class RecentTasks extends ArrayList<TaskRecord> {
     }
 
     void notifyTaskPersisterLocked(TaskRecord task, boolean flush) {
-        if (task != null && task.stack != null && task.stack.isHomeStack()) {
+        final ActivityStack stack = task != null ? task.getStack() : null;
+        if (stack != null && stack.isHomeStack()) {
             // Never persist the home stack.
             return;
         }
@@ -147,8 +148,9 @@ class RecentTasks extends ArrayList<TaskRecord> {
             }
         }
         for (int i = size() - 1; i >= 0; i--) {
-            TaskRecord task = get(i);
-            if (task.isPersistable && (task.stack == null || !task.stack.isHomeStack())) {
+            final TaskRecord task = get(i);
+            final ActivityStack stack = task.getStack();
+            if (task.isPersistable && (stack == null || !stack.isHomeStack())) {
                 // Set of persisted taskIds for task.userId should not be null here
                 // TODO Investigate why it can happen. For now initialize with an empty set
                 if (mPersistedTaskIds.get(task.userId) == null) {
@@ -618,10 +620,12 @@ class RecentTasks extends ArrayList<TaskRecord> {
         final Intent intent = task.intent;
         final boolean document = intent != null && intent.isDocument();
         int maxRecents = task.maxRecents - 1;
+        final ActivityStack stack = task.getStack();
         for (int i = 0; i < recentsCount; i++) {
             final TaskRecord tr = get(i);
+            final ActivityStack trStack = tr.getStack();
             if (task != tr) {
-                if (task.stack != null && tr.stack != null && task.stack != tr.stack) {
+                if (stack != null && trStack != null && stack != trStack) {
                     continue;
                 }
                 if (task.userId != tr.userId) {

@@ -571,7 +571,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         final ActivityRecord parent = stack.mActivityContainer.mParentActivity;
         if (parent != null) {
-            stack = parent.task.stack;
+            stack = parent.getStack();
         }
         return stack == mFocusedStack;
     }
@@ -584,7 +584,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         final ActivityRecord parent = stack.mActivityContainer.mParentActivity;
         if (parent != null) {
-            stack = parent.task.stack;
+            stack = parent.getStack();
         }
         return stack == mHomeStack.mStacks.get((mHomeStack.mStacks.size() - 1));
     }
@@ -1210,7 +1210,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             setLockTaskModeLocked(task, LOCK_TASK_MODE_LOCKED, "mLockTaskAuth==LAUNCHABLE", false);
         }
 
-        final ActivityStack stack = task.stack;
+        final ActivityStack stack = task.getStack();
         try {
             if (app.thread == null) {
                 throw new RemoteException();
@@ -1359,7 +1359,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ProcessRecord app = mService.getProcessRecordLocked(r.processName,
                 r.info.applicationInfo.uid, true);
 
-        r.task.stack.setLaunchTime(r);
+        r.getStack().setLaunchTime(r);
 
         if (app != null && app.thread != null) {
             try {
@@ -1607,7 +1607,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             r.idle = true;
 
             //Slog.i(TAG, "IDLE: mBooted=" + mBooted + ", fromTimeout=" + fromTimeout);
-            if (isFocusedStack(r.task.stack) || fromTimeout) {
+            if (isFocusedStack(r.getStack()) || fromTimeout) {
                 booting = checkFinishBootingLocked();
             }
         }
@@ -1645,7 +1645,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // waiting for the next one to start.
         for (int i = 0; i < NS; i++) {
             r = stops.get(i);
-            final ActivityStack stack = r.task.stack;
+            final ActivityStack stack = r.getStack();
             if (stack != null) {
                 if (r.finishing) {
                     stack.finishCurrentActivityLocked(r, ActivityStack.FINISH_IMMEDIATELY, false);
@@ -1659,7 +1659,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // waiting for the next one to start.
         for (int i = 0; i < NF; i++) {
             r = finishes.get(i);
-            final ActivityStack stack = r.task.stack;
+            final ActivityStack stack = r.getStack();
             if (stack != null) {
                 activityRemoved |= stack.destroyActivityLocked(r, true, "finish-idle");
             }
@@ -1835,7 +1835,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // we'll just indicate that this task returns to the home task.
             task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
         }
-        if (task.stack == null) {
+        ActivityStack currentStack = task.getStack();
+        if (currentStack == null) {
             Slog.e(TAG, "findTaskToMoveToFrontLocked: can't move task="
                     + task + " to front. Stack is null");
             return;
@@ -1849,10 +1850,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 if (stackId == INVALID_STACK_ID) {
                     stackId = task.getLaunchStackId();
                 }
-                if (stackId != task.stack.mStackId) {
-                    final ActivityStack stack = moveTaskToStackUncheckedLocked(
-                            task, stackId, ON_TOP, !FORCE_FOCUS, reason);
-                    stackId = stack.mStackId;
+                if (stackId != currentStack.mStackId) {
+                    currentStack = moveTaskToStackUncheckedLocked(task, stackId, ON_TOP,
+                            !FORCE_FOCUS, reason);
+                    stackId = currentStack.mStackId;
                     // moveTaskToStackUncheckedLocked() should already placed the task on top,
                     // still need moveTaskToFrontLocked() below for any transition settings.
                 }
@@ -1871,13 +1872,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         final ActivityRecord r = task.getTopActivity();
-        task.stack.moveTaskToFrontLocked(task, false /* noAnimation */, options,
+        currentStack.moveTaskToFrontLocked(task, false /* noAnimation */, options,
                 r == null ? null : r.appTimeTracker, reason);
 
         if (DEBUG_STACK) Slog.d(TAG_STACK,
-                "findTaskToMoveToFront: moved to front of stack=" + task.stack);
+                "findTaskToMoveToFront: moved to front of stack=" + currentStack);
 
-        handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, task.stack.mStackId,
+        handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, currentStack.mStackId,
                 forceNonResizeable);
     }
 
@@ -2212,7 +2213,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // All we can do for now is update the bounds so it can be used when the task is
             // added to window manager.
             task.updateOverrideConfiguration(bounds);
-            if (task.stack != null && task.stack.mStackId != FREEFORM_WORKSPACE_STACK_ID) {
+            if (task.getStackId() != FREEFORM_WORKSPACE_STACK_ID) {
                 // re-restore the task so it can have the proper stack association.
                 restoreRecentTaskLocked(task, FREEFORM_WORKSPACE_STACK_ID);
             }
@@ -2233,7 +2234,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (updatedConfig) {
             final ActivityRecord r = task.topRunningActivityLocked();
             if (r != null) {
-                final ActivityStack stack = task.stack;
+                final ActivityStack stack = r.getStack();
                 kept = stack.ensureActivityConfigurationLocked(r, 0, preserveWindow);
 
                 if (!deferResume) {
@@ -2291,15 +2292,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
             stackId = FULLSCREEN_WORKSPACE_STACK_ID;
         }
 
-        if (task.stack != null) {
+        final ActivityStack currentStack = task.getStack();
+        if (currentStack != null) {
             // Task has already been restored once. See if we need to do anything more
-            if (task.stack.mStackId == stackId) {
+            if (currentStack.mStackId == stackId) {
                 // Nothing else to do since it is already restored in the right stack.
                 return true;
             }
             // Remove current stack association, so we can re-associate the task with the
             // right stack below.
-            task.stack.removeTask(task, "restoreRecentTaskLocked", REMOVE_TASK_MODE_MOVING);
+            currentStack.removeTask(task, "restoreRecentTaskLocked", REMOVE_TASK_MODE_MOVING);
         }
 
         final ActivityStack stack =
@@ -2343,7 +2345,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         final ActivityRecord r = task.topRunningActivityLocked();
-        final ActivityStack prevStack = task.stack;
+        final ActivityStack prevStack = task.getStack();
         final boolean wasFocused = isFocusedStack(prevStack) && (topRunningActivityLocked() == r);
         final boolean wasResumed = prevStack.mResumedActivity == r;
         // In some cases the focused stack isn't the front stack. E.g. pinned stack.
@@ -2393,7 +2395,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return false;
         }
 
-        if (task.stack != null && task.stack.mStackId == stackId) {
+        final ActivityStack currentStack = task.getStack();
+        if (currentStack != null && currentStack.mStackId == stackId) {
             // You are already in the right stack silly...
             Slog.i(TAG, "moveTaskToStack: taskId=" + taskId + " already in stackId=" + stackId);
             return true;
@@ -2405,7 +2408,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         final ActivityRecord topActivity = task.getTopActivity();
-        final int sourceStackId = task.stack != null ? task.stack.mStackId : INVALID_STACK_ID;
+        final int sourceStackId = task.getStackId();
         final boolean mightReplaceWindow =
                 StackId.replaceWindowsOnTaskMove(sourceStackId, stackId) && topActivity != null;
         if (mightReplaceWindow) {
@@ -2505,7 +2508,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         try {
             final TaskRecord task = r.task;
 
-            if (r == task.stack.getVisibleBehindActivity()) {
+            if (r == task.getStack().getVisibleBehindActivity()) {
                 // An activity can't be pinned and visible behind at the same time. Go ahead and
                 // release it from been visible behind before pinning.
                 requestVisibleBehindLocked(r, false);
@@ -2555,13 +2558,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         final TaskRecord task = r.task;
-        if (task == null || task.stack == null) {
+        final ActivityStack stack = r.getStack();
+        if (stack == null) {
             Slog.w(TAG, "moveActivityStackToFront: invalid task or stack: r="
                     + r + " task=" + task);
             return false;
         }
 
-        final ActivityStack stack = task.stack;
         if (stack == mFocusedStack && stack.topRunningActivityLocked() == r) {
             if (DEBUG_FOCUS) Slog.d(TAG_FOCUS,
                     "moveActivityStackToFront: already on top, r=" + r);
@@ -2771,7 +2774,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     boolean reportResumedActivityLocked(ActivityRecord r) {
-        final ActivityStack stack = r.task.stack;
+        final ActivityStack stack = r.getStack();
         if (isFocusedStack(stack)) {
             mService.updateUsageStats(r, true);
         }
@@ -2795,7 +2798,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     boolean requestVisibleBehindLocked(ActivityRecord r, boolean visible) {
-        final ActivityStack stack = r.task.stack;
+        final ActivityStack stack = r.getStack();
         if (stack == null) {
             if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND,
                     "requestVisibleBehind: r=" + r + " visible=" + visible + " stack is null");
@@ -2861,7 +2864,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     // Called when WindowManager has finished animating the launchingBehind activity to the back.
     void handleLaunchTaskBehindCompleteLocked(ActivityRecord r) {
         final TaskRecord task = r.task;
-        final ActivityStack stack = task.stack;
+        final ActivityStack stack = task.getStack();
 
         r.mLaunchTaskBehind = false;
         task.setLastThumbnailLocked(stack.screenshotActivitiesLocked(r));
@@ -3606,7 +3609,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     lockTaskModeState != LOCK_TASK_MODE_NONE);
             resumeFocusedStackTopActivityLocked();
         } else if (lockTaskModeState != LOCK_TASK_MODE_NONE) {
-            handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, task.stack.mStackId,
+            handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, task.getStackId(),
                     true /* forceNonResizable */);
         }
     }
@@ -3715,7 +3718,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void scheduleReportPictureInPictureModeChangedIfNeeded(TaskRecord task, ActivityStack prevStack) {
-        final ActivityStack stack = task.stack;
+        final ActivityStack stack = task.getStack();
         if (prevStack == null || prevStack == stack
                 || (prevStack.mStackId != PINNED_STACK_ID && stack.mStackId != PINNED_STACK_ID)) {
             return;
@@ -4392,7 +4395,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 focusedStack != null ? focusedStack.topActivity() : null;
 
         if (launchStackId != INVALID_STACK_ID) {
-            if (task.stack.mStackId != launchStackId) {
+            if (task.getStackId() != launchStackId) {
                 moveTaskToStackLocked(
                         taskId, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents",
                         ANIMATE);
@@ -4418,8 +4421,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
             mService.mActivityStarter.postStartActivityUncheckedProcessing(task.getTopActivity(),
                     ActivityManager.START_TASK_TO_FRONT,
-                    sourceRecord != null ? sourceRecord.task.stack.mStackId : INVALID_STACK_ID,
-                    sourceRecord, task.stack);
+                    sourceRecord != null ? sourceRecord.task.getStackId() : INVALID_STACK_ID,
+                    sourceRecord, task.getStack());
             return ActivityManager.START_TASK_TO_FRONT;
         }
         callingUid = task.mCallingUid;

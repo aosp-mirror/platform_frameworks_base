@@ -360,7 +360,7 @@ class ActivityStarter {
             }
         }
 
-        final ActivityStack resultStack = resultRecord == null ? null : resultRecord.task.stack;
+        final ActivityStack resultStack = resultRecord == null ? null : resultRecord.getStack();
 
         if (err != START_SUCCESS) {
             if (resultRecord != null) {
@@ -591,8 +591,9 @@ class ActivityStarter {
         }
 
         int startedActivityStackId = INVALID_STACK_ID;
-        if (r.task != null && r.task.stack != null) {
-            startedActivityStackId = r.task.stack.mStackId;
+        final ActivityStack currentStack = r.getStack();
+        if (currentStack != null) {
+            startedActivityStackId = currentStack.mStackId;
         } else if (mTargetStack != null) {
             startedActivityStackId = targetStack.mStackId;
         }
@@ -1099,10 +1100,12 @@ class ActivityStarter {
         }
 
         if (mStartActivity.packageName == null) {
-            if (mStartActivity.resultTo != null && mStartActivity.resultTo.task.stack != null) {
-                mStartActivity.resultTo.task.stack.sendActivityResultLocked(
-                        -1, mStartActivity.resultTo, mStartActivity.resultWho,
-                        mStartActivity.requestCode, RESULT_CANCELED, null);
+            final ActivityStack sourceStack = mStartActivity.resultTo != null
+                    ? mStartActivity.resultTo.getStack() : null;
+            if (sourceStack != null) {
+                sourceStack.sendActivityResultLocked(-1 /* callingUid */, mStartActivity.resultTo,
+                        mStartActivity.resultWho, mStartActivity.requestCode, RESULT_CANCELED,
+                        null /* data */);
             }
             ActivityOptions.abort(mOptions);
             return START_CLASS_NOT_FOUND;
@@ -1312,15 +1315,17 @@ class ActivityStarter {
     }
 
     private void sendNewTaskResultRequestIfNeeded() {
-        if (mStartActivity.resultTo != null && (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0
-                && mStartActivity.resultTo.task.stack != null) {
+        final ActivityStack sourceStack = mStartActivity.resultTo != null
+                ? mStartActivity.resultTo.getStack() : null;
+        if (sourceStack != null && (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
             // For whatever reason this activity is being launched into a new task...
             // yet the caller has requested a result back.  Well, that is pretty messed up,
             // so instead immediately send back a cancel and let the new task continue launched
             // as normal without a dependency on its originator.
             Slog.w(TAG, "Activity is launching as a new task, so cancelling activity result.");
-            mStartActivity.resultTo.task.stack.sendActivityResultLocked(-1, mStartActivity.resultTo,
-                    mStartActivity.resultWho, mStartActivity.requestCode, RESULT_CANCELED, null);
+            sourceStack.sendActivityResultLocked(-1 /* callingUid */, mStartActivity.resultTo,
+                    mStartActivity.resultWho, mStartActivity.requestCode, RESULT_CANCELED,
+                    null /* data */);
             mStartActivity.resultTo = null;
         }
     }
@@ -1328,7 +1333,7 @@ class ActivityStarter {
     private void computeLaunchingTaskFlags() {
         // If the caller is not coming from another activity, but has given us an explicit task into
         // which they would like us to launch the new activity, then let's see about doing that.
-        if (mSourceRecord == null && mInTask != null && mInTask.stack != null) {
+        if (mSourceRecord == null && mInTask != null && mInTask.getStack() != null) {
             final Intent baseIntent = mInTask.getBaseIntent();
             final ActivityRecord root = mInTask.getRootActivity();
             if (baseIntent == null) {
@@ -1415,7 +1420,7 @@ class ActivityStarter {
             return;
         }
         if (!mSourceRecord.finishing) {
-            mSourceStack = mSourceRecord.task.stack;
+            mSourceStack = mSourceRecord.getStack();
             return;
         }
 
@@ -1474,7 +1479,7 @@ class ActivityStarter {
     }
 
     private ActivityRecord setTargetStackAndMoveToFrontIfNeeded(ActivityRecord intentActivity) {
-        mTargetStack = intentActivity.task.stack;
+        mTargetStack = intentActivity.getStack();
         mTargetStack.mLastPausedActivity = null;
         // If the target task is not in the front, then we need to bring it to the front...
         // except...  well, with SINGLE_TASK_LAUNCH it's not entirely clear. We'd like to have
@@ -1606,7 +1611,7 @@ class ActivityStarter {
                 // is put in the right place.
                 mSourceRecord = intentActivity;
                 final TaskRecord task = mSourceRecord.task;
-                if (task != null && task.stack == null) {
+                if (task != null && task.getStack() == null) {
                     // Target stack got cleared when we all activities were removed above.
                     // Go ahead and reset it.
                     mTargetStack = computeStackFocus(mSourceRecord, false /* newTask */,
@@ -1722,18 +1727,19 @@ class ActivityStarter {
         }
 
         final TaskRecord sourceTask = mSourceRecord.task;
+        final ActivityStack sourceStack = mSourceRecord.getStack();
         // We only want to allow changing stack if the target task is not the top one,
         // otherwise we would move the launching task to the other side, rather than show
         // two side by side.
-        final boolean moveStackAllowed = sourceTask.stack.topTask() != sourceTask;
+        final boolean moveStackAllowed = sourceStack.topTask() != sourceTask;
         if (moveStackAllowed) {
             mTargetStack = getLaunchStack(mStartActivity, mLaunchFlags, mStartActivity.task,
                     mOptions);
         }
 
         if (mTargetStack == null) {
-            mTargetStack = sourceTask.stack;
-        } else if (mTargetStack != sourceTask.stack) {
+            mTargetStack = sourceStack;
+        } else if (mTargetStack != sourceStack) {
             mSupervisor.moveTaskToStackLocked(sourceTask.taskId, mTargetStack.mStackId,
                     ON_TOP, FORCE_FOCUS, "launchToSide", !ANIMATE);
         }
@@ -1800,7 +1806,7 @@ class ActivityStarter {
         if (mLaunchBounds != null) {
             mInTask.updateOverrideConfiguration(mLaunchBounds);
             int stackId = mInTask.getLaunchStackId();
-            if (stackId != mInTask.stack.mStackId) {
+            if (stackId != mInTask.getStackId()) {
                 final ActivityStack stack = mSupervisor.moveTaskToStackUncheckedLocked(
                         mInTask, stackId, ON_TOP, !FORCE_FOCUS, "inTaskToFront");
                 stackId = stack.mStackId;
@@ -1809,7 +1815,7 @@ class ActivityStarter {
                 mService.resizeStack(stackId, mLaunchBounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
             }
         }
-        mTargetStack = mInTask.stack;
+        mTargetStack = mInTask.getStack();
         mTargetStack.moveTaskToFrontLocked(
                 mInTask, mNoAnimation, mOptions, mStartActivity.appTimeTracker, "inTaskToFront");
 
@@ -1916,10 +1922,10 @@ class ActivityStarter {
             return stack;
         }
 
-        if (task != null && task.stack != null) {
-            stack = task.stack;
-            if (stack.isOnHomeDisplay()) {
-                if (mSupervisor.mFocusedStack != stack) {
+        final ActivityStack currentStack = task != null ? task.getStack() : null;
+        if (currentStack != null) {
+            if (currentStack.isOnHomeDisplay()) {
+                if (mSupervisor.mFocusedStack != currentStack) {
                     if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
                             "computeStackFocus: Setting " + "focused stack to r=" + r
                                     + " task=" + task);
@@ -1929,7 +1935,7 @@ class ActivityStarter {
                                     + mSupervisor.mFocusedStack);
                 }
             }
-            return stack;
+            return currentStack;
         }
 
         final ActivityStackSupervisor.ActivityContainer container = r.mInitialActivityContainer;
@@ -1980,7 +1986,7 @@ class ActivityStarter {
 
         // We are reusing a task, keep the stack!
         if (mReuseTask != null) {
-            return mReuseTask.stack;
+            return mReuseTask.getStack();
         }
 
         final int launchStackId =
@@ -2001,7 +2007,7 @@ class ActivityStarter {
 
         // The parent activity doesn't want to launch the activity on top of itself, but
         // instead tries to put it onto other side in side-by-side mode.
-        final ActivityStack parentStack = task != null ? task.stack
+        final ActivityStack parentStack = task != null ? task.getStack()
                 : r.mInitialActivityContainer != null ? r.mInitialActivityContainer.mStack
                 : mSupervisor.mFocusedStack;
 

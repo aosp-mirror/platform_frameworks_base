@@ -464,7 +464,7 @@ final class ActivityRecord {
     }
 
     void scheduleMultiWindowModeChanged() {
-        if (task == null || task.stack == null || app == null || app.thread == null) {
+        if (task == null || task.getStack() == null || app == null || app.thread == null) {
             return;
         }
         try {
@@ -476,20 +476,19 @@ final class ActivityRecord {
     }
 
     void schedulePictureInPictureModeChanged() {
-        if (task == null || task.stack == null || app == null || app.thread == null) {
+        if (task == null || task.getStack() == null || app == null || app.thread == null) {
             return;
         }
         try {
             app.thread.schedulePictureInPictureModeChanged(
-                    appToken, task.stack.mStackId == PINNED_STACK_ID);
+                    appToken, task.getStackId() == PINNED_STACK_ID);
         } catch (Exception e) {
             // If process died, no one cares.
         }
     }
 
     boolean isFreeform() {
-        return task != null && task.stack != null
-                && task.stack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
+        return task != null && task.getStackId() == FREEFORM_WORKSPACE_STACK_ID;
     }
 
     static class Token extends IApplicationToken.Stub {
@@ -566,7 +565,7 @@ final class ActivityRecord {
                 return null;
             }
             ActivityRecord r = token.weakActivity.get();
-            if (r == null || r.task == null || r.task.stack == null) {
+            if (r == null || r.getStack() == null) {
                 return null;
             }
             return r;
@@ -777,8 +776,9 @@ final class ActivityRecord {
     }
 
     void setTask(TaskRecord newTask, TaskRecord taskToAffiliateWith) {
-        if (task != null && task.removeActivity(this) && task != newTask && task.stack != null) {
-            task.stack.removeTask(task, "setTask");
+        if (task != null && task.removeActivity(this) && task != newTask
+                && task.getStack() != null) {
+            task.getStack().removeTask(task, "setTask");
         }
         task = newTask;
         setTaskToAffiliateWith(taskToAffiliateWith);
@@ -790,6 +790,13 @@ final class ActivityRecord {
                 launchMode != ActivityInfo.LAUNCH_SINGLE_TASK) {
             task.setTaskToAffiliateWith(taskToAffiliateWith);
         }
+    }
+
+    /**
+     * @return Stack value from current task, null if there is no task.
+     */
+    ActivityStack getStack() {
+        return task != null ? task.getStack() : null;
     }
 
     boolean changeWindowTranslucency(boolean toOpaque) {
@@ -825,7 +832,8 @@ final class ActivityRecord {
     }
 
     boolean isInStackLocked() {
-        return task != null && task.stack != null && task.stack.isInStackLocked(this) != null;
+        final ActivityStack stack = getStack();
+        return stack != null && stack.isInStackLocked(this) != null;
     }
 
     boolean isHomeActivity() {
@@ -848,7 +856,7 @@ final class ActivityRecord {
     }
 
     boolean isFocusable() {
-        return StackId.canReceiveKeys(task.stack.mStackId) || isAlwaysFocusable();
+        return StackId.canReceiveKeys(task.getStackId()) || isAlwaysFocusable();
     }
 
     boolean isResizeable() {
@@ -883,8 +891,8 @@ final class ActivityRecord {
 
     void makeFinishingLocked() {
         if (!finishing) {
-            if (task != null && task.stack != null
-                    && this == task.stack.getVisibleBehindActivity()) {
+            final ActivityStack stack = getStack();
+            if (stack != null && this == stack.getVisibleBehindActivity()) {
                 // A finishing activity should not remain as visible in the background
                 mStackSupervisor.requestVisibleBehindLocked(this, false);
             }
@@ -948,7 +956,7 @@ final class ActivityRecord {
                 intent, getUriPermissionsLocked(), userId);
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
-        final ActivityStack stack = task.stack;
+        final ActivityStack stack = getStack();
         final boolean isTopActivityInStack =
                 stack != null && stack.topRunningActivityLocked() == this;
         final boolean isTopActivityWhileSleeping =
@@ -1133,7 +1141,7 @@ final class ActivityRecord {
             return false;
         }
 
-        final ActivityStack stack = task.stack;
+        final ActivityStack stack = getStack();
         if (stack == null) {
             return false;
         }
@@ -1146,7 +1154,7 @@ final class ActivityRecord {
 
     void finishLaunchTickingLocked() {
         launchTickTime = 0;
-        final ActivityStack stack = task.stack;
+        final ActivityStack stack = getStack();
         if (stack != null) {
             stack.mHandler.removeMessages(ActivityStack.LAUNCH_TICK_MSG);
         }
@@ -1180,7 +1188,7 @@ final class ActivityRecord {
         if (displayStartTime != 0) {
             reportLaunchTimeLocked(curTime);
         }
-        final ActivityStack stack = task.stack;
+        final ActivityStack stack = getStack();
         if (fullyDrawnStartTime != 0 && stack != null) {
             final long thisTime = curTime - fullyDrawnStartTime;
             final long totalTime = stack.mFullyDrawnStartTime != 0
@@ -1212,7 +1220,7 @@ final class ActivityRecord {
     }
 
     private void reportLaunchTimeLocked(final long curTime) {
-        final ActivityStack stack = task.stack;
+        final ActivityStack stack = getStack();
         if (stack == null) {
             return;
         }
@@ -1356,13 +1364,13 @@ final class ActivityRecord {
 
     static ActivityRecord isInStackLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        return (r != null) ? r.task.stack.isInStackLocked(r) : null;
+        return (r != null) ? r.getStack().isInStackLocked(r) : null;
     }
 
     static ActivityStack getStackLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.isInStackLocked(token);
         if (r != null) {
-            return r.task.stack;
+            return r.getStack();
         }
         return null;
     }
@@ -1373,8 +1381,9 @@ final class ActivityRecord {
             // This would be redundant.
             return false;
         }
-        if (task == null || task.stack == null || this == task.stack.mResumedActivity
-                || this == task.stack.mPausingActivity || !haveState || !stopped) {
+        final ActivityStack stack = getStack();
+        if (stack == null || this == stack.mResumedActivity || this == stack.mPausingActivity
+                || !haveState || !stopped) {
             // We're not ready for this kind of thing.
             return false;
         }

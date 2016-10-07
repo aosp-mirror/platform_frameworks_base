@@ -202,8 +202,8 @@ final class TaskRecord {
     /** List of all activities in the task arranged in history order */
     final ArrayList<ActivityRecord> mActivities;
 
-    /** Current stack */
-    ActivityStack stack;
+    /** Current stack. Setter must always be used to update the value. */
+    private ActivityStack mStack;
 
     /** Takes on same set of values as ActivityRecord.mActivityType */
     int taskType;
@@ -527,6 +527,21 @@ final class TaskRecord {
         mNextAffiliateTaskId = nextAffiliate == null ? INVALID_TASK_ID : nextAffiliate.taskId;
     }
 
+    ActivityStack getStack() {
+        return mStack;
+    }
+
+    void setStack(ActivityStack stack) {
+        mStack = stack;
+    }
+
+    /**
+     * @return Id of current stack, {@link INVALID_STACK_ID} if no stack is set.
+     */
+    int getStackId() {
+        return mStack != null ? mStack.mStackId : INVALID_STACK_ID;
+    }
+
     // Close up recents linked list.
     void closeRecentsChain() {
         if (mPrevAffiliate != null) {
@@ -583,10 +598,10 @@ final class TaskRecord {
             // Non-fullscreen tasks
             taskWidth = mBounds.width();
             taskHeight = mBounds.height();
-        } else if (stack != null) {
+        } else if (mStack != null) {
             // Fullscreen tasks
             final Point displaySize = new Point();
-            stack.getDisplaySize(displaySize);
+            mStack.getDisplaySize(displaySize);
             taskWidth = displaySize.x;
             taskHeight = displaySize.y;
         } else {
@@ -681,7 +696,7 @@ final class TaskRecord {
     }
 
     ActivityRecord topRunningActivityLocked() {
-        if (stack != null) {
+        if (mStack != null) {
             for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
                 ActivityRecord r = mActivities.get(activityNdx);
                 if (!r.finishing && r.okToShowLocked()) {
@@ -693,7 +708,7 @@ final class TaskRecord {
     }
 
     ActivityRecord topRunningActivityWithStartingWindowLocked() {
-        if (stack != null) {
+        if (mStack != null) {
             for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
                 ActivityRecord r = mActivities.get(activityNdx);
                 if (r.mStartingWindowState != STARTING_WINDOW_SHOWN
@@ -817,7 +832,7 @@ final class TaskRecord {
             mService.notifyTaskPersisterLocked(this, false);
         }
 
-        if (stack != null && stack.mStackId == PINNED_STACK_ID) {
+        if (getStackId() == PINNED_STACK_ID) {
             // We normally notify listeners of task stack changes on pause, however pinned stack
             // activities are normally in the paused state so no notification will be sent there
             // before the activity is removed. We send it here so instead.
@@ -849,13 +864,13 @@ final class TaskRecord {
             if (r.finishing) {
                 continue;
             }
-            if (stack == null) {
+            if (mStack == null) {
                 // Task was restored from persistent storage.
                 r.takeFromHistory();
                 mActivities.remove(activityNdx);
                 --activityNdx;
                 --numActivities;
-            } else if (stack.finishActivityLocked(
+            } else if (mStack.finishActivityLocked(
                     r, Activity.RESULT_CANCELED, null, "clear-task-index", false)) {
                 --activityNdx;
                 --numActivities;
@@ -910,7 +925,7 @@ final class TaskRecord {
                     if (opts != null) {
                         ret.updateOptionsLocked(opts);
                     }
-                    if (stack != null && stack.finishActivityLocked(
+                    if (mStack != null && mStack.finishActivityLocked(
                             r, Activity.RESULT_CANCELED, null, "clear-task-stack", false)) {
                         --activityNdx;
                         --numActivities;
@@ -924,8 +939,8 @@ final class TaskRecord {
                         && (launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0
                         && !ActivityStarter.isDocumentLaunchesIntoExisting(launchFlags)) {
                     if (!ret.finishing) {
-                        if (stack != null) {
-                            stack.finishActivityLocked(
+                        if (mStack != null) {
+                            mStack.finishActivityLocked(
                                     ret, Activity.RESULT_CANCELED, null, "clear-task-top", false);
                         }
                         return null;
@@ -940,10 +955,10 @@ final class TaskRecord {
     }
 
     public TaskThumbnail getTaskThumbnailLocked() {
-        if (stack != null) {
-            final ActivityRecord resumedActivity = stack.mResumedActivity;
+        if (mStack != null) {
+            final ActivityRecord resumedActivity = mStack.mResumedActivity;
             if (resumedActivity != null && resumedActivity.task == this) {
-                final Bitmap thumbnail = stack.screenshotActivitiesLocked(resumedActivity);
+                final Bitmap thumbnail = mStack.screenshotActivitiesLocked(resumedActivity);
                 setLastThumbnailLocked(thumbnail);
             }
         }
@@ -1417,7 +1432,7 @@ final class TaskRecord {
         // If the task has no requested minimal size, we'd like to enforce a minimal size
         // so that the user can not render the task too small to manipulate. We don't need
         // to do this for the pinned stack as the bounds are controlled by the system.
-        if (stack.mStackId != PINNED_STACK_ID) {
+        if (getStackId() != PINNED_STACK_ID) {
             if (minWidth == INVALID_MIN_SIZE) {
                 minWidth = mService.mStackSupervisor.mDefaultMinSizeOfResizeableTask;
             }
@@ -1477,7 +1492,7 @@ final class TaskRecord {
 
         mFullscreen = bounds == null;
         if (mFullscreen) {
-            if (mBounds != null && StackId.persistTaskBounds(stack.mStackId)) {
+            if (mBounds != null && StackId.persistTaskBounds(mStack.mStackId)) {
                 mLastNonFullscreenBounds = mBounds;
             }
             mBounds = null;
@@ -1490,7 +1505,7 @@ final class TaskRecord {
             } else {
                 mBounds.set(mTmpRect);
             }
-            if (stack == null || StackId.persistTaskBounds(stack.mStackId)) {
+            if (mStack == null || StackId.persistTaskBounds(mStack.mStackId)) {
                 mLastNonFullscreenBounds = mBounds;
             }
             mOverrideConfig = calculateOverrideConfig(mTmpRect, insetBounds,
@@ -1626,7 +1641,7 @@ final class TaskRecord {
     /** Updates the task's bounds and override configuration to match what is expected for the
      * input stack. */
     void updateOverrideConfigurationForStack(ActivityStack inStack) {
-        if (stack != null && stack == inStack) {
+        if (mStack != null && mStack == inStack) {
             return;
         }
 
@@ -1670,17 +1685,17 @@ final class TaskRecord {
             return null;
         }
 
-        if (stack == null) {
+        if (mStack == null) {
             return null;
         }
 
-        final int stackId = stack.mStackId;
+        final int stackId = mStack.mStackId;
         if (stackId == HOME_STACK_ID
                 || stackId == FULLSCREEN_WORKSPACE_STACK_ID
                 || (stackId == DOCKED_STACK_ID && !isResizeable())) {
-            return isResizeable() ? stack.mBounds : null;
+            return isResizeable() ? mStack.mBounds : null;
         } else if (!StackId.persistTaskBounds(stackId)) {
-            return stack.mBounds;
+            return mStack.mBounds;
         }
         return mLastNonFullscreenBounds;
     }
@@ -1688,7 +1703,7 @@ final class TaskRecord {
     boolean canMatchRootAffinity() {
         // We don't allow root affinity matching on the pinned stack as no other task should
         // be launching in it based on affinity.
-        return rootAffinity != null && (stack == null || stack.mStackId != PINNED_STACK_ID);
+        return rootAffinity != null && getStackId() != PINNED_STACK_ID;
     }
 
     void dump(PrintWriter pw, String prefix) {
@@ -1779,9 +1794,7 @@ final class TaskRecord {
         if (lastDescription != null) {
             pw.print(prefix); pw.print("lastDescription="); pw.println(lastDescription);
         }
-        if (stack != null) {
-            pw.print(prefix); pw.print("stackId="); pw.println(stack.mStackId);
-        }
+        pw.print(prefix); pw.print("stackId="); pw.println(getStackId());
         pw.print(prefix + "hasBeenVisible=" + hasBeenVisible);
                 pw.print(" mResizeMode=" + ActivityInfo.resizeModeToString(mResizeMode));
                 pw.print(" isResizeable=" + isResizeable());
@@ -1798,7 +1811,7 @@ final class TaskRecord {
             sb.append(" U=");
             sb.append(userId);
             sb.append(" StackId=");
-            sb.append(stack != null ? stack.mStackId : INVALID_STACK_ID);
+            sb.append(getStackId());
             sb.append(" sz=");
             sb.append(mActivities.size());
             sb.append('}');

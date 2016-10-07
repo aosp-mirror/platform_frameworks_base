@@ -3101,7 +3101,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             ActivityRecord r = mStackSupervisor.isInAnyStackLocked(token);
             if (r != null) {
-                r.task.stack.notifyActivityDrawnLocked(r);
+                r.getStack().notifyActivityDrawnLocked(r);
             }
         }
     }
@@ -4749,7 +4749,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
             TaskRecord task = r.task;
-            if (task != null && (!task.mFullscreen || !task.stack.mFullscreen)) {
+            if (task != null && (!task.mFullscreen || !task.getStack().mFullscreen)) {
                 // Fixed screen orientation isn't supported when activities aren't in full screen
                 // mode.
                 return;
@@ -4789,7 +4789,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             try {
                 r.forceNewConfig = true;
-                r.task.stack.ensureActivityConfigurationLocked(r, 0, false);
+                r.getStack().ensureActivityConfigurationLocked(r, 0, false);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -4835,7 +4835,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (mController != null) {
                 // Find the first activity that is not finishing.
-                ActivityRecord next = r.task.stack.topRunningActivityLocked(token, 0);
+                ActivityRecord next = r.getStack().topRunningActivityLocked(token, 0);
                 if (next != null) {
                     // ask watcher if this is allowed
                     boolean resumeOK = true;
@@ -4869,7 +4869,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         Slog.i(TAG, "Removing task failed to finish activity");
                     }
                 } else {
-                    res = tr.stack.requestFinishActivityLocked(token, resultCode,
+                    res = tr.getStack().requestFinishActivityLocked(token, resultCode,
                             resultData, "app-request", true);
                     if (!res) {
                         Slog.i(TAG, "Failed to finish by app-request");
@@ -4903,7 +4903,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i = 0; i < activities.size(); i++) {
                 ActivityRecord r = activities.get(i);
                 if (!r.finishing && r.isInStackLocked()) {
-                    r.task.stack.finishActivityLocked(r, Activity.RESULT_CANCELED,
+                    r.getStack().finishActivityLocked(r, Activity.RESULT_CANCELED,
                             null, "finish-heavy", true);
                 }
             }
@@ -4939,7 +4939,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
-                r.task.stack.finishSubActivityLocked(r, resultWho, requestCode);
+                r.getStack().finishSubActivityLocked(r, resultWho, requestCode);
             }
             Binder.restoreCallingIdentity(origId);
         }
@@ -4963,7 +4963,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mStackSupervisor.showLockTaskToast();
                     return false;
                 }
-                return task.stack.finishActivityAffinityLocked(r);
+                return task.getStack().finishActivityAffinityLocked(r);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -4994,7 +4994,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (r == null) {
                     return false;
                 }
-                return r.task.stack.safelyDestroyActivityLocked(r, "app-req");
+                return r.getStack().safelyDestroyActivityLocked(r, "app-req");
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -6930,9 +6930,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         final long origId = Binder.clearCallingIdentity();
 
         synchronized (this) {
-            ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
-                r.task.stack.activityStoppedLocked(r, icicle, persistentState, description);
+                r.getStack().activityStoppedLocked(r, icicle, persistentState, description);
             }
         }
 
@@ -9076,7 +9076,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         rti.origActivity = tr.origActivity;
         rti.realActivity = tr.realActivity;
         rti.description = tr.lastDescription;
-        rti.stackId = tr.stack != null ? tr.stack.mStackId : -1;
+        rti.stackId = tr.getStackId();
         rti.userId = tr.userId;
         rti.taskDescription = new ActivityManager.TaskDescription(tr.lastTaskDescription);
         rti.firstActiveTime = tr.firstActiveTime;
@@ -9205,15 +9205,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                             continue;
                         }
                     }
+                    final ActivityStack stack = tr.getStack();
                     if ((flags & ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS) != 0) {
-                        if (tr.stack != null && tr.stack.isHomeStack()) {
+                        if (stack != null && stack.isHomeStack()) {
                             if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
                                     "Skipping, home stack task: " + tr);
                             continue;
                         }
                     }
                     if ((flags & ActivityManager.RECENT_INGORE_DOCKED_STACK_TOP_TASK) != 0) {
-                        final ActivityStack stack = tr.stack;
                         if (stack != null && stack.isDockedStack() && stack.topTask() == tr) {
                             if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
                                     "Skipping, top task in docked stack: " + tr);
@@ -9221,7 +9221,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                     if ((flags & ActivityManager.RECENT_INGORE_PINNED_STACK_TASKS) != 0) {
-                        if (tr.stack != null && tr.stack.isPinnedStack()) {
+                        if (stack != null && stack.isPinnedStack()) {
                             if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
                                     "Skipping, pinned stack task: " + tr);
                             continue;
@@ -9328,7 +9328,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Use the full screen as the context for the task thumbnail
                 final Point displaySize = new Point();
                 final TaskThumbnailInfo thumbnailInfo = new TaskThumbnailInfo();
-                r.task.stack.getDisplaySize(displaySize);
+                r.getStack().getDisplaySize(displaySize);
                 thumbnailInfo.taskWidth = displaySize.x;
                 thumbnailInfo.taskHeight = displaySize.y;
                 thumbnailInfo.screenOrientation = mGlobalConfiguration.orientation;
@@ -9352,7 +9352,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 task.inRecents = true;
                 mRecentTasks.add(task);
-                r.task.stack.addTask(task, false, "addAppTask");
+                r.getStack().addTask(task, false, "addAppTask");
 
                 task.setLastThumbnailLocked(thumbnail);
                 task.freeLastThumbnail();
@@ -9418,7 +9418,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // - a non-null bounds on a non-freeform (fullscreen OR docked) task moves
                 //   that task to freeform
                 // - otherwise the task is not moved
-                int stackId = task.stack.mStackId;
+                int stackId = task.getStackId();
                 if (!StackId.isTaskResizeAllowed(stackId)) {
                     throw new IllegalArgumentException("resizeTask not allowed on task=" + task);
                 }
@@ -9428,7 +9428,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     stackId = FREEFORM_WORKSPACE_STACK_ID;
                 }
                 boolean preserveWindow = (resizeMode & RESIZE_MODE_PRESERVE_WINDOW) != 0;
-                if (stackId != task.stack.mStackId) {
+                if (stackId != task.getStackId()) {
                     mStackSupervisor.moveTaskToStackUncheckedLocked(
                             task, stackId, ON_TOP, !FORCE_FOCUS, "resizeTask");
                     preserveWindow = false;
@@ -9455,7 +9455,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.w(TAG, "getTaskBounds: taskId=" + taskId + " not found");
                     return rect;
                 }
-                if (task.stack != null) {
+                if (task.getStack() != null) {
                     // Return the bounds from window manager since it will be adjusted for various
                     // things like the presense of a docked stack for tasks that aren't resizeable.
                     mWindowManager.getTaskBounds(task.taskId, rect);
@@ -10113,7 +10113,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (this) {
                 final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(
                         taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
-                return tr != null && tr.stack != null && tr.stack.isHomeStack();
+                final ActivityStack stack = tr != null ? tr.getStack() : null;
+                return stack != null && stack.isHomeStack();
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -12460,7 +12461,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 final boolean translucentChanged = r.changeWindowTranslucency(true);
                 if (translucentChanged) {
-                    r.task.stack.releaseBackgroundResources(r);
+                    r.getStack().releaseBackgroundResources(r);
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 }
                 mWindowManager.setAppFullscreen(token, true);
@@ -12487,7 +12488,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 final boolean translucentChanged = r.changeWindowTranslucency(false);
                 if (translucentChanged) {
-                    r.task.stack.convertActivityToTranslucent(r);
+                    r.getStack().convertActivityToTranslucent(r);
                 }
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 mWindowManager.setAppFullscreen(token, false);
@@ -19161,7 +19162,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             ActivityRecord srec = ActivityRecord.forTokenLocked(token);
             if (srec != null) {
-                return srec.task.stack.shouldUpRecreateTaskLocked(srec, destAffinity);
+                return srec.getStack().shouldUpRecreateTaskLocked(srec, destAffinity);
             }
         }
         return false;
@@ -19173,7 +19174,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
             if (r != null) {
-                return r.task.stack.navigateUpToLocked(r, destIntent, resultCode, resultData);
+                return r.getStack().navigateUpToLocked(r, destIntent, resultCode, resultData);
             }
             return false;
         }

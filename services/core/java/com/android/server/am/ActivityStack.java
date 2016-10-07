@@ -644,9 +644,9 @@ final class ActivityStack {
             return null;
         }
         final TaskRecord task = r.task;
-        if (task != null && task.stack != null
-                && task.mActivities.contains(r) && mTaskHistory.contains(task)) {
-            if (task.stack != this) Slog.w(TAG,
+        final ActivityStack stack = r.getStack();
+        if (stack != null && task.mActivities.contains(r) && mTaskHistory.contains(task)) {
+            if (stack != this) Slog.w(TAG,
                     "Illegal state! task does not point to stack it is in.");
             return r;
         }
@@ -1467,7 +1467,7 @@ final class ActivityStack {
     private void setVisible(ActivityRecord r, boolean visible) {
         r.visible = visible;
         if (!visible && r.mUpdateTaskThumbnailWhenHidden) {
-            r.updateThumbnailLocked(r.task.stack.screenshotActivitiesLocked(r), null);
+            r.updateThumbnailLocked(r.task.getStack().screenshotActivitiesLocked(r), null);
             r.mUpdateTaskThumbnailWhenHidden = false;
         }
         mWindowManager.setAppVisibility(r.appToken, visible);
@@ -1487,7 +1487,7 @@ final class ActivityStack {
             return null;
         }
 
-        ActivityStack stack = task.stack;
+        final ActivityStack stack = task.getStack();
         if (stack == null) {
             return null;
         }
@@ -1531,7 +1531,7 @@ final class ActivityStack {
         ArrayList<ActivityStack> stacks = mStacks;
         final ActivityRecord parent = mActivityContainer.mParentActivity;
         if (parent != null) {
-            stacks = parent.task.stack.mStacks;
+            stacks = parent.getStack().mStacks;
         }
         if (stacks != null) {
             for (int i = stacks.size() - 1; i >= 0; --i) {
@@ -2276,7 +2276,7 @@ final class ActivityStack {
         }
 
         final TaskRecord nextTask = next.task;
-        if (prevTask != null && prevTask.stack == this &&
+        if (prevTask != null && prevTask.getStack() == this &&
                 prevTask.isOverHomeStack() && prev.finishing && prev.frontOfTask) {
             if (DEBUG_STACK)  mStackSupervisor.validateTopActivitiesLocked();
             if (prevTask == nextTask) {
@@ -3630,7 +3630,7 @@ final class ActivityStack {
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to FINISHING: " + r);
         r.state = ActivityState.FINISHING;
         final boolean finishingActivityInNonFocusedStack
-                = r.task.stack != mStackSupervisor.getFocusedStack()
+                = r.getStack() != mStackSupervisor.getFocusedStack()
                 && prevState == ActivityState.PAUSED && mode == FINISH_AFTER_VISIBLE;
 
         if (mode == FINISH_IMMEDIATELY
@@ -5228,7 +5228,7 @@ final class ActivityStack {
             }
         }
 
-        task.stack = null;
+        task.setStack(null);
     }
 
     TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent,
@@ -5261,7 +5261,7 @@ final class ActivityStack {
     void addTask(final TaskRecord task, final boolean toTop, String reason) {
         final ActivityStack prevStack = preAddTask(task, reason, toTop);
 
-        task.stack = this;
+        task.setStack(this);
         if (toTop) {
             insertTaskAtTop(task, null);
         } else {
@@ -5273,9 +5273,9 @@ final class ActivityStack {
 
     void positionTask(final TaskRecord task, int position) {
         final ActivityRecord topRunningActivity = task.topRunningActivityLocked();
-        final boolean wasResumed = topRunningActivity == task.stack.mResumedActivity;
+        final boolean wasResumed = topRunningActivity == task.getStack().mResumedActivity;
         final ActivityStack prevStack = preAddTask(task, "positionTask", !ON_TOP);
-        task.stack = this;
+        task.setStack(this);
         insertTaskAtPosition(task, position);
         postAddTask(task, prevStack);
         if (wasResumed) {
@@ -5289,7 +5289,7 @@ final class ActivityStack {
     }
 
     private ActivityStack preAddTask(TaskRecord task, String reason, boolean toTop) {
-        final ActivityStack prevStack = task.stack;
+        final ActivityStack prevStack = task.getStack();
         if (prevStack != null && prevStack != this) {
             prevStack.removeTask(task, reason,
                     toTop ? REMOVE_TASK_MODE_MOVING_TO_TOP : REMOVE_TASK_MODE_MOVING);
@@ -5343,7 +5343,7 @@ final class ActivityStack {
      * created on this stack which the activity is added to.
      * */
     void moveActivityToStack(ActivityRecord r) {
-        final ActivityStack prevStack = r.task.stack;
+        final ActivityStack prevStack = r.getStack();
         if (prevStack.mStackId == mStackId) {
             // You are already in the right stack silly...
             return;
