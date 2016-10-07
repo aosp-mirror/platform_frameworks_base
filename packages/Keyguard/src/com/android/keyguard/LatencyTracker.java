@@ -71,12 +71,18 @@ public class LatencyTracker {
      */
     public static final int ACTION_CHECK_CREDENTIAL_UNLOCKED = 4;
 
+    /**
+     * Time it takes to turn on the screen.
+     */
+    public static final int ACTION_TURN_ON_SCREEN = 5;
+
     private static final String[] NAMES = new String[] {
             "expand panel",
             "toggle recents",
             "fingerprint wake-and-unlock",
             "check credential",
-            "check credential unlocked" };
+            "check credential unlocked",
+            "turn on screen" };
 
     private static LatencyTracker sLatencyTracker;
 
