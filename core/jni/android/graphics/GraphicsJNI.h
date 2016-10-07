@@ -12,6 +12,7 @@
 #include "SkRect.h"
 #include <jni.h>
 #include <hwui/Canvas.h>
+#include <hwui/PixelRef.h>
 
 class SkBitmapRegionDecoder;
 class SkCanvas;
