@@ -15,6 +15,9 @@
  */
 package com.android.keyguard;
 
+import static com.android.keyguard.LatencyTracker.ACTION_CHECK_CREDENTIAL;
+import static com.android.keyguard.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
+
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.AsyncTask;
@@ -242,6 +245,10 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 return;
             }
 
+            if (LatencyTracker.isEnabled(mContext)) {
+                LatencyTracker.getInstance(mContext).onActionStart(ACTION_CHECK_CREDENTIAL);
+                LatencyTracker.getInstance(mContext).onActionStart(ACTION_CHECK_CREDENTIAL_UNLOCKED);
+            }
             mPendingLockCheck = LockPatternChecker.checkPattern(
                     mLockPatternUtils,
                     pattern,
@@ -250,17 +257,35 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
                         @Override
                         public void onEarlyMatched() {
+                            if (LatencyTracker.isEnabled(mContext)) {
+                                LatencyTracker.getInstance(mContext).onActionEnd(
+                                        ACTION_CHECK_CREDENTIAL);
+                            }
                             onPatternChecked(userId, true /* matched */, 0 /* timeoutMs */,
                                     true /* isValidPattern */);
                         }
 
                         @Override
                         public void onChecked(boolean matched, int timeoutMs) {
+                            if (LatencyTracker.isEnabled(mContext)) {
+                                LatencyTracker.getInstance(mContext).onActionEnd(
+                                        ACTION_CHECK_CREDENTIAL_UNLOCKED);
+                            }
                             mLockPatternView.enableInput();
                             mPendingLockCheck = null;
                             if (!matched) {
                                 onPatternChecked(userId, false /* matched */, timeoutMs,
                                         true /* isValidPattern */);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled() {
+                            // We already got dismissed with the early matched callback, so we
+                            // cancelled the check. However, we still need to note down the latency.
+                            if (LatencyTracker.isEnabled(mContext)) {
+                                LatencyTracker.getInstance(mContext).onActionEnd(
+                                        ACTION_CHECK_CREDENTIAL_UNLOCKED);
                             }
                         }
                     });

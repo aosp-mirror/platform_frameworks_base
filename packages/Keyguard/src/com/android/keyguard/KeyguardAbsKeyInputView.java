@@ -168,6 +168,16 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                                     true /* isValidPassword */);
                         }
                     }
+
+                    @Override
+                    public void onCancelled() {
+                        // We already got dismissed with the early matched callback, so we cancelled
+                        // the check. However, we still need to note down the latency.
+                        if (LatencyTracker.isEnabled(mContext)) {
+                            LatencyTracker.getInstance(mContext).onActionEnd(
+                                    ACTION_CHECK_CREDENTIAL_UNLOCKED);
+                        }
+                    }
                 });
     }
 
