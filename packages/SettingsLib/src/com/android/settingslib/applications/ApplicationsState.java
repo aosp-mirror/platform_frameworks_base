@@ -47,6 +47,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.settingslib.R;
 
 import java.io.File;
 import java.text.Collator;
@@ -621,7 +622,7 @@ public class ApplicationsState {
             }
 
             if (filter != null) {
-                filter.init();
+                filter.init(mContext);
             }
 
             List<AppEntry> apps;
@@ -1280,6 +1281,9 @@ public class ApplicationsState {
 
     public interface AppFilter {
         void init();
+        default void init(Context context) {
+            init();
+        }
         boolean filterApp(AppEntry info);
     }
 
@@ -1398,6 +1402,33 @@ public class ApplicationsState {
         }
     };
 
+    public static final AppFilter FILTER_NOT_HIDE = new AppFilter() {
+        private String[] mHidePackageNames;
+
+        public void init(Context context) {
+            mHidePackageNames = context.getResources()
+                .getStringArray(R.array.config_hideWhenDisabled_packageNames);
+        }
+
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            if (ArrayUtils.contains(mHidePackageNames, entry.info.packageName)) {
+                if (!entry.info.enabled) {
+                    return false;
+                } else if (entry.info.enabledSetting ==
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    };
+
     public static class VolumeFilter implements AppFilter {
         private final String mVolumeUuid;
 
@@ -1422,6 +1453,12 @@ public class ApplicationsState {
         public CompoundFilter(AppFilter first, AppFilter second) {
             mFirstFilter = first;
             mSecondFilter = second;
+        }
+
+        @Override
+        public void init(Context context) {
+            mFirstFilter.init(context);
+            mSecondFilter.init(context);
         }
 
         @Override
