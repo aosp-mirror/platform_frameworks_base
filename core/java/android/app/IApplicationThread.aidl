@@ -155,6 +155,7 @@ oneway interface IApplicationThread {
     void scheduleLocalVoiceInteractionStarted(IBinder token,
             IVoiceInteractor voiceInteractor) = 61;
     void handleTrustStorageUpdate() = 62;
+    void attachAgent(String path) = 63;
     /**
      * Don't change the existing transaction Ids as they could be used in the native code.
      * When adding a new method, assign the next available transaction id.

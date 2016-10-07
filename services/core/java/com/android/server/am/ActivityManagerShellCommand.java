@@ -220,6 +220,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runTask(pw);
                 case "write":
                     return runWrite(pw);
+                case "attach-agent":
+                    return runAttachAgent(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -2462,6 +2464,21 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int runAttachAgent(PrintWriter pw) {
+        // TODO: revisit the permissions required for attaching agents
+        mInternal.enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
+                "attach-agent");
+        String process = getNextArgRequired();
+        String agent = getNextArgRequired();
+        String opt;
+        if ((opt = getNextArg()) != null) {
+            pw.println("Error: Unknown option: " + opt);
+            return -1;
+        }
+        mInternal.attachAgent(process, agent);
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -2619,6 +2636,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Optionally controls lenient background check mode, returns current mode.");
             pw.println("  get-uid-state <UID>");
             pw.println("      Gets the process state of an app given its <UID>.");
+            pw.println("  attach-agent <PROCESS> <FILE>");
+            pw.println("    Attach an agent to the specified <PROCESS>, which may be either a process name or a PID.");
             pw.println("  get-config");
             pw.println("      Rtrieve the configuration and any recent configurations of the device.");
             pw.println("  suppress-resize-config-changes <true|false>");
