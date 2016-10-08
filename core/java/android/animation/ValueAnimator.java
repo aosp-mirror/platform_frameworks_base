@@ -276,6 +276,23 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     }
 
     /**
+     * Returns whether animators are currently enabled, system-wide. By default, all
+     * animators are enabled. This can change if either the user sets a Developer Option
+     * to set the animator duration scale to 0 or by Battery Savery mode being enabled
+     * (which disables all animations).
+     *
+     * <p>Developers should not typically need to call this method, but should an app wish
+     * to show a different experience when animators are disabled, this return value
+     * can be used as a decider of which experience to offer.
+     *
+     * @return boolean Whether animators are currently enabled. The default value is
+     * <code>true</code>.
+     */
+    public static boolean areAnimatorsEnabled() {
+        return !(sDurationScale == 0);
+    }
+
+    /**
      * Creates a new ValueAnimator object. This default constructor is primarily for
      * use internally; the factory methods which take parameters are more generally
      * useful.
