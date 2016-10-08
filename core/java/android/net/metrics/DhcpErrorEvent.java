@@ -50,6 +50,8 @@ public final class DhcpErrorEvent implements Parcelable {
     public static final int DHCP_INVALID_OPTION_LENGTH = makeErrorCode(DHCP_ERROR, 3);
     public static final int DHCP_NO_MSG_TYPE           = makeErrorCode(DHCP_ERROR, 4);
     public static final int DHCP_UNKNOWN_MSG_TYPE      = makeErrorCode(DHCP_ERROR, 5);
+    /** {@hide} */
+    public static final int DHCP_NO_COOKIE             = makeErrorCode(DHCP_ERROR, 6);
 
     public static final int BUFFER_UNDERFLOW           = makeErrorCode(MISC_ERROR, 1);
     public static final int RECEIVE_ERROR              = makeErrorCode(MISC_ERROR, 2);
