@@ -188,6 +188,25 @@ public abstract class ShellCommand {
     }
 
     /**
+     * Helper for just system services to ask the shell to open an output file.
+     * @hide
+     */
+    public ParcelFileDescriptor openOutputFileForSystem(String path) {
+        try {
+            ParcelFileDescriptor pfd = getShellCallback().openOutputFile(path,
+                    "u:r:system_server:s0");
+            if (pfd != null) {
+                return pfd;
+            }
+        } catch (RuntimeException e) {
+            getErrPrintWriter().println("Failure opening file: " + e.getMessage());
+        }
+        getErrPrintWriter().println("Error: Unable to open file: " + path);
+        getErrPrintWriter().println("Consider using a file under /data/local/tmp/");
+        return null;
+    }
+
+    /**
      * Return the next option on the command line -- that is an argument that
      * starts with '-'.  If the next argument is not an option, null is returned.
      */
