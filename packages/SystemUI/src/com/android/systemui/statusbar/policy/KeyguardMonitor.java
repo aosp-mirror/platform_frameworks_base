@@ -38,6 +38,7 @@ public final class KeyguardMonitor extends KeyguardUpdateMonitorCallback {
     private int mCurrentUser;
     private boolean mShowing;
     private boolean mSecure;
+    private boolean mOccluded;
     private boolean mCanSkipBouncer;
 
     private boolean mListening;
@@ -81,6 +82,10 @@ public final class KeyguardMonitor extends KeyguardUpdateMonitorCallback {
         return mSecure;
     }
 
+    public boolean isOccluded() {
+        return mOccluded;
+    }
+
     public boolean canSkipBouncer() {
         return mCanSkipBouncer;
     }
@@ -99,10 +104,11 @@ public final class KeyguardMonitor extends KeyguardUpdateMonitorCallback {
         }
     }
 
-    public void notifyKeyguardState(boolean showing, boolean secure) {
-        if (mShowing == showing && mSecure == secure) return;
+    public void notifyKeyguardState(boolean showing, boolean secure, boolean occluded) {
+        if (mShowing == showing && mSecure == secure && mOccluded == occluded) return;
         mShowing = showing;
         mSecure = secure;
+        mOccluded = occluded;
         notifyKeyguardChanged();
     }
 

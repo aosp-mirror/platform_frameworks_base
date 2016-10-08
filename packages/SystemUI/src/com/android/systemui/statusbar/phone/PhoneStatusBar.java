@@ -2749,7 +2749,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void handleSystemNavigationKey(int key) {
         if (SPEW) Log.d(TAG, "handleSystemNavigationKey: " + key);
         if (!panelsEnabled() || !mKeyguardMonitor.isDeviceInteractive()
-                || mKeyguardMonitor.isShowing()) {
+                || mKeyguardMonitor.isShowing() && !mKeyguardMonitor.isOccluded()) {
             return;
         }
 
@@ -4391,7 +4391,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         checkBarModes();
         updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
         mKeyguardMonitor.notifyKeyguardState(mStatusBarKeyguardViewManager.isShowing(),
-                mStatusBarKeyguardViewManager.isSecure());
+                mStatusBarKeyguardViewManager.isSecure(),
+                mStatusBarKeyguardViewManager.isOccluded());
         Trace.endSection();
     }
 
