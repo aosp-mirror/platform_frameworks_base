@@ -216,7 +216,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         private static final int DEFAULT_FG_JOB_COUNT = 4;
         private static final int DEFAULT_BG_NORMAL_JOB_COUNT = 6;
         private static final int DEFAULT_BG_MODERATE_JOB_COUNT = 4;
-        private static final int DEFAULT_BG_LOW_JOB_COUNT = 2;
+        private static final int DEFAULT_BG_LOW_JOB_COUNT = 1;
         private static final int DEFAULT_BG_CRITICAL_JOB_COUNT = 1;
 
         /**
