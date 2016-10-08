@@ -906,7 +906,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
     private boolean isCurrentlyActiveLocked(JobStatus job) {
         for (int i=0; i<mActiveServices.size(); i++) {
             JobServiceContext serviceContext = mActiveServices.get(i);
-            final JobStatus running = serviceContext.getRunningJob();
+            // The 'unsafe' direct-internal-reference running-job inspector is okay to
+            // use here because we are already holding the necessary lock *and* we
+            // immediately discard the returned object reference, if any; we return
+            // only a boolean state indicator to the caller.
+            final JobStatus running = serviceContext.getRunningJobUnsafeLocked();
             if (running != null && running.matches(job.getUid(), job.getJobId())) {
                 return true;
             }
