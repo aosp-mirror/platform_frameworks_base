@@ -46,8 +46,17 @@ PropertyValuesAnimatorSet::PropertyValuesAnimatorSet()
 
 void PropertyValuesAnimatorSet::onFinished(BaseRenderNodeAnimator* animator) {
     if (mOneShotListener.get()) {
-        mOneShotListener->onAnimationFinished(animator);
+        sp<AnimationListener> listener = std::move(mOneShotListener);
+        // Set the listener to nullptr before the onAnimationFinished callback, rather than after,
+        // for two reasons:
+        // 1) We need to prevent changes to mOneShotListener during the onAnimationFinished
+        // callback (specifically in AnimationListenerBridge::onAnimationFinished(...) from
+        // triggering dtor of the bridge and potentially unsafely re-entering
+        // AnimationListenerBridge::onAnimationFinished(...).
+        // 2) It's possible that there are changes to the listener during the callback, therefore
+        // we need to reset the listener before the callback rather than afterwards.
         mOneShotListener = nullptr;
+        listener->onAnimationFinished(animator);
     }
 }
 
