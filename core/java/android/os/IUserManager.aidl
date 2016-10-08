@@ -36,7 +36,8 @@ interface IUserManager {
     int getCredentialOwnerProfile(int userHandle);
 
     UserInfo createUser(in String name, int flags);
-    UserInfo createProfileForUser(in String name, int flags, int userHandle);
+    UserInfo createProfileForUser(in String name, int flags, int userHandle,
+            in String[] disallowedPackages);
     UserInfo createRestrictedProfile(String name, int parentUserHandle);
     void setUserEnabled(int userHandle);
     boolean removeUser(int userHandle);

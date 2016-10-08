@@ -2182,9 +2182,10 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public UserInfo createProfileForUser(String name, int flags, int userId) {
+    public UserInfo createProfileForUser(String name, int flags, int userId,
+            String[] disallowedPackages) {
         checkManageOrCreateUsersPermission(flags);
-        return createUserInternal(name, flags, userId);
+        return createUserInternal(name, flags, userId, disallowedPackages);
     }
 
     @Override
@@ -2194,6 +2195,11 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private UserInfo createUserInternal(String name, int flags, int parentId) {
+        return createUserInternal(name, flags, parentId, null);
+    }
+
+    private UserInfo createUserInternal(String name, int flags, int parentId,
+            String[] disallowedPackages) {
         if (hasUserRestriction(UserManager.DISALLOW_ADD_USER, UserHandle.getCallingUserId())) {
             Log.w(LOG_TAG, "Cannot add user. DISALLOW_ADD_USER is enabled.");
             return null;
@@ -2204,10 +2210,11 @@ public class UserManagerService extends IUserManager.Stub {
             Log.w(LOG_TAG, "Cannot add user. Not enough space on disk.");
             return null;
         }
-        return createUserInternalUnchecked(name, flags, parentId);
+        return createUserInternalUnchecked(name, flags, parentId, disallowedPackages);
     }
 
-    private UserInfo createUserInternalUnchecked(String name, int flags, int parentId) {
+    private UserInfo createUserInternalUnchecked(String name, int flags, int parentId,
+            String[] disallowedPackages) {
         if (ActivityManager.isLowRamDeviceStatic()) {
             return null;
         }
@@ -2321,7 +2328,7 @@ public class UserManagerService extends IUserManager.Stub {
             storage.createUserKey(userId, userInfo.serialNumber, userInfo.isEphemeral());
             mPm.prepareUserData(userId, userInfo.serialNumber,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-            mPm.createNewUser(userId);
+            mPm.createNewUser(userId, disallowedPackages);
             userInfo.partial = false;
             synchronized (mPackagesLock) {
                 writeUserLP(userData);
@@ -2371,7 +2378,8 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public UserInfo createRestrictedProfile(String name, int parentUserId) {
         checkManageOrCreateUsersPermission("setupRestrictedProfile");
-        final UserInfo user = createProfileForUser(name, UserInfo.FLAG_RESTRICTED, parentUserId);
+        final UserInfo user = createProfileForUser(
+                name, UserInfo.FLAG_RESTRICTED, parentUserId, null);
         if (user == null) {
             return null;
         }
@@ -3533,7 +3541,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public UserInfo createUserEvenWhenDisallowed(String name, int flags) {
-            UserInfo user = createUserInternalUnchecked(name, flags, UserHandle.USER_NULL);
+            UserInfo user = createUserInternalUnchecked(name, flags, UserHandle.USER_NULL, null);
             // Keep this in sync with UserManager.createUser
             if (user != null && !user.isAdmin()) {
                 setUserRestriction(UserManager.DISALLOW_SMS, true, user.id);

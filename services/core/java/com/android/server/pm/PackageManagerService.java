@@ -20679,9 +20679,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     /** Called by UserManagerService */
-    void createNewUser(int userId) {
+    void createNewUser(int userId, String[] disallowedPackages) {
         synchronized (mInstallLock) {
-            mSettings.createNewUserLI(this, mInstaller, userId);
+            mSettings.createNewUserLI(this, mInstaller, userId, disallowedPackages);
         }
         synchronized (mPackages) {
             scheduleWritePackageRestrictionsLocked(userId);

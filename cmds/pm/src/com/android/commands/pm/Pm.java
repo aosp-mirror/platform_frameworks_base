@@ -981,7 +981,7 @@ public final class Pm {
             } else if (userId < 0) {
                 info = mUm.createUser(name, flags);
             } else {
-                info = mUm.createProfileForUser(name, flags, userId);
+                info = mUm.createProfileForUser(name, flags, userId, null);
             }
 
             if (info != null) {

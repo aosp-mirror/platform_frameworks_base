@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.app.ActivityManager;
 import android.os.Bundle;
@@ -46,16 +47,24 @@ public class UserManagerTest extends AndroidTestCase {
     private static final int REMOVE_TIMEOUT_MILLIS = 60 * 1000; // 60 seconds
     private static final int SWITCH_USER_TIMEOUT_MILLIS = 40 * 1000; // 40 seconds
 
+    // Packages which are used during tests.
+    private static final String[] PACKAGES = new String[] {
+            "com.android.egg",
+            "com.android.retaildemo"
+    };
+
     private final Object mUserRemoveLock = new Object();
     private final Object mUserSwitchLock = new Object();
 
     private UserManager mUserManager = null;
+    private PackageManager mPackageManager;
     private List<Integer> usersToRemove;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         mUserManager = UserManager.get(getContext());
+        mPackageManager = getContext().getPackageManager();
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
@@ -183,6 +192,49 @@ public class UserManagerTest extends AndroidTestCase {
         assertNull(userInfo2);
         // Verify that current user is not a managed profile
         assertFalse(mUserManager.isManagedProfile());
+    }
+
+    // Verify that disallowed packages are not installed in the managed profile.
+    @MediumTest
+    public void testAddManagedProfile_withDisallowedPackages() throws Exception {
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        UserInfo userInfo1 = createProfileForUser("Managed1",
+                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+        // Verify that the packagesToVerify are installed by default.
+        for (String pkg : PACKAGES) {
+            assertTrue("Package should be installed in managed profile: " + pkg,
+                    isPackageInstalledForUser(pkg, userInfo1.id));
+        }
+        removeUser(userInfo1.id);
+
+        UserInfo userInfo2 = createProfileForUser("Managed2",
+                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId, PACKAGES);
+        // Verify that the packagesToVerify are not installed by default.
+        for (String pkg : PACKAGES) {
+            assertFalse("Package should not be installed in managed profile when disallowed: "
+                    + pkg, isPackageInstalledForUser(pkg, userInfo2.id));
+        }
+    }
+
+    // Verify that if any packages are disallowed to install during creation of managed profile can
+    // still be installed later.
+    @MediumTest
+    public void testAddManagedProfile_disallowedPackagesInstalledLater() throws Exception {
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        UserInfo userInfo = createProfileForUser("Managed",
+                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId, PACKAGES);
+        // Verify that the packagesToVerify are not installed by default.
+        for (String pkg : PACKAGES) {
+            assertFalse("Package should not be installed in managed profile when disallowed: "
+                    + pkg, isPackageInstalledForUser(pkg, userInfo.id));
+        }
+
+        // Verify that the disallowed packages during profile creation can be installed now.
+        for (String pkg : PACKAGES) {
+            assertEquals("Package could not be installed: " + pkg,
+                    PackageManager.INSTALL_SUCCEEDED,
+                    mPackageManager.installExistingPackageAsUser(pkg, userInfo.id));
+        }
     }
 
     @MediumTest
@@ -357,6 +409,14 @@ public class UserManagerTest extends AndroidTestCase {
         switchUser(startUser);
     }
 
+    private boolean isPackageInstalledForUser(String packageName, int userId) {
+        try {
+            return mPackageManager.getPackageInfoAsUser(packageName, 0, userId) != null;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
     private void switchUser(int userId) {
         synchronized (mUserSwitchLock) {
             ActivityManager am = getContext().getSystemService(ActivityManager.class);
@@ -401,7 +461,13 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     private UserInfo createProfileForUser(String name, int flags, int userHandle) {
-        UserInfo profile = mUserManager.createProfileForUser(name, flags, userHandle);
+        return createProfileForUser(name, flags, userHandle, null);
+    }
+
+    private UserInfo createProfileForUser(String name, int flags, int userHandle,
+            String[] disallowedPackages) {
+        UserInfo profile = mUserManager.createProfileForUser(
+                name, flags, userHandle, disallowedPackages);
         if (profile != null) {
             usersToRemove.add(profile.id);
         }
