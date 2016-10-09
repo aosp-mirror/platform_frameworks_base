@@ -1513,6 +1513,36 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Gets the currently supported profiles by the adapter.
+     *
+     *<p> This can be used to check whether a profile is supported before attempting
+     * to connect to its respective proxy.
+     *
+     * @return a list of integers indicating the ids of supported profiles as defined in
+     * {@link BluetoothProfile}.
+     * @hide
+     */
+    public List<Integer> getSupportedProfiles() {
+        final ArrayList<Integer> supportedProfiles = new ArrayList<Integer>();
+
+        try {
+            synchronized (mManagerCallback) {
+                if (mService != null) {
+                    final long supportedProfilesBitMask = mService.getSupportedProfiles();
+
+                    for (int i = 0; i <= BluetoothProfile.MAX_PROFILE_ID; i++) {
+                        if ((supportedProfilesBitMask & (1 << i)) != 0) {
+                            supportedProfiles.add(i);
+                        }
+                    }
+                }
+            }
+        } catch (RemoteException e) {Log.e(TAG, "getSupportedProfiles:", e);}
+
+        return supportedProfiles;
+    }
+
+    /**
      * Get the current connection state of the local Bluetooth adapter.
      * This can be used to check whether the local Bluetooth adapter is connected
      * to any profile of any other remote Bluetooth Device.
