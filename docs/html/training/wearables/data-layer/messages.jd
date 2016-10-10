@@ -10,12 +10,6 @@ page.title=Sending and Receiving Messages
   <li><a href="#SendMessage">Send a Message</a></li>
   <li><a href="#ReceiveMessage">Receive a Message</a></li>
 </ol>
-<h2>Try it out</h2>
-<ul>
-  <li>
-    <a href="https://github.com/googlesamples/android-FindMyPhone/" class="external-link">FindMyPhone</a>
-  </li>
-</ul>
 </div>
 </div>
 
@@ -27,6 +21,7 @@ and attach the following items to the message:</p>
   <li>An arbitrary payload (optional)</li>
   <li>A path that uniquely identifies the message's action</li>
 </ul>
+
 <p>
 Unlike with data items, there is no syncing between the handheld and wearable apps.
 Messages are a one-way communication mechanism that's good for remote procedure calls (RPC),
@@ -149,11 +144,9 @@ If you create a service that extends
 <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html"><code>WearableListenerService</code></a>
 to detect capability changes, you may want to override the
 <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html#onConnectedNodes(java.util.List<com.google.android.gms.wearable.Node>)"><code>onConnectedNodes()</code></a>
-method to listen to finer-grained connectivity details, such as when a wearable device switches
-from Wi-Fi to a Bluetooth connection to the handset. For an example implementation, see the
-<code>DisconnectListenerService</code> class in the
-<a href="https://github.com/googlesamples/android-FindMyPhone/" class="external-link">FindMyPhone</a>
-sample. For more information on how to listen for important events, see
+method to listen to finer-grained connectivity details, such as when a wearable
+device switches from Wi-Fi to a Bluetooth connection to the handset.
+For more information on how to listen for important events, see
 <a href="{@docRoot}training/wearables/data-layer/events.html#Listen">Listen for Data Layer Events</a>.
 </p>
 
