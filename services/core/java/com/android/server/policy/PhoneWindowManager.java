@@ -140,6 +140,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.policy.IShortcutService;
@@ -596,6 +597,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int DISMISS_KEYGUARD_START = 1; // Keyguard needs to be dismissed.
     private static final int DISMISS_KEYGUARD_CONTINUE = 2; // Keyguard has been dismissed.
     int mDismissKeyguard = DISMISS_KEYGUARD_NONE;
+
+    /**
+     * Indicates that we asked the Keyguard to be dismissed and we just wait for the Keyguard to
+     * dismiss itself.
+     */
+    @GuardedBy("Lw")
+    private boolean mCurrentlyDismissingKeyguard;
 
     /** The window that is currently dismissing the keyguard. Dismissing the keyguard must only
      * be done once per window. */
@@ -3707,10 +3715,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public boolean canShowDismissingWindowWhileLockedLw() {
-        // If the keyguard is trusted, it will unlock without a challange. Therefore, windows with
-        // FLAG_DISMISS_KEYGUARD don't need to be force hidden, as they will unlock the phone right
-        // away anyways.
-        return mKeyguardDelegate != null && mKeyguardDelegate.isTrusted();
+        // If the keyguard is trusted, it will unlock without a challenge. Therefore, if we are in
+        // the process of dismissing Keyguard, we don't need to hide them as the phone will be
+        // unlocked right away in any case.
+        return mKeyguardDelegate != null && mKeyguardDelegate.isTrusted()
+                && mCurrentlyDismissingKeyguard;
     }
 
     private void launchAssistLongPressAction() {
@@ -5417,22 +5426,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else if (mDismissKeyguard != DISMISS_KEYGUARD_NONE) {
                 mKeyguardHidden = false;
-                final boolean trusted = mKeyguardDelegate.isTrusted();
-                if (trusted) {
-                    // No need to un-occlude keyguard - we'll dimiss it right away anyways.
-                } else if (setKeyguardOccludedLw(false)) {
-                    changes |= FINISH_LAYOUT_REDO_LAYOUT
-                            | FINISH_LAYOUT_REDO_CONFIG
-                            | FINISH_LAYOUT_REDO_WALLPAPER;
-                }
+                boolean willDismiss = false;
                 if (mDismissKeyguard == DISMISS_KEYGUARD_START) {
+                    final boolean trusted = mKeyguardDelegate.isTrusted();
+                    willDismiss = trusted && mKeyguardOccluded && mKeyguardDelegate != null
+                            && mKeyguardDelegate.isShowing();
+                    if (willDismiss) {
+                        mCurrentlyDismissingKeyguard = true;
+                    }
+
                     // Only launch the next keyguard unlock window once per window.
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mKeyguardDelegate.dismiss(trusted /* allowWhileOccluded */);
-                        }
-                    });
+                    mHandler.post(() -> mKeyguardDelegate.dismiss(
+                            trusted /* allowWhileOccluded */));
+                }
+
+                // If we are currently dismissing Keyguard, there is no need to unocclude it.
+                if (!mCurrentlyDismissingKeyguard) {
+                    if (setKeyguardOccludedLw(false)) {
+                        changes |= FINISH_LAYOUT_REDO_LAYOUT
+                                | FINISH_LAYOUT_REDO_CONFIG
+                                | FINISH_LAYOUT_REDO_WALLPAPER;
+                    }
                 }
             } else {
                 mWinDismissingKeyguard = null;
@@ -5484,6 +5498,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return true;
         } else {
             return false;
+        }
+    }
+
+    private void onKeyguardShowingStateChanged(boolean showing) {
+        if (!showing) {
+            synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
+                mCurrentlyDismissingKeyguard = false;
+            }
         }
     }
 
@@ -7016,7 +7038,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public void systemReady() {
-        mKeyguardDelegate = new KeyguardServiceDelegate(mContext);
+        mKeyguardDelegate = new KeyguardServiceDelegate(mContext,
+                this::onKeyguardShowingStateChanged);
         mKeyguardDelegate.onSystemReady();
 
         readCameraLensCoverState();
@@ -8097,6 +8120,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(" mForceStatusBarFromKeyguard=");
                 pw.println(mForceStatusBarFromKeyguard);
         pw.print(prefix); pw.print("mDismissKeyguard="); pw.print(mDismissKeyguard);
+                pw.print(" mCurrentlyDismissingKeyguard="); pw.println(mCurrentlyDismissingKeyguard);
                 pw.print(" mWinDismissingKeyguard="); pw.print(mWinDismissingKeyguard);
                 pw.print(" mHomePressed="); pw.println(mHomePressed);
         pw.print(prefix); pw.print("mAllowLockscreenWhenOn="); pw.print(mAllowLockscreenWhenOn);
