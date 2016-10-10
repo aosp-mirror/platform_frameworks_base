@@ -3,7 +3,7 @@ include $(CLEAR_VARS)
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 HWUI_NEW_OPS := true
-BUGREPORT_FONT_CACHE_USAGE := true
+BUGREPORT_FONT_CACHE_USAGE := false
 
 # Enables fine-grained GLES error checking
 # If set to true, every GLES call is wrapped & error checked
