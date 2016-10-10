@@ -6378,6 +6378,13 @@ public final class Settings {
         public static final String CALL_AUTO_RETRY = "call_auto_retry";
 
         /**
+         * A setting that can be read whether the emergency affordance is currently needed.
+         * The value is a boolean (1 or 0).
+         * @hide
+         */
+        public static final String EMERGENCY_AFFORDANCE_NEEDED = "emergency_affordance_needed";
+
+        /**
          * The preferred network mode   7 = Global
          *                              6 = EvDo only
          *                              5 = CDMA w/o EvDo
