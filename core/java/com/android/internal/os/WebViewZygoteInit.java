@@ -16,14 +16,17 @@
 
 package com.android.internal.os;
 
+import android.app.ApplicationLoaders;
 import android.net.LocalSocket;
 import android.os.Build;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.WebViewFactory;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Startup class for the WebView zygote process.
@@ -52,7 +55,27 @@ class WebViewZygoteInit {
 
         @Override
         protected boolean handlePreloadPackage(String packagePath, String libsPath) {
-            // TODO: Use preload information to setup the ClassLoader.
+            // Ask ApplicationLoaders to create and cache a classloader for the WebView APK so that
+            // our children will reuse the same classloader instead of creating their own.
+            // This enables us to preload Java and native code in the webview zygote process and
+            // have the preloaded versions actually be used post-fork.
+            ClassLoader loader = ApplicationLoaders.getDefault().createAndCacheWebViewClassLoader(
+                    packagePath, libsPath);
+
+            // Once we have the classloader, look up the WebViewFactoryProvider implementation and
+            // call preloadInZygote() on it to give it the opportunity to preload the native library
+            // and perform any other initialisation work that should be shared among the children.
+            try {
+                Class providerClass = Class.forName(WebViewFactory.CHROMIUM_WEBVIEW_FACTORY, true,
+                                                    loader);
+                Object result = providerClass.getMethod("preloadInZygote").invoke(null);
+                if (!((Boolean)result).booleanValue()) {
+                    Log.e(TAG, "preloadInZygote returned false");
+                }
+            } catch (ClassNotFoundException | NoSuchMethodException | SecurityException |
+                     IllegalAccessException | InvocationTargetException e) {
+                Log.e(TAG, "Exception while preloading package", e);
+            }
             return false;
         }
     }
