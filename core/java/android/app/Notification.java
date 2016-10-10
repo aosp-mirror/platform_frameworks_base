@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -4683,12 +4684,12 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @param userDisplayName the name to be displayed for any replies sent by the user before the
-         * posting app reposts the notification with those messages after they've been actually
-         * sent and in previous messages sent by the user added in
+         * @param userDisplayName Required - the name to be displayed for any replies sent by the
+         * user before the posting app reposts the notification with those messages after they've
+         * been actually sent and in previous messages sent by the user added in
          * {@link #addMessage(Notification.MessagingStyle.Message)}
          */
-        public MessagingStyle(CharSequence userDisplayName) {
+        public MessagingStyle(@NonNull CharSequence userDisplayName) {
             mUserDisplayName = userDisplayName;
         }
 
