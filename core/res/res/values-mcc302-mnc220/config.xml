@@ -21,14 +21,6 @@
      for different hardware and product builds. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string-array translatable="false" name="config_operatorConsideredNonRoaming">
-        <item>302370</item>
-        <item>302610</item>
-        <item>302660</item>
-        <item>302720</item>
-        <item>302780</item>
-    </string-array>
-
     <integer name="config_mobile_mtu">1410</integer>
 
     <!-- String containing the apn value for tethering.  May be overriden by secure settings
