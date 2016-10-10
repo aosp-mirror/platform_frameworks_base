@@ -26,6 +26,7 @@ import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
+import com.android.server.policy.keyguard.KeyguardStateMonitor.OnShowingStateChangedCallback;
 
 import java.io.PrintWriter;
 
@@ -39,9 +40,11 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     private IKeyguardService mService;
     private String TAG = "KeyguardServiceWrapper";
 
-    public KeyguardServiceWrapper(Context context, IKeyguardService service) {
+    public KeyguardServiceWrapper(Context context, IKeyguardService service,
+            OnShowingStateChangedCallback showingStateChangedCallback) {
         mService = service;
-        mKeyguardStateMonitor = new KeyguardStateMonitor(context, service);
+        mKeyguardStateMonitor = new KeyguardStateMonitor(context, service,
+                showingStateChangedCallback);
     }
 
     @Override // Binder interface
