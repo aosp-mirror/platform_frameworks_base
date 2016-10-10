@@ -14,6 +14,17 @@
 #
 
 LOCAL_PATH:= $(call my-dir)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := SystemUI-tags
+
+LOCAL_SRC_FILES := src/com/android/systemui/EventLogTags.logtags
+
+include $(BUILD_STATIC_JAVA_LIBRARY)
+
+# ------------------
+
 include $(CLEAR_VARS)
 
 LOCAL_USE_AAPT2 := true
@@ -25,6 +36,8 @@ LOCAL_MODULE := Keyguard
 LOCAL_CERTIFICATE := platform
 
 LOCAL_JAVA_LIBRARIES := SettingsLib
+
+LOCAL_STATIC_JAVA_LIBRARIES = SystemUI-tags
 
 LOCAL_PRIVILEGED_MODULE := true
 

@@ -14,14 +14,13 @@
  * limitations under the License
  */
 
-package com.android.systemui;
+package com.android.keyguard;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
-import android.os.Handler;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -29,9 +28,15 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseLongArray;
 
+import com.android.systemui.EventLogTags;
+
 /**
  * Class to track various latencies in SystemUI. It then outputs the latency to logcat so these
  * latencies can be captured by tests and then used for dashboards.
+ * <p>
+ * This is currently only in Keyguard so it can be shared between SystemUI and Keyguard, but
+ * eventually we'd want to merge these two packages together so Keyguard can use common classes
+ * that are shared with SystemUI.
  */
 public class LatencyTracker {
 
@@ -55,10 +60,23 @@ public class LatencyTracker {
      */
     public static final int ACTION_FINGERPRINT_WAKE_AND_UNLOCK = 2;
 
+    /**
+     * Time it takes to check PIN/Pattern/Password.
+     */
+    public static final int ACTION_CHECK_CREDENTIAL = 3;
+
+    /**
+     * Time it takes to check fully PIN/Pattern/Password, i.e. that's the time spent including the
+     * actions to unlock a user.
+     */
+    public static final int ACTION_CHECK_CREDENTIAL_UNLOCKED = 4;
+
     private static final String[] NAMES = new String[] {
             "expand panel",
             "toggle recents",
-            "fingerprint wake-and-unlock" };
+            "fingerprint wake-and-unlock",
+            "check credential",
+            "check credential unlocked" };
 
     private static LatencyTracker sLatencyTracker;
 

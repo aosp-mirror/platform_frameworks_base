@@ -31,7 +31,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.LatencyTracker;
+import com.android.keyguard.LatencyTracker;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.RemoteInputController;

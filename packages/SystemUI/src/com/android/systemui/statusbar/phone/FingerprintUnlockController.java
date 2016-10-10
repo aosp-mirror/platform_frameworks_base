@@ -30,7 +30,7 @@ import android.util.Log;
 import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.systemui.LatencyTracker;
+import com.android.keyguard.LatencyTracker;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 
 /**
