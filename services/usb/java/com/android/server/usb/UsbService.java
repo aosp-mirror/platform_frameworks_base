@@ -16,6 +16,7 @@
 
 package com.android.server.usb;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
@@ -83,7 +84,7 @@ public class UsbService extends IUsbManager.Stub {
 
         @Override
         public void onStopUser(int userHandle) {
-            mUsbService.onStopUser(userHandle);
+            mUsbService.onStopUser(UserHandle.of(userHandle));
         }
     }
 
@@ -177,10 +178,10 @@ public class UsbService extends IUsbManager.Stub {
     /**
      * Execute operations when a user is stopped.
      *
-     * @param stoppedUserId The id of the used that is stopped
+     * @param stoppedUser The user that is stopped
      */
-    private void onStopUser(@UserIdInt int stoppedUserId) {
-        mSettingsManager.remove(stoppedUserId);
+    private void onStopUser(@NonNull UserHandle stoppedUser) {
+        mSettingsManager.remove(stoppedUser);
     }
 
     public void systemReady() {
