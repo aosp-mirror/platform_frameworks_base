@@ -10,6 +10,17 @@ import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_CLOSE;
+import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
+import static com.android.server.wm.AppTransition.TRANSIT_TASK_CLOSE;
+import static com.android.server.wm.AppTransition.TRANSIT_TASK_IN_PLACE;
+import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
+import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_BACK;
+import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
+import static com.android.server.wm.AppTransition.TRANSIT_WALLPAPER_CLOSE;
+import static com.android.server.wm.AppTransition.TRANSIT_WALLPAPER_INTRA_CLOSE;
+import static com.android.server.wm.AppTransition.TRANSIT_WALLPAPER_INTRA_OPEN;
+import static com.android.server.wm.AppTransition.TRANSIT_WALLPAPER_OPEN;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
@@ -405,8 +416,7 @@ class WindowSurfacePlacer {
 
         mService.mRoot.mWallpaperMayChange = false;
 
-        // The top-most window will supply the layout params,
-        // and we will determine it below.
+        // The top-most window will supply the layout params, and we will determine it below.
         LayoutParams animLp = null;
         int bestAnimLayer = -1;
         boolean fullscreenAnim = false;
@@ -415,21 +425,19 @@ class WindowSurfacePlacer {
         int i;
         for (i = 0; i < appsCount; i++) {
             final AppWindowToken wtoken = mService.mOpeningApps.valueAt(i);
-            // Clearing the mAnimatingExit flag before entering animation. It's set to
-            // true if app window is removed, or window relayout to invisible.
-            // This also affects window visibility. We need to clear it *before*
-            // maybeUpdateTransitToWallpaper() as the transition selection depends on
-            // wallpaper target visibility.
+            // Clearing the mAnimatingExit flag before entering animation. It's set to true if app
+            // window is removed, or window relayout to invisible. This also affects window
+            // visibility. We need to clear it *before* maybeUpdateTransitToWallpaper() as the
+            // transition selection depends on wallpaper target visibility.
             wtoken.clearAnimatingFlags();
 
         }
+
         // Adjust wallpaper before we pull the lower/upper target, since pending changes
         // (like the clearAnimatingFlags() above) might affect wallpaper target result.
-        if ((displayContent.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0 &&
-                mWallpaperControllerLocked.adjustWallpaperWindows()) {
-            mService.mLayersController.assignLayersLocked(windows);
-            displayContent.setLayoutNeeded();
-        }
+        // Or, the opening app window should be a wallpaper target.
+        mWallpaperControllerLocked.adjustWallpaperWindowsForAppTransitionIfNeeded(displayContent,
+                mService.mOpeningApps, windows);
 
         final WindowState lowerWallpaperTarget =
                 mWallpaperControllerLocked.getLowerWallpaperTarget();
@@ -447,15 +455,11 @@ class WindowSurfacePlacer {
             upperWallpaperAppToken = upperWallpaperTarget.mAppToken;
         }
 
-        // Do a first pass through the tokens for two
-        // things:
-        // (1) Determine if both the closing and opening
-        // app token sets are wallpaper targets, in which
-        // case special animations are needed
-        // (since the wallpaper needs to stay static
-        // behind them).
-        // (2) Find the layout params of the top-most
-        // application window in the tokens, which is
+        // Do a first pass through the tokens for two things:
+        // (1) Determine if both the closing and opening app token sets are wallpaper targets, in
+        // which case special animations are needed (since the wallpaper needs to stay static behind
+        // them).
+        // (2) Find the layout params of the top-most application window in the tokens, which is
         // what will control the animation theme.
         final int closingAppsCount = mService.mClosingApps.size();
         appsCount = closingAppsCount + mService.mOpeningApps.size();
@@ -496,10 +500,8 @@ class WindowSurfacePlacer {
         transit = maybeUpdateTransitToWallpaper(transit, openingAppHasWallpaper,
                 closingAppHasWallpaper, lowerWallpaperTarget, upperWallpaperTarget);
 
-        // If all closing windows are obscured, then there is
-        // no need to do an animation.  This is the case, for
-        // example, when this transition is being done behind
-        // the lock screen.
+        // If all closing windows are obscured, then there is no need to do an animation. This is
+        // the case, for example, when this transition is being done behind the lock screen.
         if (!mService.mPolicy.allowAppAnimationsLw()) {
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                     "Animations disallowed by keyguard or dream.");
@@ -721,9 +723,8 @@ class WindowSurfacePlacer {
             WindowState upperWallpaperTarget) {
         // if wallpaper is animating in or out set oldWallpaper to null else to wallpaper
         final WindowState wallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget();
-        final WindowState oldWallpaper =
-                mWallpaperControllerLocked.isWallpaperTargetAnimating()
-                        ? null : wallpaperTarget;
+        final WindowState oldWallpaper = mWallpaperControllerLocked.isWallpaperTargetAnimating()
+                ? null : wallpaperTarget;
         final ArraySet<AppWindowToken> openingApps = mService.mOpeningApps;
         final ArraySet<AppWindowToken> closingApps = mService.mClosingApps;
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
@@ -735,18 +736,17 @@ class WindowSurfacePlacer {
                         + ", closingApps=" + closingApps);
         mService.mAnimateWallpaperWithTarget = false;
         if (closingAppHasWallpaper && openingAppHasWallpaper) {
-            if (DEBUG_APP_TRANSITIONS)
-                Slog.v(TAG, "Wallpaper animation!");
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Wallpaper animation!");
             switch (transit) {
-                case AppTransition.TRANSIT_ACTIVITY_OPEN:
-                case AppTransition.TRANSIT_TASK_OPEN:
-                case AppTransition.TRANSIT_TASK_TO_FRONT:
-                    transit = AppTransition.TRANSIT_WALLPAPER_INTRA_OPEN;
+                case TRANSIT_ACTIVITY_OPEN:
+                case TRANSIT_TASK_OPEN:
+                case TRANSIT_TASK_TO_FRONT:
+                    transit = TRANSIT_WALLPAPER_INTRA_OPEN;
                     break;
-                case AppTransition.TRANSIT_ACTIVITY_CLOSE:
-                case AppTransition.TRANSIT_TASK_CLOSE:
-                case AppTransition.TRANSIT_TASK_TO_BACK:
-                    transit = AppTransition.TRANSIT_WALLPAPER_INTRA_CLOSE;
+                case TRANSIT_ACTIVITY_CLOSE:
+                case TRANSIT_TASK_CLOSE:
+                case TRANSIT_TASK_TO_BACK:
+                    transit = TRANSIT_WALLPAPER_INTRA_CLOSE;
                     break;
             }
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
@@ -755,17 +755,15 @@ class WindowSurfacePlacer {
                 && !openingApps.contains(oldWallpaper.mAppToken)
                 && closingApps.contains(oldWallpaper.mAppToken)) {
             // We are transitioning from an activity with a wallpaper to one without.
-            transit = AppTransition.TRANSIT_WALLPAPER_CLOSE;
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                    "New transit away from wallpaper: "
+            transit = TRANSIT_WALLPAPER_CLOSE;
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "New transit away from wallpaper: "
                     + AppTransition.appTransitionToString(transit));
         } else if (wallpaperTarget != null && wallpaperTarget.isVisibleLw() &&
                 openingApps.contains(wallpaperTarget.mAppToken)) {
             // We are transitioning from an activity without
             // a wallpaper to now showing the wallpaper
-            transit = AppTransition.TRANSIT_WALLPAPER_OPEN;
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                    "New transit into wallpaper: "
+            transit = TRANSIT_WALLPAPER_OPEN;
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "New transit into wallpaper: "
                     + AppTransition.appTransitionToString(transit));
         } else {
             mService.mAnimateWallpaperWithTarget = true;
@@ -774,7 +772,7 @@ class WindowSurfacePlacer {
     }
 
     private void processApplicationsAnimatingInPlace(int transit) {
-        if (transit == AppTransition.TRANSIT_TASK_IN_PLACE) {
+        if (transit == TRANSIT_TASK_IN_PLACE) {
             // Find the focused window
             final WindowState win = mService.getDefaultDisplayContentLocked().findFocusedWindow();
             if (win != null) {
