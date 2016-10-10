@@ -76,8 +76,7 @@ public class AppWindowTokenTests {
     private WindowState createWindow(WindowState parent, int type, WindowToken token) {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
 
-        return new WindowState(sWm, null, mIWindow, token, parent, 0, 0, attrs, 0,
-                sWm.getDefaultDisplayContentLocked(), 0);
+        return new WindowState(sWm, null, mIWindow, token, parent, 0, 0, attrs, 0, 0);
     }
 
     /* Used so we can gain access to some protected members of the {@link AppWindowToken} class */

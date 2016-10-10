@@ -71,6 +71,7 @@ import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
@@ -468,10 +469,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean mHasSurface = false;
 
-    private boolean mNotOnAppsDisplay = false;
-    // TODO: Get this from WindowToken? Done in ag/1522894
-    DisplayContent  mDisplayContent;
-
     /** When true this window can be displayed on screens owther than mOwnerUid's */
     private boolean mShowToOwnerOnly;
 
@@ -564,7 +561,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
-           int viewVisibility, final DisplayContent displayContent, int ownerId) {
+           int viewVisibility, int ownerId) {
         mService = service;
         mSession = s;
         mClient = c;
@@ -588,7 +585,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         };
         mAttrs.copyFrom(a);
         mViewVisibility = viewVisibility;
-        mDisplayContent = displayContent;
         mPolicy = mService.mPolicy;
         mContext = mService.mContext;
         DeathRecipient deathRecipient = new DeathRecipient();
@@ -644,15 +640,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         mIsFloatingLayer = mIsImWindow || mIsWallpaper;
 
-        if (mAppToken != null) {
-            final DisplayContent appDisplay = getDisplayContent();
-            mNotOnAppsDisplay = displayContent != appDisplay;
-
-            if (mAppToken.showForAllUsers) {
-                // Windows for apps that can show for all users should also show when the
-                // device is locked.
-                mAttrs.flags |= FLAG_SHOW_WHEN_LOCKED;
-            }
+        if (mAppToken != null && mAppToken.showForAllUsers) {
+            // Windows for apps that can show for all users should also show when the device is
+            // locked.
+            mAttrs.flags |= FLAG_SHOW_WHEN_LOCKED;
         }
 
         mWinAnimator = new WindowStateAnimator(this);
@@ -667,7 +658,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLayer = 0;
         mInputWindowHandle = new InputWindowHandle(
                 mAppToken != null ? mAppToken.mInputApplicationHandle : null, this,
-                displayContent.getDisplayId());
+                getDisplayContent().getDisplayId());
     }
 
     void attach() {
@@ -715,6 +706,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final Task task = getTask();
         final boolean fullscreenTask = !isInMultiWindowMode();
         final boolean windowsAreFloating = task != null && task.isFloating();
+        final DisplayContent dc = getDisplayContent();
 
         // If the task has temp inset bounds set, we have to make sure all its windows uses
         // the temp inset frame. Otherwise different display frames get applied to the main
@@ -780,8 +772,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             layoutXDiff = !mInsetFrame.isEmpty() ? mInsetFrame.left - mContainingFrame.left : 0;
             layoutYDiff = !mInsetFrame.isEmpty() ? mInsetFrame.top - mContainingFrame.top : 0;
             layoutContainingFrame = !mInsetFrame.isEmpty() ? mInsetFrame : mContainingFrame;
-            mTmpRect.set(0, 0, mDisplayContent.getDisplayInfo().logicalWidth,
-                    mDisplayContent.getDisplayInfo().logicalHeight);
+            mTmpRect.set(0, 0, dc.getDisplayInfo().logicalWidth, dc.getDisplayInfo().logicalHeight);
             subtractInsets(mDisplayFrame, layoutContainingFrame, df, mTmpRect);
             if (!layoutInParentFrame()) {
                 subtractInsets(mContainingFrame, layoutContainingFrame, pf, mTmpRect);
@@ -853,7 +844,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mVisibleFrame.set(mContentFrame);
             mStableFrame.set(mContentFrame);
         } else if (mAttrs.type == TYPE_DOCK_DIVIDER) {
-            mDisplayContent.getDockedDividerController().positionDockedStackedDivider(mFrame);
+            dc.getDockedDividerController().positionDockedStackedDivider(mFrame);
             mContentFrame.set(mFrame);
             if (!mFrame.equals(mLastFrame)) {
                 mMovedByResize = true;
@@ -1188,20 +1179,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    public DisplayContent getDisplayContent() {
-        if (mAppToken == null || mNotOnAppsDisplay) {
-            return mDisplayContent;
-        }
-        final TaskStack stack = getStack();
-        return stack == null ? mDisplayContent : stack.getDisplayContent();
+    DisplayContent getDisplayContent() {
+        return mToken.getDisplayContent();
     }
 
-    public DisplayInfo getDisplayInfo() {
+    DisplayInfo getDisplayInfo() {
         final DisplayContent displayContent = getDisplayContent();
         return displayContent != null ? displayContent.getDisplayInfo() : null;
     }
 
-    public int getDisplayId() {
+    int getDisplayId() {
         final DisplayContent displayContent = getDisplayContent();
         if (displayContent == null) {
             return -1;
@@ -1222,8 +1209,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         // Some system windows (e.g. "Power off" dialog) don't have a task, but we would still
         // associate them with some stack to enable dimming.
-        return mAttrs.type >= WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
-                && mDisplayContent != null ? mDisplayContent.getHomeStack() : null;
+        final DisplayContent dc = getDisplayContent();
+        return mAttrs.type >= FIRST_SYSTEM_WINDOW && dc != null ? dc.getHomeStack() : null;
     }
 
     /**
@@ -2001,12 +1988,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void scheduleAnimationIfDimming() {
-        if (mDisplayContent == null) {
+        final DisplayContent dc = getDisplayContent();
+        if (dc == null) {
             return;
         }
         final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
-        if (dimLayerUser != null && mDisplayContent.mDimLayerController.isDimming(
-                dimLayerUser, mWinAnimator)) {
+        if (dimLayerUser != null && dc.mDimLayerController.isDimming(dimLayerUser, mWinAnimator)) {
             // Force an animation pass just to update the mDimLayer layer.
             mService.scheduleAnimationLocked();
         }
@@ -2119,16 +2106,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
+        final DisplayContent dc = getDisplayContent();
         if (!mAnimatingExit && mAppDied) {
             // If app died visible, apply a dim over the window to indicate that it's inactive
-            mDisplayContent.mDimLayerController.applyDimAbove(getDimLayerUser(), mWinAnimator);
+            dc.mDimLayerController.applyDimAbove(getDimLayerUser(), mWinAnimator);
         } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0
-                && mDisplayContent != null && !mAnimatingExit && isVisibleUnchecked()) {
-            mDisplayContent.mDimLayerController.applyDimBehind(getDimLayerUser(), mWinAnimator);
+                && dc != null && !mAnimatingExit && isVisibleUnchecked()) {
+            dc.mDimLayerController.applyDimBehind(getDimLayerUser(), mWinAnimator);
         }
     }
 
-    DimLayer.DimLayerUser getDimLayerUser() {
+    private DimLayer.DimLayerUser getDimLayerUser() {
         Task task = getTask();
         if (task != null) {
             return task;
@@ -2187,8 +2175,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void setDisplayLayoutNeeded() {
-        if (mDisplayContent != null) {
-            mDisplayContent.setLayoutNeeded();
+        final DisplayContent dc = getDisplayContent();
+        if (dc != null) {
+            dc.setLayoutNeeded();
         }
     }
 
@@ -2909,18 +2898,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public boolean isDimming() {
         final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
-        return dimLayerUser != null && mDisplayContent != null &&
-                mDisplayContent.mDimLayerController.isDimming(dimLayerUser, mWinAnimator);
+        final DisplayContent dc = getDisplayContent();
+        return dimLayerUser != null && dc != null
+                && dc.mDimLayerController.isDimming(dimLayerUser, mWinAnimator);
     }
 
-    public void setShowToOwnerOnlyLocked(boolean showToOwnerOnly) {
+    void setShowToOwnerOnlyLocked(boolean showToOwnerOnly) {
         mShowToOwnerOnly = showToOwnerOnly;
     }
 
     boolean isHiddenFromUserLocked() {
         // Child windows are evaluated based on their parent window.
         final WindowState win = getTopParentWindow();
-        if (win.mAttrs.type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
+        if (win.mAttrs.type < FIRST_SYSTEM_WINDOW
                 && win.mAppToken != null && win.mAppToken.showForAllUsers) {
 
             // All window frames that are fullscreen extend above status bar, but some don't extend
@@ -3215,7 +3205,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @return Whether we reported "resize while not drag resizing" to the application.
      * @see #isResizedWhileNotDragResizing()
      */
-    boolean isResizedWhileNotDragResizingReported() {
+    private boolean isResizedWhileNotDragResizingReported() {
         return mResizedWhileNotDragResizingReported;
     }
 
@@ -3223,7 +3213,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mResizeMode;
     }
 
-    boolean computeDragResizing() {
+    private boolean computeDragResizing() {
         final Task task = getTask();
         if (task == null) {
             return false;
@@ -3241,7 +3231,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // and the bounds we clip this window to might be different. In order to avoid holes, we
         // simulate that we are still resizing so the app fills the hole with the resizing
         // background.
-        return (mDisplayContent.mDividerControllerLocked.isResizing()
+        return (getDisplayContent().mDividerControllerLocked.isResizing()
                         || mAppToken != null && !mAppToken.mFrozenBounds.isEmpty()) &&
                 !task.inFreeformWorkspace() && !isGoneForLayoutLw();
 
@@ -3257,7 +3247,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (task != null && task.isDragResizing()) {
             mResizeMode = task.getDragResizeMode();
         } else {
-            mResizeMode = mDragResizing && mDisplayContent.mDividerControllerLocked.isResizing()
+            mResizeMode = mDragResizing && getDisplayContent().mDividerControllerLocked.isResizing()
                     ? DRAG_RESIZE_MODE_DOCKED_DIVIDER
                     : DRAG_RESIZE_MODE_FREEFORM;
         }
@@ -3276,9 +3266,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         pw.print(prefix); pw.print("mDisplayId="); pw.print(getDisplayId());
                 if (stack != null) {
                     pw.print(" stackId="); pw.print(stack.mStackId);
-                }
-                if (mNotOnAppsDisplay) {
-                    pw.print(" mNotOnAppsDisplay="); pw.print(mNotOnAppsDisplay);
                 }
                 pw.print(" mSession="); pw.print(mSession);
                 pw.print(" mClient="); pw.println(mClient.asBinder());
@@ -3665,9 +3652,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void requestUpdateWallpaperIfNeeded() {
-        if (mDisplayContent != null && (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
-            mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-            mDisplayContent.setLayoutNeeded();
+        final DisplayContent dc = getDisplayContent();
+        if (dc != null && (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
+            dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+            dc.setLayoutNeeded();
             mService.mWindowPlacerLocked.requestTraversal();
         }
 
@@ -3693,12 +3681,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return winY;
     }
 
-    void transferDimToReplacement() {
+    private void transferDimToReplacement() {
         final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
-        if (dimLayerUser != null && mDisplayContent != null) {
-            mDisplayContent.mDimLayerController.applyDim(dimLayerUser,
-                    mReplacementWindow.mWinAnimator,
-                    (mAttrs.flags & FLAG_DIM_BEHIND) != 0 ? true : false);
+        final DisplayContent dc = getDisplayContent();
+        if (dimLayerUser != null && dc != null) {
+            dc.mDimLayerController.applyDim(dimLayerUser,
+                    mReplacementWindow.mWinAnimator, (mAttrs.flags & FLAG_DIM_BEHIND) != 0);
         }
     }
 
@@ -3796,13 +3784,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (mAttrs.type == TYPE_INPUT_METHOD) {
-            mDisplayContent.mDividerControllerLocked.resetImeHideRequested();
+            getDisplayContent().mDividerControllerLocked.resetImeHideRequested();
         }
 
         return true;
     }
 
-    void logPerformShow(String prefix) {
+    private void logPerformShow(String prefix) {
         if (DEBUG_VISIBILITY
                 || (DEBUG_STARTING_WINDOW && mAttrs.type == TYPE_APPLICATION_STARTING)) {
             Slog.v(TAG, prefix + this
@@ -3812,11 +3800,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " during animation: policyVis=" + mPolicyVisibility
                     + " parentHidden=" + isParentWindowHidden()
                     + " tok.hiddenRequested="
-                    + (mAppToken != null ? mAppToken.hiddenRequested : false)
-                    + " tok.hidden=" + (mAppToken != null ? mAppToken.hidden : false)
+                    + (mAppToken != null && mAppToken.hiddenRequested)
+                    + " tok.hidden=" + (mAppToken != null && mAppToken.hidden)
                     + " animating=" + mWinAnimator.mAnimating
                     + " tok animating="
-                    + (mWinAnimator.mAppAnimator != null ? mWinAnimator.mAppAnimator.animating : false)
+                    + (mWinAnimator.mAppAnimator != null && mWinAnimator.mAppAnimator.animating)
                     + " Callers=" + Debug.getCallers(4));
         }
     }
@@ -3874,13 +3862,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    int rebuildWindowList(DisplayContent dc, int addIndex) {
-        final DisplayContent winDisplayContent = getDisplayContent();
-        if (winDisplayContent == dc || winDisplayContent == null) {
-            mDisplayContent = dc;
-            return reAddWindow(addIndex);
-        }
-        return addIndex;
+    int rebuildWindowList(int addIndex) {
+        return reAddWindow(addIndex);
     }
 
     // TODO: come-up with a better name for this method that represents what it does.

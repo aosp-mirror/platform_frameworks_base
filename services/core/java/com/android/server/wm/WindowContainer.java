@@ -483,16 +483,15 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
 
     /**
      * Rebuilds the WindowList for the input display content.
-     * @param dc The display content to rebuild the window list for.
      * @param addIndex The index in the window list to add the next entry to.
      * @return The next index in the window list to.
      */
     // TODO: Hoping we can get rid of WindowList so this method wouldn't be needed.
-    int rebuildWindowList(DisplayContent dc, int addIndex) {
+    int rebuildWindowList(int addIndex) {
         final int count = mChildren.size();
         for (int i = 0; i < count; i++) {
             final WindowContainer wc = mChildren.get(i);
-            addIndex = wc.rebuildWindowList(dc, addIndex);
+            addIndex = wc.rebuildWindowList(addIndex);
         }
         return addIndex;
     }

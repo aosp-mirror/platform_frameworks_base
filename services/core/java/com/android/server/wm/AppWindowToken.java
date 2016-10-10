@@ -1184,16 +1184,16 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
-    int rebuildWindowListUnchecked(DisplayContent dc, int addIndex) {
-        return super.rebuildWindowList(dc, addIndex);
+    int rebuildWindowListUnchecked(int addIndex) {
+        return super.rebuildWindowList(addIndex);
     }
 
     @Override
-    int rebuildWindowList(DisplayContent dc, int addIndex) {
+    int rebuildWindowList(int addIndex) {
         if (mIsExiting && !waitingForReplacement()) {
             return addIndex;
         }
-        return rebuildWindowListUnchecked(dc, addIndex);
+        return rebuildWindowListUnchecked(addIndex);
     }
 
     @Override

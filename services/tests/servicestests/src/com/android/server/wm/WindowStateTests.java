@@ -163,7 +163,6 @@ public class WindowStateTests {
     private WindowState createWindow(WindowState parent, int type) {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
 
-        return new WindowState(sWm, null, mIWindow, mWindowToken, parent, 0, 0, attrs, 0,
-                sWm.getDefaultDisplayContentLocked(), 0);
+        return new WindowState(sWm, null, mIWindow, mWindowToken, parent, 0, 0, attrs, 0, 0);
     }
 }

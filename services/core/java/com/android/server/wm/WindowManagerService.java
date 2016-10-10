@@ -1257,7 +1257,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // excercise to find the appropriate input method target (used for animations
             // and dialog adjustments), but for purposes of Z ordering we simply wish to
             // place it above the docked divider. Unless it is already above the divider.
-            WindowState dockedDivider = w.mDisplayContent.mDividerControllerLocked.getWindow();
+            final WindowState dockedDivider =
+                    w.getDisplayContent().mDividerControllerLocked.getWindow();
             if (dockedDivider != null && dockedDivider.isVisibleLw()) {
                 int dividerIndex = windows.indexOf(dockedDivider);
                 if (dividerIndex > 0 && dividerIndex > i) {
@@ -1275,7 +1276,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return -1;
     }
 
-    void addInputMethodWindowToListLocked(WindowState win) {
+    private void addInputMethodWindowToListLocked(WindowState win) {
         int pos = findDesiredInputMethodWindowIndexLocked(true);
         if (pos >= 0) {
             if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
@@ -1654,7 +1655,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             WindowState win = new WindowState(this, session, client, token, parentWindow,
-                    appOp[0], seq, attrs, viewVisibility, displayContent, session.mUid);
+                    appOp[0], seq, attrs, viewVisibility, session.mUid);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
                 // continue.
