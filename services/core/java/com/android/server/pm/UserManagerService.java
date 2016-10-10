@@ -97,6 +97,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.am.UserState;
 import com.android.server.storage.DeviceStorageMonitorInternal;
+
 import libcore.io.IoUtils;
 import libcore.util.Objects;
 
@@ -2189,6 +2190,13 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public UserInfo createProfileForUserEvenWhenDisallowed(String name, int flags, int userId,
+            String[] disallowedPackages) {
+        checkManageOrCreateUsersPermission(flags);
+        return createUserInternalUnchecked(name, flags, userId, disallowedPackages);
+    }
+
+    @Override
     public UserInfo createUser(String name, int flags) {
         checkManageOrCreateUsersPermission(flags);
         return createUserInternal(name, flags, UserHandle.USER_NULL);
@@ -2204,17 +2212,17 @@ public class UserManagerService extends IUserManager.Stub {
             Log.w(LOG_TAG, "Cannot add user. DISALLOW_ADD_USER is enabled.");
             return null;
         }
+        return createUserInternalUnchecked(name, flags, parentId, disallowedPackages);
+    }
+
+    private UserInfo createUserInternalUnchecked(String name, int flags, int parentId,
+            String[] disallowedPackages) {
         DeviceStorageMonitorInternal dsm = LocalServices
                 .getService(DeviceStorageMonitorInternal.class);
         if (dsm.isMemoryLow()) {
             Log.w(LOG_TAG, "Cannot add user. Not enough space on disk.");
             return null;
         }
-        return createUserInternalUnchecked(name, flags, parentId, disallowedPackages);
-    }
-
-    private UserInfo createUserInternalUnchecked(String name, int flags, int parentId,
-            String[] disallowedPackages) {
         if (ActivityManager.isLowRamDeviceStatic()) {
             return null;
         }
