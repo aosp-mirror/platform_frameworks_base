@@ -298,6 +298,7 @@ public class PipManager {
             mListeners.get(i).onMoveToFullscreen();
         }
         resizePinnedStack(mState);
+        updatePipVisibility(false);
     }
 
     /**
