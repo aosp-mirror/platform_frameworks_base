@@ -28,7 +28,7 @@ LOCAL_C_INCLUDES += \
     frameworks/base/libs/hwui \
     $(rs_generated_include_dir)
 
-LOCAL_CFLAGS += -Wno-unused-parameter -std=c++11
+LOCAL_CFLAGS += -Wno-unused-parameter
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
 LOCAL_ADDITIONAL_DEPENDENCIES := $(addprefix $(rs_generated_include_dir)/,rsgApiFuncDecl.h)

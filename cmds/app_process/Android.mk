@@ -62,7 +62,6 @@ LOCAL_WHOLE_STATIC_LIBRARIES := libsigchain
 LOCAL_LDFLAGS := -ldl
 LOCAL_LDFLAGS_32 := -Wl,--version-script,art/sigchainlib/version-script32.txt -Wl,--export-dynamic
 LOCAL_LDFLAGS_64 := -Wl,--version-script,art/sigchainlib/version-script64.txt -Wl,--export-dynamic
-LOCAL_CPPFLAGS := -std=c++11
 
 LOCAL_MODULE := app_process__asan
 LOCAL_MULTILIB := both
