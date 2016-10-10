@@ -106,7 +106,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     private long mUserActivityTimeout = -1;
     private boolean mUpdateRotation = false;
     private boolean mObscured = false;
-    boolean mSyswin = false;
+    private boolean mSyswin = false;
     // Set to true when the display contains content to show the user.
     // When false, the display manager may choose to mirror or blank the display.
     private boolean mDisplayHasContent = false;
@@ -116,7 +116,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     // Last window that requires screen wakelock
     WindowState mHoldScreenWindow = null;
     // Last window that obscures all windows below
-    WindowState mObsuringWindow = null;
+    WindowState mObscuringWindow = null;
     // Only set while traversing the default display based on its content.
     // Affects the behavior of mirroring on secondary displays.
     private boolean mObscureApplicationContentOnSecondaryDisplays = false;
@@ -368,7 +368,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
      * Callback used to trigger bounds update after configuration change and get ids of stacks whose
      * bounds were updated.
      */
-    int[] updateStackBoundsAfterConfigChange() {
+    private int[] updateStackBoundsAfterConfigChange() {
         mChangedStackList.clear();
 
         final int numDisplays = mChildren.size();
@@ -969,7 +969,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     // TODO: Super crazy long method that should be broken down...
     private void applySurfaceChangesTransaction(boolean recoveringMemory, int defaultDw, int defaultDh) {
         mHoldScreenWindow = null;
-        mObsuringWindow = null;
+        mObscuringWindow = null;
 
         if (mService.mWatermark != null) {
             mService.mWatermark.positionSurface(defaultDw, defaultDh);
@@ -1195,7 +1195,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             // so we want to leave all of them as undimmed (for
             // performance reasons).
             if (!mObscured) {
-                mObsuringWindow = w;
+                mObscuringWindow = w;
             }
 
             mObscured = true;
