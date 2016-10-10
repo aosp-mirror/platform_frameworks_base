@@ -341,9 +341,8 @@ static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmap
         jlong paintHandle, jint dstDensity, jint srcDensity) {
 
     Canvas* canvas = get_canvas(canvasHandle);
-    Bitmap* bitmap = reinterpret_cast<Bitmap*>(bitmapHandle);
     SkBitmap skiaBitmap;
-    bitmap->getSkBitmap(&skiaBitmap);
+    bitmap::toSkBitmap(bitmapHandle, &skiaBitmap);
     const android::Res_png_9patch* chunk = reinterpret_cast<android::Res_png_9patch*>(chunkHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
