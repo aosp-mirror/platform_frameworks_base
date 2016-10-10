@@ -2984,6 +2984,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return mGestureRec;
     }
 
+    public FingerprintUnlockController getFingerprintUnlockController() {
+        return mFingerprintUnlockController;
+    }
+
     private void setNavigationIconHints(int hints) {
         if (hints == mNavigationIconHints) return;
 

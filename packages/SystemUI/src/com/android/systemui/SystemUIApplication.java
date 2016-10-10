@@ -29,11 +29,22 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.android.systemui.keyboard.KeyboardUI;
+import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.media.RingtonePlayer;
 import com.android.systemui.plugins.OverlayPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.power.PowerUI;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.shortcut.ShortcutKeyDispatcher;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.statusbar.SystemBars;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tv.pip.PipUI;
+import com.android.systemui.usb.StorageNotification;
+import com.android.systemui.volume.VolumeUI;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,19 +61,20 @@ public class SystemUIApplication extends Application {
      * The classes of the stuff to start.
      */
     private final Class<?>[] SERVICES = new Class[] {
-            com.android.systemui.tuner.TunerService.class,
-            com.android.systemui.keyguard.KeyguardViewMediator.class,
-            com.android.systemui.recents.Recents.class,
-            com.android.systemui.volume.VolumeUI.class,
+            TunerService.class,
+            KeyguardViewMediator.class,
+            Recents.class,
+            VolumeUI.class,
             Divider.class,
-            com.android.systemui.statusbar.SystemBars.class,
-            com.android.systemui.usb.StorageNotification.class,
-            com.android.systemui.power.PowerUI.class,
-            com.android.systemui.media.RingtonePlayer.class,
-            com.android.systemui.keyboard.KeyboardUI.class,
-            com.android.systemui.tv.pip.PipUI.class,
-            com.android.systemui.shortcut.ShortcutKeyDispatcher.class,
-            com.android.systemui.VendorServices.class
+            SystemBars.class,
+            StorageNotification.class,
+            PowerUI.class,
+            RingtonePlayer.class,
+            KeyboardUI.class,
+            PipUI.class,
+            ShortcutKeyDispatcher.class,
+            VendorServices.class,
+            LatencyTester.class
     };
 
     /**
@@ -70,8 +82,8 @@ public class SystemUIApplication extends Application {
      * above.
      */
     private final Class<?>[] SERVICES_PER_USER = new Class[] {
-            com.android.systemui.recents.Recents.class,
-            com.android.systemui.tv.pip.PipUI.class
+            Recents.class,
+            PipUI.class
     };
 
     /**

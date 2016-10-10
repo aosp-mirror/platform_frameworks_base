@@ -42,8 +42,6 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     private static final boolean DEBUG_FP_WAKELOCK = KeyguardConstants.DEBUG_FP_WAKELOCK;
     private static final long FINGERPRINT_WAKELOCK_TIMEOUT_MS = 15 * 1000;
     private static final String FINGERPRINT_WAKE_LOCK_NAME = "wake-and-unlock wakelock";
-    private static final String ACTION_FINGERPRINT_WAKE_FAKE =
-            "com.android.systemui.ACTION_FINGERPRINT_WAKE_FAKE";
 
     /**
      * Mode in which we don't need to wake up the device when we get a fingerprint.
@@ -123,14 +121,6 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         mScrimController = scrimController;
         mPhoneStatusBar = phoneStatusBar;
         mUnlockMethodCache = unlockMethodCache;
-        if (Build.IS_DEBUGGABLE) {
-            context.registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    fakeWakeAndUnlock();
-                }
-            }, new IntentFilter(ACTION_FINGERPRINT_WAKE_FAKE));
-        }
     }
 
     public void setStatusBarKeyguardViewManager(
@@ -157,11 +147,6 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             mWakeLock.release();
             mWakeLock = null;
         }
-    }
-
-    public void fakeWakeAndUnlock() {
-        onFingerprintAcquired();
-        onFingerprintAuthenticated(KeyguardUpdateMonitor.getCurrentUser());
     }
 
     @Override
