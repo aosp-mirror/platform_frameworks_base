@@ -64,6 +64,13 @@ public interface WindowManager extends ViewManager {
     /** @hide */
     int DOCKED_BOTTOM = 4;
 
+    /** @hide */
+    final static String INPUT_CONSUMER_PIP = "pip_input_consumer";
+    /** @hide */
+    final static String INPUT_CONSUMER_NAVIGATION = "nav_input_consumer";
+    /** @hide */
+    final static String INPUT_CONSUMER_WALLPAPER = "wallpaper_input_consumer";
+
     /**
      * Exception that is thrown when trying to add view whose
      * {@link LayoutParams} {@link LayoutParams#token}

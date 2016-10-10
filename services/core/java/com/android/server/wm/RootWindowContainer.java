@@ -47,7 +47,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
+import static android.view.WindowManager.INPUT_CONSUMER_PIP;
+import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
@@ -700,8 +704,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     void updateInputWindows(InputMonitor inputMonitor, WindowState inputFocus, boolean inDrag) {
-        boolean addInputConsumerHandle = mService.mInputConsumer != null;
-        boolean addWallpaperInputConsumerHandle = mService.mWallpaperInputConsumer != null;
+        final InputConsumerImpl navInputConsumer =
+                mService.mInputMonitor.getInputConsumer(INPUT_CONSUMER_NAVIGATION);
+        final InputConsumerImpl pipInputConsumer =
+                mService.mInputMonitor.getInputConsumer(INPUT_CONSUMER_PIP);
+        final InputConsumerImpl wallpaperInputConsumer =
+                mService.mInputMonitor.getInputConsumer(INPUT_CONSUMER_WALLPAPER);
+        boolean addInputConsumerHandle = navInputConsumer != null;
+        boolean addPipInputConsumerHandle = pipInputConsumer != null;
+        boolean addWallpaperInputConsumerHandle = wallpaperInputConsumer != null;
+        final Rect pipTouchableBounds = addPipInputConsumerHandle ? new Rect() : null;
         final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
         boolean disableWallpaperTouchEvents = false;
 
@@ -718,9 +730,20 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     // Skip this window because it cannot possibly receive input.
                     continue;
                 }
+
+                if (addPipInputConsumerHandle
+                        && child.getStackId() == PINNED_STACK_ID
+                        && inputWindowHandle.layer <= pipInputConsumer.mWindowHandle.layer) {
+                    // Update the bounds of the Pip input consumer to match the Pinned stack
+                    child.getStack().getBounds(pipTouchableBounds);
+                    pipInputConsumer.mWindowHandle.touchableRegion.set(pipTouchableBounds);
+                    inputMonitor.addInputWindowHandle(pipInputConsumer.mWindowHandle);
+                    addPipInputConsumerHandle = false;
+                }
+
                 if (addInputConsumerHandle
-                        && inputWindowHandle.layer <= mService.mInputConsumer.mWindowHandle.layer) {
-                    inputMonitor.addInputWindowHandle(mService.mInputConsumer.mWindowHandle);
+                        && inputWindowHandle.layer <= navInputConsumer.mWindowHandle.layer) {
+                    inputMonitor.addInputWindowHandle(navInputConsumer.mWindowHandle);
                     addInputConsumerHandle = false;
                 }
 
@@ -728,8 +751,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     if (child.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER &&
                             child.isVisibleLw()) {
                         // Add the wallpaper input consumer above the first visible wallpaper.
-                        inputMonitor.addInputWindowHandle(
-                                mService.mWallpaperInputConsumer.mWindowHandle);
+                        inputMonitor.addInputWindowHandle(wallpaperInputConsumer.mWindowHandle);
                         addWallpaperInputConsumerHandle = false;
                     }
                 }
@@ -763,7 +785,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         if (addWallpaperInputConsumerHandle) {
             // No visible wallpaper found, add the wallpaper input consumer at the end.
-            inputMonitor.addInputWindowHandle(mService.mWallpaperInputConsumer.mWindowHandle);
+            inputMonitor.addInputWindowHandle(wallpaperInputConsumer.mWindowHandle);
         }
     }
 

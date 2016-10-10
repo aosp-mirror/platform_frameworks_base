@@ -226,14 +226,6 @@ class WindowSurfacePlacer {
         final int dw = displayInfo.logicalWidth;
         final int dh = displayInfo.logicalHeight;
 
-        if (mService.mInputConsumer != null) {
-            mService.mInputConsumer.layout(dw, dh);
-        }
-
-        if (mService.mWallpaperInputConsumer != null) {
-            mService.mWallpaperInputConsumer.layout(dw, dh);
-        }
-
         final int N = windows.size();
         int i;
 
@@ -380,6 +372,7 @@ class WindowSurfacePlacer {
         }
 
         // Window frames may have changed. Tell the input dispatcher about it.
+        mService.mInputMonitor.layoutInputConsumers(dw, dh);
         mService.mInputMonitor.setUpdateInputWindowsNeededLw();
         if (updateInputWindows) {
             mService.mInputMonitor.updateInputWindowsLw(false /*force*/);

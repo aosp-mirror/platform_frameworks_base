@@ -612,10 +612,13 @@ public class IWindowManagerImpl implements IWindowManager {
         throws RemoteException {}
 
     @Override
-    public void createWallpaperInputConsumer(InputChannel inputChannel) throws RemoteException {}
+    public void createInputConsumer(String name, InputChannel inputChannel)
+            throws RemoteException {}
 
     @Override
-    public void removeWallpaperInputConsumer() throws RemoteException {}
+    public boolean destroyInputConsumer(String name) throws RemoteException {
+        return false;
+    }
 
     @Override
     public Bitmap screenshotWallpaper() throws RemoteException {
