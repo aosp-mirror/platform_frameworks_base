@@ -100,9 +100,6 @@ public class SettingsDrawerActivity extends Activity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.action_bar);
         if (theme.getBoolean(android.R.styleable.Theme_windowNoTitle, false)) {
             toolbar.setVisibility(View.GONE);
-            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-            mDrawerLayout = null;
-            return;
         }
         getDashboardCategories();
         setActionBar(toolbar);
@@ -123,9 +120,8 @@ public class SettingsDrawerActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mShowingMenu && mDrawerLayout != null && item.getItemId() == android.R.id.home
-                && mDrawerAdapter.getCount() != 0) {
-            openDrawer();
+        if (mShowingMenu && item.getItemId() == android.R.id.home) {
+            this.finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -255,18 +251,13 @@ public class SettingsDrawerActivity extends Activity {
         }
         // TODO: Do this in the background with some loading.
         mDrawerAdapter.updateCategories();
-        if (mDrawerAdapter.getCount() != 0) {
-            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        } else {
-            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        }
+        // Drawer: YOU SHALL NOT PASS
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
     }
 
     public void showMenuIcon() {
         mShowingMenu = true;
         if(getActionBar() != null){
-            getActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
-            getActionBar().setHomeActionContentDescription(R.string.content_description_menu_button);
             getActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
