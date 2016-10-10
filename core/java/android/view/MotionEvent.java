@@ -436,6 +436,14 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int FLAG_WINDOW_IS_PARTIALLY_OBSCURED = 0x2;
 
     /**
+     * This private flag is only set on {@link #ACTION_HOVER_MOVE} events and indicates that
+     * this event will be immediately followed by a {@link #ACTION_HOVER_EXIT}. It is used to
+     * prevent generating redundant {@link #ACTION_HOVER_ENTER} events.
+     * @hide
+     */
+    public static final int FLAG_HOVER_EXIT_PENDING = 0x4;
+
+    /**
      * Private flag that indicates when the system has detected that this motion event
      * may be inconsistent with respect to the sequence of previously delivered motion events,
      * such as when a pointer move event is sent but the pointer is not down.
@@ -1945,6 +1953,20 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         nativeSetFlags(mNativePtr, targetsFocus
                 ? flags | FLAG_TARGET_ACCESSIBILITY_FOCUS
                 : flags & ~FLAG_TARGET_ACCESSIBILITY_FOCUS);
+    }
+
+    /** @hide */
+    public final boolean isHoverExitPending() {
+        final int flags = getFlags();
+        return (flags & FLAG_HOVER_EXIT_PENDING) != 0;
+    }
+
+    /** @hide */
+    public void setHoverExitPending(boolean hoverExitPending) {
+        final int flags = getFlags();
+        nativeSetFlags(mNativePtr, hoverExitPending
+                ? flags | FLAG_HOVER_EXIT_PENDING
+                : flags & ~FLAG_HOVER_EXIT_PENDING);
     }
 
     /**
