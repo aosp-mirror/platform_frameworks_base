@@ -16,13 +16,6 @@
 
 package android.widget;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-
 import android.Manifest;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
@@ -47,6 +40,11 @@ import android.widget.RemoteViews.OnClickHandler;
 
 import com.android.internal.widget.IRemoteViewsAdapterConnection;
 import com.android.internal.widget.IRemoteViewsFactory;
+
+import java.lang.ref.WeakReference;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 /**
  * An adapter to a RemoteViewsService which fetches and caches RemoteViews

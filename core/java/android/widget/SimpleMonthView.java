@@ -16,10 +16,6 @@
 
 package android.widget;
 
-import android.view.PointerIcon;
-import com.android.internal.R;
-import com.android.internal.widget.ExploreByTouchHelper;
-
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -43,16 +39,20 @@ import android.util.MathUtils;
 import android.util.StateSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
-import java.text.NumberFormat;
-import java.util.Locale;
+import com.android.internal.R;
+import com.android.internal.widget.ExploreByTouchHelper;
 
 import libcore.icu.LocaleData;
+
+import java.text.NumberFormat;
+import java.util.Locale;
 
 /**
  * A calendar-like view displaying a specified month and the appropriate selectable day numbers

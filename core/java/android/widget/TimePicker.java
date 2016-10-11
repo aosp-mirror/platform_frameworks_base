@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -32,11 +30,13 @@ import android.util.MathUtils;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.internal.R;
+
+import libcore.icu.LocaleData;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
-
-import libcore.icu.LocaleData;
 
 /**
  * A widget for selecting the time of day, in either 24-hour or AM/PM mode.

@@ -16,11 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-import com.android.internal.view.menu.MenuBuilder;
-import com.android.internal.view.menu.MenuPopupHelper;
-import com.android.internal.view.menu.ShowableListMenu;
-
 import android.annotation.MenuRes;
 import android.content.Context;
 import android.view.Gravity;
@@ -29,6 +24,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnTouchListener;
+
+import com.android.internal.R;
+import com.android.internal.view.menu.MenuBuilder;
+import com.android.internal.view.menu.MenuPopupHelper;
+import com.android.internal.view.menu.ShowableListMenu;
 
 /**
  * A PopupMenu displays a {@link Menu} in a modal popup window anchored to a

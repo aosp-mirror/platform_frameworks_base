@@ -16,17 +16,12 @@
 
 package android.widget;
 
-import android.annotation.Nullable;
 import android.content.Context;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 
 import com.android.internal.util.Predicate;
-import com.android.internal.widget.PagerAdapter;
 import com.android.internal.widget.ViewPager;
 
 import java.util.ArrayList;

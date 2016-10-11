@@ -17,12 +17,12 @@
 package android.widget;
 
 
-import com.android.internal.widget.AutoScrollHelper.AbsListViewAutoScroller;
-
 import android.annotation.NonNull;
 import android.content.Context;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.android.internal.widget.AutoScrollHelper.AbsListViewAutoScroller;
 
 /**
  * Wrapper class for a ListView. This wrapper can hijack the focus to

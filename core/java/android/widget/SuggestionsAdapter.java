@@ -21,8 +21,8 @@ import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.ContentResolver.OpenResourceIdResult;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -39,8 +39,8 @@ import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 
 import com.android.internal.R;
 
@@ -111,7 +111,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
         mProviderContext = mSearchable.getProviderContext(mContext, activityContext);
 
         mOutsideDrawablesCache = outsideDrawablesCache;
-        
+
         // mStartSpinnerRunnable = new Runnable() {
         // public void run() {
         // // mSearchView.setWorking(true); // TODO:

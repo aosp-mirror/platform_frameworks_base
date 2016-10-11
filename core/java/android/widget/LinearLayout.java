@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,15 +32,17 @@ import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
 import android.widget.RemoteViews.RemoteView;
 
+import com.android.internal.R;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 
 /**
- * A Layout that arranges its children in a single column or a single row. The direction of 
- * the row can be set by calling {@link #setOrientation(int) setOrientation()}. 
+ * A Layout that arranges its children in a single column or a single row. The direction of
+ * the row can be set by calling {@link #setOrientation(int) setOrientation()}.
  * You can also specify gravity, which specifies the alignment of all the child elements by
- * calling {@link #setGravity(int) setGravity()} or specify that specific children 
+ * calling {@link #setGravity(int) setGravity()} or specify that specific children
  * grow to fill up any remaining space in the layout by setting the <em>weight</em> member of
  * {@link android.widget.LinearLayout.LayoutParams LinearLayout.LayoutParams}.
  * The default orientation is horizontal.
@@ -202,7 +202,7 @@ public class LinearLayout extends ViewGroup {
     public LinearLayout(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
-    
+
     public LinearLayout(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
@@ -497,7 +497,7 @@ public class LinearLayout extends ViewGroup {
      * When true, all children with a weight will be considered having
      * the minimum size of the largest child. If false, all children are
      * measured normally.
-     * 
+     *
      * @return True to measure children with a weight using the minimum
      *         size of the largest child, false otherwise.
      *
@@ -511,9 +511,9 @@ public class LinearLayout extends ViewGroup {
      * When set to true, all children with a weight will be considered having
      * the minimum size of the largest child. If false, all children are
      * measured normally.
-     * 
+     *
      * Disabled by default.
-     * 
+     *
      * @param enabled True to measure children with a weight using the
      *        minimum size of the largest child, false otherwise.
      *
@@ -589,7 +589,7 @@ public class LinearLayout extends ViewGroup {
     /**
      * @param i The index of the child that will be used if this layout is
      *          part of a larger layout that is baseline aligned.
-     * 
+     *
      * @attr ref android.R.styleable#LinearLayout_baselineAlignedChildIndex
      */
     @android.view.RemotableViewMethod
@@ -720,14 +720,14 @@ public class LinearLayout extends ViewGroup {
         float totalWeight = 0;
 
         final int count = getVirtualChildCount();
-        
+
         final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
         boolean matchWidth = false;
         boolean skippedMeasure = false;
 
-        final int baselineChildIndex = mBaselineAlignedChildIndex;        
+        final int baselineChildIndex = mBaselineAlignedChildIndex;
         final boolean useLargestChild = mUseLargestChild;
 
         int largestChildHeight = Integer.MIN_VALUE;
@@ -886,7 +886,7 @@ public class LinearLayout extends ViewGroup {
 
         // Check against our minimum height
         heightSize = Math.max(heightSize, getSuggestedMinimumHeight());
-        
+
         // Reconcile our calculated size with the heightMeasureSpec
         int heightSizeAndState = resolveSizeAndState(heightSize, heightMeasureSpec, 0);
         heightSize = heightSizeAndState & MEASURED_SIZE_MASK;
@@ -991,12 +991,12 @@ public class LinearLayout extends ViewGroup {
         if (!allFillParent && widthMode != MeasureSpec.EXACTLY) {
             maxWidth = alternativeMaxWidth;
         }
-        
+
         maxWidth += mPaddingLeft + mPaddingRight;
 
         // Check against our minimum width
         maxWidth = Math.max(maxWidth, getSuggestedMinimumWidth());
-        
+
         setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, childState),
                 heightSizeAndState);
 
@@ -1013,13 +1013,13 @@ public class LinearLayout extends ViewGroup {
            final View child = getVirtualChildAt(i);
            if (child != null && child.getVisibility() != GONE) {
                LinearLayout.LayoutParams lp = ((LinearLayout.LayoutParams)child.getLayoutParams());
-               
+
                if (lp.width == LayoutParams.MATCH_PARENT) {
                    // Temporarily force children to reuse their old measured height
                    // FIXME: this may not be right for something like wrapping text?
                    int oldHeight = lp.height;
                    lp.height = child.getMeasuredHeight();
-                   
+
                    // Remeasue with new dimensions
                    measureChildWithMargins(child, uniformMeasureSpec, 0, heightMeasureSpec, 0);
                    lp.height = oldHeight;
@@ -1037,7 +1037,7 @@ public class LinearLayout extends ViewGroup {
      *
      * @see #getOrientation()
      * @see #setOrientation(int)
-     * @see #onMeasure(int, int) 
+     * @see #onMeasure(int, int)
      */
     void measureHorizontal(int widthMeasureSpec, int heightMeasureSpec) {
         mTotalLength = 0;
@@ -1049,7 +1049,7 @@ public class LinearLayout extends ViewGroup {
         float totalWeight = 0;
 
         final int count = getVirtualChildCount();
-        
+
         final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
@@ -1069,7 +1069,7 @@ public class LinearLayout extends ViewGroup {
 
         final boolean baselineAligned = mBaselineAligned;
         final boolean useLargestChild = mUseLargestChild;
-        
+
         final boolean isExactly = widthMode == MeasureSpec.EXACTLY;
 
         int largestChildWidth = Integer.MIN_VALUE;
@@ -1084,7 +1084,7 @@ public class LinearLayout extends ViewGroup {
                 mTotalLength += measureNullChild(i);
                 continue;
             }
-           
+
             if (child.getVisibility() == GONE) {
                 i += getChildrenSkipCount(child, i);
                 continue;
@@ -1263,16 +1263,16 @@ public class LinearLayout extends ViewGroup {
 
         // Add in our padding
         mTotalLength += mPaddingLeft + mPaddingRight;
-        
+
         int widthSize = mTotalLength;
-        
+
         // Check against our minimum width
         widthSize = Math.max(widthSize, getSuggestedMinimumWidth());
-        
+
         // Reconcile our calculated size with the widthMeasureSpec
         int widthSizeAndState = resolveSizeAndState(widthSize, widthMeasureSpec, 0);
         widthSize = widthSizeAndState & MEASURED_SIZE_MASK;
-        
+
         // Either expand children with weight to take up available space or
         // shrink them if they extend beyond our current bounds. If we skipped
         // measurement on any children, we need to measure them now.
@@ -1409,12 +1409,12 @@ public class LinearLayout extends ViewGroup {
         if (!allFillParent && heightMode != MeasureSpec.EXACTLY) {
             maxHeight = alternativeMaxHeight;
         }
-        
+
         maxHeight += mPaddingTop + mPaddingBottom;
 
         // Check against our minimum height
         maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
-        
+
         setMeasuredDimension(widthSizeAndState | (childState&MEASURED_STATE_MASK),
                 resolveSizeAndState(maxHeight, heightMeasureSpec,
                         (childState<<MEASURED_HEIGHT_STATE_SHIFT)));
@@ -1434,13 +1434,13 @@ public class LinearLayout extends ViewGroup {
            final View child = getVirtualChildAt(i);
            if (child != null && child.getVisibility() != GONE) {
                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
-               
+
                if (lp.height == LayoutParams.MATCH_PARENT) {
                    // Temporarily force children to reuse their old measured width
                    // FIXME: this may not be right for something like wrapping text?
                    int oldWidth = lp.width;
                    lp.width = child.getMeasuredWidth();
-                   
+
                    // Remeasure with new dimensions
                    measureChildWithMargins(child, widthMeasureSpec, 0, uniformMeasureSpec, 0);
                    lp.width = oldWidth;
@@ -1541,14 +1541,14 @@ public class LinearLayout extends ViewGroup {
 
         int childTop;
         int childLeft;
-        
+
         // Where right end of child should go
         final int width = right - left;
         int childRight = width - mPaddingRight;
-        
+
         // Space available for child
         int childSpace = width - paddingLeft - mPaddingRight;
-        
+
         final int count = getVirtualChildCount();
 
         final int majorGravity = mGravity & Gravity.VERTICAL_GRAVITY_MASK;
@@ -1578,10 +1578,10 @@ public class LinearLayout extends ViewGroup {
             } else if (child.getVisibility() != GONE) {
                 final int childWidth = child.getMeasuredWidth();
                 final int childHeight = child.getMeasuredHeight();
-                
+
                 final LinearLayout.LayoutParams lp =
                         (LinearLayout.LayoutParams) child.getLayoutParams();
-                
+
                 int gravity = lp.gravity;
                 if (gravity < 0) {
                     gravity = minorGravity;
@@ -1647,11 +1647,11 @@ public class LinearLayout extends ViewGroup {
 
         int childTop;
         int childLeft;
-        
+
         // Where bottom of child should go
         final int height = bottom - top;
-        int childBottom = height - mPaddingBottom; 
-        
+        int childBottom = height - mPaddingBottom;
+
         // Space available for child
         int childSpace = height - paddingTop - mPaddingBottom;
 
@@ -1707,12 +1707,12 @@ public class LinearLayout extends ViewGroup {
                 if (baselineAligned && lp.height != LayoutParams.MATCH_PARENT) {
                     childBaseline = child.getBaseline();
                 }
-                
+
                 int gravity = lp.gravity;
                 if (gravity < 0) {
                     gravity = minorGravity;
                 }
-                
+
                 switch (gravity & Gravity.VERTICAL_GRAVITY_MASK) {
                     case Gravity.TOP:
                         childTop = paddingTop + lp.topMargin;
@@ -1764,15 +1764,15 @@ public class LinearLayout extends ViewGroup {
         }
     }
 
-    private void setChildFrame(View child, int left, int top, int width, int height) {        
+    private void setChildFrame(View child, int left, int top, int width, int height) {
         child.layout(left, top, left + width, top + height);
     }
-    
+
     /**
      * Should the layout be a column or a row.
      * @param orientation Pass {@link #HORIZONTAL} or {@link #VERTICAL}. Default
      * value is {@link #HORIZONTAL}.
-     * 
+     *
      * @attr ref android.R.styleable#LinearLayout_orientation
      */
     public void setOrientation(@OrientationMode int orientation) {
@@ -1784,7 +1784,7 @@ public class LinearLayout extends ViewGroup {
 
     /**
      * Returns the current orientation.
-     * 
+     *
      * @return either {@link #HORIZONTAL} or {@link #VERTICAL}
      */
     @OrientationMode
@@ -1797,9 +1797,9 @@ public class LinearLayout extends ViewGroup {
      * this layout has a VERTICAL orientation, this controls where all the child
      * views are placed if there is extra vertical space. If this layout has a
      * HORIZONTAL orientation, this controls the alignment of the children.
-     * 
+     *
      * @param gravity See {@link android.view.Gravity}
-     * 
+     *
      * @attr ref android.R.styleable#LinearLayout_gravity
      */
     @android.view.RemotableViewMethod
@@ -1845,7 +1845,7 @@ public class LinearLayout extends ViewGroup {
             requestLayout();
         }
     }
-    
+
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
         return new LinearLayout.LayoutParams(getContext(), attrs);
@@ -1909,7 +1909,7 @@ public class LinearLayout extends ViewGroup {
 
     /**
      * Per-child layout information associated with ViewLinearLayout.
-     * 
+     *
      * @attr ref android.R.styleable#LinearLayout_Layout_layout_weight
      * @attr ref android.R.styleable#LinearLayout_Layout_layout_gravity
      */

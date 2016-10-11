@@ -16,9 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-import com.android.internal.view.menu.ShowableListMenu;
-
 import android.annotation.StringRes;
 import android.content.Context;
 import android.content.Intent;
@@ -38,6 +35,9 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ActivityChooserModel.ActivityChooserModelClient;
+
+import com.android.internal.R;
+import com.android.internal.view.menu.ShowableListMenu;
 
 /**
  * This class is a view for choosing an activity for handling a given {@link Intent}.

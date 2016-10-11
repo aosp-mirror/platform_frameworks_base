@@ -17,18 +17,16 @@
 package android.widget;
 
 import android.annotation.NonNull;
-import android.content.res.Configuration;
-import android.os.Build;
-import android.os.Build.VERSION_CODES;
-import android.os.Parcel;
-import android.os.Parcelable;
-import com.android.internal.R;
-
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.StrictMode;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -46,6 +44,8 @@ import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
+
+import com.android.internal.R;
 
 import java.util.List;
 

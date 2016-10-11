@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -39,6 +37,8 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.DayPickerView.OnDaySelectedListener;
 import android.widget.YearPickerView.OnYearSelectedListener;
+
+import com.android.internal.R;
 
 import java.util.Locale;
 

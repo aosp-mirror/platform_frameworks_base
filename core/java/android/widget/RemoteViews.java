@@ -59,10 +59,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView.OnItemClickListener;
-import libcore.util.Objects;
 
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
+
+import libcore.util.Objects;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -18,15 +18,11 @@ package android.widget;
 
 import static android.os.Build.VERSION_CODES.N_MR1;
 
-import android.graphics.Rect;
-import com.android.internal.R;
-import com.android.internal.widget.ViewPager;
-import com.android.internal.widget.ViewPager.OnPageChangeListener;
-
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.icu.util.Calendar;
 import android.util.AttributeSet;
 import android.util.MathUtils;
@@ -35,9 +31,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 
-import java.util.Locale;
+import com.android.internal.R;
+import com.android.internal.widget.ViewPager;
+import com.android.internal.widget.ViewPager.OnPageChangeListener;
 
 import libcore.icu.LocaleData;
+
+import java.util.Locale;
 
 class DayPickerView extends ViewGroup {
     private static final int DEFAULT_LAYOUT = R.layout.day_picker_content_material;
