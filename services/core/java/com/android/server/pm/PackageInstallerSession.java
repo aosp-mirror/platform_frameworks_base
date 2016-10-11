@@ -439,7 +439,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (!FileUtils.isValidExtFilename(name)) {
                 throw new IllegalArgumentException("Invalid name: " + name);
             }
-            final File target = new File(resolveStageDir(), name);
+            final File target;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                target = new File(resolveStageDir(), name);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
 
             // TODO: this should delegate to DCS so the system process avoids
             // holding open FDs into containers.
@@ -1084,7 +1090,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 if (stageDir != null) {
                     prepareStageDir(stageDir);
                 } else if (stageCid != null) {
-                    prepareExternalStageCid(stageCid, params.sizeBytes);
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        prepareExternalStageCid(stageCid, params.sizeBytes);
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
 
                     // TODO: deliver more granular progress for ASEC allocation
                     mInternalProgress = 0.25f;
