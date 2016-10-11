@@ -62,7 +62,7 @@ final class UiBot {
         return getObject(text);
     }
 
-    public void closeNotifications() throws Exception {
+    public void collapseStatusBar() throws Exception {
         // TODO: mDevice should provide such method..
         StatusBarManager sbm =
                 (StatusBarManager) mInstrumentation.getContext().getSystemService("statusbar");
