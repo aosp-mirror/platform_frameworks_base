@@ -582,11 +582,6 @@
     <!-- UI debug setting: force right to left layout summary [CHAR LIMIT=100] -->
     <string name="force_rtl_layout_all_locales_summary">Force screen layout direction to RTL for all locales</string>
 
-    <!-- UI debug setting: show how CPU is being used? [CHAR LIMIT=25] -->
-    <string name="show_cpu_usage">Show CPU usage</string>
-    <!-- UI debug setting: show cpu usage summary [CHAR LIMIT=50] -->
-    <string name="show_cpu_usage_summary">Screen overlay showing current CPU usage</string>
-
     <!-- UI debug setting: force hardware acceleration to render apps [CHAR LIMIT=25] -->
     <string name="force_hw_ui">Force GPU rendering</string>
     <!-- UI debug setting: force hardware acceleration summary [CHAR LIMIT=50] -->
