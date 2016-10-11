@@ -2011,6 +2011,9 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     void standby() {
         assertRunOnServiceThread();
+        if (!canGoToStandby()) {
+            return;
+        }
         mStandbyMessageReceived = true;
         mPowerManager.goToSleep(SystemClock.uptimeMillis(), PowerManager.GO_TO_SLEEP_REASON_HDMI, 0);
         // PowerManger will send the broadcast Intent.ACTION_SCREEN_OFF and after this gets
@@ -2038,10 +2041,13 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private void onStandby(final int standbyAction) {
         assertRunOnServiceThread();
-        if (!canGoToStandby()) return;
         mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY;
         invokeVendorCommandListenersOnControlStateChanged(false,
                 HdmiControlManager.CONTROL_STATE_CHANGED_REASON_STANDBY);
+        if (!canGoToStandby()) {
+            mPowerStatus = HdmiControlManager.POWER_STATUS_STANDBY;
+            return;
+        }
 
         final List<HdmiCecLocalDevice> devices = getAllLocalDevices();
         disableDevices(new PendingActionClearedCallback() {
