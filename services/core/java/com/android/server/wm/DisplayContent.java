@@ -30,7 +30,9 @@ import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import android.app.ActivityManager.StackId;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.os.Build;
@@ -106,6 +108,8 @@ class DisplayContent {
     /** Save allocating when calculating rects */
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRect2 = new Rect();
+    private final RectF mTmpRectF = new RectF();
+    private final Matrix mTmpMatrix = new Matrix();
     private final Region mTmpRegion = new Region();
 
     /** For gathering Task objects in order. */
@@ -240,6 +244,20 @@ class DisplayContent {
         int height = mDisplayInfo.logicalHeight;
         int top = (physHeight - height) / 2;
         out.set(left, top, left + width, top + height);
+    }
+
+    private void getLogicalDisplayRect(Rect out, int orientation) {
+        getLogicalDisplayRect(out);
+
+        // Rotate the Rect if needed.
+        final int currentRotation = mDisplayInfo.rotation;
+        final int rotationDelta = deltaRotation(currentRotation, orientation);
+        if (rotationDelta == Surface.ROTATION_90 || rotationDelta == Surface.ROTATION_270) {
+            createRotationMatrix(rotationDelta, mBaseDisplayWidth, mBaseDisplayHeight, mTmpMatrix);
+            mTmpRectF.set(out);
+            mTmpMatrix.mapRect(mTmpRectF);
+            mTmpRectF.round(out);
+        }
     }
 
     void getContentRect(Rect out) {
@@ -536,38 +554,51 @@ class DisplayContent {
     }
 
     void rotateBounds(int oldRotation, int newRotation, Rect bounds) {
-        final int rotationDelta = DisplayContent.deltaRotation(oldRotation, newRotation);
-        getLogicalDisplayRect(mTmpRect);
-        switch (rotationDelta) {
-            case Surface.ROTATION_0:
-                mTmpRect2.set(bounds);
-                break;
-            case Surface.ROTATION_90:
-                mTmpRect2.top = mTmpRect.bottom - bounds.right;
-                mTmpRect2.left = bounds.top;
-                mTmpRect2.right = mTmpRect2.left + bounds.height();
-                mTmpRect2.bottom = mTmpRect2.top + bounds.width();
-                break;
-            case Surface.ROTATION_180:
-                mTmpRect2.top = mTmpRect.bottom - bounds.bottom;
-                mTmpRect2.left = mTmpRect.right - bounds.right;
-                mTmpRect2.right = mTmpRect2.left + bounds.width();
-                mTmpRect2.bottom = mTmpRect2.top + bounds.height();
-                break;
-            case Surface.ROTATION_270:
-                mTmpRect2.top = bounds.left;
-                mTmpRect2.left = mTmpRect.right - bounds.bottom;
-                mTmpRect2.right = mTmpRect2.left + bounds.height();
-                mTmpRect2.bottom = mTmpRect2.top + bounds.width();
-                break;
-        }
-        bounds.set(mTmpRect2);
+        getLogicalDisplayRect(mTmpRect, newRotation);
+
+        // Compute a transform matrix to undo the coordinate space transformation,
+        // and present the window at the same physical position it previously occupied.
+        final int deltaRotation = deltaRotation(newRotation, oldRotation);
+        createRotationMatrix(deltaRotation, mTmpRect.width(), mTmpRect.height(), mTmpMatrix);
+
+        mTmpRectF.set(bounds);
+        mTmpMatrix.mapRect(mTmpRectF);
+        mTmpRectF.round(bounds);
     }
 
     static int deltaRotation(int oldRotation, int newRotation) {
         int delta = newRotation - oldRotation;
         if (delta < 0) delta += 4;
         return delta;
+    }
+
+    static void createRotationMatrix(int rotation, float displayWidth, float displayHeight,
+            Matrix outMatrix) {
+        // For rotations without Z-ordering we don't need the target rectangle's position.
+        createRotationMatrix(rotation, 0 /* rectLeft */, 0 /* rectTop */, displayWidth,
+                displayHeight, outMatrix);
+    }
+
+    static void createRotationMatrix(int rotation, float rectLeft, float rectTop,
+            float displayWidth, float displayHeight, Matrix outMatrix) {
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                outMatrix.reset();
+                break;
+            case Surface.ROTATION_270:
+                outMatrix.setRotate(270, 0, 0);
+                outMatrix.postTranslate(0, displayHeight);
+                outMatrix.postTranslate(rectTop, 0);
+                break;
+            case Surface.ROTATION_180:
+                outMatrix.reset();
+                break;
+            case Surface.ROTATION_90:
+                outMatrix.setRotate(90, 0, 0);
+                outMatrix.postTranslate(displayWidth, 0);
+                outMatrix.postTranslate(-rectTop, rectLeft);
+                break;
+        }
     }
 
     public void dump(String prefix, PrintWriter pw) {
