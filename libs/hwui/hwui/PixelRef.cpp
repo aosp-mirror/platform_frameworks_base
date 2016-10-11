@@ -23,6 +23,84 @@
 
 namespace android {
 
+static bool computeAllocationSize(const SkBitmap& bitmap, size_t* size) {
+    int32_t rowBytes32 = SkToS32(bitmap.rowBytes());
+    int64_t bigSize = (int64_t)bitmap.height() * rowBytes32;
+    if (rowBytes32 < 0 || !sk_64_isS32(bigSize)) {
+        return false; // allocation will be too large
+    }
+
+    *size = sk_64_asS32(bigSize);
+    return true;
+}
+
+typedef sk_sp<PixelRef> (*AllocPixeRef)(size_t allocSize, const SkImageInfo& info, size_t rowBytes,
+        SkColorTable* ctable);
+
+static sk_sp<PixelRef> allocatePixelRef(SkBitmap* bitmap, SkColorTable* ctable, AllocPixeRef alloc) {
+    const SkImageInfo& info = bitmap->info();
+    if (info.colorType() == kUnknown_SkColorType) {
+        LOG_ALWAYS_FATAL("unknown bitmap configuration");
+        return nullptr;
+    }
+
+    size_t size;
+    if (!computeAllocationSize(*bitmap, &size)) {
+        return nullptr;
+    }
+
+    // we must respect the rowBytes value already set on the bitmap instead of
+    // attempting to compute our own.
+    const size_t rowBytes = bitmap->rowBytes();
+    auto wrapper = alloc(size, info, rowBytes, ctable);
+    if (wrapper) {
+        wrapper->getSkBitmap(bitmap);
+        // since we're already allocated, we lockPixels right away
+        // HeapAllocator behaves this way too
+        bitmap->lockPixels();
+    }
+    return wrapper;
+}
+
+sk_sp<PixelRef> PixelRef::allocateHeapPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
+   return allocatePixelRef(bitmap, ctable, &PixelRef::allocateHeapPixelRef);
+}
+
+sk_sp<PixelRef> PixelRef::allocateAshmemPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
+   return allocatePixelRef(bitmap, ctable, &PixelRef::allocateAshmemPixelRef);
+}
+
+sk_sp<PixelRef> PixelRef::allocateHeapPixelRef(size_t size, const SkImageInfo& info, size_t rowBytes,
+        SkColorTable* ctable) {
+    void* addr = calloc(size, 1);
+    if (!addr) {
+        return nullptr;
+    }
+    return sk_sp<PixelRef>(new PixelRef(addr, size, info, rowBytes, ctable));
+}
+
+sk_sp<PixelRef> PixelRef::allocateAshmemPixelRef(size_t size, const SkImageInfo& info,
+        size_t rowBytes, SkColorTable* ctable) {
+    // Create new ashmem region with read/write priv
+    int fd = ashmem_create_region("bitmap", size);
+    if (fd < 0) {
+        return nullptr;
+    }
+
+    void* addr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (addr == MAP_FAILED) {
+        close(fd);
+        return nullptr;
+    }
+
+    if (ashmem_set_prot_region(fd, PROT_READ) < 0) {
+        munmap(addr, size);
+        close(fd);
+        return nullptr;
+    }
+    return sk_sp<PixelRef>(new PixelRef(addr, fd, size, info, rowBytes, ctable));
+}
+
 void PixelRef::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTable* ctable) {
     if (kIndex_8_SkColorType != newInfo.colorType()) {
         ctable = nullptr;

@@ -446,7 +446,8 @@ static void drawBitmapArray(JNIEnv* env, jobject, jlong canvasHandle,
             GraphicsJNI::defaultColorSpace());
     SkBitmap bitmap;
     bitmap.setInfo(info);
-    if (!GraphicsJNI::allocatePixels(env, &bitmap, NULL)) {
+    sk_sp<PixelRef> pixelRef = PixelRef::allocateHeapPixelRef(&bitmap, NULL);
+    if (!pixelRef) {
         return;
     }
 

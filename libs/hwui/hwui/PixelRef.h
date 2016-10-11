@@ -33,6 +33,14 @@ typedef void (*FreeFunc)(void* addr, void* context);
 
 class ANDROID_API PixelRef : public SkPixelRef {
 public:
+    static sk_sp<PixelRef> allocateHeapPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
+    static sk_sp<PixelRef> allocateHeapPixelRef(size_t allocSize, const SkImageInfo& info,
+        size_t rowBytes, SkColorTable* ctable);
+
+    static sk_sp<PixelRef> allocateAshmemPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
+    static sk_sp<PixelRef> allocateAshmemPixelRef(size_t allocSize, const SkImageInfo& info,
+        size_t rowBytes, SkColorTable* ctable);
+
     PixelRef(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes,
             SkColorTable* ctable);
     PixelRef(void* address, void* context, FreeFunc freeFunc,

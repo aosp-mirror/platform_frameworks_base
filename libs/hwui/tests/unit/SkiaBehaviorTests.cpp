@@ -25,12 +25,20 @@
 using namespace android;
 using namespace android::uirenderer;
 
+SkBitmap createSkBitmap(int width, int height) {
+    SkBitmap bitmap;
+    SkImageInfo info = SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType);
+    bitmap.setInfo(info);
+    bitmap.allocPixels(info);
+    return bitmap;
+}
+
 /**
  * 1x1 bitmaps must not be optimized into solid color shaders, since HWUI can't
  * compose/render color shaders
  */
 TEST(SkiaBehavior, CreateBitmapShader1x1) {
-    SkBitmap origBitmap = TestUtils::createSkBitmap(1, 1);
+    SkBitmap origBitmap = createSkBitmap(1, 1);
     sk_sp<SkShader> s = SkMakeBitmapShader(
             origBitmap,
             SkShader::kClamp_TileMode,
@@ -49,7 +57,7 @@ TEST(SkiaBehavior, CreateBitmapShader1x1) {
 }
 
 TEST(SkiaBehavior, genIds) {
-    SkBitmap bitmap = TestUtils::createSkBitmap(100, 100);
+    SkBitmap bitmap = createSkBitmap(100, 100);
     uint32_t genId = bitmap.getGenerationID();
     bitmap.notifyPixelsChanged();
     EXPECT_NE(genId, bitmap.getGenerationID());
