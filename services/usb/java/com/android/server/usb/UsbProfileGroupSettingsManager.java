@@ -34,6 +34,7 @@ import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -42,6 +43,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.Immutable;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FastXmlSerializer;
@@ -60,7 +62,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import libcore.io.IoUtils;
 
@@ -87,12 +91,22 @@ class UsbProfileGroupSettingsManager {
     private final UserManager mUserManager;
     private final @NonNull UsbSettingsManager mSettingsManager;
 
-    // Maps DeviceFilter to user preferred application package
+    /** Maps DeviceFilter to user preferred application package */
+    @GuardedBy("mLock")
     private final HashMap<DeviceFilter, UserPackage> mDevicePreferenceMap = new HashMap<>();
-    // Maps AccessoryFilter to user preferred application package
+
+    /** Maps AccessoryFilter to user preferred application package */
+    @GuardedBy("mLock")
     private final HashMap<AccessoryFilter, UserPackage> mAccessoryPreferenceMap = new HashMap<>();
 
     private final Object mLock = new Object();
+
+    /**
+     * If a async task to persist the mDevicePreferenceMap and mAccessoryPreferenceMap is currently
+     * scheduled.
+     */
+    @GuardedBy("mLock")
+    private boolean mIsWriteSettingsScheduled;
 
     /**
      * A package of a user.
@@ -591,6 +605,42 @@ class UsbProfileGroupSettingsManager {
                 });
     }
 
+    /**
+     * Remove all defaults for a user.
+     *
+     * @param userToRemove The user the defaults belong to.
+     */
+    void removeAllDefaultsForUser(@NonNull UserHandle userToRemove) {
+        synchronized (mLock) {
+            boolean needToPersist = false;
+            Iterator<Map.Entry<DeviceFilter, UserPackage>> devicePreferenceIt = mDevicePreferenceMap
+                    .entrySet().iterator();
+            while (devicePreferenceIt.hasNext()) {
+                Map.Entry<DeviceFilter, UserPackage> entry = devicePreferenceIt.next();
+
+                if (entry.getValue().user.equals(userToRemove)) {
+                    devicePreferenceIt.remove();
+                    needToPersist = true;
+                }
+            }
+
+            Iterator<Map.Entry<AccessoryFilter, UserPackage>> accessoryPreferenceIt =
+                    mAccessoryPreferenceMap.entrySet().iterator();
+            while (accessoryPreferenceIt.hasNext()) {
+                Map.Entry<AccessoryFilter, UserPackage> entry = accessoryPreferenceIt.next();
+
+                if (entry.getValue().user.equals(userToRemove)) {
+                    accessoryPreferenceIt.remove();
+                    needToPersist = true;
+                }
+            }
+
+            if (needToPersist) {
+                scheduleWriteSettingsLocked();
+            }
+        }
+    }
+
     private void readPreference(XmlPullParser parser)
             throws XmlPullParserException, IOException {
         String packageName = null;
@@ -657,7 +707,7 @@ class UsbProfileGroupSettingsManager {
                 IoUtils.closeQuietly(fis);
             }
 
-            writeSettingsLocked();
+            scheduleWriteSettingsLocked();
 
             // Success or failure, we delete single-user file
             sSingleUserSettingsFile.delete();
@@ -695,48 +745,68 @@ class UsbProfileGroupSettingsManager {
         }
     }
 
-    private void writeSettingsLocked() {
-        if (DEBUG) Slog.v(TAG, "writeSettingsLocked()");
-
-        FileOutputStream fos = null;
-        try {
-            fos = mSettingsFile.startWrite();
-
-            FastXmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(fos, StandardCharsets.UTF_8.name());
-            serializer.startDocument(null, true);
-            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-            serializer.startTag(null, "settings");
-
-            for (DeviceFilter filter : mDevicePreferenceMap.keySet()) {
-                serializer.startTag(null, "preference");
-                serializer.attribute(null, "package", mDevicePreferenceMap.get(filter).packageName);
-                serializer.attribute(null, "user",
-                        String.valueOf(getSerial(mDevicePreferenceMap.get(filter).user)));
-                filter.write(serializer);
-                serializer.endTag(null, "preference");
-            }
-
-            for (AccessoryFilter filter : mAccessoryPreferenceMap.keySet()) {
-                serializer.startTag(null, "preference");
-                serializer.attribute(null, "package",
-                        mAccessoryPreferenceMap.get(filter).packageName);
-                serializer.attribute(null, "user",
-                        String.valueOf(getSerial(mAccessoryPreferenceMap.get(filter).user)));
-                filter.write(serializer);
-                serializer.endTag(null, "preference");
-            }
-
-            serializer.endTag(null, "settings");
-            serializer.endDocument();
-
-            mSettingsFile.finishWrite(fos);
-        } catch (IOException e) {
-            Slog.e(TAG, "Failed to write settings", e);
-            if (fos != null) {
-                mSettingsFile.failWrite(fos);
-            }
+    /**
+     * Schedule a async task to persist {@link #mDevicePreferenceMap} and
+     * {@link #mAccessoryPreferenceMap}. If a task is already scheduled but not completed, do
+     * nothing as the currently scheduled one will do the work.
+     * <p>Called with {@link #mLock} held.</p>
+     * <p>In the uncommon case that the system crashes in between the scheduling and the write the
+     * update is lost.</p>
+     */
+    private void scheduleWriteSettingsLocked() {
+        if (mIsWriteSettingsScheduled) {
+            return;
+        } else {
+            mIsWriteSettingsScheduled = true;
         }
+
+        AsyncTask.execute(() -> {
+            synchronized (mLock) {
+                FileOutputStream fos = null;
+                try {
+                    fos = mSettingsFile.startWrite();
+
+                    FastXmlSerializer serializer = new FastXmlSerializer();
+                    serializer.setOutput(fos, StandardCharsets.UTF_8.name());
+                    serializer.startDocument(null, true);
+                    serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output",
+                                    true);
+                    serializer.startTag(null, "settings");
+
+                    for (DeviceFilter filter : mDevicePreferenceMap.keySet()) {
+                        serializer.startTag(null, "preference");
+                        serializer.attribute(null, "package",
+                                mDevicePreferenceMap.get(filter).packageName);
+                        serializer.attribute(null, "user",
+                                String.valueOf(getSerial(mDevicePreferenceMap.get(filter).user)));
+                        filter.write(serializer);
+                        serializer.endTag(null, "preference");
+                    }
+
+                    for (AccessoryFilter filter : mAccessoryPreferenceMap.keySet()) {
+                        serializer.startTag(null, "preference");
+                        serializer.attribute(null, "package",
+                                mAccessoryPreferenceMap.get(filter).packageName);
+                        serializer.attribute(null, "user", String.valueOf(
+                                        getSerial(mAccessoryPreferenceMap.get(filter).user)));
+                        filter.write(serializer);
+                        serializer.endTag(null, "preference");
+                    }
+
+                    serializer.endTag(null, "settings");
+                    serializer.endDocument();
+
+                    mSettingsFile.finishWrite(fos);
+                } catch (IOException e) {
+                    Slog.e(TAG, "Failed to write settings", e);
+                    if (fos != null) {
+                        mSettingsFile.failWrite(fos);
+                    }
+                }
+
+                mIsWriteSettingsScheduled = false;
+            }
+        });
     }
 
     // Checks to see if a package matches a device or accessory.
@@ -1141,7 +1211,7 @@ class UsbProfileGroupSettingsManager {
             }
 
             if (changed) {
-                writeSettingsLocked();
+                scheduleWriteSettingsLocked();
             }
         }
     }
@@ -1178,7 +1248,7 @@ class UsbProfileGroupSettingsManager {
                 }
             }
             if (changed) {
-                writeSettingsLocked();
+                scheduleWriteSettingsLocked();
             }
         }
     }
@@ -1204,7 +1274,7 @@ class UsbProfileGroupSettingsManager {
                 }
             }
             if (changed) {
-                writeSettingsLocked();
+                scheduleWriteSettingsLocked();
             }
         }
     }
@@ -1237,7 +1307,7 @@ class UsbProfileGroupSettingsManager {
 
         synchronized (mLock) {
             if (clearPackageDefaultsLocked(userPackage)) {
-                writeSettingsLocked();
+                scheduleWriteSettingsLocked();
             }
         }
     }

@@ -108,11 +108,26 @@ class UsbSettingsManager {
     /**
      * Remove the settings for a user.
      *
-     * @param userIdToRemove The user o remove
+     * @param userToRemove The user to remove
      */
-    void remove(@UserIdInt int userIdToRemove) {
+    void remove(@NonNull UserHandle userToRemove) {
         synchronized (mSettingsByUser) {
-            mSettingsByUser.remove(userIdToRemove);
+            mSettingsByUser.remove(userToRemove.getIdentifier());
+        }
+
+        synchronized (mSettingsByProfileGroup) {
+            if (mSettingsByProfileGroup.indexOfKey(userToRemove.getIdentifier()) >= 0) {
+                // The user to remove is the parent user of the group. The parent is the last user
+                // that gets removed. All state will be removed with the user
+                mSettingsByProfileGroup.remove(userToRemove.getIdentifier());
+            } else {
+                // We cannot find the parent user of the user that is removed, hence try to remove
+                // it from all profile groups.
+                int numProfileGroups = mSettingsByProfileGroup.size();
+                for (int i = 0; i < numProfileGroups; i++) {
+                    mSettingsByProfileGroup.valueAt(i).removeAllDefaultsForUser(userToRemove);
+                }
+            }
         }
     }
 
