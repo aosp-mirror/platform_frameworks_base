@@ -994,7 +994,7 @@
     <string name="noApplications" msgid="2991814273936504689">"Aucune application ne peut effectuer cette action."</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> a cessé de fonctionner."</string>
     <string name="aerr_process" msgid="6201597323218674729">"Le processus <xliff:g id="PROCESS">%1$s</xliff:g> a cessé de fonctionner."</string>
-    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> ne cesse de s\'arrêter."</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> s\'arrête systématiquement"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"Le processus \"<xliff:g id="PROCESS">%1$s</xliff:g>\" ne cesse de s\'arrêter."</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Rouvrir l\'application"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Envoyer des commentaires"</string>
