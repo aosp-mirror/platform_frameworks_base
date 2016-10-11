@@ -643,7 +643,7 @@
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Բացել կարգավորումները:"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Բացել արագ կարգավորումները:"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Փակել արագ կարգավորումները:"</string>
-    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Զարթուցիչը կարգավորված է:"</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Զարթուցիչը դրված է:"</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Մուտք է գործել որպես <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Ինտերնետ կապ չկա:"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Բացել մանրամասները:"</string>
