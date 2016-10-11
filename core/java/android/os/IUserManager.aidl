@@ -83,4 +83,6 @@ interface IUserManager {
     boolean someUserHasSeedAccount(in String accountName, in String accountType);
     boolean isManagedProfile(int userId);
     boolean isDemoUser(int userId);
+    UserInfo createProfileForUserEvenWhenDisallowed(in String name, int flags, int userHandle,
+            in String[] disallowedPackages);
 }

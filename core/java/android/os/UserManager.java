@@ -1374,6 +1374,24 @@ public class UserManager {
     }
 
     /**
+     * Similar to {@link #createProfileForUser(String, int, int, String[])}
+     * except bypassing the checking of {@link UserManager#DISALLOW_ADD_USER}.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @see #createProfileForUser(String, int, int, String[])
+     * @hide
+     */
+    public UserInfo createProfileForUserEvenWhenDisallowed(String name, int flags,
+            @UserIdInt int userHandle, String[] disallowedPackages) {
+        try {
+            return mService.createProfileForUserEvenWhenDisallowed(name, flags, userHandle,
+                    disallowedPackages);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Creates a restricted profile with the specified name. This method also sets necessary
      * restrictions and adds shared accounts.
      *

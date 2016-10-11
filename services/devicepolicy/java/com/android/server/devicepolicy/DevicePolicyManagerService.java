@@ -8621,19 +8621,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             synchronized (this) {
                 if (mOwners.hasDeviceOwner()) {
-                    if (!mInjector.userManagerIsSplitSystemUser()) {
-                        // Only split-system-user systems support managed-profiles in combination with
-                        // device-owner.
-                        return false;
-                    }
-                    if (mOwners.getDeviceOwnerUserId() != UserHandle.USER_SYSTEM) {
-                        // Only system device-owner supports managed-profiles. Non-system device-owner
-                        // doesn't.
-                        return false;
-                    }
-                    if (callingUserId == UserHandle.USER_SYSTEM) {
-                        // Managed-profiles cannot be setup on the system user, only regular users.
-                        return false;
+                    // STOPSHIP Only allow creating a managed profile if allowed by the device
+                    // owner. http://b/31952368
+                    if (mInjector.userManagerIsSplitSystemUser()) {
+                        if (callingUserId == UserHandle.USER_SYSTEM) {
+                            // Managed-profiles cannot be setup on the system user.
+                            return false;
+                        }
                     }
                 }
             }

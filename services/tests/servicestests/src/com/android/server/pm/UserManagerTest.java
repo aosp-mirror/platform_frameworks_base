@@ -237,6 +237,38 @@ public class UserManagerTest extends AndroidTestCase {
         }
     }
 
+    // Make sure createProfile would fail if we have DISALLOW_ADD_USER.
+    @MediumTest
+    public void testCreateProfileForUser_disallowAddUser() throws Exception {
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        final UserHandle primaryUserHandle = new UserHandle(primaryUserId);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, primaryUserHandle);
+        try {
+            UserInfo userInfo = createProfileForUser("Managed",
+                    UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+            assertNull(userInfo);
+        } finally {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false,
+                    primaryUserHandle);
+        }
+    }
+
+    // Make sure createProfileEvenWhenDisallowedForUser bypass DISALLOW_ADD_USER.
+    @MediumTest
+    public void testCreateProfileForUserEvenWhenDisallowed() throws Exception {
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        final UserHandle primaryUserHandle = new UserHandle(primaryUserId);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, primaryUserHandle);
+        try {
+            UserInfo userInfo = createProfileEvenWhenDisallowedForUser("Managed",
+                    UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+            assertNotNull(userInfo);
+        } finally {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false,
+                    primaryUserHandle);
+        }
+    }
+
     @MediumTest
     public void testAddRestrictedProfile() throws Exception {
         UserInfo userInfo = createRestrictedProfile("Profile");
@@ -468,6 +500,16 @@ public class UserManagerTest extends AndroidTestCase {
             String[] disallowedPackages) {
         UserInfo profile = mUserManager.createProfileForUser(
                 name, flags, userHandle, disallowedPackages);
+        if (profile != null) {
+            usersToRemove.add(profile.id);
+        }
+        return profile;
+    }
+
+    private UserInfo createProfileEvenWhenDisallowedForUser(String name, int flags,
+            int userHandle) {
+        UserInfo profile = mUserManager.createProfileForUserEvenWhenDisallowed(
+                name, flags, userHandle, null);
         if (profile != null) {
             usersToRemove.add(profile.id);
         }
