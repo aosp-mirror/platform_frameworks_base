@@ -25,8 +25,7 @@ page.metaDescription=How app developers are making use of localization, tablet f
   <h2 class="norule">Articles</h2>
 
   <div class="resource-widget resource-flow-layout col-16"
-      data-query="type:distribute+tag:developerstory+tag:apps"
-      data-sortOrder="-timestamp"
+      data-query="collection:distribute/stories/apps/docs"
       data-cardSizes="6x6"
       data-items-per-page="15"
       data-initial-results="6"></div>
