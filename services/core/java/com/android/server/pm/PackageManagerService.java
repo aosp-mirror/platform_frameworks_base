@@ -8430,7 +8430,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         } else {
             // Modify state for the given package setting
-            commitPackageSettings(pkg, pkgSetting, user, policyFlags,
+            commitPackageSettings(pkg, pkgSetting, user, scanFlags,
                     (policyFlags & PackageParser.PARSE_CHATTY) != 0 /*chatty*/);
         }
         return pkg;
