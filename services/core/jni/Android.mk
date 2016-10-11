@@ -73,3 +73,4 @@ LOCAL_SHARED_LIBRARIES += \
     android.hardware.vr@1.0 \
     android.hardware.audio.common@2.0 \
     android.hardware.tv.input@1.0 \
+    android.hardware.thermal@1.0 \
