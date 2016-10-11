@@ -1,0 +1,89 @@
+page.title=Star Girl Increases In-App Purchases by 3.5X Through More Flexible Minimum Pricing on Google Play
+page.metaDescription=Star Girl Increases In-App Purchases by 3.5X.
+page.tags="developerstory", "games", "googleplay", "google play"
+page.image=images/cards/distribute/stories/animoca.jpg
+
+@jd:body
+
+<style type="text/css">
+  span.positive{
+    color:green;
+    font-size: 125%;
+    font-weight:bold;">
+  }
+  span.negative{
+    color:red;
+    font-size: 125%;
+    font-weight:bold;">
+  }
+</style>
+
+<h3>Background</h3>
+
+<div class="figure">
+  <img src="{@docRoot}images/distribute/stories/animoca-logo.png" />
+</div>
+
+<p>
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.animoca.google.starGirl&hl=en&e=-EnableAppDetailsPageRedesign">
+  Star Girl</a> is a series of SIM/role playing games published by <a class="external-link"
+  href="https://play.google.com/store/apps/dev?id=8271704752057011334&hl=en&e=-EnableAppDetailsPageRedesign">
+  Animoca</a>, a Hong Kong based game developer. The Star Girl series has more than 70 million
+  downloads and is localized in 18 languages. With a fast-growing user base in markets
+  including SEA, India, and Latin America, Animoca is exploring ways to effectively increase
+  monetization with a localized pricing strategy.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+ Following the introduction of
+ <a class="external-link" href="http://android-developers.blogspot.com/2015/11/minimum-purchase-price-for-apps-and-in.html">
+ more flexible minimum pricing</a> in November 2015, Animoca took the opportunity to test
+ sachet pricing models across Thailand, Malaysia, Philippines, Indonesia, Brazil, and Russia:
+</p>
+
+<p>
+ <img src="{@docRoot}images/distribute/stories/animoca-flow.jpg" />
+</p>
+
+<p>
+ Animoca created a new sachet SKU, which offered 100 diamonds and 5,000 coins, at the new lower
+ minimum price available in these markets. The new SKU is approximately 60% cheaper than the
+ previous minimum-priced product and is accessible only through geo-targeted, in-game
+ banners in localized languages.
+</p>
+
+<h3>Results</h3>
+
+<div class="figure">
+ <img src="{@docRoot}images/distribute/stories/animoca-graph.jpg" />
+</div>
+
+<p>
+ The changes to minimum prices across these markets resulted in positive results, with the
+ number of transactions increasing 3.5X in the three months following launch.
+</p>
+
+<p>
+ Also, 90% of these transactions were first-time new buyers, half of which
+ followed up with purchases of regular packages. This helps to create a more sustainable revenue
+ impact, as described by Yusuf Goolamabbas, CTO of Animoca:
+</p>
+
+<p>
+ <em>“Sachet marketing has made IAPs more affordable to users in emerging markets. We are seeing
+ significant growth in new buyers as well as returning buyers and a positive impact on revenue in
+ emerging markets.”</em>
+</p>
+
+<h3>Get started</h3>
+
+<p>
+ <a class="external-link" href="https://support.google.com/googleplay/android-developer/answer/6334373?hl=en-GB">
+ Learn more about flexible minimum pricing</a> and
+ <a class="external-link" href="http://g.co/play/playbook-dac-writtenstudies-evergreen">
+ get the Playbook for Developers app</a> to grow your business and improve
+ monetization with Google Play.
+</p>
