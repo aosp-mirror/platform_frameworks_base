@@ -1,0 +1,57 @@
+page.title=Expressen Sport App Improves Content Engagement with New Onboarding and Navigation
+page.metaDescription=Expressen enhances their Sport app.
+page.tags="developerstory", "apps", "googleplay"
+page.image=images/cards/distribute/stories/expressen-sport.png
+page.timestamp=null
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure">
+  <img src="{@docRoot}images/distribute/stories/expressen-icon.png" />
+</div>
+
+<p>
+  In January 2016,
+  <a class="external-link" href="https://play.google.com/store/apps/details?id=se.expressen.launcher&hl=en">
+  Expressen</a> launched a new sports app to reach sports enthusiasts directly
+  and to better optimize the app for sports content. They decided to analyze
+  users' behavior by looking at user paths in existing sports content,
+  combined with user research and testing various prototypes with real users.
+  They found that readers have different needs and preferences. For example,
+  some people like a specific sport, league, or player that others have no
+  interest in. Following these results, they integrated two main changes to
+  increase appeal to different types of readers.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  Expressen introduced a new onboarding flow that allows users to select the
+  type of push notifications they want to subscribe to. They also implemented
+  contextual navigation where the top header navigational links change,
+  showing the most relevant links to the reader at that moment in time. For
+  example, if you're reading about football, relevant links about that sport
+  are displayed.
+</p>
+
+<h3>Results</h3>
+
+<p>
+  After the new release of the app, <strong>results showed a higher opt-in
+  rate for push notifications in the Sport app (+16.9%)</strong> compared to
+  their main app, and content consumption increased +7% for page views and
+  +8.3% for video views.
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Learn more about the
+  <a href="https://developer.android.com/training/tv/playback/onboarding.html?hl=mk">
+  user onboarding flow</a> and find out how to
+  <a href="https://developer.android.com/design/patterns/navigation.html">
+  implement contextual navigation</a>.
+</p>
