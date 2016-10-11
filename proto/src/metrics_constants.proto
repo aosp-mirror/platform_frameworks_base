@@ -2572,6 +2572,9 @@ message MetricsEvent {
     // ACTION: Logs action which triggered provisioning.
     PROVISIONING_ACTION = 611;
 
+    // ACTION: Logs extra passed by the dpc while provisioning.
+    PROVISIONING_EXTRA = 612;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
