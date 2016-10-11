@@ -173,11 +173,7 @@ public class ImageWallpaper extends WallpaperService {
                 if (DEBUG) {
                     Log.d(TAG, "trimMemory");
                 }
-                mBackground.recycle();
-                mBackground = null;
-                mBackgroundWidth = -1;
-                mBackgroundHeight = -1;
-                mWallpaperManager.forgetLoadedWallpaper();
+                unloadWallpaper(true /* forgetSize */);
             }
         }
 
@@ -199,7 +195,7 @@ public class ImageWallpaper extends WallpaperService {
         public void onDestroy() {
             super.onDestroy();
             mBackground = null;
-            mWallpaperManager.forgetLoadedWallpaper();
+            unloadWallpaper(true /* forgetSize */);
         }
 
         boolean updateSurfaceSize(SurfaceHolder surfaceHolder, DisplayInfo displayInfo,
@@ -209,8 +205,7 @@ public class ImageWallpaper extends WallpaperService {
             // Load background image dimensions, if we haven't saved them yet
             if (mBackgroundWidth <= 0 || mBackgroundHeight <= 0) {
                 // Need to load the image to get dimensions
-                mWallpaperManager.forgetLoadedWallpaper();
-                loadWallpaper(forDraw);
+                loadWallpaper(forDraw, true /* needsReset */);
                 if (DEBUG) {
                     Log.d(TAG, "Reloading, redoing updateSurfaceSize later.");
                 }
@@ -366,8 +361,7 @@ public class ImageWallpaper extends WallpaperService {
                                 ((mBackground == null) ? 0 : mBackground.getHeight()) + ", " +
                                 dw + ", " + dh);
                     }
-                    mWallpaperManager.forgetLoadedWallpaper();
-                    loadWallpaper(true /* needDraw */);
+                    loadWallpaper(true /* needDraw */, true /* needReset */);
                     if (DEBUG) {
                         Log.d(TAG, "Reloading, resuming draw later");
                     }
@@ -426,8 +420,7 @@ public class ImageWallpaper extends WallpaperService {
                     // position it appropriately.  As such, we no longer needed
                     // the loaded bitmap.  Yay!
                     // hw-accelerated renderer retains bitmap for faster rotation
-                    mBackground = null;
-                    mWallpaperManager.forgetLoadedWallpaper();
+                    unloadWallpaper(false /* forgetSize */);
                 }
             }
         }
@@ -438,23 +431,37 @@ public class ImageWallpaper extends WallpaperService {
          *
          * If loading is already in-flight, subsequent loads are ignored (but needDraw is or-ed to
          * the active request).
+         *
+         * If {@param needsReset} is set also clears the cache in WallpaperManager first.
          */
-        private void loadWallpaper(boolean needsDraw) {
+        private void loadWallpaper(boolean needsDraw, boolean needsReset) {
             mNeedsDrawAfterLoadingWallpaper |= needsDraw;
             if (mLoader != null) {
-                if (DEBUG) {
-                    Log.d(TAG, "Skipping loadWallpaper, already in flight ");
+                if (needsReset) {
+                    mLoader.cancel(false /* interrupt */);
+                    mLoader = null;
+                } else {
+                    if (DEBUG) {
+                        Log.d(TAG, "Skipping loadWallpaper, already in flight ");
+                    }
+                    return;
                 }
-                return;
             }
             mLoader = new AsyncTask<Void, Void, Bitmap>() {
                 @Override
                 protected Bitmap doInBackground(Void... params) {
                     Throwable exception;
                     try {
+                        if (needsReset) {
+                            mWallpaperManager.forgetLoadedWallpaper();
+                        }
                         return mWallpaperManager.getBitmap();
                     } catch (RuntimeException | OutOfMemoryError e) {
                         exception = e;
+                    }
+
+                    if (isCancelled()) {
+                        return null;
                     }
 
                     if (exception != null) {
@@ -467,6 +474,10 @@ public class ImageWallpaper extends WallpaperService {
                         } catch (IOException ex) {
                             // now we're really screwed.
                             Log.w(TAG, "Unable reset to default wallpaper!", ex);
+                        }
+
+                        if (isCancelled()) {
+                            return null;
                         }
 
                         try {
@@ -501,6 +512,26 @@ public class ImageWallpaper extends WallpaperService {
 
                     mLoader = null;
                     mNeedsDrawAfterLoadingWallpaper = false;
+                }
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+
+        private void unloadWallpaper(boolean forgetSize) {
+            if (mLoader != null) {
+                mLoader.cancel(false);
+                mLoader = null;
+            }
+            mBackground = null;
+            if (forgetSize) {
+                mBackgroundWidth = -1;
+                mBackgroundHeight = -1;
+            }
+
+            mLoader = new AsyncTask<Void, Void, Bitmap>() {
+                @Override
+                protected Bitmap doInBackground(Void... params) {
+                    mWallpaperManager.forgetLoadedWallpaper();
+                    return null;
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
