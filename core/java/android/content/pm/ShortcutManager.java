@@ -329,7 +329,7 @@ import java.util.List;
  * <p>Applications with a foreground activity or service are not rate-limited.
  *
  * <p>Rate-limiting will be reset upon certain events, so that even background applications
- * can call these APIs again until they are rate limit is reached again.
+ * can call these APIs again until the rate limit is reached again.
  * These events include the following:
  * <ul>
  *   <li>When an application comes to the foreground.
