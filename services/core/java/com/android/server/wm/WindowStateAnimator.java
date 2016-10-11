@@ -2102,24 +2102,8 @@ class WindowStateAnimator {
         // Compute a transform matrix to undo the coordinate space transformation,
         // and present the window at the same physical position it previously occupied.
         final int deltaRotation = DisplayContent.deltaRotation(newRotation, oldRotation);
-        switch (deltaRotation) {
-        case Surface.ROTATION_0:
-            transform.reset();
-            break;
-        case Surface.ROTATION_270:
-            transform.setRotate(270, 0, 0);
-            transform.postTranslate(0, displayHeight);
-            transform.postTranslate(y, 0);
-            break;
-        case Surface.ROTATION_180:
-            transform.reset();
-            break;
-        case Surface.ROTATION_90:
-            transform.setRotate(90, 0, 0);
-            transform.postTranslate(displayWidth, 0);
-            transform.postTranslate(-y, x);
-            break;
-        }
+        DisplayContent.createRotationMatrix(deltaRotation, x, y, displayWidth, displayHeight,
+                transform);
 
         // We have two cases:
         //  1. Windows with NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY:
