@@ -469,7 +469,7 @@ public abstract class AbsSeekBar extends ProgressBar {
     /**
      * Returns the amount of progress changed via the arrow keys.
      * <p>
-     * By default, this will be a value that is derived from the max progress.
+     * By default, this will be a value that is derived from the progress range.
      *
      * @return The amount to increment or decrement when the user presses the
      *         arrow keys. This will be positive.
@@ -479,13 +479,27 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     @Override
-    public synchronized void setMax(int max) {
-        super.setMax(max);
+    public synchronized void setMin(int min) {
+        super.setMin(min);
+        int range = getMax() - getMin();
 
-        if ((mKeyProgressIncrement == 0) || (getMax() / mKeyProgressIncrement > 20)) {
+        if ((mKeyProgressIncrement == 0) || (range / mKeyProgressIncrement > 20)) {
+
             // It will take the user too long to change this via keys, change it
             // to something more reasonable
-            setKeyProgressIncrement(Math.max(1, Math.round((float) getMax() / 20)));
+            setKeyProgressIncrement(Math.max(1, Math.round((float) range / 20)));
+        }
+    }
+
+    @Override
+    public synchronized void setMax(int max) {
+        super.setMax(max);
+        int range = getMax() - getMin();
+
+        if ((mKeyProgressIncrement == 0) || (range / mKeyProgressIncrement > 20)) {
+            // It will take the user too long to change this via keys, change it
+            // to something more reasonable
+            setKeyProgressIncrement(Math.max(1, Math.round((float) range / 20)));
         }
     }
 
@@ -596,8 +610,10 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     private float getScale() {
-        final int max = getMax();
-        return max > 0 ? getProgress() / (float) max : 0;
+        int min = getMin();
+        int max = getMax();
+        int range = max - min;
+        return range > 0 ? (getProgress() - min) / (float) range : 0;
     }
 
     /**
@@ -691,7 +707,7 @@ public abstract class AbsSeekBar extends ProgressBar {
      */
     void drawTickMarks(Canvas canvas) {
         if (mTickMark != null) {
-            final int count = getMax();
+            final int count = getMax() - getMin();
             if (count > 1) {
                 final int w = mTickMark.getIntrinsicWidth();
                 final int h = mTickMark.getIntrinsicHeight();
@@ -847,8 +863,8 @@ public abstract class AbsSeekBar extends ProgressBar {
             }
         }
 
-        final int max = getMax();
-        progress += scale * max;
+        final int range = getMax() - getMin();
+        progress += scale * range;
 
         setHotspot(x, y);
         setProgressInternal(Math.round(progress), true, false);
@@ -922,7 +938,7 @@ public abstract class AbsSeekBar extends ProgressBar {
 
         if (isEnabled()) {
             final int progress = getProgress();
-            if (progress > 0) {
+            if (progress > getMin()) {
                 info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
             }
             if (progress < getMax()) {
@@ -960,7 +976,8 @@ public abstract class AbsSeekBar extends ProgressBar {
                 if (!canUserSetProgress()) {
                     return false;
                 }
-                int increment = Math.max(1, Math.round((float) getMax() / 20));
+                int range = getMax() - getMin();
+                int increment = Math.max(1, Math.round((float) range / 20));
                 if (action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) {
                     increment = -increment;
                 }
