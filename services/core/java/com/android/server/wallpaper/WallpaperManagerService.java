@@ -480,6 +480,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     WallpaperData mLastWallpaper;
     IWallpaperManagerCallback mKeyguardListener;
     boolean mWaitingForUnlock;
+    boolean mShuttingDown;
 
     /**
      * ID of the current wallpaper, changed every time anything sets a wallpaper.
@@ -607,6 +608,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
         private Runnable mResetRunnable = () -> {
             synchronized (mLock) {
+                if (mShuttingDown) {
+                    // Don't expect wallpaper services to relaunch during shutdown
+                    if (DEBUG) {
+                        Slog.i(TAG, "Ignoring relaunch timeout during shutdown");
+                    }
+                    return;
+                }
+
                 if (!mWallpaper.wallpaperUpdating
                         && mWallpaper.userId == mCurrentUserId) {
                     Slog.w(TAG, "Wallpaper reconnect timed out, "
@@ -867,6 +876,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     public WallpaperManagerService(Context context) {
         if (DEBUG) Slog.v(TAG, "WallpaperService startup");
         mContext = context;
+        mShuttingDown = false;
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
         mIWindowManager = IWindowManager.Stub.asInterface(
@@ -930,6 +940,21 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 }
             }
         }, userFilter);
+
+        final IntentFilter shutdownFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (Intent.ACTION_SHUTDOWN.equals(intent.getAction())) {
+                    if (DEBUG) {
+                        Slog.i(TAG, "Shutting down");
+                    }
+                    synchronized (mLock) {
+                        mShuttingDown = true;
+                    }
+                }
+            }
+        }, shutdownFilter);
 
         try {
             ActivityManagerNative.getDefault().registerUserSwitchObserver(
