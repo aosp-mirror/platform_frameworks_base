@@ -127,7 +127,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
     final WindowManagerService mService;
 
     /** Remove this display when animation on it has completed. */
-    boolean mDeferredRemoval;
+    private boolean mDeferredRemoval;
 
     final DockedStackDividerController mDividerControllerLocked;
 

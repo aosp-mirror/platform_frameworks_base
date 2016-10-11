@@ -157,7 +157,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // to capture touch events in that area.
     static final int RESIZE_HANDLE_WIDTH_IN_DP = 30;
 
-    static final boolean DEBUG_DISABLE_SAVING_SURFACES = false;
+    private static final boolean DEBUG_DISABLE_SAVING_SURFACES = false;
 
     final WindowManagerService mService;
     final WindowManagerPolicy mPolicy;
@@ -182,7 +182,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final boolean mLayoutAttached;
     final boolean mIsImWindow;
     final boolean mIsWallpaper;
-    final boolean mIsFloatingLayer;
+    private final boolean mIsFloatingLayer;
     int mSeq;
     boolean mEnforceSizeCompat;
     int mViewVisibility;
@@ -199,16 +199,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * animation is done.
      */
     boolean mPolicyVisibilityAfterAnim = true;
-    boolean mAppOpVisibility = true;
+    private boolean mAppOpVisibility = true;
     boolean mPermanentlyHidden; // the window should never be shown again
     boolean mAppFreezing;
     boolean mHidden;    // Used to determine if to show child windows.
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
-    boolean mDragResizing;
-    boolean mDragResizingChangeReported;
-    int mResizeMode;
+    private boolean mDragResizing;
+    private boolean mDragResizingChangeReported;
+    private int mResizeMode;
 
-    RemoteCallbackList<IWindowFocusObserver> mFocusCallbacks;
+    private RemoteCallbackList<IWindowFocusObserver> mFocusCallbacks;
 
     /**
      * The window size that was requested by the application.  These are in
@@ -216,8 +216,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     int mRequestedWidth;
     int mRequestedHeight;
-    int mLastRequestedWidth;
-    int mLastRequestedHeight;
+    private int mLastRequestedWidth;
+    private int mLastRequestedHeight;
 
     int mLayer;
     boolean mHaveFrame;
@@ -244,8 +244,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * coordinate space (without compatibility scale applied).
      */
     final Rect mVisibleInsets = new Rect();
-    final Rect mLastVisibleInsets = new Rect();
-    boolean mVisibleInsetsChanged;
+    private final Rect mLastVisibleInsets = new Rect();
+    private boolean mVisibleInsetsChanged;
 
     /**
      * Insets that are covered by system windows (such as the status bar) and
@@ -254,31 +254,31 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     final Rect mContentInsets = new Rect();
     final Rect mLastContentInsets = new Rect();
-    boolean mContentInsetsChanged;
+    private boolean mContentInsetsChanged;
 
     /**
      * Insets that determine the area covered by the display overscan region.  These are in the
      * application's coordinate space (without compatibility scale applied).
      */
     final Rect mOverscanInsets = new Rect();
-    final Rect mLastOverscanInsets = new Rect();
-    boolean mOverscanInsetsChanged;
+    private final Rect mLastOverscanInsets = new Rect();
+    private boolean mOverscanInsetsChanged;
 
     /**
      * Insets that determine the area covered by the stable system windows.  These are in the
      * application's coordinate space (without compatibility scale applied).
      */
     final Rect mStableInsets = new Rect();
-    final Rect mLastStableInsets = new Rect();
-    boolean mStableInsetsChanged;
+    private final Rect mLastStableInsets = new Rect();
+    private boolean mStableInsetsChanged;
 
     /**
      * Outsets determine the area outside of the surface where we want to pretend that it's possible
      * to draw anyway.
      */
     final Rect mOutsets = new Rect();
-    final Rect mLastOutsets = new Rect();
-    boolean mOutsetsChanged = false;
+    private final Rect mLastOutsets = new Rect();
+    private boolean mOutsetsChanged = false;
 
     /**
      * Set to true if we are waiting for this window to receive its
@@ -321,14 +321,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // "Real" frame that the application sees, in display coordinate space.
     final Rect mFrame = new Rect();
     final Rect mLastFrame = new Rect();
-    boolean mFrameSizeChanged = false;
+    private boolean mFrameSizeChanged = false;
     // Frame that is scaled to the application's coordinate space when in
     // screen size compatibility mode.
     final Rect mCompatFrame = new Rect();
 
     final Rect mContainingFrame = new Rect();
 
-    final Rect mParentFrame = new Rect();
+    private final Rect mParentFrame = new Rect();
 
     // The entire screen area of the {@link TaskStack} this window is in. Usually equal to the
     // screen area of the device.
@@ -338,11 +338,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // is mostly a special case for TV where some displays don’t have the entire display usable.
     // {@link WindowManager.LayoutParams#FLAG_LAYOUT_IN_OVERSCAN} flag can be used to allow
     // window display contents to extend into the overscan region.
-    final Rect mOverscanFrame = new Rect();
+    private final Rect mOverscanFrame = new Rect();
 
     // The display frame minus the stable insets. This value is always constant regardless of if
     // the status bar or navigation bar is visible.
-    final Rect mStableFrame = new Rect();
+    private final Rect mStableFrame = new Rect();
 
     // The area not occupied by the status and navigation bars. So, if both status and navigation
     // bars are visible, the decor frame is equal to the stable frame.
@@ -350,7 +350,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     // Equal to the decor frame if the IME (e.g. keyboard) is not present. Equal to the decor frame
     // minus the area occupied by the IME if the IME is present.
-    final Rect mContentFrame = new Rect();
+    private final Rect mContentFrame = new Rect();
 
     // Legacy stuff. Generally equal to the content frame expect when the IME for older apps
     // displays hint text.
@@ -358,13 +358,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     // Frame that includes dead area outside of the surface but where we want to pretend that it's
     // possible to draw.
-    final Rect mOutsetFrame = new Rect();
+    private final Rect mOutsetFrame = new Rect();
 
     /**
      * Usually empty. Set to the task's tempInsetFrame. See
      *{@link android.app.IActivityManager#resizeDockedStack}.
      */
-    final Rect mInsetFrame = new Rect();
+    private final Rect mInsetFrame = new Rect();
 
     boolean mContentChanged;
 
@@ -446,7 +446,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * or some other higher level component said so (e.g. activity manager).
      * TODO: We should either have different booleans for the removal reason or use a bit-field.
      */
-    boolean mWindowRemovalAllowed;
+    private boolean mWindowRemovalAllowed;
 
     /**
      * Temp for keeping track of windows that have been removed when
@@ -457,18 +457,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // Input channel and input window handle used by the input dispatcher.
     final InputWindowHandle mInputWindowHandle;
     InputChannel mInputChannel;
-    InputChannel mClientChannel;
+    private InputChannel mClientChannel;
 
     // Used to improve performance of toString()
-    String mStringNameCache;
-    CharSequence mLastTitle;
-    boolean mWasExiting;
+    private String mStringNameCache;
+    private CharSequence mLastTitle;
+    private boolean mWasExiting;
 
     final WindowStateAnimator mWinAnimator;
 
     boolean mHasSurface = false;
 
-    boolean mNotOnAppsDisplay = false;
+    private boolean mNotOnAppsDisplay = false;
     DisplayContent  mDisplayContent;
 
     /** When true this window can be displayed on screens owther than mOwnerUid's */
@@ -486,26 +486,26 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // Whether the window was visible when we set the app to invisible last time. WM uses
     // this as a hint to restore the surface (if available) for early animation next time
     // the app is brought visible.
-    boolean mWasVisibleBeforeClientHidden;
+    private boolean mWasVisibleBeforeClientHidden;
 
     // This window will be replaced due to relaunch. This allows window manager
     // to differentiate between simple removal of a window and replacement. In the latter case it
     // will preserve the old window until the new one is drawn.
     boolean mWillReplaceWindow = false;
     // If true, the replaced window was already requested to be removed.
-    boolean mReplacingRemoveRequested = false;
+    private boolean mReplacingRemoveRequested = false;
     // Whether the replacement of the window should trigger app transition animation.
-    boolean mAnimateReplacingWindow = false;
+    private boolean mAnimateReplacingWindow = false;
     // If not null, the window that will be used to replace the old one. This is being set when
     // the window is added and unset when this window reports its first draw.
-    WindowState mReplacementWindow = null;
+    private WindowState mReplacementWindow = null;
     // For the new window in the replacement transition, if we have
     // requested to replace without animation, then we should
     // make sure we also don't apply an enter animation for
     // the new window.
     boolean mSkipEnterAnimationForSeamlessReplacement = false;
     // Whether this window is being moved via the resize API
-    boolean mMovedByResize;
+    private boolean mMovedByResize;
 
     /**
      * Wake lock for drawing.
@@ -514,7 +514,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * who is preventing the system from suspending.
      * This lock is only acquired on first use.
      */
-    PowerManager.WakeLock mDrawLock;
+    private PowerManager.WakeLock mDrawLock;
 
     final private Rect mTmpRect = new Rect();
 

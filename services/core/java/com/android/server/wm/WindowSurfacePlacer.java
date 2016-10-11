@@ -9,7 +9,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
-import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_CLOSE;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_CLOSE;
@@ -897,6 +896,6 @@ class WindowSurfacePlacer {
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "mTraversalScheduled=" + mTraversalScheduled);
         pw.println(prefix + "mHoldScreenWindow=" + mService.mRoot.mHoldScreenWindow);
-        pw.println(prefix + "mObsuringWindow=" + mService.mRoot.mObsuringWindow);
+        pw.println(prefix + "mObscuringWindow=" + mService.mRoot.mObscuringWindow);
     }
 }

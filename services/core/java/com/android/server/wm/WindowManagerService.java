@@ -166,6 +166,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
@@ -203,6 +204,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.EventLogTags.WM_TASK_CREATED;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_END;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
@@ -2738,10 +2740,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
-        String msg = "Permission Denial: " + func + " from pid="
-                + Binder.getCallingPid()
-                + ", uid=" + Binder.getCallingUid()
-                + " requires " + permission;
+        final String msg = "Permission Denial: " + func + " from pid=" + Binder.getCallingPid()
+                + ", uid=" + Binder.getCallingUid() + " requires " + permission;
         Slog.w(TAG_WM, msg);
         return false;
     }
@@ -2760,8 +2760,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void addWindowToken(IBinder token, int type) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "addWindowToken()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "addWindowToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -2780,8 +2779,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void removeWindowToken(IBinder token) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "removeWindowToken()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "removeWindowToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -2808,9 +2806,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 + " atoken=" + atoken + " bounds=" + bounds);
         final TaskStack stack = mStackIdToStack.get(stackId);
         if (stack == null) {
-            throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
+            throw new IllegalArgumentException("createTaskLocked: invalid stackId=" + stackId);
         }
-        EventLog.writeEvent(EventLogTags.WM_TASK_CREATED, taskId, stackId);
+        EventLog.writeEvent(WM_TASK_CREATED, taskId, stackId);
         Task task = new Task(taskId, stack, userId, this, bounds, overrideConfig, isOnTopLauncher);
         mTaskIdToTask.put(taskId, task);
         stack.addTask(task, !atoken.mLaunchTaskBehind /* toTop */, atoken.showForAllUsers);
@@ -2824,8 +2822,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Rect taskBounds, Configuration overrideConfig, int taskResizeMode,
             boolean alwaysFocusable, boolean homeTask, int targetSdkVersion,
             int rotationAnimationHint, boolean isOnTopLauncher) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "addAppToken()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -2880,8 +2877,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void setAppTask(IBinder token, int taskId, int stackId, Rect taskBounds,
             Configuration overrideConfig, int taskResizeMode, boolean homeTask,
             boolean isOnTopLauncher) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "setAppTask()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "setAppTask()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -2978,8 +2974,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public Configuration updateOrientationFromAppTokens(
             Configuration currentConfig, IBinder freezeThisOneIfNeeded) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "updateOrientationFromAppTokens()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "updateOrientationFromAppTokens()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -3092,8 +3087,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public int[] setNewConfiguration(Configuration config) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "setNewConfiguration()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "setNewConfiguration()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -3118,8 +3112,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setAppOrientation(IApplicationToken token, int requestedOrientation) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "setAppOrientation()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "setAppOrientation()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -3158,8 +3151,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setFocusedApp(IBinder token, boolean moveFocusNow) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "setFocusedApp()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "setFocusedApp()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -3200,8 +3192,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public void prepareAppTransition(int transit, boolean alwaysKeepCurrent) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "prepareAppTransition()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "prepareAppTransition()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
         synchronized(mWindowMap) {
@@ -3329,8 +3320,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void executeAppTransition() {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "executeAppTransition()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "executeAppTransition()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -3354,8 +3344,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int theme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo,
             int windowFlags, IBinder transferFrom, boolean createIfNeeded) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "setAppStartingWindow()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "setAppStartingWindow()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -3426,7 +3415,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if (wtoken != null && wtoken.transferStartingWindow(transferFrom)) {
+            if (wtoken.transferStartingWindow(transferFrom)) {
                 return true;
             }
 
@@ -3473,10 +3462,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void setWindowOpaqueLocked(IBinder token, boolean isOpaque) {
-        AppWindowToken wtoken = findAppWindowToken(token);
+    private void setWindowOpaqueLocked(IBinder token, boolean isOpaque) {
+        final AppWindowToken wtoken = findAppWindowToken(token);
         if (wtoken != null) {
-            WindowState win = wtoken.findMainWindow();
+            final WindowState win = wtoken.findMainWindow();
             if (win != null) {
                 win.mWinAnimator.setOpaqueLocked(isOpaque);
             }
@@ -3494,8 +3483,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void notifyAppResumed(IBinder token, boolean wasStopped, boolean allowSavedSurface) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "notifyAppResumed()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "notifyAppResumed()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -3512,8 +3500,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void notifyAppStopped(IBinder token) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "notifyAppStopped()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "notifyAppStopped()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -3530,8 +3517,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setAppVisibility(IBinder token, boolean visible) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "setAppVisibility()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "setAppVisibility()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -3648,8 +3634,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void startAppFreezingScreen(IBinder token, int configChanges) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "setAppFreezingScreen()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "setAppFreezingScreen()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -3672,19 +3657,18 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void stopAppFreezingScreen(IBinder token, boolean force) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "setAppFreezingScreen()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "setAppFreezingScreen()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
-            AppWindowToken wtoken = findAppWindowToken(token);
+            final AppWindowToken wtoken = findAppWindowToken(token);
             if (wtoken == null || wtoken.appToken == null) {
                 return;
             }
             final long origId = Binder.clearCallingIdentity();
-            if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Clear freezing of " + token
-                    + ": hidden=" + wtoken.hidden + " freezing=" + wtoken.mAppAnimator.freezingScreen);
+            if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Clear freezing of " + token + ": hidden="
+                    + wtoken.hidden + " freezing=" + wtoken.mAppAnimator.freezingScreen);
             wtoken.stopFreezingScreen(true, force);
             Binder.restoreCallingIdentity(origId);
         }
@@ -3692,8 +3676,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void removeAppToken(IBinder token) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "removeAppToken()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "removeAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -6628,8 +6611,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void pauseKeyDispatching(IBinder _token) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "pauseKeyDispatching()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "pauseKeyDispatching()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -6643,8 +6625,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void resumeKeyDispatching(IBinder _token) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "resumeKeyDispatching()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "resumeKeyDispatching()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -6658,8 +6639,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setEventDispatching(boolean enabled) {
-        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "setEventDispatching()")) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "setEventDispatching()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
@@ -8133,10 +8113,10 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 if (DEBUG_KEEP_SCREEN_ON) {
                     Slog.d(TAG_KEEP_SCREEN_ON, "Releasing screen wakelock, obscured by "
-                            + mRoot.mObsuringWindow);
+                            + mRoot.mObscuringWindow);
                 }
                 mLastWakeLockHoldingWindow = null;
-                mLastWakeLockObscuringWindow = mRoot.mObsuringWindow;
+                mLastWakeLockObscuringWindow = mRoot.mObscuringWindow;
                 mPolicy.keepScreenOnStoppedLw();
                 mHoldingScreenWakeLock.release();
             }
@@ -8711,17 +8691,17 @@ public class WindowManagerService extends IWindowManager.Stub
         return getDefaultDisplayContentLocked().getDockedDividerController().getContentInsets();
     }
 
-    void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {
+    private void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {
         pw.println("WINDOW MANAGER POLICY STATE (dumpsys window policy)");
         mPolicy.dump("    ", pw, args);
     }
 
-    void dumpAnimatorLocked(PrintWriter pw, String[] args, boolean dumpAll) {
+    private void dumpAnimatorLocked(PrintWriter pw, String[] args, boolean dumpAll) {
         pw.println("WINDOW MANAGER ANIMATOR STATE (dumpsys window animator)");
         mAnimator.dumpLocked(pw, "    ", dumpAll);
     }
 
-    void dumpTokensLocked(PrintWriter pw, boolean dumpAll) {
+    private void dumpTokensLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER TOKENS (dumpsys window tokens)");
         if (!mTokenMap.isEmpty()) {
             pw.println("  All tokens:");
@@ -8764,7 +8744,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void dumpSessionsLocked(PrintWriter pw, boolean dumpAll) {
+    private void dumpSessionsLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER SESSIONS (dumpsys window sessions)");
         for (int i=0; i<mSessions.size(); i++) {
             Session s = mSessions.valueAt(i);
@@ -8773,13 +8753,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,
+    private void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,
             ArrayList<WindowState> windows) {
         pw.println("WINDOW MANAGER WINDOWS (dumpsys window windows)");
         dumpWindowsNoHeaderLocked(pw, dumpAll, windows);
     }
 
-    void dumpWindowsNoHeaderLocked(PrintWriter pw, boolean dumpAll,
+    private void dumpWindowsNoHeaderLocked(PrintWriter pw, boolean dumpAll,
             ArrayList<WindowState> windows) {
         mRoot.dumpWindowsNoHeader(pw, dumpAll, windows);
 
