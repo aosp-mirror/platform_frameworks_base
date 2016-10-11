@@ -75,14 +75,12 @@ public class NightDisplayTile extends QSTile<QSTile.BooleanState>
     protected void handleUpdateState(BooleanState state, Object arg) {
         final boolean isActivated = mController.isActivated();
         state.value = isActivated;
-        state.label = mContext.getString(R.string.quick_settings_night_display_label);
+        state.label = state.contentDescription =
+                mContext.getString(R.string.quick_settings_night_display_label);
         state.icon = ResourceIcon.get(isActivated ? R.drawable.ic_qs_night_display_on
                 : R.drawable.ic_qs_night_display_off);
-        state.contentDescription = mContext.getString(isActivated
-                ? R.string.quick_settings_night_display_summary_on
-                : R.string.quick_settings_night_display_summary_off);
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Switch.class.getName();
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName =
+                Switch.class.getName();
     }
 
     @Override
