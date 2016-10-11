@@ -59,11 +59,7 @@ public class CategoryManager {
     public synchronized DashboardCategory getTilesByCategory(Context context, String categoryKey) {
         tryInitCategories(context);
 
-        final DashboardCategory category = mCategoryByKeyMap.get(categoryKey);
-        if (category == null) {
-            throw new IllegalStateException("Can't find category with key " + categoryKey);
-        }
-        return category;
+        return mCategoryByKeyMap.get(categoryKey);
     }
 
     public synchronized List<DashboardCategory> getCategories(Context context) {
