@@ -24,6 +24,7 @@
             android:maxHeight="24dp"
             android:maxWidth="24dp"
             android:layout_marginTop="12dp"
+            android:layout_gravity="center_horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@null" />
