@@ -2038,6 +2038,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (!mIsExpanded) {
             mBackgroundBounds.top = 0;
             mBackgroundBounds.bottom = 0;
+            return;
         }
         ActivatableNotificationView firstView = mFirstVisibleBackgroundChild;
         int top = 0;
