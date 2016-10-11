@@ -37,4 +37,8 @@
 
     <!-- The amount to offset when scrolling to a selection in an AlertDialog -->
     <dimen name="config_alertDialogSelectionScrollOffset">0dp</dimen>
+
+    <!-- Style the scrollbars accoridngly. -->
+    <drawable name="config_scrollbarThumbVertical">@drawable/scrollbar_handle_material</drawable>
+    <drawable name="config_scrollbarTrackVertical">@null</drawable>
 </resources>
