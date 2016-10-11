@@ -31,7 +31,7 @@ public abstract class QSContainer extends FrameLayout {
 
     // This should be incremented any time this class or ActivityStarter or BaseStatusBarHeader
     // change in incompatible ways.
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
 
     public QSContainer(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -40,6 +40,7 @@ public abstract class QSContainer extends FrameLayout {
     public abstract void setPanelView(HeightListener notificationPanelView);
     public abstract BaseStatusBarHeader getHeader();
 
+    public abstract void hideImmediately();
     public abstract int getQsMinExpansionHeight();
     public abstract int getDesiredHeight();
     public abstract void setHeightOverride(int desiredHeight);

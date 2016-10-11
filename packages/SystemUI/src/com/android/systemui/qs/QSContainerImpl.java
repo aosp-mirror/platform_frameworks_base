@@ -335,6 +335,7 @@ public class QSContainerImpl extends QSContainer {
         return mHeader.getHeight();
     }
 
+    @Override
     public void hideImmediately() {
         animate().cancel();
         setY(-mHeader.getHeight());
