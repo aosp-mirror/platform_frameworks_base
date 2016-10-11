@@ -329,7 +329,7 @@
     <string name="recents_empty_message" msgid="808480104164008572">"Niciun element recent"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Ați șters tot"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informații despre aplicație"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"fixare pe ecran"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"fixarea ecranului"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"căutare"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> nu a putut porni."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplicația <xliff:g id="APP">%s</xliff:g> este dezactivată în modul sigur."</string>
