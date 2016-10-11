@@ -2981,7 +2981,6 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "type": "distribute",
     "category": "google"
   },
-
   {
     "lang": "en",
     "group": "",
@@ -5379,6 +5378,9 @@ METADATA['en'].collections = {
   "distribute/stories/games/docs": {
     "title": "",
     "resources": [
+      "distribute/stories/games/animoca-star-girl.html",
+      "distribute/stories/games/happy-labs-experiment.html",
+      "distribute/stories/games/playlab-puzzles.html",
       "distribute/stories/games/upbeat-games.html",
       "distribute/stories/games/tapps.html",
       "distribute/stories/games/noodlecake-super-stickman.html",
@@ -5401,6 +5403,11 @@ METADATA['en'].collections = {
   "distribute/stories/apps/docs": {
     "title": "",
     "resources": [
+      "distribute/stories/apps/condenast-shopping.html",
+      "distribute/stories/apps/economist-espresso.html",
+      "distribute/stories/apps/expressen-sports.html",
+      "distribute/stories/apps/drupe-communications.html",
+      "distribute/stories/apps/noom-health.html",
       "distribute/stories/apps/aftenposten.html",
       "distribute/stories/apps/el-mundo.html",
       "distribute/stories/apps/segundamano.html",
