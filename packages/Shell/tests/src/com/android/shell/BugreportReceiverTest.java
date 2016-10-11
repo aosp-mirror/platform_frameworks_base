@@ -201,7 +201,12 @@ public class BugreportReceiverTest {
     @After
     public void tearDown() throws Exception {
         Log.i(TAG, getName() + ".tearDown()");
-        cancelExistingNotifications();
+        try {
+            cancelExistingNotifications();
+        } finally {
+            // Collapses just in case, so a failure here does not compromise tests on other classes.
+            mUiBot.collapseStatusBar();
+        }
     }
 
     @Test
@@ -362,7 +367,7 @@ public class BugreportReceiverTest {
         detailsUi.assertName(NAME);  // Sanity check
 
         cancelFromNotification();
-        mUiBot.closeNotifications();
+        mUiBot.collapseStatusBar();
 
         assertDetailsUiClosed();
         assertServiceNotRunning();
