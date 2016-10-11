@@ -330,7 +330,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> är inaktiverad i säkert läge."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Rensa alla"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Appen har inte stöd för delad skärm."</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Dra här om du vill dela upp skärmen"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Dra hit för att dela upp skärmen"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Dela horisontellt"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Dela vertikalt"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Dela anpassad"</string>
