@@ -237,7 +237,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Spraakassistent"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Nu vergrendelen"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999 +"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Inhoud verborgen"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Content verborgen"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Content verborgen op basis van beleid"</string>
     <string name="safeMode" msgid="2788228061547930246">"Veilige modus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-systeem"</string>
@@ -261,12 +261,12 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"bellen en telefoontjes beheren"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Lichaamssensoren"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"toegang krijgen tot sensorgegevens over je vitale functies"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Inhoud van vensters ophalen"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"De inhoud inspecteren van een venster waarmee je interactie hebt."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Content van vensters ophalen"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"De content inspecteren van een venster waarmee je interactie hebt."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\'Verkennen via aanraking\' inschakelen"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Aangetikte items worden hardop benoemd en het scherm kan worden verkend door middel van gebaren."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Verbeterde internettoegankelijkheid inschakelen"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Er kunnen scripts worden geïnstalleerd om app-inhoud toegankelijker te maken."</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Er kunnen scripts worden geïnstalleerd om app-content toegankelijker te maken."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Tekst observeren die u typt"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Omvat persoonlijke gegevens zoals creditcardnummers en wachtwoorden."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Schermvergroting bedienen"</string>
@@ -296,9 +296,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"sms\'jes verzenden en bekijken"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Hiermee kan de app sms-berichten verzenden. Dit kan tot onverwachte kosten leiden. Schadelijke apps kunnen u geld kosten doordat ze zonder je bevestiging berichten kunnen verzenden."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"je tekstberichten (SMS of MMS) lezen"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op je tablet of simkaart. De app kan alle sms-berichten lezen, ongeacht inhoud of vertrouwelijkheid."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op je tv of simkaart. De app kan alle sms-berichten lezen, ongeacht inhoud of vertrouwelijkheid."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op je telefoon of simkaart. De app kan alle sms-berichten lezen, ongeacht inhoud of vertrouwelijkheid."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op je tablet of simkaart. De app kan alle sms-berichten lezen, ongeacht content of vertrouwelijkheid."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op je tv of simkaart. De app kan alle sms-berichten lezen, ongeacht content of vertrouwelijkheid."</string>
+    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op je telefoon of simkaart. De app kan alle sms-berichten lezen, ongeacht content of vertrouwelijkheid."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"tekstberichten (WAP) ontvangen"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Hiermee kan de app WAP-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar je apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"actieve apps ophalen"</string>
@@ -460,12 +460,12 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Hiermee kan een app de synchronisatie-instellingen aanpassen voor een account. Deze toestemming kan bijvoorbeeld worden gebruikt om synchronisatie van de app Personen in te schakelen voor een account."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"synchronisatiestatistieken lezen"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Hiermee kan een app de synchronisatiestatistieken voor een account lezen, inclusief de geschiedenis van synchronisatie-activiteiten en hoeveel gegevens zijn gesynchroniseerd."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"de inhoud van je USB-opslag lezen"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"de inhoud van je SD-kaart lezen"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"De app toestaan de inhoud van je USB-opslag te lezen."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"De app toestaan de inhoud van je SD-kaart te lezen."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"de inhoud van je USB-opslag aanpassen of verwijderen"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"de inhoud van je SD-kaart aanpassen of verwijderen"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"de content van je USB-opslag lezen"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"de content van je SD-kaart lezen"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"De app toestaan de content van je USB-opslag te lezen."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"De app toestaan de content van je SD-kaart te lezen."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"de content van je USB-opslag aanpassen of verwijderen"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"de content van je SD-kaart aanpassen of verwijderen"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Hiermee kan de app schrijven naar de USB-opslag."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Hiermee kan de app schrijven naar de SD-kaart."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP-oproepen plaatsen/ontvangen"</string>
@@ -1527,7 +1527,7 @@
     <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"Onbekend portret"</string>
     <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"Onbekend landschap"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Geannuleerd"</string>
-    <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Fout bij schrijven van inhoud"</string>
+    <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Fout bij schrijven van content"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"onbekend"</string>
     <string name="reason_service_unavailable" msgid="7824008732243903268">"Afdrukservice niet ingeschakeld"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g>-service geïnstalleerd"</string>
