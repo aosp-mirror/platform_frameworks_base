@@ -334,4 +334,9 @@ public class QSContainerImpl extends QSContainer {
     public int getQsMinExpansionHeight() {
         return mHeader.getHeight();
     }
+
+    public void hideImmediately() {
+        animate().cancel();
+        setY(-mHeader.getHeight());
+    }
 }
