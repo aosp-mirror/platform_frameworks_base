@@ -202,7 +202,9 @@ void FullPath::drawPath(SkCanvas* outCanvas, SkPath& renderPath, float strokeSca
     if (properties.getFillGradient() != nullptr) {
         paint.setColor(applyAlpha(SK_ColorBLACK, properties.getFillAlpha()));
         SkShader* newShader = properties.getFillGradient()->newWithLocalMatrix(matrix);
-        paint.setShader(newShader);
+        // newWithLocalMatrix(...) creates a new SkShader and returns a bare pointer. We need to
+        // remove the extra ref so that the ref count is correctly managed.
+        paint.setShader(newShader)->unref();
         needsFill = true;
     } else if (properties.getFillColor() != SK_ColorTRANSPARENT) {
         paint.setColor(applyAlpha(properties.getFillColor(), properties.getFillAlpha()));
@@ -222,7 +224,9 @@ void FullPath::drawPath(SkCanvas* outCanvas, SkPath& renderPath, float strokeSca
     if (properties.getStrokeGradient() != nullptr) {
         paint.setColor(applyAlpha(SK_ColorBLACK, properties.getStrokeAlpha()));
         SkShader* newShader = properties.getStrokeGradient()->newWithLocalMatrix(matrix);
-        paint.setShader(newShader);
+        // newWithLocalMatrix(...) creates a new SkShader and returns a bare pointer. We need to
+        // remove the extra ref so that the ref count is correctly managed.
+        paint.setShader(newShader)->unref();
         needsStroke = true;
     } else if (properties.getStrokeColor() != SK_ColorTRANSPARENT) {
         paint.setColor(applyAlpha(properties.getStrokeColor(), properties.getStrokeAlpha()));
