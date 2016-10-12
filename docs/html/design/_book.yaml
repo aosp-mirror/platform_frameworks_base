@@ -117,8 +117,6 @@ toc:
     path: /design/patterns/pure-android.html
   - title: Compatibility
     path: /design/patterns/compatibility.html
-  - title: Accessibility
-    path: /design/patterns/accessibility.html
   - title: Help
     path: /design/patterns/help.html
 
