@@ -16,14 +16,14 @@
 
 package android.text.method;
 
-import android.view.KeyEvent;
-import android.view.View;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.view.KeyEvent;
+import android.view.View;
 
 /**
  * For numeric text entry
@@ -91,7 +91,7 @@ public abstract class NumberKeyListener extends BaseKeyListener
 
         return false;
     }
-    
+
     @Override
     public boolean onKeyDown(View view, Editable content,
                              int keyCode, KeyEvent event) {

@@ -16,11 +16,15 @@
 
 package android.text.format;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+
+import com.android.internal.R;
+
+import libcore.icu.DateIntervalFormat;
+import libcore.icu.LocaleData;
+import libcore.icu.RelativeDateTimeFormatter;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -29,10 +33,6 @@ import java.util.Formatter;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import libcore.icu.DateIntervalFormat;
-import libcore.icu.LocaleData;
-import libcore.icu.RelativeDateTimeFormatter;
 
 /**
  * This class contains various date-related utilities for creating text for things like
