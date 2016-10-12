@@ -102,10 +102,18 @@
         <activity
             android:name=".SlowBindRecyclerViewActivity"
             android:label="General/Slow Bind RecyclerView" >
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="com.android.test.uibench.TEST" />
-        </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SlowNestedRecyclerViewActivity"
+            android:label="General/Slow Nested RecyclerView" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".ActivityTransition"
