@@ -1049,6 +1049,7 @@ public class Notification implements Parcelable
             this(Icon.createWithResource("", icon), title, intent, new Bundle(), null, false);
         }
 
+        /** Keep in sync with {@link Notification.Action.Builder#Builder(Action)}! */
         private Action(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
                 RemoteInput[] remoteInputs, boolean allowGeneratedReplies) {
             this.mIcon = icon;
@@ -1115,7 +1116,7 @@ public class Notification implements Parcelable
              */
             @Deprecated
             public Builder(int icon, CharSequence title, PendingIntent intent) {
-                this(Icon.createWithResource("", icon), title, intent, new Bundle(), null);
+                this(Icon.createWithResource("", icon), title, intent);
             }
 
             /**
@@ -1125,7 +1126,7 @@ public class Notification implements Parcelable
              * @param intent the {@link PendingIntent} to fire when users trigger this action
              */
             public Builder(Icon icon, CharSequence title, PendingIntent intent) {
-                this(icon, title, intent, new Bundle(), null);
+                this(icon, title, intent, new Bundle(), null, false);
             }
 
             /**
@@ -1134,12 +1135,13 @@ public class Notification implements Parcelable
              * @param action the action to read fields from.
              */
             public Builder(Action action) {
-                this(action.getIcon(), action.title, action.actionIntent, new Bundle(action.mExtras),
-                        action.getRemoteInputs());
+                this(action.getIcon(), action.title, action.actionIntent,
+                        new Bundle(action.mExtras), action.getRemoteInputs(),
+                        action.getAllowGeneratedReplies());
             }
 
             private Builder(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
-                    RemoteInput[] remoteInputs) {
+                    RemoteInput[] remoteInputs, boolean allowGeneratedReplies) {
                 mIcon = icon;
                 mTitle = title;
                 mIntent = intent;
@@ -1148,6 +1150,7 @@ public class Notification implements Parcelable
                     mRemoteInputs = new ArrayList<RemoteInput>(remoteInputs.length);
                     Collections.addAll(mRemoteInputs, remoteInputs);
                 }
+                mAllowGeneratedReplies = allowGeneratedReplies;
             }
 
             /**
