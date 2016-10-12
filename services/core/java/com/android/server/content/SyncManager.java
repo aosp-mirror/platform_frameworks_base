@@ -795,7 +795,17 @@ public class SyncManager {
      *           Use {@link AuthorityInfo#UNDEFINED} to sync all authorities.
      */
     public void scheduleSync(Account requestedAccount, int userId, int reason,
-            String requestedAuthority, Bundle extras, int targetSyncState) {
+                             String requestedAuthority, Bundle extras, int targetSyncState) {
+        scheduleSync(requestedAccount, userId, reason, requestedAuthority, extras, targetSyncState,
+                0 /* min delay */);
+    }
+
+    /**
+     * @param minDelayMillis The sync can't land before this delay expires.
+     */
+    private void scheduleSync(Account requestedAccount, int userId, int reason,
+                             String requestedAuthority, Bundle extras, int targetSyncState,
+                             final long minDelayMillis) {
         final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
         if (extras == null) {
             extras = new Bundle();
@@ -906,7 +916,7 @@ public class SyncManager {
                                 if (result != null
                                         && result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT)) {
                                     scheduleSync(account.account, userId, reason, authority,
-                                            finalExtras, targetSyncState);
+                                            finalExtras, targetSyncState, minDelayMillis);
                                 }
                             }
                         ));
@@ -967,7 +977,8 @@ public class SyncManager {
                     postScheduleSyncMessage(
                             new SyncOperation(account.account, account.userId,
                                     owningUid, owningPackage, reason, source,
-                                    authority, newExtras, allowParallelSyncs)
+                                    authority, newExtras, allowParallelSyncs),
+                            minDelayMillis
                     );
                 } else if (targetSyncState == AuthorityInfo.UNDEFINED
                         || targetSyncState == isSyncable) {
@@ -982,7 +993,8 @@ public class SyncManager {
                     postScheduleSyncMessage(
                             new SyncOperation(account.account, account.userId,
                                     owningUid, owningPackage, reason, source,
-                                    authority, extras, allowParallelSyncs)
+                                    authority, extras, allowParallelSyncs),
+                            minDelayMillis
                     );
                 }
             }
@@ -1088,14 +1100,14 @@ public class SyncManager {
     }
 
     /**
-     * Schedule sync based on local changes to a provider. Occurs within interval
-     * [LOCAL_SYNC_DELAY, 2*LOCAL_SYNC_DELAY].
+     * Schedule sync based on local changes to a provider. We wait for at least LOCAL_SYNC_DELAY
+     * ms to batch syncs.
      */
     public void scheduleLocalSync(Account account, int userId, int reason, String authority) {
         final Bundle extras = new Bundle();
         extras.putBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, true);
         scheduleSync(account, userId, reason, authority, extras,
-                AuthorityInfo.UNDEFINED);
+                AuthorityInfo.UNDEFINED, LOCAL_SYNC_DELAY);
     }
 
     public SyncAdapterType[] getSyncAdapterTypes(int userId) {
@@ -1152,9 +1164,10 @@ public class SyncManager {
         mSyncHandler.sendMessageDelayed(monitorMessage, SYNC_MONITOR_WINDOW_LENGTH_MILLIS);
     }
 
-    private void postScheduleSyncMessage(SyncOperation syncOperation) {
-        mSyncHandler.obtainMessage(mSyncHandler.MESSAGE_SCHEDULE_SYNC, syncOperation)
-                .sendToTarget();
+    private void postScheduleSyncMessage(SyncOperation syncOperation, long minDelayMillis) {
+        ScheduleSyncMessagePayload payload =
+                new ScheduleSyncMessagePayload(syncOperation, minDelayMillis);
+        mSyncHandler.obtainMessage(mSyncHandler.MESSAGE_SCHEDULE_SYNC, payload).sendToTarget();
     }
 
     /**
@@ -1191,6 +1204,16 @@ public class SyncManager {
             this.pollFrequency = pollFrequency;
             this.flex = flex;
             this.extras = extras;
+        }
+    }
+
+    private static class ScheduleSyncMessagePayload {
+        final SyncOperation syncOperation;
+        final long minDelayMillis;
+
+        ScheduleSyncMessagePayload(SyncOperation syncOperation, long minDelayMillis) {
+            this.syncOperation = syncOperation;
+            this.minDelayMillis = minDelayMillis;
         }
     }
 
@@ -1262,7 +1285,7 @@ public class SyncManager {
             if (!op.isPeriodic && op.target.matchesSpec(target)) {
                 count++;
                 getJobScheduler().cancel(op.jobId);
-                postScheduleSyncMessage(op);
+                postScheduleSyncMessage(op, 0 /* min delay */);
             }
         }
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -2417,8 +2440,10 @@ public class SyncManager {
                 mDataConnectionIsConnected = readDataConnectionState();
                 switch (msg.what) {
                     case MESSAGE_SCHEDULE_SYNC:
-                        SyncOperation op = (SyncOperation) msg.obj;
-                        scheduleSyncOperationH(op);
+                        ScheduleSyncMessagePayload syncPayload =
+                                (ScheduleSyncMessagePayload) msg.obj;
+                        SyncOperation op = syncPayload.syncOperation;
+                        scheduleSyncOperationH(op, syncPayload.minDelayMillis);
                         break;
 
                     case MESSAGE_START_SYNC:
@@ -3101,7 +3126,8 @@ public class SyncManager {
                         maybeRescheduleSync(syncResult, syncOperation);
                     } else {
                         // create a normal sync instance that will respect adapter backoffs
-                        postScheduleSyncMessage(syncOperation.createOneTimeSyncOperation());
+                        postScheduleSyncMessage(syncOperation.createOneTimeSyncOperation(),
+                                0 /* min delay */);
                     }
                     historyMessage = ContentResolver.syncErrorToString(
                             syncResultToErrorNumber(syncResult));
