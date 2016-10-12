@@ -75,6 +75,11 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
 class PackageManagerShellCommand extends ShellCommand {
+    /** Path for streaming APK content */
+    private static final String STDIN_PATH = "-";
+    /** Whether or not APK content must be streamed from stdin */
+    private static final boolean FORCE_STREAM_INSTALL = true;
+
     final IPackageManager mInterface;
     final private WeakHashMap<String, Resources> mResourceCache =
             new WeakHashMap<String, Resources>();
@@ -139,30 +144,45 @@ class PackageManagerShellCommand extends ShellCommand {
         return -1;
     }
 
-    private int runInstall() throws RemoteException {
+    private void setParamsSize(InstallParams params, String inPath) {
+        // If we're forced to stream the package, the params size
+        // must be set via command-line argument. There's nothing
+        // to do here.
+        if (FORCE_STREAM_INSTALL) {
+            return;
+        }
         final PrintWriter pw = getOutPrintWriter();
-        final InstallParams params = makeInstallParams();
-        final String inPath = getNextArg();
-        if (params.sessionParams.sizeBytes < 0 && inPath != null) {
+        if (params.sessionParams.sizeBytes == -1 && !STDIN_PATH.equals(inPath)) {
             File file = new File(inPath);
             if (file.isFile()) {
                 try {
                     ApkLite baseApk = PackageParser.parseApkLite(file, 0);
                     PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null);
-                    params.sessionParams.setSize(
-                            PackageHelper.calculateInstalledSize(pkgLite,false, params.sessionParams.abiOverride));
+                    params.sessionParams.setSize(PackageHelper.calculateInstalledSize(
+                            pkgLite, false, params.sessionParams.abiOverride));
                 } catch (PackageParserException | IOException e) {
-                    pw.println("Error: Failed to parse APK file : " + e);
-                    return 1;
+                    pw.println("Error: Failed to parse APK file: " + file);
+                    throw new IllegalArgumentException(
+                            "Error: Failed to parse APK file: " + file, e);
                 }
+            } else {
+                pw.println("Error: Can't open non-file: " + inPath);
+                throw new IllegalArgumentException("Error: Can't open non-file: " + inPath);
             }
         }
+    }
 
+    private int runInstall() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        final InstallParams params = makeInstallParams();
+        final String inPath = getNextArg();
+
+        setParamsSize(params, inPath);
         final int sessionId = doCreateSession(params.sessionParams,
                 params.installerPackageName, params.userId);
         boolean abandonSession = true;
         try {
-            if (inPath == null && params.sessionParams.sizeBytes == 0) {
+            if (inPath == null && params.sessionParams.sizeBytes == -1) {
                 pw.println("Error: must either specify a package size or an APK file");
                 return 1;
             }
@@ -1075,7 +1095,11 @@ class PackageManagerShellCommand extends ShellCommand {
                     }
                     break;
                 case "-S":
-                    sessionParams.setSize(Long.parseLong(getNextArg()));
+                    final long sizeBytes = Long.parseLong(getNextArg());
+                    if (sizeBytes <= 0) {
+                        throw new IllegalArgumentException("Size must be positive");
+                    }
+                    sessionParams.setSize(sizeBytes);
                     break;
                 case "--abi":
                     sessionParams.abiOverride = checkAbiArgument(getNextArg());
@@ -1180,15 +1204,22 @@ class PackageManagerShellCommand extends ShellCommand {
     private int doWriteSplit(int sessionId, String inPath, long sizeBytes, String splitName,
             boolean logSuccess) throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
+        if (FORCE_STREAM_INSTALL && inPath != null && !STDIN_PATH.equals(inPath)) {
+            pw.println("Error: APK content must be streamed");
+            return 1;
+        }
+        if (STDIN_PATH.equals(inPath)) {
+            inPath = null;
+        } else if (inPath != null) {
+            final File file = new File(inPath);
+            if (file.isFile()) {
+                sizeBytes = file.length();
+            }
+        }
         if (sizeBytes <= 0) {
             pw.println("Error: must specify a APK size");
             return 1;
         }
-        if (inPath != null && !"-".equals(inPath)) {
-            pw.println("Error: APK content must be streamed");
-            return 1;
-        }
-        inPath = null;
 
         final SessionInfo info = mInterface.getPackageInstaller().getSessionInfo(sessionId);
 

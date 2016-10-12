@@ -84,6 +84,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class Pm {
     private static final String TAG = "Pm";
+    private static final String STDIN_PATH = "-";
 
     IPackageManager mPm;
     IPackageInstaller mInstaller;
@@ -403,7 +404,7 @@ public final class Pm {
     private int runInstall() throws RemoteException {
         final InstallParams params = makeInstallParams();
         final String inPath = nextArg();
-        if (params.sessionParams.sizeBytes < 0 && inPath != null) {
+        if (params.sessionParams.sizeBytes == -1 && !STDIN_PATH.equals(inPath)) {
             File file = new File(inPath);
             if (file.isFile()) {
                 try {
@@ -413,9 +414,12 @@ public final class Pm {
                             PackageHelper.calculateInstalledSize(pkgLite, false,
                             params.sessionParams.abiOverride));
                 } catch (PackageParserException | IOException e) {
-                    System.err.println("Error: Failed to parse APK file : " + e);
+                    System.err.println("Error: Failed to parse APK file: " + e);
                     return 1;
                 }
+            } else {
+                System.err.println("Error: Can't open non-file: " + inPath);
+                return 1;
             }
         }
 
@@ -423,7 +427,7 @@ public final class Pm {
                 params.installerPackageName, params.userId);
 
         try {
-            if (inPath == null && params.sessionParams.sizeBytes == 0) {
+            if (inPath == null && params.sessionParams.sizeBytes == -1) {
                 System.err.println("Error: must either specify a package size or an APK file");
                 return 1;
             }
@@ -540,7 +544,11 @@ public final class Pm {
                     }
                     break;
                 case "-S":
-                    sessionParams.setSize(Long.parseLong(nextOptionData()));
+                    final long sizeBytes = Long.parseLong(nextOptionData());
+                    if (sizeBytes <= 0) {
+                        throw new IllegalArgumentException("Size must be positive");
+                    }
+                    sessionParams.setSize(sizeBytes);
                     break;
                 case "--abi":
                     sessionParams.abiOverride = checkAbiArgument(nextOptionData());
@@ -585,7 +593,7 @@ public final class Pm {
 
     private int doWriteSession(int sessionId, String inPath, long sizeBytes, String splitName,
             boolean logSuccess) throws RemoteException {
-        if ("-".equals(inPath)) {
+        if (STDIN_PATH.equals(inPath)) {
             inPath = null;
         } else if (inPath != null) {
             final File file = new File(inPath);
