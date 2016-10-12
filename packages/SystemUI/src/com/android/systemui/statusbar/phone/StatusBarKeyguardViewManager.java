@@ -264,10 +264,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
         }
         mOccluded = occluded;
-        mPhoneStatusBar.updateMediaMetaData(false, animate && !occluded);
+        if (mShowing) {
+            mPhoneStatusBar.updateMediaMetaData(false, animate && !occluded);
+        }
         mStatusBarWindowManager.setKeyguardOccluded(occluded);
         reset();
-        if (animate && !occluded) {
+        if (animate && !occluded && mShowing) {
             mPhoneStatusBar.animateKeyguardUnoccluding();
         }
     }
