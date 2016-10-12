@@ -57,6 +57,12 @@
     <!-- Bulgaria: 4-5 digits, plus EU -->
     <shortcode country="bg" pattern="\\d{4,5}" premium="18(?:16|423)|19(?:1[56]|35)" free="116\\d{3}" />
 
+    <!-- Bahrain: 1-5 digits (standard system default, not country specific) -->
+    <shortcode country="bh" pattern="\\d{1,5}" free="81181" />
+
+    <!-- Brazil: 1-5 digits (standard system default, not country specific) -->
+    <shortcode country="br" pattern="\\d{1,5}" free="6000[012]\\d" />
+
     <!-- Belarus: 4 digits -->
     <shortcode country="by" pattern="\\d{4}" premium="3336|4161|444[4689]|501[34]|7781" />
 
@@ -129,7 +135,7 @@
 
     <!-- Italy: 5 digits (premium=4xxxx), plus EU:
          http://clients.txtnation.com/attachments/token/di5kfblvubttvlw/?name=Italy_CASP_EN.pdf -->
-    <shortcode country="it" pattern="\\d{5}" premium="4\\d{4}" free="116\\d{3}|4112503" />
+    <shortcode country="it" pattern="\\d{5}" premium="4\\d{4}" free="116\\d{3}|4112503" standard="43\\d{3}" />
 
     <!-- Japan: 8083 used by SOFTBANK_DCB_2 -->
     <shortcode country="jp" free="8083" />
@@ -204,7 +210,7 @@
     <shortcode country="si" pattern="\\d{4}" premium="[368]\\d{3}" free="116\\d{3}" />
 
     <!-- Slovakia: 4 digits (premium), plus EU: http://www.cmtelecom.com/premium-sms/slovakia -->
-    <shortcode country="sk" premium="\\d{4}" free="116\\d{3}" />
+    <shortcode country="sk" premium="\\d{4}" free="116\\d{3}|8000" />
 
     <!-- Thailand: 4186001 used by AIS_TH_DCB -->
     <shortcode country="th" free="4186001" />
@@ -220,9 +226,9 @@
 
     <!-- USA: 5-6 digits (premium codes from https://www.premiumsmsrefunds.com/ShortCodes.htm),
          visual voicemail code for T-Mobile: 122 -->
-    <shortcode country="us" pattern="\\d{5,6}" premium="20433|21(?:344|472)|22715|23(?:333|847)|24(?:15|28)0|25209|27(?:449|606|663)|28498|305(?:00|83)|32(?:340|941)|33(?:166|786|849)|34746|35(?:182|564)|37975|38(?:135|146|254)|41(?:366|463)|42335|43(?:355|500)|44(?:578|711|811)|45814|46(?:157|173|327)|46666|47553|48(?:221|277|669)|50(?:844|920)|51(?:062|368)|52944|54(?:723|892)|55928|56483|57370|59(?:182|187|252|342)|60339|61(?:266|982)|62478|64(?:219|898)|65(?:108|500)|69(?:208|388)|70877|71851|72(?:078|087|465)|73(?:288|588|882|909|997)|74(?:034|332|815)|76426|79213|81946|83177|84(?:103|685)|85797|86(?:234|236|666)|89616|90(?:715|842|938)|91(?:362|958)|94719|95297|96(?:040|666|835|969)|97(?:142|294|688)|99(?:689|796|807)" standard="44567" free="122|87902" />
+    <shortcode country="us" pattern="\\d{5,6}" premium="20433|21(?:344|472)|22715|23(?:333|847)|24(?:15|28)0|25209|27(?:449|606|663)|28498|305(?:00|83)|32(?:340|941)|33(?:166|786|849)|34746|35(?:182|564)|37975|38(?:135|146|254)|41(?:366|463)|42335|43(?:355|500)|44(?:578|711|811)|45814|46(?:157|173|327)|46666|47553|48(?:221|277|669)|50(?:844|920)|51(?:062|368)|52944|54(?:723|892)|55928|56483|57370|59(?:182|187|252|342)|60339|61(?:266|982)|62478|64(?:219|898)|65(?:108|500)|69(?:208|388)|70877|71851|72(?:078|087|465)|73(?:288|588|882|909|997)|74(?:034|332|815)|76426|79213|81946|83177|84(?:103|685)|85797|86(?:234|236|666)|89616|90(?:715|842|938)|91(?:362|958)|94719|95297|96(?:040|666|835|969)|97(?:142|294|688)|99(?:689|796|807)" standard="44567" free="122|87902|21696|24614|28003|30356|33669|40196|41064|41270|43753|44034|46645|52413|56139|57969|61785|66975|75136|76227|81398|83952|85140|86566|86799|95737|96684|99245" />
 
     <!-- Vietnam: 1-5 digits (standard system default, not country specific) -->
-    <shortcode country="vn" pattern="\\d{1,5}" free="5001" />
+    <shortcode country="vn" pattern="\\d{1,5}" free="5001|9055" />
 
 </shortcodes>
