@@ -1048,6 +1048,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     public final void onBusEvent(RecentsActivityStartingEvent recentsActivityStartingEvent) {
         if (mGrowRecents && getWindowManagerProxy().getDockSide() == WindowManager.DOCKED_TOP
+                && getSnapAlgorithm().getMiddleTarget() != getSnapAlgorithm().getLastSplitTarget()
                 && getCurrentPosition() == getSnapAlgorithm().getLastSplitTarget().position) {
             mState.growAfterRecentsDrawn = true;
             startDragging(false /* animate */, false /* touching */);
