@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.LocalActivityManager;
@@ -35,6 +33,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+
+import com.android.internal.R;
+
 import java.util.ArrayList;
 import java.util.List;
 

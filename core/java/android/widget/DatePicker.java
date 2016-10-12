@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -34,6 +32,8 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+
+import com.android.internal.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

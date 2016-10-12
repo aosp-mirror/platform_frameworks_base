@@ -17,7 +17,7 @@
 package android.widget;
 
 import android.content.Context;
-import android.view.KeyEvent;
+import android.graphics.Rect;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Selection;
@@ -28,8 +28,8 @@ import android.text.method.DialerKeyListener;
 import android.text.method.KeyListener;
 import android.text.method.TextKeyListener;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.View;
-import android.graphics.Rect;
 
 /**
  * This widget is a layout that contains several specifically-named child views that
@@ -169,7 +169,7 @@ public class DialerFilter extends RelativeLayout
                         // Only check to see if the digit is valid if the key is a printing key
                         // in the TextKeyListener. This prevents us from hiding the digits
                         // line when keys like UP and DOWN are hit.
-                        // XXX note that KEYCODE_TAB is special-cased here for 
+                        // XXX note that KEYCODE_TAB is special-cased here for
                         // devices that share tab and 0 on a single key.
                         boolean isPrint = event.isPrintingKey();
                         if (isPrint || keyCode == KeyEvent.KEYCODE_SPACE

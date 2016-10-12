@@ -33,13 +33,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker.AbstractDatePickerDelegate;
 import android.widget.NumberPicker.OnValueChangeListener;
 
+import libcore.icu.ICU;
+
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Locale;
-
-import libcore.icu.ICU;
 
 /**
  * A delegate implementing the basic DatePicker

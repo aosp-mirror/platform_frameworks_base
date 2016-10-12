@@ -16,6 +16,9 @@
 
 package android.widget;
 
+import static android.view.ViewDebug.ExportedProperty;
+import static android.widget.RemoteViews.RemoteView;
+
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
@@ -37,13 +40,10 @@ import android.view.ViewHierarchyEncoder;
 
 import com.android.internal.R;
 
-import java.util.Calendar;
-import java.util.TimeZone;
-
 import libcore.icu.LocaleData;
 
-import static android.view.ViewDebug.ExportedProperty;
-import static android.widget.RemoteViews.*;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * <p><code>TextClock</code> can display the current date and/or time as

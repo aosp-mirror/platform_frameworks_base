@@ -17,7 +17,6 @@
 package android.widget;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.Spannable;

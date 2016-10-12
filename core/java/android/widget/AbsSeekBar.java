@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -35,6 +33,8 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityNodeInfo;
+
+import com.android.internal.R;
 
 
 /**

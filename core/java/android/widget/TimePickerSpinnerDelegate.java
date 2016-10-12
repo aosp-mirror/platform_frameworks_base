@@ -16,6 +16,9 @@
 
 package android.widget;
 
+import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO;
+import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
+
 import android.annotation.TestApi;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -29,14 +32,12 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import com.android.internal.R;
 
-import java.util.Calendar;
+import com.android.internal.R;
 
 import libcore.icu.LocaleData;
 
-import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO;
-import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
+import java.util.Calendar;
 
 /**
  * A delegate implementing the basic spinner-based TimePicker.

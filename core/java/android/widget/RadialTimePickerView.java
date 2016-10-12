@@ -16,10 +16,6 @@
 
 package android.widget;
 
-import android.view.PointerIcon;
-import com.android.internal.R;
-import com.android.internal.widget.ExploreByTouchHelper;
-
 import android.animation.ObjectAnimator;
 import android.annotation.IntDef;
 import android.content.Context;
@@ -43,10 +39,14 @@ import android.util.StateSet;
 import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
+
+import com.android.internal.R;
+import com.android.internal.widget.ExploreByTouchHelper;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

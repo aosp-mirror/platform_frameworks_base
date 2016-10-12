@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.annotation.AttrRes;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
@@ -35,6 +33,8 @@ import android.icu.util.Calendar;
 import android.icu.util.TimeZone;
 import android.util.AttributeSet;
 import android.util.Log;
+
+import com.android.internal.R;
 
 import java.text.DateFormat;
 import java.text.ParseException;

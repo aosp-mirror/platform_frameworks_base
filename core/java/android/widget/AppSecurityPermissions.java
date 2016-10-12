@@ -16,10 +16,6 @@
 */
 package android.widget;
 
-import android.annotation.SystemApi;
-import android.os.UserHandle;
-import com.android.internal.R;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -31,6 +27,7 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
+import android.os.UserHandle;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -38,6 +35,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.android.internal.R;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -57,7 +56,7 @@ import java.util.Set;
  * extended information consisting of all groups and permissions.
  * To use this view define a LinearLayout or any ViewGroup and add this
  * view by instantiating AppSecurityPermissions and invoking getPermissionsView.
- * 
+ *
  * {@hide}
  */
 public class AppSecurityPermissions {
@@ -324,7 +323,7 @@ public class AppSecurityPermissions {
         return getPermissionItemViewOld(context, inflater, grpName,
                 description, dangerous, icon);
     }
-    
+
     private void getAllUsedPermissions(int sharedUid, Set<MyPermissionInfo> permSet) {
         String sharedPkgList[] = mPm.getPackagesForUid(sharedUid);
         if(sharedPkgList == null || (sharedPkgList.length == 0)) {
@@ -334,7 +333,7 @@ public class AppSecurityPermissions {
             getPermissionsForPackage(sharedPkg, permSet);
         }
     }
-    
+
     private void getPermissionsForPackage(String packageName, Set<MyPermissionInfo> permSet) {
         try {
             PackageInfo pkgInfo = mPm.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
@@ -417,7 +416,7 @@ public class AppSecurityPermissions {
             }
         }
     }
-    
+
     public int getPermissionCount() {
         return getPermissionCount(WHICH_ALL);
     }
@@ -570,7 +569,7 @@ public class AppSecurityPermissions {
         }
         return false;
     }
-    
+
     private static class PermissionGroupInfoComparator implements Comparator<MyPermissionGroupInfo> {
         private final Collator sCollator = Collator.getInstance();
         @Override
@@ -578,7 +577,7 @@ public class AppSecurityPermissions {
             return sCollator.compare(a.mLabel, b.mLabel);
         }
     }
-    
+
     private static class PermissionInfoComparator implements Comparator<MyPermissionInfo> {
         private final Collator sCollator = Collator.getInstance();
         PermissionInfoComparator() {

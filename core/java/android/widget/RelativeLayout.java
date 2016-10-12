@@ -16,20 +16,14 @@
 
 package android.widget;
 
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+
 import android.annotation.NonNull;
-import android.util.ArrayMap;
-import com.android.internal.R;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.os.Build;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
@@ -41,7 +35,13 @@ import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.RemoteViews.RemoteView;
 
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+import com.android.internal.R;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A Layout where the positions of the children can be described in relation to each other or to the
@@ -209,7 +209,7 @@ public class RelativeLayout extends ViewGroup {
     private int mIgnoreGravity;
 
     private SortedSet<View> mTopToBottomLeftToRightSet = null;
-    
+
     private boolean mDirtyHierarchy;
     private View[] mSortedHorizontalChildren;
     private View[] mSortedVerticalChildren;

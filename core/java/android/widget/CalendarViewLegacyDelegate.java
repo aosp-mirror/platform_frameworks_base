@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.app.Service;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -38,9 +36,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.Locale;
+import com.android.internal.R;
 
 import libcore.icu.LocaleData;
+
+import java.util.Locale;
 
 /**
  * A delegate implementing the legacy CalendarView

@@ -19,14 +19,11 @@ package android.widget;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.PorterDuff;
-import android.view.ViewHierarchyEncoder;
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -34,8 +31,11 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.SoundEffectConstants;
 import android.view.ViewDebug;
+import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+
+import com.android.internal.R;
 
 /**
  * <p>
@@ -159,7 +159,7 @@ public abstract class CompoundButton extends Button implements Checkable {
                 mOnCheckedChangeWidgetListener.onCheckedChanged(this, mChecked);
             }
 
-            mBroadcasting = false;            
+            mBroadcasting = false;
         }
     }
 
@@ -492,7 +492,7 @@ public abstract class CompoundButton extends Button implements Checkable {
         SavedState(Parcelable superState) {
             super(superState);
         }
-        
+
         /**
          * Constructor called from {@link #CREATOR}
          */

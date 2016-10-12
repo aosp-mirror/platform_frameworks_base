@@ -17,14 +17,13 @@
 package android.widget;
 
 import android.annotation.ColorInt;
+import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-
-import android.content.Context;
-import android.graphics.Canvas;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -103,7 +102,7 @@ public class EdgeEffect {
     private int mState = STATE_IDLE;
 
     private float mPullDistance;
-    
+
     private final Rect mBounds = new Rect();
     private final Paint mPaint = new Paint();
     private float mRadius;

@@ -16,10 +16,6 @@
 
 package android.widget;
 
-import android.view.MotionEvent;
-import android.view.PointerIcon;
-import com.android.internal.R;
-
 import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -29,10 +25,14 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
+
+import com.android.internal.R;
 
 /**
  *
