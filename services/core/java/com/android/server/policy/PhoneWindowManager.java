@@ -5484,6 +5484,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mStatusBar.getAttrs().privateFlags &= ~PRIVATE_FLAG_KEYGUARD;
             mStatusBar.getAttrs().flags &= ~FLAG_SHOW_WALLPAPER;
             return true;
+        } else if (wasOccluded != isOccluded) {
+            mKeyguardOccluded = isOccluded;
+            mKeyguardDelegate.setOccluded(isOccluded, false /* animate */);
+            return false;
         } else {
             return false;
         }
