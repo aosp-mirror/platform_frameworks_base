@@ -289,6 +289,8 @@ redirects:
   to: /design/patterns/app-structure.html
 - from: /guide/practices/ui_guidelines/menu_design.html
   to: /design/patterns/actionbar.html
+- from: /design/patterns/accessibility.html
+  to: https://material.google.com/usability/accessibility.html
 - from: /design/get-started/ui-overview.html
   to: /design/handhelds/index.html
 - from: /design/building-blocks/buttons.html
