@@ -16,8 +16,6 @@
 
 package android.text.style;
 
-import com.android.internal.util.Preconditions;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Paint;
@@ -26,6 +24,8 @@ import android.os.Parcel;
 import android.text.ParcelableSpan;
 import android.text.TextPaint;
 import android.text.TextUtils;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.Locale;
 

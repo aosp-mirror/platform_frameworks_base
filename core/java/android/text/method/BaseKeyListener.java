@@ -19,19 +19,22 @@ package android.text.method;
 import android.graphics.Paint;
 import android.icu.lang.UCharacter;
 import android.icu.lang.UProperty;
-import android.view.KeyEvent;
-import android.view.View;
-import android.text.*;
+import android.text.Editable;
+import android.text.Emoji;
+import android.text.InputType;
+import android.text.Layout;
+import android.text.NoCopySpan;
+import android.text.Selection;
+import android.text.Spanned;
 import android.text.method.TextKeyListener.Capitalize;
 import android.text.style.ReplacementSpan;
+import android.view.KeyEvent;
+import android.view.View;
 import android.widget.TextView;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.text.BreakIterator;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 
 /**
  * Abstract base class for key listeners.

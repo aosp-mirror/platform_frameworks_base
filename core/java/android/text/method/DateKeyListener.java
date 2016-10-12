@@ -16,8 +16,8 @@
 
 package android.text.method;
 
-import android.view.KeyEvent;
 import android.text.InputType;
+import android.view.KeyEvent;
 
 /**
  * For entering dates in a text field.
@@ -32,7 +32,7 @@ public class DateKeyListener extends NumberKeyListener
         return InputType.TYPE_CLASS_DATETIME
                 | InputType.TYPE_DATETIME_VARIATION_DATE;
     }
-    
+
     @Override
     protected char[] getAcceptedChars()
     {

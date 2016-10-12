@@ -18,8 +18,8 @@ package android.text.method;
 
 import android.annotation.NonNull;
 import android.icu.text.BreakIterator;
-import android.text.Selection;
 import android.text.CharSequenceCharacterIterator;
+import android.text.Selection;
 
 import java.util.Locale;
 

@@ -17,8 +17,8 @@
 package android.text.method;
 
 import android.text.InputType;
-import android.text.Spanned;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.view.KeyEvent;
 
 
@@ -133,7 +133,7 @@ public class DigitsKeyListener extends NumberKeyListener
         }
         return contentType;
     }
-    
+
     @Override
     public CharSequence filter(CharSequence source, int start, int end,
                                Spanned dest, int dstart, int dend) {

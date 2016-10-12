@@ -60,8 +60,6 @@ import android.view.View;
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 
-import libcore.icu.ICU;
-
 import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.List;

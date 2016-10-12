@@ -23,15 +23,15 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 
+import libcore.icu.ICU;
+import libcore.icu.LocaleData;
+
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.text.SimpleDateFormat;
-
-import libcore.icu.ICU;
-import libcore.icu.LocaleData;
 
 /**
  * Utility class for producing strings with formatted date/time.

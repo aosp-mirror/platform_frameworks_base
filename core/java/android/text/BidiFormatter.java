@@ -16,10 +16,10 @@
 
 package android.text;
 
+import static android.text.TextDirectionHeuristics.FIRSTSTRONG_LTR;
+
 import android.annotation.Nullable;
 import android.view.View;
-
-import static android.text.TextDirectionHeuristics.FIRSTSTRONG_LTR;
 
 import java.util.Locale;
 

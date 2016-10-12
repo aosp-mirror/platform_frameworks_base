@@ -20,11 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
+import android.net.NetworkUtils;
 import android.text.BidiFormatter;
 import android.text.TextUtils;
 import android.view.View;
-import android.net.NetworkUtils;
-import android.net.TrafficStats;
 
 import java.util.Locale;
 
