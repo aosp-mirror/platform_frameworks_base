@@ -1188,6 +1188,13 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
     return JNI_TRUE;
 }
 
+static jlong Bitmap_refPixelRef(JNIEnv* env, jobject, jlong bitmapHandle) {
+    LocalScopedBitmap bitmap(bitmapHandle);
+    SkPixelRef* pixelRef = bitmap->pixelRef();
+    SkSafeRef(pixelRef);
+    return reinterpret_cast<jlong>(pixelRef);
+}
+
 static void Bitmap_prepareToDraw(JNIEnv* env, jobject, jlong bitmapPtr) {
     LocalScopedBitmap bitmapHandle(bitmapPtr);
     if (!bitmapHandle.valid()) return;
@@ -1257,6 +1264,7 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeCopyPixelsFromBuffer", "(JLjava/nio/Buffer;)V",
                                             (void*)Bitmap_copyPixelsFromBuffer },
     {   "nativeSameAs",             "(JJ)Z", (void*)Bitmap_sameAs },
+    {   "nativeRefPixelRef",        "(J)J", (void*)Bitmap_refPixelRef },
     {   "nativePrepareToDraw",      "(J)V", (void*)Bitmap_prepareToDraw },
     {   "nativeGetAllocationByteCount", "(J)I", (void*)Bitmap_getAllocationByteCount },
 };
