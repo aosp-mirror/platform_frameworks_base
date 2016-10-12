@@ -18,6 +18,7 @@ package android.net;
 
 import android.os.Parcelable;
 import android.net.ConnectivityMetricsEvent;
+import android.net.INetdEventCallback;
 
 /** {@hide} */
 interface IIpConnectivityMetrics {
@@ -27,4 +28,13 @@ interface IIpConnectivityMetrics {
      * or -1 if the event was dropped due to rate limiting.
      */
     int logEvent(in ConnectivityMetricsEvent event);
+
+    /**
+     * At most one callback can be registered (by DevicePolicyManager).
+     * @return status {@code true} if registering/unregistering of the callback was successful,
+     *         {@code false} otherwise (might happen if IIpConnectivityMetrics is not available,
+     *         if it happens make sure you call it when the service is up in the caller)
+     */
+    boolean registerNetdEventCallback(in INetdEventCallback callback);
+    boolean unregisterNetdEventCallback();
 }
