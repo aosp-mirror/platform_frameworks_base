@@ -154,11 +154,13 @@ private:
     size_t bytesPerPixel() const;
     size_t sourceBytesPerPixel() const;
 
-    typedef void (GradientCache::*ChannelMixer)(FloatColor& start, FloatColor& end,
+    typedef void (GradientCache::*ChannelMixer)(const FloatColor& start, const FloatColor& end,
             float amount, uint8_t*& dst) const;
 
-    void mixBytes(FloatColor& start, FloatColor& end, float amount, uint8_t*& dst) const;
-    void mixFloats(FloatColor& start, FloatColor& end, float amount, uint8_t*& dst) const;
+    void mixBytes(const FloatColor& start, const FloatColor& end,
+            float amount, uint8_t*& dst) const;
+    void mixFloats(const FloatColor& start, const FloatColor& end,
+            float amount, uint8_t*& dst) const;
 
     LruCache<GradientCacheEntry, Texture*> mCache;
 

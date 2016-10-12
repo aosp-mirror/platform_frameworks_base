@@ -173,8 +173,8 @@ bool tryStoreGradient(Caches& caches, const SkShader& shader, const Matrix4 mode
         outData->gradientSampler = 0;
         outData->gradientTexture = nullptr;
 
-        outData->startColor.set(gradInfo.fColors[0]);
-        outData->endColor.set(gradInfo.fColors[1]);
+        outData->startColor.setSRGB(gradInfo.fColors[0]);
+        outData->endColor.setSRGB(gradInfo.fColors[1]);
     }
 
     return true;
