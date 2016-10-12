@@ -65,4 +65,8 @@ LOCAL_SHARED_LIBRARIES += \
     libEGL \
     libGLESv2 \
     libnetutils \
+    libhidl \
+    libhwbinder \
+    libutils \
+    android.hardware.power@1.0 \
 

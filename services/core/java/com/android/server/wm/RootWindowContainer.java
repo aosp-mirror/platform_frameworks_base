@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.app.AppOpsManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.power.V1_0.PowerHint;
 import android.os.Binder;
 import android.os.Debug;
 import android.os.ParcelFileDescriptor;
@@ -890,7 +891,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         if (mSustainedPerformanceModeCurrent != mSustainedPerformanceModeEnabled) {
             mSustainedPerformanceModeEnabled = mSustainedPerformanceModeCurrent;
             mService.mPowerManagerInternal.powerHint(
-                    mService.mPowerManagerInternal.POWER_HINT_SUSTAINED_PERFORMANCE_MODE,
+                    PowerHint.SUSTAINED_PERFORMANCE,
                     (mSustainedPerformanceModeEnabled ? 1 : 0));
         }
 

@@ -31,6 +31,7 @@ import android.hardware.SensorManager;
 import android.hardware.SystemSensorManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
+import android.hardware.power.V1_0.PowerHint;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
@@ -84,7 +85,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static android.os.PowerManagerInternal.POWER_HINT_INTERACTION;
 import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
 import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
@@ -162,10 +162,6 @@ public final class PowerManagerService extends SystemService
 
     // How long a partial wake lock must be held until we consider it a long wake lock.
     static final long MIN_LONG_WAKE_CHECK_INTERVAL = 60*1000;
-
-    // Power hints defined in hardware/libhardware/include/hardware/power.h.
-    private static final int POWER_HINT_LOW_POWER = 5;
-    private static final int POWER_HINT_VR_MODE = 7;
 
     // Power features defined in hardware/libhardware/include/hardware/power.h.
     private static final int POWER_FEATURE_DOUBLE_TAP_TO_WAKE = 1;
@@ -826,7 +822,7 @@ public final class PowerManagerService extends SystemService
 
         if (mLowPowerModeEnabled != lowPowerModeEnabled) {
             mLowPowerModeEnabled = lowPowerModeEnabled;
-            powerHintInternal(POWER_HINT_LOW_POWER, lowPowerModeEnabled ? 1 : 0);
+            powerHintInternal(PowerHint.LOW_POWER, lowPowerModeEnabled ? 1 : 0);
             postAfterBootCompleted(new Runnable() {
                 @Override
                 public void run() {
@@ -1152,7 +1148,7 @@ public final class PowerManagerService extends SystemService
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "userActivity");
         try {
             if (eventTime > mLastInteractivePowerHintTime) {
-                powerHintInternal(POWER_HINT_INTERACTION, 0);
+                powerHintInternal(PowerHint.INTERACTION, 0);
                 mLastInteractivePowerHintTime = eventTime;
             }
 
@@ -3083,7 +3079,7 @@ public final class PowerManagerService extends SystemService
     private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
         @Override
         public void onVrStateChanged(boolean enabled) {
-            powerHintInternal(POWER_HINT_VR_MODE, enabled ? 1 : 0);
+            powerHintInternal(PowerHint.VR_MODE, enabled ? 1 : 0);
         }
     };
 

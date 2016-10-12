@@ -98,6 +98,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.power.V1_0.PowerHint;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -1003,7 +1004,7 @@ class ActivityStarter {
                 curTop.task != null && mStartActivity != null &&
                 curTop.task != mStartActivity.task )) &&
                 mService.mLocalPowerManager != null) {
-            mService.mLocalPowerManager.powerHint(PowerManagerInternal.POWER_HINT_LAUNCH, 1);
+            mService.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 1);
             mPowerHintSent = true;
         }
     }
@@ -1011,7 +1012,7 @@ class ActivityStarter {
     void sendPowerHintForLaunchEndIfNeeded() {
         // Trigger launch power hint if activity is launched
         if (mPowerHintSent && mService.mLocalPowerManager != null) {
-            mService.mLocalPowerManager.powerHint(PowerManagerInternal.POWER_HINT_LAUNCH, 0);
+            mService.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 0);
             mPowerHintSent = false;
         }
     }
