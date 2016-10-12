@@ -18,8 +18,9 @@ package android.perftests.utils;
 
 import android.support.test.InstrumentationRegistry;
 
-import org.junit.rules.TestWatcher;
+import org.junit.rules.TestRule;
 import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -47,7 +48,7 @@ import static junit.framework.Assert.assertTrue;
  * name when using parameterization.
  */
 
-public class PerfStatusReporter extends TestWatcher {
+public class PerfStatusReporter implements TestRule {
     private final BenchmarkState mState = new BenchmarkState();
 
     public BenchmarkState getBenchmarkState() {
@@ -55,33 +56,39 @@ public class PerfStatusReporter extends TestWatcher {
     }
 
     @Override
-    protected void succeeded(Description description) {
-        String invokeMethodName = description.getMethodName();
-        // validate and simplify the function name.
-        // First, remove the "test" prefix which normally comes from CTS test.
-        // Then make sure the [subTestName] is valid, not just numbers like [0].
-        if (invokeMethodName.startsWith("test")) {
-            assertTrue("The test name " + invokeMethodName + " is too short",
-                    invokeMethodName.length() > 5);
-            invokeMethodName = invokeMethodName.substring(4, 5).toLowerCase()
-                    + invokeMethodName.substring(5);
-        }
-
-        int index = invokeMethodName.lastIndexOf('[');
-        if (index > 0) {
-            boolean allDigits = true;
-            for (int i = index + 1; i < invokeMethodName.length() - 1; i++) {
-                if (!Character.isDigit(invokeMethodName.charAt(i))) {
-                    allDigits = false;
-                    break;
+    public Statement apply(Statement base, Description description) {
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                String invokeMethodName = description.getMethodName();
+                // validate and simplify the function name.
+                // First, remove the "test" prefix which normally comes from CTS test.
+                // Then make sure the [subTestName] is valid, not just numbers like [0].
+                if (invokeMethodName.startsWith("test")) {
+                    assertTrue("The test name " + invokeMethodName + " is too short",
+                            invokeMethodName.length() > 5);
+                    invokeMethodName = invokeMethodName.substring(4, 5).toLowerCase()
+                            + invokeMethodName.substring(5);
                 }
+
+                int index = invokeMethodName.lastIndexOf('[');
+                if (index > 0) {
+                    boolean allDigits = true;
+                    for (int i = index + 1; i < invokeMethodName.length() - 1; i++) {
+                        if (!Character.isDigit(invokeMethodName.charAt(i))) {
+                            allDigits = false;
+                            break;
+                        }
+                    }
+                    assertFalse("The name in [] can't contain only digits for " + invokeMethodName,
+                            allDigits);
+                }
+
+                base.evaluate();
+
+                mState.sendFullStatusReport(InstrumentationRegistry.getInstrumentation(),
+                        invokeMethodName);
             }
-            assertFalse("The name in [] can't contain only digits for " + invokeMethodName,
-                    allDigits);
-        }
-
-        mState.sendFullStatusReport(InstrumentationRegistry.getInstrumentation(),
-                invokeMethodName);
+        };
     }
-
 }
