@@ -87,6 +87,11 @@ public class NotificationTestList extends TestActivity
     }
 
     private Test[] mTests = new Test[] {
+            new Test("cancel all") {
+                public void run() {
+                    mNM.cancelAll();
+                }
+            },
             new Test("Phone call") {
                 public void run()
                 {
