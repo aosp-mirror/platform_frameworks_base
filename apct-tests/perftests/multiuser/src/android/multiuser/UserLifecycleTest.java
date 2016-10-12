@@ -57,8 +57,6 @@ import java.util.concurrent.TimeUnit;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class UserLifecycleTest {
-    private final int MIN_REPEAT_TIMES = 4;
-
     private final int TIMEOUT_REMOVE_USER_MS = 4 * 1000; // 4 sec
     private final int CHECK_USER_REMOVED_INTERVAL_MS = 200; // 0.2 sec
 
@@ -90,7 +88,6 @@ public class UserLifecycleTest {
         mAm = context.getSystemService(ActivityManager.class);
         mIam = ActivityManagerNative.getDefault();
         mState = mPerfStatusReporter.getBenchmarkState();
-        mState.setMinRepeatTimes(MIN_REPEAT_TIMES);
         mUsersToRemove = new ArrayList<>();
     }
 
