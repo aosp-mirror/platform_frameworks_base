@@ -21,6 +21,18 @@
 
 namespace android {
 
+// Offsets into the outValues array populated by the methods below. outValues is a uint32_t
+// array, but each logical element takes up 6 uint32_t-sized physical elements.
+enum {
+  STYLE_NUM_ENTRIES = 6,
+  STYLE_TYPE = 0,
+  STYLE_DATA = 1,
+  STYLE_ASSET_COOKIE = 2,
+  STYLE_RESOURCE_ID = 3,
+  STYLE_CHANGING_CONFIGURATIONS = 4,
+  STYLE_DENSITY = 5
+};
+
 // These are all variations of the same method. They each perform the exact same operation,
 // but on various data sources. I *think* they are re-written to avoid an extra branch
 // in the inner loop, but after one branch miss (some pointer != null), the branch predictor should
@@ -28,26 +40,17 @@ namespace android {
 // TODO(adamlesinski): Run performance tests against these methods and a new, single method
 // that uses all the sources and branches to the right ones within the inner loop.
 
-bool resolveAttrs(ResTable::Theme* theme,
-                  uint32_t defStyleAttr,
-                  uint32_t defStyleRes,
-                  uint32_t* srcValues, size_t srcValuesLength,
-                  uint32_t* attrs, size_t attrsLength,
-                  uint32_t* outValues,
-                  uint32_t* outIndices);
+bool ResolveAttrs(ResTable::Theme* theme, uint32_t def_style_attr, uint32_t def_style_res,
+                  uint32_t* src_values, size_t src_values_length, uint32_t* attrs,
+                  size_t attrs_length, uint32_t* out_values, uint32_t* out_indices);
 
-bool applyStyle(ResTable::Theme* theme, ResXMLParser* xmlParser,
-                uint32_t defStyleAttr,
-                uint32_t defStyleRes,
-                uint32_t* attrs, size_t attrsLength,
-                uint32_t* outValues,
-                uint32_t* outIndices);
+bool ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
+                uint32_t def_style_res, uint32_t* attrs, size_t attrs_length, uint32_t* out_values,
+                uint32_t* out_indices);
 
-bool retrieveAttributes(const ResTable* res, ResXMLParser* xmlParser,
-                        uint32_t* attrs, size_t attrsLength,
-                        uint32_t* outValues,
-                        uint32_t* outIndices);
+bool RetrieveAttributes(const ResTable* res, ResXMLParser* xml_parser, uint32_t* attrs,
+                        size_t attrs_length, uint32_t* out_values, uint32_t* out_indices);
 
-} // namespace android
+}  // namespace android
 
 #endif /* ANDROIDFW_ATTRIBUTERESOLUTION_H */
