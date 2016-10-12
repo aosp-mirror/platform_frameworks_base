@@ -102,7 +102,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
     @Override
     public void onServiceAdded(ComponentName component) {
         if (DEBUG) Log.d(TAG, "onServiceAdded " + component);
-        mHelper.setConfigAsync(mHelper.getConfig(), "zmc.onServiceAdded");
+        mHelper.setConfig(mHelper.getConfig(), "zmc.onServiceAdded");
     }
 
     @Override
@@ -116,7 +116,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
             updated |= updateSnoozing(automaticRule);
         }
         if (updated) {
-            mHelper.setConfigAsync(config, "conditionChanged");
+            mHelper.setConfig(config, "conditionChanged");
         }
     }
 
