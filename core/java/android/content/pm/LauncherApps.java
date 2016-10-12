@@ -447,12 +447,12 @@ public class LauncherApps {
     /**
      * Retrieve all of the information we know about a particular package / application.
      *
-     * @param packageName The package of the application
+     * @param packageName The package name of the application
      * @param flags Additional option flags {@link PackageManager#getApplicationInfo}
      * @param user The UserHandle of the profile.
      *
      * @return An {@link ApplicationInfo} containing information about the package or
-     *         null of the package isn't found.
+     *         null if the package isn't installed for the given user.
      * @hide
      */
     public ApplicationInfo getApplicationInfo(String packageName, @ApplicationInfoFlags int flags,

@@ -478,20 +478,25 @@ public class PackageParser {
     /**
      * Returns true if the package is installed and not hidden, or if the caller
      * explicitly wanted all uninstalled and hidden packages as well.
+     * @param appInfo The applicationInfo of the app being checked.
      */
-    private static boolean checkUseInstalledOrHidden(int flags, PackageUserState state) {
-        return (state.installed && !state.hidden)
-                || (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
+    private static boolean checkUseInstalledOrHidden(int flags, PackageUserState state,
+            ApplicationInfo appInfo) {
+        // If available for the target user, or trying to match uninstalled packages and it's
+        // a system app.
+        return state.isAvailable(flags)
+                || (appInfo != null && appInfo.isSystemApp()
+                        && (flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0);
     }
 
     public static boolean isAvailable(PackageUserState state) {
-        return checkUseInstalledOrHidden(0, state);
+        return checkUseInstalledOrHidden(0, state, null);
     }
 
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
             Set<String> grantedPermissions, PackageUserState state, int userId) {
-        if (!checkUseInstalledOrHidden(flags, state) || !p.isMatch(flags)) {
+        if (!checkUseInstalledOrHidden(flags, state, p.applicationInfo) || !p.isMatch(flags)) {
             return null;
         }
         PackageInfo pi = new PackageInfo();
@@ -5445,7 +5450,7 @@ public class PackageParser {
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
             PackageUserState state, int userId) {
         if (p == null) return null;
-        if (!checkUseInstalledOrHidden(flags, state) || !p.isMatch(flags)) {
+        if (!checkUseInstalledOrHidden(flags, state, p.applicationInfo) || !p.isMatch(flags)) {
             return null;
         }
         if (!copyNeeded(flags, p, state, null, userId)
@@ -5483,7 +5488,7 @@ public class PackageParser {
     public static ApplicationInfo generateApplicationInfo(ApplicationInfo ai, int flags,
             PackageUserState state, int userId) {
         if (ai == null) return null;
-        if (!checkUseInstalledOrHidden(flags, state)) {
+        if (!checkUseInstalledOrHidden(flags, state, ai)) {
             return null;
         }
         // This is only used to return the ResolverActivity; we will just always
@@ -5549,7 +5554,7 @@ public class PackageParser {
     public static final ActivityInfo generateActivityInfo(Activity a, int flags,
             PackageUserState state, int userId) {
         if (a == null) return null;
-        if (!checkUseInstalledOrHidden(flags, state)) {
+        if (!checkUseInstalledOrHidden(flags, state, a.owner.applicationInfo)) {
             return null;
         }
         if (!copyNeeded(flags, a.owner, state, a.metaData, userId)) {
@@ -5565,7 +5570,7 @@ public class PackageParser {
     public static final ActivityInfo generateActivityInfo(ActivityInfo ai, int flags,
             PackageUserState state, int userId) {
         if (ai == null) return null;
-        if (!checkUseInstalledOrHidden(flags, state)) {
+        if (!checkUseInstalledOrHidden(flags, state, ai.applicationInfo)) {
             return null;
         }
         // This is only used to return the ResolverActivity; we will just always
@@ -5603,7 +5608,7 @@ public class PackageParser {
     public static final ServiceInfo generateServiceInfo(Service s, int flags,
             PackageUserState state, int userId) {
         if (s == null) return null;
-        if (!checkUseInstalledOrHidden(flags, state)) {
+        if (!checkUseInstalledOrHidden(flags, state, s.owner.applicationInfo)) {
             return null;
         }
         if (!copyNeeded(flags, s.owner, state, s.metaData, userId)) {
@@ -5652,7 +5657,7 @@ public class PackageParser {
     public static final ProviderInfo generateProviderInfo(Provider p, int flags,
             PackageUserState state, int userId) {
         if (p == null) return null;
-        if (!checkUseInstalledOrHidden(flags, state)) {
+        if (!checkUseInstalledOrHidden(flags, state, p.owner.applicationInfo)) {
             return null;
         }
         if (!copyNeeded(flags, p.owner, state, p.metaData, userId)

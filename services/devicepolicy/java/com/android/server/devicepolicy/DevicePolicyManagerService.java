@@ -20,7 +20,7 @@ import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
-import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
+import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
@@ -7032,7 +7032,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 boolean systemService = false;
                 try {
                     ApplicationInfo applicationInfo = mIPackageManager.getApplicationInfo(
-                            enabledPackage, PackageManager.GET_UNINSTALLED_PACKAGES, userIdToCheck);
+                            enabledPackage, PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                            userIdToCheck);
                     systemService = (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
                 } catch (RemoteException e) {
                     Log.i(LOG_TAG, "Can't talk to package managed", e);
@@ -7787,7 +7788,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean isSystemApp(IPackageManager pm, String packageName, int userId)
             throws RemoteException {
-        ApplicationInfo appInfo = pm.getApplicationInfo(packageName, GET_UNINSTALLED_PACKAGES,
+        ApplicationInfo appInfo = pm.getApplicationInfo(packageName, MATCH_UNINSTALLED_PACKAGES,
                 userId);
         if (appInfo == null) {
             throw new IllegalArgumentException("The application " + packageName +

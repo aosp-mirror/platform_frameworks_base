@@ -1417,8 +1417,8 @@ final class TaskRecord extends ConfigurationContainer {
                 try {
                     ApplicationInfo ai = pm.getApplicationInfo(
                             checkIntent.getComponent().getPackageName(),
-                            PackageManager.GET_UNINSTALLED_PACKAGES
-                                    | PackageManager.GET_DISABLED_COMPONENTS, userId);
+                            PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                    | PackageManager.MATCH_DISABLED_COMPONENTS, userId);
                     if (ai != null) {
                         effectiveUid = ai.uid;
                     }

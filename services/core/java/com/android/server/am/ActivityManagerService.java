@@ -275,6 +275,7 @@ import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEME
 import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.GET_PROVIDERS;
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
@@ -14430,7 +14431,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (dumpPackage != null) {
             IPackageManager pm = AppGlobals.getPackageManager();
             try {
-                dumpUid = pm.getPackageUid(dumpPackage, MATCH_UNINSTALLED_PACKAGES, 0);
+                dumpUid = pm.getPackageUid(dumpPackage, MATCH_ANY_USER, 0);
             } catch (RemoteException e) {
             }
         }
@@ -15407,7 +15408,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (dumpPackage != null) {
                 try {
                     dumpUid = mContext.getPackageManager().getPackageUidAsUser(dumpPackage,
-                            MATCH_UNINSTALLED_PACKAGES, 0);
+                            MATCH_ANY_USER, 0);
                 } catch (NameNotFoundException e) {
                     dumpUid = -1;
                 }

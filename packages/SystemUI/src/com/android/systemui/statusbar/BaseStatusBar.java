@@ -1073,8 +1073,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         int appUid = -1;
         try {
             final ApplicationInfo info = pmUser.getApplicationInfo(pkg,
-                    PackageManager.GET_UNINSTALLED_PACKAGES
-                            | PackageManager.GET_DISABLED_COMPONENTS);
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES
+                            | PackageManager.MATCH_DISABLED_COMPONENTS);
             if (info != null) {
                 appname = String.valueOf(pmUser.getApplicationLabel(info));
                 pkgicon = pmUser.getApplicationIcon(info);
@@ -1643,8 +1643,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             String appname = pkg;
             try {
                 final ApplicationInfo info = pmUser.getApplicationInfo(pkg,
-                        PackageManager.GET_UNINSTALLED_PACKAGES
-                                | PackageManager.GET_DISABLED_COMPONENTS);
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                | PackageManager.MATCH_DISABLED_COMPONENTS);
                 if (info != null) {
                     appname = String.valueOf(pmUser.getApplicationLabel(info));
                 }

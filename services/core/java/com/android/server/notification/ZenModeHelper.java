@@ -595,7 +595,7 @@ public class ZenModeHelper {
                     if (RULE_INSTANCE_GRACE_PERIOD < (currentTime - rule.creationTime)) {
                         try {
                             mPm.getPackageInfo(rule.component.getPackageName(),
-                                    PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                                    PackageManager.MATCH_ANY_USER);
                         } catch (PackageManager.NameNotFoundException e) {
                             newConfig.automaticRules.removeAt(i);
                         }

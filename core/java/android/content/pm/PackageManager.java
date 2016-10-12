@@ -435,6 +435,20 @@ public abstract class PackageManager {
     public static final int MATCH_FACTORY_ONLY = 0x00200000;
 
     /**
+     * Allows querying of packages installed for any user, not just the specific one. This flag
+     * is only meant for use by apps that have INTERACT_ACROSS_USERS_FULL permission.
+     * @hide
+     */
+    public static final int MATCH_ANY_USER = 0x00400000;
+
+    /**
+     * Combination of MATCH_ANY_USER and MATCH_UNINSTALLED_PACKAGES to mean any known
+     * package.
+     * @hide
+     */
+    public static final int MATCH_KNOWN_PACKAGES = MATCH_UNINSTALLED_PACKAGES | MATCH_ANY_USER;
+
+    /**
      * Internal flag used to indicate that a system component has done their
      * homework and verified that they correctly handle packages and components
      * that come and go over time. In particular:

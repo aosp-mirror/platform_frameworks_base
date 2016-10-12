@@ -620,7 +620,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 try {
                     pkgInfo = pm.getPackageInfo(pkg,
                             PackageManager.GET_PERMISSIONS
-                            | PackageManager.GET_UNINSTALLED_PACKAGES);
+                            | PackageManager.MATCH_UNINSTALLED_PACKAGES);
                 } catch (NameNotFoundException e) {
                     pkgInfo = null;
                 }
@@ -712,7 +712,7 @@ public class PackageManagerTests extends AndroidTestCase {
             // Make sure the package doesn't exist
             try {
                 ApplicationInfo appInfo = pm.getApplicationInfo(pkg.packageName,
-                        PackageManager.GET_UNINSTALLED_PACKAGES);
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES);
                 GenericReceiver receiver = new DeleteReceiver(pkg.packageName);
                 invokeDeletePackage(pkg.packageName, 0, receiver);
             } catch (NameNotFoundException e) {
@@ -974,7 +974,7 @@ public class PackageManagerTests extends AndroidTestCase {
     public boolean invokeDeletePackage(final String pkgName, int flags, GenericReceiver receiver)
             throws Exception {
         ApplicationInfo info = getPm().getApplicationInfo(pkgName,
-                PackageManager.GET_UNINSTALLED_PACKAGES);
+                PackageManager.MATCH_UNINSTALLED_PACKAGES);
 
         mContext.registerReceiver(receiver, receiver.filter);
         try {
@@ -1019,7 +1019,7 @@ public class PackageManagerTests extends AndroidTestCase {
             Log.i(TAG, "okay4");
             try {
                 info = getPm().getApplicationInfo(ip.pkg.packageName,
-                        PackageManager.GET_UNINSTALLED_PACKAGES);
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES);
             } catch (NameNotFoundException e) {
                 info = null;
             }
@@ -1323,7 +1323,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
         ApplicationInfo info = null;
         try {
-            info = getPm().getApplicationInfo(packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
+            info = getPm().getApplicationInfo(packageName, PackageManager.MATCH_UNINSTALLED_PACKAGES);
         } catch (NameNotFoundException ignored) {
         }
 
@@ -1350,7 +1350,7 @@ public class PackageManagerTests extends AndroidTestCase {
         Log.i(TAG, "Deleting package : " + pkgName);
         try {
             ApplicationInfo info = getPm().getApplicationInfo(pkgName,
-                    PackageManager.GET_UNINSTALLED_PACKAGES);
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES);
 
             if (info != null) {
                 DeleteObserver observer = new DeleteObserver(pkgName);
@@ -3756,7 +3756,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public void testGetUnInstalledPackages() throws Exception {
         List<PackageInfo> packages = getPm().getInstalledPackages(
-                PackageManager.GET_UNINSTALLED_PACKAGES);
+                PackageManager.MATCH_UNINSTALLED_PACKAGES);
         assertNotNull("installed packages cannot be null", packages);
         assertTrue("installed packages cannot be empty", packages.size() > 0);
     }
@@ -3769,7 +3769,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 | PackageManager.GET_CONFIGURATIONS | PackageManager.GET_INSTRUMENTATION
                 | PackageManager.GET_PERMISSIONS | PackageManager.GET_PROVIDERS
                 | PackageManager.GET_RECEIVERS | PackageManager.GET_SERVICES
-                | PackageManager.GET_SIGNATURES | PackageManager.GET_UNINSTALLED_PACKAGES;
+                | PackageManager.GET_SIGNATURES | PackageManager.MATCH_UNINSTALLED_PACKAGES;
 
         final InstallParams ip =
                 installFromRawResource("install.apk", R.raw.install_complete_package_info,
@@ -3809,12 +3809,12 @@ public class PackageManagerTests extends AndroidTestCase {
      * flags when the GET_UNINSTALLED_PACKAGES flag is set.
      */
     public void testGetUnInstalledPackagesAll() throws Exception {
-        final int flags = PackageManager.GET_UNINSTALLED_PACKAGES
+        final int flags = PackageManager.MATCH_UNINSTALLED_PACKAGES
                 | PackageManager.GET_ACTIVITIES | PackageManager.GET_GIDS
                 | PackageManager.GET_CONFIGURATIONS | PackageManager.GET_INSTRUMENTATION
                 | PackageManager.GET_PERMISSIONS | PackageManager.GET_PROVIDERS
                 | PackageManager.GET_RECEIVERS | PackageManager.GET_SERVICES
-                | PackageManager.GET_SIGNATURES | PackageManager.GET_UNINSTALLED_PACKAGES;
+                | PackageManager.GET_SIGNATURES;
 
         // first, install the package
         final InstallParams ip =

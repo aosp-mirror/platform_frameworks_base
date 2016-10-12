@@ -1212,7 +1212,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // Build list of UIDs that we should clean up
         int[] uids = new int[0];
         final List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(
-                PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_DISABLED_COMPONENTS);
+                PackageManager.MATCH_ANY_USER
+                | PackageManager.MATCH_DISABLED_COMPONENTS);
         for (ApplicationInfo app : apps) {
             final int uid = UserHandle.getUid(userId, app.uid);
             uids = ArrayUtils.appendInt(uids, uid);

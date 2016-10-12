@@ -29,7 +29,6 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
 import android.util.ArraySet;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 /**
@@ -80,9 +79,14 @@ public class PackageUserState {
     /**
      * Test if this package is installed.
      */
-    public boolean isInstalled(int flags) {
-        return (this.installed && !this.hidden)
-                || (flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0;
+    public boolean isAvailable(int flags) {
+        // True if it is installed for this user and it is not hidden. If it is hidden,
+        // still return true if the caller requested MATCH_UNINSTALLED_PACKAGES
+        final boolean matchAnyUser = (flags & PackageManager.MATCH_ANY_USER) != 0;
+        final boolean matchUninstalled = (flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0;
+        return matchAnyUser
+                || (this.installed
+                        && (!this.hidden || matchUninstalled));
     }
 
     /**
@@ -95,11 +99,14 @@ public class PackageUserState {
      * </p>
      */
     public boolean isMatch(ComponentInfo componentInfo, int flags) {
-        if (!isInstalled(flags)) return false;
+        final boolean isSystemApp = componentInfo.applicationInfo.isSystemApp();
+        final boolean matchUninstalled = (flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0;
+        if (!isAvailable(flags)
+                && !(isSystemApp && matchUninstalled)) return false;
         if (!isEnabled(componentInfo, flags)) return false;
 
         if ((flags & MATCH_SYSTEM_ONLY) != 0) {
-            if (!componentInfo.applicationInfo.isSystemApp()) {
+            if (!isSystemApp) {
                 return false;
             }
         }
