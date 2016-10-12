@@ -545,7 +545,8 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     }
 
     SkBitmap bitmap;
-    bitmap.setInfo(SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType));
+    bitmap.setInfo(SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType,
+            GraphicsJNI::defaultColorSpace()));
 
     PixelRef* nativeBitmap = GraphicsJNI::allocateHeapPixelRef(&bitmap, NULL);
     if (!nativeBitmap) {
@@ -646,7 +647,8 @@ static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         // Otherwise respect the premultiplied request.
         alphaType = requestPremul ? kPremul_SkAlphaType : kUnpremul_SkAlphaType;
     }
-    bitmap->pixelRef()->reconfigure(SkImageInfo::Make(width, height, colorType, alphaType));
+    bitmap->pixelRef()->reconfigure(SkImageInfo::Make(width, height, colorType, alphaType,
+            sk_sp<SkColorSpace>(bitmap->info().colorSpace())));
 }
 
 // These must match the int values in Bitmap.java
@@ -779,6 +781,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     const bool        isMutable = p->readInt32() != 0;
     const SkColorType colorType = (SkColorType)p->readInt32();
     const SkAlphaType alphaType = (SkAlphaType)p->readInt32();
+    const bool        isSRGB = p->readInt32() != 0;
     const int         width = p->readInt32();
     const int         height = p->readInt32();
     const int         rowBytes = p->readInt32();
@@ -795,7 +798,8 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
     std::unique_ptr<SkBitmap> bitmap(new SkBitmap);
 
-    if (!bitmap->setInfo(SkImageInfo::Make(width, height, colorType, alphaType), rowBytes)) {
+    if (!bitmap->setInfo(SkImageInfo::Make(width, height, colorType, alphaType,
+            isSRGB ? SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named) : nullptr), rowBytes)) {
         return NULL;
     }
 
@@ -910,9 +914,13 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     auto androidBitmap = reinterpret_cast<Bitmap*>(bitmapHandle);
     androidBitmap->getSkBitmap(&bitmap);
 
+    sk_sp<SkColorSpace> sRGB = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
+    bool isSRGB = bitmap.colorSpace() == sRGB.get();
+
     p->writeInt32(isMutable);
     p->writeInt32(bitmap.colorType());
     p->writeInt32(bitmap.alphaType());
+    p->writeInt32(isSRGB); // TODO: We should write the color space (b/32072280)
     p->writeInt32(bitmap.width());
     p->writeInt32(bitmap.height());
     p->writeInt32(bitmap.rowBytes());
@@ -1125,7 +1133,9 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
     reinterpret_cast<Bitmap*>(bm1Handle)->getSkBitmap(&bm1);
     if (bm0.width() != bm1.width() ||
         bm0.height() != bm1.height() ||
-        bm0.colorType() != bm1.colorType()) {
+        bm0.colorType() != bm1.colorType() ||
+        bm0.alphaType() != bm1.alphaType() ||
+        bm0.colorSpace() != bm1.colorSpace()) {
         return JNI_FALSE;
     }
 
@@ -1176,13 +1186,6 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
         }
     }
     return JNI_TRUE;
-}
-
-static jlong Bitmap_refPixelRef(JNIEnv* env, jobject, jlong bitmapHandle) {
-    LocalScopedBitmap bitmap(bitmapHandle);
-    SkPixelRef* pixelRef = bitmap->pixelRef();
-    SkSafeRef(pixelRef);
-    return reinterpret_cast<jlong>(pixelRef);
 }
 
 static void Bitmap_prepareToDraw(JNIEnv* env, jobject, jlong bitmapPtr) {
@@ -1254,7 +1257,6 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeCopyPixelsFromBuffer", "(JLjava/nio/Buffer;)V",
                                             (void*)Bitmap_copyPixelsFromBuffer },
     {   "nativeSameAs",             "(JJ)Z", (void*)Bitmap_sameAs },
-    {   "nativeRefPixelRef",        "(J)J", (void*)Bitmap_refPixelRef },
     {   "nativePrepareToDraw",      "(J)V", (void*)Bitmap_prepareToDraw },
     {   "nativeGetAllocationByteCount", "(J)I", (void*)Bitmap_getAllocationByteCount },
 };

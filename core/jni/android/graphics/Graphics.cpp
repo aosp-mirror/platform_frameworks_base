@@ -587,6 +587,14 @@ android::PixelRef* GraphicsJNI::mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
     return wrapper;
 }
 
+sk_sp<SkColorSpace> GraphicsJNI::defaultColorSpace() {
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+    return SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
+#else
+    return nullptr;
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 bool HeapAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
     mStorage.reset(GraphicsJNI::allocateHeapPixelRef(bitmap, ctable));

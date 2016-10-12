@@ -175,7 +175,9 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
     }
     SkImageInfo screenshotInfo = SkImageInfo::Make(screenshot->getWidth(),
                                                    screenshot->getHeight(),
-                                                   colorType, alphaType);
+                                                   colorType,
+                                                   alphaType,
+                                                   GraphicsJNI::defaultColorSpace());
 
     const size_t rowBytes =
             screenshot->getStride() * android::bytesPerPixel(screenshot->getFormat());

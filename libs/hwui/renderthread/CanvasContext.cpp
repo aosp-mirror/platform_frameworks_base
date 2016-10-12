@@ -545,11 +545,6 @@ DeferredLayerUpdater* CanvasContext::createTextureLayer() {
     return mRenderPipeline->createTextureLayer();
 }
 
-void CanvasContext::setTextureAtlas(RenderThread& thread,
-        const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize) {
-    thread.eglManager().setTextureAtlas(buffer, map, mapSize);
-}
-
 void CanvasContext::dumpFrames(int fd) {
     FILE* file = fdopen(fd, "a");
     fprintf(file, "\n\n---PROFILEDATA---\n");

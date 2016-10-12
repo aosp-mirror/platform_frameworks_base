@@ -60,11 +60,17 @@ void TextDrawFunctor::draw(CacheTexture& texture, bool linearFiltering) {
     }
     int transformFlags = pureTranslate
             ? TransformFlags::MeshIgnoresCanvasTransform : TransformFlags::None;
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+    bool gammaCorrection = true;
+#else
+    bool gammaCorrection = false;
+#endif
     Glop glop;
     GlopBuilder(renderer->renderState(), renderer->caches(), &glop)
             .setRoundRectClipState(bakedState->roundRectClipState)
             .setMeshTexturedIndexedQuads(texture.mesh(), texture.meshElementCount())
             .setFillTexturePaint(texture.getTexture(), textureFillFlags, paint, bakedState->alpha)
+            .setGammaCorrection(gammaCorrection)
             .setTransform(bakedState->computedState.transform, transformFlags)
             .setModelViewIdentityEmptyBounds()
             .build();
@@ -287,24 +293,23 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     // Copy the glyph image, taking the mask format into account
     switch (format) {
         case SkMask::kA8_Format: {
-            uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
             uint32_t row = (startY - TEXTURE_BORDER_SIZE) * cacheWidth + startX
                     - TEXTURE_BORDER_SIZE;
             // write leading border line
             memset(&cacheBuffer[row], 0, glyph.fWidth + 2 * TEXTURE_BORDER_SIZE);
             // write glyph data
             if (mGammaTable) {
-                for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += srcStride) {
+                for (uint32_t cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += srcStride) {
                     row = cacheY * cacheWidth;
                     cacheBuffer[row + startX - TEXTURE_BORDER_SIZE] = 0;
-                    for (cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
+                    for (uint32_t cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
                         uint8_t tempCol = bitmapBuffer[bY + bX];
                         cacheBuffer[row + cacheX] = mGammaTable[tempCol];
                     }
                     cacheBuffer[row + endX + TEXTURE_BORDER_SIZE - 1] = 0;
                 }
             } else {
-                for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += srcStride) {
+                for (uint32_t cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += srcStride) {
                     row = cacheY * cacheWidth;
                     memcpy(&cacheBuffer[row + startX], &bitmapBuffer[bY], glyph.fWidth);
                     cacheBuffer[row + startX - TEXTURE_BORDER_SIZE] = 0;

@@ -46,7 +46,6 @@ hwui_src_files := \
     AnimationContext.cpp \
     Animator.cpp \
     AnimatorManager.cpp \
-    AssetAtlas.cpp \
     BakedOpDispatcher.cpp \
     BakedOpRenderer.cpp \
     BakedOpState.cpp \
@@ -57,7 +56,6 @@ hwui_src_files := \
     DeferredLayerUpdater.cpp \
     DeviceInfo.cpp \
     DisplayList.cpp \
-    Dither.cpp \
     Extensions.cpp \
     FboCache.cpp \
     FontRenderer.cpp \
@@ -131,6 +129,14 @@ ifeq ($(TARGET_USES_HWC2),true)
     hwui_cflags += -DUSE_HWC2
 endif
 
+# TODO: Linear blending should be enabled by default, but we are
+# TODO: making it an opt-in while it's a work in progress
+# TODO: The final test should be:
+# TODO: ifneq ($(TARGET_ENABLE_LINEAR_BLENDING),false)
+ifeq ($(TARGET_ENABLE_LINEAR_BLENDING),true)
+    hwui_cflags += -DANDROID_ENABLE_LINEAR_BLENDING
+endif
+
 # GCC false-positives on this warning, and since we -Werror that's
 # a problem
 hwui_cflags += -Wno-free-nonheap-object
@@ -143,7 +149,6 @@ ifeq (true, $(BUGREPORT_FONT_CACHE_USAGE))
         font/FontCacheHistoryTracker.cpp
     hwui_cflags += -DBUGREPORT_FONT_CACHE_USAGE
 endif
-
 
 ifndef HWUI_COMPILE_SYMBOLS
     hwui_cflags += -fvisibility=hidden

@@ -612,7 +612,6 @@ void FrameBuilder::deferBitmapOp(const BitmapOp& op) {
             && op.bitmap->colorType() != kAlpha_8_SkColorType
             && hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.bitmap->getGenerationID());
-        // TODO: AssetAtlas in mergeId
         currentLayer().deferMergeableOp(mAllocator, bakedState, OpBatchType::Bitmap, mergeId);
     } else {
         currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
@@ -687,7 +686,6 @@ void FrameBuilder::deferPatchOp(const PatchOp& op) {
             && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode
             && hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.bitmap->getGenerationID());
-        // TODO: AssetAtlas in mergeId
 
         // Only use the MergedPatch batchId when merged, so Bitmap+Patch don't try to merge together
         currentLayer().deferMergeableOp(mAllocator, bakedState, OpBatchType::MergedPatch, mergeId);

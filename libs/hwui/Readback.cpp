@@ -197,7 +197,7 @@ CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
 
     Texture sourceTexture(caches);
     sourceTexture.wrap(sourceTexId,
-            sourceBuffer->getWidth(), sourceBuffer->getHeight(), 0 /* total lie */);
+            sourceBuffer->getWidth(), sourceBuffer->getHeight(), 0, 0 /* total lie */);
 
     CopyResult copyResult = copyTextureInto(caches, renderThread.renderState(),
             sourceTexture, texTransform, srcRect, bitmap);

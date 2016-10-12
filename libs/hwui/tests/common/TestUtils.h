@@ -124,8 +124,9 @@ public:
     static SkBitmap createSkBitmap(int width, int height,
             SkColorType colorType = kN32_SkColorType) {
         SkBitmap bitmap;
+        sk_sp<SkColorSpace> colorSpace = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
         SkImageInfo info = SkImageInfo::Make(width, height,
-                colorType, kPremul_SkAlphaType);
+                colorType, kPremul_SkAlphaType, colorSpace);
         bitmap.setInfo(info);
         bitmap.allocPixels(info);
         return bitmap;

@@ -43,6 +43,8 @@ public:
     inline bool hasPixelBufferObjects() const { return mVersionMajor >= 3; }
     inline bool hasOcclusionQueries() const { return mVersionMajor >= 3; }
     inline bool hasFloatTextures() const { return mVersionMajor >= 3; }
+    inline bool hasSRGB() const { return mVersionMajor >= 3 || mHasSRGB; }
+    inline bool hasSRGBWriteControl() const { return hasSRGB() && mHasSRGBWriteControl; }
 
     inline int getMajorGlVersion() const { return mVersionMajor; }
     inline int getMinorGlVersion() const { return mVersionMinor; }
@@ -55,6 +57,8 @@ private:
     bool mHas1BitStencil;
     bool mHas4BitStencil;
     bool mHasUnpackSubImage;
+    bool mHasSRGB;
+    bool mHasSRGBWriteControl;
 
     int mVersionMajor;
     int mVersionMinor;

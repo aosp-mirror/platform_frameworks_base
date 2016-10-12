@@ -110,9 +110,10 @@ public:
     }
 
     bool capturePixels(SkBitmap* bmp) {
+        sk_sp<SkColorSpace> colorSpace = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
         SkImageInfo destinationConfig =
             SkImageInfo::Make(mSize.width(), mSize.height(),
-                              kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+                              kRGBA_8888_SkColorType, kPremul_SkAlphaType, colorSpace);
         bmp->allocPixels(destinationConfig);
         android_memset32((uint32_t*) bmp->getPixels(), SK_ColorRED,
                          mSize.width() * mSize.height() * 4);

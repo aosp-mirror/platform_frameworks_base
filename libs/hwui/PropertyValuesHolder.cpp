@@ -16,6 +16,7 @@
 
 #include "PropertyValuesHolder.h"
 
+#include "utils/Color.h"
 #include "utils/VectorDrawableUtils.h"
 
 #include <utils/Log.h>
@@ -25,18 +26,26 @@ namespace uirenderer {
 
 using namespace VectorDrawable;
 
-inline U8CPU lerp(U8CPU fromValue, U8CPU toValue, float fraction) {
-    return (U8CPU) (fromValue * (1 - fraction) + toValue * fraction);
+inline constexpr float lerp(float fromValue, float toValue, float fraction) {
+    return float (fromValue * (1 - fraction) + toValue * fraction);
+}
+
+inline constexpr float linearize(U8CPU component) {
+    return EOCF_sRGB(component / 255.0f);
 }
 
 // TODO: Add a test for this
 void ColorEvaluator::evaluate(SkColor* outColor,
         const SkColor& fromColor, const SkColor& toColor, float fraction) const {
-    U8CPU alpha = lerp(SkColorGetA(fromColor), SkColorGetA(toColor), fraction);
-    U8CPU red = lerp(SkColorGetR(fromColor), SkColorGetR(toColor), fraction);
-    U8CPU green = lerp(SkColorGetG(fromColor), SkColorGetG(toColor), fraction);
-    U8CPU blue = lerp(SkColorGetB(fromColor), SkColorGetB(toColor), fraction);
-    *outColor = SkColorSetARGB(alpha, red, green, blue);
+    float a = lerp(SkColorGetA(fromColor) / 255.0f, SkColorGetA(toColor) / 255.0f, fraction);
+    float r = lerp(linearize(SkColorGetR(fromColor)), linearize(SkColorGetR(toColor)), fraction);
+    float g = lerp(linearize(SkColorGetG(fromColor)), linearize(SkColorGetG(toColor)), fraction);
+    float b = lerp(linearize(SkColorGetB(fromColor)), linearize(SkColorGetB(toColor)), fraction);
+    *outColor = SkColorSetARGB(
+            (U8CPU) roundf(a * 255.0f),
+            (U8CPU) roundf(OECF_sRGB(r) * 255.0f),
+            (U8CPU) roundf(OECF_sRGB(g) * 255.0f),
+            (U8CPU) roundf(OECF_sRGB(b) * 255.0f));
 }
 
 void PathEvaluator::evaluate(PathData* out,

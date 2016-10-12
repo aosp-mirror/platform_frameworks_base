@@ -35,11 +35,11 @@
 namespace android {
 namespace uirenderer {
 
-static void storeTexturedRect(TextureVertex* vertices, const Rect& bounds, const Rect& texCoord) {
-    vertices[0] = { bounds.left, bounds.top, texCoord.left, texCoord.top };
-    vertices[1] = { bounds.right, bounds.top, texCoord.right, texCoord.top };
-    vertices[2] = { bounds.left, bounds.bottom, texCoord.left, texCoord.bottom };
-    vertices[3] = { bounds.right, bounds.bottom, texCoord.right, texCoord.bottom };
+static void storeTexturedRect(TextureVertex* vertices, const Rect& bounds) {
+    vertices[0] = { bounds.left,  bounds.top,    0, 0 };
+    vertices[1] = { bounds.right, bounds.top,    1, 0 };
+    vertices[2] = { bounds.left,  bounds.bottom, 0, 1 };
+    vertices[3] = { bounds.right, bounds.bottom, 1, 1 };
 }
 
 void BakedOpDispatcher::onMergedBitmapOps(BakedOpRenderer& renderer,
@@ -48,16 +48,11 @@ void BakedOpDispatcher::onMergedBitmapOps(BakedOpRenderer& renderer,
     const BakedOpState& firstState = *(opList.states[0]);
     const SkBitmap* bitmap = (static_cast<const BitmapOp*>(opList.states[0]->op))->bitmap;
 
-    AssetAtlas::Entry* entry = renderer.renderState().assetAtlas().getEntry(bitmap->pixelRef());
-    Texture* texture = entry ? entry->texture : renderer.caches().textureCache.get(bitmap);
+    Texture* texture = renderer.caches().textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
     TextureVertex vertices[opList.count * 4];
-    Rect texCoords(0, 0, 1, 1);
-    if (entry) {
-        entry->uvMapper.map(texCoords);
-    }
     for (size_t i = 0; i < opList.count; i++) {
         const BakedOpState& state = *(opList.states[i]);
         TextureVertex* rectVerts = &vertices[i * 4];
@@ -69,7 +64,7 @@ void BakedOpDispatcher::onMergedBitmapOps(BakedOpRenderer& renderer,
             // pure translate, so snap (same behavior as onBitmapOp)
             opBounds.snapToPixelBoundaries();
         }
-        storeTexturedRect(rectVerts, opBounds, texCoords);
+        storeTexturedRect(rectVerts, opBounds);
         renderer.dirtyRenderTarget(opBounds);
     }
 
@@ -92,8 +87,6 @@ void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
         const MergedBakedOpList& opList) {
     const PatchOp& firstOp = *(static_cast<const PatchOp*>(opList.states[0]->op));
     const BakedOpState& firstState = *(opList.states[0]);
-    AssetAtlas::Entry* entry = renderer.renderState().assetAtlas().getEntry(
-            firstOp.bitmap->pixelRef());
 
     // Batches will usually contain a small number of items so it's
     // worth performing a first iteration to count the exact number
@@ -105,7 +98,7 @@ void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
 
         // TODO: cache mesh lookups
         const Patch* opMesh = renderer.caches().patchCache.get(
-                entry, op.bitmap->width(), op.bitmap->height(),
+                op.bitmap->width(), op.bitmap->height(),
                 op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.patch);
         totalVertices += opMesh->verticesCount;
     }
@@ -126,7 +119,7 @@ void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
 
         // TODO: cache mesh lookups
         const Patch* opMesh = renderer.caches().patchCache.get(
-                entry, op.bitmap->width(), op.bitmap->height(),
+                op.bitmap->width(), op.bitmap->height(),
                 op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.patch);
 
 
@@ -172,7 +165,7 @@ void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
     }
 
 
-    Texture* texture = entry ? entry->texture : renderer.caches().textureCache.get(firstOp.bitmap);
+    Texture* texture = renderer.caches().textureCache.get(firstOp.bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
@@ -442,7 +435,12 @@ void BakedOpDispatcher::onBitmapOp(BakedOpRenderer& renderer, const BitmapOp& op
 }
 
 void BakedOpDispatcher::onBitmapMeshOp(BakedOpRenderer& renderer, const BitmapMeshOp& op, const BakedOpState& state) {
-    const static UvMapper defaultUvMapper;
+    Texture* texture = renderer.caches().textureCache.get(op.bitmap);
+    if (!texture) {
+        return;
+    }
+    const AutoTexture autoCleanup(texture);
+
     const uint32_t elementCount = op.meshWidth * op.meshHeight * 6;
 
     std::unique_ptr<ColorTextureVertex[]> mesh(new ColorTextureVertex[elementCount]);
@@ -457,9 +455,6 @@ void BakedOpDispatcher::onBitmapMeshOp(BakedOpRenderer& renderer, const BitmapMe
         colors = tempColors.get();
     }
 
-    Texture* texture = renderer.renderState().assetAtlas().getEntryTexture(op.bitmap->pixelRef());
-    const UvMapper& mapper(texture && texture->uvMapper ? *texture->uvMapper : defaultUvMapper);
-
     for (int32_t y = 0; y < op.meshHeight; y++) {
         for (int32_t x = 0; x < op.meshWidth; x++) {
             uint32_t i = (y * (op.meshWidth + 1) + x) * 2;
@@ -468,8 +463,6 @@ void BakedOpDispatcher::onBitmapMeshOp(BakedOpRenderer& renderer, const BitmapMe
             float u2 = float(x + 1) / op.meshWidth;
             float v1 = float(y) / op.meshHeight;
             float v2 = float(y + 1) / op.meshHeight;
-
-            mapper.map(u1, v1, u2, v2);
 
             int ax = i + (op.meshWidth + 1) * 2;
             int ay = ax + 1;
@@ -490,14 +483,6 @@ void BakedOpDispatcher::onBitmapMeshOp(BakedOpRenderer& renderer, const BitmapMe
             ColorTextureVertex::set(vertex++, vertices[cx], vertices[cy], u2, v1, colors[cx / 2]);
         }
     }
-
-    if (!texture) {
-        texture = renderer.caches().textureCache.get(op.bitmap);
-        if (!texture) {
-            return;
-        }
-    }
-    const AutoTexture autoCleanup(texture);
 
     /*
      * TODO: handle alpha_8 textures correctly by applying paint color, but *not*
@@ -599,12 +584,11 @@ void BakedOpDispatcher::onPatchOp(BakedOpRenderer& renderer, const PatchOp& op, 
     }
 
     // TODO: avoid redoing the below work each frame:
-    AssetAtlas::Entry* entry = renderer.renderState().assetAtlas().getEntry(op.bitmap->pixelRef());
     const Patch* mesh = renderer.caches().patchCache.get(
-            entry, op.bitmap->width(), op.bitmap->height(),
+            op.bitmap->width(), op.bitmap->height(),
             op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.patch);
 
-    Texture* texture = entry ? entry->texture : renderer.caches().textureCache.get(op.bitmap);
+    Texture* texture = renderer.caches().textureCache.get(op.bitmap);
     if (CC_LIKELY(texture)) {
         const AutoTexture autoCleanup(texture);
         Glop glop;

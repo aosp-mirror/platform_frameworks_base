@@ -19,6 +19,14 @@ ifneq ($(ENABLE_CPUSETS),)
     LOCAL_CFLAGS += -DENABLE_CPUSETS
 endif
 
+# TODO: Linear blending should be enabled by default, but we are
+# TODO: making it an opt-in while it's a work in progress
+# TODO: The final test should be:
+# TODO: ifneq ($(TARGET_ENABLE_LINEAR_BLENDING),false)
+ifeq ($(TARGET_ENABLE_LINEAR_BLENDING),true)
+    hwui_cflags += -DANDROID_ENABLE_LINEAR_BLENDING
+endif
+
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
 LOCAL_CFLAGS += -DU_USING_ICU_NAMESPACE=0

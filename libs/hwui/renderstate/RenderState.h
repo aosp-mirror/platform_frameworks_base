@@ -16,7 +16,6 @@
 #ifndef RENDERSTATE_H
 #define RENDERSTATE_H
 
-#include "AssetAtlas.h"
 #include "Caches.h"
 #include "Glop.h"
 #include "renderstate/Blend.h"
@@ -92,7 +91,6 @@ public:
 
     void render(const Glop& glop, const Matrix4& orthoMatrix);
 
-    AssetAtlas& assetAtlas() { return mAssetAtlas; }
     Blend& blend() { return *mBlend; }
     MeshState& meshState() { return *mMeshState; }
     Scissor& scissor() { return *mScissor; }
@@ -120,7 +118,6 @@ private:
 
     OffscreenBufferPool mLayerPool;
 
-    AssetAtlas mAssetAtlas;
     std::set<Layer*> mActiveLayers;
     std::set<renderthread::CanvasContext*> mRegisteredContexts;
 

@@ -561,8 +561,12 @@ void Tree::updateBitmapCache(SkBitmap* outCache, bool useStagingData) {
 
 bool Tree::allocateBitmapIfNeeded(SkBitmap* outCache, int width, int height) {
     if (!canReuseBitmap(*outCache, width, height)) {
-        SkImageInfo info = SkImageInfo::Make(width, height,
-                kN32_SkColorType, kPremul_SkAlphaType);
+#ifndef ANDROID_ENABLE_LINEAR_BLENDING
+        sk_sp<SkColorSpace> colorSpace = nullptr;
+#else
+        sk_sp<SkColorSpace> colorSpace = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
+#endif
+        SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType, colorSpace);
         outCache->setInfo(info);
         // TODO: Count the bitmap cache against app's java heap
         outCache->allocPixels(info);

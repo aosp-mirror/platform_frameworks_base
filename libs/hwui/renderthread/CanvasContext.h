@@ -119,9 +119,6 @@ public:
 
     DeferredLayerUpdater* createTextureLayer();
 
-    ANDROID_API static void setTextureAtlas(RenderThread& thread,
-            const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize);
-
     void stopDrawing();
     void notifyFramePending();
 

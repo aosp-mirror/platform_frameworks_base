@@ -16,6 +16,7 @@
 #ifndef FLOATCOLOR_H
 #define FLOATCOLOR_H
 
+#include "utils/Color.h"
 #include "utils/Macros.h"
 #include "utils/MathUtils.h"
 
@@ -25,11 +26,13 @@ namespace android {
 namespace uirenderer {
 
 struct FloatColor {
+    // "color" is a gamma-encoded sRGB color
+    // After calling this method, the color is stored as a pre-multiplied linear color
     void set(uint32_t color) {
         a = ((color >> 24) & 0xff) / 255.0f;
-        r = a * ((color >> 16) & 0xff) / 255.0f;
-        g = a * ((color >>  8) & 0xff) / 255.0f;
-        b = a * ((color      ) & 0xff) / 255.0f;
+        r = a * EOCF_sRGB(((color >> 16) & 0xff) / 255.0f);
+        g = a * EOCF_sRGB(((color >>  8) & 0xff) / 255.0f);
+        b = a * EOCF_sRGB(((color      ) & 0xff) / 255.0f);
     }
 
     bool isNotBlack() {

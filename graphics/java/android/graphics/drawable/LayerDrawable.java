@@ -23,7 +23,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Outline;
@@ -42,7 +41,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.Collection;
 
 /**
  * A Drawable that manages an array of other Drawables. These are drawn in array
@@ -2128,22 +2126,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             mHaveIsStateful = false;
         }
 
-        @Override
-        public int addAtlasableBitmaps(Collection<Bitmap> atlasList) {
-            final ChildDrawable[] array = mChildren;
-            final int N = mNum;
-            int pixelCount = 0;
-            for (int i = 0; i < N; i++) {
-                final Drawable dr = array[i].mDrawable;
-                if (dr != null) {
-                    final ConstantState state = dr.getConstantState();
-                    if (state != null) {
-                        pixelCount += state.addAtlasableBitmaps(atlasList);
-                    }
-                }
-            }
-            return pixelCount;
-        }
     }
 }
 

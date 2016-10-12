@@ -53,7 +53,6 @@ Caches::Caches(RenderState& renderState)
         : gradientCache(mExtensions)
         , patchCache(renderState)
         , programCache(mExtensions)
-        , dither(*this)
         , mRenderState(&renderState)
         , mInitialized(false) {
     INIT_LOGD("Creating OpenGL renderer caches");
@@ -238,7 +237,6 @@ void Caches::flush(FlushMode mode) {
             gradientCache.clear();
             fontRenderer.clear();
             fboCache.clear();
-            dither.clear();
             // fall through
         case FlushMode::Moderate:
             fontRenderer.flush();

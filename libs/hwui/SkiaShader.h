@@ -62,7 +62,6 @@ struct SkiaShaderData {
     } bitmapData;
     struct GradientShaderData {
         Matrix4 screenSpace;
-        GLuint ditherSampler;
 
         // simple gradient
         FloatColor startColor;
@@ -72,7 +71,6 @@ struct SkiaShaderData {
         Texture* gradientTexture;
         GLuint gradientSampler;
         GLenum wrapST;
-
     } gradientData;
     struct LayerShaderData {
         Layer* layer;
@@ -90,7 +88,8 @@ public:
     static void store(Caches& caches, const SkShader& shader, const Matrix4& modelViewMatrix,
             GLuint* textureUnit, ProgramDescription* description,
             SkiaShaderData* outData);
-    static void apply(Caches& caches, const SkiaShaderData& data);
+    static void apply(Caches& caches, const SkiaShaderData& data,
+            const GLsizei width, const GLsizei height);
 };
 
 }; // namespace uirenderer
