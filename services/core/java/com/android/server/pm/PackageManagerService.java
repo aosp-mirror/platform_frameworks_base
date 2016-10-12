@@ -21228,6 +21228,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             PackageManagerService.this.revokeRuntimePermission(packageName, name, userId,
                     overridePolicy);
         }
+
+        @Override
+        public String getNameForUid(int uid) {
+            return PackageManagerService.this.getNameForUid(uid);
+        }
     }
 
     @Override
