@@ -92,7 +92,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                     color = info.getIconTint();
                 }
             }
-            mSecurityMessageDisplay.setMessage(msg, true);
+            mSecurityMessageDisplay.setMessage(msg);
             mSimImageView.setImageTintList(ColorStateList.valueOf(color));
         }
     }
@@ -141,7 +141,6 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mSecurityMessageDisplay.setTimeout(0); // don't show ownerinfo/charging status by default
         if (mEcaView instanceof EmergencyCarrierArea) {
             ((EmergencyCarrierArea) mEcaView).setCarrierTextVisible(true);
         }
@@ -252,7 +251,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
 
         if (entry.length() < 4) {
             // otherwise, display a message to the user, and don't submit.
-            mSecurityMessageDisplay.setMessage(R.string.kg_invalid_sim_pin_hint, true);
+            mSecurityMessageDisplay.setMessage(R.string.kg_invalid_sim_pin_hint);
             resetPasswordText(true /* animate */, true /* announce */);
             mCallback.userActivity();
             return;
@@ -284,13 +283,13 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                                     } else {
                                         // show message
                                         mSecurityMessageDisplay.setMessage(
-                                                getPinPasswordErrorMessage(attemptsRemaining), true);
+                                                getPinPasswordErrorMessage(attemptsRemaining));
                                     }
                                 } else {
                                     // "PIN operation failed!" - no idea what this was and no way to
                                     // find out. :/
                                     mSecurityMessageDisplay.setMessage(getContext().getString(
-                                            R.string.kg_password_pin_failed), true);
+                                            R.string.kg_password_pin_failed));
                                 }
                                 if (DEBUG) Log.d(LOG_TAG, "verifyPasswordAndUnlock "
                                         + " CheckSimPin.onSimCheckResponse: " + result
