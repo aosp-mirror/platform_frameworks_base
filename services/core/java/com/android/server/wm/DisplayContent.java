@@ -1122,13 +1122,13 @@ class DisplayContent extends WindowContainer<TaskStack> {
             AppTokenList exitingAppTokens = mChildren.get(stackNdx).mExitingAppTokens;
             int NT = exitingAppTokens.size();
             for (int j = 0; j < NT; j++) {
-                i = exitingAppTokens.get(j).rebuildWindowListUnchecked(this, i);
+                i = exitingAppTokens.get(j).rebuildWindowListUnchecked(i);
             }
         }
 
         // And add in the still active app tokens in Z order.
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            i = mChildren.get(stackNdx).rebuildWindowList(this, i);
+            i = mChildren.get(stackNdx).rebuildWindowList(i);
         }
 
         i -= lastBelow;
