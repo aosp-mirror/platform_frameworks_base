@@ -1141,7 +1141,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             }
             mService.mPendingRemove.toArray(mService.mPendingRemoveTmp);
             mService.mPendingRemove.clear();
-            DisplayContentList displayList = new DisplayContentList();
+            ArrayList<DisplayContent> displayList = new ArrayList();
             for (i = 0; i < N; i++) {
                 final WindowState w = mService.mPendingRemoveTmp[i];
                 w.removeImmediately();
