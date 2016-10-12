@@ -50,7 +50,7 @@ public class UsbCommand extends Svc.Command {
                 IUsbManager usbMgr = IUsbManager.Stub.asInterface(ServiceManager.getService(
                         Context.USB_SERVICE));
                 try {
-                    usbMgr.setCurrentFunction((args.length >=3 ? args[2] : null));
+                    usbMgr.setCurrentFunction((args.length >=3 ? args[2] : null), false);
                 } catch (RemoteException e) {
                     System.err.println("Error communicating with UsbManager: " + e);
                 }
