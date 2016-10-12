@@ -289,10 +289,10 @@ void GlopBuilder::setFill(int color, float alphaScale,
             // Skia uses the range [0..255] for the addition vector, but we need
             // the [0..1] range to apply the vector in GLSL
             float* colorVector = mOutGlop->fill.filter.matrix.vector;
-            colorVector[0] = EOCF_sRGB(srcColorMatrix[4]  / 255.0f);
-            colorVector[1] = EOCF_sRGB(srcColorMatrix[9]  / 255.0f);
-            colorVector[2] = EOCF_sRGB(srcColorMatrix[14] / 255.0f);
-            colorVector[3] = EOCF_sRGB(srcColorMatrix[19] / 255.0f);
+            colorVector[0] = EOCF(srcColorMatrix[4]  / 255.0f);
+            colorVector[1] = EOCF(srcColorMatrix[9]  / 255.0f);
+            colorVector[2] = EOCF(srcColorMatrix[14] / 255.0f);
+            colorVector[3] =      srcColorMatrix[19] / 255.0f;  // alpha is linear
         } else {
             LOG_ALWAYS_FATAL("unsupported ColorFilter");
         }
