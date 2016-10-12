@@ -1654,6 +1654,16 @@ public final class Bitmap implements Parcelable {
         nativePrepareToDraw(mNativePtr);
     }
 
+    /**
+     * Refs the underlying SkPixelRef and returns a pointer to it.
+     *
+     * @hide
+     * */
+    public final long refSkPixelRef() {
+        checkRecycled("Can't refSkPixelRef on a recycled bitmap!");
+        return nativeRefPixelRef(mNativePtr);
+    }
+
     //////////// native methods
 
     private static native Bitmap nativeCreate(int[] colors, int offset,
@@ -1710,6 +1720,7 @@ public final class Bitmap implements Parcelable {
     private static native boolean nativeHasMipMap(long nativeBitmap);
     private static native void nativeSetHasMipMap(long nativeBitmap, boolean hasMipMap);
     private static native boolean nativeSameAs(long nativeBitmap0, long nativeBitmap1);
+    private static native long nativeRefPixelRef(long nativeBitmap);
     private static native void nativePrepareToDraw(long nativeBitmap);
     private static native int nativeGetAllocationByteCount(long nativeBitmap);
 }
