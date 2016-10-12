@@ -182,8 +182,7 @@ static SkBitmap* drawPath(const SkPath* path, const SkPaint* paint, PathTexture*
 PathCache::PathCache()
         : mCache(LruCache<PathDescription, PathTexture*>::kUnlimitedCapacity)
         , mSize(0)
-        , mMaxSize(Properties::pathCacheSize)
-        , mTexNum(0) {
+        , mMaxSize(Properties::pathCacheSize) {
     mCache.setOnEntryRemovedListener(this);
 
     GLint maxTextureSize;
@@ -239,7 +238,6 @@ void PathCache::removeTexture(PathTexture* texture) {
                         "the cache in an inconsistent state", size);
             }
             mSize -= size;
-            mTexNum--;
         }
 
         PATH_LOGD("PathCache::delete name, size, mSize = %d, %d, %d",
@@ -264,7 +262,14 @@ void PathCache::purgeCache(uint32_t width, uint32_t height) {
 }
 
 void PathCache::trim() {
-    while (mSize > mMaxSize || mTexNum > DEFAULT_PATH_TEXTURE_CAP) {
+    // 25 is just an arbitrary lower bound to ensure we aren't in weird edge cases
+    // of things like a cap of 0 or 1 as that's going to break things.
+    // It does not represent a reasonable minimum value
+    static_assert(DEFAULT_PATH_TEXTURE_CAP > 25, "Path cache texture cap is too small");
+
+    while (mSize > mMaxSize || mCache.size() > DEFAULT_PATH_TEXTURE_CAP) {
+        LOG_ALWAYS_FATAL_IF(!mCache.size(), "Inconsistent mSize! Ran out of items to remove!"
+                " mSize = %u, mMaxSize = %u", mSize, mMaxSize);
         mCache.removeOldest();
     }
 }
@@ -312,7 +317,6 @@ void PathCache::generateTexture(SkBitmap& bitmap, Texture* texture) {
     ATRACE_NAME("Upload Path Texture");
     texture->upload(bitmap);
     texture->setFilter(GL_LINEAR);
-    mTexNum++;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
