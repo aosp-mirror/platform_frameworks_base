@@ -530,33 +530,23 @@ public class UsbManager {
      * {@link #USB_FUNCTION_MIDI}, {@link #USB_FUNCTION_MTP}, {@link #USB_FUNCTION_PTP},
      * or {@link #USB_FUNCTION_RNDIS}.
      * </p><p>
+     * Also sets whether USB data (for example, MTP exposed pictures) should be made available
+     * on the USB connection when in device mode. Unlocking usb data should only be done with
+     * user involvement, since exposing pictures or other data could leak sensitive
+     * user information.
+     * </p><p>
      * Note: This function is asynchronous and may fail silently without applying
      * the requested changes.
      * </p>
      *
      * @param function name of the USB function, or null to restore the default function
+     * @param usbDataUnlocked whether user data is accessible
      *
      * {@hide}
      */
-    public void setCurrentFunction(String function) {
+    public void setCurrentFunction(String function, boolean usbDataUnlocked) {
         try {
-            mService.setCurrentFunction(function);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Sets whether USB data (for example, MTP exposed pictures) should be made available
-     * on the USB connection when in device mode. Unlocking usb data should only be done with
-     * user involvement, since exposing pictures or other data could leak sensitive
-     * user information.
-     *
-     * {@hide}
-     */
-    public void setUsbDataUnlocked(boolean unlocked) {
-        try {
-            mService.setUsbDataUnlocked(unlocked);
+            mService.setCurrentFunction(function, usbDataUnlocked);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

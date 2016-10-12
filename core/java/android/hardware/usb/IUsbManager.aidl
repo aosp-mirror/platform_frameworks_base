@@ -87,15 +87,13 @@ interface IUsbManager
     /* Returns true if the specified USB function is enabled. */
     boolean isFunctionEnabled(String function);
 
-    /* Sets the current USB function. */
-    void setCurrentFunction(String function);
-
-    /* Sets whether USB data (for example, MTP exposed pictures) should be made
-     * available on the USB connection. Unlocking data should only be done with
-     * user involvement, since exposing pictures or other data could leak sensitive
-     * user information.
+    /* Sets the current USB function as well as whether USB data
+     * (for example, MTP exposed pictures) should be made available
+     * on the USB connection. Unlocking data should only be done with
+     * user involvement, since exposing pictures or other data could
+     * leak sensitive user information.
      */
-    void setUsbDataUnlocked(boolean unlock);
+    void setCurrentFunction(String function, boolean usbDataUnlocked);
 
     /* Allow USB debugging from the attached host. If alwaysAllow is true, add the
      * the public key to list of host keys that the user has approved.
