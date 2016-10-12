@@ -16,9 +16,6 @@
 
 package android.view.inputmethod;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -38,6 +35,9 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;

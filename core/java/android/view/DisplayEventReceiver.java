@@ -16,12 +16,12 @@
 
 package android.view;
 
-import dalvik.annotation.optimization.FastNative;
-import dalvik.system.CloseGuard;
-
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
+
+import dalvik.annotation.optimization.FastNative;
+import dalvik.system.CloseGuard;
 
 import java.lang.ref.WeakReference;
 

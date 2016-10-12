@@ -16,11 +16,9 @@
 
 package android.view;
 
-import com.android.internal.view.BaseIWindow;
-
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.CompatibilityInfo.Translator;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
@@ -28,11 +26,13 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.ParcelFileDescriptor;
 import android.util.AttributeSet;
 import android.util.Log;
+
+import com.android.internal.view.BaseIWindow;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

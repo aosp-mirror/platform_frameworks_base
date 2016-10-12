@@ -19,10 +19,10 @@ package android.view;
 import android.content.Context;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
+import android.os.NullVibrator;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Vibrator;
-import android.os.NullVibrator;
 
 import java.util.ArrayList;
 import java.util.List;

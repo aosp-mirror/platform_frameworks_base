@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
@@ -24,7 +26,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.annotation.SystemApi;
-import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -43,8 +44,6 @@ import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.view.accessibility.AccessibilityEvent;
-
-import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 
 import java.util.List;
 

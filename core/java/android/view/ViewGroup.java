@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+
 import android.animation.LayoutTransition;
 import android.annotation.IdRes;
 import android.annotation.NonNull;
@@ -61,8 +63,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
 /**
  * <p>

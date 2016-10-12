@@ -16,13 +16,14 @@
 
 package android.view;
 
-import dalvik.system.CloseGuard;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
+
+import dalvik.system.CloseGuard;
 
 /**
  * SurfaceControl
