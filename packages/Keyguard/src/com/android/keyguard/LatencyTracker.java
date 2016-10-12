@@ -141,6 +141,7 @@ public class LatencyTracker {
         if (startRtc == -1) {
             return;
         }
+        mStartRtc.delete(action);
         Trace.asyncTraceEnd(Trace.TRACE_TAG_APP, NAMES[action], 0);
         long duration = endRtc - startRtc;
         Log.i(TAG, "action=" + action + " latency=" + duration);
