@@ -1276,21 +1276,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return -1;
     }
 
-    private void addInputMethodWindowToListLocked(WindowState win) {
-        int pos = findDesiredInputMethodWindowIndexLocked(true);
-        if (pos >= 0) {
-            if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
-                    TAG_WM, "Adding input method window " + win + " at " + pos);
-            // TODO(multidisplay): IMEs are only supported on the default display.
-            getDefaultWindowListLocked().add(pos, win);
-            mWindowsChanged = true;
-            moveInputMethodDialogsLocked(pos + 1);
-            return;
-        }
-        win.mToken.addWindow(win);
-        moveInputMethodDialogsLocked(pos);
-    }
-
     private void reAddWindowToListInOrderLocked(WindowState win) {
         win.mToken.addWindow(win);
         // This is a hack to get all of the child windows added as well at the right position. Child
@@ -1305,7 +1290,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void logWindowList(final WindowList windows, String prefix) {
+    private void logWindowList(final WindowList windows, String prefix) {
         int N = windows.size();
         while (N > 0) {
             N--;
@@ -1746,7 +1731,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (type == TYPE_INPUT_METHOD) {
                 win.mGivenInsetsPending = true;
                 mInputMethodWindow = win;
-                addInputMethodWindowToListLocked(win);
+                win.mToken.addImeWindow(win);
                 imMayMove = false;
             } else if (type == TYPE_INPUT_METHOD_DIALOG) {
                 mInputMethodDialogs.add(win);
@@ -1980,7 +1965,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void removeWindow(Session session, IWindow client) {
+    void removeWindow(Session session, IWindow client) {
         synchronized(mWindowMap) {
             WindowState win = windowForClientLocked(session, client, false);
             if (win == null) {
