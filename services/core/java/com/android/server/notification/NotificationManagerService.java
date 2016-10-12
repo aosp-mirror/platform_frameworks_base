@@ -3641,7 +3641,7 @@ public class NotificationManagerService extends SystemService {
                 if (pkg != null && !r.sbn.getPackageName().equals(pkg)) {
                     continue;
                 }
-                if (channelId == null || !channelId.equals(r.getChannel().getId())) {
+                if (channelId != null && !channelId.equals(r.getChannel().getId())) {
                     continue;
                 }
                 if (canceledNotifications == null) {
