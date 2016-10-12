@@ -467,6 +467,14 @@ public class ImageView extends View {
      * {@link #setImageBitmap(android.graphics.Bitmap)} and
      * {@link android.graphics.BitmapFactory} instead.</p>
      *
+     * <p class="note">On devices running SDK < 24, this method will fail to
+     * apply correct density scaling to images loaded from
+     * {@link ContentResolver#SCHEME_CONTENT content} and
+     * {@link ContentResolver#SCHEME_FILE file} schemes. Applications running
+     * on devices with SDK >= 24 <strong>MUST</strong> specify the
+     * {@code targetSdkVersion} in their manifest as 24 or above for density
+     * scaling to be applied to images loaded from these schemes.</p>
+     *
      * @param uri the Uri of an image, or {@code null} to clear the content
      */
     @android.view.RemotableViewMethod(asyncImpl="setImageURIAsync")
