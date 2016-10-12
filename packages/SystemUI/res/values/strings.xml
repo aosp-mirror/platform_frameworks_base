@@ -1666,7 +1666,10 @@
     <!-- accessibility label for button to edit quick settings [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_edit">Edit order of settings.</string>
 
-    <!-- accessibility label for paging indicator in quick settings [CHAR LIMITi=NONE] -->
+    <!-- accessibility label for paging indicator in quick settings [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_page">Page <xliff:g name="current_page" example="1">%1$d</xliff:g> of <xliff:g name="num_pages" example="2">%2$d</xliff:g></string>
 
+    <!-- Label that replaces other notification controls when the notification is from the system
+         and cannot be silenced (see @string/show_silently) or blocked (see @string/block) -->
+    <string name="cant_silence_or_block">Notifications can\'t be silenced or blocked</string>
 </resources>
