@@ -16,11 +16,6 @@
 
 package android.view.textservice;
 
-import com.android.internal.textservice.ISpellCheckerSession;
-import com.android.internal.textservice.ISpellCheckerSessionListener;
-import com.android.internal.textservice.ITextServicesManager;
-import com.android.internal.textservice.ITextServicesSessionListener;
-
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -28,6 +23,11 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.android.internal.textservice.ISpellCheckerSession;
+import com.android.internal.textservice.ISpellCheckerSessionListener;
+import com.android.internal.textservice.ITextServicesManager;
+import com.android.internal.textservice.ITextServicesSessionListener;
 
 import java.util.LinkedList;
 import java.util.Queue;

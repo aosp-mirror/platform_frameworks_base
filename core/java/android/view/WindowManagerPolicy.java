@@ -25,12 +25,12 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.view.animation.Animation;
+
 import com.android.internal.policy.IShortcutService;
 
 import java.io.PrintWriter;

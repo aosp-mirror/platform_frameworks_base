@@ -16,14 +16,13 @@
 
 package android.view;
 
+import android.hardware.input.InputManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.method.MetaKeyKeyListener;
 import android.util.AndroidRuntimeException;
 import android.util.SparseIntArray;
-import android.hardware.input.InputManager;
 
-import java.lang.Character;
 import java.text.Normalizer;
 
 /**

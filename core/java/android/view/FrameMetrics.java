@@ -17,7 +17,6 @@
 package android.view;
 
 import android.annotation.IntDef;
-import android.view.Window;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

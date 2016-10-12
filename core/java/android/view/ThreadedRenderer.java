@@ -16,9 +16,9 @@
 
 package android.view;
 
-import android.app.ActivityManagerNative;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;

@@ -16,11 +16,11 @@
 
 package android.view;
 
+import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
+
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
-import android.content.Context;
 import android.content.res.CompatibilityInfo;
-import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -35,8 +35,6 @@ import android.util.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
-
-import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 
 /**
  * Provides information about the size and density of a logical display.

@@ -26,10 +26,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import dalvik.system.CloseGuard;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import dalvik.system.CloseGuard;
 
 /**
  * Handle onto a raw buffer that is being managed by the screen compositor.

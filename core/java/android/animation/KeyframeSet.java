@@ -16,14 +16,14 @@
 
 package android.animation;
 
-import java.util.Arrays;
-import java.util.List;
-
-import android.animation.Keyframe.IntKeyframe;
 import android.animation.Keyframe.FloatKeyframe;
+import android.animation.Keyframe.IntKeyframe;
 import android.animation.Keyframe.ObjectKeyframe;
 import android.graphics.Path;
 import android.util.Log;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class holds a collection of Keyframe objects and is called by ValueAnimator to calculate

@@ -16,6 +16,14 @@
 
 package android.view;
 
+import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+import static android.os.Build.VERSION_CODES.KITKAT;
+import static android.os.Build.VERSION_CODES.M;
+import static android.os.Build.VERSION_CODES.N;
+
+import static java.lang.Math.max;
+
 import android.animation.AnimatorInflater;
 import android.animation.StateListAnimator;
 import android.annotation.CallSuper;
@@ -79,11 +87,11 @@ import android.util.SparseArray;
 import android.util.StateSet;
 import android.util.SuperNotCalledException;
 import android.util.TypedValue;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.AccessibilityIterators.CharacterTextSegmentIterator;
 import android.view.AccessibilityIterators.ParagraphTextSegmentIterator;
 import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.AccessibilityIterators.WordTextSegmentIterator;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -99,17 +107,15 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
-import static android.os.Build.VERSION_CODES.*;
-import static java.lang.Math.max;
 
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.ScrollBarUtils;
+
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
-import java.lang.NullPointerException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;

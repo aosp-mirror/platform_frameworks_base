@@ -21,7 +21,6 @@ import android.os.Parcelable;
 import android.text.method.MetaKeyKeyListener;
 import android.util.Log;
 import android.util.SparseIntArray;
-import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.KeyData;
 
 /**

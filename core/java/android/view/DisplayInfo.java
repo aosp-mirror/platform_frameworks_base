@@ -23,9 +23,9 @@ import android.os.Parcelable;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 
-import java.util.Arrays;
-
 import libcore.util.Objects;
+
+import java.util.Arrays;
 
 /**
  * Describes the characteristics of a particular logical display.

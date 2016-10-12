@@ -21,7 +21,6 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.Handler;
