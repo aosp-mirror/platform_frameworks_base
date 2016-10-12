@@ -35,10 +35,10 @@ import org.junit.runners.JUnit4;
 import org.junit.Test;
 
 @RunWith(JUnit4.class)
-public class AppFuseTest {
+public class AppFusePerfTest {
     @Test
     @LargeTest
-    public void testPerfReadWriteFile() throws IOException {
+    public void testReadWriteFile() throws IOException {
         final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         final StorageManager storageManager = context.getSystemService(StorageManager.class);
         final int INODE = 10;
