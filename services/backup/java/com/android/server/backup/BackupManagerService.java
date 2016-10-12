@@ -6057,7 +6057,11 @@ public class BackupManagerService {
                                         // the app developer's cert, so they're different on every
                                         // device.
                                         if (signaturesMatch(sigs, pkgInfo)) {
-                                            if (pkgInfo.versionCode >= version) {
+                                            if ((pkgInfo.applicationInfo.flags
+                                                    & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {
+                                                Slog.i(TAG, "Package has restoreAnyVersion; taking data");
+                                                policy = RestorePolicy.ACCEPT;
+                                            } else if (pkgInfo.versionCode >= version) {
                                                 Slog.i(TAG, "Sig + version match; taking data");
                                                 policy = RestorePolicy.ACCEPT;
                                             } else {
@@ -7479,7 +7483,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                                         // the app developer's cert, so they're different on every
                                         // device.
                                         if (signaturesMatch(sigs, pkgInfo)) {
-                                            if (pkgInfo.versionCode >= version) {
+                                            if ((pkgInfo.applicationInfo.flags
+                                                    & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {
+                                                Slog.i(TAG, "Package has restoreAnyVersion; taking data");
+                                                policy = RestorePolicy.ACCEPT;
+                                            } else if (pkgInfo.versionCode >= version) {
                                                 Slog.i(TAG, "Sig + version match; taking data");
                                                 policy = RestorePolicy.ACCEPT;
                                             } else {
