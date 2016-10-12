@@ -404,11 +404,13 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         // Check carrier config for entitlement checks
         final CarrierConfigManager configManager = (CarrierConfigManager) mContext
              .getSystemService(Context.CARRIER_CONFIG_SERVICE);
-        boolean isEntitlementCheckRequired = configManager.getConfig().getBoolean(
-             CarrierConfigManager.KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL);
-
-        if (!isEntitlementCheckRequired) {
-            return false;
+        if (configManager != null && configManager.getConfig() != null) {
+            // we do have a CarrierConfigManager and it has a config.
+            boolean isEntitlementCheckRequired = configManager.getConfig().getBoolean(
+                    CarrierConfigManager.KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL);
+            if (!isEntitlementCheckRequired) {
+                return false;
+            }
         }
         return (provisionApp.length == 2);
     }
