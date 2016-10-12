@@ -184,28 +184,38 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
                     mINotificationManager.getImportance(sbn.getPackageName(), sbn.getUid());
         } catch (RemoteException e) {}
         mNotificationImportance = importance;
-        boolean nonBlockable = false;
-        try {
-            final PackageInfo info =
-                    pm.getPackageInfo(sbn.getPackageName(), PackageManager.GET_SIGNATURES);
-            nonBlockable = Utils.isSystemPackage(getResources(), pm, info);
-        } catch (PackageManager.NameNotFoundException e) {
-            // unlikely.
-        }
-        if (nonBlockablePkgs != null) {
-            nonBlockable |= nonBlockablePkgs.contains(sbn.getPackageName());
-        }
 
         final View importanceSlider = findViewById(R.id.importance_slider);
         final View importanceButtons = findViewById(R.id.importance_buttons);
-        if (mShowSlider) {
-            bindSlider(importanceSlider, nonBlockable);
-            importanceSlider.setVisibility(View.VISIBLE);
+        final View cantTouchThis = findViewById(R.id.cant_silence_or_block);
+
+        final boolean essentialPackage =
+                (nonBlockablePkgs != null && nonBlockablePkgs.contains(sbn.getPackageName()));
+        if (essentialPackage) {
             importanceButtons.setVisibility(View.GONE);
-        } else {
-            bindToggles(importanceButtons, mStartingUserImportance, nonBlockable);
-            importanceButtons.setVisibility(View.VISIBLE);
             importanceSlider.setVisibility(View.GONE);
+            cantTouchThis.setVisibility(View.VISIBLE);
+        } else {
+            cantTouchThis.setVisibility(View.GONE);
+
+            boolean nonBlockable = false;
+            try {
+                final PackageInfo info =
+                        pm.getPackageInfo(sbn.getPackageName(), PackageManager.GET_SIGNATURES);
+                nonBlockable = Utils.isSystemPackage(getResources(), pm, info);
+            } catch (PackageManager.NameNotFoundException e) {
+                // unlikely.
+            }
+
+            if (mShowSlider) {
+                bindSlider(importanceSlider, nonBlockable);
+                importanceSlider.setVisibility(View.VISIBLE);
+                importanceButtons.setVisibility(View.GONE);
+            } else {
+                bindToggles(importanceButtons, mStartingUserImportance, nonBlockable);
+                importanceButtons.setVisibility(View.VISIBLE);
+                importanceSlider.setVisibility(View.GONE);
+            }
         }
     }
 

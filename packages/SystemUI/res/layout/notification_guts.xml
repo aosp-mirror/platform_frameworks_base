@@ -91,6 +91,16 @@
                 style="@style/TextAppearance.NotificationGuts.Radio"
                 android:buttonTint="@color/notification_guts_buttons" />
     </RadioGroup>
+    <!-- When neither blocking or silencing is available -->
+    <TextView
+        android:id="@+id/cant_silence_or_block"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        style="@style/TextAppearance.NotificationGuts.Radio"
+        android:text="@string/cant_silence_or_block"
+        android:visibility="gone"
+        />
     <!-- Importance slider -->
     <LinearLayout
             android:id="@+id/importance_slider"
