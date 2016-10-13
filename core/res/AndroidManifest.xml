@@ -3035,7 +3035,7 @@
     <!-- @SystemApi Allows access to MAC addresses of WiFi and Bluetooth peer devices.
         @hide -->
     <permission android:name="android.permission.PEERS_MAC_ADDRESS"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature|setup" />
 
     <!-- Allows the Nfc stack to dispatch Nfc messages to applications. Applications
         can use this permission to ensure incoming Nfc messages are from the Nfc stack
