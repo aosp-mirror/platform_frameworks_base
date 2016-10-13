@@ -3038,4 +3038,5 @@
   <java-symbol type="array" name="config_batteryPackageTypeSystem" />
   <java-symbol type="array" name="config_batteryPackageTypeService" />
 
+  <java-symbol type="bool" name="config_display_no_service_when_sim_unready" />
 </resources>

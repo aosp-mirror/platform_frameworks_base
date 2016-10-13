@@ -2971,4 +2971,8 @@
 
     <!-- An array of packages that need to be treated as type service in battery settings -->
     <string-array translatable="false" name="config_batteryPackageTypeService"/>
+
+    <!-- Decide whether to display 'No service' on status bar instead of 'Emergency calls only'
+         when SIM is unready. -->
+    <bool name="config_display_no_service_when_sim_unready">false</bool>
 </resources>
