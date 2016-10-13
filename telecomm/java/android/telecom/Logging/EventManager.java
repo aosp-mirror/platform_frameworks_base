@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.telecom.Log;
 import android.text.TextUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.text.DateFormat;
@@ -46,6 +47,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class EventManager {
 
     public static final String TAG = "Logging.Events";
+    @VisibleForTesting
     public static final int DEFAULT_EVENTS_TO_CACHE = 10;  // Arbitrarily chosen.
 
     public interface Loggable {
@@ -79,7 +81,7 @@ public class EventManager {
      * Maps from request events to a list of possible response events. Used to track
      * end-to-end timing for critical user-facing operations in Telecom.
      */
-    public final Map<String, List<TimedEventPair>> requestResponsePairs = new HashMap<>();
+    private final Map<String, List<TimedEventPair>> requestResponsePairs = new HashMap<>();
 
     private static final Object mSync = new Object();
 
@@ -338,6 +340,16 @@ public class EventManager {
                 mEventListeners.add(e);
             }
         }
+    }
+
+    @VisibleForTesting
+    public LinkedBlockingQueue<EventRecord> getEventRecords() {
+        return mEventRecords;
+    }
+
+    @VisibleForTesting
+    public Map<Loggable, EventRecord> getCallEventRecordMap() {
+        return mCallEventRecordMap;
     }
 
     private void addEventRecord(EventRecord newRecord) {
