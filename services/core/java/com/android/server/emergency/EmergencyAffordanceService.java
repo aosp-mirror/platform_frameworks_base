@@ -99,6 +99,7 @@ public class EmergencyAffordanceService extends SystemService {
     };
     private boolean mSimNeedsEmergencyAffordance;
     private boolean mNetworkNeedsEmergencyAffordance;
+    private boolean mVoiceCapable;
 
     private void requestCellScan() {
         mHandler.obtainMessage(CELL_INFO_STATE_CHANGED).sendToTarget();
@@ -125,8 +126,8 @@ public class EmergencyAffordanceService extends SystemService {
 
     private void updateEmergencyAffordanceNeeded() {
         synchronized (mLock) {
-            mEmergencyAffordanceNeeded = mSimNeedsEmergencyAffordance ||
-                    mNetworkNeedsEmergencyAffordance;
+            mEmergencyAffordanceNeeded = mVoiceCapable && (mSimNeedsEmergencyAffordance ||
+                    mNetworkNeedsEmergencyAffordance);
             Settings.Global.putInt(mContext.getContentResolver(),
                     Settings.Global.EMERGENCY_AFFORDANCE_NEEDED,
                     mEmergencyAffordanceNeeded ? 1 : 0);
@@ -157,6 +158,11 @@ public class EmergencyAffordanceService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
+            mVoiceCapable = mTelephonyManager.isVoiceCapable();
+            if (!mVoiceCapable) {
+                updateEmergencyAffordanceNeeded();
+                return;
+            }
             mSubscriptionManager = SubscriptionManager.from(mContext);
             HandlerThread thread = new HandlerThread(TAG);
             thread.start();
