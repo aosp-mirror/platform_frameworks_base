@@ -1909,6 +1909,61 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verifyScreenTimeoutCall(Integer.MAX_VALUE, false);
     }
 
+    public void testSetRequiredStrongAuthTimeout_DeviceOwner() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        final long MINIMUM_STRONG_AUTH_TIMEOUT_MS = 1 * 60 * 60 * 1000; // 1h
+        final long ONE_MINUTE = 60 * 1000;
+
+        // aggregation should be the default if unset by any admin
+        assertEquals(dpm.getRequiredStrongAuthTimeout(null),
+                DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS);
+
+        // admin not participating by default
+        assertEquals(dpm.getRequiredStrongAuthTimeout(admin1), 0);
+
+        //clamping from the top
+        dpm.setRequiredStrongAuthTimeout(admin1,
+                DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS + ONE_MINUTE);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(admin1),
+                DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(null),
+                DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS);
+
+        // 0 means default
+        dpm.setRequiredStrongAuthTimeout(admin1, 0);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(admin1), 0);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(null),
+                DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS);
+
+        // clamping from the bottom
+        dpm.setRequiredStrongAuthTimeout(admin1, MINIMUM_STRONG_AUTH_TIMEOUT_MS - ONE_MINUTE);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(admin1), MINIMUM_STRONG_AUTH_TIMEOUT_MS);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(null), MINIMUM_STRONG_AUTH_TIMEOUT_MS);
+
+        // value within range
+        dpm.setRequiredStrongAuthTimeout(admin1, MINIMUM_STRONG_AUTH_TIMEOUT_MS + ONE_MINUTE);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(admin1), MINIMUM_STRONG_AUTH_TIMEOUT_MS
+                + ONE_MINUTE);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(null), MINIMUM_STRONG_AUTH_TIMEOUT_MS
+                + ONE_MINUTE);
+
+        // reset to default
+        dpm.setRequiredStrongAuthTimeout(admin1, 0);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(admin1), 0);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(null),
+                DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS);
+
+        // negative value
+        try {
+            dpm.setRequiredStrongAuthTimeout(admin1, -ONE_MINUTE);
+            fail("Didn't throw IllegalArgumentException");
+        } catch (IllegalArgumentException iae) {
+        }
+    }
+
     private void verifyScreenTimeoutCall(Integer expectedTimeout,
             boolean shouldStayOnWhilePluggedInBeCleared) {
         if (expectedTimeout == null) {
