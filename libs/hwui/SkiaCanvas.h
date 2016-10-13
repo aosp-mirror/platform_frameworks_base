@@ -48,7 +48,8 @@ public:
         return mCanvas.get();
     }
 
-    virtual void resetRecording(int width, int height) override {
+    virtual void resetRecording(int width, int height,
+            uirenderer::RenderNode* renderNode) override {
         LOG_ALWAYS_FATAL("SkiaCanvas cannot be reset as a recording canvas");
     }
 

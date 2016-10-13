@@ -17,6 +17,7 @@
 #include "Canvas.h"
 
 #include "RecordingCanvas.h"
+#include "RenderNode.h"
 #include "MinikinUtils.h"
 #include "Paint.h"
 #include "Typeface.h"
@@ -25,7 +26,7 @@
 
 namespace android {
 
-Canvas* Canvas::create_recording_canvas(int width, int height) {
+Canvas* Canvas::create_recording_canvas(int width, int height, uirenderer::RenderNode* renderNode) {
     return new uirenderer::RecordingCanvas(width, height);
 }
 

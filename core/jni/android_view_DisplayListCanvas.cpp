@@ -169,14 +169,16 @@ static jlong android_view_DisplayListCanvas_finishRecording(JNIEnv* env,
 }
 
 static jlong android_view_DisplayListCanvas_createDisplayListCanvas(JNIEnv* env, jobject clazz,
-        jint width, jint height) {
-    return reinterpret_cast<jlong>(Canvas::create_recording_canvas(width, height));
+        jlong renderNodePtr, jint width, jint height) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return reinterpret_cast<jlong>(Canvas::create_recording_canvas(width, height, renderNode));
 }
 
 static void android_view_DisplayListCanvas_resetDisplayListCanvas(JNIEnv* env, jobject clazz,
-        jlong canvasPtr, jint width, jint height) {
+        jlong canvasPtr, jlong renderNodePtr, jint width, jint height) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
-    canvas->resetRecording(width, height);
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    canvas->resetRecording(width, height, renderNode);
 }
 
 
@@ -229,8 +231,8 @@ static JNINativeMethod gMethods[] = {
     { "nFinishRecording",   "(J)J",            (void*) android_view_DisplayListCanvas_finishRecording },
     { "nDrawRenderNode",    "(JJ)V",           (void*) android_view_DisplayListCanvas_drawRenderNode },
 
-    { "nCreateDisplayListCanvas", "(II)J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
-    { "nResetDisplayListCanvas", "(JII)V",     (void*) android_view_DisplayListCanvas_resetDisplayListCanvas },
+    { "nCreateDisplayListCanvas", "(JII)J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
+    { "nResetDisplayListCanvas", "(JJII)V",     (void*) android_view_DisplayListCanvas_resetDisplayListCanvas },
 
     { "nDrawLayer",               "(JJ)V",     (void*) android_view_DisplayListCanvas_drawLayer },
 

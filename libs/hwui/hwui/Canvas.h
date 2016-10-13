@@ -74,7 +74,23 @@ public:
 
     static Canvas* create_canvas(const SkBitmap& bitmap);
 
-    static WARN_UNUSED_RESULT Canvas* create_recording_canvas(int width, int height);
+    /**
+     *  Create a new Canvas object that records view system drawing operations for deferred
+     *  rendering. A canvas returned by this call supports calls to the resetRecording(...) and
+     *  finishRecording() calls.  The latter call returns a DisplayList that is specific to the
+     *  RenderPipeline defined by Properties::getRenderPipelineType().
+     *
+     *  @param width of the requested Canvas.
+     *  @param height of the requested Canvas.
+     *  @param renderNode is an optional parameter that specifies the node that will consume the
+     *      DisplayList produced by the returned Canvas.  This enables the reuse of select C++
+     *      objects as a speed optimization.
+     *  @return new non-null Canvas Object.  The type of DisplayList produced by this canvas is
+            determined based on Properties::getRenderPipelineType().
+     *
+     */
+    static WARN_UNUSED_RESULT Canvas* create_recording_canvas(int width, int height,
+            uirenderer::RenderNode* renderNode = nullptr);
 
     /**
      *  Create a new Canvas object which delegates to an SkCanvas.
@@ -83,7 +99,8 @@ public:
      *      delegated to this object. This function will call ref() on the
      *      SkCanvas, and the returned Canvas will unref() it upon
      *      destruction.
-     *  @return new Canvas object. Will not return NULL.
+     *  @return new non-null Canvas Object.  The type of DisplayList produced by this canvas is
+     *      determined based on  Properties::getRenderPipelineType().
      */
     static Canvas* create_canvas(SkCanvas* skiaCanvas);
 
@@ -112,7 +129,8 @@ public:
 // View System operations (not exposed in public Canvas API)
 // ----------------------------------------------------------------------------
 
-    virtual void resetRecording(int width, int height) = 0;
+    virtual void resetRecording(int width, int height,
+            uirenderer::RenderNode* renderNode = nullptr) = 0;
     virtual uirenderer::DisplayList* finishRecording() = 0;
     virtual void insertReorderBarrier(bool enableReorder) = 0;
 

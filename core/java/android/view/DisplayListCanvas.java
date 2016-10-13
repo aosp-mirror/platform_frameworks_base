@@ -52,9 +52,10 @@ public class DisplayListCanvas extends Canvas {
         if (node == null) throw new IllegalArgumentException("node cannot be null");
         DisplayListCanvas canvas = sPool.acquire();
         if (canvas == null) {
-            canvas = new DisplayListCanvas(width, height);
+            canvas = new DisplayListCanvas(node, width, height);
         } else {
-            nResetDisplayListCanvas(canvas.mNativeCanvasWrapper, width, height);
+            nResetDisplayListCanvas(canvas.mNativeCanvasWrapper, node.mNativeRenderNode,
+                    width, height);
         }
         canvas.mNode = node;
         canvas.mWidth = width;
@@ -80,8 +81,8 @@ public class DisplayListCanvas extends Canvas {
     // Constructors
     ///////////////////////////////////////////////////////////////////////////
 
-    private DisplayListCanvas(int width, int height) {
-        super(nCreateDisplayListCanvas(width, height));
+    private DisplayListCanvas(@NonNull RenderNode node, int width, int height) {
+        super(nCreateDisplayListCanvas(node.mNativeRenderNode, width, height));
         mDensity = 0; // disable bitmap density scaling
     }
 
@@ -231,9 +232,10 @@ public class DisplayListCanvas extends Canvas {
     }
 
     @FastNative
-    private static native long nCreateDisplayListCanvas(int width, int height);
+    private static native long nCreateDisplayListCanvas(long node, int width, int height);
     @FastNative
-    private static native void nResetDisplayListCanvas(long canvas, int width, int height);
+    private static native void nResetDisplayListCanvas(long canvas, long node,
+            int width, int height);
     @FastNative
     private static native int nGetMaximumTextureWidth();
     @FastNative
