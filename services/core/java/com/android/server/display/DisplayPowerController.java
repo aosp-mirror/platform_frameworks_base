@@ -322,15 +322,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 com.android.internal.R.fraction.config_autoBrightnessAdjustmentMaxGamma,
                 1, 1);
 
-        int[] brightLevels = resources.getIntArray(
-                com.android.internal.R.array.config_dynamicHysteresisBrightLevels);
-        int[] darkLevels = resources.getIntArray(
-                com.android.internal.R.array.config_dynamicHysteresisDarkLevels);
-        int[] luxLevels = resources.getIntArray(
-                com.android.internal.R.array.config_dynamicHysteresisLuxLevels);
-        HysteresisLevels dynamicHysteresis = new HysteresisLevels(
-                brightLevels, darkLevels, luxLevels);
-
         if (mUseSoftwareAutoBrightnessConfig) {
             int[] lux = resources.getIntArray(
                     com.android.internal.R.array.config_autoBrightnessLevels);
@@ -341,6 +332,24 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             final float dozeScaleFactor = resources.getFraction(
                     com.android.internal.R.fraction.config_screenAutoBrightnessDozeScaleFactor,
                     1, 1);
+
+            // hysteresis configs
+            int[] brightHysteresisLevels = resources.getIntArray(
+                    com.android.internal.R.array.config_dynamicHysteresisBrightLevels);
+            int[] darkHysteresisLevels = resources.getIntArray(
+                    com.android.internal.R.array.config_dynamicHysteresisDarkLevels);
+            int[] luxHysteresisLevels = resources.getIntArray(
+                    com.android.internal.R.array.config_dynamicHysteresisLuxLevels);
+            // doze brightness configs
+            int[] dozeSensorLuxLevels = resources.getIntArray(
+                    com.android.internal.R.array.config_dozeSensorLuxLevels);
+            int[] dozeBrightnessBacklightValues = resources.getIntArray(
+                    com.android.internal.R.array.config_dozeBrightnessBacklightValues);
+            boolean useNewSensorSamplesForDoze = resources.getBoolean(
+                    com.android.internal.R.bool.config_useNewSensorSamplesForDoze);
+            LuxLevels luxLevels = new LuxLevels(brightHysteresisLevels, darkHysteresisLevels,
+                    luxHysteresisLevels, useNewSensorSamplesForDoze, dozeSensorLuxLevels,
+                    dozeBrightnessBacklightValues);
 
             Spline screenAutoBrightnessSpline = createAutoBrightnessSpline(lux, screenBrightness);
             if (screenAutoBrightnessSpline == null) {
@@ -368,7 +377,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         mScreenBrightnessRangeMaximum, dozeScaleFactor, lightSensorRate,
                         brighteningLightDebounce, darkeningLightDebounce,
                         autoBrightnessResetAmbientLuxAfterWarmUp, ambientLightHorizon,
-                        autoBrightnessAdjustmentMaxGamma, dynamicHysteresis);
+                        autoBrightnessAdjustmentMaxGamma, luxLevels);
             }
         }
 
