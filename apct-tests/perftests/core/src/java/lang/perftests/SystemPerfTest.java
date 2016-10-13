@@ -37,4 +37,10 @@ public class SystemPerfTest {
             System.nanoTime();
         }
     }
+
+    @Test
+    public void testBenchmarkOverhead() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {}
+    }
 }

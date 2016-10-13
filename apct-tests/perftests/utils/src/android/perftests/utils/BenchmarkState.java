@@ -23,6 +23,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides a benchmark framework.
@@ -41,39 +42,47 @@ import java.util.Collections;
  *     System.out.println(state.summaryLine());
  * }
  */
-public class BenchmarkState {
+public final class BenchmarkState {
     private static final String TAG = "BenchmarkState";
 
-    private static final int NOT_STARTED = 1;  // The benchmark has not started yet.
+    private static final int NOT_STARTED = 0;  // The benchmark has not started yet.
+    private static final int WARMUP = 1; // The benchmark is warming up.
     private static final int RUNNING = 2;  // The benchmark is running.
     private static final int RUNNING_PAUSED = 3;  // The benchmark is temporary paused.
     private static final int FINISHED = 4;  // The benchmark has stopped.
 
     private int mState = NOT_STARTED;  // Current benchmark state.
 
-    private long mNanoPreviousTime = 0;  // Previously captured System.nanoTime().
-    private long mNanoFinishTime = 0;  // Finish if System.nanoTime() returns after than this value.
-    private long mNanoPausedTime = 0; // The System.nanoTime() when the pauseTiming() is called.
-    private long mNanoPausedDuration = 0;  // The duration of paused state in nano sec.
-    private long mNanoTimeLimit = 1 * 1000 * 1000 * 1000;  // 1 sec. Default time limit.
+    private static final long WARMUP_DURATION_NS = ms2ns(250); // warm-up for at least 250ms
+    private static final int WARMUP_MIN_ITERATIONS = 16; // minimum iterations to warm-up for
+
+    // TODO: Tune these values.
+    private static final long TARGET_TEST_DURATION_NS = ms2ns(500); // target testing for 500 ms
+    private static final int MAX_TEST_ITERATIONS = 1000000;
+    private static final int MIN_TEST_ITERATIONS = 100;
+    private static final int REPEAT_COUNT = 5;
+
+    private long mStartTimeNs = 0;  // Previously captured System.nanoTime().
+    private long mPausedTimeNs = 0; // The System.nanoTime() when the pauseTiming() is called.
+    private long mPausedDurationNs = 0;  // The duration of paused state in nano sec.
+
+    private int mIteration = 0;
+    private int mMaxIterations = 0;
+
+    private int mRepeatCount = 0;
 
     // Statistics. These values will be filled when the benchmark has finished.
     // The computation needs double precision, but long int is fine for final reporting.
     private long mMedian = 0;
     private double mMean = 0.0;
     private double mStandardDeviation = 0.0;
-
-    // Number of iterations needed for calculating the stats.
-    private int mMinRepeatTimes = 16;
+    private long mMin = 0;
 
     // Individual duration in nano seconds.
     private ArrayList<Long> mResults = new ArrayList<>();
 
-    /**
-     * Sets the number of iterations needed for calculating the stats. Default is 16.
-     */
-    public void setMinRepeatTimes(int minRepeatTimes) {
-        mMinRepeatTimes = minRepeatTimes;
+    private static final long ms2ns(long ms) {
+        return TimeUnit.MILLISECONDS.toNanos(ms);
     }
 
     /**
@@ -89,8 +98,13 @@ public class BenchmarkState {
         mMedian = size % 2 == 0 ? (mResults.get(size / 2) + mResults.get(size / 2 + 1)) / 2 :
                 mResults.get(size / 2);
 
+        mMin = mResults.get(0);
         for (int i = 0; i < size; ++i) {
-            mMean += mResults.get(i);
+            long result = mResults.get(i);
+            mMean += result;
+            if (result < mMin) {
+                mMin = result;
+            }
         }
         mMean /= (double) size;
 
@@ -108,7 +122,7 @@ public class BenchmarkState {
             throw new IllegalStateException(
                     "Unable to pause the benchmark. The benchmark has already paused.");
         }
-        mNanoPausedTime = System.nanoTime();
+        mPausedTimeNs = System.nanoTime();
         mState = RUNNING_PAUSED;
     }
 
@@ -119,9 +133,41 @@ public class BenchmarkState {
             throw new IllegalStateException(
                     "Unable to resume the benchmark. The benchmark is already running.");
         }
-        mNanoPausedDuration += System.nanoTime() - mNanoPausedTime;
-        mNanoPausedTime = 0;
+        mPausedDurationNs += System.nanoTime() - mPausedTimeNs;
+        mPausedTimeNs = 0;
         mState = RUNNING;
+    }
+
+    private void beginWarmup() {
+        mStartTimeNs = System.nanoTime();
+        mIteration = 0;
+        mState = WARMUP;
+    }
+
+    private void beginBenchmark(long warmupDuration, int iterations) {
+        mMaxIterations = (int) (TARGET_TEST_DURATION_NS / (warmupDuration / iterations));
+        mMaxIterations = Math.min(MAX_TEST_ITERATIONS,
+                Math.max(mMaxIterations, MIN_TEST_ITERATIONS));
+        mPausedDurationNs = 0;
+        mIteration = 0;
+        mRepeatCount = 0;
+        mState = RUNNING;
+        mStartTimeNs = System.nanoTime();
+    }
+
+    private boolean startNextTestRun() {
+        final long currentTime = System.nanoTime();
+        mResults.add((currentTime - mStartTimeNs - mPausedDurationNs) / mMaxIterations);
+        mRepeatCount++;
+        if (mRepeatCount >= REPEAT_COUNT) {
+            calculateSatistics();
+            mState = FINISHED;
+            return false;
+        }
+        mPausedDurationNs = 0;
+        mIteration = 0;
+        mStartTimeNs = System.nanoTime();
+        return true;
     }
 
     /**
@@ -132,23 +178,22 @@ public class BenchmarkState {
     public boolean keepRunning() {
         switch (mState) {
             case NOT_STARTED:
-                mNanoPreviousTime = System.nanoTime();
-                mNanoFinishTime = mNanoPreviousTime + mNanoTimeLimit;
-                mState = RUNNING;
+                beginWarmup();
+                return true;
+            case WARMUP:
+                mIteration++;
+                // Only check nanoTime on every iteration in WARMUP since we
+                // don't yet have a target iteration count.
+                final long duration = System.nanoTime() - mStartTimeNs;
+                if (mIteration >= WARMUP_MIN_ITERATIONS && duration >= WARMUP_DURATION_NS) {
+                    beginBenchmark(duration, mIteration);
+                }
                 return true;
             case RUNNING:
-                final long currentTime = System.nanoTime();
-                mResults.add(currentTime - mNanoPreviousTime - mNanoPausedDuration);
-                mNanoPausedDuration = 0;
-
-                // To calculate statistics, needs two or more samples.
-                if (mResults.size() > mMinRepeatTimes && currentTime > mNanoFinishTime) {
-                    calculateSatistics();
-                    mState = FINISHED;
-                    return false;
+                mIteration++;
+                if (mIteration >= mMaxIterations) {
+                    return startNextTestRun();
                 }
-
-                mNanoPreviousTime = currentTime;
                 return true;
             case RUNNING_PAUSED:
                 throw new IllegalStateException(
@@ -161,21 +206,28 @@ public class BenchmarkState {
         }
     }
 
-    public long mean() {
+    private long mean() {
         if (mState != FINISHED) {
             throw new IllegalStateException("The benchmark hasn't finished");
         }
         return (long) mMean;
     }
 
-    public long median() {
+    private long median() {
         if (mState != FINISHED) {
             throw new IllegalStateException("The benchmark hasn't finished");
         }
         return mMedian;
     }
 
-    public long standardDeviation() {
+    private long min() {
+        if (mState != FINISHED) {
+            throw new IllegalStateException("The benchmark hasn't finished");
+        }
+        return mMin;
+    }
+
+    private long standardDeviation() {
         if (mState != FINISHED) {
             throw new IllegalStateException("The benchmark hasn't finished");
         }
@@ -187,10 +239,11 @@ public class BenchmarkState {
         sb.append("Summary: ");
         sb.append("median=").append(median()).append("ns, ");
         sb.append("mean=").append(mean()).append("ns, ");
+        sb.append("min=").append(min()).append("ns, ");
         sb.append("sigma=").append(standardDeviation()).append(", ");
         sb.append("iteration=").append(mResults.size()).append(", ");
         // print out the first few iterations' number for double checking.
-        int sampleNumber = Math.min(mResults.size(), mMinRepeatTimes);
+        int sampleNumber = Math.min(mResults.size(), 16);
         for (int i = 0; i < sampleNumber; i++) {
             sb.append("No ").append(i).append(" result is ").append(mResults.get(i)).append(", ");
         }
@@ -202,6 +255,7 @@ public class BenchmarkState {
         Bundle status = new Bundle();
         status.putLong(key + "_median", median());
         status.putLong(key + "_mean", mean());
+        status.putLong(key + "_min", min());
         status.putLong(key + "_standardDeviation", standardDeviation());
         instrumentation.sendStatus(Activity.RESULT_OK, status);
     }
