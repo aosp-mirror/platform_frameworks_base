@@ -21,6 +21,7 @@ commonSources := \
     Asset.cpp \
     AssetDir.cpp \
     AssetManager.cpp \
+    AttributeResolution.cpp \
     LocaleData.cpp \
     misc.cpp \
     ObbFile.cpp \
