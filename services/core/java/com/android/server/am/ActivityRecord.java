@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.StackId;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
@@ -150,11 +149,11 @@ final class ActivityRecord {
     long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
     long pauseTime;         // last time we started pausing the activity
     long launchTickTime;    // base time for launch tick messages
-    Configuration configuration; // configuration activity was last running in
+    Configuration mLastReportedConfiguration; // configuration activity was last running in
     // Overridden configuration by the activity task
-    // WARNING: Reference points to {@link TaskRecord#mOverrideConfig}, so its internal state
-    // should never be altered directly.
-    Configuration taskConfigOverride;
+    // WARNING: Reference points to {@link TaskRecord#getMergedOverrideConfig}, so its internal
+    // state should never be altered directly.
+    Configuration mLastReportedOverrideConfiguration;
     CompatibilityInfo compat;// last used compatibility mode
     ActivityRecord resultTo; // who started this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
@@ -279,8 +278,10 @@ final class ActivityRecord {
                 pw.print(" labelRes=0x"); pw.print(Integer.toHexString(labelRes));
                 pw.print(" icon=0x"); pw.print(Integer.toHexString(icon));
                 pw.print(" theme=0x"); pw.println(Integer.toHexString(theme));
-        pw.print(prefix); pw.print("config="); pw.println(configuration);
-        pw.print(prefix); pw.print("taskConfigOverride="); pw.println(taskConfigOverride);
+        pw.print(prefix); pw.print("mLastReportedConfiguration=");
+                pw.println(mLastReportedConfiguration);
+        pw.print(prefix); pw.print("mLastReportedOverrideConfiguration=");
+                pw.println(mLastReportedOverrideConfiguration);
         if (resultTo != null || resultWho != null) {
             pw.print(prefix); pw.print("resultTo="); pw.print(resultTo);
                     pw.print(" resultWho="); pw.print(resultWho);
@@ -457,7 +458,8 @@ final class ActivityRecord {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + this + " " +
                     "reportToActivity=" + reportToActivity + " and config: " + config);
 
-            app.thread.scheduleActivityConfigurationChanged(appToken, config, reportToActivity);
+            app.thread.scheduleActivityConfigurationChanged(appToken, new Configuration(config),
+                    reportToActivity);
         } catch (RemoteException e) {
             // If process died, whatever.
         }
@@ -614,8 +616,8 @@ final class ActivityRecord {
         resolvedType = _resolvedType;
         componentSpecified = _componentSpecified;
         rootVoiceInteraction = _rootVoiceInteraction;
-        configuration = _configuration;
-        taskConfigOverride = Configuration.EMPTY;
+        mLastReportedConfiguration = new Configuration(_configuration);
+        mLastReportedOverrideConfiguration = new Configuration();
         resultTo = _resultTo;
         resultWho = _resultWho;
         requestCode = _reqCode;
