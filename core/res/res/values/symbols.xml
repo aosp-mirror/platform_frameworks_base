@@ -3082,4 +3082,5 @@
 
   <java-symbol type="integer" name="config_stableDeviceDisplayWidth" />
   <java-symbol type="integer" name="config_stableDeviceDisplayHeight" />
+  <java-symbol type="bool" name="config_display_no_service_when_sim_unready" />
 </resources>
