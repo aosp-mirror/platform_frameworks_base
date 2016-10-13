@@ -5430,7 +5430,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowList windows = displayContent.getWindowList();
 
         final int oldRotation = mRotation;
-        boolean rotateSeamlessly = mPolicy.shouldRotateSeamlessly(oldRotation, mRotation);
+        int rotation = mPolicy.rotationForOrientationLw(mLastOrientation, mRotation);
+        boolean rotateSeamlessly = mPolicy.shouldRotateSeamlessly(oldRotation, rotation);
 
         if (rotateSeamlessly) {
             for (int i = windows.size() - 1; i >= 0; i--) {
@@ -5463,7 +5464,6 @@ public class WindowManagerService extends IWindowManager.Stub
         //       an orientation that has different metrics than it expected.
         //       eg. Portrait instead of Landscape.
 
-        int rotation = mPolicy.rotationForOrientationLw(mLastOrientation, mRotation);
         boolean altOrientation = !mPolicy.rotationHasCompatibleMetricsLw(
                 mLastOrientation, rotation);
 
