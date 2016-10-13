@@ -337,13 +337,11 @@ public class UsbDeviceManager {
                 // Restore default functions.
                 mCurrentFunctions = SystemProperties.get(USB_CONFIG_PROPERTY,
                         UsbManager.USB_FUNCTION_NONE);
-                if (UsbManager.USB_FUNCTION_NONE.equals(mCurrentFunctions)) {
-                    mCurrentFunctions = UsbManager.USB_FUNCTION_MTP;
-                }
                 mCurrentFunctionsApplied = mCurrentFunctions.equals(
                         SystemProperties.get(USB_STATE_PROPERTY));
                 mAdbEnabled = UsbManager.containsFunction(getDefaultFunctions(),
                         UsbManager.USB_FUNCTION_ADB);
+
                 setEnabledFunctions(null, false);
 
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
@@ -452,17 +450,24 @@ public class UsbDeviceManager {
             if (DEBUG) Slog.d(TAG, "setAdbEnabled: " + enable);
             if (enable != mAdbEnabled) {
                 mAdbEnabled = enable;
+                String oldFunctions = mCurrentFunctions;
 
-                // Due to the persist.sys.usb.config property trigger, changing adb state requires
-                // persisting default function
-                String oldFunctions = getDefaultFunctions();
-                String newFunctions = applyAdbFunction(oldFunctions);
-                if (!oldFunctions.equals(newFunctions)) {
-                    SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY, newFunctions);
+                // Persist the adb setting
+                String newFunction = applyAdbFunction(SystemProperties.get(
+                            USB_PERSISTENT_CONFIG_PROPERTY, UsbManager.USB_FUNCTION_NONE));
+                SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY, newFunction);
+
+                // Changing the persistent config also changes the normal
+                // config. Wait for this to happen before changing again.
+                waitForState(newFunction);
+
+                // Remove mtp from the config if file transfer is not enabled
+                if (oldFunctions.equals(UsbManager.USB_FUNCTION_MTP) &&
+                        !mUsbDataUnlocked && enable) {
+                    oldFunctions = UsbManager.USB_FUNCTION_NONE;
                 }
 
-                // After persisting them use the lock-down aware function set
-                setEnabledFunctions(mCurrentFunctions, false);
+                setEnabledFunctions(oldFunctions, false);
                 updateAdbNotification();
             }
 
@@ -514,7 +519,8 @@ public class UsbDeviceManager {
         }
 
         private boolean trySetEnabledFunctions(String functions, boolean forceRestart) {
-            if (functions == null) {
+            if (functions == null || applyAdbFunction(functions)
+                    .equals(UsbManager.USB_FUNCTION_NONE)) {
                 functions = getDefaultFunctions();
             }
             functions = applyAdbFunction(functions);
@@ -596,10 +602,6 @@ public class UsbDeviceManager {
             if (mBroadcastedIntent == null) {
                 for (String key : keySet) {
                     if (intent.getBooleanExtra(key, false)) {
-                        // MTP function is enabled by default.
-                        if (UsbManager.USB_FUNCTION_MTP.equals(key)) {
-                            continue;
-                        }
                         return true;
                     }
                 }
