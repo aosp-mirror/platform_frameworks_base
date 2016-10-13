@@ -309,25 +309,49 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * Filter values in Bundle to only basic types.
      * @hide
      */
-    public void filterValues() {
+    public Bundle filterValues() {
         unparcel();
+        Bundle bundle = this;
         if (mMap != null) {
-            for (int i = mMap.size() - 1; i >= 0; i--) {
-                Object value = mMap.valueAt(i);
+            ArrayMap<String, Object> map = mMap;
+            for (int i = map.size() - 1; i >= 0; i--) {
+                Object value = map.valueAt(i);
                 if (PersistableBundle.isValidType(value)) {
                     continue;
                 }
                 if (value instanceof Bundle) {
-                    ((Bundle)value).filterValues();
+                    Bundle newBundle = ((Bundle)value).filterValues();
+                    if (newBundle != value) {
+                        if (map == mMap) {
+                            // The filter had to generate a new bundle, but we have not yet
+                            // created a new one here.  Do that now.
+                            bundle = new Bundle(this);
+                            // Note the ArrayMap<> constructor is guaranteed to generate
+                            // a new object with items in the same order as the original.
+                            map = bundle.mMap;
+                        }
+                        // Replace this current entry with the new child bundle.
+                        map.setValueAt(i, newBundle);
+                    }
+                    continue;
                 }
                 if (value.getClass().getName().startsWith("android.")) {
                     continue;
                 }
-                mMap.removeAt(i);
+                if (map == mMap) {
+                    // This is the first time we have had to remove something, that means we
+                    // need to switch to a new Bundle.
+                    bundle = new Bundle(this);
+                    // Note the ArrayMap<> constructor is guaranteed to generate
+                    // a new object with items in the same order as the original.
+                    map = bundle.mMap;
+                }
+                map.removeAt(i);
             }
         }
         mFlags |= FLAG_HAS_FDS_KNOWN;
         mFlags &= ~FLAG_HAS_FDS;
+        return bundle;
     }
 
     /**
