@@ -346,7 +346,8 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </p>
 
     <p class="warning">
-      <strong>Warning:</strong> Installing a system image on a watch removes all data from the
+      <strong>Warning:</strong> Installing a system image on a watch
+      removes all data from the
       watch, so you should back up your data first.
     </p>
 
@@ -355,8 +356,7 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </h4>
 
     <p>
-      From the phone, unpair ("Forget") the watch.
-      Then on the watch, enable the Developer Options menu and ADB debugging as
+      On the watch, enable the Developer Options menu and ADB debugging as
       follows:
     </p>
 
@@ -365,14 +365,14 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       </li>
 
       <li>Scroll to the bottom of the menu. If no <strong>Developer
-      Options</strong> item is provided, tap <strong>About</strong>.
+      Options</strong> item is provided, tap <strong>System</strong>
+      and then <strong>About</strong>.
       </li>
 
       <li>Tap the build number 7 times.
       </li>
 
-      <li>From the Settings menu, tap the <strong>Developer Options</strong>
-      item.
+      <li>From the Settings menu, tap <strong>Developer Options</strong>.
       </li>
 
       <li>Enable ADB debugging.
@@ -418,7 +418,9 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       </li>
 
       <li>Use the following <a href="{@docRoot}tools/help/adb.html">adb
-      command</a> to confirm that the watch is available for flashing:
+      command</a> to confirm that the watch is recognized.
+      You may need to turn ADB debugging off and then on for the watch to
+      be recognized:
       <code>adb devices</code>
       </li>
 
@@ -432,11 +434,11 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       devices, <code>fastboot oem unlock</code>
       </li>
 
-      <li>On the watch, select the <strong>Unlock</strong> option.
+      <li>On the watch, select the option to unlock the bootloader.
       </li>
 
-      <li>Navigate to the directory where you unzipped the system image in Step
-      1. At the top level of that directory,
+      <li>On your computer, navigate to the directory where you unzipped the
+      system image in Step 1. At the top level of that directory,
       execute the <code>flash-all</code> script by typing
       <code>flash-all.sh</code> or, in the case of Windows,
       <code>flash-all.bat</code>. The following may need to
@@ -449,16 +451,16 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       Set up the watch
     </h4>
 
-      <p>
-        After the <code>flash-all</code> script finishes, your watch reboots.
-        Only pair the watch with a phone (so you can begin testing the preview)
-        by using the instructions in <a href="#set_up_a_phone">Set Up a Phone</a>.
-        Additionally, before installing an app, perform the
-        following steps on the watch to re-secure the watch's bootloader:
+    <p>
+      After the <code>flash-all</code> script finishes, the watch reboots.
+      Only pair the watch with a phone (so you can begin testing the preview)
+      by using the instructions in <a href="#set_up_a_phone">Set Up a Phone</a>.
+      Additionally, before installing an app, perform the
+      following steps on the watch to re-secure the watch's bootloader:
     </p>
 
     <ol>
-      <li>Open the Settings menu (on the watch).
+      <li>Open the Settings menu by long-pressing the physical button.
       </li>
 
       <li>Scroll to the bottom of the menu and tap <strong>About</strong>.
@@ -467,15 +469,16 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       <li>Tap the build number 7 times.
       </li>
 
-      <li>From the Settings menu, tap the <strong>Developer Options</strong>
-      item.
+      <li>From the Settings menu, tap <strong>Developer Options</strong>.
       </li>
 
       <li>Enable ADB debugging.
       </li>
 
       <li>Connect the watch to your computer and tap <strong>Always allow from
-      this computer</strong>.
+      this computer</strong>. (You may need to turn ADB debugging off
+      and then on, to be prompted to always allow ADB debugging from
+      the connected computer.)
       </li>
 
       <li>Use the following adb command to start the device in fastboot mode:
@@ -487,8 +490,11 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       devices, <code>fastboot oem lock</code>
       </li>
 
-      <li>On the watch, continue the boot by choosing
-      <strong>Start</strong> and touching <strong>'0'</strong>.
+      <li>On the watch, continue the boot as follows:
+      On an LGE Watch Urbane 2nd Edition, choose
+      <strong>Start</strong> and touch <strong>'0'</strong>.
+      On a Huawei Watch, confirm that <strong>Reboot</strong> is chosen and
+      long-press the physical button.
       </li>
     </ol>
 
@@ -610,7 +616,8 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
 
     <p>
       After you install the beta version of the companion app on a phone,
-      you can pair the phone to the watch:
+      unpair ("Forget") any obsolete watch pairings, if necessary.
+      Then you can pair the phone to a newly-imaged watch:
     </p>
 
     <ol>
