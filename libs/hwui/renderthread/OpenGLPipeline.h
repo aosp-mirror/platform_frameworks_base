@@ -26,9 +26,6 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-class Frame;
-
-
 class OpenGLPipeline : public IRenderPipeline {
 public:
     OpenGLPipeline(RenderThread& thread);
@@ -59,6 +56,7 @@ public:
     bool createOrUpdateLayer(RenderNode* node,
             const DamageAccumulator& damageAccumulator) override;
     static void destroyLayer(RenderNode* node);
+    GrContext* getGrContext() override { return nullptr; }
 
 private:
     EglManager& mEglManager;

@@ -19,10 +19,12 @@
 
 #include <utils/Trace.h>
 
+#include "DamageAccumulator.h"
 #include "Debug.h"
 #include "DisplayList.h"
 #include "RecordedOp.h"
 #include "RenderNode.h"
+#include "VectorDrawable.h"
 
 namespace android {
 namespace uirenderer {
@@ -84,6 +86,47 @@ size_t DisplayList::addChild(NodeOpType* op) {
     size_t index = children.size();
     children.push_back(op);
     return index;
+}
+
+void DisplayList::syncContents() {
+    for (auto& iter : functors) {
+        (*iter.functor)(DrawGlInfo::kModeSync, nullptr);
+    }
+    for (auto& vectorDrawable : vectorDrawables) {
+        vectorDrawable->syncProperties();
+    }
+}
+
+void DisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) {
+    for (auto&& child : children) {
+        updateFn(child->renderNode);
+    }
+}
+
+bool DisplayList::prepareListAndChildren(TreeInfo& info, bool functorsNeedLayer,
+        std::function<void(RenderNode*, TreeInfo&, bool)> childFn) {
+    TextureCache& cache = Caches::getInstance().textureCache;
+    for (auto&& bitmapResource : bitmapResources) {
+        void* ownerToken = &info.canvasContext;
+        info.prepareTextures = cache.prefetchAndMarkInUse(ownerToken, bitmapResource);
+    }
+    for (auto&& op : children) {
+        RenderNode* childNode = op->renderNode;
+        info.damageAccumulator->pushTransform(&op->localMatrix);
+        bool childFunctorsNeedLayer = functorsNeedLayer; // TODO! || op->mRecordedWithPotentialStencilClip;
+        childFn(childNode, info, childFunctorsNeedLayer);
+        info.damageAccumulator->popTransform();
+    }
+
+    bool isDirty = false;
+    for (auto& vectorDrawable : vectorDrawables) {
+        // If any vector drawable in the display list needs update, damage the node.
+        if (vectorDrawable->isDirty()) {
+            isDirty = true;
+        }
+        vectorDrawable->setPropertyChangeWillBeConsumed(true);
+    }
+    return isDirty;
 }
 
 }; // namespace uirenderer

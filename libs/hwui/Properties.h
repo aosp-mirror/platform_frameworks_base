@@ -308,6 +308,7 @@ public:
 
     static ProfileType getProfileType();
     static RenderPipelineType getRenderPipelineType();
+    static bool isSkiaEnabled();
 
     // Should be used only by test apps
     static bool waitForGpuCompletion;
