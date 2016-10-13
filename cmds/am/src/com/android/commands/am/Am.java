@@ -63,6 +63,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.view.IWindowManager;
 
 import com.android.internal.os.BaseCommand;
@@ -385,7 +386,9 @@ public class Am extends BaseCommand {
 
         String op = nextArgRequired();
 
-        if (op.equals("instrument")) {
+        if (op.equals("broadcast")) {
+            sendBroadcast();
+        } else if (op.equals("instrument")) {
             runInstrument();
         } else {
             runAmCmd(getRawArgs());
@@ -454,6 +457,90 @@ public class Am extends BaseCommand {
         } finally {
             cb.mActive = false;
         }
+    }
+
+    private Intent makeIntent(int defUser) throws URISyntaxException {
+        mStartFlags = 0;
+        mWaitOption = false;
+        mStopOption = false;
+        mRepeat = 0;
+        mProfileFile = null;
+        mSamplingInterval = 0;
+        mAutoStop = false;
+        mUserId = defUser;
+        mStackId = INVALID_STACK_ID;
+
+        return Intent.parseCommandArgs(mArgs, new Intent.CommandOptionHandler() {
+            @Override
+            public boolean handleOption(String opt, ShellCommand cmd) {
+                if (opt.equals("-D")) {
+                    mStartFlags |= ActivityManager.START_FLAG_DEBUG;
+                } else if (opt.equals("-N")) {
+                    mStartFlags |= ActivityManager.START_FLAG_NATIVE_DEBUGGING;
+                } else if (opt.equals("-W")) {
+                    mWaitOption = true;
+                } else if (opt.equals("-P")) {
+                    mProfileFile = nextArgRequired();
+                    mAutoStop = true;
+                } else if (opt.equals("--start-profiler")) {
+                    mProfileFile = nextArgRequired();
+                    mAutoStop = false;
+                } else if (opt.equals("--sampling")) {
+                    mSamplingInterval = Integer.parseInt(nextArgRequired());
+                } else if (opt.equals("-R")) {
+                    mRepeat = Integer.parseInt(nextArgRequired());
+                } else if (opt.equals("-S")) {
+                    mStopOption = true;
+                } else if (opt.equals("--track-allocation")) {
+                    mStartFlags |= ActivityManager.START_FLAG_TRACK_ALLOCATION;
+                } else if (opt.equals("--user")) {
+                    mUserId = UserHandle.parseUserArg(nextArgRequired());
+                } else if (opt.equals("--receiver-permission")) {
+                    mReceiverPermission = nextArgRequired();
+                } else if (opt.equals("--stack")) {
+                    mStackId = Integer.parseInt(nextArgRequired());
+                } else {
+                    return false;
+                }
+                return true;
+            }
+        });
+    }
+
+    private class IntentReceiver extends IIntentReceiver.Stub {
+        private boolean mFinished = false;
+
+        @Override
+        public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
+                boolean ordered, boolean sticky, int sendingUser) {
+            String line = "Broadcast completed: result=" + resultCode;
+            if (data != null) line = line + ", data=\"" + data + "\"";
+            if (extras != null) line = line + ", extras: " + extras;
+            System.out.println(line);
+            synchronized (this) {
+                mFinished = true;
+                notifyAll();
+            }
+        }
+
+        public synchronized void waitForFinish() {
+            try {
+                while (!mFinished) wait();
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
+    private void sendBroadcast() throws Exception {
+        Intent intent = makeIntent(UserHandle.USER_CURRENT);
+        IntentReceiver receiver = new IntentReceiver();
+        String[] requiredPermissions = mReceiverPermission == null ? null
+                : new String[] {mReceiverPermission};
+        System.out.println("Broadcasting: " + intent);
+        mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, requiredPermissions,
+                android.app.AppOpsManager.OP_NONE, null, true, false, mUserId);
+        receiver.waitForFinish();
     }
 
     private void runInstrument() throws Exception {
