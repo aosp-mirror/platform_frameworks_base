@@ -22,6 +22,7 @@ services := \
     core \
     accessibility \
     appwidget \
+    autofill \
     backup \
     devicepolicy \
     midi \

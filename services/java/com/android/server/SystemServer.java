@@ -184,6 +184,8 @@ public final class SystemServer {
             "com.android.server.content.ContentService$Lifecycle";
     private static final String WALLPAPER_SERVICE_CLASS =
             "com.android.server.wallpaper.WallpaperManagerService$Lifecycle";
+    private static final String AUTO_FILL_MANAGER_SERVICE_CLASS =
+            "com.android.server.autofill.AutoFillManagerService";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -1360,6 +1362,10 @@ public final class SystemServer {
 
         traceBeginAndSlog("StartRetailDemoModeService");
         mSystemServiceManager.startService(RetailDemoModeService.class);
+        traceEnd();
+
+        traceBeginAndSlog("StartAutoFillService");
+        mSystemServiceManager.startService(AUTO_FILL_MANAGER_SERVICE_CLASS);
         traceEnd();
 
         // It is now time to start up the app processes...
