@@ -204,7 +204,8 @@ public class IpConnectivityMetricsTest extends TestCase {
                 "    router_lifetime: 2000",
                 "  >",
                 "  time_ms: 700",
-                ">");
+                ">",
+                "version: 2");
 
         verifySerialization(want, getdump("flush"));
     }

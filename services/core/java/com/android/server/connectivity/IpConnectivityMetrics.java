@@ -40,6 +40,13 @@ final public class IpConnectivityMetrics extends SystemService {
     private static final String TAG = IpConnectivityMetrics.class.getSimpleName();
     private static final boolean DBG = false;
 
+    // The logical version numbers of ipconnectivity.proto, corresponding to the
+    // "version" field of IpConnectivityLog.
+    private static final int NYC      = 0;
+    private static final int NYC_MR1  = 1;
+    private static final int NYC_MR2  = 2;
+    public static final int VERSION   = NYC_MR2;
+
     private static final String SERVICE_NAME = IpConnectivityLog.SERVICE_NAME;
 
     // Default size of the event buffer. Once the buffer is full, incoming events are dropped.
