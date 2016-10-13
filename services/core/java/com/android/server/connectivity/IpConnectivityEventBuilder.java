@@ -48,6 +48,10 @@ final public class IpConnectivityEventBuilder {
         final IpConnectivityLog log = new IpConnectivityLog();
         log.events = toProto(events);
         log.droppedEvents = dropped;
+        if ((log.events.length > 0) || (dropped > 0)) {
+            // Only write version number if log has some information at all.
+            log.version = IpConnectivityMetrics.VERSION;
+        }
         return IpConnectivityLog.toByteArray(log);
     }
 
