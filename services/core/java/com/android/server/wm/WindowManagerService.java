@@ -583,6 +583,9 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArraySet<AppWindowToken> mOpeningApps = new ArraySet<>();
     final ArraySet<AppWindowToken> mClosingApps = new ArraySet<>();
 
+    final UnknownAppVisibilityController mUnknownAppVisibilityController =
+            new UnknownAppVisibilityController(this);
+
     boolean mIsTouchDevice;
 
     final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
@@ -2069,6 +2072,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
             }
 
+            if (win.mAppToken != null) {
+                mUnknownAppVisibilityController.notifyRelayouted(win.mAppToken);
+            }
+
             win.setDisplayLayoutNeeded();
             win.mGivenInsetsPending = (flags&WindowManagerGlobal.RELAYOUT_INSETS_PENDING) != 0;
             configChanged = updateOrientationFromAppTokensLocked(false, displayId);
@@ -3193,6 +3200,19 @@ public class WindowManagerService extends IWindowManager.Stub
             wtoken.setVisibility(null, visible, TRANSIT_UNSET, true, wtoken.voiceInteraction);
             wtoken.updateReportedVisibilityLocked();
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Notifies that we launched an app that might be visible or not visible depending on what kind
+     * of Keyguard flags it's going to set on its windows.
+     */
+    public void notifyUnknownAppVisibilityLaunched(IBinder token) {
+        synchronized(mWindowMap) {
+            AppWindowToken appWindow = mRoot.getAppWindowToken(token);
+            if (appWindow != null) {
+                mUnknownAppVisibilityController.notifyLaunched(appWindow);
+            }
         }
     }
 
@@ -7692,6 +7712,15 @@ public class WindowManagerService extends IWindowManager.Stub
             final AppWindowToken appWindow = mRoot.getAppWindowToken(token);
             if (appWindow != null) {
                 appWindow.clearRelaunching();
+            }
+        }
+    }
+
+    public void notifyAppResumedFinished(IBinder token) {
+        synchronized (mWindowMap) {
+            final AppWindowToken appWindow = mRoot.getAppWindowToken(token);
+            if (appWindow != null) {
+                mUnknownAppVisibilityController.notifyAppResumedFinished(appWindow);
             }
         }
     }

@@ -1222,6 +1222,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer
                     displayId);
         }
 
+        if (mKeyguardController.isKeyguardLocked()) {
+            mWindowManager.notifyUnknownAppVisibilityLaunched(r.appToken);
+        }
+
         r.app = app;
         app.waitingToKill = null;
         r.launchCount++;

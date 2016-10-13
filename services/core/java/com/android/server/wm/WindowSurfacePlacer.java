@@ -361,6 +361,7 @@ class WindowSurfacePlacer {
 
         mService.mOpeningApps.clear();
         mService.mClosingApps.clear();
+        mService.mUnknownAppVisibilityController.clear();
 
         // This has changed the visibility of windows, so perform
         // a new layout to get them all up-to-date.
@@ -552,6 +553,14 @@ class WindowSurfacePlacer {
             // We also need to wait for the specs to be fetched, if needed.
             if (mService.mAppTransition.isFetchingAppTransitionsSpecs()) {
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "isFetchingAppTransitionSpecs=true");
+                return false;
+            }
+
+            if (!mService.mUnknownAppVisibilityController.allResolved()) {
+                if (DEBUG_APP_TRANSITIONS) {
+                    Slog.v(TAG, "unknownApps is not empty: "
+                            + mService.mUnknownAppVisibilityController.getDebugMessage());
+                }
                 return false;
             }
 

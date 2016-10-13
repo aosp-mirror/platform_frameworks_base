@@ -6758,6 +6758,7 @@ public class ActivityManagerService extends ActivityManagerNative
         final long origId = Binder.clearCallingIdentity();
         synchronized(this) {
             ActivityRecord.activityResumedLocked(token);
+            mWindowManager.notifyAppResumedFinished(token);
         }
         Binder.restoreCallingIdentity(origId);
     }

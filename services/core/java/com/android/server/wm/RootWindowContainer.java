@@ -483,6 +483,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     appToken.voiceInteraction);
 
             mService.mOpeningApps.remove(appToken);
+            mService.mUnknownAppVisibilityController.appRemoved(appToken);
             appToken.waitingToShow = false;
             if (mService.mClosingApps.contains(appToken)) {
                 delayed = true;
