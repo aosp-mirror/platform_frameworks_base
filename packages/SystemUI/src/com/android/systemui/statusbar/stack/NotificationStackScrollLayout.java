@@ -1056,7 +1056,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public int getMaxExpandHeight(ExpandableView view) {
         int maxContentHeight = view.getMaxContentHeight();
-        if (view.isSummaryWithChildren()) {
+        if (view.isSummaryWithChildren() && view.getParent() == this) {
             // Faking a measure with the group expanded to simulate how the group would look if
             // it was. Doing a calculation here would be highly non-trivial because of the
             // algorithm
@@ -1071,8 +1071,11 @@ public class NotificationStackScrollLayout extends ViewGroup
                     row.getStatusBarNotification());
             mGroupExpandedForMeasure = false;
             row.setForceUnlocked(false);
-            int height = mCurrentStackScrollState.getViewStateForView(view).height;
-            return Math.min(height, maxContentHeight);
+            StackViewState viewState = mCurrentStackScrollState.getViewStateForView(view);
+            if (viewState != null) {
+                // The view could have been removed
+                return Math.min(viewState.height, maxContentHeight);
+            }
         }
         return maxContentHeight;
     }
