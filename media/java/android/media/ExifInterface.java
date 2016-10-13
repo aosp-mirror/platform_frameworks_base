@@ -1372,8 +1372,7 @@ public class ExifInterface {
      */
     public void saveAttributes() throws IOException {
         if (!mIsSupportedFile) {
-            throw new UnsupportedOperationException(
-                    "ExifInterface only supports saving attributes on JPEG formats.");
+            throw new IOException("ExifInterface only supports saving attributes on JPEG formats.");
         }
         // Keep the thumbnail in memory
         mThumbnailBytes = getThumbnail();
