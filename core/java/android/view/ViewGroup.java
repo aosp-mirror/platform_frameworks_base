@@ -1865,8 +1865,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 // Synthesize an exit from a move or enter.
                 // Ignore the result because hover focus has moved to a different view.
                 if (action == MotionEvent.ACTION_HOVER_MOVE) {
+                    final boolean hoverExitPending = event.isHoverExitPending();
+                    event.setHoverExitPending(true);
                     dispatchTransformedGenericPointerEvent(
                             event, child); // move
+                    event.setHoverExitPending(hoverExitPending);
                 }
                 eventNoHistory = obtainMotionEventNoHistoryOrSelf(eventNoHistory);
                 eventNoHistory.setAction(MotionEvent.ACTION_HOVER_EXIT);
@@ -1880,8 +1883,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             firstOldHoverTarget = nextOldHoverTarget;
         }
 
-        // Send events to the view group itself if no children have handled it.
-        boolean newHoveredSelf = !handled;
+        // Send events to the view group itself if no children have handled it and the view group
+        // itself is not currently being hover-exited.
+        boolean newHoveredSelf = !handled &&
+                (action != MotionEvent.ACTION_HOVER_EXIT) && !event.isHoverExitPending();
         if (newHoveredSelf == mHoveredSelf) {
             if (newHoveredSelf) {
                 // Send event to the view group as before.
