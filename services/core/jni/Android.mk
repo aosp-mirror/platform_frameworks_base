@@ -68,7 +68,5 @@ LOCAL_SHARED_LIBRARIES += \
     libhwbinder \
     libutils \
     android.hardware.power@1.0 \
-
-LOCAL_SHARED_LIBRARIES += \
-    libhidl libhwbinder android.hardware.vibrator@1.0
-
+    android.hardware.vibrator@1.0 \
+    android.hardware.light@2.0 \
