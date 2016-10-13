@@ -28,8 +28,7 @@ import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
-import static android.view.Display.DEFAULT_DISPLAY;
-
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SCREENSHOTS;
@@ -897,7 +896,8 @@ final class ActivityRecord {
 
     boolean isNonResizableOrForced() {
         return !isHomeActivity() && info.resizeMode != RESIZE_MODE_RESIZEABLE
-                && info.resizeMode != RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+                && info.resizeMode != RESIZE_MODE_RESIZEABLE_AND_PIPABLE
+                && info.resizeMode != RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
     }
 
     boolean supportsPictureInPicture() {

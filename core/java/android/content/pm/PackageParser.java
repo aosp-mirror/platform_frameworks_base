@@ -83,10 +83,12 @@ import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
-import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES;
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_EXPLICITLY_SET;
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
@@ -2940,9 +2942,12 @@ public class PackageParser {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
         }
 
-        if (sa.getBoolean(R.styleable.AndroidManifestApplication_resizeableActivity,
-                owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N)) {
-            ai.privateFlags |= PRIVATE_FLAG_RESIZEABLE_ACTIVITIES;
+        if (sa.hasValueOrEmpty(R.styleable.AndroidManifestApplication_resizeableActivity)) {
+            if (sa.getBoolean(R.styleable.AndroidManifestApplication_resizeableActivity, true)) {
+                ai.privateFlags |= PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_EXPLICITLY_SET;
+            }
+        } else if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N) {
+            ai.privateFlags |= PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION;
         }
 
         ai.networkSecurityConfigRes = sa.getResourceId(
@@ -3683,31 +3688,36 @@ public class PackageParser {
     }
 
     private void setActivityResizeMode(ActivityInfo aInfo, TypedArray sa, Package owner) {
-        aInfo.resizeMode = RESIZE_MODE_UNRESIZEABLE;
-        final boolean appDefault = (owner.applicationInfo.privateFlags
-                & PRIVATE_FLAG_RESIZEABLE_ACTIVITIES) != 0;
-        // This flag is used to workaround the issue with ignored resizeableActivity param when
-        // either targetSdkVersion is not set at all or <uses-sdk> tag is below <application>
-        // tag in AndroidManifest. If this param was explicitly set to 'false' we need to set
-        // corresponding resizeMode regardless of targetSdkVersion value at this point in time.
-        final boolean resizeableSetExplicitly
-                = sa.hasValue(R.styleable.AndroidManifestActivity_resizeableActivity);
-        final boolean resizeable = sa.getBoolean(
-                R.styleable.AndroidManifestActivity_resizeableActivity, appDefault);
+        final boolean appExplicitDefault = (owner.applicationInfo.privateFlags
+                & PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_EXPLICITLY_SET) != 0;
+        final boolean supportsPip =
+                sa.getBoolean(R.styleable.AndroidManifestActivity_supportsPictureInPicture, false);
 
-        if (resizeable) {
-            if (sa.getBoolean(R.styleable.AndroidManifestActivity_supportsPictureInPicture,
-                    false)) {
-                aInfo.resizeMode = RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+        if (sa.hasValue(R.styleable.AndroidManifestActivity_resizeableActivity)
+                || appExplicitDefault) {
+            // Activity or app explicitly set if it is resizeable or not;
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_resizeableActivity,
+                    appExplicitDefault)) {
+                aInfo.resizeMode =
+                        supportsPip ? RESIZE_MODE_RESIZEABLE_AND_PIPABLE : RESIZE_MODE_RESIZEABLE;
             } else {
-                aInfo.resizeMode = RESIZE_MODE_RESIZEABLE;
+                aInfo.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             }
-        } else if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N
-                || resizeableSetExplicitly) {
-            aInfo.resizeMode = RESIZE_MODE_UNRESIZEABLE;
-        } else if (!aInfo.isFixedOrientation() && (aInfo.flags & FLAG_IMMERSIVE) == 0) {
-            aInfo.resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
+            return;
         }
+
+        if ((owner.applicationInfo.privateFlags
+                & PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION) != 0) {
+            // The activity or app didn't explicitly set the resizing option, however we want to
+            // make it resize due to the sdk version it is targeting.
+            aInfo.resizeMode = RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
+            return;
+        }
+
+        // resize preference isn't set and target sdk version doesn't support resizing apps by
+        // default. For the app to be resizeable if it isn't fixed orientation or immersive.
+        aInfo.resizeMode = (aInfo.isFixedOrientation() || (aInfo.flags & FLAG_IMMERSIVE) != 0)
+                ? RESIZE_MODE_UNRESIZEABLE : RESIZE_MODE_FORCE_RESIZEABLE;
     }
 
     private void parseLayout(Resources res, AttributeSet attrs, Activity a) {

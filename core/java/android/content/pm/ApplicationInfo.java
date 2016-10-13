@@ -520,12 +520,26 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER = 1 << 10;
 
     /**
-     * When set, the activities associated with this application are resizeable by default.
+     * When set, the application explicitly requested that its activities by resizeable by default.
      * @see android.R.styleable#AndroidManifestActivity_resizeableActivity
      *
      * @hide
      */
-    public static final int PRIVATE_FLAG_RESIZEABLE_ACTIVITIES = 1 << 11;
+    public static final int PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_EXPLICITLY_SET = 1 << 11;
+
+    /**
+     * The application isn't requesting explicitly requesting for its activities to be resizeable or
+     * non-resizeable by default. So, we are making it activities resizeable by default based on the
+     * target SDK version of the app.
+     * @see android.R.styleable#AndroidManifestActivity_resizeableActivity
+     *
+     * NOTE: This only affects apps with target SDK >= N where the resizeableActivity attribute was
+     * introduced. It shouldn't be confused with {@link ActivityInfo#RESIZE_MODE_FORCE_RESIZEABLE}
+     * where certain pre-N apps are forced to the resizeable.
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION = 1 << 12;
 
     /**
      * Value for {@link #privateFlags}: {@code true} means the OS should go ahead and
@@ -533,7 +547,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * foreground-equivalent run state.  Defaults to {@code false} if unspecified.
      * @hide
      */
-    public static final int PRIVATE_FLAG_BACKUP_IN_FOREGROUND = 1 << 12;
+    public static final int PRIVATE_FLAG_BACKUP_IN_FOREGROUND = 1 << 13;
 
     /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.

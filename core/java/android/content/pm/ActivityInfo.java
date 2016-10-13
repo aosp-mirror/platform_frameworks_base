@@ -163,7 +163,13 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int RESIZE_MODE_UNRESIZEABLE = 0;
     /**
-     * Activity is resizeable.
+     * Activity didn't explicitly request to be resizeable, but we are making it resizeable because
+     * of the SDK version it targets.
+     * @hide
+     */
+    public static final int RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION = 1;
+    /**
+     * Activity explicitly requested to be resizeable.
      * @hide
      */
     public static final int RESIZE_MODE_RESIZEABLE = 2;
@@ -856,7 +862,8 @@ public class ActivityInfo extends ComponentInfo
     public static boolean isResizeableMode(int mode) {
         return mode == RESIZE_MODE_RESIZEABLE
                 || mode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE
-                || mode == RESIZE_MODE_FORCE_RESIZEABLE;
+                || mode == RESIZE_MODE_FORCE_RESIZEABLE
+                || mode == RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
     }
 
     /** @hide */
@@ -864,6 +871,8 @@ public class ActivityInfo extends ComponentInfo
         switch (mode) {
             case RESIZE_MODE_UNRESIZEABLE:
                 return "RESIZE_MODE_UNRESIZEABLE";
+            case RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION:
+                return "RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION";
             case RESIZE_MODE_RESIZEABLE:
                 return "RESIZE_MODE_RESIZEABLE";
             case RESIZE_MODE_RESIZEABLE_AND_PIPABLE:

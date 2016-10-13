@@ -479,6 +479,7 @@ public class Recents extends SystemUI
                 return COUNTER_WINDOW_UNSUPPORTED;
             case ActivityInfo.RESIZE_MODE_RESIZEABLE:
             case ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE:
+            case ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION:
                 return COUNTER_WINDOW_SUPPORTED;
             default:
                 return COUNTER_WINDOW_INCOMPATIBLE;
