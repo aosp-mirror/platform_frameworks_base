@@ -3004,4 +3004,8 @@
 
     <!-- Allow SystemUI to show the shutdown dialog -->
     <bool name="config_showSysuiShutdown">true</bool>
+
+    <!-- Decide whether to display 'No service' on status bar instead of 'Emergency calls only'
+         when SIM is unready. -->
+    <bool name="config_display_no_service_when_sim_unready">false</bool>
 </resources>
