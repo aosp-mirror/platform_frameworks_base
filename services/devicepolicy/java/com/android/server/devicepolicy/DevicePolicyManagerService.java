@@ -221,6 +221,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String ATTR_PERMISSION_POLICY = "permission-policy";
     private static final String ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED =
             "device-provisioning-config-applied";
+    private static final String ATTR_DEVICE_PAIRED = "device-paired";
 
     private static final String ATTR_DELEGATED_CERT_INSTALLER = "delegated-cert-installer";
     private static final String ATTR_APPLICATION_RESTRICTIONS_MANAGER
@@ -301,6 +302,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final int CODE_NONSYSTEM_USER_EXISTS = 5;
     private static final int CODE_ACCOUNTS_NOT_EMPTY = 6;
     private static final int CODE_NOT_SYSTEM_USER = 7;
+    private static final int CODE_HAS_PAIRED = 8;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({ CODE_OK, CODE_HAS_DEVICE_OWNER, CODE_USER_HAS_PROFILE_OWNER, CODE_USER_NOT_RUNNING,
@@ -343,6 +345,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * public methods.
      */
     boolean mHasFeature;
+
+    /**
+     * Whether or not this device is a watch.
+     */
+    boolean mIsWatch;
 
     private final SecurityLogMonitor mSecurityLogMonitor;
 
@@ -424,6 +431,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int mPasswordOwner = -1;
         long mLastMaximumTimeToLock = -1;
         boolean mUserSetupComplete = false;
+        boolean mPaired = false;
         int mUserProvisioningState;
         int mPermissionPolicy;
 
@@ -1615,6 +1623,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         mHasFeature = mContext.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN);
+        mIsWatch = mContext.getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_WATCH);
         if (!mHasFeature) {
             // Skip the rest of the initialization
             return;
@@ -2215,6 +2225,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_SETUP_COMPLETE,
                         Boolean.toString(true));
             }
+            if (policy.mPaired) {
+                out.attribute(null, ATTR_DEVICE_PAIRED,
+                        Boolean.toString(true));
+            }
             if (policy.mDeviceProvisioningConfigApplied) {
                 out.attribute(null, ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED,
                         Boolean.toString(true));
@@ -2378,6 +2392,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String userSetupComplete = parser.getAttributeValue(null, ATTR_SETUP_COMPLETE);
             if (userSetupComplete != null && Boolean.toString(true).equals(userSetupComplete)) {
                 policy.mUserSetupComplete = true;
+            }
+            String paired = parser.getAttributeValue(null, ATTR_DEVICE_PAIRED);
+            if (paired != null && Boolean.toString(true).equals(paired)) {
+                policy.mPaired = true;
             }
             String deviceProvisioningConfigApplied = parser.getAttributeValue(null,
                     ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED);
@@ -2613,7 +2631,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Register an observer for watching for user setup complete.
         new SetupContentObserver(mHandler).register();
         // Initialize the user setup state, to handle the upgrade case.
-        updateUserSetupComplete();
+        updateUserSetupCompleteAndPaired();
 
         List<String> packageList;
         synchronized (this) {
@@ -6151,6 +6169,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return getUserData(userHandle).mUserSetupComplete;
     }
 
+    private boolean hasPaired(int userHandle) {
+        if (!mHasFeature) {
+            return true;
+        }
+        return getUserData(userHandle).mPaired;
+    }
+
     @Override
     public int getUserProvisioningState() {
         if (!mHasFeature) {
@@ -6435,6 +6460,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             case CODE_ACCOUNTS_NOT_EMPTY:
                 throw new IllegalStateException("Not allowed to set the device owner because there "
                         + "are already some accounts on the device");
+            case CODE_HAS_PAIRED:
+                throw new IllegalStateException("Not allowed to set the device owner because this "
+                        + "device has already paired");
             default:
                 throw new IllegalStateException("Unknown @DeviceOwnerPreConditionCode " + code);
         }
@@ -8186,14 +8214,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
-     * We need to update the internal state of whether a user has completed setup once. After
-     * that, we ignore any changes that reset the Settings.Secure.USER_SETUP_COMPLETE changes
-     * as we don't trust any apps that might try to reset it.
+     * We need to update the internal state of whether a user has completed setup or a
+     * device has paired once. After that, we ignore any changes that reset the
+     * Settings.Secure.USER_SETUP_COMPLETE or Settings.Secure.DEVICE_PAIRED change
+     * as we don't trust any apps that might try to reset them.
      * <p>
      * Unfortunately, we don't know which user's setup state was changed, so we write all of
      * them.
      */
-    void updateUserSetupComplete() {
+    void updateUserSetupCompleteAndPaired() {
         List<UserInfo> users = mUserManager.getUsers(true);
         final int N = users.size();
         for (int i = 0; i < N; i++) {
@@ -8208,6 +8237,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 }
             }
+            if (mIsWatch && mInjector.settingsSecureGetIntForUser(Settings.Secure.DEVICE_PAIRED, 0,
+                    userHandle) != 0) {
+                DevicePolicyData policy = getUserData(userHandle);
+                if (!policy.mPaired) {
+                    policy.mPaired = true;
+                    synchronized (this) {
+                        saveSettingsLocked(userHandle);
+                    }
+                }
+            }
         }
     }
 
@@ -8217,6 +8256,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Settings.Secure.USER_SETUP_COMPLETE);
         private final Uri mDeviceProvisioned = Settings.Global.getUriFor(
                 Settings.Global.DEVICE_PROVISIONED);
+        private final Uri mPaired = Settings.Secure.getUriFor(Settings.Secure.DEVICE_PAIRED);
 
         public SetupContentObserver(Handler handler) {
             super(handler);
@@ -8225,12 +8265,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         void register() {
             mInjector.registerContentObserver(mUserSetupComplete, false, this, UserHandle.USER_ALL);
             mInjector.registerContentObserver(mDeviceProvisioned, false, this, UserHandle.USER_ALL);
+            if (mIsWatch) {
+                mInjector.registerContentObserver(mPaired, false, this, UserHandle.USER_ALL);
+            }
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            if (mUserSetupComplete.equals(uri)) {
-                updateUserSetupComplete();
+            if (mUserSetupComplete.equals(uri) || (mIsWatch && mPaired.equals(uri))) {
+                updateUserSetupCompleteAndPaired();
             } else if (mDeviceProvisioned.equals(uri)) {
                 synchronized (DevicePolicyManagerService.this) {
                     // Set PROPERTY_DEVICE_OWNER_PRESENT, for the SUW case where setting the property
@@ -8685,6 +8728,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         if (!mUserManager.isUserRunning(new UserHandle(deviceOwnerUserId))) {
             return CODE_USER_NOT_RUNNING;
+        }
+        if (mIsWatch && hasPaired(UserHandle.USER_SYSTEM)) {
+            return CODE_HAS_PAIRED;
         }
         if (isAdb) {
             // if shell command runs after user setup completed check device status. Otherwise, OK.
