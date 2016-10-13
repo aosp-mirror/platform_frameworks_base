@@ -6586,7 +6586,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     public void removeUnsafeExtras() {
         if (mExtras != null) {
-            mExtras.filterValues();
+            mExtras = mExtras.filterValues();
         }
     }
 
