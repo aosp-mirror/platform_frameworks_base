@@ -1646,6 +1646,8 @@
   <java-symbol type="array" name="config_dynamicHysteresisBrightLevels" />
   <java-symbol type="array" name="config_dynamicHysteresisDarkLevels" />
   <java-symbol type="array" name="config_dynamicHysteresisLuxLevels" />
+  <java-symbol type="array" name="config_dozeBrightnessBacklightValues" />
+  <java-symbol type="array" name="config_dozeSensorLuxLevels" />
   <java-symbol type="array" name="config_protectedNetworks" />
   <java-symbol type="array" name="config_statusBarIcons" />
   <java-symbol type="array" name="config_tether_bluetooth_regexs" />
@@ -1663,6 +1665,7 @@
   <java-symbol type="array" name="config_defaultNotificationVibePattern" />
   <java-symbol type="array" name="config_notificationFallbackVibePattern" />
   <java-symbol type="array" name="config_onlySingleDcAllowed" />
+  <java-symbol type="bool" name="config_useNewSensorSamplesForDoze" />
   <java-symbol type="bool" name="config_useAttentionLight" />
   <java-symbol type="bool" name="config_animateScreenLights" />
   <java-symbol type="bool" name="config_automatic_brightness_available" />
