@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"کلپ باؤنڈز، حاشیے وغیرہ دکھائیں"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"‏RTL لے آؤٹ سمت زبردستی نافذ کریں"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"‏سبھی زبانوں کیلئے اسکرین لے آؤٹ کی سمت کو RTL پر مجبور کریں"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"‏CPU استعمال دکھائیں"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"‏موجودہ CPU استعمال دکھانے والا اسکرین اوورلے"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"‏GPU رینڈرنگ زبردستی نافذ کریں"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"‏2D ڈرائنگ کیلئے GPU کا استعمال زبردستی نافذ کریں"</string>
     <string name="force_msaa" msgid="7920323238677284387">"‏4x MSAA زبردستی نافذ کریں"</string>

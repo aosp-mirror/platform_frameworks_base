@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Εμφάνιση ορίων κλιπ, περιθωρίων, κλπ."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Επιβολή κατ. διάταξης RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Επιβολή διάταξης οθόν. RTL για όλες τις τοπ. ρυθμ."</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Προβολή χρήσης CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Επικάλυψη οθόνης για προβολή τρέχουσας χρήσης CPU"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Αναγκαστική απόδοση GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Αναγκαστική χρήση του GPU για σχέδιο 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Αναγκαστικά 4x MSAA"</string>

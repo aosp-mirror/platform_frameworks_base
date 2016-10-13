@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Shfaq konturet e klipit, hapësirat etj."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Detyro drejtimin e shkrimit nga e djathta në të majtë"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Ndrysho me detyrim drejtimin e planit të ekranit nga e djathta në të majtë për të gjitha vendet"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Shfaq përdorimin e CPU-së"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Mbivendosja e ekranit tregon përdorimin e CPU-së"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Detyro interpretimin e GPU-së"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Detyro përdorimin e GPU-së për vizatimin e dytë"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Detyro 4x MSAA"</string>

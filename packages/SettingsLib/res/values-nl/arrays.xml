@@ -50,12 +50,12 @@
   </string-array>
   <string-array name="hdcp_checking_titles">
     <item msgid="441827799230089869">"Nooit controleren"</item>
-    <item msgid="6042769699089883931">"Alleen controleren op DRM-inhoud"</item>
+    <item msgid="6042769699089883931">"Alleen controleren op DRM-content"</item>
     <item msgid="9174900380056846820">"Altijd controleren"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="505558545611516707">"HDCP-controle nooit gebruiken"</item>
-    <item msgid="3878793616631049349">"HDCP-controle alleen voor DRM-inhoud gebruiken"</item>
+    <item msgid="3878793616631049349">"HDCP-controle alleen voor DRM-content gebruiken"</item>
     <item msgid="45075631231212732">"HDCP-controle altijd gebruiken"</item>
   </string-array>
   <string-array name="select_logd_size_titles">

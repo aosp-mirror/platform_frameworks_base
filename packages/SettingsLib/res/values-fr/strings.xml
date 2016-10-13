@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Afficher les limites de coupe, les marges, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forcer droite à gauche"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forcer orient. droite à gauche pour toutes langues"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Afficher mém. CPU utilisée"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Superposition écran indiquant mémoire CPU utilisée"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Forcer le rendu GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Forcer l\'utilisation du GPU pour le dessin 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Forcer MSAA 4x"</string>

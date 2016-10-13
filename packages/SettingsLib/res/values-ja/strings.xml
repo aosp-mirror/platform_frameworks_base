@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"クリップの境界線、マージンなどを表示"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTLレイアウト方向を使用"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"すべての言語/地域で画面レイアウト方向をRTLに設定"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU使用状況を表示"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"現在のCPU使用状況をオーバーレイ表示する"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPUレンダリングを使用"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2D描画にGPUを常に使用する"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAAを適用"</string>
