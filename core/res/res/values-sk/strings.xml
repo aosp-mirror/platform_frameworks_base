@@ -210,6 +210,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Možnosti telefónu"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Zámka obrazovky"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Vypnúť"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Tiesňové volanie"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Hlásenie o chybách"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Vytvoriť hlásenie chyby"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Týmto zhromaždíte informácie o aktuálnom stave zariadenia. Informácie je potom možné odoslať e-mailom, chvíľu však potrvá, kým bude hlásenie chyby pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>

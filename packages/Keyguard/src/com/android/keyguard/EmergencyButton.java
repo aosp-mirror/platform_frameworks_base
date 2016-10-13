@@ -27,13 +27,16 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.telecom.TelecomManager;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.util.Slog;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.Button;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.policy.EmergencyAffordanceManager;
 
 /**
  * This class implements a smart emergency button that updates itself based
@@ -50,7 +53,10 @@ public class EmergencyButton extends Button {
                     | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
     private static final String LOG_TAG = "EmergencyButton";
+    private final EmergencyAffordanceManager mEmergencyAffordanceManager;
 
+    private int mDownX;
+    private int mDownY;
     KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
@@ -63,6 +69,7 @@ public class EmergencyButton extends Button {
             updateEmergencyCallButton();
         }
     };
+    private boolean mLongPressWasDragged;
 
     public interface EmergencyButtonCallback {
         public void onEmergencyButtonClickedWhenInCall();
@@ -85,6 +92,7 @@ public class EmergencyButton extends Button {
                 com.android.internal.R.bool.config_voice_capable);
         mEnableEmergencyCallWhileSimLocked = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enable_emergency_call_while_sim_locked);
+        mEmergencyAffordanceManager = new EmergencyAffordanceManager(context);
     }
 
     @Override
@@ -109,7 +117,37 @@ public class EmergencyButton extends Button {
                 takeEmergencyCallAction();
             }
         });
+        setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (!mLongPressWasDragged
+                        && mEmergencyAffordanceManager.needsEmergencyAffordance()) {
+                    mEmergencyAffordanceManager.performEmergencyCall();
+                    return true;
+                }
+                return false;
+            }
+        });
         updateEmergencyCallButton();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        final int x = (int) event.getX();
+        final int y = (int) event.getY();
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            mDownX = x;
+            mDownY = y;
+            mLongPressWasDragged = false;
+        } else {
+            final int xDiff = Math.abs(x - mDownX);
+            final int yDiff = Math.abs(y - mDownY);
+            int touchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
+            if (Math.abs(yDiff) > touchSlop || Math.abs(xDiff) > touchSlop) {
+                mLongPressWasDragged = true;
+            }
+        }
+        return super.onTouchEvent(event);
     }
 
     @Override

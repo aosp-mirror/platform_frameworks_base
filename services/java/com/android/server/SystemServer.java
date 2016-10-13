@@ -49,6 +49,7 @@ import android.webkit.WebViewFactory;
 import com.android.internal.R;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
+import com.android.internal.policy.EmergencyAffordanceManager;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accounts.AccountManagerService;
 import com.android.server.am.ActivityManagerService;
@@ -59,6 +60,7 @@ import com.android.server.content.ContentService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
+import com.android.server.emergency.EmergencyAffordanceService;
 import com.android.server.fingerprint.FingerprintService;
 import com.android.server.hdmi.HdmiControlService;
 import com.android.server.input.InputManagerService;
@@ -920,6 +922,11 @@ public final class SystemServer {
                 } catch (Throwable e) {
                     reportWtf("starting CertBlacklister", e);
                 }
+            }
+
+            if (!disableNetwork && !disableNonCoreServices && EmergencyAffordanceManager.ENABLED) {
+                // EmergencyMode sevice
+                mSystemServiceManager.startService(EmergencyAffordanceService.class);
             }
 
             if (!disableNonCoreServices) {
