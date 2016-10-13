@@ -257,15 +257,18 @@ public class PipManager {
                 wm.createInputConsumer(INPUT_CONSUMER_PIP, mInputChannel);
                 mInputEventReceiver = new PipInputEventReceiver(mInputChannel, Looper.myLooper());
             } catch (RemoteException e) {
-                Log.e(TAG, "Failed to create Pip input consumer", e);
+                Log.e(TAG, "Failed to create PIP input consumer", e);
             }
         }
     }
 
     private void loadConfigurationsAndApply() {
         Resources res = mContext.getResources();
-        mDefaultPipBounds = Rect.unflattenFromString(res.getString(
-                com.android.internal.R.string.config_defaultPictureInPictureBounds));
+        try {
+            mDefaultPipBounds = mActivityManager.getDefaultPictureInPictureBounds();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get default PIP bounds", e);
+        }
         mSettingsPipBounds = Rect.unflattenFromString(res.getString(
                 R.string.pip_settings_bounds));
         mMenuModePipBounds = Rect.unflattenFromString(res.getString(
