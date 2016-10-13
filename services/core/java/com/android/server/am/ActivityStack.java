@@ -4406,7 +4406,7 @@ final class ActivityStack {
                     mStackSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID);
             if (fullscreenStack != null && fullscreenStack.hasVisibleBehindActivity()) {
                 final ActivityRecord visibleBehind = fullscreenStack.getVisibleBehindActivity();
-                mService.setFocusedActivityLocked(visibleBehind, "moveTaskToBack");
+                mService.setFocusedActivityLocked(visibleBehind, "moveHomeTaskToBack");
                 mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 return true;
             }
@@ -4459,9 +4459,11 @@ final class ActivityStack {
             }
             final int taskToReturnTo = tr.getTaskToReturnTo();
             tr.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
-            return mStackSupervisor.resumeHomeStackTask(taskToReturnTo, null, "moveTaskToBack");
+            return mStackSupervisor.resumeHomeStackTask(taskToReturnTo, null,
+                    "moveTaskToBackAndShowHome");
         }
 
+        adjustFocusedActivityLocked(mResumedActivity, "moveTaskToBack");
         mStackSupervisor.resumeFocusedStackTopActivityLocked();
         return true;
     }
