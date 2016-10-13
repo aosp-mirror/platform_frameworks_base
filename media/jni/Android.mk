@@ -2,7 +2,6 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-    android_media_AmrInputStream.cpp \
     android_media_ExifInterface.cpp \
     android_media_ImageWriter.cpp \
     android_media_ImageReader.cpp \
@@ -46,11 +45,9 @@ LOCAL_SHARED_LIBRARIES := \
     libusbhost \
     libexif \
     libpiex \
-    libstagefright_amrnb_common \
     libandroidfw
 
 LOCAL_STATIC_LIBRARIES := \
-    libstagefright_amrnbenc
 
 LOCAL_C_INCLUDES += \
     external/libexif/ \
@@ -60,9 +57,6 @@ LOCAL_C_INCLUDES += \
     frameworks/base/libs/hwui \
     frameworks/av/media/libmedia \
     frameworks/av/media/libstagefright \
-    frameworks/av/media/libstagefright/codecs/amrnb/enc/src \
-    frameworks/av/media/libstagefright/codecs/amrnb/common \
-    frameworks/av/media/libstagefright/codecs/amrnb/common/include \
     frameworks/av/media/mtp \
     frameworks/native/include/media/openmax \
     $(call include-path-for, libhardware)/hardware \
