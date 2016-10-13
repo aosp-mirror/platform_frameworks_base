@@ -611,7 +611,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         static final long DEF_MAXIMUM_TIME_TO_UNLOCK = 0;
         long maximumTimeToUnlock = DEF_MAXIMUM_TIME_TO_UNLOCK;
 
-        long strongAuthUnlockTimeout = DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS;
+        long strongAuthUnlockTimeout = 0; // admin doesn't participate by default
 
         static final int DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE = 0;
         int maximumFailedPasswordsForWipe = DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE;
@@ -4248,10 +4248,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
-        Preconditions.checkArgument(timeoutMs >= MINIMUM_STRONG_AUTH_TIMEOUT_MS,
-                "Timeout must not be lower than the minimum strong auth timeout.");
-        Preconditions.checkArgument(timeoutMs <= DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS,
-                "Timeout must not be higher than the default strong auth timeout.");
+        Preconditions.checkArgument(timeoutMs >= 0, "Timeout must not be a negative number.");
+        // timeoutMs with value 0 means that the admin doesn't participate
+        // timeoutMs is clamped to the interval in case the internal constants change in the future
+        if (timeoutMs != 0 && timeoutMs < MINIMUM_STRONG_AUTH_TIMEOUT_MS) {
+            timeoutMs = MINIMUM_STRONG_AUTH_TIMEOUT_MS;
+        }
+        if (timeoutMs > DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS) {
+            timeoutMs = DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS;
+        }
 
         final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
@@ -4267,7 +4272,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     /**
      * Return a single admin's strong auth unlock timeout or minimum value (strictest) of all
      * admins if who is null.
-     * Returns default timeout if not configured.
+     * Returns 0 if not configured for the provided admin.
      */
     @Override
     public long getRequiredStrongAuthTimeout(ComponentName who, int userId, boolean parent) {
@@ -4278,9 +4283,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userId, parent);
-                return admin != null ? Math.max(admin.strongAuthUnlockTimeout,
-                        MINIMUM_STRONG_AUTH_TIMEOUT_MS)
-                        : DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS;
+                return admin != null ? admin.strongAuthUnlockTimeout : 0;
             }
 
             // Return the strictest policy across all participating admins.
@@ -4288,8 +4291,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long strongAuthUnlockTimeout = DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS;
             for (int i = 0; i < admins.size(); i++) {
-                strongAuthUnlockTimeout = Math.min(admins.get(i).strongAuthUnlockTimeout,
-                        strongAuthUnlockTimeout);
+                final long timeout = admins.get(i).strongAuthUnlockTimeout;
+                if (timeout != 0) { // take only participating admins into account
+                    strongAuthUnlockTimeout = Math.min(timeout, strongAuthUnlockTimeout);
+                }
             }
             return Math.max(strongAuthUnlockTimeout, MINIMUM_STRONG_AUTH_TIMEOUT_MS);
         }
