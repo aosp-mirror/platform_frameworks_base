@@ -18,9 +18,12 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+
+import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
@@ -39,6 +42,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
+import android.view.animation.Animation;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -124,6 +128,16 @@ class WallpaperController {
 
     boolean isWallpaperVisible() {
         return isWallpaperVisible(mWallpaperTarget);
+    }
+
+    /**
+     * Starts {@param a} on all wallpaper windows.
+     */
+    void startWallpaperAnimation(Animation a) {
+        for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
+            final WindowToken token = mWallpaperTokens.get(curTokenNdx);
+            token.startAnimation(a);
+        }
     }
 
     private boolean isWallpaperVisible(WindowState wallpaperTarget) {
@@ -383,6 +397,7 @@ class WallpaperController {
         boolean inFreeformSpace = false;
         boolean replacing = false;
         boolean keyguardGoingAwayWithWallpaper = false;
+        boolean needsShowWhenLockedWallpaper = false;
 
         for (int i = windows.size() - 1; i >= 0; i--) {
             w = windows.get(i);
@@ -413,7 +428,19 @@ class WallpaperController {
 
             replacing |= w.mWillReplaceWindow;
             keyguardGoingAwayWithWallpaper |= (w.mAppToken != null
-                    && w.mWinAnimator.mKeyguardGoingAwayWithWallpaper);
+                    && AppTransition.isKeyguardGoingAwayTransit(
+                            w.mAppToken.mAppAnimator.getTransit())
+                    && (w.mAppToken.mAppAnimator.getTransitFlags()
+                            & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
+
+            if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
+                    && mService.mPolicy.isKeyguardLocked()
+                    && mService.mPolicy.isKeyguardOccluded()) {
+                // The lowest show when locked window decides whether we need to put the wallpaper
+                // behind.
+                needsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
+                        || (w.mAppToken != null && !w.mAppToken.fillsParent());
+            }
 
             final boolean hasWallpaper = (w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
             if (hasWallpaper && w.isOnScreen() && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
@@ -447,12 +474,17 @@ class WallpaperController {
             // appear and can determine the visibility, to avoid flickering.
             result.setWallpaperTarget(result.topWallpaper, result.topWallpaperIndex);
 
-        } else if (keyguardGoingAwayWithWallpaper) {
-            // If the app is executing an animation because the keyguard is going away (and the
-            // keyguard was showing the wallpaper) keep the wallpaper during the animation so it
-            // doesn't flicker out by having it be its own target.
+        } else if (keyguardGoingAwayWithWallpaper || needsShowWhenLockedWallpaper) {
+            // Keep the wallpaper during Keyguard exit but also when it's needed for a
+            // non-fullscreen show when locked activity.
             result.setWallpaperTarget(result.topWallpaper, result.topWallpaperIndex);
         }
+    }
+
+    private boolean isFullscreen(WindowManager.LayoutParams attrs) {
+        return attrs.x == 0 && attrs.y == 0
+                && attrs.width == WindowManager.LayoutParams.MATCH_PARENT
+                && attrs.height == WindowManager.LayoutParams.MATCH_PARENT;
     }
 
     /** Updates the target wallpaper if needed and returns true if an update happened. */

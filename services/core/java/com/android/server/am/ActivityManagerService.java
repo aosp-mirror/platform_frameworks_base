@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.app.ApplicationThreadConstants;
+import android.annotation.Nullable;
 import android.os.IDeviceIdentifiersPolicyService;
 import android.util.Size;
 import android.util.TypedValue;
@@ -312,7 +313,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IMMERSIVE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKSCREEN;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
@@ -374,13 +374,14 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_RELAUNCH;
+import static com.android.server.wm.AppTransition.TRANSIT_NONE;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_IN_PLACE;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
-public final class ActivityManagerService extends ActivityManagerNative
+public class ActivityManagerService extends ActivityManagerNative
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityManagerService" : TAG_AM;
@@ -549,6 +550,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     /** Run all ActivityStacks through this */
     final ActivityStackSupervisor mStackSupervisor;
+    private final KeyguardController mKeyguardController;
 
     final ActivityStarter mActivityStarter;
 
@@ -632,7 +634,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public boolean canShowErrorDialogs() {
         return mShowDialogs && !mSleeping && !mShuttingDown
-                && mLockScreenShown != LOCK_SCREEN_SHOWN;
+                && !mKeyguardController.isKeyguardShowing();
     }
 
     private static final class PriorityState {
@@ -1250,14 +1252,6 @@ public final class ActivityManagerService extends ActivityManagerNative
      * activities.
      */
     final ArrayList<SleepToken> mSleepTokens = new ArrayList<SleepToken>();
-
-    static final int LOCK_SCREEN_HIDDEN = 0;
-    static final int LOCK_SCREEN_LEAVING = 1;
-    static final int LOCK_SCREEN_SHOWN = 2;
-    /**
-     * State of external call telling us if the lock screen is shown.
-     */
-    int mLockScreenShown = LOCK_SCREEN_HIDDEN;
 
     /**
      * Set if we are shutting down the system, similar to sleeping.
@@ -2621,6 +2615,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mStackSupervisor = new ActivityStackSupervisor(this);
         mStackSupervisor.onConfigurationChanged(mTempConfig);
+        mKeyguardController = mStackSupervisor.mKeyguardController;
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
         mTaskChangeNotificationController =
@@ -3037,7 +3032,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mHandler.obtainMessage(VR_MODE_CHANGE_MSG, 0, 0, r));
     }
 
-    private void applyVrModeIfNeededLocked(ActivityRecord r, boolean enable) {
+    void applyVrModeIfNeededLocked(ActivityRecord r, boolean enable) {
         mHandler.sendMessage(
                 mHandler.obtainMessage(VR_MODE_APPLY_IF_NEEDED_MSG, enable ? 1 : 0, 0, r));
     }
@@ -4967,12 +4962,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             finishInstrumentationLocked(app, Activity.RESULT_CANCELED, info);
         }
 
-        if (!restarting && hasVisibleActivities
-                && !mStackSupervisor.resumeFocusedStackTopActivityLocked()) {
-            // If there was nothing to resume, and we are not already restarting this process, but
-            // there is a visible activity that is hosted by the process...  then make sure all
-            // visible activities are running, taking care of restarting this process.
-            mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+        mWindowManager.deferSurfaceLayout();
+        try {
+            if (!restarting && hasVisibleActivities
+                    && !mStackSupervisor.resumeFocusedStackTopActivityLocked()) {
+                // If there was nothing to resume, and we are not already restarting this process, but
+                // there is a visible activity that is hosted by the process...  then make sure all
+                // visible activities are running, taking care of restarting this process.
+                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+            }
+        } finally {
+            mWindowManager.continueSurfaceLayout();
         }
     }
 
@@ -6602,39 +6602,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void keyguardWaitingForActivityDrawn() {
-        enforceNotIsolatedCaller("keyguardWaitingForActivityDrawn");
-        final long token = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                if (DEBUG_LOCKSCREEN) logLockScreen("");
-                mWindowManager.keyguardWaitingForActivityDrawn();
-                if (mLockScreenShown == LOCK_SCREEN_SHOWN) {
-                    mLockScreenShown = LOCK_SCREEN_LEAVING;
-                    updateSleepIfNeededLocked();
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    @Override
     public void keyguardGoingAway(int flags) {
         enforceNotIsolatedCaller("keyguardGoingAway");
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                if (DEBUG_LOCKSCREEN) logLockScreen("");
-                mWindowManager.keyguardGoingAway(flags);
-                if (mLockScreenShown == LOCK_SCREEN_SHOWN) {
-                    mLockScreenShown = LOCK_SCREEN_HIDDEN;
-                    updateSleepIfNeededLocked();
-
-                    // Some stack visibility might change (e.g. docked stack)
-                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-                    applyVrModeIfNeededLocked(mStackSupervisor.getResumedActivityLocked(), true);
-                }
+                mKeyguardController.keyguardGoingAway(flags);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -11524,7 +11497,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             case PowerManagerInternal.WAKEFULNESS_DOZING:
                 // Pause applications whenever the lock screen is shown or any sleep
                 // tokens have been acquired.
-                return (mLockScreenShown != LOCK_SCREEN_HIDDEN || !mSleepTokens.isEmpty());
+                return mKeyguardController.isKeyguardShowing() || !mSleepTokens.isEmpty();
             case PowerManagerInternal.WAKEFULNESS_ASLEEP:
             default:
                 // If we're asleep then pause applications unconditionally.
@@ -11592,22 +11565,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         Binder.restoreCallingIdentity(origId);
     }
 
-    private String lockScreenShownToString() {
-        switch (mLockScreenShown) {
-            case LOCK_SCREEN_HIDDEN: return "LOCK_SCREEN_HIDDEN";
-            case LOCK_SCREEN_LEAVING: return "LOCK_SCREEN_LEAVING";
-            case LOCK_SCREEN_SHOWN: return "LOCK_SCREEN_SHOWN";
-            default: return "Unknown=" + mLockScreenShown;
-        }
-    }
-
-    void logLockScreen(String msg) {
-        if (DEBUG_LOCKSCREEN) Slog.d(TAG_LOCKSCREEN, Debug.getCallers(2) + ":" + msg
-                + " mLockScreenShown=" + lockScreenShownToString() + " mWakefulness="
-                + PowerManagerInternal.wakefulnessToString(mWakefulness)
-                + " mSleeping=" + mSleeping);
-    }
-
     void startRunningVoiceLocked(IVoiceInteractionSession session, int targetUid) {
         Slog.d(TAG, "<<<  startRunningVoiceLocked()");
         mVoiceWakeLock.setWorkSource(new WorkSource(targetUid));
@@ -11625,7 +11582,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         mWindowManager.setEventDispatching(mBooted && !mShuttingDown);
     }
 
-    public void setLockScreenShown(boolean showing, boolean occluded) {
+    @Override
+    public void setLockScreenShown(boolean showing) {
         if (checkCallingPermission(android.Manifest.permission.DEVICE_POWER)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission "
@@ -11635,18 +11593,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                if (DEBUG_LOCKSCREEN) logLockScreen(" showing=" + showing + " occluded=" + occluded);
-                mLockScreenShown = (showing && !occluded) ? LOCK_SCREEN_SHOWN : LOCK_SCREEN_HIDDEN;
-                if (showing && occluded) {
-                    // The lock screen is currently showing, but is occluded by a window that can
-                    // show on top of the lock screen. In this can we want to dismiss the docked
-                    // stack since it will be complicated/risky to try to put the activity on top
-                    // of the lock screen in the right fullscreen configuration.
-                    mStackSupervisor.moveTasksToFullscreenStackLocked(DOCKED_STACK_ID,
-                            mStackSupervisor.mFocusedStack.getStackId() == DOCKED_STACK_ID);
-                }
-
-                updateSleepIfNeededLocked();
+                mKeyguardController.setKeyguardShown(showing);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -14652,8 +14599,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("  mWakefulness="
                     + PowerManagerInternal.wakefulnessToString(mWakefulness));
             pw.println("  mSleepTokens=" + mSleepTokens);
-            pw.println("  mSleeping=" + mSleeping + " mLockScreenShown="
-                    + lockScreenShownToString());
+            pw.println("  mSleeping=" + mSleeping);
             pw.println("  mShuttingDown=" + mShuttingDown + " mTestPssMode=" + mTestPssMode);
             if (mRunningVoice != null) {
                 pw.println("  mRunningVoice=" + mRunningVoice);
@@ -22090,6 +22036,21 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public int getUidProcessState(int uid) {
             return getUidState(uid);
+        }
+
+        @Override
+        public void notifyKeyguardFlagsChanged(@Nullable Runnable callback) {
+            synchronized (ActivityManagerService.this) {
+
+                // We might change the visibilities here, so prepare an empty app transition which
+                // might be overridden later if we actually change visibilities.
+                mWindowManager.prepareAppTransition(TRANSIT_NONE, false /* alwaysKeepCurrent */);
+                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                mWindowManager.executeAppTransition();
+            }
+            if (callback != null) {
+                callback.run();
+            }
         }
     }
 

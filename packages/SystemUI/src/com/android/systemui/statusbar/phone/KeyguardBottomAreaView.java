@@ -496,7 +496,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                     } catch (RemoteException e) {
                         Log.w(TAG, "Unable to start camera activity", e);
                     }
-                    mActivityStarter.preventNextAnimation();
                     final boolean launched = isSuccessfulLaunch(result);
                     post(new Runnable() {
                         @Override
@@ -539,7 +538,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             @Override
             public void run() {
                 mAssistManager.launchVoiceAssistFromKeyguard();
-                mActivityStarter.preventNextAnimation();
             }
         };
         if (mPhoneStatusBar.isKeyguardCurrentlySecure()) {

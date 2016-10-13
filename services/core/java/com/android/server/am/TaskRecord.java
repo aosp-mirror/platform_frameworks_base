@@ -56,8 +56,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
@@ -89,7 +87,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityManagerService.LOCK_SCREEN_SHOWN;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
@@ -1700,7 +1697,7 @@ final class TaskRecord extends ConfigurationContainer {
     /** Returns the bounds that should be used to launch this task. */
     Rect getLaunchBounds() {
         // If we're over lockscreen, forget about stack bounds and use fullscreen.
-        if (mService.mLockScreenShown == LOCK_SCREEN_SHOWN) {
+        if (mService.mStackSupervisor.mKeyguardController.isKeyguardShowing()) {
             return null;
         }
 

@@ -1153,7 +1153,6 @@ public class KeyguardViewMediator extends SystemUI {
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
                 mStatusBarKeyguardViewManager.setOccluded(isOccluded, animate);
-                updateActivityLockScreenState();
                 adjustStatusBarLocked();
             }
         }
@@ -1638,7 +1637,7 @@ public class KeyguardViewMediator extends SystemUI {
     private void updateActivityLockScreenState() {
         Trace.beginSection("KeyguardViewMediator#updateActivityLockScreenState");
         try {
-            ActivityManagerNative.getDefault().setLockScreenShown(mShowing, mOccluded);
+            ActivityManagerNative.getDefault().setLockScreenShown(mShowing);
         } catch (RemoteException e) {
         }
         Trace.endSection();
@@ -1668,7 +1667,6 @@ public class KeyguardViewMediator extends SystemUI {
             mWakeAndUnlocking = false;
             resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
-            updateActivityLockScreenState();
             adjustStatusBarLocked();
             userActivity();
 
@@ -1784,7 +1782,6 @@ public class KeyguardViewMediator extends SystemUI {
             mStatusBarKeyguardViewManager.hide(startTime, fadeoutDuration);
             resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
-            updateActivityLockScreenState();
             adjustStatusBarLocked();
             sendUserPresentBroadcast();
         }
@@ -1831,7 +1828,7 @@ public class KeyguardViewMediator extends SystemUI {
     private void handleReset() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleReset");
-            mStatusBarKeyguardViewManager.reset();
+            mStatusBarKeyguardViewManager.reset(true /* hideBouncerWhenShowing */);
         }
     }
 
@@ -1845,7 +1842,6 @@ public class KeyguardViewMediator extends SystemUI {
             if (DEBUG) Log.d(TAG, "handleVerifyUnlock");
             setShowingLocked(true);
             mStatusBarKeyguardViewManager.verifyUnlock();
-            updateActivityLockScreenState();
         }
         Trace.endSection();
     }
@@ -2027,6 +2023,7 @@ public class KeyguardViewMediator extends SystemUI {
             }
             updateInputRestrictedLocked();
             mTrustManager.reportKeyguardShowingChanged();
+            updateActivityLockScreenState();
         }
     }
 

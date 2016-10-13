@@ -577,10 +577,6 @@ class ActivityStarter {
             ActivityStack targetStack) {
 
         if (result < START_SUCCESS) {
-            // If someone asked to have the keyguard dismissed on the next activity start,
-            // but we are not actually doing an activity switch...  just dismiss the keyguard now,
-            // because we probably want to see whatever is behind it.
-            mSupervisor.notifyActivityDrawnForKeyguard();
             return;
         }
 
@@ -1661,11 +1657,6 @@ class ActivityStarter {
     private void resumeTargetStackIfNeeded() {
         if (mDoResume) {
             mSupervisor.resumeFocusedStackTopActivityLocked(mTargetStack, null, mOptions);
-            if (!mMovedToFront) {
-                // Make sure to notify Keyguard as well if we are not running an app transition
-                // later.
-                mSupervisor.notifyActivityDrawnForKeyguard();
-            }
         } else {
             ActivityOptions.abort(mOptions);
         }

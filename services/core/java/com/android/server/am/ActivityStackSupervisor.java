@@ -16,6 +16,79 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.START_ANY_ACTIVITY;
+import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
+import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
+import static android.app.ActivityManager.RESIZE_MODE_FORCED;
+import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
+import static android.app.ActivityManager.START_TASK_TO_FRONT;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
+import static android.app.ActivityManager.StackId.FIRST_STATIC_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityManager.StackId.LAST_STATIC_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.view.Display.DEFAULT_DISPLAY;
+
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONTAINERS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IDLE;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PAUSE;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RELEASE;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBLE_BEHIND;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONTAINERS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_IDLE;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PAUSE;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RELEASE;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STATES;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBLE_BEHIND;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityManagerService.ANIMATE;
+import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
+import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
+import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
+import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
+import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
+import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
+import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
+import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
+import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
+import static com.android.server.am.ActivityStack.STACK_VISIBLE;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
+import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
+
 import android.Manifest;
 import android.annotation.UserIdInt;
 import android.app.Activity;
@@ -26,7 +99,6 @@ import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.app.IActivityManager;
 import android.app.IActivityManager.WaitResult;
@@ -83,7 +155,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Display;
-import android.view.DisplayInfo;
 import android.view.InputEvent;
 import android.view.Surface;
 
@@ -106,79 +177,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static android.Manifest.permission.START_ANY_ACTIVITY;
-import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
-import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
-import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
-import static android.app.ActivityManager.RESIZE_MODE_FORCED;
-import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
-import static android.app.ActivityManager.START_TASK_TO_FRONT;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
-import static android.app.ActivityManager.StackId.FIRST_STATIC_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.LAST_STATIC_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONTAINERS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IDLE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKSCREEN;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PAUSE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RELEASE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBLE_BEHIND;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONTAINERS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_IDLE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PAUSE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RELEASE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STATES;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBLE_BEHIND;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityManagerService.ANIMATE;
-import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
-import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
-import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
-import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
-import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
-import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
-import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
-import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
-import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
-import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
-import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
-import static com.android.server.am.ActivityStack.STACK_VISIBLE;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
-import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
-
-public final class ActivityStackSupervisor extends ConfigurationContainer
+public class ActivityStackSupervisor extends ConfigurationContainer
         implements DisplayListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_AM;
     private static final String TAG_CONTAINERS = TAG + POSTFIX_CONTAINERS;
@@ -477,6 +476,8 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
      */
     boolean mIsDockMinimized;
 
+    final KeyguardController mKeyguardController;
+
     /**
      * Description of a request to start a new activity, which has been held
      * due to app switches being disabled.
@@ -514,6 +515,7 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
         mHandler = new ActivityStackSupervisorHandler(mService.mHandler.getLooper());
         mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext);
         mResizeDockedStackTimeout = new ResizeDockedStackTimeout(service, this, mHandler);
+        mKeyguardController = new KeyguardController(service, this);
     }
 
     void setRecentTasks(RecentTasks recentTasks) {
@@ -562,6 +564,7 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
     void setWindowManager(WindowManagerService wm) {
         synchronized (mService) {
             mWindowManager = wm;
+            mKeyguardController.setWindowManager(wm);
 
             mDisplayManager =
                     (DisplayManager)mService.mContext.getSystemService(Context.DISPLAY_SERVICE);
@@ -583,11 +586,6 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
 
             mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         }
-    }
-
-    void notifyActivityDrawnForKeyguard() {
-        if (DEBUG_LOCKSCREEN) mService.logLockScreen("");
-        mWindowManager.notifyActivityDrawnForKeyguard();
     }
 
     ActivityStack getFocusedStack() {
@@ -1944,7 +1942,7 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
             return null;
         }
         // TODO(multi-display): Allow creating stacks on secondary displays.
-        return createStackOnDisplay(stackId, Display.DEFAULT_DISPLAY, createOnTop);
+        return createStackOnDisplay(stackId, DEFAULT_DISPLAY, createOnTop);
     }
 
     ArrayList<ActivityStack> getStacks() {
@@ -1953,6 +1951,10 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
             allStacks.addAll(mActivityDisplays.valueAt(displayNdx).mStacks);
         }
         return allStacks;
+    }
+
+    ArrayList<ActivityStack> getStacksOnDefaultDisplay() {
+        return mActivityDisplays.valueAt(DEFAULT_DISPLAY).mStacks;
     }
 
     ActivityRecord getHomeActivity() {
@@ -2919,14 +2921,19 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
 
     void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
-        // First the front stacks. In case any are not fullscreen and are in front of home.
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
-            final int topStackNdx = stacks.size() - 1;
-            for (int stackNdx = topStackNdx; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = stacks.get(stackNdx);
-                stack.ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows);
+        mKeyguardController.beginActivityVisibilityUpdate();
+        try {
+            // First the front stacks. In case any are not fullscreen and are in front of home.
+            for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+                final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
+                final int topStackNdx = stacks.size() - 1;
+                for (int stackNdx = topStackNdx; stackNdx >= 0; --stackNdx) {
+                    final ActivityStack stack = stacks.get(stackNdx);
+                    stack.ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows);
+                }
             }
+        } finally {
+            mKeyguardController.endActivityVisibilityUpdate();
         }
     }
 
@@ -3470,10 +3477,10 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
     }
 
     private StackInfo getStackInfoLocked(ActivityStack stack) {
-        final ActivityDisplay display = mActivityDisplays.get(Display.DEFAULT_DISPLAY);
+        final ActivityDisplay display = mActivityDisplays.get(DEFAULT_DISPLAY);
         StackInfo info = new StackInfo();
         mWindowManager.getStackBounds(stack.mStackId, info.bounds);
-        info.displayId = Display.DEFAULT_DISPLAY;
+        info.displayId = DEFAULT_DISPLAY;
         info.stackId = stack.mStackId;
         info.userId = stack.mCurrentUser;
         info.visible = stack.getStackVisibilityLocked(null) == STACK_VISIBLE;
@@ -4390,7 +4397,7 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
 
     ActivityStack findStackBehind(ActivityStack stack) {
         // TODO(multi-display): We are only looking for stacks on the default display.
-        final ActivityDisplay display = mActivityDisplays.get(Display.DEFAULT_DISPLAY);
+        final ActivityDisplay display = mActivityDisplays.get(DEFAULT_DISPLAY);
         if (display == null) {
             return null;
         }
@@ -4505,7 +4512,7 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
     public List<IBinder> getTopVisibleActivities() {
         // TODO(multi-display): Get rid of DEFAULT_DISPLAY here. Used in
         // VoiceInteractionManagerServiceImpl#showSessionLocked.
-        final ActivityDisplay display = mActivityDisplays.get(Display.DEFAULT_DISPLAY);
+        final ActivityDisplay display = mActivityDisplays.get(DEFAULT_DISPLAY);
         if (display == null) {
             return Collections.EMPTY_LIST;
         }

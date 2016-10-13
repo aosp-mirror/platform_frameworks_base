@@ -347,17 +347,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                 dismissKeyguardThenExecute(new OnDismissAction() {
                     @Override
                     public boolean onDismiss() {
-                        if (keyguardShowing && !afterKeyguardGone) {
-                            try {
-                                ActivityManagerNative.getDefault()
-                                        .keyguardWaitingForActivityDrawn();
-                                ActivityManagerNative.getDefault().resumeAppSwitches();
-                            } catch (RemoteException e) {
-                            }
+                        try {
+                            ActivityManagerNative.getDefault().resumeAppSwitches();
+                        } catch (RemoteException e) {
                         }
 
                         boolean handled = superOnClickHandler(view, pendingIntent, fillInIntent);
-                        overrideActivityPendingAppTransition(keyguardShowing && !afterKeyguardGone);
 
                         // close the shade if it was open
                         if (handled) {
@@ -1054,24 +1049,15 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     private void startNotificationGutsIntent(final Intent intent, final int appUid) {
-        final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
         dismissKeyguardThenExecute(new OnDismissAction() {
             @Override
             public boolean onDismiss() {
                 AsyncTask.execute(new Runnable() {
                     public void run() {
-                        try {
-                            if (keyguardShowing) {
-                                ActivityManagerNative.getDefault()
-                                        .keyguardWaitingForActivityDrawn();
-                            }
-                            TaskStackBuilder.create(mContext)
-                                    .addNextIntentWithParentStack(intent)
-                                    .startActivities(getActivityOptions(),
-                                            new UserHandle(UserHandle.getUserId(appUid)));
-                            overrideActivityPendingAppTransition(keyguardShowing);
-                        } catch (RemoteException e) {
-                        }
+                        TaskStackBuilder.create(mContext)
+                                .addNextIntentWithParentStack(intent)
+                                .startActivities(getActivityOptions(),
+                                        new UserHandle(UserHandle.getUserId(appUid)));
                     }
                 });
                 animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
@@ -1834,11 +1820,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                     @Override
                     public void run() {
                         try {
-                            if (keyguardShowing && !afterKeyguardGone) {
-                                ActivityManagerNative.getDefault()
-                                        .keyguardWaitingForActivityDrawn();
-                            }
-
                             // The intent we are sending is for the application, which
                             // won't have permission to immediately start an activity after
                             // the user switches to home.  We know it is safe to do at this
@@ -1857,8 +1838,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                         }
                         if (intent.isActivity()) {
                             mAssistManager.hideAssist();
-                            overrideActivityPendingAppTransition(keyguardShowing
-                                    && !afterKeyguardGone);
                         }
                     }
                 }.start();
@@ -1945,11 +1924,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                         @Override
                         public void run() {
                             try {
-                                if (keyguardShowing && !afterKeyguardGone) {
-                                    ActivityManagerNative.getDefault()
-                                            .keyguardWaitingForActivityDrawn();
-                                }
-
                                 // The intent we are sending is for the application, which
                                 // won't have permission to immediately start an activity after
                                 // the user switches to home.  We know it is safe to do at this
@@ -1995,8 +1969,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                                 }
                                 if (intent.isActivity()) {
                                     mAssistManager.hideAssist();
-                                    overrideActivityPendingAppTransition(keyguardShowing
-                                            && !afterKeyguardGone);
                                 }
                             }
 
@@ -2065,16 +2037,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void animateCollapsePanels(int flags, boolean force, boolean delayed) {
-    }
-
-    public void overrideActivityPendingAppTransition(boolean keyguardShowing) {
-        if (keyguardShowing) {
-            try {
-                mWindowManagerService.overridePendingAppTransition(null, 0, 0, null);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Error overriding app transition: " + e);
-            }
-        }
     }
 
     protected boolean startWorkChallengeIfNecessary(int userId, IntentSender intendSender,

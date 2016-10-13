@@ -31,7 +31,7 @@ public abstract class QSContainer extends FrameLayout {
 
     // This should be incremented any time this class or ActivityStarter or BaseStatusBarHeader
     // change in incompatible ways.
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
 
     public QSContainer(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -116,7 +116,6 @@ public abstract class QSContainer extends FrameLayout {
         void startPendingIntentDismissingKeyguard(PendingIntent intent);
         void startActivity(Intent intent, boolean dismissShade);
         void startActivity(Intent intent, boolean dismissShade, Callback callback);
-        void preventNextAnimation();
 
         interface Callback {
             void onActivityStarted(int resultCode);

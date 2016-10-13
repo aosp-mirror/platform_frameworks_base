@@ -23,7 +23,6 @@ import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.server.UiThread;
-import com.android.server.policy.keyguard.KeyguardStateMonitor.OnShowingStateChangedCallback;
 
 import java.io.PrintWriter;
 
@@ -50,7 +49,6 @@ public class KeyguardServiceDelegate {
     private final Handler mScrimHandler;
     private final KeyguardState mKeyguardState = new KeyguardState();
     private DrawnListener mDrawnListenerWhenConnect;
-    private final OnShowingStateChangedCallback mShowingStateChangedCallback;
 
     private static final class KeyguardState {
         KeyguardState() {
@@ -119,11 +117,9 @@ public class KeyguardServiceDelegate {
         }
     };
 
-    public KeyguardServiceDelegate(Context context,
-            OnShowingStateChangedCallback showingStateChangedCallback) {
+    public KeyguardServiceDelegate(Context context) {
         mContext = context;
         mScrimHandler = UiThread.getHandler();
-        mShowingStateChangedCallback = showingStateChangedCallback;
         mScrim = createScrim(context, mScrimHandler);
     }
 
@@ -159,7 +155,7 @@ public class KeyguardServiceDelegate {
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG) Log.v(TAG, "*** Keyguard connected (yay!)");
             mKeyguardService = new KeyguardServiceWrapper(mContext,
-                    IKeyguardService.Stub.asInterface(service), mShowingStateChangedCallback);
+                    IKeyguardService.Stub.asInterface(service));
             if (mKeyguardState.systemIsReady) {
                 // If the system is ready, it means keyguard crashed and restarted.
                 mKeyguardService.onSystemReady();

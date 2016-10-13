@@ -413,12 +413,6 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         }
     }
 
-    void overridePlayingAppAnimations(Animation a) {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            mChildren.get(i).overridePlayingAppAnimations(a);
-        }
-    }
-
     void setOrientation(int orientation) {
         mOrientation = orientation;
     }

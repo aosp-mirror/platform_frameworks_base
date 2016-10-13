@@ -115,11 +115,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean canShowDismissingWindowWhileLockedLw() {
-        return false;
-    }
-
-    @Override
     public void setInitialDisplaySize(Display display, int width, int height, int density) {
 
     }
@@ -299,24 +294,13 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean isForceHiding(WindowManager.LayoutParams attrs) {
-        return false;
-    }
-
-    @Override
     public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs) {
         return false;
     }
 
     @Override
-    public boolean canBeForceHidden(WindowState win,
-            WindowManager.LayoutParams attrs) {
+    public boolean canBeHiddenByKeyguardLw(WindowState win) {
         return false;
-    }
-
-    @Override
-    public WindowState getWinShowWhenLockedLw() {
-        return null;
     }
 
     @Override
@@ -359,13 +343,13 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public Animation createForceHideEnterAnimation(boolean onWallpaper,
+    public Animation createHiddenByKeyguardExit(boolean onWallpaper,
             boolean goingToNotificationShade) {
         return null;
     }
 
     @Override
-    public Animation createForceHideWallpaperExitAnimation(boolean goingToNotificationShade) {
+    public Animation createKeyguardWallpaperExit(boolean goingToNotificationShade) {
         return null;
     }
 
@@ -432,8 +416,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void applyPostLayoutPolicyLw(WindowState win,
-            WindowManager.LayoutParams attrs, WindowState attached) {
-
+            WindowManager.LayoutParams attrs, WindowState attached, WindowState imeTarget) {
     }
 
     @Override
@@ -523,7 +506,12 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean isKeyguardShowingOrOccluded() {
+    public boolean isKeyguardOccluded() {
+        return false;
+    }
+
+    @Override
+    public boolean isKeyguardTrustedLw() {
         return false;
     }
 
@@ -543,13 +531,12 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void notifyActivityDrawnForKeyguardLw() {
-
+    public boolean isKeyguardDrawnLw() {
+        return false;
     }
 
     @Override
-    public boolean isKeyguardDrawnLw() {
-        return false;
+    public void onKeyguardOccludedChangedLw(boolean occluded) {
     }
 
     @Override

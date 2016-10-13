@@ -357,8 +357,7 @@ public interface IActivityManager extends IInterface {
     public void killPackageDependents(final String packageName, int userId) throws RemoteException;
     public void forceStopPackage(final String packageName, int userId) throws RemoteException;
 
-    // Note: probably don't want to allow applications access to these.
-    public void setLockScreenShown(boolean showing, boolean occluded) throws RemoteException;
+    public void setLockScreenShown(boolean showing) throws RemoteException;
 
     public void unhandledBack() throws RemoteException;
     public ParcelFileDescriptor openContentUri(Uri uri) throws RemoteException;
@@ -517,8 +516,6 @@ public interface IActivityManager extends IInterface {
     public long[] getProcessPss(int[] pids) throws RemoteException;
 
     public void showBootMessage(CharSequence msg, boolean always) throws RemoteException;
-
-    public void keyguardWaitingForActivityDrawn() throws RemoteException;
 
     /**
      * Notify the system that the keyguard is going away.
@@ -1017,7 +1014,6 @@ public interface IActivityManager extends IInterface {
     int NOTIFY_LAUNCH_TASK_BEHIND_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+228;
     int START_ACTIVITY_FROM_RECENTS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 229;
     int NOTIFY_ENTER_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+230;
-    int KEYGUARD_WAITING_FOR_ACTIVITY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+231;
     int START_ACTIVITY_AS_CALLER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+232;
     int ADD_APP_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+233;
     int GET_APP_TASK_THUMBNAIL_SIZE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+234;

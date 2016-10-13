@@ -350,7 +350,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         return mFillsParent
                 || !StackId.isTaskResizeableByDockedStack(mStack.mStackId)
                 || displayContent == null
-                || displayContent.getDockedStackVisibleForUserLocked() != null;
+                || displayContent.getDockedStackIgnoringVisibility() != null;
     }
 
     /** Original bounds of the task if applicable, otherwise fullscreen rect. */

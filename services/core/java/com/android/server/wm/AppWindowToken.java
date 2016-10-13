@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.app.ActivityManager.StackId;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -151,6 +153,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     boolean mAppStopped;
     int mRotationAnimationHint;
     private int mPendingRelaunchCount;
+
+    private boolean mLastContainsShowWhenLockedWindow;
+    private boolean mLastContainsDismissKeyguardWindow;
 
     private ArrayList<WindowSurfaceController.SurfaceControlWithBackground> mSurfaceViewBackgrounds =
         new ArrayList<>();
@@ -718,6 +723,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (gotReplacementWindow) {
             mService.scheduleWindowReplacementTimeouts(this);
         }
+        checkKeyguardFlagsChanged();
+    }
+
+    @Override
+    void removeChild(WindowState child) {
+        super.removeChild(child);
+        checkKeyguardFlagsChanged();
     }
 
     private boolean waitingForReplacement() {
@@ -805,21 +817,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         for (int i = 0; i < mSurfaceViewBackgrounds.size(); i++) {
             WindowSurfaceController.SurfaceControlWithBackground sc = mSurfaceViewBackgrounds.get(i);
             sc.updateBackgroundVisibility(sc != bottom);
-        }
-    }
-
-    /**
-     * See {@link WindowManagerService#overridePlayingAppAnimationsLw}
-     */
-    void overridePlayingAppAnimations(Animation a) {
-        if (mAppAnimator.isAnimating()) {
-            final WindowState win = findMainWindow();
-            if (win == null) {
-                return;
-            }
-            final int width = win.mContainingFrame.width();
-            final int height = win.mContainingFrame.height();
-            mAppAnimator.setAnimation(a, width, height, false, STACK_CLIP_NONE);
         }
     }
 
@@ -1222,6 +1219,35 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     void setFillsParent(boolean fillsParent) {
         mFillsParent = fillsParent;
+    }
+
+    boolean containsDismissKeyguardWindow() {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            if ((mChildren.get(i).mAttrs.flags & FLAG_DISMISS_KEYGUARD) != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean containsShowWhenLockedWindow() {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            if ((mChildren.get(i).mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void checkKeyguardFlagsChanged() {
+        final boolean containsDismissKeyguard = containsDismissKeyguardWindow();
+        final boolean containsShowWhenLocked = containsShowWhenLockedWindow();
+        if (containsDismissKeyguard != mLastContainsDismissKeyguardWindow
+                || containsShowWhenLocked != mLastContainsShowWhenLockedWindow) {
+            mService.notifyKeyguardFlagsChanged(null /* callback */);
+        }
+        mLastContainsDismissKeyguardWindow = containsDismissKeyguard;
+        mLastContainsShowWhenLockedWindow = containsShowWhenLocked;
     }
 
     @Override

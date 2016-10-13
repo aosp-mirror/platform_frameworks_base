@@ -37,7 +37,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.IActivityManager;
-import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -50,7 +49,6 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -2514,11 +2512,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         startActivityDismissingKeyguard(intent, false, dismissShade, callback);
     }
 
-    @Override
-    public void preventNextAnimation() {
-        overrideActivityPendingAppTransition(true /* keyguardShowing */);
-    }
-
     public void setQsExpanded(boolean expanded) {
         mStatusBarWindowManager.setQsExpanded(expanded);
         mKeyguardStatusView.setImportantForAccessibility(expanded
@@ -2870,7 +2863,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         for (int i = 0; i < size; i++) {
             clonedList.get(i).run();
         }
-
+        mStatusBarKeyguardViewManager.readyForKeyguardDone();
     }
 
     @Override
@@ -3497,7 +3490,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
                 mContext, intent, mCurrentUserId);
-        final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -3528,8 +3520,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 } catch (RemoteException e) {
                     Log.w(TAG, "Unable to start activity", e);
                 }
-                overrideActivityPendingAppTransition(
-                        keyguardShowing && !afterKeyguardGone);
                 if (callback != null) {
                     callback.onActivityStarted(result);
                 }
@@ -3547,36 +3537,24 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 afterKeyguardGone, true /* deferred */);
     }
 
+    public void readyForKeyguardDone() {
+        mStatusBarKeyguardViewManager.readyForKeyguardDone();
+    }
+
     public void executeRunnableDismissingKeyguard(final Runnable runnable,
             final Runnable cancelAction,
             final boolean dismissShade,
             final boolean afterKeyguardGone,
             final boolean deferred) {
-        final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
-        dismissKeyguardThenExecute(new OnDismissAction() {
-            @Override
-            public boolean onDismiss() {
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if (keyguardShowing && !afterKeyguardGone) {
-                                ActivityManagerNative.getDefault()
-                                        .keyguardWaitingForActivityDrawn();
-                            }
-                            if (runnable != null) {
-                                runnable.run();
-                            }
-                        } catch (RemoteException e) {
-                        }
-                    }
-                });
-                if (dismissShade) {
-                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */,
-                            true /* delayed*/);
-                }
-                return deferred;
+        dismissKeyguardThenExecute(() -> {
+            if (runnable != null) {
+                AsyncTask.execute(runnable);
             }
+            if (dismissShade) {
+                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */,
+                        true /* delayed*/);
+            }
+            return deferred;
         }, cancelAction, afterKeyguardGone);
     }
 

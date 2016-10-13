@@ -1858,6 +1858,7 @@ public class NotificationPanelView extends PanelView implements
             mLaunchAnimationEndRunnable.run();
             mLaunchAnimationEndRunnable = null;
         }
+        mStatusBar.readyForKeyguardDone();
     }
 
     @Override

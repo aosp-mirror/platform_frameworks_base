@@ -11,6 +11,11 @@ import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_CLOSE;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
+import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
+import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
+import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
+import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_GOING_AWAY;
+import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_CLOSE;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_IN_PLACE;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
@@ -347,8 +352,10 @@ class WindowSurfacePlacer {
         final AppWindowAnimator closingAppAnimator = (topClosingApp == null) ? null :
                 topClosingApp.mAppAnimator;
 
-        mService.mAppTransition.goodToGo(openingAppAnimator, closingAppAnimator,
-                mService.mOpeningApps, mService.mClosingApps);
+        final int flags = mService.mAppTransition.getTransitFlags();
+        int layoutRedo = mService.mAppTransition.goodToGo(transit, openingAppAnimator,
+                closingAppAnimator, mService.mOpeningApps, mService.mClosingApps);
+        handleNonAppWindowsInTransition(transit, flags);
         mService.mAppTransition.postAnimationCallback();
         mService.mAppTransition.clear();
 
@@ -369,11 +376,10 @@ class WindowSurfacePlacer {
         mService.updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
                 true /*updateInputWindows*/);
         mService.mFocusMayChange = false;
-        mService.notifyActivityDrawnForKeyguard();
 
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
 
-        return FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_CONFIG;
+        return layoutRedo | FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_CONFIG;
     }
 
     private AppWindowToken handleOpeningApps(int transit, LayoutParams animLp,
@@ -472,6 +478,26 @@ class WindowSurfacePlacer {
         }
     }
 
+    private void handleNonAppWindowsInTransition(int transit, int flags) {
+        if (transit == TRANSIT_KEYGUARD_GOING_AWAY) {
+            if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0
+                    && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) == 0) {
+                Animation anim = mService.mPolicy.createKeyguardWallpaperExit(
+                        (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0);
+                if (anim != null) {
+                    mService.getDefaultDisplayContentLocked().mWallpaperController
+                            .startWallpaperAnimation(anim);
+                }
+            }
+        }
+        if (transit == TRANSIT_KEYGUARD_GOING_AWAY
+                || transit == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER) {
+            mService.getDefaultDisplayContentLocked().startKeyguardExitOnNonAppWindows(
+                    transit == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
+                    (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0);
+        }
+    }
+
     private boolean transitionGoodToGo(int appsCount) {
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                 "Checking " + appsCount + " opening apps (frozen="
@@ -551,6 +577,7 @@ class WindowSurfacePlacer {
                 ? null : wallpaperTarget;
         final ArraySet<AppWindowToken> openingApps = mService.mOpeningApps;
         final ArraySet<AppWindowToken> closingApps = mService.mClosingApps;
+        boolean openingCanBeWallpaperTarget = canBeWallpaperTarget(openingApps);
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                 "New wallpaper target=" + wallpaperTarget
                         + ", oldWallpaper=" + oldWallpaper
@@ -575,6 +602,10 @@ class WindowSurfacePlacer {
             }
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                     "New transit: " + AppTransition.appTransitionToString(transit));
+        } else if (openingCanBeWallpaperTarget && transit == TRANSIT_KEYGUARD_GOING_AWAY) {
+            transit = TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                    "New transit: " + AppTransition.appTransitionToString(transit));
         } else if (oldWallpaper != null && !mService.mOpeningApps.isEmpty()
                 && !openingApps.contains(oldWallpaper.mAppToken)
                 && closingApps.contains(oldWallpaper.mAppToken)) {
@@ -593,6 +624,15 @@ class WindowSurfacePlacer {
             mService.mAnimateWallpaperWithTarget = true;
         }
         return transit;
+    }
+
+    private boolean canBeWallpaperTarget(ArraySet<AppWindowToken> apps) {
+        for (int i = apps.size() - 1; i >= 0; i--) {
+            if (apps.valueAt(i).windowsCanBeWallpaperTarget()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void processApplicationsAnimatingInPlace(int transit) {

@@ -17,11 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
@@ -39,7 +35,6 @@ import android.util.TimeUtils;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
-import android.view.animation.Animation;
 
 import java.io.PrintWriter;
 
@@ -49,9 +44,6 @@ import java.io.PrintWriter;
  */
 public class WindowAnimator {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowAnimator" : TAG_WM;
-
-    /** How long to give statusbar to clear the private keyguard flag when animating out */
-    static final long KEYGUARD_ANIM_TIMEOUT_MS = 1000;
 
     final WindowManagerService mService;
     final Context mContext;
@@ -86,36 +78,9 @@ public class WindowAnimator {
 
     boolean mInitialized = false;
 
-    boolean mKeyguardGoingAway;
-    int mKeyguardGoingAwayFlags;
-    boolean mKeyguardAnimatingIn;
-
-    /** Use one animation for all entering activities after keyguard is dismissed. */
-    Animation mPostKeyguardExitAnimation;
-
-    // forceHiding states.
-    static final int KEYGUARD_NOT_SHOWN     = 0;
-    static final int KEYGUARD_SHOWN         = 1;
-    static final int KEYGUARD_ANIMATING_OUT = 2;
-    int mForceHiding = KEYGUARD_NOT_SHOWN;
-
     // When set to true the animator will go over all windows after an animation frame is posted and
     // check if some got replaced and can be removed.
     private boolean mRemoveReplacedWindows = false;
-
-    private final AppTokenList mTmpExitingAppTokens = new AppTokenList();
-
-    /** The window that was previously hiding the Keyguard. */
-    WindowState mLastShowWinWhenLocked;
-
-    String forceHidingToString() {
-        switch (mForceHiding) {
-            case KEYGUARD_NOT_SHOWN:    return "KEYGUARD_NOT_SHOWN";
-            case KEYGUARD_SHOWN:        return "KEYGUARD_SHOWN";
-            case KEYGUARD_ANIMATING_OUT:return "KEYGUARD_ANIMATING_OUT";
-            default: return "KEYGUARD STATE UNKNOWN " + mForceHiding;
-        }
-    }
 
     WindowAnimator(final WindowManagerService service) {
         mService = service;
@@ -151,63 +116,6 @@ public class WindowAnimator {
         }
 
         mDisplayContentsAnimators.delete(displayId);
-    }
-
-    /**
-     * @return The window that is currently hiding the Keyguard, or if it was hiding the Keyguard,
-     *         and it's still animating.
-     */
-    private WindowState getWinShowWhenLockedOrAnimating() {
-        final WindowState winShowWhenLocked = (WindowState) mPolicy.getWinShowWhenLockedLw();
-        if (winShowWhenLocked != null) {
-            return winShowWhenLocked;
-        }
-        if (mLastShowWinWhenLocked != null && mLastShowWinWhenLocked.isOnScreen()
-                && mLastShowWinWhenLocked.isAnimatingLw()
-                && (mLastShowWinWhenLocked.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
-            return mLastShowWinWhenLocked;
-        }
-        return null;
-    }
-
-    boolean shouldForceHide(WindowState win) {
-        final WindowState imeTarget = mService.mInputMethodTarget;
-        final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisibleNow() &&
-                ((imeTarget.getAttrs().flags & FLAG_SHOW_WHEN_LOCKED) != 0
-                        || !mPolicy.canBeForceHidden(imeTarget, imeTarget.mAttrs));
-
-        final WindowState winShowWhenLocked = getWinShowWhenLockedOrAnimating();
-        final AppWindowToken appShowWhenLocked = winShowWhenLocked == null ?
-                null : winShowWhenLocked.mAppToken;
-
-        boolean allowWhenLocked = false;
-        // Show IME over the keyguard if the target allows it
-        allowWhenLocked |= (win.mIsImWindow || imeTarget == win) && showImeOverKeyguard;
-        // Show SHOW_WHEN_LOCKED windows that turn on the screen
-        allowWhenLocked |= (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && win.mTurnOnScreen;
-
-        if (appShowWhenLocked != null) {
-            allowWhenLocked |= appShowWhenLocked == win.mAppToken
-                    // Show all SHOW_WHEN_LOCKED windows if some apps are shown over lockscreen
-                    || (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
-                    // Show error dialogs over apps that are shown on lockscreen
-                    || (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0;
-        }
-
-        // Allow showing a window that dismisses Keyguard if the policy allows it. This is used for
-        // when the policy knows that the Keyguard can be dismissed without user interaction to
-        // provide a smooth transition in that case.
-        allowWhenLocked |= (win.mAttrs.flags & FLAG_DISMISS_KEYGUARD) != 0
-                && mPolicy.canShowDismissingWindowWhileLockedLw();
-
-        // Only hide windows if the keyguard is active and not animating away.
-        boolean keyguardOn = mPolicy.isKeyguardShowingOrOccluded()
-                && mForceHiding != KEYGUARD_ANIMATING_OUT
-                && !mKeyguardAnimatingIn;
-        boolean hideDockDivider = win.mAttrs.type == TYPE_DOCK_DIVIDER
-                && win.getDisplayContent().getDockedStackLocked() == null;
-        return keyguardOn && !allowWhenLocked && (win.getDisplayId() == DEFAULT_DISPLAY)
-                || hideDockDivider;
     }
 
     /** Locked on mService.mWindowMap. */
@@ -388,7 +296,6 @@ public class WindowAnimator {
         if (dumpAll) {
             pw.print(prefix); pw.print("mAnimTransactionSequence=");
                     pw.print(mAnimTransactionSequence);
-                    pw.print(" mForceHiding="); pw.println(forceHidingToString());
             pw.print(prefix); pw.print("mCurrentTime=");
                     pw.println(TimeUtils.formatUptime(mCurrentTime));
         }

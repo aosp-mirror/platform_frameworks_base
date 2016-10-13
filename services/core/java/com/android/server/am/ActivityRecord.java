@@ -83,6 +83,7 @@ import android.util.TimeUtils;
 import android.view.AppTransitionAnimationSpec;
 import android.view.IApplicationToken;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
@@ -721,7 +722,7 @@ final class ActivityRecord {
                         : android.R.style.Theme_Holo;
             }
             if ((aInfo.flags&ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
-                windowFlags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+                windowFlags |= LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
             if ((aInfo.flags&ActivityInfo.FLAG_MULTIPROCESS) != 0
                     && _caller != null
@@ -927,6 +928,22 @@ final class ActivityRecord {
 
     boolean isAlwaysFocusable() {
         return (info.flags & FLAG_ALWAYS_FOCUSABLE) != 0;
+    }
+
+    /**
+     * @return true if the activity contains windows that have
+     *         {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} set
+     */
+    boolean hasShowWhenLockedWindows() {
+        return service.mWindowManager.containsShowWhenLockedWindow(appToken);
+    }
+
+    /**
+     * @return true if the activity contains windows that have
+     *         {@link LayoutParams#FLAG_DISMISS_KEYGUARD} set
+     */
+    boolean hasDismissKeyguardWindows() {
+        return service.mWindowManager.containsDismissKeyguardWindow(appToken);
     }
 
     void makeFinishingLocked() {
@@ -1334,7 +1351,6 @@ final class ActivityRecord {
         if (nowVisible) {
             // We won't get a call to reportActivityVisibleLocked() so dismiss lockscreen now.
             mStackSupervisor.reportActivityVisibleLocked(this);
-            mStackSupervisor.notifyActivityDrawnForKeyguard();
         }
 
         // Schedule an idle timeout in case the app doesn't do it for us.
