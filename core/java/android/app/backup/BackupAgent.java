@@ -649,10 +649,11 @@ public abstract class BackupAgent extends ContextWrapper {
                 File file = scanQueue.remove(0);
                 String filePath;
                 try {
-                    // Ignore symlinks outright
+                    // Ignore things that aren't "real" files or dirs
                     StructStat stat = Os.lstat(file.getPath());
-                    if (OsConstants.S_ISLNK(stat.st_mode)) {
-                        if (DEBUG) Log.i(TAG, "Symlink (skipping)!: " + file);
+                    if (!OsConstants.S_ISREG(stat.st_mode)
+                            && !OsConstants.S_ISDIR(stat.st_mode)) {
+                        if (DEBUG) Log.i(TAG, "Not a file/dir (skipping)!: " + file);
                         continue;
                     }
 
