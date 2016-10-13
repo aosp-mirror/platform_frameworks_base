@@ -661,6 +661,12 @@ public final class ContactsContract {
             ContentValues contentValues = new ContentValues();
             resolver.update(Directory.CONTENT_URI, contentValues, null, null);
         }
+
+        /**
+         * A query parameter that's passed to directory providers which indicates the client
+         * package name that has made the query requests.
+         */
+        public static final String CALLER_PACKAGE_PARAM_KEY = "callerPackage";
     }
 
     /**
