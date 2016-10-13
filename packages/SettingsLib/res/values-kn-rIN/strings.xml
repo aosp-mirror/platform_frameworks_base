@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"ಕ್ಲಿಪ್‌ನ ಗಡಿಗಳು, ಅಂಚುಗಳು, ಇತ್ಯಾದಿ ತೋರಿಸು."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL ಲೇಔಟ್‌ ಪರಿಮಿತಿ ಬಲಗೊಳಿಸಿ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"ಎಲ್ಲ ಸ್ಥಳಗಳಿಗಾಗಿ RTL ಗೆ ಸ್ಕ್ರೀನ್‌ ಲೇಔಟ್‌ ದಿಕ್ಕನ್ನು ಪ್ರಬಲಗೊಳಿಸಿ"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU ಬಳಕೆಯನ್ನು ತೋರಿಸು"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"ಪ್ರಸ್ತುತ CPU ಬಳಕೆಯನ್ನು ತೋರಿಸುತ್ತಿರುವ ಪರದೆಯ ಓವರ್‌ಲೇ"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU ನೀಡುವಿಕೆ ಬಲಗೊಳಿಸು"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d ಚಿತ್ರಕಲೆಗಾಗಿ GPU ಬಳಕೆ ಬಲಗೊಳಿಸಿ"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA ಪ್ರಬಲಗೊಳಿಸಿ"</string>

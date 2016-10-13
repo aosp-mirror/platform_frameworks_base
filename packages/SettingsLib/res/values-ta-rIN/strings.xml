@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"கிளிப் எல்லைகள், ஓரங்கள், மேலும் பலவற்றைக் காட்டு"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL தளவமைப்பின் திசையை வலியுறுத்து"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"எல்லா மொழிகளுக்கும் திரையின் தளவமைப்பு திசையை RTL க்கு மாற்று"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU பயன்பாட்டைக் காட்டு"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"தற்போதைய CPU பயன்பாட்டைக் காட்டும் திரை மேலடுக்கு"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU காட்சியாக்கத்தை வலியுறுத்து"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d வரைபடத்திற்கு GPU பயன்பாட்டை வலியுறுத்து"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA ஐ வலியுறுத்து"</string>

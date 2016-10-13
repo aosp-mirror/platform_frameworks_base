@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Pokaži meje obrezovanja, obrobe ipd."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Vsili od desne proti levi"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Vsili smer postavitve na zaslonu od desne proti levi za vse jezike"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Prikaži uporabo CPE-ja"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Prekrivanje zaslona prikazuje tren. uporabo CPE-ja"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Vsili upodabljanje z GPE-jem"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Za risanje 2D vsili uporabo grafičnega procesorja"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Vsili 4x MSAA"</string>

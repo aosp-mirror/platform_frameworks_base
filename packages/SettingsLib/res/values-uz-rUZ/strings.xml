@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Klip, maydon va h.k. chegaralarini ko‘rsatish"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"O‘ngdan chapga qarab yozish"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Barcha tillarda o‘ngdan chapga qarab yozish"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"MP yuklanishini ko‘rsatish"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Joriy MP yuklanishini ko‘rsatuvchi ekran"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU yordamida tezlatish"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Ikki o‘lchamli chizma uchun doim GPU ishlatilsin"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAAni yoqish"</string>

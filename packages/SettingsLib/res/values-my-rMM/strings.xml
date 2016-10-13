@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"ဖြတ်ပိုင်းအနားသတ်များ၊ အနားများ စသဖြင့် ပြပါ။"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL ဖွဲ့စည်းပုံအညွှန်း မဖြစ်မနေလုပ်ပါ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"လိုကယ်လ်အားလုံးအတွက် မျက်နှာပြင် ဖွဲ့စည်းပုံအညွှန်း မဖြစ်မနေလုပ်ရန်"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPUအသုံးပြုမှုအား ပြသရန်"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"လက်ရှိCPUအသုံးပြုမှုအားလုံး မျက်နှာပြင်တွင်ပြသမှု"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPUအား အတင်းအကျပ်ဖြစ်စေမည်"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"GPUကို ၂ဖက်မြင်ပုံဆွဲခြင်းအတွက် မဖြစ်မနေအသုံးပြုစေရန်"</string>
     <string name="force_msaa" msgid="7920323238677284387">"တွန်းအား ၄× MSAA"</string>

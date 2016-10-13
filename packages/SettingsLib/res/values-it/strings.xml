@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Mostra limiti, margini dei clip e così via"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forza direzione layout RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Direzione layout schermo RTL per tutte le lingue"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Mostra utilizzo CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Overlay schermo che mostra l\'uso corrente della CPU"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Forza rendering GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Forza l\'uso della GPU per i disegni 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Forza MSAA 4x"</string>
