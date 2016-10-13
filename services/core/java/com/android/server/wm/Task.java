@@ -20,7 +20,6 @@ import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -35,7 +34,6 @@ import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
-import android.view.SurfaceControl;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -43,17 +41,17 @@ import java.io.PrintWriter;
 class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerUser {
     static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_WM;
     // Return value from {@link setBounds} indicating no change was made to the Task bounds.
-    static final int BOUNDS_CHANGE_NONE = 0;
+    private static final int BOUNDS_CHANGE_NONE = 0;
     // Return value from {@link setBounds} indicating the position of the Task bounds changed.
-    static final int BOUNDS_CHANGE_POSITION = 1;
+    private static final int BOUNDS_CHANGE_POSITION = 1;
     // Return value from {@link setBounds} indicating the size of the Task bounds changed.
-    static final int BOUNDS_CHANGE_SIZE = 1 << 1;
+    private static final int BOUNDS_CHANGE_SIZE = 1 << 1;
 
     // TODO: Track parent marks like this in WindowContainer.
     TaskStack mStack;
     final int mTaskId;
     final int mUserId;
-    boolean mDeferRemoval = false;
+    private boolean mDeferRemoval = false;
     final WindowManagerService mService;
 
     // Content limits relative to the DisplayContent this sits in.
@@ -65,7 +63,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     private final Rect mTempInsetBounds = new Rect();
 
     // Device rotation as of the last time {@link #mBounds} was set.
-    int mRotation;
+    private int mRotation;
 
     // Whether mBounds is fullscreen
     private boolean mFillsParent = true;
@@ -288,7 +286,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     }
 
     boolean cropWindowsToStackBounds() {
-        return !mHomeTask && (isResizeable() || mResizeMode == RESIZE_MODE_CROP_WINDOWS);
+        return !mHomeTask && isResizeable();
     }
 
     boolean isHomeTask() {

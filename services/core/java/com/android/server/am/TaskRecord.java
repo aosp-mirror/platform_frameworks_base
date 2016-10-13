@@ -69,11 +69,11 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
+import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
@@ -100,11 +100,11 @@ final class TaskRecord extends ConfigurationContainer {
     private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
     private static final String TAG_TASKS = TAG + POSTFIX_TASKS;
 
-    static final String ATTR_TASKID = "task_id";
+    private static final String ATTR_TASKID = "task_id";
     private static final String TAG_INTENT = "intent";
     private static final String TAG_AFFINITYINTENT = "affinity_intent";
-    static final String ATTR_REALACTIVITY = "real_activity";
-    static final String ATTR_REALACTIVITY_SUSPENDED = "real_activity_suspended";
+    private static final String ATTR_REALACTIVITY = "real_activity";
+    private static final String ATTR_REALACTIVITY_SUSPENDED = "real_activity_suspended";
     private static final String ATTR_ORIGACTIVITY = "orig_activity";
     private static final String TAG_ACTIVITY = "activity";
     private static final String ATTR_AFFINITY = "affinity";
@@ -121,7 +121,7 @@ final class TaskRecord extends ConfigurationContainer {
     private static final String ATTR_LASTDESCRIPTION = "last_description";
     private static final String ATTR_LASTTIMEMOVED = "last_time_moved";
     private static final String ATTR_NEVERRELINQUISH = "never_relinquish_identity";
-    static final String ATTR_TASK_AFFILIATION = "task_affiliation";
+    private static final String ATTR_TASK_AFFILIATION = "task_affiliation";
     private static final String ATTR_PREV_AFFILIATION = "prev_affiliation";
     private static final String ATTR_NEXT_AFFILIATION = "next_affiliation";
     private static final String ATTR_TASK_AFFILIATION_COLOR = "task_affiliation_color";
@@ -137,7 +137,7 @@ final class TaskRecord extends ConfigurationContainer {
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
 
     static final int INVALID_TASK_ID = -1;
-    static final int INVALID_MIN_SIZE = -1;
+    private static final int INVALID_MIN_SIZE = -1;
 
     final int taskId;       // Unique identifier for this task.
     String affinity;        // The affinity name for this task, or null; may change identity.
@@ -173,8 +173,8 @@ final class TaskRecord extends ConfigurationContainer {
                             // Based on the {@link ActivityInfo#resizeMode} of the root activity.
     boolean mTemporarilyUnresizable; // Separate flag from mResizeMode used to suppress resize
                                      // changes on a temporary basis.
-    int mLockTaskMode;      // Which tasklock mode to launch this task in. One of
-                            // ActivityManager.LOCK_TASK_LAUNCH_MODE_*
+    private int mLockTaskMode;  // Which tasklock mode to launch this task in. One of
+                                // ActivityManager.LOCK_TASK_LAUNCH_MODE_*
     private boolean mPrivileged;    // The root activity application of this task holds
                                     // privileged permissions.
     private boolean mIsOnTopLauncher; // Whether this task is an on-top launcher. See
@@ -223,7 +223,7 @@ final class TaskRecord extends ConfigurationContainer {
     private int mTaskToReturnTo = APPLICATION_ACTIVITY_TYPE;
 
     /** If original intent did not allow relinquishing task identity, save that information */
-    boolean mNeverRelinquishIdentity = true;
+    private boolean mNeverRelinquishIdentity = true;
 
     // Used in the unique case where we are clearing the task in order to reuse it. In that case we
     // do not want to delete the stack when the task goes empty.
@@ -402,7 +402,7 @@ final class TaskRecord extends ConfigurationContainer {
     private void setIntent(Intent _intent, ActivityInfo info) {
         if (intent == null) {
             mNeverRelinquishIdentity =
-                    (info.flags & ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY) == 0;
+                    (info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
         } else if (mNeverRelinquishIdentity) {
             return;
         }
@@ -1075,12 +1075,8 @@ final class TaskRecord extends ConfigurationContainer {
         return isHomeTask() && mIsOnTopLauncher;
     }
 
-    boolean inCropWindowsResizeMode() {
-        return !isResizeable() && mResizeMode == RESIZE_MODE_CROP_WINDOWS;
-    }
-
     boolean canGoInDockedStack() {
-        return isResizeable() || inCropWindowsResizeMode();
+        return isResizeable();
     }
 
     /**
@@ -1107,12 +1103,12 @@ final class TaskRecord extends ConfigurationContainer {
         // utility activities.
         int activityNdx;
         final int numActivities = mActivities.size();
-        final boolean relinquish = numActivities == 0 ? false :
-                (mActivities.get(0).info.flags & ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY) != 0;
+        final boolean relinquish = numActivities != 0 &&
+                (mActivities.get(0).info.flags & FLAG_RELINQUISH_TASK_IDENTITY) != 0;
         for (activityNdx = Math.min(numActivities, 1); activityNdx < numActivities;
                 ++activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
-            if (relinquish && (r.info.flags & ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
+            if (relinquish && (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
                 // This will be the top activity for determining taskDescription. Pre-inc to
                 // overcome initial decrement below.
                 ++activityNdx;
@@ -1167,7 +1163,7 @@ final class TaskRecord extends ConfigurationContainer {
                 continue;
             }
             effectiveNdx = activityNdx;
-            if ((r.info.flags & ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
+            if ((r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
                 break;
             }
         }
@@ -1362,8 +1358,6 @@ final class TaskRecord extends ConfigurationContainer {
                 callingPackage = attrValue;
             } else if (ATTR_RESIZE_MODE.equals(attrName)) {
                 resizeMode = Integer.parseInt(attrValue);
-                resizeMode = (resizeMode == RESIZE_MODE_CROP_WINDOWS)
-                        ? RESIZE_MODE_FORCE_RESIZEABLE : resizeMode;
             } else if (ATTR_PRIVILEGED.equals(attrName)) {
                 privileged = Boolean.parseBoolean(attrValue);
             } else if (ATTR_NON_FULLSCREEN_BOUNDS.equals(attrName)) {

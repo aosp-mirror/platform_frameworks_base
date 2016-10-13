@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.StackId;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
@@ -26,7 +25,6 @@ import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
@@ -907,16 +905,11 @@ final class ActivityRecord {
     }
 
     boolean canGoInDockedStack() {
-        return !isHomeActivity()
-                && (isResizeableOrForced() || info.resizeMode == RESIZE_MODE_CROP_WINDOWS);
+        return !isHomeActivity() && isResizeableOrForced();
     }
 
     boolean isAlwaysFocusable() {
         return (info.flags & FLAG_ALWAYS_FOCUSABLE) != 0;
-    }
-
-    boolean isOnTopLauncher() {
-        return isHomeActivity() && (info.flags & FLAG_ON_TOP_LAUNCHER) != 0;
     }
 
     void makeFinishingLocked() {

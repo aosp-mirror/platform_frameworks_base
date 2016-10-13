@@ -3548,31 +3548,7 @@ public class PackageParser {
                     R.styleable.AndroidManifestActivity_screenOrientation,
                     SCREEN_ORIENTATION_UNSPECIFIED);
 
-            a.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
-            final boolean appDefault = (owner.applicationInfo.privateFlags
-                    & PRIVATE_FLAG_RESIZEABLE_ACTIVITIES) != 0;
-            // This flag is used to workaround the issue with ignored resizeableActivity param when
-            // either targetSdkVersion is not set at all or <uses-sdk> tag is below <application>
-            // tag in AndroidManifest. If this param was explicitly set to 'false' we need to set
-            // corresponding resizeMode regardless of targetSdkVersion value at this point in time.
-            final boolean resizeableSetExplicitly
-                    = sa.hasValue(R.styleable.AndroidManifestActivity_resizeableActivity);
-            final boolean resizeable = sa.getBoolean(
-                    R.styleable.AndroidManifestActivity_resizeableActivity, appDefault);
-
-            if (resizeable) {
-                if (sa.getBoolean(R.styleable.AndroidManifestActivity_supportsPictureInPicture,
-                        false)) {
-                    a.info.resizeMode = RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
-                } else {
-                    a.info.resizeMode = RESIZE_MODE_RESIZEABLE;
-                }
-            } else if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N
-                    || resizeableSetExplicitly) {
-                a.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
-            } else if (!a.info.isFixedOrientation() && (a.info.flags & FLAG_IMMERSIVE) == 0) {
-                a.info.resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
-            }
+            setActivityResizeMode(a.info, sa, owner);
 
             if (sa.getBoolean(R.styleable.AndroidManifestActivity_alwaysFocusable, false)) {
                 a.info.flags |= FLAG_ALWAYS_FOCUSABLE;
@@ -3704,6 +3680,34 @@ public class PackageParser {
         }
 
         return a;
+    }
+
+    private void setActivityResizeMode(ActivityInfo aInfo, TypedArray sa, Package owner) {
+        aInfo.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+        final boolean appDefault = (owner.applicationInfo.privateFlags
+                & PRIVATE_FLAG_RESIZEABLE_ACTIVITIES) != 0;
+        // This flag is used to workaround the issue with ignored resizeableActivity param when
+        // either targetSdkVersion is not set at all or <uses-sdk> tag is below <application>
+        // tag in AndroidManifest. If this param was explicitly set to 'false' we need to set
+        // corresponding resizeMode regardless of targetSdkVersion value at this point in time.
+        final boolean resizeableSetExplicitly
+                = sa.hasValue(R.styleable.AndroidManifestActivity_resizeableActivity);
+        final boolean resizeable = sa.getBoolean(
+                R.styleable.AndroidManifestActivity_resizeableActivity, appDefault);
+
+        if (resizeable) {
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_supportsPictureInPicture,
+                    false)) {
+                aInfo.resizeMode = RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+            } else {
+                aInfo.resizeMode = RESIZE_MODE_RESIZEABLE;
+            }
+        } else if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N
+                || resizeableSetExplicitly) {
+            aInfo.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+        } else if (!aInfo.isFixedOrientation() && (aInfo.flags & FLAG_IMMERSIVE) == 0) {
+            aInfo.resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
+        }
     }
 
     private void parseLayout(Resources res, AttributeSet attrs, Activity a) {

@@ -163,12 +163,6 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int RESIZE_MODE_UNRESIZEABLE = 0;
     /**
-     * Activity can not be resized and always occupies the fullscreen area with all windows cropped
-     * to either the task or stack bounds.
-     * @hide
-     */
-    public static final int RESIZE_MODE_CROP_WINDOWS = 1;
-    /**
      * Activity is resizeable.
      * @hide
      */
@@ -870,8 +864,6 @@ public class ActivityInfo extends ComponentInfo
         switch (mode) {
             case RESIZE_MODE_UNRESIZEABLE:
                 return "RESIZE_MODE_UNRESIZEABLE";
-            case RESIZE_MODE_CROP_WINDOWS:
-                return "RESIZE_MODE_CROP_WINDOWS";
             case RESIZE_MODE_RESIZEABLE:
                 return "RESIZE_MODE_RESIZEABLE";
             case RESIZE_MODE_RESIZEABLE_AND_PIPABLE:
