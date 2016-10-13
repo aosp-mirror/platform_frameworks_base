@@ -1479,7 +1479,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         lockWP.cropHint.set(sysWP.cropHint);
         lockWP.width = sysWP.width;
         lockWP.height = sysWP.height;
-        lockWP.allowBackup = false;
+        lockWP.allowBackup = sysWP.allowBackup;
 
         // Migrate the bitmap files outright; no need to copy
         try {
