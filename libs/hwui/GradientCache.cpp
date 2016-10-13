@@ -198,7 +198,7 @@ void GradientCache::mixFloats(const FloatColor& start, const FloatColor& end,
         float amount, uint8_t*& dst) const {
     float oppAmount = 1.0f - amount;
     float* d = (float*) dst;
-#if ANDROID_LINEAR_BLENDING_ENABLED
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
     *d++ = start.r * oppAmount + end.r * amount;
     *d++ = start.g * oppAmount + end.g * amount;
     *d++ = start.b * oppAmount + end.b * amount;
