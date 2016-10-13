@@ -162,6 +162,7 @@ public class RankingHelper implements RankingConfig {
                             r = mRestoredWithoutUids.get(name);
                             if (r == null) {
                                 r = new Record();
+                                r.pkg = name;
                                 mRestoredWithoutUids.put(name, r);
                             }
                         } else {
@@ -606,7 +607,7 @@ public class RankingHelper implements RankingConfig {
     }
 
     public void onPackagesChanged(boolean removingPackage, String[] pkgList) {
-        if (!removingPackage || pkgList == null || pkgList.length == 0
+        if (removingPackage || pkgList == null || pkgList.length == 0
                 || mRestoredWithoutUids.isEmpty()) {
             return; // nothing to do
         }
