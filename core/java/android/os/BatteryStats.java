@@ -5433,7 +5433,8 @@ public abstract class BatteryStats implements Parcelable {
         if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
             if (dumpDurationSteps(pw, "  ", "Discharge step durations:",
                     getDischargeLevelStepTracker(), false)) {
-                long timeRemaining = computeBatteryTimeRemaining(SystemClock.elapsedRealtime());
+                long timeRemaining = computeBatteryTimeRemaining(
+                    SystemClock.elapsedRealtime() * 1000);
                 if (timeRemaining >= 0) {
                     pw.print("  Estimated discharge time remaining: ");
                     TimeUtils.formatDuration(timeRemaining / 1000, pw);
@@ -5449,7 +5450,8 @@ public abstract class BatteryStats implements Parcelable {
             }
             if (dumpDurationSteps(pw, "  ", "Charge step durations:",
                     getChargeLevelStepTracker(), false)) {
-                long timeRemaining = computeChargeTimeRemaining(SystemClock.elapsedRealtime());
+                long timeRemaining = computeChargeTimeRemaining(
+                    SystemClock.elapsedRealtime() * 1000);
                 if (timeRemaining >= 0) {
                     pw.print("  Estimated charge time remaining: ");
                     TimeUtils.formatDuration(timeRemaining / 1000, pw);
@@ -5612,14 +5614,14 @@ public abstract class BatteryStats implements Parcelable {
         if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
             dumpDurationSteps(pw, "", DISCHARGE_STEP_DATA, getDischargeLevelStepTracker(), true);
             String[] lineArgs = new String[1];
-            long timeRemaining = computeBatteryTimeRemaining(SystemClock.elapsedRealtime());
+            long timeRemaining = computeBatteryTimeRemaining(SystemClock.elapsedRealtime() * 1000);
             if (timeRemaining >= 0) {
                 lineArgs[0] = Long.toString(timeRemaining);
                 dumpLine(pw, 0 /* uid */, "i" /* category */, DISCHARGE_TIME_REMAIN_DATA,
                         (Object[])lineArgs);
             }
             dumpDurationSteps(pw, "", CHARGE_STEP_DATA, getChargeLevelStepTracker(), true);
-            timeRemaining = computeChargeTimeRemaining(SystemClock.elapsedRealtime());
+            timeRemaining = computeChargeTimeRemaining(SystemClock.elapsedRealtime() * 1000);
             if (timeRemaining >= 0) {
                 lineArgs[0] = Long.toString(timeRemaining);
                 dumpLine(pw, 0 /* uid */, "i" /* category */, CHARGE_TIME_REMAIN_DATA,
