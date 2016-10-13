@@ -214,6 +214,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonalternativ"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skärmlås"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Stäng av"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Nödsituation"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Felrapport"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Skapa felrapport"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Nu hämtas information om aktuell status för enheten, som sedan skickas i ett e-postmeddelade. Det tar en liten stund innan felrapporten är färdig och kan skickas, så vi ber dig ha tålamod."</string>
