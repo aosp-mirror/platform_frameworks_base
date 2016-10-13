@@ -116,8 +116,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final String TAG = "ViewGroup";
 
     private static final boolean DBG = false;
-    /** @hide */
-    public static boolean DEBUG_DRAW = false;
 
     /**
      * Views which have been hidden or removed which need to be animated on
@@ -476,7 +474,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final int ARRAY_INITIAL_CAPACITY = 12;
     private static final int ARRAY_CAPACITY_INCREMENT = 12;
 
-    private static Paint sDebugPaint;
     private static float[] sDebugLines;
 
     // Used to draw cached views
@@ -584,10 +581,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         super(context, attrs, defStyleAttr, defStyleRes);
         initViewGroup();
         initFromAttributes(context, attrs, defStyleAttr, defStyleRes);
-    }
-
-    private boolean debugDraw() {
-        return DEBUG_DRAW || mAttachInfo != null && mAttachInfo.mDebugLayout;
     }
 
     private void initViewGroup() {
@@ -3380,11 +3373,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         fillRect(c, paint, x1, y1, x1 + lw * sign(dx), y1 + dy);
     }
 
-    private int dipsToPixels(int dips) {
-        float scale = getContext().getResources().getDisplayMetrics().density;
-        return (int) (dips * scale + 0.5f);
-    }
-
     private static void drawRectCorners(Canvas canvas, int x1, int y1, int x2, int y2, Paint paint,
             int lineLength, int lineWidth) {
         drawCorner(canvas, paint, x1, y1, lineLength, lineLength, lineWidth);
@@ -3453,10 +3441,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         // Draw clip bounds
         {
-            paint.setColor(Color.rgb(63, 127, 255));
+            paint.setColor(DEBUG_CORNERS_COLOR);
             paint.setStyle(Paint.Style.FILL);
 
-            int lineLength = dipsToPixels(8);
+            int lineLength = dipsToPixels(DEBUG_CORNERS_SIZE_DIP);
             int lineWidth = dipsToPixels(1);
             for (int i = 0; i < getChildCount(); i++) {
                 View c = getChildAt(i);
@@ -7929,14 +7917,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mView = null;
             mLocation.set(0, 0, 0, 0);
         }
-    }
-
-    private static Paint getDebugPaint() {
-        if (sDebugPaint == null) {
-            sDebugPaint = new Paint();
-            sDebugPaint.setAntiAlias(false);
-        }
-        return sDebugPaint;
     }
 
     private static void drawRect(Canvas canvas, Paint paint, int x1, int y1, int x2, int y2) {

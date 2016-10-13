@@ -48,6 +48,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Interpolator;
 import android.graphics.LinearGradient;
@@ -763,6 +764,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         AccessibilityEventSource {
     private static final boolean DBG = false;
 
+    /** @hide */
+    public static boolean DEBUG_DRAW = false;
+
     /**
      * The logging tag used by this class with android.util.Log.
      */
@@ -1189,6 +1193,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     static final int PARENT_SAVE_DISABLED_MASK = 0x20000000;
+
+    private static Paint sDebugPaint;
 
     /** @hide */
     @IntDef(flag = true,
@@ -1660,6 +1666,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             | AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED
             | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED
             | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY;
+
+    static final int DEBUG_CORNERS_COLOR = Color.rgb(63, 127, 255);
+
+    static final int DEBUG_CORNERS_SIZE_DIP = 8;
 
     /**
      * Temporary Rect currently for use in setBackground().  This will probably
@@ -4747,6 +4757,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     View() {
         mResources = null;
         mRenderNode = RenderNode.create(getClass().getName(), this);
+    }
+
+    final boolean debugDraw() {
+        return DEBUG_DRAW || mAttachInfo != null && mAttachInfo.mDebugLayout;
     }
 
     private static SparseArray<String> getAttributeMap() {
@@ -16143,6 +16157,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         if (mOverlay != null && !mOverlay.isEmpty()) {
                             mOverlay.getOverlayView().draw(canvas);
                         }
+                        if (debugDraw()) {
+                            debugDrawFocus(canvas);
+                        }
                     } else {
                         draw(canvas);
                     }
@@ -17121,6 +17138,41 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return more;
     }
 
+    static Paint getDebugPaint() {
+        if (sDebugPaint == null) {
+            sDebugPaint = new Paint();
+            sDebugPaint.setAntiAlias(false);
+        }
+        return sDebugPaint;
+    }
+
+    final int dipsToPixels(int dips) {
+        float scale = getContext().getResources().getDisplayMetrics().density;
+        return (int) (dips * scale + 0.5f);
+    }
+
+    final private void debugDrawFocus(Canvas canvas) {
+        if (isFocused()) {
+            final int cornerSquareSize = dipsToPixels(DEBUG_CORNERS_SIZE_DIP);
+            final int w = getWidth();
+            final int h = getHeight();
+            final Paint paint = getDebugPaint();
+            paint.setColor(DEBUG_CORNERS_COLOR);
+
+            // Draw squares in corners.
+            paint.setStyle(Paint.Style.FILL);
+            canvas.drawRect(0, 0, cornerSquareSize, cornerSquareSize, paint);
+            canvas.drawRect(w - cornerSquareSize, 0, w, cornerSquareSize, paint);
+            canvas.drawRect(0, h - cornerSquareSize, cornerSquareSize, h, paint);
+            canvas.drawRect(w - cornerSquareSize, h - cornerSquareSize, w, h, paint);
+
+            // Draw big X across the view.
+            paint.setStyle(Paint.Style.STROKE);
+            canvas.drawLine(0, 0, getWidth(), getHeight(), paint);
+            canvas.drawLine(0, getHeight(), getWidth(), 0, paint);
+        }
+    }
+
     /**
      * Manually render this view (and all of its children) to the given Canvas.
      * The view must have already done a full layout before this function is
@@ -17174,6 +17226,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             // Step 6, draw decorations (foreground, scrollbars)
             onDrawForeground(canvas);
+
+            if (debugDraw()) {
+                debugDrawFocus(canvas);
+            }
 
             // we're done...
             return;
