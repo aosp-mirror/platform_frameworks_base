@@ -85,4 +85,5 @@ interface IUserManager {
     boolean isDemoUser(int userId);
     UserInfo createProfileForUserEvenWhenDisallowed(in String name, int flags, int userHandle,
             in String[] disallowedPackages);
+    boolean isUserUnlockingOrUnlocked(int userId);
 }
