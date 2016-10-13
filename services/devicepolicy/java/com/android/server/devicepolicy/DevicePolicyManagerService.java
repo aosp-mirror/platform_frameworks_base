@@ -496,12 +496,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 });
             }
-            // STOPSHIP: Remove this code once all dogfood devices are fixed. See b/31754835
-            if (Intent.ACTION_BOOT_COMPLETED.equals(action) && !mOwners.hasDeviceOwner()
-                    && !isBackupServiceEnabledInternal()) {
-                setBackupServiceEnabledInternal(true);
-                Slog.w(LOG_TAG, "Fix backup for device that is not in Device Owner mode.");
-            }
             if (Intent.ACTION_USER_UNLOCKED.equals(action)
                     || Intent.ACTION_USER_STARTED.equals(action)
                     || KeyChain.ACTION_TRUST_STORE_CHANGED.equals(action)) {
@@ -9357,16 +9351,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return true;
         }
         synchronized (this) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-            return isBackupServiceEnabledInternal();
-        }
-    }
-    private boolean isBackupServiceEnabledInternal() {
-        try {
-            IBackupManager ibm = mInjector.getIBackupManager();
-            return ibm != null && ibm.isBackupServiceActive(UserHandle.USER_SYSTEM);
-        } catch (RemoteException e) {
-            throw new IllegalStateException("Failed requesting backup service state.", e);
+            try {
+                getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+                IBackupManager ibm = mInjector.getIBackupManager();
+                return ibm != null && ibm.isBackupServiceActive(UserHandle.USER_SYSTEM);
+            } catch (RemoteException e) {
+                throw new IllegalStateException("Failed requesting backup service state.", e);
+            }
         }
     }
 
