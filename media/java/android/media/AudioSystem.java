@@ -39,27 +39,29 @@ public class AudioSystem
      * If these are modified, please also update Settings.System.VOLUME_SETTINGS
      * and attrs.xml and AudioManager.java.
      */
-    /* The default audio stream */
+    /** Used to identify the default audio stream volume */
     public static final int STREAM_DEFAULT = -1;
-    /* The audio stream for phone calls */
+    /** Used to identify the volume of audio streams for phone calls */
     public static final int STREAM_VOICE_CALL = 0;
-    /* The audio stream for system sounds */
+    /** Used to identify the volume of audio streams for system sounds */
     public static final int STREAM_SYSTEM = 1;
-    /* The audio stream for the phone ring and message alerts */
+    /** Used to identify the volume of audio streams for the phone ring and message alerts */
     public static final int STREAM_RING = 2;
-    /* The audio stream for music playback */
+    /** Used to identify the volume of audio streams for music playback */
     public static final int STREAM_MUSIC = 3;
-    /* The audio stream for alarms */
+    /** Used to identify the volume of audio streams for alarms */
     public static final int STREAM_ALARM = 4;
-    /* The audio stream for notifications */
+    /** Used to identify the volume of audio streams for notifications */
     public static final int STREAM_NOTIFICATION = 5;
-    /* @hide The audio stream for phone calls when connected on bluetooth */
+    /** Used to identify the volume of audio streams for phone calls when connected on bluetooth */
     public static final int STREAM_BLUETOOTH_SCO = 6;
-    /* @hide The audio stream for enforced system sounds in certain countries (e.g camera in Japan) */
+    /** Used to identify the volume of audio streams for enforced system sounds in certain
+     * countries (e.g camera in Japan) */
     public static final int STREAM_SYSTEM_ENFORCED = 7;
-    /* @hide The audio stream for DTMF tones */
+    /** Used to identify the volume of audio streams for DTMF tones */
     public static final int STREAM_DTMF = 8;
-    /* @hide The audio stream for text to speech (TTS) */
+    /** Used to identify the volume of audio streams exclusively transmitted through the
+     *  speaker (TTS) of the device */
     public static final int STREAM_TTS = 9;
     /**
      * @deprecated Use {@link #numStreamTypes() instead}

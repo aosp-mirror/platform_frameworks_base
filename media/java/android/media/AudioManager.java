@@ -312,29 +312,32 @@ public class AudioManager {
      */
     public static final String EXTRA_ENCODINGS = "android.media.extra.ENCODINGS";
 
-    /** The audio stream for phone calls */
+    /** Used to identify the volume of audio streams for phone calls */
     public static final int STREAM_VOICE_CALL = AudioSystem.STREAM_VOICE_CALL;
-    /** The audio stream for system sounds */
+    /** Used to identify the volume of audio streams for system sounds */
     public static final int STREAM_SYSTEM = AudioSystem.STREAM_SYSTEM;
-    /** The audio stream for the phone ring */
+    /** Used to identify the volume of audio streams for the phone ring */
     public static final int STREAM_RING = AudioSystem.STREAM_RING;
-    /** The audio stream for music playback */
+    /** Used to identify the volume of audio streams for music playback */
     public static final int STREAM_MUSIC = AudioSystem.STREAM_MUSIC;
-    /** The audio stream for alarms */
+    /** Used to identify the volume of audio streams for alarms */
     public static final int STREAM_ALARM = AudioSystem.STREAM_ALARM;
-    /** The audio stream for notifications */
+    /** Used to identify the volume of audio streams for notifications */
     public static final int STREAM_NOTIFICATION = AudioSystem.STREAM_NOTIFICATION;
-    /** @hide The audio stream for phone calls when connected to bluetooth */
+    /** @hide Used to identify the volume of audio streams for phone calls when connected
+     *        to bluetooth */
     public static final int STREAM_BLUETOOTH_SCO = AudioSystem.STREAM_BLUETOOTH_SCO;
-    /** @hide The audio stream for enforced system sounds in certain countries (e.g camera in Japan) */
+    /** @hide Used to identify the volume of audio streams for enforced system sounds
+     *        in certain countries (e.g camera in Japan) */
     public static final int STREAM_SYSTEM_ENFORCED = AudioSystem.STREAM_SYSTEM_ENFORCED;
-    /** The audio stream for DTMF Tones */
+    /** Used to identify the volume of audio streams for DTMF Tones */
     public static final int STREAM_DTMF = AudioSystem.STREAM_DTMF;
-    /** @hide The audio stream for text to speech (TTS) */
+    /** @hide Used to identify the volume of audio streams exclusively transmitted through the
+     *        speaker (TTS) of the device */
     public static final int STREAM_TTS = AudioSystem.STREAM_TTS;
     /** Number of audio streams */
     /**
-     * @deprecated Use AudioSystem.getNumStreamTypes() instead
+     * @deprecated Do not iterate on volume stream type values.
      */
     @Deprecated public static final int NUM_STREAMS = AudioSystem.NUM_STREAMS;
 
