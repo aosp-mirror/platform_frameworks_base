@@ -1381,7 +1381,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     static void handlePackageBroadcast(int cmd, String[] pkgList, boolean hasPkgInfo) {
         boolean immediateGc = false;
-        if (cmd == IApplicationThread.EXTERNAL_STORAGE_UNAVAILABLE) {
+        if (cmd == ApplicationThreadConstants.EXTERNAL_STORAGE_UNAVAILABLE) {
             immediateGc = true;
         }
         if (pkgList != null && (pkgList.length > 0)) {

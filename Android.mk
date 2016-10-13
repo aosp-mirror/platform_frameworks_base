@@ -73,6 +73,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IAlarmListener.aidl \
 	core/java/android/app/IAlarmManager.aidl \
 	core/java/android/app/IAppTask.aidl \
+	core/java/android/app/IApplicationThread.aidl \
 	core/java/android/app/ITaskStackListener.aidl \
 	core/java/android/app/IBackupAgent.aidl \
 	core/java/android/app/IEphemeralResolver.aidl \
@@ -597,6 +598,7 @@ aidl_files := \
 	frameworks/base/core/java/android/os/WorkSource.aidl \
 	frameworks/base/core/java/android/os/DropBoxManager.aidl \
 	frameworks/base/core/java/android/os/Bundle.aidl \
+	frameworks/base/core/java/android/os/Debug.aidl \
 	frameworks/base/core/java/android/accessibilityservice/AccessibilityServiceInfo.aidl \
 	frameworks/base/core/java/android/net/Network.aidl \
 	frameworks/base/core/java/android/net/RouteInfo.aidl \

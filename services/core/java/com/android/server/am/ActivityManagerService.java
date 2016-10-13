@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.app.ApplicationThreadConstants;
 import android.os.IDeviceIdentifiersPolicyService;
 import com.android.internal.telephony.TelephonyIntents;
 import com.google.android.collect.Lists;
@@ -82,7 +83,6 @@ import android.app.AlertDialog;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.ApplicationErrorReport;
-import android.app.ApplicationThreadNative;
 import android.app.BroadcastOptions;
 import android.app.Dialog;
 import android.app.IActivityContainer;
@@ -6507,11 +6507,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             TAG, "New app record " + app
             + " thread=" + thread.asBinder() + " pid=" + pid);
         try {
-            int testMode = IApplicationThread.DEBUG_OFF;
+            int testMode = ApplicationThreadConstants.DEBUG_OFF;
             if (mDebugApp != null && mDebugApp.equals(processName)) {
                 testMode = mWaitForDebugger
-                    ? IApplicationThread.DEBUG_WAIT
-                    : IApplicationThread.DEBUG_ON;
+                    ? ApplicationThreadConstants.DEBUG_WAIT
+                    : ApplicationThreadConstants.DEBUG_ON;
                 app.debugging = true;
                 if (mDebugTransient) {
                     mDebugApp = mOrigDebugApp;
@@ -15190,7 +15190,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 TransferPipe tp = new TransferPipe();
                 try {
-                    r.app.thread.dumpActivity(tp.getWriteFd().getFileDescriptor(),
+                    r.app.thread.dumpActivity(tp.getWriteFd(),
                             r.appToken, innerPrefix, args);
                     tp.go(fd);
                 } finally {
@@ -15723,7 +15723,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     TransferPipe tp = new TransferPipe();
                     try {
-                        r.thread.dumpGfxInfo(tp.getWriteFd().getFileDescriptor(), args);
+                        r.thread.dumpGfxInfo(tp.getWriteFd(), args);
                         tp.go(fd);
                     } finally {
                         tp.kill();
@@ -15756,7 +15756,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     TransferPipe tp = new TransferPipe();
                     try {
-                        r.thread.dumpDbInfo(tp.getWriteFd().getFileDescriptor(), args);
+                        r.thread.dumpDbInfo(tp.getWriteFd(), args);
                         tp.go(fd);
                     } finally {
                         tp.kill();
@@ -16160,10 +16160,22 @@ public final class ActivityManagerService extends ActivityManagerNative
                             pw.println();
                         }
                     } else {
+                        pw.flush();
                         try {
-                            pw.flush();
-                            thread.dumpMemInfo(fd, mi, isCheckinRequest, dumpFullDetails,
-                                    dumpDalvik, dumpSummaryOnly, dumpUnreachable, innerArgs);
+                            TransferPipe tp = new TransferPipe();
+                            try {
+                                thread.dumpMemInfo(tp.getWriteFd(),
+                                        mi, isCheckinRequest, dumpFullDetails,
+                                        dumpDalvik, dumpSummaryOnly, dumpUnreachable, innerArgs);
+                                tp.go(fd);
+                            } finally {
+                                tp.kill();
+                            }
+                        } catch (IOException e) {
+                            if (!isCheckinRequest) {
+                                pw.println("Got IoException!");
+                                pw.flush();
+                            }
                         } catch (RemoteException e) {
                             if (!isCheckinRequest) {
                                 pw.println("Got RemoteException!");
@@ -17333,9 +17345,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             BackupRecord r = new BackupRecord(ss, app, backupMode);
-            ComponentName hostingName = (backupMode == IApplicationThread.BACKUP_MODE_INCREMENTAL)
-                    ? new ComponentName(app.packageName, app.backupAgentName)
-                    : new ComponentName("android", "FullBackupAgent");
+            ComponentName hostingName =
+                    (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL)
+                            ? new ComponentName(app.packageName, app.backupAgentName)
+                            : new ComponentName("android", "FullBackupAgent");
             // startProcessLocked() returns existing proc's record if it's already running
             ProcessRecord proc = startProcessLocked(app.processName, app,
                     false, 0, "backup", hostingName, false, false, false);
@@ -17348,7 +17361,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             // process, etc, then mark it as being in full backup so that certain calls to the
             // process can be blocked. This is not reset to false anywhere because we kill the
             // process after the full backup is done and the ProcessRecord will vaporize anyway.
-            if (UserHandle.isApp(app.uid) && backupMode == IApplicationThread.BACKUP_MODE_FULL) {
+            if (UserHandle.isApp(app.uid) &&
+                    backupMode == ApplicationThreadConstants.BACKUP_MODE_FULL) {
                 proc.inFullBackup = true;
             }
             r.app = proc;
@@ -18019,8 +18033,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 }
                                 mRecentTasks.cleanupLocked(UserHandle.USER_ALL);
                                 sendPackageBroadcastLocked(
-                                        IApplicationThread.EXTERNAL_STORAGE_UNAVAILABLE, list,
-                                        userId);
+                                        ApplicationThreadConstants.EXTERNAL_STORAGE_UNAVAILABLE,
+                                        list, userId);
                             }
                             break;
                         case Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE:
@@ -18045,8 +18059,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                                                 removed ? "pkg removed" : "pkg changed");
                                     }
                                     final int cmd = killProcess
-                                            ? IApplicationThread.PACKAGE_REMOVED
-                                            : IApplicationThread.PACKAGE_REMOVED_DONT_KILL;
+                                            ? ApplicationThreadConstants.PACKAGE_REMOVED
+                                            : ApplicationThreadConstants.PACKAGE_REMOVED_DONT_KILL;
                                     sendPackageBroadcastLocked(cmd,
                                             new String[] {ssp}, userId);
                                     if (fullUninstall) {
@@ -18111,7 +18125,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             return ActivityManager.BROADCAST_SUCCESS;
                         }
                         mStackSupervisor.updateActivityApplicationInfoLocked(aInfo);
-                        sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REPLACED,
+                        sendPackageBroadcastLocked(ApplicationThreadConstants.PACKAGE_REPLACED,
                                 new String[] {ssp}, userId);
                     }
                     break;
@@ -21881,8 +21895,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     try {
                         TransferPipe tp = new TransferPipe();
                         try {
-                            process.thread.stopBinderTrackingAndDump(
-                                    tp.getWriteFd().getFileDescriptor());
+                            process.thread.stopBinderTrackingAndDump(tp.getWriteFd());
                             tp.go(fd.getFileDescriptor());
                         } finally {
                             tp.kill();
@@ -22206,7 +22219,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (tr == null) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }
-                appThread = ApplicationThreadNative.asInterface(whoThread);
+                appThread = IApplicationThread.Stub.asInterface(whoThread);
                 if (appThread == null) {
                     throw new IllegalArgumentException("Bad app thread " + appThread);
                 }

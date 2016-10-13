@@ -150,7 +150,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             String callingPackage = data.readString();
             Intent intent = Intent.CREATOR.createFromParcel(data);
             String resolvedType = data.readString();
@@ -173,7 +173,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             String callingPackage = data.readString();
             Intent intent = Intent.CREATOR.createFromParcel(data);
             String resolvedType = data.readString();
@@ -197,7 +197,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             String callingPackage = data.readString();
             Intent intent = Intent.CREATOR.createFromParcel(data);
             String resolvedType = data.readString();
@@ -223,7 +223,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             String callingPackage = data.readString();
             Intent intent = Intent.CREATOR.createFromParcel(data);
             String resolvedType = data.readString();
@@ -247,7 +247,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             String callingPackage = data.readString();
             Intent intent = Intent.CREATOR.createFromParcel(data);
             String resolvedType = data.readString();
@@ -270,7 +270,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             IntentSender intent = IntentSender.CREATOR.createFromParcel(data);
             Intent fillInIntent = null;
             if (data.readInt() != 0) {
@@ -432,7 +432,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
         case RELEASE_SOME_ACTIVITIES_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            IApplicationThread app = ApplicationThreadNative.asInterface(data.readStrongBinder());
+            IApplicationThread app = IApplicationThread.Stub.asInterface(data.readStrongBinder());
             releaseSomeActivities(app);
             reply.writeNoException();
             return true;
@@ -452,7 +452,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
             IApplicationThread app =
-                b != null ? ApplicationThreadNative.asInterface(b) : null;
+                b != null ? IApplicationThread.Stub.asInterface(b) : null;
             String packageName = data.readString();
             b = data.readStrongBinder();
             IIntentReceiver rec
@@ -489,7 +489,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
             IApplicationThread app =
-                b != null ? ApplicationThreadNative.asInterface(b) : null;
+                b != null ? IApplicationThread.Stub.asInterface(b) : null;
             Intent intent = Intent.CREATOR.createFromParcel(data);
             String resolvedType = data.readString();
             b = data.readStrongBinder();
@@ -516,7 +516,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = b != null ? ApplicationThreadNative.asInterface(b) : null;
+            IApplicationThread app = b != null ? IApplicationThread.Stub.asInterface(b) : null;
             Intent intent = Intent.CREATOR.createFromParcel(data);
             int userId = data.readInt();
             unbroadcastIntent(app, intent, userId);
@@ -541,7 +541,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
         case ATTACH_APPLICATION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            IApplicationThread app = ApplicationThreadNative.asInterface(
+            IApplicationThread app = IApplicationThread.Stub.asInterface(
                     data.readStrongBinder());
             if (app != null) {
                 attachApplication(app);
@@ -978,7 +978,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case GET_CONTENT_PROVIDER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             String name = data.readString();
             int userId = data.readInt();
             boolean stable = data.readInt() != 0;
@@ -1012,7 +1012,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case PUBLISH_CONTENT_PROVIDERS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             ArrayList<ContentProviderHolder> providers =
                 data.createTypedArrayList(ContentProviderHolder.CREATOR);
             publishContentProviders(app, providers);
@@ -1077,7 +1077,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case START_SERVICE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             Intent service = Intent.CREATOR.createFromParcel(data);
             String resolvedType = data.readString();
             String callingPackage = data.readString();
@@ -1091,7 +1091,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case STOP_SERVICE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             Intent service = Intent.CREATOR.createFromParcel(data);
             String resolvedType = data.readString();
             int userId = data.readInt();
@@ -1130,7 +1130,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case BIND_SERVICE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             IBinder token = data.readStrongBinder();
             Intent service = Intent.CREATOR.createFromParcel(data);
             String resolvedType = data.readString();
@@ -1210,7 +1210,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case FINISH_INSTRUMENTATION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             int resultCode = data.readInt();
             Bundle results = data.readBundle();
             finishInstrumentation(app, resultCode, results);
@@ -1421,7 +1421,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case GRANT_URI_PERMISSION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             String targetPkg = data.readString();
             Uri uri = Uri.CREATOR.createFromParcel(data);
             int mode = data.readInt();
@@ -1434,7 +1434,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case REVOKE_URI_PERMISSION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             Uri uri = Uri.CREATOR.createFromParcel(data);
             int mode = data.readInt();
             int userId = data.readInt();
@@ -1497,7 +1497,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case SHOW_WAITING_FOR_DEBUGGER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             boolean waiting = data.readInt() != 0;
             showWaitingForDebugger(app, waiting);
             reply.writeNoException();
@@ -2061,7 +2061,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
-            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            IApplicationThread app = IApplicationThread.Stub.asInterface(b);
             String callingPackage = data.readString();
             Intent[] intents = data.createTypedArray(Intent.CREATOR);
             String[] resolvedTypes = data.createStringArray();

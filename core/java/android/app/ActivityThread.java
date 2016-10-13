@@ -647,7 +647,7 @@ public final class ActivityThread {
 
     private native void dumpGraphicsInfo(FileDescriptor fd);
 
-    private class ApplicationThread extends ApplicationThreadNative {
+    private class ApplicationThread extends IApplicationThread.Stub {
         private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
 
         private int mLastProcessState = -1;
@@ -859,7 +859,7 @@ public final class ActivityThread {
                 IUiAutomationConnection instrumentationUiConnection, int debugMode,
                 boolean enableBinderTracking, boolean trackAllocation,
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
-                CompatibilityInfo compatInfo, Map<String, IBinder> services, Bundle coreSettings,
+                CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
                 String buildSerial) {
 
             if (services != null) {
@@ -929,15 +929,17 @@ public final class ActivityThread {
             mH.sendMessage(mH.obtainMessage(H.GC_WHEN_IDLE));
         }
 
-        public void dumpService(FileDescriptor fd, IBinder servicetoken, String[] args) {
+        public void dumpService(ParcelFileDescriptor pfd, IBinder servicetoken, String[] args) {
             DumpComponentInfo data = new DumpComponentInfo();
             try {
-                data.fd = ParcelFileDescriptor.dup(fd);
+                data.fd = pfd.dup();
                 data.token = servicetoken;
                 data.args = args;
                 sendMessage(H.DUMP_SERVICE, data, 0, 0, true /*async*/);
             } catch (IOException e) {
                 Slog.w(TAG, "dumpService failed", e);
+            } finally {
+                IoUtils.closeQuietly(pfd);
             }
         }
 
@@ -996,43 +998,48 @@ public final class ActivityThread {
             sendMessage(H.SCHEDULE_CRASH, msg);
         }
 
-        public void dumpActivity(FileDescriptor fd, IBinder activitytoken,
+        public void dumpActivity(ParcelFileDescriptor pfd, IBinder activitytoken,
                 String prefix, String[] args) {
             DumpComponentInfo data = new DumpComponentInfo();
             try {
-                data.fd = ParcelFileDescriptor.dup(fd);
+                data.fd = pfd.dup();
                 data.token = activitytoken;
                 data.prefix = prefix;
                 data.args = args;
                 sendMessage(H.DUMP_ACTIVITY, data, 0, 0, true /*async*/);
             } catch (IOException e) {
                 Slog.w(TAG, "dumpActivity failed", e);
+            } finally {
+                IoUtils.closeQuietly(pfd);
             }
         }
 
-        public void dumpProvider(FileDescriptor fd, IBinder providertoken,
+        public void dumpProvider(ParcelFileDescriptor pfd, IBinder providertoken,
                 String[] args) {
             DumpComponentInfo data = new DumpComponentInfo();
             try {
-                data.fd = ParcelFileDescriptor.dup(fd);
+                data.fd = pfd.dup();
                 data.token = providertoken;
                 data.args = args;
                 sendMessage(H.DUMP_PROVIDER, data, 0, 0, true /*async*/);
             } catch (IOException e) {
                 Slog.w(TAG, "dumpProvider failed", e);
+            } finally {
+                IoUtils.closeQuietly(pfd);
             }
         }
 
         @Override
-        public void dumpMemInfo(FileDescriptor fd, Debug.MemoryInfo mem, boolean checkin,
+        public void dumpMemInfo(ParcelFileDescriptor pfd, Debug.MemoryInfo mem, boolean checkin,
                 boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
                 boolean dumpUnreachable, String[] args) {
-            FileOutputStream fout = new FileOutputStream(fd);
+            FileOutputStream fout = new FileOutputStream(pfd.getFileDescriptor());
             PrintWriter pw = new FastPrintWriter(fout);
             try {
                 dumpMemInfo(pw, mem, checkin, dumpFullInfo, dumpDalvik, dumpSummaryOnly, dumpUnreachable);
             } finally {
                 pw.flush();
+                IoUtils.closeQuietly(pfd);
             }
         }
 
@@ -1175,44 +1182,49 @@ public final class ActivityThread {
         }
 
         @Override
-        public void dumpGfxInfo(FileDescriptor fd, String[] args) {
-            dumpGraphicsInfo(fd);
-            WindowManagerGlobal.getInstance().dumpGfxInfo(fd, args);
+        public void dumpGfxInfo(ParcelFileDescriptor pfd, String[] args) {
+            dumpGraphicsInfo(pfd.getFileDescriptor());
+            WindowManagerGlobal.getInstance().dumpGfxInfo(pfd.getFileDescriptor(), args);
+            IoUtils.closeQuietly(pfd);
         }
 
-        private void dumpDatabaseInfo(FileDescriptor fd, String[] args) {
-            PrintWriter pw = new FastPrintWriter(new FileOutputStream(fd));
+        private void dumpDatabaseInfo(ParcelFileDescriptor pfd, String[] args) {
+            PrintWriter pw = new FastPrintWriter(
+                    new FileOutputStream(pfd.getFileDescriptor()));
             PrintWriterPrinter printer = new PrintWriterPrinter(pw);
             SQLiteDebug.dump(printer, args);
             pw.flush();
         }
 
         @Override
-        public void dumpDbInfo(final FileDescriptor fd, final String[] args) {
+        public void dumpDbInfo(final ParcelFileDescriptor pfd, final String[] args) {
             if (mSystemThread) {
                 // Ensure this invocation is asynchronous to prevent writer waiting if buffer cannot
                 // be consumed. But it must duplicate the file descriptor first, since caller might
                 // be closing it.
                 final ParcelFileDescriptor dup;
                 try {
-                    dup = ParcelFileDescriptor.dup(fd);
+                    dup = pfd.dup();
                 } catch (IOException e) {
-                    Log.w(TAG, "Could not dup FD " + fd.getInt$());
+                    Log.w(TAG, "Could not dup FD " + pfd.getFileDescriptor().getInt$());
                     return;
+                } finally {
+                    IoUtils.closeQuietly(pfd);
                 }
 
                 AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            dumpDatabaseInfo(dup.getFileDescriptor(), args);
+                            dumpDatabaseInfo(dup, args);
                         } finally {
                             IoUtils.closeQuietly(dup);
                         }
                     }
                 });
             } else {
-                dumpDatabaseInfo(fd, args);
+                dumpDatabaseInfo(pfd, args);
+                IoUtils.closeQuietly(pfd);
             }
         }
 
@@ -1251,9 +1263,9 @@ public final class ActivityThread {
             sendMessage(H.TRANSLUCENT_CONVERSION_COMPLETE, token, drawComplete ? 1 : 0);
         }
 
-        public void scheduleOnNewActivityOptions(IBinder token, ActivityOptions options) {
+        public void scheduleOnNewActivityOptions(IBinder token, Bundle options) {
             sendMessage(H.ON_NEW_ACTIVITY_OPTIONS,
-                    new Pair<IBinder, ActivityOptions>(token, options));
+                    new Pair<IBinder, ActivityOptions>(token, ActivityOptions.fromBundle(options)));
         }
 
         public void setProcessState(int state) {
@@ -1319,10 +1331,12 @@ public final class ActivityThread {
         }
 
         @Override
-        public void stopBinderTrackingAndDump(FileDescriptor fd) {
+        public void stopBinderTrackingAndDump(ParcelFileDescriptor pfd) {
             try {
-                sendMessage(H.STOP_BINDER_TRACKING_AND_DUMP, ParcelFileDescriptor.dup(fd));
+                sendMessage(H.STOP_BINDER_TRACKING_AND_DUMP, pfd.dup());
             } catch (IOException e) {
+            } finally {
+                IoUtils.closeQuietly(pfd);
             }
         }
 
@@ -3097,8 +3111,8 @@ public final class ActivityThread {
 
         String classname = data.appInfo.backupAgentName;
         // full backup operation but no app-supplied agent?  use the default implementation
-        if (classname == null && (data.backupMode == IApplicationThread.BACKUP_MODE_FULL
-                || data.backupMode == IApplicationThread.BACKUP_MODE_RESTORE_FULL)) {
+        if (classname == null && (data.backupMode == ApplicationThreadConstants.BACKUP_MODE_FULL
+                || data.backupMode == ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL)) {
             classname = "android.app.backup.FullBackupAgent";
         }
 
@@ -3130,8 +3144,9 @@ public final class ActivityThread {
                     // If this is during restore, fail silently; otherwise go
                     // ahead and let the user see the crash.
                     Slog.e(TAG, "Agent threw during creation: " + e);
-                    if (data.backupMode != IApplicationThread.BACKUP_MODE_RESTORE
-                            && data.backupMode != IApplicationThread.BACKUP_MODE_RESTORE_FULL) {
+                    if (data.backupMode != ApplicationThreadConstants.BACKUP_MODE_RESTORE
+                            && data.backupMode !=
+                                    ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL) {
                         throw e;
                     }
                     // falling through with 'binder' still null
@@ -4904,10 +4919,10 @@ public final class ActivityThread {
     final void handleDispatchPackageBroadcast(int cmd, String[] packages) {
         boolean hasPkgInfo = false;
         switch (cmd) {
-            case IApplicationThread.PACKAGE_REMOVED:
-            case IApplicationThread.PACKAGE_REMOVED_DONT_KILL:
+            case ApplicationThreadConstants.PACKAGE_REMOVED:
+            case ApplicationThreadConstants.PACKAGE_REMOVED_DONT_KILL:
             {
-                final boolean killApp = cmd == IApplicationThread.PACKAGE_REMOVED;
+                final boolean killApp = cmd == ApplicationThreadConstants.PACKAGE_REMOVED;
                 if (packages == null) {
                     break;
                 }
@@ -4932,7 +4947,7 @@ public final class ActivityThread {
                 }
                 break;
             }
-            case IApplicationThread.PACKAGE_REPLACED:
+            case ApplicationThreadConstants.PACKAGE_REPLACED:
             {
                 if (packages == null) {
                     break;
@@ -5232,10 +5247,10 @@ public final class ActivityThread {
             /* ignore */
         }
 
-        if (data.debugMode != IApplicationThread.DEBUG_OFF) {
+        if (data.debugMode != ApplicationThreadConstants.DEBUG_OFF) {
             // XXX should have option to change the port.
             Debug.changeDebugPort(8100);
-            if (data.debugMode == IApplicationThread.DEBUG_WAIT) {
+            if (data.debugMode == ApplicationThreadConstants.DEBUG_WAIT) {
                 Slog.w(TAG, "Application " + data.info.getPackageName()
                       + " is waiting for the debugger on port 8100...");
 

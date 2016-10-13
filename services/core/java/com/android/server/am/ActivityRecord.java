@@ -1279,7 +1279,7 @@ final class ActivityRecord {
         stopFreezingScreenLocked(false);
         try {
             if (returningOptions != null) {
-                app.thread.scheduleOnNewActivityOptions(appToken, returningOptions);
+                app.thread.scheduleOnNewActivityOptions(appToken, returningOptions.toBundle());
             }
         } catch(RemoteException e) {
         }

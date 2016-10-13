@@ -21,8 +21,8 @@ import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROU
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
+import android.app.ApplicationThreadConstants;
 import android.app.IActivityManager;
-import android.app.IApplicationThread;
 import android.app.IBackupAgent;
 import android.app.PackageInstallObserver;
 import android.app.PendingIntent;
@@ -2897,7 +2897,7 @@ public class BackupManagerService {
                 try {
                     mWakelock.setWorkSource(new WorkSource(mCurrentPackage.applicationInfo.uid));
                     agent = bindToAgentSynchronous(mCurrentPackage.applicationInfo,
-                            IApplicationThread.BACKUP_MODE_INCREMENTAL);
+                            ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL);
                     addBackupTrace("agent bound; a? = " + (agent != null));
                     if (agent != null) {
                         mAgentBinder = agent;
@@ -3808,7 +3808,7 @@ public class BackupManagerService {
                     Slog.d(TAG, "Binding to full backup agent : " + mPkg.packageName);
                 }
                 mAgent = bindToAgentSynchronous(mPkg.applicationInfo,
-                        IApplicationThread.BACKUP_MODE_FULL);
+                        ApplicationThreadConstants.BACKUP_MODE_FULL);
             }
             return mAgent != null;
         }
@@ -5533,7 +5533,7 @@ public class BackupManagerService {
                                 // All set; now set up the IPC and launch the agent
                                 setUpPipes();
                                 mAgent = bindToAgentSynchronous(mTargetApp,
-                                        IApplicationThread.BACKUP_MODE_RESTORE_FULL);
+                                        ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL);
                                 mAgentPackage = pkg;
                             } catch (IOException e) {
                                 // fall through to error handling
@@ -6968,7 +6968,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                                 // All set; now set up the IPC and launch the agent
                                 setUpPipes();
                                 mAgent = bindToAgentSynchronous(mTargetApp,
-                                        IApplicationThread.BACKUP_MODE_RESTORE_FULL);
+                                        ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL);
                                 mAgentPackage = pkg;
                             } catch (IOException e) {
                                 // fall through to error handling
@@ -8390,7 +8390,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             // Good to go!  Set up and bind the agent...
             mAgent = bindToAgentSynchronous(
                     mCurrentPackage.applicationInfo,
-                    IApplicationThread.BACKUP_MODE_INCREMENTAL);
+                    ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL);
             if (mAgent == null) {
                 Slog.w(TAG, "Can't find backup agent for " + packageName);
                 EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
