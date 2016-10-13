@@ -673,6 +673,10 @@ public class UserManagerService extends IUserManager.Stub {
     public boolean isSameProfileGroup(int userId, int otherUserId) {
         if (userId == otherUserId) return true;
         checkManageUsersPermission("check if in the same profile group");
+        return isSameProfileGroupNoChecks(userId, otherUserId);
+    }
+
+    private boolean isSameProfileGroupNoChecks(int userId, int otherUserId) {
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             if (userInfo == null || userInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
@@ -874,7 +878,7 @@ public class UserManagerService extends IUserManager.Stub {
     public boolean isManagedProfile(int userId) {
         int callingUserId = UserHandle.getCallingUserId();
         if (callingUserId != userId && !hasManageUsersPermission()) {
-            if (!isSameProfileGroup(callingUserId, userId)) {
+            if (!isSameProfileGroupNoChecks(callingUserId, userId)) {
                 throw new SecurityException(
                         "You need MANAGE_USERS permission to: check if specified user a " +
                         "managed profile outside your profile group");
@@ -890,7 +894,7 @@ public class UserManagerService extends IUserManager.Stub {
     public boolean isUserUnlockingOrUnlocked(int userId) {
         int callingUserId = UserHandle.getCallingUserId();
         if (callingUserId != userId && !hasManageUsersPermission()) {
-            if (!isSameProfileGroup(callingUserId, userId)) {
+            if (!isSameProfileGroupNoChecks(callingUserId, userId)) {
                 throw new SecurityException(
                         "You need MANAGE_USERS permission to: check isUserUnlockingOrUnlocked");
             }
