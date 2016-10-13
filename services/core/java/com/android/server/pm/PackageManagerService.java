@@ -4084,6 +4084,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
 
+            if (pkg.applicationInfo.isEphemeralApp() && !bp.isEphemeral()) {
+                throw new SecurityException("Cannot grant non-ephemeral permission"
+                        + name + " for package " + packageName);
+            }
+
             if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
                 Slog.w(TAG, "Cannot grant runtime permission to a legacy app");
                 return;
@@ -10107,6 +10112,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Slog.w(TAG, "Unknown permission " + name
                             + " in package " + pkg.packageName);
                 }
+                continue;
+            }
+
+
+            // Limit ephemeral apps to ephemeral allowed permissions.
+            if (pkg.applicationInfo.isEphemeralApp() && !bp.isEphemeral()) {
+                Log.i(TAG, "Denying non-ephemeral permission " + bp.name + " for package "
+                        + pkg.packageName);
                 continue;
             }
 
