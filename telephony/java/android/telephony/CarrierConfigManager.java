@@ -726,6 +726,16 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_ADDITIONAL_CBS_CHANNELS_STRINGS =
             "carrier_additional_cbs_channels_strings";
 
+    /**
+      * Indicates whether STK LAUNCH_BROWSER command is disabled.
+      * If {@code true}, then the browser will not be launched
+      * on UI for the LAUNCH_BROWSER STK command.
+      * @hide
+      */
+    public static final String KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL =
+            "stk_disable_launch_browser_bool";
+
+
     // These variables are used by the MMS service and exposed through another API, {@link
     // SmsManager}. The variable names and string values are copied from there.
     public static final String KEY_MMS_ALIAS_ENABLED_BOOL = "aliasEnabled";
@@ -1194,6 +1204,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_NOTIFY_VT_HANDOVER_TO_WIFI_FAILURE_BOOL, false);
         sDefaults.putStringArray(FILTERED_CNAP_NAMES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
+        sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
     }
 
     /**
