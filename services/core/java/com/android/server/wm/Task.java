@@ -277,8 +277,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     }
 
     boolean isResizeable() {
-        return !mHomeTask
-                && (ActivityInfo.isResizeableMode(mResizeMode) || mService.mForceResizableTasks);
+        return ActivityInfo.isResizeableMode(mResizeMode) || mService.mForceResizableTasks;
     }
 
     boolean isOnTopLauncher() {
@@ -286,7 +285,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     }
 
     boolean cropWindowsToStackBounds() {
-        return !mHomeTask && isResizeable();
+        return isResizeable();
     }
 
     boolean isHomeTask() {
@@ -560,7 +559,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     @Override
     public boolean dimFullscreen() {
-        return isHomeTask() || isFullscreen();
+        return isFullscreen();
     }
 
     boolean isFullscreen() {

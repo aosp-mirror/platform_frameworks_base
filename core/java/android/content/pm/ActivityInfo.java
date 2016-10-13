@@ -164,7 +164,8 @@ public class ActivityInfo extends ComponentInfo
     public static final int RESIZE_MODE_UNRESIZEABLE = 0;
     /**
      * Activity didn't explicitly request to be resizeable, but we are making it resizeable because
-     * of the SDK version it targets.
+     * of the SDK version it targets. Only affects apps with target SDK >= N where the app is
+     * implied to be resizeable if it doesn't explicitly set the attribute to any value.
      * @hide
      */
     public static final int RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION = 1;
@@ -179,7 +180,8 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int RESIZE_MODE_RESIZEABLE_AND_PIPABLE = 3;
     /**
-     * Activity is does not support resizing, but we are forcing it to be resizeable.
+     * Activity is does not support resizing, but we are forcing it to be resizeable. Only affects
+     * certain pre-N apps where we force them to be resizeable.
      * @hide
      */
     public static final int RESIZE_MODE_FORCE_RESIZEABLE = 4;

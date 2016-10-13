@@ -1067,8 +1067,8 @@ final class TaskRecord extends ConfigurationContainer {
     }
 
     boolean isResizeable() {
-        return !isHomeTask() && (mService.mForceResizableActivities
-                || ActivityInfo.isResizeableMode(mResizeMode)) && !mTemporarilyUnresizable;
+        return (mService.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode))
+                && !mTemporarilyUnresizable;
     }
 
     boolean isOnTopLauncher() {

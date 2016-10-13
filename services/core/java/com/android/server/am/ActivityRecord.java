@@ -26,9 +26,11 @@ import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SCREENSHOTS;
@@ -795,6 +797,12 @@ final class ActivityRecord {
                 && isHomeIntent(intent) && !isResolverActivity()) {
             // This sure looks like a home activity!
             mActivityType = HOME_ACTIVITY_TYPE;
+
+            if (info.resizeMode == RESIZE_MODE_FORCE_RESIZEABLE
+                    || info.resizeMode == RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION) {
+                // We only allow home activities to be resizeable if they explicitly requested it.
+                info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+            }
         } else if (realActivity.getClassName().contains(RECENTS_PACKAGE_NAME)) {
             mActivityType = RECENTS_ACTIVITY_TYPE;
         } else {
@@ -887,7 +895,7 @@ final class ActivityRecord {
     }
 
     boolean isResizeable() {
-        return !isHomeActivity() && ActivityInfo.isResizeableMode(info.resizeMode);
+        return ActivityInfo.isResizeableMode(info.resizeMode);
     }
 
     boolean isResizeableOrForced() {
@@ -895,7 +903,7 @@ final class ActivityRecord {
     }
 
     boolean isNonResizableOrForced() {
-        return !isHomeActivity() && info.resizeMode != RESIZE_MODE_RESIZEABLE
+        return info.resizeMode != RESIZE_MODE_RESIZEABLE
                 && info.resizeMode != RESIZE_MODE_RESIZEABLE_AND_PIPABLE
                 && info.resizeMode != RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
     }
