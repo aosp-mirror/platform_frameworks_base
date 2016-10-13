@@ -1619,7 +1619,7 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
             // We'll update with whatever configuration it now says
             // it used to launch.
             if (config != null) {
-                r.mLastReportedConfiguration.setTo(config);
+                r.setLastReportedConfiguration(config);
             }
 
             // We are now idle.  If someone is waiting for a thumbnail from
@@ -2255,11 +2255,9 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
         if (updatedConfig) {
             final ActivityRecord r = task.topRunningActivityLocked();
             if (r != null) {
-                final ActivityStack stack = r.getStack();
-                kept = stack.ensureActivityConfigurationLocked(r, 0, preserveWindow);
+                kept = r.ensureActivityConfigurationLocked(0 /* globalChanges */, preserveWindow);
 
                 if (!deferResume) {
-
                     // All other activities must be made visible with their correct configuration.
                     ensureActivitiesVisibleLocked(r, 0, !PRESERVE_WINDOWS);
                     if (!kept) {
@@ -2884,12 +2882,12 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
     }
 
     // Called when WindowManager has finished animating the launchingBehind activity to the back.
-    void handleLaunchTaskBehindCompleteLocked(ActivityRecord r) {
+    private void handleLaunchTaskBehindCompleteLocked(ActivityRecord r) {
         final TaskRecord task = r.task;
         final ActivityStack stack = task.getStack();
 
         r.mLaunchTaskBehind = false;
-        task.setLastThumbnailLocked(stack.screenshotActivitiesLocked(r));
+        task.setLastThumbnailLocked(r.screenshotActivityLocked());
         mRecentTasks.addLocked(task);
         mService.notifyTaskStackChangedLocked();
         mWindowManager.setAppVisibility(r.appToken, false);

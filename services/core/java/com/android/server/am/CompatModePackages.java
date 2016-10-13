@@ -385,7 +385,8 @@ public final class CompatModePackages {
             }
 
             if (starting != null) {
-                stack.ensureActivityConfigurationLocked(starting, 0, false);
+                starting.ensureActivityConfigurationLocked(0 /* globalChanges */,
+                        false /* preserveWindow */);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.
                 stack.ensureActivitiesVisibleLocked(starting, 0, !PRESERVE_WINDOWS);
