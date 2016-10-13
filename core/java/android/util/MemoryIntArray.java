@@ -54,7 +54,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     private final int mOwnerPid;
     private final boolean mClientWritable;
     private final long mMemoryAddr;
-    private int mFd;
+    private int mFd = -1;
 
     /**
      * Creates a new instance.
