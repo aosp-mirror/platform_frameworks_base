@@ -84,6 +84,14 @@ public class UsbDeviceManager {
     private static final String USB_CONFIG_PROPERTY = "sys.usb.config";
 
     /**
+     * The property which stores the current build type (user/userdebug/eng).
+     */
+    private static final String BUILD_TYPE_PROPERTY = "ro.build.type";
+
+    private static final String BUILD_TYPE_USERDEBUG = "userdebug";
+    private static final String BUILD_TYPE_ENG = "eng";
+
+    /**
      * The non-persistent property which stores the current USB actual state.
      */
     private static final String USB_STATE_PROPERTY = "sys.usb.state";
@@ -343,6 +351,12 @@ public class UsbDeviceManager {
                         SystemProperties.get(USB_STATE_PROPERTY));
                 mAdbEnabled = UsbManager.containsFunction(getDefaultFunctions(),
                         UsbManager.USB_FUNCTION_ADB);
+
+                String buildType = SystemProperties.get(BUILD_TYPE_PROPERTY);
+                if (buildType.equals(BUILD_TYPE_USERDEBUG) || buildType.equals(BUILD_TYPE_ENG)) {
+                    setAdbEnabled(true);
+                }
+
                 setEnabledFunctions(null, false, false);
 
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
@@ -454,10 +468,9 @@ public class UsbDeviceManager {
                 String oldFunctions = mCurrentFunctions;
 
                 // Persist the adb setting
-                String newFunction = enable ? UsbManager.USB_FUNCTION_ADB
-                    : UsbManager.USB_FUNCTION_NONE;
-                if (!UsbManager.containsFunction(getDefaultFunctions(), newFunction))
-                   SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY, newFunction);
+                String newFunction = applyAdbFunction(SystemProperties.get(
+                            USB_PERSISTENT_CONFIG_PROPERTY, UsbManager.USB_FUNCTION_NONE));
+                SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY, newFunction);
 
                 // Changing the persistent config also changes the normal
                 // config. Wait for this to happen before changing again.
