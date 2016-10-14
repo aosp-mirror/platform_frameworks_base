@@ -1059,6 +1059,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mService.mWindowsChanged = true;
     }
 
+    void addToWindowList(WindowState win, int index) {
+        mWindows.add(index, win);
+    }
+
     void addChildWindowToWindowList(WindowState win) {
         final WindowState parentWindow = win.getParentWindow();
 
