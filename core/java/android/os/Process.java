@@ -17,8 +17,6 @@
 package android.os;
 
 import android.annotation.TestApi;
-import android.net.LocalSocket;
-import android.net.LocalSocketAddress;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.Log;
