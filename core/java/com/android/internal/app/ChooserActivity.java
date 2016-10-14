@@ -68,6 +68,7 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import com.android.internal.R;
+import com.android.internal.app.ResolverActivity.TargetInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.google.android.collect.Lists;
@@ -342,6 +343,12 @@ public class ChooserActivity extends ResolverActivity {
     @Override
     public boolean shouldGetActivityMetadata() {
         return true;
+    }
+
+    @Override
+    public boolean shouldAutoLaunchSingleChoice(TargetInfo target) {
+        return getIntent().getBooleanExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE,
+                super.shouldAutoLaunchSingleChoice(target));
     }
 
     @Override

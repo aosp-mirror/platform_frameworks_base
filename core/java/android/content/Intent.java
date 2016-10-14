@@ -4196,6 +4196,16 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.MEDIA_RESOURCE_TYPE";
 
     /**
+     * Used as a boolean extra field in {@link #ACTION_CHOOSER} intents to specify
+     * whether to show the chooser or not when there is only one application available
+     * to choose from.
+     *
+     * @hide
+     */
+    public static final String EXTRA_AUTO_LAUNCH_SINGLE_CHOICE =
+            "android.intent.extra.AUTO_LAUNCH_SINGLE_CHOICE";
+
+    /**
      * Used as an int value for {@link #EXTRA_MEDIA_RESOURCE_TYPE}
      * to represent that a video codec is allowed to use.
      *
