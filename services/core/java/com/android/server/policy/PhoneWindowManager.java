@@ -2734,7 +2734,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
 
-            if (overrideConfig != null && overrideConfig != EMPTY) {
+            if (overrideConfig != null && !overrideConfig.equals(EMPTY)) {
                 if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "addStartingWindow: creating context based"
                         + " on overrideConfig" + overrideConfig + " for starting window");
                 final Context overrideContext = context.createConfigurationContext(overrideConfig);
