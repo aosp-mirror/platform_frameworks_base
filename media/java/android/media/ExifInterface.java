@@ -1764,16 +1764,13 @@ public class ExifInterface {
      * <p>
      * This method is only supported for JPEG files.
      * </p>
-     *
-     * @throws UnsupportedOperationException If this method is called with unsupported files.
      */
     public void saveAttributes() throws IOException {
         if (!mIsSupportedFile || mMimeType != IMAGE_TYPE_JPEG) {
-            throw new UnsupportedOperationException(
-                    "ExifInterface only supports saving attributes on JPEG formats.");
+            throw new IOException("ExifInterface only supports saving attributes on JPEG formats.");
         }
         if (mIsInputStream || (mSeekableFileDescriptor == null && mFilename == null)) {
-            throw new UnsupportedOperationException(
+            throw new IOException(
                     "ExifInterface does not support saving attributes for the current input.");
         }
 
