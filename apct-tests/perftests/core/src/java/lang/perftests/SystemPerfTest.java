@@ -24,6 +24,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.TimeUnit;
+
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class SystemPerfTest {
@@ -42,5 +44,20 @@ public class SystemPerfTest {
     public void testBenchmarkOverhead() {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {}
+    }
+
+    void spinBlock(long durationNs) {
+        long start = System.nanoTime();
+        while (System.nanoTime() - start < durationNs) {}
+    }
+
+    @Test
+    public void testBenchmarkPauseResumeOverhead() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            spinBlock(TimeUnit.MICROSECONDS.toNanos(5));
+            state.resumeTiming();
+        }
     }
 }
