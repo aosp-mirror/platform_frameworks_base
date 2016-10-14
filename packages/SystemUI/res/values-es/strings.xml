@@ -233,8 +233,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Modo de trabajo activado."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Modo de trabajo desactivado."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Modo de trabajo activado."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Economizador de Datos desactivado."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Economizador de Datos activado."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Ahorro de datos desactivado."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Ahorro de datos activado."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Brillo de la pantalla"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Datos 2G-3G pausados"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Datos 4G pausados"</string>
@@ -580,9 +580,9 @@
     <string name="headset" msgid="4534219457597457353">"Auriculares"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Auriculares conectados"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Auriculares conectados"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Economizador de Datos"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Economizador de Datos activado"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Economizador de Datos desactivado"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Ahorro de datos"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Ahorro de datos activado"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Ahorro de datos desactivado"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Sí"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"No"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Barra de navegación"</string>
@@ -653,4 +653,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Abrir ajustes de <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Cambiar el orden de los ajustes."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"Las notificaciones no se pueden silenciar ni bloquear"</string>
 </resources>

@@ -651,4 +651,6 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ترتیبات کھولیں۔"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ترتیبات کی ترتیب میں ترمیم کریں۔"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"صفحہ <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <!-- no translation found for cant_silence_or_block (999689262131488625) -->
+    <skip />
 </resources>

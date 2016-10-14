@@ -304,7 +304,7 @@
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Byt om på farver"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Farvekorrigeringstilstand"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Flere indstillinger"</string>
-    <string name="quick_settings_done" msgid="3402999958839153376">"Udført"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"Udfør"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Tilsluttet"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Opretter forbindelse…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Netdeling"</string>
@@ -521,7 +521,7 @@
     <string name="notification_importance_high" msgid="1729480727023990427">"Se altid smugkig. Ingen afbrydelse af fuld skærm."</string>
     <string name="notification_importance_max" msgid="2508384624461849111">"Se altid smugkig, og tillad afbrydelse af fuld skærm."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Flere indstillinger"</string>
-    <string name="notification_done" msgid="5279426047273930175">"Færdig"</string>
+    <string name="notification_done" msgid="5279426047273930175">"Udfør"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Kontrolelementer til underretninger for <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Batteriforbrug"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterisparefunktionen er ikke tilgængelig under opladning"</string>
@@ -651,4 +651,6 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Åbn <xliff:g id="ID_1">%s</xliff:g>-indstillinger."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Rediger rækkefølgen af indstillinger."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Side <xliff:g id="ID_1">%1$d</xliff:g> af <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <!-- no translation found for cant_silence_or_block (999689262131488625) -->
+    <skip />
 </resources>
