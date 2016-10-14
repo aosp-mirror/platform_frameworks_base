@@ -839,19 +839,19 @@ public class ResourcesManager {
                             tmpConfig = new Configuration();
                         }
                         tmpConfig.setTo(config);
-                        if (!isDefaultDisplay) {
-                            // Get new DisplayMetrics based on the DisplayAdjustments given
-                            // to the ResourcesImpl. Udate a copy if the CompatibilityInfo
-                            // changed, because the ResourcesImpl object will handle the
-                            // update internally.
-                            DisplayAdjustments daj = r.getDisplayAdjustments();
-                            if (compat != null) {
-                                daj = new DisplayAdjustments(daj);
-                                daj.setCompatibilityInfo(compat);
-                            }
-                            dm = getDisplayMetrics(displayId, daj);
-                            applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
+
+                        // Get new DisplayMetrics based on the DisplayAdjustments given
+                        // to the ResourcesImpl. Update a copy if the CompatibilityInfo
+                        // changed, because the ResourcesImpl object will handle the
+                        // update internally.
+                        DisplayAdjustments daj = r.getDisplayAdjustments();
+                        if (compat != null) {
+                            daj = new DisplayAdjustments(daj);
+                            daj.setCompatibilityInfo(compat);
                         }
+                        dm = getDisplayMetrics(displayId, daj);
+                        applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
+
                         if (hasOverrideConfiguration) {
                             tmpConfig.updateFrom(key.mOverrideConfiguration);
                         }
