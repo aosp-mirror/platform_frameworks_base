@@ -114,7 +114,9 @@ public class PluginInstanceManager<T extends Plugin> {
 
     public void disableAll() {
         ArrayList<PluginInfo> plugins = new ArrayList<>(mPluginHandler.mPlugins);
-        plugins.forEach(this::disable);
+        for (int i = 0; i < plugins.size(); i++) {
+            disable(plugins.get(i));
+        }
     }
 
     private void disable(PluginInfo info) {
