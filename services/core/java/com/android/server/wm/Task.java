@@ -164,7 +164,8 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         stack.addTask(this, toTop);
     }
 
-    void positionTaskInStack(TaskStack stack, int position, Rect bounds, Configuration config) {
+    void positionTaskInStack(TaskStack stack, int position, Rect bounds,
+            Configuration overrideConfig) {
         if (mStack != null && stack != mStack) {
             if (DEBUG_STACK) Slog.i(TAG, "positionTaskInStack: removing taskId=" + mTaskId
                     + " from stack=" + mStack);
@@ -172,7 +173,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
             mStack.removeChild(this);
         }
         stack.positionTask(this, position, showForAllUsers());
-        resizeLocked(bounds, config, false /* force */);
+        resizeLocked(bounds, overrideConfig, false /* force */);
 
         for (int activityNdx = mChildren.size() - 1; activityNdx >= 0; --activityNdx) {
             mChildren.get(activityNdx).notifyMovedInStack();

@@ -470,9 +470,9 @@ class ActivityStarter {
         }
 
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,
-                intent, resolvedType, aInfo, mService.mGlobalConfiguration, resultRecord, resultWho,
-                requestCode, componentSpecified, voiceSession != null, mSupervisor, container,
-                options, sourceRecord);
+                intent, resolvedType, aInfo, mService.getGlobalConfiguration(), resultRecord,
+                resultWho, requestCode, componentSpecified, voiceSession != null, mSupervisor,
+                container, options, sourceRecord);
         if (outActivity != null) {
             outActivity[0] = r;
         }
@@ -782,7 +782,7 @@ class ActivityStarter {
                 stack = container.mStack;
             }
             stack.mConfigWillChange = globalConfig != null
-                    && mService.mGlobalConfiguration.diff(globalConfig) != 0;
+                    && mService.getGlobalConfiguration().diff(globalConfig) != 0;
             if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Starting activity when config will change = " + stack.mConfigWillChange);
 

@@ -28,7 +28,6 @@ import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
-import static android.content.res.Configuration.SCREENLAYOUT_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
@@ -143,7 +142,7 @@ import java.util.Set;
 /**
  * State and management of a single stack of activities.
  */
-final class ActivityStack {
+final class ActivityStack extends ConfigurationContainer {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStack" : TAG_AM;
     private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
@@ -199,6 +198,21 @@ final class ActivityStack {
 
     // How many activities have to be scheduled to stop to force a stop pass.
     private static final int MAX_STOPPING_TO_FORCE = 3;
+
+    @Override
+    protected int getChildCount() {
+        return mTaskHistory.size();
+    }
+
+    @Override
+    protected ConfigurationContainer getChildAt(int index) {
+        return mTaskHistory.get(index);
+    }
+
+    @Override
+    protected ConfigurationContainer getParent() {
+        return mActivityContainer.mActivityDisplay;
+    }
 
     enum ActivityState {
         INITIALIZING,
@@ -337,6 +351,12 @@ final class ActivityStack {
     private final SparseArray<Rect> mTmpInsetBounds = new SparseArray<>();
     private final Rect tempRect2 = new Rect();
 
+    /**
+     * Temp configs used in {@link #ensureActivityConfigurationLocked(ActivityRecord, int, boolean)}
+     */
+    private final Configuration mTmpGlobalConfig = new Configuration();
+    private final Configuration mTmpTaskConfig = new Configuration();
+
     /** Run all ActivityStacks through this */
     final ActivityStackSupervisor mStackSupervisor;
 
@@ -466,6 +486,7 @@ final class ActivityStack {
             mTaskPositioner.setDisplay(activityDisplay.mDisplay);
             mTaskPositioner.configure(mBounds);
         }
+        onParentChanged();
 
         if (mStackId == DOCKED_STACK_ID) {
             // If we created a docked stack we want to resize it so it resizes all other stacks
@@ -482,6 +503,7 @@ final class ActivityStack {
             mTaskPositioner.reset();
         }
         mWindowManager.detachStack(mStackId);
+        onParentChanged();
         if (mStackId == DOCKED_STACK_ID) {
             // If we removed a docked stack we want to resize it so it resizes all other stacks
             // in the system to fullscreen.
@@ -2529,7 +2551,7 @@ final class ActivityStack {
             boolean notUpdated = true;
             if (mStackSupervisor.isFocusedStack(this)) {
                 Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                        mService.mGlobalConfiguration,
+                        mService.getGlobalConfiguration(),
                         next.mayFreezeScreenLocked(next.app) ? next.appToken : null);
                 if (config != null) {
                     next.frozenBeforeDestroy = true;
@@ -4582,7 +4604,7 @@ final class ActivityStack {
                 }
             }
 
-            mTmpConfigs.put(task.taskId, task.mOverrideConfig);
+            mTmpConfigs.put(task.taskId, task.getOverrideConfiguration());
             mTmpBounds.put(task.taskId, task.mBounds);
             if (tempTaskInsetBounds != null) {
                 mTmpInsetBounds.put(task.taskId, tempTaskInsetBounds);
@@ -4655,11 +4677,10 @@ final class ActivityStack {
 
         // Short circuit: if the two configurations are equal (the common case), then there is
         // nothing to do.
-        final Configuration newConfig = mService.mGlobalConfiguration;
-        r.task.sanitizeOverrideConfiguration(newConfig);
-        final Configuration taskConfig = r.task.mOverrideConfig;
-        if (r.configuration.equals(newConfig)
-                && r.taskConfigOverride.equals(taskConfig)
+        final Configuration newGlobalConfig = mService.getGlobalConfiguration();
+        final Configuration newTaskMergedOverrideConfig = r.task.getMergedOverrideConfiguration();
+        if (r.mLastReportedConfiguration.equals(newGlobalConfig)
+                && r.mLastReportedOverrideConfiguration.equals(newTaskMergedOverrideConfig)
                 && !r.forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration unchanged in " + r);
@@ -4676,19 +4697,20 @@ final class ActivityStack {
 
         // Okay we now are going to make this activity have the new config.
         // But then we need to figure out how it needs to deal with that.
-        final Configuration oldConfig = r.configuration;
-        final Configuration oldTaskOverride = r.taskConfigOverride;
-        r.configuration = newConfig;
-        r.taskConfigOverride = taskConfig;
+        mTmpGlobalConfig.setTo(r.mLastReportedConfiguration);
+        mTmpTaskConfig.setTo(r.mLastReportedOverrideConfiguration);
+        r.mLastReportedConfiguration.setTo(newGlobalConfig);
+        r.mLastReportedOverrideConfiguration.setTo(newTaskMergedOverrideConfig);
 
-        int taskChanges = getTaskConfigurationChanges(r, taskConfig, oldTaskOverride);
-        final int changes = oldConfig.diff(newConfig) | taskChanges;
+        int taskChanges = getTaskConfigurationChanges(r, newTaskMergedOverrideConfig,
+                mTmpTaskConfig);
+        final int changes = mTmpGlobalConfig.diff(newGlobalConfig) | taskChanges;
         if (changes == 0 && !r.forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration no differences in " + r);
             // There are no significant differences, so we won't relaunch but should still deliver
             // the new configuration to the client process.
-            r.scheduleConfigurationChanged(taskConfig, true);
+            r.scheduleConfigurationChanged(newTaskMergedOverrideConfig, true);
             return true;
         }
 
@@ -4711,8 +4733,9 @@ final class ActivityStack {
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                 "Checking to restart " + r.info.name + ": changed=0x"
                 + Integer.toHexString(changes) + ", handles=0x"
-                + Integer.toHexString(r.info.getRealConfigChanged()) + ", newConfig=" + newConfig
-                + ", taskConfig=" + taskConfig);
+                + Integer.toHexString(r.info.getRealConfigChanged())
+                + ", newGlobalConfig=" + newGlobalConfig
+                + ", newTaskMergedOverrideConfig=" + newTaskMergedOverrideConfig);
 
         if ((changes&(~r.info.getRealConfigChanged())) != 0 || r.forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
@@ -4759,7 +4782,7 @@ final class ActivityStack {
         // NOTE: We only forward the task override configuration as the system level configuration
         // changes is always sent to all processes when they happen so it can just use whatever
         // system level configuration it last got.
-        r.scheduleConfigurationChanged(taskConfig, true);
+        r.scheduleConfigurationChanged(newTaskMergedOverrideConfig, true);
         r.stopFreezingScreenLocked(false);
 
         return true;
@@ -4772,13 +4795,13 @@ final class ActivityStack {
         // configuration task diff, so the diff stays as small as possible.
         if (Configuration.EMPTY.equals(oldTaskOverride)
                 && !Configuration.EMPTY.equals(taskConfig)) {
-            oldTaskOverride = record.task.extractOverrideConfig(record.configuration);
+            oldTaskOverride = record.task.extractOverrideConfig(record.mLastReportedConfiguration);
         }
 
         // Conversely, do the same when going the other direction.
         if (Configuration.EMPTY.equals(taskConfig)
                 && !Configuration.EMPTY.equals(oldTaskOverride)) {
-            taskConfig = record.task.extractOverrideConfig(record.configuration);
+            taskConfig = record.task.extractOverrideConfig(record.mLastReportedConfiguration);
         }
 
         // Determine what has changed.  May be nothing, if this is a config
@@ -4843,8 +4866,8 @@ final class ActivityStack {
             r.forceNewConfig = false;
             mStackSupervisor.activityRelaunchingLocked(r);
             r.app.thread.scheduleRelaunchActivity(r.appToken, results, newIntents, changes,
-                    !andResume, new Configuration(mService.mGlobalConfiguration),
-                    new Configuration(r.task.mOverrideConfig), preserveWindow);
+                    !andResume, new Configuration(mService.getGlobalConfiguration()),
+                    new Configuration(r.task.getMergedOverrideConfiguration()), preserveWindow);
             // Note: don't need to call pauseIfSleepingLocked() here, because
             // the caller will only pass in 'andResume' if this activity is
             // currently resumed, which implies we aren't sleeping.
@@ -5314,10 +5337,11 @@ final class ActivityStack {
         mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                 (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId, r.info.configChanges,
-                task.voiceSession != null, r.mLaunchTaskBehind, bounds, task.mOverrideConfig,
-                task.mResizeMode, r.isAlwaysFocusable(), task.isHomeTask(),
-                r.appInfo.targetSdkVersion, r.mRotationAnimationHint, task.isOnTopLauncher());
-        r.taskConfigOverride = task.mOverrideConfig;
+                task.voiceSession != null, r.mLaunchTaskBehind, bounds,
+                task.getOverrideConfiguration(), task.mResizeMode, r.isAlwaysFocusable(),
+                task.isHomeTask(), r.appInfo.targetSdkVersion, r.mRotationAnimationHint,
+                task.isOnTopLauncher());
+        r.mLastReportedOverrideConfiguration.setTo(task.getMergedOverrideConfiguration());
     }
 
     void moveToFrontAndResumeStateIfNeeded(
@@ -5368,9 +5392,10 @@ final class ActivityStack {
 
     private void setAppTask(ActivityRecord r, TaskRecord task) {
         final Rect bounds = task.updateOverrideConfigurationFromLaunchBounds();
-        mWindowManager.setAppTask(r.appToken, task.taskId, mStackId, bounds, task.mOverrideConfig,
-                task.mResizeMode, task.isHomeTask(), task.isOnTopLauncher());
-        r.taskConfigOverride = task.mOverrideConfig;
+        mWindowManager.setAppTask(r.appToken, task.taskId, mStackId, bounds,
+                task.getOverrideConfiguration(), task.mResizeMode, task.isHomeTask(),
+                task.isOnTopLauncher());
+        r.mLastReportedOverrideConfiguration.setTo(task.getMergedOverrideConfiguration());
     }
 
     public int getStackId() {

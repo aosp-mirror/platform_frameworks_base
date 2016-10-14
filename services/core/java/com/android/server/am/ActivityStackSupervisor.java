@@ -178,7 +178,8 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
-public final class ActivityStackSupervisor implements DisplayListener {
+public final class ActivityStackSupervisor extends ConfigurationContainer
+        implements DisplayListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_AM;
     private static final String TAG_CONTAINERS = TAG + POSTFIX_CONTAINERS;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
@@ -411,6 +412,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
     final ActivityMetricsLogger mActivityMetricsLogger;
 
     private final ResizeDockedStackTimeout mResizeDockedStackTimeout;
+
+    @Override
+    protected int getChildCount() {
+        return mActivityDisplays.size();
+    }
+
+    @Override
+    protected ConfigurationContainer getChildAt(int index) {
+        return mActivityDisplays.valueAt(index);
+    }
+
+    @Override
+    protected ConfigurationContainer getParent() {
+        return null;
+    }
 
     static class FindTaskResult {
         ActivityRecord r;
@@ -1182,7 +1198,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // just restarting it anyway.
         if (checkConfig) {
             Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                    mService.mGlobalConfiguration,
+                    mService.getGlobalConfiguration(),
                     r.mayFreezeScreenLocked(app) ? r.appToken : null);
             // Deferring resume here because we're going to launch new activity shortly.
             // We don't want to perform a redundant launch of the same record while ensuring
@@ -1272,12 +1288,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 app.pendingUiClean = true;
             }
             app.forceProcessStateUpTo(mService.mTopProcessState);
+            // Because we could be starting an Activity in the system process this may not go across
+            // a Binder interface which would create a new Configuration. Consequently we have to
+            // always create a new Configuration here.
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info,
-                    new Configuration(mService.mGlobalConfiguration),
-                    new Configuration(task.mOverrideConfig), r.compat, r.launchedFromPackage,
-                    task.voiceInteractor, app.repProcState, r.icicle, r.persistentState, results,
-                    newIntents, !andResume, mService.isNextTransitionForward(), profilerInfo);
+                    new Configuration(mService.getGlobalConfiguration()),
+                    new Configuration(task.getMergedOverrideConfiguration()), r.compat,
+                    r.launchedFromPackage, task.voiceInteractor, app.repProcState, r.icicle,
+                    r.persistentState, results, newIntents, !andResume,
+                    mService.isNextTransitionForward(), profilerInfo);
 
             if ((app.info.privateFlags&ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Note that the package
@@ -1599,7 +1619,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // We'll update with whatever configuration it now says
             // it used to launch.
             if (config != null) {
-                r.configuration = config;
+                r.mLastReportedConfiguration.setTo(config);
             }
 
             // We are now idle.  If someone is waiting for a thumbnail from
@@ -1865,8 +1885,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     // WM resizeTask must be done after the task is moved to the correct stack,
                     // because Task's setBounds() also updates dim layer's bounds, but that has
                     // dependency on the stack.
-                    mWindowManager.resizeTask(task.taskId, task.mBounds, task.mOverrideConfig,
-                            false /* relayout */, false /* forced */);
+                    mWindowManager.resizeTask(task.taskId, task.mBounds,
+                            task.getOverrideConfiguration(), false /* relayout */,
+                            false /* forced */);
                 }
             }
         }
@@ -2247,7 +2268,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
         }
-        mWindowManager.resizeTask(task.taskId, task.mBounds, task.mOverrideConfig, kept, forced);
+        mWindowManager.resizeTask(task.taskId, task.mBounds, task.getOverrideConfiguration(), kept,
+                forced);
 
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
         return kept;
@@ -2589,7 +2611,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         task.updateOverrideConfigurationForStack(stack);
 
         mWindowManager.positionTaskInStack(
-                taskId, stackId, position, task.mBounds, task.mOverrideConfig);
+                taskId, stackId, position, task.mBounds, task.getOverrideConfiguration());
         stack.positionTask(task, position);
         // The task might have already been running and its visibility needs to be synchronized with
         // the visibility of the stack / windows.
@@ -4230,7 +4252,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     /** Exactly one of these classes per Display in the system. Capable of holding zero or more
      * attached {@link ActivityStack}s */
-    class ActivityDisplay {
+    class ActivityDisplay extends ConfigurationContainer {
         /** Actual Display this object tracks. */
         int mDisplayId;
         Display mDisplay;
@@ -4289,6 +4311,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
         @Override
         public String toString() {
             return "ActivityDisplay={" + mDisplayId + " numStacks=" + mStacks.size() + "}";
+        }
+
+        @Override
+        protected int getChildCount() {
+            return mStacks.size();
+        }
+
+        @Override
+        protected ConfigurationContainer getChildAt(int index) {
+            return mStacks.get(index);
+        }
+
+        @Override
+        protected ConfigurationContainer getParent() {
+            return ActivityStackSupervisor.this;
         }
     }
 

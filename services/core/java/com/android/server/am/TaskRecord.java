@@ -56,6 +56,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
@@ -74,8 +76,6 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
-import static android.content.res.Configuration.SCREENLAYOUT_LONG_MASK;
-import static android.content.res.Configuration.SCREENLAYOUT_SIZE_MASK;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
@@ -93,7 +93,7 @@ import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.STARTING_WINDOW_SHOWN;
 
-final class TaskRecord {
+final class TaskRecord extends ConfigurationContainer {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_AM;
     private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
@@ -271,8 +271,8 @@ final class TaskRecord {
     // This number will be assigned when we evaluate OOM scores for all visible tasks.
     int mLayerRank = -1;
 
-    /** Contains configurations settings that are different from the parent's configuration. */
-    Configuration mOverrideConfig = Configuration.EMPTY;
+    /** Helper object used for updating override configuration. */
+    private Configuration mTmpConfig = new Configuration();
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
@@ -531,8 +531,10 @@ final class TaskRecord {
         return mStack;
     }
 
+    /** Must be used for setting parent stack because it performs configuration updates. */
     void setStack(ActivityStack stack) {
         mStack = stack;
+        onParentChanged();
     }
 
     /**
@@ -540,6 +542,21 @@ final class TaskRecord {
      */
     int getStackId() {
         return mStack != null ? mStack.mStackId : INVALID_STACK_ID;
+    }
+
+    @Override
+    protected int getChildCount() {
+        return 0;
+    }
+
+    @Override
+    protected ConfigurationContainer getChildAt(int index) {
+        return null;
+    }
+
+    @Override
+    protected ConfigurationContainer getParent() {
+        return mStack;
     }
 
     // Close up recents linked list.
@@ -591,7 +608,6 @@ final class TaskRecord {
      * @return whether the thumbnail was set
      */
     boolean setLastThumbnailLocked(Bitmap thumbnail) {
-        final Configuration serviceConfig = mService.mGlobalConfiguration;
         int taskWidth = 0;
         int taskHeight = 0;
         if (mBounds != null) {
@@ -607,7 +623,11 @@ final class TaskRecord {
         } else {
             Slog.e(TAG, "setLastThumbnailLocked() called on Task without stack");
         }
-        return setLastThumbnailLocked(thumbnail, taskWidth, taskHeight, serviceConfig.orientation);
+        // We need to provide the current orientation of the display on which this task resides,
+        // not the orientation of the task.
+        final int orientation =
+                getStack().mActivityContainer.mActivityDisplay.getConfiguration().orientation;
+        return setLastThumbnailLocked(thumbnail, taskWidth, taskHeight, orientation);
     }
 
     /**
@@ -1487,8 +1507,9 @@ final class TaskRecord {
         if (Objects.equals(mBounds, bounds)) {
             return false;
         }
-        final Configuration oldConfig = mOverrideConfig;
+        mTmpConfig.setTo(getOverrideConfiguration());
         final boolean oldFullscreen = mFullscreen;
+        final Configuration newConfig = getOverrideConfiguration();
 
         mFullscreen = bounds == null;
         if (mFullscreen) {
@@ -1496,7 +1517,7 @@ final class TaskRecord {
                 mLastNonFullscreenBounds = mBounds;
             }
             mBounds = null;
-            mOverrideConfig = Configuration.EMPTY;
+            newConfig.unset();
         } else {
             mTmpRect.set(bounds);
             adjustForMinimalTaskDimensions(mTmpRect);
@@ -1508,15 +1529,16 @@ final class TaskRecord {
             if (mStack == null || StackId.persistTaskBounds(mStack.mStackId)) {
                 mLastNonFullscreenBounds = mBounds;
             }
-            mOverrideConfig = calculateOverrideConfig(mTmpRect, insetBounds,
+            calculateOverrideConfig(newConfig, mTmpRect, insetBounds,
                     mTmpRect.right != bounds.right, mTmpRect.bottom != bounds.bottom);
         }
+        onOverrideConfigurationChanged(newConfig);
 
         if (mFullscreen != oldFullscreen) {
             mService.mStackSupervisor.scheduleReportMultiWindowModeChanged(this);
         }
 
-        return !mOverrideConfig.equals(oldConfig);
+        return !mTmpConfig.equals(newConfig);
     }
 
     private void subtractNonDecorInsets(Rect inOutBounds, Rect inInsetBounds,
@@ -1541,8 +1563,9 @@ final class TaskRecord {
         inOutBounds.inset(leftInset, topInset, rightInset, bottomInset);
     }
 
-    private Configuration calculateOverrideConfig(Rect bounds, Rect insetBounds,
-                                                  boolean overrideWidth, boolean overrideHeight) {
+    /** Clears passed config and fills it with new override values. */
+    private Configuration calculateOverrideConfig(Configuration config, Rect bounds,
+            Rect insetBounds, boolean overrideWidth, boolean overrideHeight) {
         mTmpNonDecorBounds.set(bounds);
         mTmpStableBounds.set(bounds);
         subtractNonDecorInsets(
@@ -1552,16 +1575,16 @@ final class TaskRecord {
                 mTmpStableBounds, insetBounds != null ? insetBounds : bounds,
                 overrideWidth, overrideHeight);
 
-        // For calculating screenWidthDp, screenWidthDp, we use the stable inset screen area,
+        // For calculating screenWidthDp, screenHeightDp, we use the stable inset screen area,
         // i.e. the screen area without the system bars.
-        final Configuration serviceConfig = mService.mGlobalConfiguration;
-        final Configuration config = new Configuration(Configuration.EMPTY);
-        // TODO(multidisplay): Update Dp to that of display stack is on.
-        final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        // Additionally task dimensions should not be bigger than its parents dimensions.
+        final Configuration parentConfig = getParent().getConfiguration();
+        config.unset();
+        final float density = parentConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
         config.screenWidthDp =
-                Math.min((int)(mTmpStableBounds.width() / density), serviceConfig.screenWidthDp);
+                Math.min((int)(mTmpStableBounds.width() / density), parentConfig.screenWidthDp);
         config.screenHeightDp =
-                Math.min((int)(mTmpStableBounds.height() / density), serviceConfig.screenHeightDp);
+                Math.min((int)(mTmpStableBounds.height() / density), parentConfig.screenHeightDp);
 
         // TODO: Orientation?
         config.orientation = (config.screenWidthDp <= config.screenHeightDp)
@@ -1573,9 +1596,11 @@ final class TaskRecord {
         // never go away in Honeycomb.
         final int compatScreenWidthDp = (int)(mTmpNonDecorBounds.width() / density);
         final int compatScreenHeightDp = (int)(mTmpNonDecorBounds.height() / density);
-        final int sl = Configuration.resetScreenLayout(serviceConfig.screenLayout);
+        // We're only overriding LONG, SIZE and COMPAT parts of screenLayout, so we start override
+        // calculation with partial default.
+        final int sl = Configuration.SCREENLAYOUT_LONG_YES | Configuration.SCREENLAYOUT_SIZE_XLARGE;
         final int longSize = Math.max(compatScreenHeightDp, compatScreenWidthDp);
-        final int shortSize = Math.min(compatScreenHeightDp, compatScreenWidthDp);;
+        final int shortSize = Math.min(compatScreenHeightDp, compatScreenWidthDp);
         config.screenLayout = Configuration.reduceScreenLayout(sl, longSize, shortSize);
 
         config.smallestScreenWidthDp = mService.mWindowManager.getSmallestWidthForTaskBounds(
@@ -1589,12 +1614,14 @@ final class TaskRecord {
      * {@param config}.
      */
     Configuration extractOverrideConfig(Configuration config) {
-        final Configuration extracted = new Configuration(Configuration.EMPTY);
+        final Configuration extracted = new Configuration();
         extracted.screenWidthDp = config.screenWidthDp;
         extracted.screenHeightDp = config.screenHeightDp;
         extracted.smallestScreenWidthDp = config.smallestScreenWidthDp;
         extracted.orientation = config.orientation;
-        extracted.screenLayout = config.screenLayout;
+        // We're only overriding LONG, SIZE and COMPAT parts of screenLayout.
+        extracted.screenLayout = config.screenLayout & (Configuration.SCREENLAYOUT_LONG_MASK
+                | Configuration.SCREENLAYOUT_SIZE_MASK | Configuration.SCREENLAYOUT_COMPAT_NEEDED);
         return extracted;
     }
 
@@ -1605,29 +1632,6 @@ final class TaskRecord {
             bounds.set(mBounds);
         }
         return bounds;
-    }
-
-    /**
-     * Update fields that are not overridden for task from global configuration.
-     *
-     * @param globalConfig global configuration to update from.
-     */
-    void sanitizeOverrideConfiguration(Configuration globalConfig) {
-        // If it's fullscreen, the override config should be empty and we should leave it alone.
-        if (mFullscreen) {
-            return;
-        }
-
-        // screenLayout field is set in #calculateOverrideConfig but only part of it is really
-        // overridden - aspect ratio and size. Other flags (like layout direction) can be updated
-        // separately in global config and they also must be updated in override config.
-        int overrideScreenLayout = mOverrideConfig.screenLayout;
-        int newScreenLayout = globalConfig.screenLayout;
-        newScreenLayout = (newScreenLayout & ~SCREENLAYOUT_LONG_MASK)
-                | (overrideScreenLayout & SCREENLAYOUT_LONG_MASK);
-        newScreenLayout = (newScreenLayout & ~SCREENLAYOUT_SIZE_MASK)
-                | (overrideScreenLayout & SCREENLAYOUT_SIZE_MASK);
-        mOverrideConfig.screenLayout = newScreenLayout;
     }
 
     static Rect validateBounds(Rect bounds) {

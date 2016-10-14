@@ -1121,18 +1121,12 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     final AppOpsService mAppOpsService;
 
-    /**
-     * Current global configuration information. Contains general settings for the entire system,
-     * also corresponds to the merged configuration of the default display.
-     */
-    Configuration mGlobalConfiguration = new Configuration();
-
     /** Current sequencing integer of the configuration, for skipping old configurations. */
     private int mConfigurationSeq;
 
     /**
      * Temp object used when global configuration is updated. It is also sent to outer world
-     * instead of {@link #mGlobalConfiguration} because we don't trust anyone...
+     * instead of {@link #getGlobalConfiguration} because we don't trust anyone...
      */
     private Configuration mTempGlobalConfig = new Configuration();
 
@@ -1581,6 +1575,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     private int mViSessionId = 1000;
 
     final boolean mPermissionReviewRequired;
+
+    /**
+     * Current global configuration information. Contains general settings for the entire system,
+     * also corresponds to the merged configuration of the default display.
+     */
+    Configuration getGlobalConfiguration() {
+        return mStackSupervisor.getConfiguration();
+    }
 
     final class KillHandler extends Handler {
         static final int KILL_PROCESS_GROUP_MSG = 4000;
@@ -2329,7 +2331,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     callingPackage = r.info.getComponentName();
                     if (mInVrMode != vrMode) {
                         mInVrMode = vrMode;
-                        mShowDialogs = shouldShowDialogs(mGlobalConfiguration, mInVrMode);
+                        mShowDialogs = shouldShowDialogs(getGlobalConfiguration(), mInVrMode);
                         if (r.app != null) {
                             ProcessRecord proc = r.app;
                             if (proc.vrThreadTid > 0) {
@@ -2705,15 +2707,16 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mTrackingAssociations = "1".equals(SystemProperties.get("debug.track-associations"));
 
-        mGlobalConfiguration.setToDefaults();
-        mGlobalConfiguration.setLocales(LocaleList.getDefault());
+        mTempGlobalConfig.setToDefaults();
+        mTempGlobalConfig.setLocales(LocaleList.getDefault());
+        mConfigurationSeq = mTempGlobalConfig.seq = 1;
 
-        mConfigurationSeq = mGlobalConfiguration.seq = 1;
         mProcessCpuTracker.init();
 
+        mStackSupervisor = new ActivityStackSupervisor(this);
+        mStackSupervisor.onConfigurationChanged(mTempGlobalConfig);
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
-        mStackSupervisor = new ActivityStackSupervisor(this);
         mActivityStarter = new ActivityStarter(this, mStackSupervisor);
         mRecentTasks = new RecentTasks(this, mStackSupervisor);
 
@@ -3145,8 +3148,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final void showUnsupportedZoomDialogIfNeededLocked(ActivityRecord r) {
-        if (mGlobalConfiguration.densityDpi != DisplayMetrics.DENSITY_DEVICE_STABLE
-                && r.appInfo.requiresSmallestWidthDp > mGlobalConfiguration.smallestScreenWidthDp) {
+        final Configuration globalConfig = getGlobalConfiguration();
+        if (globalConfig.densityDpi != DisplayMetrics.DENSITY_DEVICE_STABLE
+                && r.appInfo.requiresSmallestWidthDp > globalConfig.smallestScreenWidthDp) {
             final Message msg = Message.obtain();
             msg.what = SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG;
             msg.obj = r;
@@ -4757,7 +4761,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             mWindowManager.setAppOrientation(r.appToken, requestedOrientation);
             Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                    mGlobalConfiguration, r.mayFreezeScreenLocked(r.app) ? r.appToken : null);
+                    getGlobalConfiguration(), r.mayFreezeScreenLocked(r.app) ? r.appToken : null);
             if (config != null) {
                 r.frozenBeforeDestroy = true;
                 if (!updateConfigurationLocked(config, r, false)) {
@@ -6544,7 +6548,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                  PackageManager.NOTIFY_PACKAGE_USE_INSTRUMENTATION);
             }
             if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Binding proc "
-                    + processName + " with config " + mGlobalConfiguration);
+                    + processName + " with config " + getGlobalConfiguration());
             ApplicationInfo appInfo = app.instrumentationInfo != null
                     ? app.instrumentationInfo : app.info;
             app.compat = compatibilityInfoForPackageLocked(appInfo);
@@ -6569,7 +6573,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.instrumentationUiAutomationConnection, testMode,
                     mBinderTransactionTrackingEnabled, enableTrackAllocation,
                     isRestrictedBackupMode || !normalMode, app.persistent,
-                    new Configuration(mGlobalConfiguration), app.compat,
+                    new Configuration(getGlobalConfiguration()), app.compat,
                     getCommonServicesLocked(app.isolated),
                     mCoreSettingsObserver.getCoreSettingsLocked(),
                     buildSerial);
@@ -9325,17 +9329,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                // Use the full screen as the context for the task thumbnail
-                final Point displaySize = new Point();
-                final TaskThumbnailInfo thumbnailInfo = new TaskThumbnailInfo();
-                r.getStack().getDisplaySize(displaySize);
-                thumbnailInfo.taskWidth = displaySize.x;
-                thumbnailInfo.taskHeight = displaySize.y;
-                thumbnailInfo.screenOrientation = mGlobalConfiguration.orientation;
-
                 TaskRecord task = new TaskRecord(this,
                         mStackSupervisor.getNextTaskIdForUserLocked(r.userId),
-                        ainfo, intent, description, thumbnailInfo);
+                        ainfo, intent, description, new TaskThumbnailInfo());
 
                 int trimIdx = mRecentTasks.trimForTaskLocked(task, false);
                 if (trimIdx >= 0) {
@@ -13170,8 +13166,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             // This happens before any activities are started, so we can change global configuration
             // in-place.
             updateConfigurationLocked(configuration, null, true);
-            if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Initial config: " + mGlobalConfiguration);
+            final Configuration globalConfig = getGlobalConfiguration();
+            if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Initial config: " + globalConfig);
 
             // Load resources only after the current configuration has been set.
             final Resources res = mContext.getResources();
@@ -13186,11 +13182,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     com.android.internal.R.string.config_appsNotReportingCrashes));
             mUserController.mUserSwitchUiEnabled = !res.getBoolean(
                     com.android.internal.R.bool.config_customUserSwitchUi);
-            if ((mGlobalConfiguration.uiMode & UI_MODE_TYPE_TELEVISION)
-                    == UI_MODE_TYPE_TELEVISION) {
+            if ((globalConfig.uiMode & UI_MODE_TYPE_TELEVISION) == UI_MODE_TYPE_TELEVISION) {
                 mFullscreenThumbnailScale = (float) res
                     .getInteger(com.android.internal.R.integer.thumbnail_width_tv) /
-                    (float) mGlobalConfiguration.screenWidthDp;
+                    (float) globalConfig.screenWidthDp;
             } else {
                 mFullscreenThumbnailScale = res.getFraction(
                     com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
@@ -14785,7 +14780,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
         }
         if (dumpPackage == null) {
-            pw.println("  mGlobalConfiguration: " + mGlobalConfiguration);
+            pw.println("  mGlobalConfiguration: " + getGlobalConfiguration());
         }
         if (dumpAll) {
             pw.println("  mConfigWillChange: " + getFocusedStack().mConfigWillChange);
@@ -18768,15 +18763,16 @@ public final class ActivityManagerService extends ActivityManagerNative
     public ConfigurationInfo getDeviceConfigurationInfo() {
         ConfigurationInfo config = new ConfigurationInfo();
         synchronized (this) {
-            config.reqTouchScreen = mGlobalConfiguration.touchscreen;
-            config.reqKeyboardType = mGlobalConfiguration.keyboard;
-            config.reqNavigation = mGlobalConfiguration.navigation;
-            if (mGlobalConfiguration.navigation == Configuration.NAVIGATION_DPAD
-                    || mGlobalConfiguration.navigation == Configuration.NAVIGATION_TRACKBALL) {
+            final Configuration globalConfig = getGlobalConfiguration();
+            config.reqTouchScreen = globalConfig.touchscreen;
+            config.reqKeyboardType = globalConfig.keyboard;
+            config.reqNavigation = globalConfig.navigation;
+            if (globalConfig.navigation == Configuration.NAVIGATION_DPAD
+                    || globalConfig.navigation == Configuration.NAVIGATION_TRACKBALL) {
                 config.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_FIVE_WAY_NAV;
             }
-            if (mGlobalConfiguration.keyboard != Configuration.KEYBOARD_UNDEFINED
-                    && mGlobalConfiguration.keyboard != Configuration.KEYBOARD_NOKEYS) {
+            if (globalConfig.keyboard != Configuration.KEYBOARD_UNDEFINED
+                    && globalConfig.keyboard != Configuration.KEYBOARD_NOKEYS) {
                 config.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_HARD_KEYBOARD;
             }
             config.reqGlEsVersion = GL_ES_VERSION;
@@ -18800,7 +18796,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public Configuration getConfiguration() {
         Configuration ci;
         synchronized(this) {
-            ci = new Configuration(mGlobalConfiguration);
+            ci = new Configuration(getGlobalConfiguration());
             ci.userSetLocale = false;
         }
         return ci;
@@ -18858,7 +18854,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private void updateFontScaleIfNeeded(@UserIdInt int userId) {
         final float scaleFactor = Settings.System.getFloatForUser(mContext.getContentResolver(),
                 FONT_SCALE, 1.0f, userId);
-        if (mGlobalConfiguration.fontScale != scaleFactor) {
+        if (getGlobalConfiguration().fontScale != scaleFactor) {
             final Configuration configuration = mWindowManager.computeNewConfiguration();
             configuration.fontScale = scaleFactor;
             synchronized (this) {
@@ -18918,7 +18914,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void updateUserConfigurationLocked() {
-        final Configuration configuration = new Configuration(mGlobalConfiguration);
+        final Configuration configuration = new Configuration(getGlobalConfiguration());
         final int currentUserId = mUserController.getCurrentUserIdLocked();
         Settings.System.adjustConfigurationForUser(mContext.getContentResolver(), configuration,
                 currentUserId, Settings.System.canWrite(mContext));
@@ -18989,7 +18985,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     /** Update default (global) configuration and notify listeners about changes. */
     private int updateGlobalConfiguration(@NonNull Configuration values, boolean initLocale,
             boolean persistent, int userId, boolean deferResume) {
-        mTempGlobalConfig.setTo(mGlobalConfiguration);
+        mTempGlobalConfig.setTo(getGlobalConfiguration());
         final int changes = mTempGlobalConfig.updateFrom(values);
         if (changes == 0) {
             return 0;
@@ -19019,7 +19015,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         mConfigurationSeq = Math.max(++mConfigurationSeq, 1);
         mTempGlobalConfig.seq = mConfigurationSeq;
 
-        mGlobalConfiguration.setTo(mTempGlobalConfig);
+        // Update stored global config and notify everyone about the change.
+        mStackSupervisor.onConfigurationChanged(mTempGlobalConfig);
+
         Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + mTempGlobalConfig);
         // TODO(multi-display): Update UsageEvents#Event to include displayId.
         mUsageStatsService.reportConfigurationChange(mTempGlobalConfig,
@@ -19041,7 +19039,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // We need another copy of global config because we're scheduling some calls instead of
         // running them in place. We need to be sure that object we send will be handled unchanged.
-        final Configuration configCopy = new Configuration(mGlobalConfiguration);
+        final Configuration configCopy = new Configuration(mTempGlobalConfig);
         if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
             Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
             msg.obj = configCopy;

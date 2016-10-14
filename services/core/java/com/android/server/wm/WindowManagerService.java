@@ -3974,7 +3974,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void positionTaskInStack(int taskId, int stackId, int position, Rect bounds,
-            Configuration config) {
+            Configuration overrideConfig) {
         synchronized (mWindowMap) {
             if (DEBUG_STACK) Slog.i(TAG_WM, "positionTaskInStack: positioning taskId=" + taskId
                     + " in stackId=" + stackId + " at " + position);
@@ -3990,7 +3990,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         "positionTaskInStack: could not find stackId=" + stackId);
                 return;
             }
-            task.positionTaskInStack(stack, position, bounds, config);
+            task.positionTaskInStack(stack, position, bounds, overrideConfig);
             final DisplayContent displayContent = stack.getDisplayContent();
             displayContent.setLayoutNeeded();
             mWindowPlacerLocked.performSurfacePlacement();
@@ -9405,6 +9405,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     public int getSmallestWidthForTaskBounds(Rect bounds) {
         synchronized (mWindowMap) {
+            // TODO(multi-display): Use correct display content here
             return getDefaultDisplayContentLocked().getDockedDividerController()
                     .getSmallestWidthDpForBounds(bounds);
         }
