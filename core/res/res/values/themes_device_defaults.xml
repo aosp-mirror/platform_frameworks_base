@@ -49,7 +49,7 @@ easier.
          Type.DeviceDefault.Etc (for example, {@code Widget.DeviceDefault.Button} and
          {@code TextAppearance.DeviceDefault.Widget.PopupMenu.Large}).</p>
           -->
-    <style name="Theme.DeviceDefault" parent="Theme.Material" >
+    <style name="Theme.DeviceDefaultBase" parent="Theme.Material" >
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance.DeviceDefault</item>
         <item name="textAppearanceInverse">@style/TextAppearance.DeviceDefault.Inverse</item>
@@ -205,6 +205,8 @@ easier.
         <item name="colorAccent">@color/accent_device_default_dark</item>
 
     </style>
+
+    <style name="Theme.DeviceDefault" parent="Theme.DeviceDefaultBase" />
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar -->
     <style name="Theme.DeviceDefault.NoActionBar" parent="Theme.Material.NoActionBar">
