@@ -321,8 +321,6 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> 경고"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"작업 모드"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"야간 조명"</string>
-    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"야간 조명 사용 설정됨, 사용 중지하려면 탭"</string>
-    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"야간 조명 사용 중지됨, 사용 설정하려면 탭"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"최근 항목이 없습니다."</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"모든 항목을 삭제했습니다."</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"애플리케이션 정보"</string>

@@ -319,8 +319,6 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Προειδοποίηση για <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Λειτουργία εργασίας"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Νυχτερινός φωτισμός"</string>
-    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Ο Νυχτερινός φωτισμός είναι ενεργοποιημένος. Πατήστε για απενεργοποίηση."</string>
-    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Ο Νυχτερινός φωτισμός είναι απενεργοποιημένος. Πατήστε για ενεργοποίηση."</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Δεν υπάρχουν πρόσφατα στοιχεία"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Έχει γίνει εκκαθάριση όλων των στοιχείων"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Πληροφορίες εφαρμογής"</string>
