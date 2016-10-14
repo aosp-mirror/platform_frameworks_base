@@ -55,7 +55,10 @@ public:
         return !!mBitmap;
     }
 
-    Bitmap* bitmap() { return mBitmap.get(); }
+    Bitmap& bitmap() {
+        assertValid();
+        return *mBitmap;
+    }
 
     void assertValid() {
         LOG_ALWAYS_FATAL_IF(!valid(), "Error, cannot access an invalid/free'd bitmap here!");
@@ -134,7 +137,7 @@ public:
     }
 
     void* pixels() {
-        return mBitmapWrapper->bitmap()->pixels();
+        return mBitmapWrapper->bitmap().pixels();
     }
 
     bool valid() {
@@ -200,13 +203,12 @@ void toSkBitmap(jlong bitmapHandle, SkBitmap* outBitmap) {
     bitmap->getSkBitmap(outBitmap);
 }
 
-Bitmap* toBitmap(JNIEnv* env, jobject bitmap) {
+Bitmap& toBitmap(JNIEnv* env, jobject bitmap) {
     SkASSERT(env);
     SkASSERT(bitmap);
     SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
     jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
     LocalScopedBitmap localBitmap(bitmapHandle);
-    localBitmap->assertValid();
     return localBitmap->bitmap();
 }
 
@@ -646,7 +648,7 @@ static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         // Otherwise respect the premultiplied request.
         alphaType = requestPremul ? kPremul_SkAlphaType : kUnpremul_SkAlphaType;
     }
-    bitmap->bitmap()->reconfigure(SkImageInfo::Make(width, height, colorType, alphaType,
+    bitmap->bitmap().reconfigure(SkImageInfo::Make(width, height, colorType, alphaType,
             sk_sp<SkColorSpace>(bitmap->info().colorSpace())));
 }
 
@@ -941,7 +943,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
 
     // Transfer the underlying ashmem region if we have one and it's immutable.
     android::status_t status;
-    int fd = bitmapWrapper->bitmap()->getAshmemFd();
+    int fd = bitmapWrapper->bitmap().getAshmemFd();
     if (fd >= 0 && !isMutable && p->allowFds()) {
 #if DEBUG_PARCEL
         ALOGD("Bitmap.writeToParcel: transferring immutable bitmap's ashmem fd as "
@@ -1189,9 +1191,9 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
 
 static jlong Bitmap_refPixelRef(JNIEnv* env, jobject, jlong bitmapHandle) {
     LocalScopedBitmap bitmap(bitmapHandle);
-    SkPixelRef* pixelRef = bitmap->bitmap();
-    SkSafeRef(pixelRef);
-    return reinterpret_cast<jlong>(pixelRef);
+    SkPixelRef& pixelRef = bitmap->bitmap();
+    pixelRef.ref();
+    return reinterpret_cast<jlong>(&pixelRef);
 }
 
 static void Bitmap_prepareToDraw(JNIEnv* env, jobject, jlong bitmapPtr) {

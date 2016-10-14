@@ -372,8 +372,7 @@ static void drawBitmap(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap
                        jfloat left, jfloat top, jlong paintHandle, jint canvasDensity,
                        jint screenDensity, jint bitmapDensity) {
     Canvas* canvas = get_canvas(canvasHandle);
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
     if (canvasDensity == bitmapDensity || canvasDensity == 0 || bitmapDensity == 0) {
@@ -456,7 +455,7 @@ static void drawBitmapArray(JNIEnv* env, jobject, jlong canvasHandle,
     }
 
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    get_canvas(canvasHandle)->drawBitmap(bitmap, x, y, paint);
+    get_canvas(canvasHandle)->drawBitmap(*androidBitmap, x, y, paint);
 }
 
 static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap,

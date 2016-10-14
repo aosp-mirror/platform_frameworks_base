@@ -261,8 +261,7 @@ TEST(RecordingCanvas, drawColor) {
 
 TEST(RecordingCanvas, backgroundAndImage) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
-        SkBitmap bitmap;
-        bitmap.setInfo(SkImageInfo::MakeUnknown(25, 25));
+        sk_sp<Bitmap> bitmap(TestUtils::createBitmap(25, 25));
         SkPaint paint;
         paint.setColor(SK_ColorBLUE);
 
@@ -278,7 +277,7 @@ TEST(RecordingCanvas, backgroundAndImage) {
             canvas.save(SaveFlags::MatrixClip);
             canvas.translate(25, 25);
             canvas.scale(2, 2);
-            canvas.drawBitmap(bitmap, 0, 0, nullptr);
+            canvas.drawBitmap(*bitmap, 0, 0, nullptr);
             canvas.restore();
         }
         canvas.restore();
@@ -728,9 +727,9 @@ TEST(RecordingCanvas, refPaint) {
 }
 
 TEST(RecordingCanvas, refBitmap) {
-    SkBitmap bitmap = TestUtils::createSkBitmap(100, 100);
+    sk_sp<Bitmap> bitmap(TestUtils::createBitmap(100, 100));
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [&bitmap](RecordingCanvas& canvas) {
-        canvas.drawBitmap(bitmap, 0, 0, nullptr);
+        canvas.drawBitmap(*bitmap, 0, 0, nullptr);
     });
     auto& bitmaps = dl->getBitmapResources();
     EXPECT_EQ(1u, bitmaps.size());

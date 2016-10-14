@@ -41,7 +41,7 @@ const BakedOpRenderer::LightInfo sLightInfo = { 128, 128 };
 static sp<RenderNode> createTestNode() {
     auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        SkBitmap bitmap = TestUtils::createSkBitmap(10, 10);
+        sk_sp<Bitmap> bitmap(TestUtils::createBitmap(10, 10));
         SkPaint paint;
 
         // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.
@@ -50,7 +50,7 @@ static sp<RenderNode> createTestNode() {
         for (int i = 0; i < 30; i++) {
             canvas.translate(0, 10);
             canvas.drawRect(0, 0, 10, 10, paint);
-            canvas.drawBitmap(bitmap, 5, 0, nullptr);
+            canvas.drawBitmap(*bitmap, 5, 0, nullptr);
         }
         canvas.restore();
     });

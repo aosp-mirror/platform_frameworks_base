@@ -337,13 +337,13 @@ SkColorType GraphicsJNI::legacyBitmapConfigToColorType(jint legacyConfig) {
 }
 
 void GraphicsJNI::getSkBitmap(JNIEnv* env, jobject bitmap, SkBitmap* outBitmap) {
-    android::bitmap::toBitmap(env, bitmap)->getSkBitmap(outBitmap);
+    android::bitmap::toBitmap(env, bitmap).getSkBitmap(outBitmap);
 }
 
-SkPixelRef* GraphicsJNI::refSkPixelRef(JNIEnv* env, jobject bitmap) {
-    SkPixelRef* pixelRef = android::bitmap::toBitmap(env, bitmap);
-    pixelRef->ref();
-    return pixelRef;
+SkPixelRef* GraphicsJNI::refSkPixelRef(JNIEnv* env, jobject jbitmap) {
+    android::Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
+    bitmap.ref();
+    return &bitmap;
 }
 SkColorType GraphicsJNI::getNativeBitmapColorType(JNIEnv* env, jobject jconfig) {
     SkASSERT(env);

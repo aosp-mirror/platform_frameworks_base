@@ -129,9 +129,9 @@ RENDERTHREAD_TEST(FrameBuilder, simple) {
 
     auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        SkBitmap bitmap = TestUtils::createSkBitmap(25, 25);
+        sk_sp<Bitmap> bitmap(TestUtils::createBitmap(25, 25));
         canvas.drawRect(0, 0, 100, 200, SkPaint());
-        canvas.drawBitmap(bitmap, 10, 10, nullptr);
+        canvas.drawBitmap(*bitmap, 10, 10, nullptr);
     });
     FrameBuilder frameBuilder(SkRect::MakeWH(100, 200), 100, 200,
             sLightGeometry, Caches::getInstance());
@@ -200,8 +200,9 @@ RENDERTHREAD_TEST(FrameBuilder, simpleBatching) {
 
     auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        SkBitmap bitmap = TestUtils::createSkBitmap(10, 10,
-                kAlpha_8_SkColorType); // Disable merging by using alpha 8 bitmap
+
+        sk_sp<Bitmap> bitmap(TestUtils::createBitmap(10, 10,
+                kAlpha_8_SkColorType)); // Disable merging by using alpha 8 bitmap
 
         // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.
         // Rects don't overlap bitmaps, so bitmaps should be brought to front as a group.
@@ -209,7 +210,7 @@ RENDERTHREAD_TEST(FrameBuilder, simpleBatching) {
         for (int i = 0; i < LOOPS; i++) {
             canvas.translate(0, 10);
             canvas.drawRect(0, 0, 10, 10, SkPaint());
-            canvas.drawBitmap(bitmap, 5, 0, nullptr);
+            canvas.drawBitmap(*bitmap, 5, 0, nullptr);
         }
         canvas.restore();
     });
@@ -393,19 +394,19 @@ RENDERTHREAD_TEST(FrameBuilder, avoidOverdraw_rects) {
 }
 
 RENDERTHREAD_TEST(FrameBuilder, avoidOverdraw_bitmaps) {
-    static SkBitmap opaqueBitmap = TestUtils::createSkBitmap(50, 50,
-            SkColorType::kRGB_565_SkColorType);
-    static SkBitmap transpBitmap = TestUtils::createSkBitmap(50, 50,
-            SkColorType::kAlpha_8_SkColorType);
+    static sk_sp<Bitmap> opaqueBitmap(TestUtils::createBitmap(50, 50,
+            SkColorType::kRGB_565_SkColorType));
+    static sk_sp<Bitmap> transpBitmap(TestUtils::createBitmap(50, 50,
+            SkColorType::kAlpha_8_SkColorType));
     class AvoidOverdrawBitmapsTestRenderer : public TestRendererBase {
     public:
         void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
             switch(mIndex++) {
             case 0:
-                EXPECT_EQ(opaqueBitmap.pixelRef(), op.bitmap->pixelRef());
+                EXPECT_EQ(opaqueBitmap.get(), op.bitmap->pixelRef());
                 break;
             case 1:
-                EXPECT_EQ(transpBitmap.pixelRef(), op.bitmap->pixelRef());
+                EXPECT_EQ(transpBitmap.get(), op.bitmap->pixelRef());
                 break;
             default:
                 ADD_FAILURE() << "Only two ops expected.";
@@ -417,11 +418,11 @@ RENDERTHREAD_TEST(FrameBuilder, avoidOverdraw_bitmaps) {
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.drawRect(0, 0, 50, 50, SkPaint());
         canvas.drawRect(0, 0, 50, 50, SkPaint());
-        canvas.drawBitmap(transpBitmap, 0, 0, nullptr);
+        canvas.drawBitmap(*transpBitmap, 0, 0, nullptr);
 
         // only the below draws should remain, since they're
-        canvas.drawBitmap(opaqueBitmap, 0, 0, nullptr);
-        canvas.drawBitmap(transpBitmap, 0, 0, nullptr);
+        canvas.drawBitmap(*opaqueBitmap, 0, 0, nullptr);
+        canvas.drawBitmap(*transpBitmap, 0, 0, nullptr);
     });
     FrameBuilder frameBuilder(SkRect::MakeWH(50, 50), 50, 50,
             sLightGeometry, Caches::getInstance());
@@ -449,23 +450,23 @@ RENDERTHREAD_TEST(FrameBuilder, clippedMerging) {
     };
     auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        SkBitmap bitmap = TestUtils::createSkBitmap(20, 20);
+        sk_sp<Bitmap> bitmap(TestUtils::createBitmap(20, 20));
 
         // left side clipped (to inset left half)
         canvas.clipRect(10, 0, 50, 100, SkRegion::kReplace_Op);
-        canvas.drawBitmap(bitmap, 0, 40, nullptr);
+        canvas.drawBitmap(*bitmap, 0, 40, nullptr);
 
         // top side clipped (to inset top half)
         canvas.clipRect(0, 10, 100, 50, SkRegion::kReplace_Op);
-        canvas.drawBitmap(bitmap, 40, 0, nullptr);
+        canvas.drawBitmap(*bitmap, 40, 0, nullptr);
 
         // right side clipped (to inset right half)
         canvas.clipRect(50, 0, 90, 100, SkRegion::kReplace_Op);
-        canvas.drawBitmap(bitmap, 80, 40, nullptr);
+        canvas.drawBitmap(*bitmap, 80, 40, nullptr);
 
         // bottom not clipped, just abutting (inset bottom half)
         canvas.clipRect(0, 50, 100, 90, SkRegion::kReplace_Op);
-        canvas.drawBitmap(bitmap, 40, 70, nullptr);
+        canvas.drawBitmap(*bitmap, 40, 70, nullptr);
     });
 
     FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
@@ -822,8 +823,8 @@ RENDERTHREAD_TEST(FrameBuilder, clipped) {
 
     auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        SkBitmap bitmap = TestUtils::createSkBitmap(200, 200);
-        canvas.drawBitmap(bitmap, 0, 0, nullptr);
+        sk_sp<Bitmap> bitmap(TestUtils::createBitmap(200, 200));
+        canvas.drawBitmap(*bitmap, 0, 0, nullptr);
     });
 
     // clip to small area, should see in receiver

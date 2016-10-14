@@ -76,8 +76,8 @@ static void movie_draw(JNIEnv* env, jobject movie, jlong canvasHandle,
 
     SkMovie* m = J2Movie(env, movie);
     const SkBitmap& b = m->bitmap();
-
-    c->drawBitmap(b, fx, fy, p);
+    sk_sp<android::Bitmap> wrapper = android::Bitmap::createFrom(b.info(), *b.pixelRef());
+    c->drawBitmap(*wrapper, fx, fy, p);
 }
 
 static jobject movie_decodeAsset(JNIEnv* env, jobject clazz, jlong native_asset) {

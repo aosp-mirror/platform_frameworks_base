@@ -16,6 +16,8 @@
 
 #include "SkiaCanvasProxy.h"
 
+#include "hwui/Bitmap.h"
+
 #include <cutils/log.h>
 #include <SkPatchUtils.h>
 #include <SkPaint.h>
@@ -122,7 +124,8 @@ void SkiaCanvasProxy::onDrawBitmap(const SkBitmap& bitmap, SkScalar left, SkScal
                             top + bitmap.dimensions().height(),
                             paint);
     } else {
-        mCanvas->drawBitmap(bitmap, left, top, paint);
+        auto hwuiBitmap= Bitmap::createFrom(bitmap.info(), *pxRef);
+        mCanvas->drawBitmap(*hwuiBitmap, left, top, paint);
     }
 }
 

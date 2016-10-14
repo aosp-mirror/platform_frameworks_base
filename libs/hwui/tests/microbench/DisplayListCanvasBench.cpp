@@ -93,7 +93,7 @@ void BM_DisplayListCanvas_record_simpleBitmapView(benchmark::State& benchState) 
     delete canvas->finishRecording();
 
     SkPaint rectPaint;
-    SkBitmap iconBitmap = TestUtils::createSkBitmap(80, 80);
+    sk_sp<Bitmap> iconBitmap(TestUtils::createBitmap(80, 80));
 
     while (benchState.KeepRunning()) {
         canvas->resetRecording(100, 100);
@@ -105,7 +105,7 @@ void BM_DisplayListCanvas_record_simpleBitmapView(benchmark::State& benchState) 
         {
             canvas->save(SaveFlags::MatrixClip);
             canvas->translate(10, 10);
-            canvas->drawBitmap(iconBitmap, 0, 0, nullptr);
+            canvas->drawBitmap(*iconBitmap, 0, 0, nullptr);
             canvas->restore();
         }
         benchmark::DoNotOptimize(canvas.get());

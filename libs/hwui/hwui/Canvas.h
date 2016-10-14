@@ -65,6 +65,7 @@ class Tree;
 };
 typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
+class Bitmap;
 class Paint;
 struct Typeface;
 
@@ -217,7 +218,7 @@ public:
                               const uint16_t* indices, int indexCount, const SkPaint& paint) = 0;
 
     // Bitmap-based
-    virtual void drawBitmap(const SkBitmap& bitmap, float left, float top,
+    virtual void drawBitmap(Bitmap& bitmap, float left, float top,
             const SkPaint* paint) = 0;
     virtual void drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
             const SkPaint* paint) = 0;

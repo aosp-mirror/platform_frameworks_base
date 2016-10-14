@@ -101,6 +101,19 @@ sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info,
     return sk_sp<Bitmap>(new Bitmap(addr, fd, size, info, rowBytes, ctable));
 }
 
+void FreePixelRef(void* addr, void* context) {
+    auto pixelRef = (SkPixelRef*) context;
+    pixelRef->unlockPixels();
+    pixelRef->unref();
+}
+
+sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, SkPixelRef& pixelRef) {
+    pixelRef.ref();
+    pixelRef.lockPixels();
+    return sk_sp<Bitmap>(new Bitmap((void*) pixelRef.pixels(), (void*) &pixelRef, FreePixelRef,
+            info, pixelRef.rowBytes(), pixelRef.colorTable()));
+}
+
 void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTable* ctable) {
     if (kIndex_8_SkColorType != newInfo.colorType()) {
         ctable = nullptr;

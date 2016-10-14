@@ -18,6 +18,7 @@
 
 #include "CanvasProperty.h"
 #include "VectorDrawable.h"
+#include "hwui/Bitmap.h"
 #include "hwui/MinikinUtils.h"
 
 #include <SkDrawable.h>
@@ -490,8 +491,10 @@ void SkiaCanvas::drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
 // Canvas draw operations: Bitmaps
 // ----------------------------------------------------------------------------
 
-void SkiaCanvas::drawBitmap(const SkBitmap& bitmap, float left, float top, const SkPaint* paint) {
-    mCanvas->drawBitmap(bitmap, left, top, paint);
+void SkiaCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
+    SkBitmap skBitmap;
+    bitmap.getSkBitmap(&skBitmap);
+    mCanvas->drawBitmap(skBitmap, left, top, paint);
 }
 
 void SkiaCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) {

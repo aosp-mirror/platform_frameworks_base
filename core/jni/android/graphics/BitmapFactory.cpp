@@ -330,7 +330,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     android::Bitmap* reuseBitmap = nullptr;
     unsigned int existingBufferSize = 0;
     if (javaBitmap != NULL) {
-        reuseBitmap = bitmap::toBitmap(env, javaBitmap);
+        reuseBitmap = &bitmap::toBitmap(env, javaBitmap);
         if (reuseBitmap->isImmutable()) {
             ALOGW("Unable to reuse an immutable bitmap as an image decoder target.");
             javaBitmap = NULL;

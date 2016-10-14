@@ -21,6 +21,7 @@
 #include "RenderNode.h"
 #include "VectorDrawable.h"
 #include "hwui/MinikinUtils.h"
+#include "hwui/Bitmap.h"
 
 namespace android {
 namespace uirenderer {
@@ -468,10 +469,12 @@ void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 }
 
 // Bitmap-based
-void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float left, float top, const SkPaint* paint) {
+void RecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
+    SkBitmap skBitmap;
+    bitmap.getSkBitmap(&skBitmap);
     save(SaveFlags::Matrix);
     translate(left, top);
-    drawBitmap(&bitmap, paint);
+    drawBitmap(&skBitmap, paint);
     restore();
 }
 
