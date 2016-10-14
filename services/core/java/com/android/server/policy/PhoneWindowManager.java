@@ -28,6 +28,7 @@ import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.WindowManager.DOCKED_TOP;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
+import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
 import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
 import static android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION;
 import static android.view.WindowManager.LayoutParams.*;
@@ -3960,14 +3961,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
     }
-    final InputEventReceiver.Factory mHideNavInputEventReceiverFactory =
-            new InputEventReceiver.Factory() {
-        @Override
-        public InputEventReceiver createInputEventReceiver(
-                InputChannel inputChannel, Looper looper) {
-            return new HideNavInputEventReceiver(inputChannel, looper);
-        }
-    };
 
     @Override
     public void setRecentsVisibilityLw(boolean visible) {
@@ -4192,8 +4185,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mInputConsumer = null;
                 }
             } else if (mInputConsumer == null) {
-                mInputConsumer = mWindowManagerFuncs.addInputConsumer(mHandler.getLooper(),
-                        mHideNavInputEventReceiverFactory);
+                mInputConsumer = mWindowManagerFuncs.createInputConsumer(mHandler.getLooper(),
+                        INPUT_CONSUMER_NAVIGATION,
+                        (channel, looper) -> new HideNavInputEventReceiver(channel, looper));
             }
 
             // For purposes of positioning and showing the nav bar, if we have

@@ -19,13 +19,13 @@ package com.android.systemui.tv.pip;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerNative;
-import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.media.session.MediaController;
@@ -33,24 +33,27 @@ import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
-
+import android.view.IWindowManager;
+import android.view.InputChannel;
+import android.view.InputEvent;
+import android.view.InputEventReceiver;
+import android.view.WindowManagerGlobal;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.SystemUIApplication;
-import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.statusbar.tv.TvStatusBar;
+import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 import static com.android.systemui.Prefs.Key.TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN;
 
 /**
@@ -160,6 +163,9 @@ public class PipManager {
     private boolean mOnboardingShown;
     private String[] mLastPackagesResourceGranted;
 
+    private InputChannel mInputChannel;
+    private PipInputEventReceiver mInputEventReceiver;
+
     private final Runnable mResizePinnedStackRunnable = new Runnable() {
         @Override
         public void run() {
@@ -197,6 +203,25 @@ public class PipManager {
                 }
             };
 
+    /**
+     * Input handler used for Pip windows.  Currently eats all the input events.
+     */
+    private final class PipInputEventReceiver extends InputEventReceiver {
+        public PipInputEventReceiver(InputChannel inputChannel, Looper looper) {
+            super(inputChannel, looper);
+        }
+
+        @Override
+        public void onInputEvent(InputEvent event) {
+            boolean handled = true;
+            try {
+                // To be implemented for input handling over Pip windows
+            } finally {
+                finishInputEvent(event, handled);
+            }
+        }
+    }
+
     private PipManager() { }
 
     /**
@@ -221,6 +246,20 @@ public class PipManager {
         mPipRecentsOverlayManager = new PipRecentsOverlayManager(context);
         mMediaSessionManager =
                 (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
+
+        PackageManager pm = mContext.getPackageManager();
+        if (!pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK_ONLY)) {
+            // Initialize the Pip input consumer
+            mInputChannel = new InputChannel();
+            try {
+                IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+                wm.destroyInputConsumer(INPUT_CONSUMER_PIP);
+                wm.createInputConsumer(INPUT_CONSUMER_PIP, mInputChannel);
+                mInputEventReceiver = new PipInputEventReceiver(mInputChannel, Looper.myLooper());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to create Pip input consumer", e);
+            }
+        }
     }
 
     private void loadConfigurationsAndApply() {
@@ -308,7 +347,11 @@ public class PipManager {
      */
     private void showPipOverlay() {
         if (DEBUG) Log.d(TAG, "showPipOverlay()");
-        PipOverlayActivity.showPipOverlay(mContext);
+        // Temporary workaround to prevent the overlay on phones
+        PackageManager pm = mContext.getPackageManager();
+        if (pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK_ONLY)) {
+            PipOverlayActivity.showPipOverlay(mContext);
+        }
     }
 
     /**

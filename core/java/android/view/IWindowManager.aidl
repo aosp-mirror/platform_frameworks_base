@@ -454,12 +454,13 @@ interface IWindowManager
     void registerShortcutKey(in long shortcutCode, IShortcutService keySubscriber);
 
     /**
-     * Create the input consumer for wallpaper events.
+     * Create an input consumer by name.
      */
-    void createWallpaperInputConsumer(out InputChannel inputChannel);
+    void createInputConsumer(String name, out InputChannel inputChannel);
 
     /**
-     * Remove the input consumer for wallpaper events.
+     * Destroy an input consumer by name.  This method will also dispose the input channels
+     * associated with that InputConsumer.
      */
-    void removeWallpaperInputConsumer();
+    boolean destroyInputConsumer(String name);
 }

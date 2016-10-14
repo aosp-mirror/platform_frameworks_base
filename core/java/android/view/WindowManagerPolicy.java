@@ -458,7 +458,7 @@ public interface WindowManagerPolicy {
         /**
          * Add a input consumer which will consume all input events going to any window below it.
          */
-        public InputConsumer addInputConsumer(Looper looper,
+        public InputConsumer createInputConsumer(Looper looper, String name,
                 InputEventReceiver.Factory inputEventReceiverFactory);
 
         /**

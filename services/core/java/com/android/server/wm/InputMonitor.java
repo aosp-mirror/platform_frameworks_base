@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.INPUT_CONSUMER_PIP;
+import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
@@ -25,14 +27,17 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.app.ActivityManagerNative;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.os.Looper;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
-import android.view.Display;
 import android.view.InputChannel;
+import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
+import android.view.WindowManagerPolicy;
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputManagerService;
 import com.android.server.input.InputWindowHandle;
@@ -69,8 +74,101 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     private final Object mInputDevicesReadyMonitor = new Object();
     private boolean mInputDevicesReady;
 
+    /**
+     * The set of input consumer added to the window manager by name, which consumes input events
+     * for the windows below it.
+     */
+    private final ArrayMap<String, InputConsumerImpl> mInputConsumers = new ArrayMap();
+
+    private static final class EventReceiverInputConsumer extends InputConsumerImpl
+            implements WindowManagerPolicy.InputConsumer {
+        private InputMonitor mInputMonitor;
+        private final InputEventReceiver mInputEventReceiver;
+
+        EventReceiverInputConsumer(WindowManagerService service, InputMonitor monitor,
+                                   Looper looper, String name,
+                                   InputEventReceiver.Factory inputEventReceiverFactory) {
+            super(service, name, null);
+            mInputMonitor = monitor;
+            mInputEventReceiver = inputEventReceiverFactory.createInputEventReceiver(
+                    mClientChannel, looper);
+        }
+
+        @Override
+        public void dismiss() {
+            synchronized (mService.mWindowMap) {
+                if (mInputMonitor.destroyInputConsumer(mWindowHandle.name)) {
+                    mInputEventReceiver.dispose();
+                }
+            }
+        }
+    }
+
     public InputMonitor(WindowManagerService service) {
         mService = service;
+    }
+
+    void addInputConsumer(String name, InputConsumerImpl consumer) {
+        mInputConsumers.put(name, consumer);
+        updateInputWindowsLw(true /* force */);
+    }
+
+    boolean destroyInputConsumer(String name) {
+        if (disposeInputConsumer(mInputConsumers.remove(name))) {
+            updateInputWindowsLw(true /* force */);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean disposeInputConsumer(InputConsumerImpl consumer) {
+        if (consumer != null) {
+            consumer.disposeChannelsLw();
+            return true;
+        }
+        return false;
+    }
+
+    InputConsumerImpl getInputConsumer(String name) {
+        return mInputConsumers.get(name);
+    }
+
+    void layoutInputConsumers(int dw, int dh) {
+        for (int i = mInputConsumers.size() - 1; i >= 0; i--) {
+            mInputConsumers.valueAt(i).layout(dw, dh);
+        }
+    }
+
+    WindowManagerPolicy.InputConsumer createInputConsumer(Looper looper, String name,
+            InputEventReceiver.Factory inputEventReceiverFactory) {
+        if (mInputConsumers.containsKey(name)) {
+            throw new IllegalStateException("Existing input consumer found with name: " + name);
+        }
+
+        final EventReceiverInputConsumer consumer = new EventReceiverInputConsumer(mService,
+                this, looper, name, inputEventReceiverFactory);
+        addInputConsumer(name, consumer);
+        return consumer;
+    }
+
+    void createInputConsumer(String name, InputChannel inputChannel) {
+        if (mInputConsumers.containsKey(name)) {
+            throw new IllegalStateException("Existing input consumer found with name: " + name);
+        }
+
+        final InputConsumerImpl consumer = new InputConsumerImpl(mService, name, inputChannel);
+        switch (name) {
+            case INPUT_CONSUMER_WALLPAPER:
+                consumer.mWindowHandle.hasWallpaper = true;
+                break;
+            case INPUT_CONSUMER_PIP:
+                // The touchable region of the Pip input window is cropped to the bounds of the
+                // stack, and we need FLAG_NOT_TOUCH_MODAL to ensure other events fall through
+                consumer.mWindowHandle.layoutParamsFlags |=
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+                break;
+        }
+        addInputConsumer(name, consumer);
     }
 
     /* Notifies the window manager about a broken input channel.

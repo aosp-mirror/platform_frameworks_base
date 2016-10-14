@@ -421,17 +421,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<AppWindowToken> mWindowReplacementTimeouts = new ArrayList<>();
 
     /**
-     * The input consumer added to the window manager which consumes input events to windows below
-     * it.
-     */
-    InputConsumerImpl mInputConsumer;
-
-    /**
-     * The input consumer added to the window manager before all wallpaper windows.
-     */
-    InputConsumerImpl mWallpaperInputConsumer;
-
-    /**
      * Windows that are being resized.  Used so we can tell the client about
      * the resize after closing the transaction in which we resized the
      * underlying surface.
@@ -8453,68 +8442,25 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private static final class HideNavInputConsumer extends InputConsumerImpl
-            implements WindowManagerPolicy.InputConsumer {
-        private final InputEventReceiver mInputEventReceiver;
-
-        HideNavInputConsumer(WindowManagerService service, Looper looper,
-                             InputEventReceiver.Factory inputEventReceiverFactory) {
-            super(service, "input consumer", null);
-            mInputEventReceiver = inputEventReceiverFactory.createInputEventReceiver(
-                    mClientChannel, looper);
-        }
-
-        @Override
-        public void dismiss() {
-            if (mService.removeInputConsumer()) {
-                synchronized (mService.mWindowMap) {
-                    mInputEventReceiver.dispose();
-                    disposeChannelsLw();
-                }
-            }
-        }
-    }
-
     @Override
-    public WindowManagerPolicy.InputConsumer addInputConsumer(Looper looper,
+    public WindowManagerPolicy.InputConsumer createInputConsumer(Looper looper, String name,
             InputEventReceiver.Factory inputEventReceiverFactory) {
         synchronized (mWindowMap) {
-            HideNavInputConsumer inputConsumerImpl = new HideNavInputConsumer(
-                    this, looper, inputEventReceiverFactory);
-            mInputConsumer = inputConsumerImpl;
-            mInputMonitor.updateInputWindowsLw(true);
-            return inputConsumerImpl;
-        }
-    }
-
-    boolean removeInputConsumer() {
-        synchronized (mWindowMap) {
-            if (mInputConsumer != null) {
-                mInputConsumer = null;
-                mInputMonitor.updateInputWindowsLw(true);
-                return true;
-            }
-            return false;
+            return mInputMonitor.createInputConsumer(looper, name, inputEventReceiverFactory);
         }
     }
 
     @Override
-    public void createWallpaperInputConsumer(InputChannel inputChannel) {
+    public void createInputConsumer(String name, InputChannel inputChannel) {
         synchronized (mWindowMap) {
-            mWallpaperInputConsumer = new InputConsumerImpl(this, "wallpaper input", inputChannel);
-            mWallpaperInputConsumer.mWindowHandle.hasWallpaper = true;
-            mInputMonitor.updateInputWindowsLw(true);
+            mInputMonitor.createInputConsumer(name, inputChannel);
         }
     }
 
     @Override
-    public void removeWallpaperInputConsumer() {
+    public boolean destroyInputConsumer(String name) {
         synchronized (mWindowMap) {
-            if (mWallpaperInputConsumer != null) {
-                mWallpaperInputConsumer.disposeChannelsLw();
-                mWallpaperInputConsumer = null;
-                mInputMonitor.updateInputWindowsLw(true);
-            }
+            return mInputMonitor.destroyInputConsumer(name);
         }
     }
 
