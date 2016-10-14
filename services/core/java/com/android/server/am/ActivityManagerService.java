@@ -4793,7 +4793,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             try {
                 r.forceNewConfig = true;
-                r.getStack().ensureActivityConfigurationLocked(r, 0, false);
+                r.ensureActivityConfigurationLocked(0 /* globalChanges */,
+                        false /* preserveWindow */);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -6901,10 +6902,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public final void activityResumed(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         synchronized(this) {
-            ActivityStack stack = ActivityRecord.getStackLocked(token);
-            if (stack != null) {
-                stack.activityResumedLocked(token);
-            }
+            ActivityRecord.activityResumedLocked(token);
         }
         Binder.restoreCallingIdentity(origId);
     }
@@ -6936,7 +6934,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             final ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
-                r.getStack().activityStoppedLocked(r, icicle, persistentState, description);
+                r.activityStoppedLocked(icicle, persistentState, description);
             }
         }
 
@@ -19117,7 +19115,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             if (starting != null) {
-                kept = mainStack.ensureActivityConfigurationLocked(starting, changes, false);
+                kept = starting.ensureActivityConfigurationLocked(changes,
+                        false /* preserveWindow */);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.
                 mStackSupervisor.ensureActivitiesVisibleLocked(starting, changes,

@@ -22,10 +22,7 @@ import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
-import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
-import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -33,14 +30,12 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_APP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CLEANUP;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONTAINERS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKSCREEN;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PAUSE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RELEASE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RESULTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SCREENSHOTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
@@ -51,13 +46,11 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_APP;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONTAINERS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PAUSE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RELEASE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RESULTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SAVED_STATE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SCREENSHOTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STATES;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
@@ -68,7 +61,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILIT
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.LOCK_SCREEN_SHOWN;
-import static com.android.server.am.ActivityManagerService.TAKE_FULLSCREEN_SCREENSHOTS;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.STARTING_WINDOW_REMOVED;
@@ -98,7 +90,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -109,7 +100,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -123,7 +113,6 @@ import android.util.SparseArray;
 import android.view.Display;
 
 import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
@@ -148,13 +137,11 @@ final class ActivityStack extends ConfigurationContainer {
     private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_APP = TAG + POSTFIX_APP;
     private static final String TAG_CLEANUP = TAG + POSTFIX_CLEANUP;
-    private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_CONTAINERS = TAG + POSTFIX_CONTAINERS;
     private static final String TAG_PAUSE = TAG + POSTFIX_PAUSE;
     private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
     private static final String TAG_RESULTS = TAG + POSTFIX_RESULTS;
     private static final String TAG_SAVED_STATE = TAG + POSTFIX_SAVED_STATE;
-    private static final String TAG_SCREENSHOTS = TAG + POSTFIX_SCREENSHOTS;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
     private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
@@ -169,32 +156,28 @@ final class ActivityStack extends ConfigurationContainer {
     // How long we wait until giving up on the last activity to pause.  This
     // is short because it directly impacts the responsiveness of starting the
     // next activity.
-    static final int PAUSE_TIMEOUT = 500;
+    private static final int PAUSE_TIMEOUT = 500;
 
     // How long we wait for the activity to tell us it has stopped before
     // giving up.  This is a good amount of time because we really need this
     // from the application in order to get its saved state.
-    static final int STOP_TIMEOUT = 10 * 1000;
+    private static final int STOP_TIMEOUT = 10 * 1000;
 
     // How long we wait until giving up on an activity telling us it has
     // finished destroying itself.
-    static final int DESTROY_TIMEOUT = 10 * 1000;
+    private static final int DESTROY_TIMEOUT = 10 * 1000;
 
     // How long until we reset a task when the user returns to it.  Currently
     // disabled.
-    static final long ACTIVITY_INACTIVE_RESET_TIME = 0;
-
-    // How long between activity launches that we consider safe to not warn
-    // the user about an unexpected activity being launched on top.
-    static final long START_WARN_TIME = 5 * 1000;
+    private static final long ACTIVITY_INACTIVE_RESET_TIME = 0;
 
     // Set to false to disable the preview that is shown while a new activity
     // is being started.
-    static final boolean SHOW_APP_STARTING_PREVIEW = true;
+    private static final boolean SHOW_APP_STARTING_PREVIEW = true;
 
     // How long to wait for all background Activities to redraw following a call to
     // convertToTranslucent().
-    static final long TRANSLUCENT_CONVERSION_TIMEOUT = 2000;
+    private static final long TRANSLUCENT_CONVERSION_TIMEOUT = 2000;
 
     // How many activities have to be scheduled to stop to force a stop pass.
     private static final int MAX_STOPPING_TO_FORCE = 3;
@@ -232,18 +215,18 @@ final class ActivityStack extends ConfigurationContainer {
     static final int STACK_VISIBLE = 1;
     // Stack is considered visible, but only becuase it has activity that is visible behind other
     // activities and there is a specific combination of stacks.
-    static final int STACK_VISIBLE_ACTIVITY_BEHIND = 2;
+    private static final int STACK_VISIBLE_ACTIVITY_BEHIND = 2;
 
     /* The various modes for the method {@link #removeTask}. */
     // Task is being completely removed from all stacks in the system.
-    static final int REMOVE_TASK_MODE_DESTROYING = 0;
+    private static final int REMOVE_TASK_MODE_DESTROYING = 0;
     // Task is being removed from this stack so we can add it to another stack. In the case we are
     // moving we don't want to perform some operations on the task like removing it from window
     // manager or recents.
     static final int REMOVE_TASK_MODE_MOVING = 1;
     // Similar to {@link #REMOVE_TASK_MODE_MOVING} and the task will be added to the top of its new
     // stack and the new stack will be on top of all stacks.
-    static final int REMOVE_TASK_MODE_MOVING_TO_TOP = 2;
+    private static final int REMOVE_TASK_MODE_MOVING_TO_TOP = 2;
 
     // The height/width divide used when fitting a task within a bounds with method
     // {@link #fitWithinBounds}.
@@ -253,7 +236,7 @@ final class ActivityStack extends ConfigurationContainer {
     private static final int FIT_WITHIN_BOUNDS_DIVIDER = 3;
 
     final ActivityManagerService mService;
-    final WindowManagerService mWindowManager;
+    private final WindowManagerService mWindowManager;
     private final RecentTasks mRecentTasks;
 
     /**
@@ -300,13 +283,6 @@ final class ActivityStack extends ConfigurationContainer {
      */
     ActivityRecord mResumedActivity = null;
 
-    /**
-     * This is the last activity that has been started.  It is only used to
-     * identify when multiple activities are started at once so that the user
-     * can be warned they may not be in the activity they think they are.
-     */
-    ActivityRecord mLastStartedActivity = null;
-
     // The topmost Activity passed to convertToTranslucent(). When non-null it means we are
     // waiting for all Activities in mUndrawnActivitiesBelowTopTranslucent to be removed as they
     // are drawn. When the last member of mUndrawnActivitiesBelowTopTranslucent is removed the
@@ -314,7 +290,7 @@ final class ActivityStack extends ConfigurationContainer {
     // Activity.onTranslucentConversionComplete(false). If a timeout occurs prior to the last
     // background activity being drawn then the same call will be made with a true value.
     ActivityRecord mTranslucentActivityWaiting = null;
-    private ArrayList<ActivityRecord> mUndrawnActivitiesBelowTopTranslucent = new ArrayList<>();
+    ArrayList<ActivityRecord> mUndrawnActivitiesBelowTopTranslucent = new ArrayList<>();
 
     /**
      * Set when we know we are going to be calling updateConfiguration()
@@ -327,11 +303,11 @@ final class ActivityStack extends ConfigurationContainer {
     // Current bounds of the stack or null if fullscreen.
     Rect mBounds = null;
 
-    boolean mUpdateBoundsDeferred;
-    boolean mUpdateBoundsDeferredCalled;
-    final Rect mDeferredBounds = new Rect();
-    final Rect mDeferredTaskBounds = new Rect();
-    final Rect mDeferredTaskInsetBounds = new Rect();
+    private boolean mUpdateBoundsDeferred;
+    private boolean mUpdateBoundsDeferredCalled;
+    private final Rect mDeferredBounds = new Rect();
+    private final Rect mDeferredTaskBounds = new Rect();
+    private final Rect mDeferredTaskInsetBounds = new Rect();
 
     long mLaunchStartTime = 0;
     long mFullyDrawnStartTime = 0;
@@ -351,14 +327,8 @@ final class ActivityStack extends ConfigurationContainer {
     private final SparseArray<Rect> mTmpInsetBounds = new SparseArray<>();
     private final Rect tempRect2 = new Rect();
 
-    /**
-     * Temp configs used in {@link #ensureActivityConfigurationLocked(ActivityRecord, int, boolean)}
-     */
-    private final Configuration mTmpGlobalConfig = new Configuration();
-    private final Configuration mTmpTaskConfig = new Configuration();
-
     /** Run all ActivityStacks through this */
-    final ActivityStackSupervisor mStackSupervisor;
+    private final ActivityStackSupervisor mStackSupervisor;
 
     private final LaunchingTaskPositioner mTaskPositioner;
 
@@ -371,7 +341,7 @@ final class ActivityStack extends ConfigurationContainer {
     static final int RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG =
             ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 7;
 
-    static class ScheduleDestroyArgs {
+    private static class ScheduleDestroyArgs {
         final ProcessRecord mOwner;
         final String mReason;
         ScheduleDestroyArgs(ProcessRecord owner, String reason) {
@@ -382,7 +352,7 @@ final class ActivityStack extends ConfigurationContainer {
 
     final Handler mHandler;
 
-    final class ActivityStackHandler extends Handler {
+    private class ActivityStackHandler extends Handler {
 
         ActivityStackHandler(Looper looper) {
             super(looper);
@@ -427,7 +397,8 @@ final class ActivityStack extends ConfigurationContainer {
                     Slog.w(TAG, "Activity stop timeout for " + r);
                     synchronized (mService) {
                         if (r.isInHistory()) {
-                            activityStoppedLocked(r, null, null, null);
+                            r.activityStoppedLocked(null /* icicle */,
+                                    null /* persistentState */, null /* description */);
                         }
                     }
                 } break;
@@ -512,7 +483,7 @@ final class ActivityStack extends ConfigurationContainer {
         }
     }
 
-    public void getDisplaySize(Point out) {
+    void getDisplaySize(Point out) {
         mActivityContainer.mActivityDisplay.mDisplay.getSize(out);
     }
 
@@ -742,7 +713,7 @@ final class ActivityStack extends ConfigurationContainer {
     /**
      * @param task If non-null, the task will be moved to the back of the stack.
      * */
-    void moveToBack(TaskRecord task) {
+    private void moveToBack(TaskRecord task) {
         if (!isAttached()) {
             return;
         }
@@ -936,7 +907,7 @@ final class ActivityStack extends ConfigurationContainer {
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + r + " (starting new instance)"
                 + " callers=" + Debug.getCallers(5));
         setResumedActivityLocked(r, "minimalResumeActivityLocked");
-        completeResumeLocked(r);
+        r.completeResumeLocked();
         setLaunchTime(r);
         if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE,
                 "Launch completed; removing icicle of " + r.icicle);
@@ -977,7 +948,7 @@ final class ActivityStack extends ConfigurationContainer {
         }
     }
 
-    void clearLaunchTime(ActivityRecord r) {
+    private void clearLaunchTime(ActivityRecord r) {
         // Make sure that there is no activity waiting for this to launch.
         if (mStackSupervisor.mWaitingActivityLaunched.isEmpty()) {
             r.displayStartTime = r.fullyDrawnStartTime = 0;
@@ -1057,50 +1028,6 @@ final class ActivityStack extends ConfigurationContainer {
                 }
             }
         }
-    }
-
-    public final Bitmap screenshotActivitiesLocked(ActivityRecord who) {
-        if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "screenshotActivitiesLocked: " + who);
-        if (who.noDisplay) {
-            if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "\tNo display");
-            return null;
-        }
-
-        if (isHomeStack()) {
-            // This is an optimization -- since we never show Home or Recents within Recents itself,
-            // we can just go ahead and skip taking the screenshot if this is the home stack.
-            if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "\tHome stack");
-            return null;
-        }
-
-        int w = mService.mThumbnailWidth;
-        int h = mService.mThumbnailHeight;
-
-        if (w <= 0) {
-            Slog.e(TAG, "\tInvalid thumbnail dimensions: " + w + "x" + h);
-            return null;
-        }
-
-        if (mStackId == DOCKED_STACK_ID && mStackSupervisor.mIsDockMinimized) {
-            // When the docked stack is minimized its app windows are cropped significantly so any
-            // screenshot taken will not display the apps contain. So, we avoid taking a screenshot
-            // in that case.
-            if (DEBUG_SCREENSHOTS) Slog.e(TAG, "\tIn minimized docked stack");
-            return null;
-        }
-
-        float scale = 1f;
-        if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "\tTaking screenshot");
-
-        // When this flag is set, we currently take the fullscreen screenshot of the activity but
-        // scaled to half the size. This gives us a "good-enough" fullscreen thumbnail to use within
-        // SystemUI while keeping memory usage low.
-        if (TAKE_FULLSCREEN_SCREENSHOTS) {
-            w = h = -1;
-            scale = mService.mFullscreenThumbnailScale;
-        }
-
-        return mWindowManager.screenshotApplications(who.appToken, DEFAULT_DISPLAY, w, h, scale);
     }
 
     /**
@@ -1261,57 +1188,6 @@ final class ActivityStack extends ConfigurationContainer {
         mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
     }
 
-    final void activityResumedLocked(IBinder token) {
-        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        if (DEBUG_SAVED_STATE) Slog.i(TAG_STATES, "Resumed activity; dropping state of: " + r);
-        r.icicle = null;
-        r.haveState = false;
-    }
-
-    final void activityStoppedLocked(ActivityRecord r, Bundle icicle,
-            PersistableBundle persistentState, CharSequence description) {
-        if (r.state != ActivityState.STOPPING) {
-            Slog.i(TAG, "Activity reported stop, but no longer stopping: " + r);
-            mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
-            return;
-        }
-        if (persistentState != null) {
-            r.persistentState = persistentState;
-            mService.notifyTaskPersisterLocked(r.task, false);
-        }
-        if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE, "Saving icicle of " + r + ": " + icicle);
-        if (icicle != null) {
-            // If icicle is null, this is happening due to a timeout, so we
-            // haven't really saved the state.
-            r.icicle = icicle;
-            r.haveState = true;
-            r.launchCount = 0;
-            r.updateThumbnailLocked(null, description);
-        }
-        if (!r.stopped) {
-            if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to STOPPED: " + r + " (stop complete)");
-            mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
-            r.stopped = true;
-            r.state = ActivityState.STOPPED;
-
-            mWindowManager.notifyAppStopped(r.appToken);
-
-            if (getVisibleBehindActivity() == r) {
-                mStackSupervisor.requestVisibleBehindLocked(r, false);
-            }
-            if (r.finishing) {
-                r.clearOptionsLocked();
-            } else {
-                if (r.deferRelaunchUntilPaused) {
-                    destroyActivityLocked(r, true, "stop-config");
-                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
-                } else {
-                    mStackSupervisor.updatePreviousProcessLocked(r);
-                }
-            }
-        }
-    }
-
     private void completePauseLocked(boolean resumeNext, ActivityRecord resuming) {
         ActivityRecord prev = mPausingActivity;
         if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Complete pause: " + prev);
@@ -1332,7 +1208,7 @@ final class ActivityStack extends ConfigurationContainer {
                 if (prev.deferRelaunchUntilPaused) {
                     // Complete the deferred relaunch that was waiting for pause to complete.
                     if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Re-launching after pause: " + prev);
-                    relaunchActivityLocked(prev, prev.configChangeFlags, false,
+                    prev.relaunchActivityLocked(false /* andResume */,
                             prev.preserveWindowOnDeferredRelaunch);
                 } else if (wasStopping) {
                     // We are also stopping, the stop request must have gone soon after the pause.
@@ -1409,7 +1285,7 @@ final class ActivityStack extends ConfigurationContainer {
         mStackSupervisor.ensureActivitiesVisibleLocked(resuming, 0, !PRESERVE_WINDOWS);
     }
 
-    private void addToStopping(ActivityRecord r, boolean immediate) {
+    void addToStopping(ActivityRecord r, boolean immediate) {
         if (!mStackSupervisor.mStoppingActivities.contains(r)) {
             mStackSupervisor.mStoppingActivities.add(r);
         }
@@ -1428,77 +1304,6 @@ final class ActivityStack extends ConfigurationContainer {
         } else {
             mStackSupervisor.checkReadyForSleepLocked();
         }
-    }
-
-    /**
-     * Once we know that we have asked an application to put an activity in
-     * the resumed state (either by launching it or explicitly telling it),
-     * this function updates the rest of our state to match that fact.
-     */
-    private void completeResumeLocked(ActivityRecord next) {
-        boolean wasVisible = next.visible;
-        next.visible = true;
-        if (!wasVisible) {
-            // Visibility has changed, so take a note of it so we call the TaskStackChangedListener
-            mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
-        }
-        next.idle = false;
-        next.results = null;
-        next.newIntents = null;
-        next.stopped = false;
-
-        if (next.isHomeActivity()) {
-            ProcessRecord app = next.task.mActivities.get(0).app;
-            if (app != null && app != mService.mHomeProcess) {
-                mService.mHomeProcess = app;
-            }
-        }
-
-        if (next.nowVisible) {
-            // We won't get a call to reportActivityVisibleLocked() so dismiss lockscreen now.
-            mStackSupervisor.reportActivityVisibleLocked(next);
-            mStackSupervisor.notifyActivityDrawnForKeyguard();
-        }
-
-        // schedule an idle timeout in case the app doesn't do it for us.
-        mStackSupervisor.scheduleIdleTimeoutLocked(next);
-
-        mStackSupervisor.reportResumedActivityLocked(next);
-
-        next.resumeKeyDispatchingLocked();
-        mNoAnimActivities.clear();
-
-        // Mark the point when the activity is resuming
-        // TODO: To be more accurate, the mark should be before the onCreate,
-        //       not after the onResume. But for subsequent starts, onResume is fine.
-        if (next.app != null) {
-            next.cpuTimeAtResume = mService.mProcessCpuTracker.getCpuTimeForPid(next.app.pid);
-        } else {
-            next.cpuTimeAtResume = 0; // Couldn't get the cpu time of process
-        }
-
-        next.returningOptions = null;
-
-        if (getVisibleBehindActivity() == next) {
-            // When resuming an activity, require it to call requestVisibleBehind() again.
-            setVisibleBehindActivity(null);
-        }
-        mStackSupervisor.checkReadyForSleepLocked();
-    }
-
-    private void setVisible(ActivityRecord r, boolean visible) {
-        r.visible = visible;
-        if (!visible && r.mUpdateTaskThumbnailWhenHidden) {
-            r.updateThumbnailLocked(r.task.getStack().screenshotActivitiesLocked(r), null);
-            r.mUpdateTaskThumbnailWhenHidden = false;
-        }
-        mWindowManager.setAppVisibility(r.appToken, visible);
-        final ArrayList<ActivityContainer> containers = r.mChildContainers;
-        for (int containerNdx = containers.size() - 1; containerNdx >= 0; --containerNdx) {
-            ActivityContainer container = containers.get(containerNdx);
-            container.setVisible(visible);
-        }
-        mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
     }
 
     // Find the first visible activity above the passed activity and if it is translucent return it
@@ -1803,7 +1608,8 @@ final class ActivityStack extends ConfigurationContainer {
                     // is finishing, we no longer change its visibility, but we still need to take
                     // the screenshots if startPausingLocked decided it should be taken.
                     if (r.mUpdateTaskThumbnailWhenHidden) {
-                        r.updateThumbnailLocked(screenshotActivitiesLocked(r), null);
+                        r.updateThumbnailLocked(r.screenshotActivityLocked(),
+                                null /* description */);
                         r.mUpdateTaskThumbnailWhenHidden = false;
                     }
                     continue;
@@ -1814,14 +1620,14 @@ final class ActivityStack extends ConfigurationContainer {
                 }
                 aboveTop = false;
 
-                if (shouldBeVisible(r, behindTranslucentActivity, stackVisibleBehind,
+                if (r.shouldBeVisible(behindTranslucentActivity, stackVisibleBehind,
                         visibleBehind, behindFullscreenActivity)) {
                     if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make visible? " + r
                             + " finishing=" + r.finishing + " state=" + r.state);
                     // First: if this is not the current activity being started, make
                     // sure it matches the current configuration.
                     if (r != starting) {
-                        ensureActivityConfigurationLocked(r, 0, preserveWindows);
+                        r.ensureActivityConfigurationLocked(0 /* globalChanges */, preserveWindows);
                     }
 
                     if (r.app == null || r.app.thread == null) {
@@ -1839,11 +1645,11 @@ final class ActivityStack extends ConfigurationContainer {
                         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                                 "Skipping: already visible at " + r);
 
-                        if (handleAlreadyVisible(r)) {
+                        if (r.handleAlreadyVisible()) {
                             resumeNextActivity = false;
                         }
                     } else {
-                        makeVisibleIfNeeded(starting, r);
+                        r.makeVisibleIfNeeded(starting);
                     }
                     // Aggregate current change flags.
                     configChanges |= r.configChangeFlags;
@@ -1924,33 +1730,6 @@ final class ActivityStack extends ConfigurationContainer {
         }
     }
 
-    /** Return true if the input activity should be made visible */
-    private boolean shouldBeVisible(ActivityRecord r, boolean behindTranslucentActivity,
-            boolean stackVisibleBehind, ActivityRecord visibleBehind,
-            boolean behindFullscreenActivity) {
-
-        if (r == null || !r.okToShowLocked()) {
-            return false;
-        }
-
-        // mLaunchingBehind: Activities launching behind are at the back of the task stack
-        // but must be drawn initially for the animation as though they were visible.
-        final boolean activityVisibleBehind =
-                (behindTranslucentActivity || stackVisibleBehind) && visibleBehind == r;
-
-        boolean isVisible =
-                !behindFullscreenActivity || r.mLaunchTaskBehind || activityVisibleBehind;
-
-        if (mService.mSupportsLeanbackOnly && isVisible && r.isRecentsActivity()) {
-            // On devices that support leanback only (Android TV), Recents activity can only be
-            // visible if the home stack is the focused stack or we are in split-screen mode.
-            isVisible = mStackSupervisor.getStack(DOCKED_STACK_ID) != null
-                    || mStackSupervisor.isFocusedStack(this);
-        }
-
-        return isVisible;
-    }
-
     private void checkTranslucentActivityWaiting(ActivityRecord top) {
         if (mTranslucentActivityWaiting != top) {
             mUndrawnActivitiesBelowTopTranslucent.clear();
@@ -1978,7 +1757,7 @@ final class ActivityStack extends ConfigurationContainer {
             }
             if (!r.visible || r.mLaunchTaskBehind) {
                 if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Starting and making visible: " + r);
-                setVisible(r, true);
+                r.setVisible(true);
             }
             if (r != starting) {
                 mStackSupervisor.startSpecificActivityLocked(r, andResume, false);
@@ -1997,7 +1776,7 @@ final class ActivityStack extends ConfigurationContainer {
         // keeping the screen frozen.
         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Making invisible: " + r + " " + r.state);
         try {
-            setVisible(r, false);
+            r.setVisible(false);
             switch (r.state) {
                 case STOPPING:
                 case STOPPED:
@@ -2045,50 +1824,6 @@ final class ActivityStack extends ConfigurationContainer {
             behindFullscreenActivity = true;
         }
         return behindFullscreenActivity;
-    }
-
-    private void makeVisibleIfNeeded(ActivityRecord starting, ActivityRecord r) {
-
-        // This activity is not currently visible, but is running. Tell it to become visible.
-        if (r.state == ActivityState.RESUMED || r == starting) {
-            if (DEBUG_VISIBILITY) Slog.d(TAG_VISIBILITY,
-                    "Not making visible, r=" + r + " state=" + r.state + " starting=" + starting);
-            return;
-        }
-
-        // If this activity is paused, tell it to now show its window.
-        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                "Making visible and scheduling visibility: " + r);
-        try {
-            if (mTranslucentActivityWaiting != null) {
-                r.updateOptionsLocked(r.returningOptions);
-                mUndrawnActivitiesBelowTopTranslucent.add(r);
-            }
-            setVisible(r, true);
-            r.sleeping = false;
-            r.app.pendingUiClean = true;
-            r.app.thread.scheduleWindowVisibility(r.appToken, true);
-            // The activity may be waiting for stop, but that is no longer
-            // appropriate for it.
-            mStackSupervisor.mStoppingActivities.remove(r);
-            mStackSupervisor.mGoingToSleepActivities.remove(r);
-        } catch (Exception e) {
-            // Just skip on any failure; we'll make it
-            // visible when it next restarts.
-            Slog.w(TAG, "Exception thrown making visibile: " + r.intent.getComponent(), e);
-        }
-        handleAlreadyVisible(r);
-    }
-
-    private boolean handleAlreadyVisible(ActivityRecord r) {
-        r.stopFreezingScreenLocked(false);
-        try {
-            if (r.returningOptions != null) {
-                r.app.thread.scheduleOnNewActivityOptions(r.appToken, r.returningOptions);
-            }
-        } catch(RemoteException e) {
-        }
-        return r.state == ActivityState.RESUMED;
     }
 
     void convertActivityToTranslucent(ActivityRecord r) {
@@ -2576,7 +2311,7 @@ final class ActivityStack extends ConfigurationContainer {
                 if (!next.visible || next.stopped) {
                     mWindowManager.setAppVisibility(next.appToken, true);
                 }
-                completeResumeLocked(next);
+                next.completeResumeLocked();
                 if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
                 return true;
             }
@@ -2650,7 +2385,7 @@ final class ActivityStack extends ConfigurationContainer {
             // From this point on, if something goes wrong there is no way
             // to recover the activity.
             try {
-                completeResumeLocked(next);
+                next.completeResumeLocked();
             } catch (Exception e) {
                 // If any exception gets thrown, toss away this
                 // activity and try the next one.
@@ -2925,7 +2660,7 @@ final class ActivityStack extends ConfigurationContainer {
      * @param forceReset
      * @return An ActivityOptions that needs to be processed.
      */
-    final ActivityOptions resetTargetTaskIfNeededLocked(TaskRecord task, boolean forceReset) {
+    private ActivityOptions resetTargetTaskIfNeededLocked(TaskRecord task, boolean forceReset) {
         ActivityOptions topOptions = null;
 
         int replyChainEnd = -1;
@@ -3507,7 +3242,7 @@ final class ActivityStack extends ConfigurationContainer {
         return true;
     }
 
-    final void finishActivityResultsLocked(ActivityRecord r, int resultCode, Intent resultData) {
+    private void finishActivityResultsLocked(ActivityRecord r, int resultCode, Intent resultData) {
         // send the result
         ActivityRecord resultTo = r.resultTo;
         if (resultTo != null) {
@@ -3833,8 +3568,7 @@ final class ActivityStack extends ConfigurationContainer {
      *
      * Note: Call before #removeActivityFromHistoryLocked.
      */
-    final void cleanUpActivityLocked(ActivityRecord r, boolean cleanServices,
-            boolean setState) {
+    private void cleanUpActivityLocked(ActivityRecord r, boolean cleanServices, boolean setState) {
         if (mResumedActivity == r) {
             mResumedActivity = null;
         }
@@ -3924,7 +3658,7 @@ final class ActivityStack extends ConfigurationContainer {
     /**
      * Perform clean-up of service connections in an activity record.
      */
-    final void cleanUpActivityServicesLocked(ActivityRecord r) {
+    private void cleanUpActivityServicesLocked(ActivityRecord r) {
         // Throw away any services that have been bound by this activity.
         if (r.connections != null) {
             Iterator<ConnectionRecord> it = r.connections.iterator();
@@ -3942,7 +3676,7 @@ final class ActivityStack extends ConfigurationContainer {
         mHandler.sendMessage(msg);
     }
 
-    final void destroyActivitiesLocked(ProcessRecord owner, String reason) {
+    private void destroyActivitiesLocked(ProcessRecord owner, String reason) {
         boolean lastIsOpaque = false;
         boolean activityRemoved = false;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
@@ -4219,7 +3953,7 @@ final class ActivityStack extends ConfigurationContainer {
         }
     }
 
-    boolean removeHistoryRecordsForAppLocked(ProcessRecord app) {
+    private boolean removeHistoryRecordsForAppLocked(ProcessRecord app) {
         removeHistoryRecordsForAppLocked(mLRUActivities, app, "mLRUActivities");
         removeHistoryRecordsForAppLocked(mStackSupervisor.mStoppingActivities, app,
                 "mStoppingActivities");
@@ -4310,7 +4044,7 @@ final class ActivityStack extends ConfigurationContainer {
         return hasVisibleActivities;
     }
 
-    final void updateTransitLocked(int transit, ActivityOptions options) {
+    private void updateTransitLocked(int transit, ActivityOptions options) {
         if (options != null) {
             ActivityRecord r = topRunningActivityLocked();
             if (r != null && r.state != ActivityState.RESUMED) {
@@ -4322,7 +4056,7 @@ final class ActivityStack extends ConfigurationContainer {
         mWindowManager.prepareAppTransition(transit, false);
     }
 
-    void updateTaskMovement(TaskRecord task, boolean toFront) {
+    private void updateTaskMovement(TaskRecord task, boolean toFront) {
         if (task.isPersistable) {
             task.mLastTimeMoved = System.currentTimeMillis();
             // Sign is used to keep tasks sorted when persisted. Tasks sent to the bottom most
@@ -4531,8 +4265,7 @@ final class ActivityStack extends ConfigurationContainer {
         return true;
     }
 
-    static final void logStartActivity(int tag, ActivityRecord r,
-            TaskRecord task) {
+    static void logStartActivity(int tag, ActivityRecord r, TaskRecord task) {
         final Uri data = r.intent.getData();
         final String strData = data != null ? data.toSafeString() : null;
 
@@ -4561,7 +4294,8 @@ final class ActivityStack extends ConfigurationContainer {
                     (start.task == task) ? activities.indexOf(start) : activities.size() - 1;
             for (; activityIndex >= 0; --activityIndex) {
                 final ActivityRecord r = activities.get(activityIndex);
-                updatedConfig |= ensureActivityConfigurationLocked(r, 0, preserveWindow);
+                updatedConfig |= r.ensureActivityConfigurationLocked(0 /* globalChanges */,
+                        preserveWindow);
                 if (r.fullscreen) {
                     behindFullscreen = true;
                     break;
@@ -4656,246 +4390,6 @@ final class ActivityStack extends ConfigurationContainer {
             bounds.top += verticalDiff;
             bounds.bottom += verticalDiff;
         }
-    }
-
-    /**
-     * Make sure the given activity matches the current configuration. Returns false if the activity
-     * had to be destroyed.  Returns true if the configuration is the same, or the activity will
-     * remain running as-is for whatever reason. Ensures the HistoryRecord is updated with the
-     * correct configuration and all other bookkeeping is handled.
-     */
-    boolean ensureActivityConfigurationLocked(
-            ActivityRecord r, int globalChanges, boolean preserveWindow) {
-        if (mConfigWillChange) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Skipping config check (will change): " + r);
-            return true;
-        }
-
-        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                "Ensuring correct configuration: " + r);
-
-        // Short circuit: if the two configurations are equal (the common case), then there is
-        // nothing to do.
-        final Configuration newGlobalConfig = mService.getGlobalConfiguration();
-        final Configuration newTaskMergedOverrideConfig = r.task.getMergedOverrideConfiguration();
-        if (r.mLastReportedConfiguration.equals(newGlobalConfig)
-                && r.mLastReportedOverrideConfiguration.equals(newTaskMergedOverrideConfig)
-                && !r.forceNewConfig) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Configuration unchanged in " + r);
-            return true;
-        }
-
-        // We don't worry about activities that are finishing.
-        if (r.finishing) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Configuration doesn't matter in finishing " + r);
-            r.stopFreezingScreenLocked(false);
-            return true;
-        }
-
-        // Okay we now are going to make this activity have the new config.
-        // But then we need to figure out how it needs to deal with that.
-        mTmpGlobalConfig.setTo(r.mLastReportedConfiguration);
-        mTmpTaskConfig.setTo(r.mLastReportedOverrideConfiguration);
-        r.mLastReportedConfiguration.setTo(newGlobalConfig);
-        r.mLastReportedOverrideConfiguration.setTo(newTaskMergedOverrideConfig);
-
-        int taskChanges = getTaskConfigurationChanges(r, newTaskMergedOverrideConfig,
-                mTmpTaskConfig);
-        final int changes = mTmpGlobalConfig.diff(newGlobalConfig) | taskChanges;
-        if (changes == 0 && !r.forceNewConfig) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Configuration no differences in " + r);
-            // There are no significant differences, so we won't relaunch but should still deliver
-            // the new configuration to the client process.
-            r.scheduleConfigurationChanged(newTaskMergedOverrideConfig, true);
-            return true;
-        }
-
-        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                "Configuration changes for " + r + " ; taskChanges="
-                        + Configuration.configurationDiffToString(taskChanges) + ", allChanges="
-                        + Configuration.configurationDiffToString(changes));
-
-        // If the activity isn't currently running, just leave the new
-        // configuration and it will pick that up next time it starts.
-        if (r.app == null || r.app.thread == null) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Configuration doesn't matter not running " + r);
-            r.stopFreezingScreenLocked(false);
-            r.forceNewConfig = false;
-            return true;
-        }
-
-        // Figure out how to handle the changes between the configurations.
-        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                "Checking to restart " + r.info.name + ": changed=0x"
-                + Integer.toHexString(changes) + ", handles=0x"
-                + Integer.toHexString(r.info.getRealConfigChanged())
-                + ", newGlobalConfig=" + newGlobalConfig
-                + ", newTaskMergedOverrideConfig=" + newTaskMergedOverrideConfig);
-
-        if ((changes&(~r.info.getRealConfigChanged())) != 0 || r.forceNewConfig) {
-            // Aha, the activity isn't handling the change, so DIE DIE DIE.
-            r.configChangeFlags |= changes;
-            r.startFreezingScreenLocked(r.app, globalChanges);
-            r.forceNewConfig = false;
-            preserveWindow &= isResizeOnlyChange(changes);
-            if (r.app == null || r.app.thread == null) {
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                        "Config is destroying non-running " + r);
-                destroyActivityLocked(r, true, "config");
-            } else if (r.state == ActivityState.PAUSING) {
-                // A little annoying: we are waiting for this activity to finish pausing. Let's not
-                // do anything now, but just flag that it needs to be restarted when done pausing.
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                        "Config is skipping already pausing " + r);
-                r.deferRelaunchUntilPaused = true;
-                r.preserveWindowOnDeferredRelaunch = preserveWindow;
-                return true;
-            } else if (r.state == ActivityState.RESUMED) {
-                // Try to optimize this case: the configuration is changing and we need to restart
-                // the top, resumed activity. Instead of doing the normal handshaking, just say
-                // "restart!".
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                        "Config is relaunching resumed " + r);
-
-                if (DEBUG_STATES && !r.visible) {
-                    Slog.v(TAG_STATES, "Config is relaunching resumed invisible activity " + r
-                            + " called by " + Debug.getCallers(4));
-                }
-
-                relaunchActivityLocked(r, r.configChangeFlags, true, preserveWindow);
-            } else {
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                        "Config is relaunching non-resumed " + r);
-                relaunchActivityLocked(r, r.configChangeFlags, false, preserveWindow);
-            }
-
-            // All done...  tell the caller we weren't able to keep this activity around.
-            return false;
-        }
-
-        // Default case: the activity can handle this new configuration, so hand it over.
-        // NOTE: We only forward the task override configuration as the system level configuration
-        // changes is always sent to all processes when they happen so it can just use whatever
-        // system level configuration it last got.
-        r.scheduleConfigurationChanged(newTaskMergedOverrideConfig, true);
-        r.stopFreezingScreenLocked(false);
-
-        return true;
-    }
-
-    private int getTaskConfigurationChanges(ActivityRecord record, Configuration taskConfig,
-            Configuration oldTaskOverride) {
-
-        // If we went from full-screen to non-full-screen, make sure to use the correct
-        // configuration task diff, so the diff stays as small as possible.
-        if (Configuration.EMPTY.equals(oldTaskOverride)
-                && !Configuration.EMPTY.equals(taskConfig)) {
-            oldTaskOverride = record.task.extractOverrideConfig(record.mLastReportedConfiguration);
-        }
-
-        // Conversely, do the same when going the other direction.
-        if (Configuration.EMPTY.equals(taskConfig)
-                && !Configuration.EMPTY.equals(oldTaskOverride)) {
-            taskConfig = record.task.extractOverrideConfig(record.mLastReportedConfiguration);
-        }
-
-        // Determine what has changed.  May be nothing, if this is a config
-        // that has come back from the app after going idle.  In that case
-        // we just want to leave the official config object now in the
-        // activity and do nothing else.
-        int taskChanges = oldTaskOverride.diff(taskConfig, true /* skipUndefined */);
-        // We don't want to use size changes if they don't cross boundaries that are important to
-        // the app.
-        if ((taskChanges & CONFIG_SCREEN_SIZE) != 0) {
-            final boolean crosses = record.crossesHorizontalSizeThreshold(
-                    oldTaskOverride.screenWidthDp, taskConfig.screenWidthDp)
-                    || record.crossesVerticalSizeThreshold(
-                    oldTaskOverride.screenHeightDp, taskConfig.screenHeightDp);
-            if (!crosses) {
-                taskChanges &= ~CONFIG_SCREEN_SIZE;
-            }
-        }
-        if ((taskChanges & CONFIG_SMALLEST_SCREEN_SIZE) != 0) {
-            final int oldSmallest = oldTaskOverride.smallestScreenWidthDp;
-            final int newSmallest = taskConfig.smallestScreenWidthDp;
-            if (!record.crossesSmallestSizeThreshold(oldSmallest, newSmallest)) {
-                taskChanges &= ~CONFIG_SMALLEST_SCREEN_SIZE;
-            }
-        }
-        return taskChanges;
-    }
-
-    private static boolean isResizeOnlyChange(int change) {
-        return (change & ~(CONFIG_SCREEN_SIZE | CONFIG_SMALLEST_SCREEN_SIZE | CONFIG_ORIENTATION
-                | CONFIG_SCREEN_LAYOUT)) == 0;
-    }
-
-    private void relaunchActivityLocked(
-            ActivityRecord r, int changes, boolean andResume, boolean preserveWindow) {
-        if (mService.mSuppressResizeConfigChanges && preserveWindow) {
-            r.configChangeFlags = 0;
-            return;
-        }
-
-        List<ResultInfo> results = null;
-        List<ReferrerIntent> newIntents = null;
-        if (andResume) {
-            results = r.results;
-            newIntents = r.newIntents;
-        }
-        if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
-                "Relaunching: " + r + " with results=" + results + " newIntents=" + newIntents
-                + " andResume=" + andResume + " preserveWindow=" + preserveWindow);
-        EventLog.writeEvent(andResume ? EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY
-                : EventLogTags.AM_RELAUNCH_ACTIVITY, r.userId, System.identityHashCode(r),
-                r.task.taskId, r.shortComponentName);
-
-        r.startFreezingScreenLocked(r.app, 0);
-
-        mStackSupervisor.removeChildActivityContainers(r);
-
-        try {
-            if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_SWITCH,
-                    "Moving to " + (andResume ? "RESUMED" : "PAUSED") + " Relaunching " + r
-                    + " callers=" + Debug.getCallers(6));
-            r.forceNewConfig = false;
-            mStackSupervisor.activityRelaunchingLocked(r);
-            r.app.thread.scheduleRelaunchActivity(r.appToken, results, newIntents, changes,
-                    !andResume, new Configuration(mService.getGlobalConfiguration()),
-                    new Configuration(r.task.getMergedOverrideConfiguration()), preserveWindow);
-            // Note: don't need to call pauseIfSleepingLocked() here, because
-            // the caller will only pass in 'andResume' if this activity is
-            // currently resumed, which implies we aren't sleeping.
-        } catch (RemoteException e) {
-            if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_SWITCH, "Relaunch failed", e);
-        }
-
-        if (andResume) {
-            if (DEBUG_STATES) {
-                Slog.d(TAG_STATES, "Resumed after relaunch " + r);
-            }
-            r.results = null;
-            r.newIntents = null;
-            mService.showUnsupportedZoomDialogIfNeededLocked(r);
-            mService.showAskCompatModeDialogLocked(r);
-        } else {
-            mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
-            r.state = ActivityState.PAUSED;
-            // if the app is relaunched when it's stopped, and we're not resuming,
-            // put it back into stopped state.
-            if (r.stopped) {
-                addToStopping(r, true /* immediate */);
-            }
-        }
-
-        r.configChangeFlags = 0;
-        r.deferRelaunchUntilPaused = false;
-        r.preserveWindowOnDeferredRelaunch = false;
     }
 
     boolean willActivityBeVisibleLocked(IBinder token) {
@@ -5051,7 +4545,7 @@ final class ActivityStack extends ConfigurationContainer {
         }
     }
 
-    public void unhandledBackLocked() {
+    void unhandledBackLocked() {
         final int top = mTaskHistory.size() - 1;
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH, "Performing unhandledBack(): top activity at " + top);
         if (top >= 0) {
@@ -5341,7 +4835,7 @@ final class ActivityStack extends ConfigurationContainer {
                 task.getOverrideConfiguration(), task.mResizeMode, r.isAlwaysFocusable(),
                 task.isHomeTask(), r.appInfo.targetSdkVersion, r.mRotationAnimationHint,
                 task.isOnTopLauncher());
-        r.mLastReportedOverrideConfiguration.setTo(task.getMergedOverrideConfiguration());
+        r.onOverrideConfigurationSent();
     }
 
     void moveToFrontAndResumeStateIfNeeded(
@@ -5395,7 +4889,7 @@ final class ActivityStack extends ConfigurationContainer {
         mWindowManager.setAppTask(r.appToken, task.taskId, mStackId, bounds,
                 task.getOverrideConfiguration(), task.mResizeMode, task.isHomeTask(),
                 task.isOnTopLauncher());
-        r.mLastReportedOverrideConfiguration.setTo(task.getMergedOverrideConfiguration());
+        r.onOverrideConfigurationSent();
     }
 
     public int getStackId() {

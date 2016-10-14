@@ -974,11 +974,11 @@ final class TaskRecord extends ConfigurationContainer {
         return null;
     }
 
-    public TaskThumbnail getTaskThumbnailLocked() {
+    TaskThumbnail getTaskThumbnailLocked() {
         if (mStack != null) {
             final ActivityRecord resumedActivity = mStack.mResumedActivity;
             if (resumedActivity != null && resumedActivity.task == this) {
-                final Bitmap thumbnail = mStack.screenshotActivitiesLocked(resumedActivity);
+                final Bitmap thumbnail = resumedActivity.screenshotActivityLocked();
                 setLastThumbnailLocked(thumbnail);
             }
         }
@@ -987,7 +987,7 @@ final class TaskRecord extends ConfigurationContainer {
         return taskThumbnail;
     }
 
-    public void removeTaskActivitiesLocked() {
+    void removeTaskActivitiesLocked() {
         // Just remove the entire task.
         performClearTaskAtIndexLocked(0);
     }
