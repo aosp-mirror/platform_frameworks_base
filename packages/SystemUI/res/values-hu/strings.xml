@@ -651,4 +651,6 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"A(z) <xliff:g id="ID_1">%s</xliff:g> beállításainak megnyitása."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Beállítások sorrendjének szerkesztése."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>. oldal, összesen: <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <!-- no translation found for cant_silence_or_block (999689262131488625) -->
+    <skip />
 </resources>
