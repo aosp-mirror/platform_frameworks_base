@@ -59,7 +59,8 @@ public final class ResourcesKey {
         mOverlayDirs = overlayDirs;
         mLibDirs = libDirs;
         mDisplayId = displayId;
-        mOverrideConfiguration = overrideConfig != null ? overrideConfig : Configuration.EMPTY;
+        mOverrideConfiguration = new Configuration(overrideConfig != null
+                ? overrideConfig : Configuration.EMPTY);
         mCompatInfo = compatInfo != null ? compatInfo : CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
 
         int hash = 17;

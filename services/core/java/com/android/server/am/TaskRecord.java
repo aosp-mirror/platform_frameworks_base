@@ -1558,8 +1558,8 @@ final class TaskRecord extends ConfigurationContainer {
     }
 
     /** Clears passed config and fills it with new override values. */
-    private Configuration calculateOverrideConfig(Configuration config, Rect bounds,
-            Rect insetBounds, boolean overrideWidth, boolean overrideHeight) {
+    private void calculateOverrideConfig(Configuration config, Rect bounds, Rect insetBounds,
+            boolean overrideWidth, boolean overrideHeight) {
         mTmpNonDecorBounds.set(bounds);
         mTmpStableBounds.set(bounds);
         subtractNonDecorInsets(
@@ -1599,7 +1599,6 @@ final class TaskRecord extends ConfigurationContainer {
 
         config.smallestScreenWidthDp = mService.mWindowManager.getSmallestWidthForTaskBounds(
                 insetBounds != null ? insetBounds : bounds);
-        return config;
     }
 
     /**
