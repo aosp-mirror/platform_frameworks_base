@@ -321,7 +321,6 @@ class AutomaticBrightnessController {
                 mLightSensorEnabled = false;
                 mRecentLightSamples = 0;
                 mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
-                Slog.d(TAG, "disabling light sensor");
                 mSensorManager.unregisterListener(mLightSensorListener);
             }
         }
@@ -349,7 +348,6 @@ class AutomaticBrightnessController {
         }
         mAmbientLightRingBuffer.prune(time - mAmbientLightHorizon);
         mAmbientLightRingBuffer.push(time, lux);
-        Slog.d(TAG, "pushing lux: " + lux);
 
         // Remember this sample value.
         mLastObservedLux = lux;
