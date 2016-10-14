@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Клипийн зах, хязгаар зэргийг харуулах"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL байрлалын чиглэлийг хүчээр тогтоох"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Бүх локалын хувьд дэлгэцийн байрлалын чиглэлийг хүчээр RTL болгох"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU ашиглалтыг харуулах"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Дэлгэцийн давхцалаар одоогийн CPU ашиглалтыг харуулж байна"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Хүчээр GPU ашиглах"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"GPU-г 2d зурагт хүчээр ашиглах"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Хүчээр 4x MSAA ашиглах"</string>

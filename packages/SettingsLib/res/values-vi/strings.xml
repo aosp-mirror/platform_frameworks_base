@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Hiển thị viền đoạn video, lề, v.v.."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Buộc hướng bố cục RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Buộc hướng bố cục màn hình RTL cho tất cả ngôn ngữ"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Hiển thị mức sử dụng CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Lớp phủ màn hình hiển thị mức sử dụng CPU hiện tại"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Bắt buộc kết xuất GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Bắt buộc sử dụng GPU cho bản vẽ 2d"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Bắt buộc 4x MSAA"</string>

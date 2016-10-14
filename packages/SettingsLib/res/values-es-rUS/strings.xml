@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Mostrar límites de recortes, márgenes, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forzar diseño der. a izq."</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forzar diseño pantalla der.&gt;izq., cualquier idioma"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Mostrar el uso de CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Mostrar superposición en pantalla con uso actual de la CPU"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Forzar representación GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Forzar uso de GPU para dibujar en 2d"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Forzar MSAA 4x"</string>

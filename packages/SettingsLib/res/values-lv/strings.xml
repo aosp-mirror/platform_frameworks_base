@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Rādīt klipu robežas, malas utt."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Virziens no labās uz kreiso (Obligāts) WL: 295"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Obl. izkārt. virz. no labās uz kr. pusi visām lok."</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Rādīt CPU lietojumu"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Ekrāna pārklājums ar aktuālo CPU lietojumu"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Piespiedu GPU render."</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Izmantot GPU atveidi divdimensiju zīmējumiem"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA piespiedu palaiš."</string>

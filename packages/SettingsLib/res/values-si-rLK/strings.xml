@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"ක්ලිප් සීමා, මායිම්, ආදිය පෙන්වන්න."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"බල RTL පිරිසැලසුම් දිශාව"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"සියලු පෙදෙසි සඳහා RTL වෙත බල තිර පිරිසැලසුම"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU භාවිතය පෙන්වන්න"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"තීර උඩැතිරිය වත්මන් CPU භාවිතය පෙන්නුම් කරයි"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU විදහාපෑම බලකරන්න"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d ඇඳීම් සඳහා GPU බලයෙන් භාවිතා කරන්න"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA බල කරන්න"</string>

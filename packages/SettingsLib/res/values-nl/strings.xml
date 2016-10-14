@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Clipgrenzen, marges en meer weergeven"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"V.r.n.l.-indelingsrichting afdwingen"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Schermindelingsrichting geforceerd instellen op v.r.n.l. voor alle talen"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU-gebruik weergeven"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Schermoverlay met huidig CPU-gebruik"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU-rendering afdwingen"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Gebruik van GPU voor 2D-tekening forceren"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA forceren"</string>
