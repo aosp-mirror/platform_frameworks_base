@@ -915,7 +915,11 @@ public final class TvInputManagerService extends SystemService {
         public void updateTvInputInfo(TvInputInfo inputInfo, int userId) {
             String inputInfoPackageName = inputInfo.getServiceInfo().packageName;
             String callingPackageName = getCallingPackageName();
-            if (!TextUtils.equals(inputInfoPackageName, callingPackageName)) {
+            if (!TextUtils.equals(inputInfoPackageName, callingPackageName)
+                    && mContext.checkCallingPermission(
+                            android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                                    != PackageManager.PERMISSION_GRANTED) {
+                // Only the app owning the input and system settings are allowed to update info.
                 throw new IllegalArgumentException("calling package " + callingPackageName
                         + " is not allowed to change TvInputInfo for " + inputInfoPackageName);
             }
