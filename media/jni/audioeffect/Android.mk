@@ -13,9 +13,6 @@ LOCAL_SHARED_LIBRARIES := \
     libnativehelper \
     libmedia
 
-LOCAL_C_INCLUDES := \
-    $(call include-path-for, audio-effects)
-
 LOCAL_MODULE:= libaudioeffect_jni
 
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
