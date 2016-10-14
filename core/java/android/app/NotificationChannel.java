@@ -134,11 +134,11 @@ public final class NotificationChannel implements Parcelable {
         this.mLockscreenVisibility = lockscreenVisibility;
     }
 
-    // Modifiable by apps.
+    // Modifiable by apps on channel creation.
 
     /**
      * Sets the ringtone that should be played for notifications posted to this channel if
-     * the notifications don't supply a ringtone.
+     * the notifications don't supply a ringtone. Only modifiable on channel creation.
      */
     public void setDefaultRingtone(Uri defaultRingtone) {
         this.mRingtone = defaultRingtone;
@@ -146,7 +146,7 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Sets whether notifications posted to this channel should display notification lights,
-     * on devices that support that feature.
+     * on devices that support that feature. Only modifiable on channel creation.
      */
     public void setLights(boolean lights) {
         this.mLights = lights;
@@ -154,7 +154,7 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Sets whether notification posted to this channel should vibrate, even if individual
-     * notifications are marked as having vibration.
+     * notifications are marked as having vibration only modifiable on channel creation.
      */
     public void setVibration(boolean vibration) {
         this.mVibration = vibration;

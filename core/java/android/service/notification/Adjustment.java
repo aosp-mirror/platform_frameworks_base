@@ -36,9 +36,6 @@ public final class Adjustment implements Parcelable {
     private final Bundle mSignals;
     private final int mUser;
 
-    public static final String GROUP_KEY_OVERRIDE_KEY = "group_key_override";
-    public static final String NEEDS_AUTOGROUPING_KEY = "autogroup_needed";
-
     /**
      * Create a notification adjustment.
      *
