@@ -2578,6 +2578,21 @@ message MetricsEvent {
     // OPEN Settings > Bluetooth > Attempt to connect to device that shows dialog
     BLUETOOTH_DIALOG_FRAGMENT = 613;
 
+    // ACTION: Logs provisioning started by zero touch.
+    PROVISIONING_ENTRY_POINT_ZERO_TOUCH = 614;
+
+    // ACTION: Logs provisioning started by NFC bump.
+    PROVISIONING_ENTRY_POINT_NFC = 615;
+
+    // ACTION: Logs provisioning started using QR code.
+    PROVISIONING_ENTRY_POINT_QR_CODE = 616;
+
+    // ACTION: Logs provisioning started using adb.
+    PROVISIONING_ENTRY_POINT_ADB = 617;
+
+    // ACTION: Logs provisioning started by trusted source.
+    PROVISIONING_ENTRY_POINT_TRUSTED_SOURCE = 618;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
