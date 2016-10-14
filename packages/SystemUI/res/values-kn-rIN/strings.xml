@@ -84,7 +84,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"ಮುಖಪುಟ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"ಮೆನು"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"ಸಮಗ್ರ ನೋಟ"</string>
-    <string name="accessibility_search_light" msgid="1103867596330271848">"ಹುಡುಕು"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"ಹುಡುಕಿ"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ಕ್ಯಾಮರಾ"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ಫೋನ್"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"ಧ್ವನಿ ಸಹಾಯಕ"</string>
@@ -651,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಕ್ರಮವನ್ನು ಎಡಿಟ್ ಮಾಡಿ."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="ID_1">%1$d</xliff:g> ಪುಟ"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"ಸೂಚನೆಗಳನ್ನು ಮೌನವಾಗಿಸಲಾಗುವುದಿಲ್ಲ ಅಥವಾ ತಡೆಹಿಡಿಯಲಾಗುವುದಿಲ್ಲ"</string>
 </resources>
