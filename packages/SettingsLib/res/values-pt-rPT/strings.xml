@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Apresentar limites de clipes, margens, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forçar dir. do esq. RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forçar dir. do esq. do ecrã p. RTL tds os locais"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Mostrar utilização da CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Sobrep. de ecrã que mostra a utiliz. atual da CPU"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Forçar composição GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Forçar a utilização de GPU para desenho 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Forçar 4x MSAA"</string>

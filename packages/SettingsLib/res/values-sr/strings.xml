@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Прикажи границе клипа, маргине итд."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Наметни смер распореда здесна налево"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Наметни смер распореда екрана здесна налево за све локалитете"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Прик. употребу процесора"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Постав. елемент са тренутном употребом процесора"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Принудни приказ пом. GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Принудно користи GPU за 2D цртање"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Наметни 4x MSAA"</string>
@@ -283,7 +281,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Покрећите WebView приказиваче засебно"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Примена WebView-а"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Подесите примену WebView-а"</string>
-    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Овај избор више није важећи. Покушајте поново."</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Овај избор више није важећи. Пробајте поново."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Конвертуј у шифровање датотека"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Конвертуј..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Већ се користи шифровање датотека"</string>

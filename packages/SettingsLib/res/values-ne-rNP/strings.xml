@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"क्लिप सीमा, मार्जिन, इत्यादि देखाउनुहोस्।"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL लेआउट दिशामा जबर्जस्ती गर्नुहोस्"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"सबै लोकेलहरूको लागि RTLमा स्क्रिन लेआउट दिशामा जबर्जस्ती गर्नुहोस्"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU उपयोग देखाउनुहोस्"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"स्क्रिन ओभरले वर्तमान CPU प्रयोग देखाउँदै"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU रेन्डर गर्न जोड गर्नुहोस्"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d चित्र कोर्नका लागि GPU को प्रयोगलाई जोड दिनुहोस्"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA जोड गर्नुहोस्"</string>

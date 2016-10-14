@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Sýna skurðlínur, spássíur o.s.frv."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Þvinga umbrot frá hægri til vinstri"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Þvinga umbrot skjás frá hægri til vinstri fyrir alla tungumálskóða"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Sýna örgjörvanotkun"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Skjáyfirlögn sem sýnir núverandi örgjörvanotkun"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Þvinga skjákortsteiknun"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Þvinga notkun skjákorts fyrir tvívíða teikningu"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Þvinga 4x MSAA"</string>

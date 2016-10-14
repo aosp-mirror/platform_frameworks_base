@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"ક્લિપ બાઉન્ડ્સ, હાંસિયાં વગેરે બતાવો."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL લેઆઉટ દિશા નિર્દેશની ફરજ પાડો"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"તમામ લૉકેલ્સ માટે સ્ક્રીન લેઆઉટ દિશા નિર્દેશને RTL ની ફરજ પાડો"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU સંગ્રહ બતાવો"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"વર્તમાન CPU વપરાશ દર્શાવતું સ્ક્રીન ઓવરલે"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU રેન્ડરિંગની ફરજ પાડો"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2જા રેખાંકન માટે GPU ના ઉપયોગની ફરજ પાડો"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA ને ફરજ પાડો"</string>

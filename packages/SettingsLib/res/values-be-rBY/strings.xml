@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Паказаць межы кліпу, палі і г. д."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Прымусовая раскладка справа налева"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Прымусовая раскладка экрана справа налева для ўсіх рэгіянальных налад"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Паказаць выкарыстанне ЦП"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Наклад на экран з бягучым выкарыстаннем працэсара"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Прымусовае адлюстраванне GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Прымусовае выкарыстанне GPU для 2-мерных чарцяжоў"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Прымусовае выкананне 4x MSAA"</string>
