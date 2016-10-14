@@ -78,6 +78,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -226,11 +227,35 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         } else {
             WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
             attrs.setTitle("GlobalActions");
+
+            boolean isPrimary = UserHandle.getCallingUserId() == UserHandle.USER_OWNER;
+            int powermenuAnimations = isPrimary ? getPowermenuAnimations() : 0;
+
+            switch (powermenuAnimations) {
+               case 0:
+                  attrs.windowAnimations = R.style.GlobalActionsAnimationEnter;
+                  attrs.gravity = Gravity.CENTER|Gravity.CENTER_HORIZONTAL;
+               break;
+               case 1:
+                  attrs.windowAnimations = R.style.GlobalActionsAnimation;
+                  attrs.gravity = Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL;
+               break;
+               case 2:
+                  attrs.windowAnimations = R.style.GlobalActionsAnimationTop;
+                  attrs.gravity = Gravity.TOP|Gravity.CENTER_HORIZONTAL;
+               break;
+            }
+
             mDialog.getWindow().setAttributes(attrs);
             mDialog.getWindow().setDimAmount(setPowerRebootDialogDim());
             mDialog.show();
             mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
         }
+    }
+
+    private int getPowermenuAnimations() {
+        return Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.POWER_MENU_ANIMATIONS, 0);
     }
 
     private float setPowerRebootDialogDim() {
