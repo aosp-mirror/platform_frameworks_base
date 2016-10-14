@@ -81,8 +81,12 @@
     <!-- Height of a heads up notification in the status bar -->
     <dimen name="notification_max_heads_up_height">148dp</dimen>
 
-    <!-- Height of a the summary ("more card") notification on keyguard. -->
-    <dimen name="notification_summary_height">44dp</dimen>
+    <!-- Height of a the shelf with the notification icons -->
+    <dimen name="notification_shelf_height">32dp</dimen>
+
+    <!-- The padding of a notification icon on top to the start of the notification. Used for custom
+         views where the distance can't be measured -->
+    <dimen name="notification_icon_appear_padding">15dp</dimen>
 
     <!-- Minimum layouted height of a notification in the statusbar-->
     <dimen name="min_notification_layout_height">48dp</dimen>
@@ -94,7 +98,7 @@
     <dimen name="notification_gear_padding">20dp</dimen>
 
     <!-- size at which Notification icons will be drawn in the status bar -->
-    <dimen name="status_bar_icon_drawing_size">17dip</dimen>
+    <dimen name="status_bar_icon_drawing_size">17dp</dimen>
 
     <!-- opacity at which Notification icons will be drawn in the status bar -->
     <item type="dimen" name="status_bar_icon_drawing_alpha">90%</item>

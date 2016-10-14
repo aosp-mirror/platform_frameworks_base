@@ -28,25 +28,34 @@ import com.android.systemui.statusbar.ExpandableView;
 public class ViewState {
 
     public float alpha;
+    public float xTranslation;
     public float yTranslation;
     public float zTranslation;
     public boolean gone;
     public boolean hidden;
+    public float scaleX = 1.0f;
+    public float scaleY = 1.0f;
 
     public void copyFrom(ViewState viewState) {
         alpha = viewState.alpha;
+        xTranslation = viewState.xTranslation;
         yTranslation = viewState.yTranslation;
         zTranslation = viewState.zTranslation;
         gone = viewState.gone;
         hidden = viewState.hidden;
+        scaleX = viewState.scaleX;
+        scaleY = viewState.scaleY;
     }
 
     public void initFrom(View view) {
         alpha = view.getAlpha();
+        xTranslation = view.getTranslationX();
         yTranslation = view.getTranslationY();
         zTranslation = view.getTranslationZ();
         gone = view.getVisibility() == View.GONE;
         hidden = false;
+        scaleX = view.getScaleX();
+        scaleY = view.getScaleY();
     }
 
     /**
@@ -57,17 +66,10 @@ public class ViewState {
             // don't do anything with it
             return;
         }
-        float alpha = view.getAlpha();
-        float yTranslation = view.getTranslationY();
-        float xTranslation = view.getTranslationX();
-        float zTranslation = view.getTranslationZ();
-        float newAlpha = this.alpha;
-        float newYTranslation = this.yTranslation;
-        float newZTranslation = this.zTranslation;
-        boolean becomesInvisible = newAlpha == 0.0f || this.hidden;
-        if (alpha != newAlpha && xTranslation == 0) {
+        boolean becomesInvisible = this.alpha == 0.0f || this.hidden;
+        if (view.getAlpha() != this.alpha) {
             // apply layer type
-            boolean becomesFullyVisible = newAlpha == 1.0f;
+            boolean becomesFullyVisible = this.alpha == 1.0f;
             boolean newLayerTypeIsHardware = !becomesInvisible && !becomesFullyVisible
                     && view.hasOverlappingRendering();
             int layerType = view.getLayerType();
@@ -79,7 +81,7 @@ public class ViewState {
             }
 
             // apply alpha
-            view.setAlpha(newAlpha);
+            view.setAlpha(this.alpha);
         }
 
         // apply visibility
@@ -92,14 +94,29 @@ public class ViewState {
             }
         }
 
+        // apply xTranslation
+        if (view.getTranslationX() != this.xTranslation) {
+            view.setTranslationX(this.xTranslation);
+        }
+
         // apply yTranslation
-        if (yTranslation != newYTranslation) {
-            view.setTranslationY(newYTranslation);
+        if (view.getTranslationY() != this.yTranslation) {
+            view.setTranslationY(this.yTranslation);
         }
 
         // apply zTranslation
-        if (zTranslation != newZTranslation) {
-            view.setTranslationZ(newZTranslation);
+        if (view.getTranslationZ() != this.zTranslation) {
+            view.setTranslationZ(this.zTranslation);
+        }
+
+        // apply scaleX
+        if (view.getScaleX() != this.scaleX) {
+            view.setScaleX(this.scaleX);
+        }
+
+        // apply scaleY
+        if (view.getScaleY() != this.scaleY) {
+            view.setScaleY(this.scaleY);
         }
     }
 }

@@ -247,8 +247,8 @@ public class StackStateAnimator {
         // start dimmed animation
         child.setDimmed(viewState.dimmed, mAnimationFilter.animateDimmed);
 
-        // apply speed bump state
-        child.setBelowSpeedBump(viewState.belowSpeedBump);
+        // apply below shelf state
+        child.setBelowShelf(viewState.belowShelf);
 
         // start hiding sensitive animation
         child.setHideSensitive(viewState.hideSensitive, mAnimationFilter.animateHideSensitive,

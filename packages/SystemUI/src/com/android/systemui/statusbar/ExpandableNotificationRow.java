@@ -318,6 +318,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mStatusBarNotification;
     }
 
+    public NotificationData.Entry getEntry() {
+        return mEntry;
+    }
+
     public boolean isHeadsUp() {
         return mIsHeadsUp;
     }
@@ -783,6 +787,26 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setOnDismissListener(OnClickListener listener) {
         mVetoButton.setOnClickListener(listener);
+    }
+
+    public View getNotificationIcon() {
+        NotificationHeaderView notificationHeader = getNotificationHeader();
+        if (notificationHeader != null) {
+            return notificationHeader.getIcon();
+        }
+        return null;
+    }
+
+    /**
+     * @return whether the notification is currently showing a view with an icon.
+     */
+    public boolean isShowingIcon() {
+        if (mIsSummaryWithChildren) {
+            return true;
+        }
+        NotificationContentView showingLayout = getShowingLayout();
+        NotificationHeaderView notificationHeader = showingLayout.getVisibleNotificationHeader();
+        return notificationHeader != null;
     }
 
     public interface ExpansionLogger {

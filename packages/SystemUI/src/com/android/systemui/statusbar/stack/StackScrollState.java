@@ -79,7 +79,10 @@ public class StackScrollState {
         viewState.alpha = 1f;
         viewState.shadowAlpha = 1f;
         viewState.notGoneIndex = -1;
+        viewState.xTranslation = view.getTranslationX();
         viewState.hidden = false;
+        viewState.scaleX = view.getScaleX();
+        viewState.scaleY = view.getScaleY();
     }
 
     public ExpandableViewState getViewStateForView(View requestedView) {

@@ -59,15 +59,15 @@ public class ExpandableViewState extends ViewState {
     public static final int LOCATION_BOTTOM_STACK_HIDDEN = 0x10;
 
     /**
-     * The view isn't layouted at all.
-     * */
+     * The view isn't laid out at all.
+     */
     public static final int LOCATION_GONE = 0x40;
 
     public int height;
     public boolean dimmed;
     public boolean dark;
     public boolean hideSensitive;
-    public boolean belowSpeedBump;
+    public boolean belowShelf;
     public float shadowAlpha;
 
     /**
@@ -103,7 +103,7 @@ public class ExpandableViewState extends ViewState {
             shadowAlpha = svs.shadowAlpha;
             dark = svs.dark;
             hideSensitive = svs.hideSensitive;
-            belowSpeedBump = svs.belowSpeedBump;
+            belowShelf = svs.belowShelf;
             clipTopAmount = svs.clipTopAmount;
             notGoneIndex = svs.notGoneIndex;
             location = svs.location;
@@ -144,7 +144,7 @@ public class ExpandableViewState extends ViewState {
                     this.hideSensitive, false /* animated */, 0 /* delay */, 0 /* duration */);
 
             // apply below shelf speedBump
-            expandableView.setBelowSpeedBump(this.belowSpeedBump);
+            expandableView.setBelowShelf(this.belowShelf);
 
             // apply dark
             expandableView.setDark(this.dark, false /* animate */, 0 /* delay */);

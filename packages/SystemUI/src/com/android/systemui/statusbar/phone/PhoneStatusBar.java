@@ -164,7 +164,7 @@ import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
-import com.android.systemui.statusbar.NotificationOverflowContainer;
+import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
@@ -659,10 +659,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         array.clear();
     }
 
-    private final View.OnClickListener mOverflowClickListener = new View.OnClickListener() {
+    private final View.OnClickListener mShelfClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            goToLockedShade(null);
+            if (mState == StatusBarState.KEYGUARD) {
+                goToLockedShade(null);
+            }
         }
     };
     private HashMap<ExpandableNotificationRow, List<ExpandableNotificationRow>> mTmpChildOrderMap
@@ -812,7 +814,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setHeadsUpManager(mHeadsUpManager);
         mGroupManager.setOnGroupChangeListener(mStackScroller);
 
-        inflateOverflowContainer();
+        inflateShelf();
         inflateEmptyShadeView();
         inflateDismissView();
         mExpandedContents = mStackScroller;
@@ -1049,13 +1051,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return new BatteryControllerImpl(mContext);
     }
 
-    private void inflateOverflowContainer() {
-        mKeyguardIconOverflowContainer =
-                (NotificationOverflowContainer) LayoutInflater.from(mContext).inflate(
-                        R.layout.status_bar_notification_keyguard_overflow, mStackScroller, false);
-        mKeyguardIconOverflowContainer.setOnActivatedListener(this);
-        mKeyguardIconOverflowContainer.setOnClickListener(mOverflowClickListener);
-        mStackScroller.setOverflowContainer(mKeyguardIconOverflowContainer);
+    private void inflateShelf() {
+        mNotificationShelf =
+                (NotificationShelf) LayoutInflater.from(mContext).inflate(
+                        R.layout.status_bar_notification_icon_container, mStackScroller, false);
+        mNotificationShelf.setOnActivatedListener(this);
+        mNotificationShelf.setOnClickListener(mShelfClickListener);
+        mStackScroller.setShelf(mNotificationShelf);
     }
 
     @Override
@@ -1072,7 +1074,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateClearAll();
         inflateEmptyShadeView();
         updateEmptyShadeView();
-        inflateOverflowContainer();
+        inflateShelf();
         mStatusBarKeyguardViewManager.onDensityOrFontScaleChanged();
         mUserInfoController.onDensityOrFontScaleChanged();
         if (mUserSwitcherController != null) {
@@ -1866,7 +1868,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mTmpChildOrderMap.clear();
 
         updateRowStates();
-        updateSpeedbump();
+        updateShelfIndex();
         updateClearAll();
         updateEmptyShadeView();
 
@@ -1987,8 +1989,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNotificationPanel.setShadeEmpty(showEmptyShade);
     }
 
-    private void updateSpeedbump() {
-        int speedbumpIndex = -1;
+    private void updateShelfIndex() {
+        int shelfIndex = -1;
         int currentIndex = 0;
         final int N = mStackScroller.getChildCount();
         for (int i = 0; i < N; i++) {
@@ -1998,12 +2000,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
             if (mNotificationData.isAmbient(row.getStatusBarNotification().getKey())) {
-                speedbumpIndex = currentIndex;
+                shelfIndex = currentIndex;
                 break;
             }
             currentIndex++;
         }
-        mStackScroller.updateSpeedBumpIndex(speedbumpIndex);
+        mStackScroller.updateShelfIndex(shelfIndex);
     }
 
     public static boolean isTopLevelChild(Entry entry) {
@@ -2692,6 +2694,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void onScreenTurnedOff() {
         mFalsingManager.onScreenOff();
+    }
+
+    public NotificationShelf getNotificationShelf() {
+        return mNotificationShelf;
+    }
+
+    public NotificationStackScrollLayout getNotificationScrollLayout() {
+        return mStackScroller;
     }
 
     public boolean isPulsing() {

@@ -54,6 +54,7 @@ public class StatusBarIconView extends AnimatedImageView {
     private Notification mNotification;
     private final boolean mBlocked;
     private int mDensity;
+    private float mIconScale = 1.0f;
 
     public StatusBarIconView(Context context, String slot, Notification notification) {
         this(context, slot, notification, false);
@@ -86,9 +87,13 @@ public class StatusBarIconView extends AnimatedImageView {
         Resources res = mContext.getResources();
         final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
         final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
-        final float scale = (float)imageBounds / (float)outerBounds;
-        setScaleX(scale);
-        setScaleY(scale);
+        mIconScale = (float)imageBounds / (float)outerBounds;
+        setScaleX(mIconScale);
+        setScaleY(mIconScale);
+    }
+
+    public float getIconScale() {
+        return mIconScale;
     }
 
     @Override

@@ -404,10 +404,11 @@ public class NotificationPanelView extends PanelView implements
         int notificationPadding = Math.max(1, getResources().getDimensionPixelSize(
                 R.dimen.notification_divider_height));
         final int overflowheight = getResources().getDimensionPixelSize(
-                R.dimen.notification_summary_height);
-        float bottomStackSize = mNotificationStackScroller.getKeyguardBottomStackSize();
+                R.dimen.notification_shelf_height);
+        float shelfSize = mNotificationStackScroller.getNotificationShelf().getIntrinsicHeight()
+                + notificationPadding;
         float availableSpace = mNotificationStackScroller.getHeight() - minPadding - overflowheight
-                - bottomStackSize;
+                - shelfSize;
         int count = 0;
         for (int i = 0; i < mNotificationStackScroller.getChildCount(); i++) {
             ExpandableView child = (ExpandableView) mNotificationStackScroller.getChildAt(i);
@@ -429,6 +430,16 @@ public class NotificationPanelView extends PanelView implements
             availableSpace -= child.getMinHeight() + notificationPadding;
             if (availableSpace >= 0 && count < maximum) {
                 count++;
+            } else if (availableSpace > -shelfSize) {
+                // if we are exactly the last view, then we can show us still!
+                for (int j = i + 1; j < mNotificationStackScroller.getChildCount(); j++) {
+                    if (mNotificationStackScroller.getChildAt(j)
+                            instanceof ExpandableNotificationRow) {
+                        return count;
+                    }
+                }
+                count++;
+                return count;
             } else {
                 return count;
             }

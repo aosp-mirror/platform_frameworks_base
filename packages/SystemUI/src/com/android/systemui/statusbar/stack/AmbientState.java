@@ -16,9 +16,12 @@
 
 package com.android.systemui.statusbar.stack;
 
+import android.content.Context;
 import android.view.View;
 
+import com.android.systemui.R;
 import com.android.systemui.statusbar.ActivatableNotificationView;
+import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
@@ -33,7 +36,7 @@ public class AmbientState {
     private ActivatableNotificationView mActivatedChild;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
-    private int mSpeedBumpIndex = -1;
+    private int mShelfIndex = -1;
     private boolean mDark;
     private boolean mHideSensitive;
     private HeadsUpManager mHeadsUpManager;
@@ -44,6 +47,37 @@ public class AmbientState {
     private float mMaxHeadsUpTranslation;
     private boolean mDismissAllInProgress;
     private int mLayoutMinHeight;
+    private NotificationShelf mShelf;
+    private int mZDistanceBetweenElements;
+    private int mBaseZHeight;
+
+    public AmbientState(Context context) {
+        reload(context);
+    }
+
+    /**
+     * Reload the dimens e.g. if the density changed.
+     */
+    public void reload(Context context) {
+        mZDistanceBetweenElements = Math.max(1, context.getResources()
+                .getDimensionPixelSize(R.dimen.z_distance_between_notifications));
+        mBaseZHeight = (StackScrollAlgorithm.MAX_ITEMS_IN_BOTTOM_STACK + 1)
+                * mZDistanceBetweenElements;
+    }
+
+    /**
+     * @return the basic Z height on which notifications remain.
+     */
+    public int getBaseZHeight() {
+        return mBaseZHeight;
+    }
+
+    /**
+     * @return the distance in Z between two overlaying notifications.
+     */
+    public int getZDistanceBetweenElements() {
+        return mZDistanceBetweenElements;
+    }
 
     public int getScrollY() {
         return mScrollY;
@@ -118,12 +152,12 @@ public class AmbientState {
         return top ? mOverScrollTopAmount : mOverScrollBottomAmount;
     }
 
-    public int getSpeedBumpIndex() {
-        return mSpeedBumpIndex;
+    public int getShelfIndex() {
+        return mShelfIndex;
     }
 
-    public void setSpeedBumpIndex(int speedBumpIndex) {
-        mSpeedBumpIndex = speedBumpIndex;
+    public void setShelfIndex(int shelfIndex) {
+        mShelfIndex = shelfIndex;
     }
 
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
@@ -180,5 +214,13 @@ public class AmbientState {
 
     public void setLayoutMinHeight(int layoutMinHeight) {
         mLayoutMinHeight = layoutMinHeight;
+    }
+
+    public void setShelf(NotificationShelf shelf) {
+        mShelf = shelf;
+    }
+
+    public NotificationShelf getShelf() {
+        return mShelf;
     }
 }

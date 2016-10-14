@@ -311,6 +311,10 @@ public class NotificationHeaderView extends ViewGroup {
         return mProfileBadge;
     }
 
+    public View getIcon() {
+        return mIcon;
+    }
+
     public class HeaderTouchListener implements View.OnTouchListener {
 
         private final ArrayList<Rect> mTouchRects = new ArrayList<>();

@@ -263,7 +263,11 @@ public abstract class ExpandableView extends FrameLayout {
 
     public abstract void performAddAnimation(long delay, long duration);
 
-    public void setBelowSpeedBump(boolean below) {
+    /**
+     * Set the notification appearance to be below the shelf.
+     * @param below true if it is below.
+     */
+    public void setBelowShelf(boolean below) {
     }
 
     /**
@@ -442,6 +446,15 @@ public abstract class ExpandableView extends FrameLayout {
 
     public ExpandableViewState createNewViewState(StackScrollState stackScrollState) {
         return new ExpandableViewState();
+    }
+
+    /**
+     * @return whether the current view doesn't add height to the overall content. This means that
+     * if it is added to a list of items, it's content will still have the same height.
+     * An example is the notification shelf, that is always placed on top of another view.
+     */
+    public boolean hasNoContentHeight() {
+        return false;
     }
 
     /**
