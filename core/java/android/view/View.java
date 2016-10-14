@@ -17148,22 +17148,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     final private void debugDrawFocus(Canvas canvas) {
         if (isFocused()) {
             final int cornerSquareSize = dipsToPixels(DEBUG_CORNERS_SIZE_DIP);
-            final int w = getWidth();
-            final int h = getHeight();
+            final int l = mScrollX;
+            final int r = l + mRight - mLeft;
+            final int t = mScrollY;
+            final int b = t + mBottom - mTop;
+
             final Paint paint = getDebugPaint();
             paint.setColor(DEBUG_CORNERS_COLOR);
 
             // Draw squares in corners.
             paint.setStyle(Paint.Style.FILL);
-            canvas.drawRect(0, 0, cornerSquareSize, cornerSquareSize, paint);
-            canvas.drawRect(w - cornerSquareSize, 0, w, cornerSquareSize, paint);
-            canvas.drawRect(0, h - cornerSquareSize, cornerSquareSize, h, paint);
-            canvas.drawRect(w - cornerSquareSize, h - cornerSquareSize, w, h, paint);
+            canvas.drawRect(l, t, l + cornerSquareSize, t + cornerSquareSize, paint);
+            canvas.drawRect(r - cornerSquareSize, t, r, t + cornerSquareSize, paint);
+            canvas.drawRect(l, b - cornerSquareSize, l + cornerSquareSize, b, paint);
+            canvas.drawRect(r - cornerSquareSize, b - cornerSquareSize, r, b, paint);
 
             // Draw big X across the view.
             paint.setStyle(Paint.Style.STROKE);
-            canvas.drawLine(0, 0, getWidth(), getHeight(), paint);
-            canvas.drawLine(0, getHeight(), getWidth(), 0, paint);
+            canvas.drawLine(l, t, r, b, paint);
+            canvas.drawLine(l, b, r, t, paint);
         }
     }
 
@@ -17373,6 +17376,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Step 6, draw decorations (foreground, scrollbars)
         onDrawForeground(canvas);
+
+        if (debugDraw()) {
+            debugDrawFocus(canvas);
+        }
     }
 
     /**
