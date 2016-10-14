@@ -418,7 +418,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      * surfaces that's eligible, if the app is already stopped.
      */
     private void destroySurfaces(boolean cleanupOnResume) {
-        final DisplayContentList displayList = new DisplayContentList();
+        final ArrayList<DisplayContent> displayList = new ArrayList();
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final WindowState win = mChildren.get(i);
             final boolean destroyed = win.destroySurface(cleanupOnResume, mAppStopped);

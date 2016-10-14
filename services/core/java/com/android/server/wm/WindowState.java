@@ -3012,9 +3012,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return mAppToken.mFrozenMergedConfig.peek();
         }
 
-        // TODO: Remove when all windows' hierarchies will start from same root.
-        return mAppToken != null
-                ? super.getConfiguration() : getDisplayContent().getConfiguration();
+        return super.getConfiguration();
     }
 
     void reportResized() {
@@ -3029,7 +3027,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             } else {
                 newConfig = null;
             }
-            if (DEBUG_ORIENTATION && mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING)
+            if (DEBUG_ORIENTATION && mWinAnimator.mDrawState == DRAW_PENDING)
                 Slog.i(TAG, "Resizing " + this + " WITH DRAW PENDING");
 
             final Rect frame = mFrame;
@@ -3038,7 +3036,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final Rect visibleInsets = mLastVisibleInsets;
             final Rect stableInsets = mLastStableInsets;
             final Rect outsets = mLastOutsets;
-            final boolean reportDraw = mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING;
+            final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING;
             if (mAttrs.type != WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
                     && mClient instanceof IWindow.Stub) {
                 // To prevent deadlock simulate one-way call if win.mClient is a local object.

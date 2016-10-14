@@ -23,6 +23,8 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
@@ -47,6 +49,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEME
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.dipToPixel;
+import static com.android.server.wm.WindowManagerService.localLOGV;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 
 import android.annotation.NonNull;
@@ -65,7 +69,7 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.IWindow;
-import android.view.Surface;
+
 import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
@@ -73,12 +77,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-
-class DisplayContentList extends ArrayList<DisplayContent> {
-}
 
 /**
  * Utility class for keeping track of the WindowStates and other pertinent contents of a
@@ -87,10 +89,16 @@ class DisplayContentList extends ArrayList<DisplayContent> {
  * IMPORTANT: No method from this class should ever be used without holding
  * WindowManagerService.mWindowMap.
  */
-class DisplayContent extends WindowContainer<TaskStack> {
+class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowContainer> {
 
     /** Unique identifier of this stack. */
     private final int mDisplayId;
+
+    // The display only has 2 child window containers. mTaskStackContainers which contains all
+    // window containers that are related to apps (Activities) and mNonAppWindowContainers which
+    // contains all window containers not related to apps (e.g. Status bar).
+    private final TaskStackContainers mTaskStackContainers = new TaskStackContainers();
+    private final NonAppWindowContainers mNonAppWindowContainers = new NonAppWindowContainers();
 
     /** Z-ordered (bottom-most first) list of all Window objects. Assigned to an element
      * from mDisplayWindows; */
@@ -166,11 +174,15 @@ class DisplayContent extends WindowContainer<TaskStack> {
         mDisplayId = display.getDisplayId();
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
-        isDefaultDisplay = mDisplayId == Display.DEFAULT_DISPLAY;
+        isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
         mService = service;
         initializeDisplayBaseInfo();
         mDividerControllerLocked = new DockedStackDividerController(service, this);
         mDimLayerController = new DimLayerController(this);
+
+        // These are the only direct children we should ever have and they are permanent.
+        super.addChild(mTaskStackContainers, null);
+        super.addChild(mNonAppWindowContainers, null);
     }
 
     int getDisplayId() {
@@ -204,10 +216,20 @@ class DisplayContent extends WindowContainer<TaskStack> {
                     + " already mapped to display=" + dc + " tokens=" + dc.mTokenMap);
         }
         mTokenMap.put(binder, token);
+
+        if (token.asAppWindowToken() == null) {
+            // Add non-app token to container hierarchy on the display. App tokens are added through
+            // the parent container managing them (e.g. Tasks).
+            mNonAppWindowContainers.addChild(token, null);
+        }
     }
 
     WindowToken removeWindowToken(IBinder binder) {
-        return mTokenMap.remove(binder);
+        final WindowToken token = mTokenMap.remove(binder);
+        if (token != null && token.asAppWindowToken() == null) {
+            mNonAppWindowContainers.removeChild(token);
+        }
+        return token;
     }
 
     Display getDisplay() {
@@ -234,19 +256,19 @@ class DisplayContent extends WindowContainer<TaskStack> {
     }
 
     boolean isPrivate() {
-        return (mDisplay.getFlags() & Display.FLAG_PRIVATE) != 0;
+        return (mDisplay.getFlags() & FLAG_PRIVATE) != 0;
     }
 
     TaskStack getHomeStack() {
-        if (mHomeStack == null && mDisplayId == Display.DEFAULT_DISPLAY) {
+        if (mHomeStack == null && mDisplayId == DEFAULT_DISPLAY) {
             Slog.e(TAG_WM, "getHomeStack: Returning null from this=" + this);
         }
         return mHomeStack;
     }
 
     TaskStack getStackById(int stackId) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final TaskStack stack = mChildren.get(i);
+        for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mTaskStackContainers.get(i);
             if (stack.mStackId == stackId) {
                 return stack;
             }
@@ -271,8 +293,8 @@ class DisplayContent extends WindowContainer<TaskStack> {
      * bounds were updated.
      */
     void updateStackBoundsAfterConfigChange(@NonNull List<Integer> changedStackList) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final TaskStack stack = mChildren.get(i);
+        for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mTaskStackContainers.get(i);
             if (stack.updateBoundsAfterConfigChange()) {
                 changedStackList.add(stack.mStackId);
             }
@@ -337,8 +359,8 @@ class DisplayContent extends WindowContainer<TaskStack> {
     void updateDisplayInfo() {
         mDisplay.getDisplayInfo(mDisplayInfo);
         mDisplay.getMetrics(mDisplayMetrics);
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            mChildren.get(i).updateDisplayInfo(null);
+        for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
+            mTaskStackContainers.get(i).updateDisplayInfo(null);
         }
     }
 
@@ -391,46 +413,27 @@ class DisplayContent extends WindowContainer<TaskStack> {
 
     /** Refer to {@link WindowManagerService#attachStack(int, int, boolean)} */
     void attachStack(TaskStack stack, boolean onTop) {
-        if (stack.mStackId == HOME_STACK_ID) {
-            if (mHomeStack != null) {
-                throw new IllegalArgumentException("attachStack: HOME_STACK_ID (0) not first.");
-            }
-            mHomeStack = stack;
-        }
-        addChild(stack, onTop);
-        stack.onDisplayChanged(this);
+        mTaskStackContainers.attachStack(stack, onTop);
     }
 
     void moveStack(TaskStack stack, boolean toTop) {
-        if (StackId.isAlwaysOnTop(stack.mStackId) && !toTop) {
-            // This stack is always-on-top silly...
-            Slog.w(TAG_WM, "Ignoring move of always-on-top stack=" + stack + " to bottom");
-            return;
-        }
-
-        if (!mChildren.contains(stack)) {
-            Slog.wtf(TAG_WM, "moving stack that was not added: " + stack, new Throwable());
-        }
-        removeChild(stack);
-        addChild(stack, toTop);
+        mTaskStackContainers.moveStack(stack, toTop);
     }
 
-    private void addChild(TaskStack stack, boolean toTop) {
-        int addIndex = toTop ? mChildren.size() : 0;
+    @Override
+    protected void addChild(DisplayChildWindowContainer child,
+            Comparator<DisplayChildWindowContainer> comparator) {
+        throw new UnsupportedOperationException("See DisplayChildWindowContainer");
+    }
 
-        if (toTop
-                && mService.isStackVisibleLocked(PINNED_STACK_ID)
-                && stack.mStackId != PINNED_STACK_ID) {
-            // The pinned stack is always the top most stack (always-on-top) when it is visible.
-            // So, stack is moved just below the pinned stack.
-            addIndex--;
-            TaskStack topStack = mChildren.get(addIndex);
-            if (topStack.mStackId != PINNED_STACK_ID) {
-                throw new IllegalStateException("Pinned stack isn't top stack??? " + mChildren);
-            }
-        }
-        addChild(stack, addIndex);
-        setLayoutNeeded();
+    @Override
+    protected void addChild(DisplayChildWindowContainer child, int index) {
+        throw new UnsupportedOperationException("See DisplayChildWindowContainer");
+    }
+
+    @Override
+    protected void removeChild(DisplayChildWindowContainer child) {
+        throw new UnsupportedOperationException("See DisplayChildWindowContainer");
     }
 
     /**
@@ -442,8 +445,8 @@ class DisplayContent extends WindowContainer<TaskStack> {
     }
 
     int taskIdFromPoint(int x, int y) {
-        for (int stackNdx = mChildren.size() - 1; stackNdx >= 0; --stackNdx) {
-            final TaskStack stack = mChildren.get(stackNdx);
+        for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
+            final TaskStack stack = mTaskStackContainers.get(stackNdx);
             final int taskId = stack.taskIdFromPoint(x, y);
             if (taskId != -1) {
                 return taskId;
@@ -457,10 +460,10 @@ class DisplayContent extends WindowContainer<TaskStack> {
      * Returns null if the touch doesn't fall into a resizing area.
      */
     Task findTaskForResizePoint(int x, int y) {
-        final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
+        final int delta = dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
         mTmpTaskForResizePointSearchResult.reset();
-        for (int stackNdx = mChildren.size() - 1; stackNdx >= 0; --stackNdx) {
-            TaskStack stack = mChildren.get(stackNdx);
+        for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
+            final TaskStack stack = mTaskStackContainers.get(stackNdx);
             if (!StackId.isTaskResizeAllowed(stack.mStackId)) {
                 return null;
             }
@@ -475,10 +478,10 @@ class DisplayContent extends WindowContainer<TaskStack> {
 
     void setTouchExcludeRegion(Task focusedTask) {
         mTouchExcludeRegion.set(mBaseDisplayRect);
-        final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
+        final int delta = dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
         mTmpRect2.setEmpty();
-        for (int stackNdx = mChildren.size() - 1; stackNdx >= 0; --stackNdx) {
-            final TaskStack stack = mChildren.get(stackNdx);
+        for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
+            final TaskStack stack = mTaskStackContainers.get(stackNdx);
             stack.setTouchExcludeRegion(
                     focusedTask, delta, mTouchExcludeRegion, mContentRect, mTmpRect2);
         }
@@ -522,16 +525,16 @@ class DisplayContent extends WindowContainer<TaskStack> {
             }
         }
 
-        for (int stackNdx = mChildren.size() - 1; stackNdx >= 0; --stackNdx) {
-            mChildren.get(stackNdx).switchUser();
+        for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
+            mTaskStackContainers.get(stackNdx).switchUser();
         }
 
         rebuildAppWindowList();
     }
 
     void resetAnimationBackgroundAnimator() {
-        for (int stackNdx = mChildren.size() - 1; stackNdx >= 0; --stackNdx) {
-            mChildren.get(stackNdx).resetAnimationBackgroundAnimator();
+        for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
+            mTaskStackContainers.get(stackNdx).resetAnimationBackgroundAnimator();
         }
     }
 
@@ -565,7 +568,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
         super.removeImmediately();
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
         mDimLayerController.close();
-        if (mDisplayId == Display.DEFAULT_DISPLAY) {
+        if (mDisplayId == DEFAULT_DISPLAY) {
             mService.unregisterPointerEventListener(mTapDetector);
             mService.unregisterPointerEventListener(mService.mMousePositionTracker);
         }
@@ -588,8 +591,8 @@ class DisplayContent extends WindowContainer<TaskStack> {
             float dividerAnimationTarget) {
         boolean updated = false;
 
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final TaskStack stack = mChildren.get(i);
+        for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mTaskStackContainers.get(i);
             if (stack == null || !stack.isAdjustedForIme()) {
                 continue;
             }
@@ -617,8 +620,8 @@ class DisplayContent extends WindowContainer<TaskStack> {
 
     boolean clearImeAdjustAnimation() {
         boolean changed = false;
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final TaskStack stack = mChildren.get(i);
+        for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mTaskStackContainers.get(i);
             if (stack != null && stack.isAdjustedForIme()) {
                 stack.resetAdjustedForIme(true /* adjustBoundsNow */);
                 changed  = true;
@@ -628,8 +631,8 @@ class DisplayContent extends WindowContainer<TaskStack> {
     }
 
     void beginImeAdjustAnimation() {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final TaskStack stack = mChildren.get(i);
+        for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mTaskStackContainers.get(i);
             if (stack.isVisible() && stack.isAdjustedForIme()) {
                 stack.beginImeAdjustAnimation();
             }
@@ -658,8 +661,8 @@ class DisplayContent extends WindowContainer<TaskStack> {
         // - If IME is not visible, divider is not moved and is normal width.
 
         if (imeVisible && dockVisible && (imeOnTop || imeOnBottom) && !dockMinimized) {
-            for (int i = mChildren.size() - 1; i >= 0; --i) {
-                final TaskStack stack = mChildren.get(i);
+            for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
+                final TaskStack stack = mTaskStackContainers.get(i);
                 final boolean isDockedOnBottom = stack.getDockSide() == DOCKED_BOTTOM;
                 if (stack.isVisible() && (imeOnBottom || isDockedOnBottom)) {
                     stack.setAdjustedForIme(imeWin, imeOnBottom && imeHeightChanged);
@@ -670,8 +673,8 @@ class DisplayContent extends WindowContainer<TaskStack> {
             mDividerControllerLocked.setAdjustedForIme(
                     imeOnBottom /*ime*/, true /*divider*/, true /*animate*/, imeWin, imeHeight);
         } else {
-            for (int i = mChildren.size() - 1; i >= 0; --i) {
-                final TaskStack stack = mChildren.get(i);
+            for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
+                final TaskStack stack = mTaskStackContainers.get(i);
                 stack.resetAdjustedForIme(!dockVisible);
             }
             mDividerControllerLocked.setAdjustedForIme(
@@ -680,8 +683,8 @@ class DisplayContent extends WindowContainer<TaskStack> {
     }
 
     void prepareFreezingTaskBounds() {
-        for (int stackNdx = mChildren.size() - 1; stackNdx >= 0; --stackNdx) {
-            final TaskStack stack = mChildren.get(stackNdx);
+        for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
+            final TaskStack stack = mTaskStackContainers.get(stackNdx);
             stack.prepareFreezingTaskBounds();
         }
     }
@@ -705,7 +708,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
         return delta;
     }
 
-    static void createRotationMatrix(int rotation, float displayWidth, float displayHeight,
+    private static void createRotationMatrix(int rotation, float displayWidth, float displayHeight,
             Matrix outMatrix) {
         // For rotations without Z-ordering we don't need the target rectangle's position.
         createRotationMatrix(rotation, 0 /* rectLeft */, 0 /* rectTop */, displayWidth,
@@ -765,8 +768,8 @@ class DisplayContent extends WindowContainer<TaskStack> {
 
         pw.println();
         pw.println("  Application tokens in top down Z order:");
-        for (int stackNdx = mChildren.size() - 1; stackNdx >= 0; --stackNdx) {
-            final TaskStack stack = mChildren.get(stackNdx);
+        for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
+            final TaskStack stack = mTaskStackContainers.get(stackNdx);
             stack.dump(prefix + "  ", pw);
         }
 
@@ -775,7 +778,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
             pw.println();
             pw.println("  Exiting tokens:");
             for (int i = mExitingTokens.size() - 1; i >= 0; i--) {
-                WindowToken token = mExitingTokens.get(i);
+                final WindowToken token = mExitingTokens.get(i);
                 pw.print("  Exiting #"); pw.print(i);
                 pw.print(' '); pw.print(token);
                 pw.println(':');
@@ -790,11 +793,11 @@ class DisplayContent extends WindowContainer<TaskStack> {
 
     @Override
     public String toString() {
-        return getName() + " stacks=" + mChildren;
+        return "Display " + mDisplayId + " info=" + mDisplayInfo + " stacks=" + mChildren;
     }
 
     String getName() {
-        return "Display " + mDisplayId + " info=" + mDisplayInfo;
+        return "Display " + mDisplayId + " name=\"" + mDisplayInfo.name + "\"";
     }
 
     /**
@@ -862,8 +865,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
         return true;
     }
 
-    void scheduleToastWindowsTimeoutIfNeededLocked(WindowState oldFocus,
-                                                   WindowState newFocus) {
+    void scheduleToastWindowsTimeoutIfNeededLocked(WindowState oldFocus, WindowState newFocus) {
         if (oldFocus == null || (newFocus != null && newFocus.mOwnerUid == oldFocus.mOwnerUid)) {
             return;
         }
@@ -947,15 +949,15 @@ class DisplayContent extends WindowContainer<TaskStack> {
         }
 
         // No windows from this token on this display
-        if (mService.localLOGV) Slog.v(TAG_WM, "Figuring out where to add app window "
+        if (localLOGV) Slog.v(TAG_WM, "Figuring out where to add app window "
                 + client.asBinder() + " (token=" + this + ")");
 
         final WindowToken wToken = win.mToken;
 
         // Figure out where the window should go, based on the order of applications.
         mTmpGetWindowOnDisplaySearchResult.reset();
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final TaskStack stack = mChildren.get(i);
+        for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mTaskStackContainers.get(i);
             stack.getWindowOnDisplayBeforeToken(this, wToken, mTmpGetWindowOnDisplaySearchResult);
             if (mTmpGetWindowOnDisplaySearchResult.reachedToken) {
                 // We have reach the token we are interested in. End search.
@@ -986,8 +988,8 @@ class DisplayContent extends WindowContainer<TaskStack> {
 
         // Continue looking down until we find the first token that has windows on this display.
         mTmpGetWindowOnDisplaySearchResult.reset();
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final TaskStack stack = mChildren.get(i);
+        for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mTaskStackContainers.get(i);
             stack.getWindowOnDisplayAfterToken(this, wToken, mTmpGetWindowOnDisplaySearchResult);
             if (mTmpGetWindowOnDisplaySearchResult.foundWindow != null) {
                 // We have found a window after the token. End search.
@@ -1151,9 +1153,9 @@ class DisplayContent extends WindowContainer<TaskStack> {
         // First add all of the exiting app tokens...  these are no longer in the main app list,
         // but still have windows shown. We put them in the back because now that the animation is
         // over we no longer will care about them.
-        final int numStacks = mChildren.size();
+        final int numStacks = mTaskStackContainers.size();
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            AppTokenList exitingAppTokens = mChildren.get(stackNdx).mExitingAppTokens;
+            AppTokenList exitingAppTokens = mTaskStackContainers.get(stackNdx).mExitingAppTokens;
             int NT = exitingAppTokens.size();
             for (int j = 0; j < NT; j++) {
                 i = exitingAppTokens.get(j).rebuildWindowListUnchecked(i);
@@ -1162,7 +1164,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
 
         // And add in the still active app tokens in Z order.
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            i = mChildren.get(stackNdx).rebuildWindowList(i);
+            i = mTaskStackContainers.get(stackNdx).rebuildWindowList(i);
         }
 
         i -= lastBelow;
@@ -1327,6 +1329,20 @@ class DisplayContent extends WindowContainer<TaskStack> {
         }
     }
 
+    void enableSurfaceTrace(FileDescriptor fd) {
+        for (int i = mWindows.size() - 1; i >= 0; i--) {
+            final WindowState win = mWindows.get(i);
+            win.mWinAnimator.enableSurfaceTrace(fd);
+        }
+    }
+
+    void disableSurfaceTrace() {
+        for (int i = mWindows.size() - 1; i >= 0; i--) {
+            final WindowState win = mWindows.get(i);
+            win.mWinAnimator.disableSurfaceTrace();
+        }
+    }
+
     static final class GetWindowOnDisplaySearchResult {
         boolean reachedToken;
         WindowState foundWindow;
@@ -1347,17 +1363,89 @@ class DisplayContent extends WindowContainer<TaskStack> {
         }
     }
 
-    void enableSurfaceTrace(FileDescriptor fd) {
-        for (int i = mWindows.size()  - 1; i >= 0; i--) {
-            final WindowState win = mWindows.get(i);
-            win.mWinAnimator.enableSurfaceTrace(fd);
+    /**
+     * Base class for any direct child window container of {@link #DisplayContent} need to inherit
+     * from. This is mainly a pass through class that allows {@link #DisplayContent} to have
+     * homogeneous children type which is currently required by sub-classes of
+     * {@link WindowContainer} class.
+     */
+    static class DisplayChildWindowContainer<E extends WindowContainer> extends WindowContainer<E> {
+
+        int size() {
+            return mChildren.size();
+        }
+
+        E get(int index) {
+            return mChildren.get(index);
+        }
+
+        @Override
+        boolean fillsParent() {
+            return true;
+        }
+
+        @Override
+        boolean isVisible() {
+            return true;
         }
     }
 
-    void disableSurfaceTrace() {
-        for (int i = mWindows.size()  - 1; i >= 0; i--) {
-            final WindowState win = mWindows.get(i);
-            win.mWinAnimator.disableSurfaceTrace();
+    /**
+     * Window container class that contains all containers on this display relating to Apps.
+     * I.e Activities.
+     */
+    private class TaskStackContainers extends DisplayChildWindowContainer<TaskStack> {
+
+        void attachStack(TaskStack stack, boolean onTop) {
+            if (stack.mStackId == HOME_STACK_ID) {
+                if (mHomeStack != null) {
+                    throw new IllegalArgumentException("attachStack: HOME_STACK_ID (0) not first.");
+                }
+                mHomeStack = stack;
+            }
+            addChild(stack, onTop);
+            stack.onDisplayChanged(DisplayContent.this);
         }
+
+        void moveStack(TaskStack stack, boolean toTop) {
+            if (StackId.isAlwaysOnTop(stack.mStackId) && !toTop) {
+                // This stack is always-on-top silly...
+                Slog.w(TAG_WM, "Ignoring move of always-on-top stack=" + stack + " to bottom");
+                return;
+            }
+
+            if (!mChildren.contains(stack)) {
+                Slog.wtf(TAG_WM, "moving stack that was not added: " + stack, new Throwable());
+            }
+            removeChild(stack);
+            addChild(stack, toTop);
+        }
+
+        private void addChild(TaskStack stack, boolean toTop) {
+            int addIndex = toTop ? mChildren.size() : 0;
+
+            if (toTop
+                    && mService.isStackVisibleLocked(PINNED_STACK_ID)
+                    && stack.mStackId != PINNED_STACK_ID) {
+                // The pinned stack is always the top most stack (always-on-top) when it is visible.
+                // So, stack is moved just below the pinned stack.
+                addIndex--;
+                TaskStack topStack = mChildren.get(addIndex);
+                if (topStack.mStackId != PINNED_STACK_ID) {
+                    throw new IllegalStateException("Pinned stack isn't top stack??? " + mChildren);
+                }
+            }
+            addChild(stack, addIndex);
+            setLayoutNeeded();
+        }
+
+    }
+
+    /**
+     * Window container class that contains all containers on this display that are not related to
+     * Apps. E.g. status bar.
+     */
+    private static class NonAppWindowContainers extends DisplayChildWindowContainer<WindowToken> {
+
     }
 }
