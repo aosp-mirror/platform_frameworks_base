@@ -319,8 +319,6 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Peringatan <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Mode kerja"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Cahaya Malam"</string>
-    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Cahaya Malam hidup, ketuk untuk mematikan"</string>
-    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Cahaya Malam mati, ketuk untuk menyalakan"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Tidak ada item baru-baru ini"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Anda sudah menghapus semua"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Info Aplikasi"</string>

@@ -319,8 +319,6 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> අවවාද කිරීම"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"වැඩ ප්‍රකාරය"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"රාත්‍රී ආලෝකය"</string>
-    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"රාත්‍රී ආලෝකය ක්‍රියාත්මකයි, ක්‍රියාවිරහිත කිරීමට තට්ටු කරන්න"</string>
-    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"රාත්‍රී ආලෝකය ක්‍රියාවිරහිතයි, ක්‍රියාත්මක කිරීමට තට්ටු කරන්න"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"මෑත අයිතම නැත"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"ඔබ සියලු දේ හිස් කර ඇත"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"යෙදුම් තොරතුරු"</string>
