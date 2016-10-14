@@ -30,6 +30,7 @@ import static android.service.notification.NotificationRankerService.REASON_PACK
 import static android.service.notification.NotificationRankerService.REASON_PACKAGE_CHANGED;
 import static android.service.notification.NotificationRankerService.REASON_PACKAGE_SUSPENDED;
 import static android.service.notification.NotificationRankerService.REASON_PROFILE_TURNED_OFF;
+import static android.service.notification.NotificationRankerService.REASON_SNOOZED;
 import static android.service.notification.NotificationRankerService.REASON_UNAUTOBUNDLED;
 import static android.service.notification.NotificationRankerService.REASON_USER_STOPPED;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
@@ -308,6 +309,8 @@ public class NotificationManagerService extends SystemService {
     private long mLastOverRateLogTime;
     private float mMaxPackageEnqueueRate = DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
     private String mSystemNotificationSound;
+
+    private SnoozeHelper mSnoozeHelper;
 
     private static class Archive {
         final int mBufferSize;
@@ -999,6 +1002,22 @@ public class NotificationManagerService extends SystemService {
                 sendRegisteredOnlyBroadcast(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED);
             }
         });
+        mSnoozeHelper = new SnoozeHelper(getContext(), new SnoozeHelper.Callback() {
+            @Override
+            public void repost(int userId, NotificationRecord r) {
+                try {
+                    if (DBG) {
+                        Slog.d(TAG, "Reposting " + r.getKey());
+                    }
+                    enqueueNotificationInternal(r.sbn.getPackageName(), r.sbn.getOpPkg(),
+                            r.sbn.getUid(), r.sbn.getInitialPid(), r.sbn.getTag(), r.sbn.getId(),
+                            r.sbn.getNotification(), new int[1], userId);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Cannot un-snooze notification", e);
+                }
+            }
+        }, mUserProfiles);
+
         final File systemDir = new File(Environment.getDataDirectory(), "system");
         mPolicyFile = new AtomicFile(new File(systemDir, "notification_policy.xml"));
 
@@ -1810,12 +1829,36 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        /**
+         * Allow an INotificationListener to simulate clearing (dismissing) a single notification.
+         *
+         * {@see com.android.server.StatusBarManagerService.NotificationCallbacks#onNotificationClear}
+         *
+         * @param token The binder for the listener, to check that the caller is allowed
+         */
         private void cancelNotificationFromListenerLocked(ManagedServiceInfo info,
                 int callingUid, int callingPid, String pkg, String tag, int id, int userId) {
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
                     Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
                     true,
                     userId, REASON_LISTENER_CANCEL, info);
+        }
+
+        /**
+         * Allow an INotificationListener to snooze a single notification.
+         *
+         * @param token The binder for the listener, to check that the caller is allowed
+         */
+        @Override
+        public void snoozeNotificationFromListener(INotificationListener token, String key,
+                long snoozeUntil) {
+            long identity = Binder.clearCallingIdentity();
+            try {
+                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                snoozeNotificationInt(key, snoozeUntil, info);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         /**
@@ -2592,6 +2635,11 @@ public class NotificationManagerService extends SystemService {
                 pw.println("\n  Notification ranker services:");
                 mRankerServices.dump(pw, filter);
             }
+
+            if (!zenOnly) {
+                mSnoozeHelper.dump(pw, filter);
+            }
+
             pw.println("\n  Policy access:");
             pw.print("    mPolicyAccess: "); pw.println(mPolicyAccess);
 
@@ -2765,6 +2813,16 @@ public class NotificationManagerService extends SystemService {
         public void run() {
 
             synchronized (mNotificationList) {
+                if (mSnoozeHelper.isSnoozed(userId, r.sbn.getPackageName(), r.getKey())) {
+                    // TODO: log to event log
+                    if (DBG) {
+                        Slog.d(TAG, "Ignored enqueue for snoozed notification " + r.getKey());
+                    }
+                    mSnoozeHelper.update(userId, r);
+                    savePolicyFile();
+                    return;
+                }
+
                 final StatusBarNotification n = r.sbn;
                 if (DBG) Slog.d(TAG, "EnqueueNotificationRunnable.run for: " + n.getKey());
                 NotificationRecord old = mNotificationsByKey.get(n.getKey());
@@ -3578,6 +3636,11 @@ public class NotificationManagerService extends SystemService {
                         cancelGroupChildrenLocked(r, callingUid, callingPid, listenerName,
                                 REASON_GROUP_SUMMARY_CANCELED, sendDelete);
                         updateLightsLocked();
+                    } else {
+                        final boolean wasSnoozed = mSnoozeHelper.cancel(userId, pkg, tag, id);
+                        if (wasSnoozed) {
+                            savePolicyFile();
+                        }
                     }
                 }
             }
@@ -3654,6 +3717,7 @@ public class NotificationManagerService extends SystemService {
                 mNotificationList.remove(i);
                 cancelNotificationLocked(r, false, reason);
             }
+            mSnoozeHelper.cancel(userId, pkg);
             if (doit && canceledNotifications != null) {
                 final int M = canceledNotifications.size();
                 for (int i = 0; i < M; i++) {
@@ -3665,6 +3729,28 @@ public class NotificationManagerService extends SystemService {
                 updateLightsLocked();
             }
             return canceledNotifications != null;
+        }
+    }
+
+    void snoozeNotificationInt(String key, long until, ManagedServiceInfo listener) {
+        String listenerName = listener == null ? null : listener.component.toShortString();
+        // TODO: write to event log
+        if (DBG) {
+            Slog.d(TAG, String.format("snooze event(%s, %d, %s)", key, until,
+                    listenerName));
+        }
+        if (until < System.currentTimeMillis()) {
+            return;
+        }
+        synchronized (mNotificationList) {
+            final NotificationRecord r = mNotificationsByKey.get(key);
+            if (r != null) {
+                mNotificationList.remove(r);
+                cancelNotificationLocked(r, false, REASON_SNOOZED);
+                updateLightsLocked();
+                mSnoozeHelper.snooze(r, r.getUser().getIdentifier(), until);
+                savePolicyFile();
+            }
         }
     }
 
@@ -3699,6 +3785,7 @@ public class NotificationManagerService extends SystemService {
                 canceledNotifications.add(r);
             }
         }
+        mSnoozeHelper.cancel(userId, includeCurrentProfiles);
         int M = canceledNotifications != null ? canceledNotifications.size() : 0;
         for (int i = 0; i < M; i++) {
             cancelGroupChildrenLocked(canceledNotifications.get(i), callingUid, callingPid,

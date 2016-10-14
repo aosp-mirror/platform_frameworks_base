@@ -102,6 +102,9 @@ public abstract class NotificationRankerService extends NotificationListenerServ
     /** Notification was canceled by the user banning the channel. */
     public static final int REASON_CHANNEL_BANNED = 17;
 
+    /** Notification was snoozed. */
+    public static final int REASON_SNOOZED = 18;
+
     private Handler mHandler;
 
     /** @hide */

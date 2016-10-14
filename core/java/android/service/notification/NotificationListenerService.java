@@ -450,6 +450,28 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
+     * Inform the notification manager about snoozing a specific notification.
+     * <p>
+     * Use this if your listener has a user interface that allows the user to snooze a notification
+     * until a given time.  It should be called after the user snoozes a single notification using
+     * your UI; upon being informed, the notification manager will actually remove the notification
+     * and you will get an {@link #onNotificationRemoved(StatusBarNotification)} callback. When the
+     * snoozing period expires, you will get a
+     * {@link #onNotificationPosted(StatusBarNotification, RankingMap)} callback for the
+     * notification.
+     * @param key The key of the notification to snooze
+     * @param snoozeUntil A time in the future, in milliseconds.
+     */
+    public final void snoozeNotification(String key, long snoozeUntil) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().snoozeNotificationFromListener(mWrapper, key, snoozeUntil);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
+    /**
      * Inform the notification manager that these notifications have been viewed by the
      * user. This should only be called when there is sufficient confidence that the user is
      * looking at the notifications, such as when the notifications appear on the screen due to
