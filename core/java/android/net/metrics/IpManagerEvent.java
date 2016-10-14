@@ -38,9 +38,15 @@ public final class IpManagerEvent implements Parcelable {
     public static final int PROVISIONING_OK    = 1;
     public static final int PROVISIONING_FAIL  = 2;
     public static final int COMPLETE_LIFECYCLE = 3;
+    /** @hide */ public static final int ERROR_STARTING_IPV4 = 4;
+    /** @hide */ public static final int ERROR_STARTING_IPV6 = 5;
+    /** @hide */ public static final int ERROR_STARTING_IPREACHABILITYMONITOR = 6;
 
     /** {@hide} */
-    @IntDef(value = {PROVISIONING_OK, PROVISIONING_FAIL, COMPLETE_LIFECYCLE})
+    @IntDef(value = {
+            PROVISIONING_OK, PROVISIONING_FAIL, COMPLETE_LIFECYCLE,
+            ERROR_STARTING_IPV4, ERROR_STARTING_IPV6, ERROR_STARTING_IPREACHABILITYMONITOR,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {}
 
@@ -95,6 +101,7 @@ public final class IpManagerEvent implements Parcelable {
 
     final static class Decoder {
         static final SparseArray<String> constants = MessageUtils.findMessageNames(
-                new Class[]{IpManagerEvent.class}, new String[]{"PROVISIONING_", "COMPLETE_"});
+                new Class[]{IpManagerEvent.class},
+                new String[]{"PROVISIONING_", "COMPLETE_", "ERROR_"});
     }
 }
