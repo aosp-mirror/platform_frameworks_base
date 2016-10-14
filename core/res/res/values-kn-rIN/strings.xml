@@ -815,9 +815,9 @@
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ಅಳಿಸು"</string>
-    <string name="search_go" msgid="8298016669822141719">"ಹುಡುಕು"</string>
+    <string name="search_go" msgid="8298016669822141719">"ಹುಡುಕಿ"</string>
     <string name="search_hint" msgid="1733947260773056054">"ಹುಡುಕಿ…"</string>
-    <string name="searchview_description_search" msgid="6749826639098512120">"ಹುಡುಕು"</string>
+    <string name="searchview_description_search" msgid="6749826639098512120">"ಹುಡುಕಿ"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"ಪ್ರಶ್ನೆಯನ್ನು ಹುಡುಕಿ"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"ಪ್ರಶ್ನೆಯನ್ನು ತೆರವುಗೊಳಿಸು"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"ಪ್ರಶ್ನೆಯನ್ನು ಸಲ್ಲಿಸು"</string>
@@ -1211,7 +1211,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ಝೂಮ್‌ ನಿಯಂತ್ರಿಸಲು ಎರಡು ಬಾರಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ವಿಜೆಟ್ ಸೇರಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ಹೋಗು"</string>
-    <string name="ime_action_search" msgid="658110271822807811">"ಹುಡುಕು"</string>
+    <string name="ime_action_search" msgid="658110271822807811">"ಹುಡುಕಿ"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"ಕಳುಹಿಸು"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"ಮುಂದೆ"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"ಮುಗಿದಿದೆ"</string>
@@ -1269,8 +1269,8 @@
     <string name="share" msgid="1778686618230011964">"ಹಂಚು"</string>
     <string name="find" msgid="4808270900322985960">"ಹುಡುಕಿ"</string>
     <string name="websearch" msgid="4337157977400211589">"ವೆಬ್ ಹುಡುಕಾಟ"</string>
-    <string name="find_next" msgid="5742124618942193978">"ಮುಂದಿನದನ್ನು ಹುಡುಕು"</string>
-    <string name="find_previous" msgid="2196723669388360506">"ಹಿಂದಿನದನ್ನು ಹುಡುಕು"</string>
+    <string name="find_next" msgid="5742124618942193978">"ಮುಂದಿನದನ್ನು ಹುಡುಕಿ"</string>
+    <string name="find_previous" msgid="2196723669388360506">"ಹಿಂದಿನದನ್ನು ಹುಡುಕಿ"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g> ಅವರಿಂದ ಸ್ಥಾನ ವಿನಂತಿ"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"ಸ್ಥಾನ ವಿನಂತಿ"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) ಅವರಿಂದ ವಿನಂತಿಸಲಾಗಿದೆ"</string>
@@ -1649,7 +1649,7 @@
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"ಸೂಚಿತ ಭಾಷೆ"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"ಎಲ್ಲಾ ಭಾಷೆಗಳು"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ಎಲ್ಲಾ ಪ್ರದೇಶಗಳು"</string>
-    <string name="locale_search_menu" msgid="2560710726687249178">"ಹುಡುಕು"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"ಹುಡುಕಿ"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"ಕೆಲಸದ ಮೋಡ್ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು, ಹಿನ್ನೆಲೆ ಸಿಂಕ್ ಮತ್ತು ಇತರ ಸಂಬಂಧಿತ ವೈಶಿಷ್ಟ್ಯಗಳು ಸೇರಿದಂತೆ ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌‌ ಕಾರ್ಯನಿರ್ವಹಿಸಲು ಅನುಮತಿಸಿ."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ಆನ್ ಮಾಡು"</string>
