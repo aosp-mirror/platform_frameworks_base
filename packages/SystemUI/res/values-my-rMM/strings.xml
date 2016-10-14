@@ -651,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ဆက်တင်များကို ဖွင့်ပါ။"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ဆက်တင်များ၏ အစီအစဉ်ကို တည်းဖြတ်ပါ။"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"စာမျက်နှာ <xliff:g id="ID_2">%2$d</xliff:g> အနက်မှ စာမျက်နှာ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"အကြောင်းကြားချက်များကို အသံတိတ်ခြင်း သို့မဟုတ် ပိတ်ဆို့ခြင်းများ ပြုလုပ်၍ မရပါ"</string>
 </resources>
