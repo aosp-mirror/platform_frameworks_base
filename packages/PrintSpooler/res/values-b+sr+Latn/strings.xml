@@ -103,8 +103,8 @@
     <item msgid="3199660090246166812">"Vodoravno"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Upisivanje u datoteku nije moguće"</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"Žao nam je, ovo nije uspelo. Pokušajte ponovo."</string>
-    <string name="print_error_retry" msgid="1426421728784259538">"Pokušajte ponovo"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"Žao nam je, ovo nije uspelo. Probajte ponovo."</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"Probajte ponovo"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Ovaj štampač trenutno nije dostupan."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"Nije uspeo prikaz pregleda"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"Priprema pregleda..."</string>
