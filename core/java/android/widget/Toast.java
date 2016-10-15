@@ -380,7 +380,7 @@ public class Toast {
         String mPackageName;
 
         static final long SHORT_DURATION_TIMEOUT = 5000;
-        static final long LONG_DURATION_TIMEOUT = 1000;
+        static final long LONG_DURATION_TIMEOUT = 10000;
 
         TN(String packageName) {
             // XXX This should be changed to use a Dialog, with a Theme.Toast
