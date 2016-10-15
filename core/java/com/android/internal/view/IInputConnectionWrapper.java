@@ -580,7 +580,13 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                         return;
                     }
                     if (grantUriPermission) {
-                        inputContentInfo.requestPermission();
+                        try {
+                            inputContentInfo.requestPermission();
+                        } catch (Exception e) {
+                            Log.e(TAG, "InputConnectionInfo.requestPermission() failed", e);
+                            args.callback.setCommitContentResult(false, args.seq);
+                            return;
+                        }
                     }
                     final boolean result =
                             ic.commitContent(inputContentInfo, flags, (Bundle) args.arg2);
