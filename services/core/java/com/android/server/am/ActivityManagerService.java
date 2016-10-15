@@ -886,6 +886,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * For example, references to the commonly used services.
      */
     HashMap<String, IBinder> mAppBindArgs;
+    HashMap<String, IBinder> mIsolatedAppBindArgs;
 
     /**
      * Temporary to avoid allocations.  Protected by main lock.
@@ -2542,10 +2543,18 @@ public final class ActivityManagerService extends ActivityManagerNative
      * process when the bindApplication() IPC is sent to the process. They're
      * lazily setup to make sure the services are running when they're asked for.
      */
-    private HashMap<String, IBinder> getCommonServicesLocked() {
+    private HashMap<String, IBinder> getCommonServicesLocked(boolean isolated) {
+        // Isolated processes won't get this optimization, so that we don't
+        // violate the rules about which services they have access to.
+        if (isolated) {
+            if (mIsolatedAppBindArgs == null) {
+                mIsolatedAppBindArgs = new HashMap<String, IBinder>();
+                mIsolatedAppBindArgs.put("package", ServiceManager.getService("package"));
+            }
+            return mIsolatedAppBindArgs;
+        }
         if (mAppBindArgs == null) {
             mAppBindArgs = new HashMap<String, IBinder>();
-
             // Setup the application init args
             mAppBindArgs.put("package", ServiceManager.getService("package"));
             mAppBindArgs.put("window", ServiceManager.getService("window"));
@@ -6180,7 +6189,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     profilerInfo, app.instrumentationArguments, app.instrumentationWatcher,
                     app.instrumentationUiAutomationConnection, testMode, enableOpenGlTrace,
                     isRestrictedBackupMode || !normalMode, app.persistent,
-                    new Configuration(mConfiguration), app.compat, getCommonServicesLocked(),
+                    new Configuration(mConfiguration), app.compat,
+                    getCommonServicesLocked(app.isolated),
                     mCoreSettingsObserver.getCoreSettingsLocked());
             updateLruProcessLocked(app, false, null);
             app.lastRequestedGc = app.lastLowMemory = SystemClock.uptimeMillis();
