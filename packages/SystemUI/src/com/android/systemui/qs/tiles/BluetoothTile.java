@@ -89,7 +89,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     protected void handleLongClick() {
-        boolean easyToggle = isBtEasyToggleEnabled();
+        boolean easyToggle = isEasyToggleEnabled();
         if (easyToggle) {
             if (!mController.canConfigBluetooth()) {
                 mHost.startActivityDismissingKeyguard(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
@@ -103,7 +103,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     protected void handleClick() {
-        boolean easyToggle = isBtEasyToggleEnabled();
+        boolean easyToggle = isEasyToggleEnabled();
             if (easyToggle) {
                 final boolean isEnabled = (Boolean)mState.value;
                 MetricsLogger.action(mContext, getMetricsCategory(), !isEnabled);
@@ -181,9 +181,9 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         state.minimalAccessibilityClassName = Switch.class.getName();
     }
 
-    public boolean isBtEasyToggleEnabled() {
+    public boolean isEasyToggleEnabled() {
         return Settings.Secure.getInt(mContext.getContentResolver(),
-            Settings.Secure.QS_BT_EASY_TOGGLE, 0) == 1;
+            Settings.Secure.QS_EASY_TOGGLE, 0) == 1;
     }
 
     @Override

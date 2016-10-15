@@ -88,7 +88,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     protected void handleClick() {
         MetricsLogger.action(mContext, getMetricsCategory());
         if (mDataController.isMobileDataSupported()) {
-            if(mController.isAdvancedDataTileEnabled()) {
+            if(mController.isEasyToggleEnabled()) {
                 mDataController.setMobileDataEnabled(!mDataController.isMobileDataEnabled());
             } else {
                 showDetail(true);
@@ -101,7 +101,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     @Override
     protected void handleLongClick() {
         MetricsLogger.action(mContext, getMetricsCategory());
-        if(mController.isAdvancedDataTileEnabled()) {
+        if(mController.isEasyToggleEnabled()) {
             if (mDataController.isMobileDataSupported()) {
             showDetail(true);
             } else {
