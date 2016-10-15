@@ -16,8 +16,11 @@
 
 package android.telephony;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -28,12 +31,13 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.BatteryStats;
-import android.os.ResultReceiver;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.service.carrier.CarrierIdentifier;
@@ -837,6 +841,29 @@ public class TelephonyManager {
      * A flavor of OMTP protocol with a different mobile originated (MO) format
      */
     public static final String VVM_TYPE_CVVM = "vvm_type_cvvm";
+
+    /**
+     * @hide
+     */
+    public static final String USSD_RESPONSE = "USSD_RESPONSE";
+
+    /**
+     * USSD return code success.
+     * @hide
+     */
+    public static final int USSD_RETURN_SUCCESS = 100;
+
+    /**
+     * USSD return code for failure case.
+     * @hide
+     */
+    public static final int USSD_RETURN_FAILURE = -1;
+
+    /**
+     * USSD return code for failure case.
+     * @hide
+     */
+    public static final int USSD_ERROR_SERVICE_UNAVAIL = -2;
 
     //
     //
@@ -4963,6 +4990,56 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#]", e);
         }
         return new int[0];
+    }
+
+    public static abstract class OnReceiveUssdResponseCallback {
+       /**
+        ** Called when USSD has succeeded.
+        **/
+       public void onReceiveUssdResponse(String request, CharSequence response) {};
+
+       /**
+        ** Called when USSD has failed.
+        **/
+       public void onReceiveUssdResponseFailed(String request, int failureCode) {};
+    }
+
+    /* <p>Requires permission:
+     * @link android.Manifest.permission#CALL_PHONE}
+     */
+    @RequiresPermission(android.Manifest.permission.CALL_PHONE)
+    public void sendUssdRequest(String ussdRequest,
+                                final OnReceiveUssdResponseCallback callback, Handler handler) {
+       checkNotNull(callback, "OnReceiveUssdResponseCallback cannot be null.");
+
+       ResultReceiver wrappedCallback = new ResultReceiver(handler) {
+           @Override
+           protected void onReceiveResult(int resultCode, Bundle ussdResponse) {
+              Rlog.d(TAG, "USSD:" + resultCode);
+              checkNotNull(ussdResponse, "ussdResponse cannot be null.");
+              UssdResponse response = ussdResponse.getParcelable(USSD_RESPONSE);
+
+              if (resultCode == USSD_RETURN_SUCCESS) {
+                 callback.onReceiveUssdResponse(response.getUssdRequest(),
+                         response.getReturnMessage());
+              } else {
+                 callback.onReceiveUssdResponseFailed(response.getUssdRequest(), resultCode);
+              }
+           }
+        };
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.handleUssdRequest(ussdRequest, wrappedCallback);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#sendUSSDCode", e);
+            UssdResponse response = new UssdResponse(ussdRequest, "");
+            Bundle returnData = new Bundle();
+            returnData.putParcelable(USSD_RESPONSE, response);
+            wrappedCallback.send(USSD_ERROR_SERVICE_UNAVAIL, returnData);
+        }
     }
 
     /** @hide */
