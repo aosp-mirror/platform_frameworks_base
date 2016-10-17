@@ -17,7 +17,7 @@
 package android.text;
 
 import android.annotation.Nullable;
-import android.graphics.Canvas;
+import android.graphics.BaseCanvas;
 import android.graphics.Paint;
 import android.util.Log;
 
@@ -1357,7 +1357,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * Don't call this yourself -- exists for Canvas to use internally.
      * {@hide}
      */
-    public void drawText(Canvas c, int start, int end, float x, float y, Paint p) {
+    @Override
+    public void drawText(BaseCanvas c, int start, int end, float x, float y, Paint p) {
         checkRange("drawText", start, end);
 
         if (end <= mGapStart) {
@@ -1378,7 +1379,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * Don't call this yourself -- exists for Canvas to use internally.
      * {@hide}
      */
-    public void drawTextRun(Canvas c, int start, int end, int contextStart, int contextEnd,
+    @Override
+    public void drawTextRun(BaseCanvas c, int start, int end, int contextStart, int contextEnd,
             float x, float y, boolean isRtl, Paint p) {
         checkRange("drawTextRun", start, end);
 

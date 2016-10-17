@@ -19,7 +19,6 @@ package android.view;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.util.Pools.SynchronizedPool;
@@ -34,7 +33,7 @@ import dalvik.annotation.optimization.FastNative;
  *
  * @hide
  */
-public class DisplayListCanvas extends Canvas {
+public final class DisplayListCanvas extends RecordingCanvas {
     // The recording canvas pool should be large enough to handle a deeply nested
     // view hierarchy because display lists are generated recursively.
     private static final int POOL_LIMIT = 25;
@@ -42,7 +41,7 @@ public class DisplayListCanvas extends Canvas {
     private static final int MAX_BITMAP_SIZE = 100 * 1024 * 1024; // 100 MB
 
     private static final SynchronizedPool<DisplayListCanvas> sPool =
-            new SynchronizedPool<DisplayListCanvas>(POOL_LIMIT);
+            new SynchronizedPool<>(POOL_LIMIT);
 
     RenderNode mNode;
     private int mWidth;

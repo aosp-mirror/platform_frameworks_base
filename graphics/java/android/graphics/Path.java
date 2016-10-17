@@ -775,7 +775,8 @@ public class Path {
         }
     }
 
-    final long readOnlyNI() {
+    /** @hide */
+    public final long readOnlyNI() {
         return mNativePath;
     }
 

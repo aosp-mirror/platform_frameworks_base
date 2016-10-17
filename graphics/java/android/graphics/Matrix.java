@@ -838,7 +838,8 @@ public class Matrix {
 
     }
 
-    /* package */ final long ni() {
+    /** @hide */
+    public final long ni() {
         return native_instance;
     }
 
