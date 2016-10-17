@@ -131,6 +131,7 @@ public class TileQueryHelper {
         state.label = label;
         state.contentDescription = label;
         state.icon = new DrawableIcon(drawable);
+        state.autoMirrorDrawable = false;
         addTile(spec, appLabel, state, false);
     }
 
