@@ -1313,9 +1313,12 @@ public class NotificationPanelView extends PanelView implements
             }
             return;
         }
-        boolean belowFalsingThreshold = isFalseTouch();
-        if (belowFalsingThreshold) {
+
+        // If we move in the opposite direction, reset velocity and use a different duration.
+        boolean oppositeDirection = false;
+        if (vel > 0 && !expand || vel < 0 && expand) {
             vel = 0;
+            oppositeDirection = true;
         }
         ValueAnimator animator = ValueAnimator.ofFloat(mQsExpansionHeight, target);
         if (isClick) {
@@ -1324,7 +1327,7 @@ public class NotificationPanelView extends PanelView implements
         } else {
             mFlingAnimationUtils.apply(animator, mQsExpansionHeight, target, vel);
         }
-        if (belowFalsingThreshold) {
+        if (oppositeDirection) {
             animator.setDuration(350);
         }
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
