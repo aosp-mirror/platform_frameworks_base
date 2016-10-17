@@ -466,8 +466,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
     /**
-     * If VENDOR_OVERLAY_SKU_PROPERTY is set, search for runtime resource overlay APKs in
-     * VENDOR_OVERLAY_DIR/<value of VENDOR_OVERLAY_SKU_PROPERTY> rather than in
+     * If VENDOR_OVERLAY_SKU_PROPERTY is set, search for runtime resource overlay APKs also in
+     * VENDOR_OVERLAY_DIR/<value of VENDOR_OVERLAY_SKU_PROPERTY> in addition to
      * VENDOR_OVERLAY_DIR.
      */
     private static final String VENDOR_OVERLAY_SKU_PROPERTY = "ro.boot.vendor.overlay.sku";
@@ -2285,18 +2285,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            // Collect vendor overlay packages.
-            // (Do this before scanning any apps.)
+            // Collect vendor overlay packages. (Do this before scanning any apps.)
             // For security and version matching reason, only consider
             // overlay packages if they reside in the right directory.
-            File vendorOverlayDir;
             String overlaySkuDir = SystemProperties.get(VENDOR_OVERLAY_SKU_PROPERTY);
             if (!overlaySkuDir.isEmpty()) {
-                vendorOverlayDir = new File(VENDOR_OVERLAY_DIR, overlaySkuDir);
-            } else {
-                vendorOverlayDir = new File(VENDOR_OVERLAY_DIR);
+                scanDirTracedLI(new File(VENDOR_OVERLAY_DIR, overlaySkuDir), mDefParseFlags
+                        | PackageParser.PARSE_IS_SYSTEM
+                        | PackageParser.PARSE_IS_SYSTEM_DIR
+                        | PackageParser.PARSE_TRUSTED_OVERLAY, scanFlags | SCAN_TRUSTED_OVERLAY, 0);
             }
-            scanDirTracedLI(vendorOverlayDir, mDefParseFlags
+            scanDirTracedLI(new File(VENDOR_OVERLAY_DIR), mDefParseFlags
                     | PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR
                     | PackageParser.PARSE_TRUSTED_OVERLAY, scanFlags | SCAN_TRUSTED_OVERLAY, 0);
