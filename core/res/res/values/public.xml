@@ -2765,4 +2765,5 @@
     </public-group>
 
     <public type="attr" name="min" />
+    <public type="attr" name="rotationAnimation" />
 </resources>

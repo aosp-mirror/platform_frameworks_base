@@ -98,6 +98,7 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 
 /**
  * Parser for package files (APKs) on disk. This supports apps packaged either
@@ -3572,6 +3573,9 @@ public class PackageParser {
 
             a.info.requestedVrComponent =
                 sa.getString(R.styleable.AndroidManifestActivity_enableVrMode);
+
+            a.info.rotationAnimation =
+                sa.getInt(R.styleable.AndroidManifestActivity_rotationAnimation, ROTATION_ANIMATION_ROTATE);
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;
