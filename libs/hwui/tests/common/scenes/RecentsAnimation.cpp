@@ -45,12 +45,14 @@ public:
         int x = dp(32);
         for (int i = 0; i < 4; i++) {
             int y = (height / 4) * i;
-            SkBitmap thumb = TestUtils::createSkBitmap(thumbnailSize, thumbnailSize);
-            thumb.eraseColor(COLORS[i]);
-            sp<RenderNode> card = createCard(x, y, cardsize, cardsize, thumb);
+            SkBitmap bitmap;
+            sk_sp<Bitmap> thumb(TestUtils::createBitmap(thumbnailSize, thumbnailSize, &bitmap));
+
+            bitmap.eraseColor(COLORS[i]);
+            sp<RenderNode> card = createCard(x, y, cardsize, cardsize, *thumb);
             card->mutateStagingProperties().setElevation(i * dp(8));
             renderer.drawRenderNode(card.get());
-            mThumbnail = thumb;
+            mThumbnail = bitmap;
             mCards.push_back(card);
         }
 
@@ -68,8 +70,7 @@ public:
     }
 
 private:
-    sp<RenderNode> createCard(int x, int y, int width, int height,
-            const SkBitmap& thumb) {
+    sp<RenderNode> createCard(int x, int y, int width, int height, Bitmap& thumb) {
         return TestUtils::createNode(x, y, x + width, y + height,
                 [&thumb, width, height](RenderProperties& props, Canvas& canvas) {
             props.setElevation(dp(16));

@@ -478,8 +478,10 @@ void RecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const Sk
     restore();
 }
 
-void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
+void RecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, const SkMatrix& matrix,
                             const SkPaint* paint) {
+    SkBitmap bitmap;
+    hwuiBitmap.getSkBitmap(&bitmap);
     if (matrix.isIdentity()) {
         drawBitmap(&bitmap, paint);
     } else if (!(matrix.getType() & ~(SkMatrix::kScale_Mask | SkMatrix::kTranslate_Mask))
@@ -490,7 +492,7 @@ void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
         SkRect dst;
         bitmap.getBounds(&src);
         matrix.mapRect(&dst, src);
-        drawBitmap(bitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,
+        drawBitmap(hwuiBitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,
                    dst.fLeft, dst.fTop, dst.fRight, dst.fBottom, paint);
     } else {
         save(SaveFlags::Matrix);
@@ -500,9 +502,11 @@ void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
     }
 }
 
-void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
+void RecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint) {
+    SkBitmap bitmap;
+    hwuiBitmap.getSkBitmap(&bitmap);
     if (srcLeft == 0 && srcTop == 0
             && srcRight == bitmap.width()
             && srcBottom == bitmap.height()

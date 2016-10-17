@@ -407,8 +407,7 @@ static void drawBitmapMatrix(JNIEnv* env, jobject, jlong canvasHandle, jobject j
                              jlong matrixHandle, jlong paintHandle) {
     const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
     get_canvas(canvasHandle)->drawBitmap(bitmap, *matrix, paint);
 }
 
@@ -419,8 +418,7 @@ static void drawBitmapRect(JNIEnv* env, jobject, jlong canvasHandle, jobject jbi
     Canvas* canvas = get_canvas(canvasHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
     if (screenDensity != 0 && screenDensity != bitmapDensity) {
         Paint filteredPaint;
         if (paint) {

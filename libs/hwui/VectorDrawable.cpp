@@ -502,18 +502,18 @@ int Tree::draw(Canvas* outCanvas, SkColorFilter* colorFilter,
 }
 
 void Tree::drawStaging(Canvas* outCanvas) {
-    bool redrawNeeded = allocateBitmapIfNeeded(&mStagingCache.bitmap,
+    bool redrawNeeded = allocateBitmapIfNeeded(mStagingCache,
             mStagingProperties.getScaledWidth(), mStagingProperties.getScaledHeight());
     // draw bitmap cache
     if (redrawNeeded || mStagingCache.dirty) {
-        updateBitmapCache(&mStagingCache.bitmap, true);
+        updateBitmapCache(*mStagingCache.bitmap, true);
         mStagingCache.dirty = false;
     }
 
     SkPaint tmpPaint;
     SkPaint* paint = updatePaint(&tmpPaint, &mStagingProperties);
-    outCanvas->drawBitmap(mStagingCache.bitmap, 0, 0,
-            mStagingCache.bitmap.width(), mStagingCache.bitmap.height(),
+    outCanvas->drawBitmap(*mStagingCache.bitmap, 0, 0,
+            mStagingCache.bitmap->width(), mStagingCache.bitmap->height(),
             mStagingProperties.getBounds().left(), mStagingProperties.getBounds().top(),
             mStagingProperties.getBounds().right(), mStagingProperties.getBounds().bottom(), paint);
 }
@@ -535,46 +535,46 @@ SkPaint* Tree::updatePaint(SkPaint* outPaint, TreeProperties* prop) {
     }
 }
 
-const SkBitmap& Tree::getBitmapUpdateIfDirty() {
-    bool redrawNeeded = allocateBitmapIfNeeded(&mCache.bitmap, mProperties.getScaledWidth(),
+Bitmap& Tree::getBitmapUpdateIfDirty() {
+    bool redrawNeeded = allocateBitmapIfNeeded(mCache, mProperties.getScaledWidth(),
             mProperties.getScaledHeight());
     if (redrawNeeded || mCache.dirty) {
-        updateBitmapCache(&mCache.bitmap, false);
+        updateBitmapCache(*mCache.bitmap, false);
         mCache.dirty = false;
     }
-    return mCache.bitmap;
+    return *mCache.bitmap;
 }
 
-void Tree::updateBitmapCache(SkBitmap* outCache, bool useStagingData) {
-    outCache->eraseColor(SK_ColorTRANSPARENT);
-    SkCanvas outCanvas(*outCache);
+void Tree::updateBitmapCache(Bitmap& bitmap, bool useStagingData) {
+    SkBitmap outCache;
+    bitmap.getSkBitmap(&outCache);
+    outCache.eraseColor(SK_ColorTRANSPARENT);
+    SkCanvas outCanvas(outCache);
     float viewportWidth = useStagingData ?
             mStagingProperties.getViewportWidth() : mProperties.getViewportWidth();
     float viewportHeight = useStagingData ?
             mStagingProperties.getViewportHeight() : mProperties.getViewportHeight();
-    float scaleX = outCache->width() / viewportWidth;
-    float scaleY = outCache->height() / viewportHeight;
+    float scaleX = outCache.width() / viewportWidth;
+    float scaleY = outCache.height() / viewportHeight;
     mRootNode->draw(&outCanvas, SkMatrix::I(), scaleX, scaleY, useStagingData);
 }
 
-bool Tree::allocateBitmapIfNeeded(SkBitmap* outCache, int width, int height) {
-    if (!canReuseBitmap(*outCache, width, height)) {
+bool Tree::allocateBitmapIfNeeded(Cache& cache, int width, int height) {
+    if (!canReuseBitmap(cache.bitmap.get(), width, height)) {
 #ifndef ANDROID_ENABLE_LINEAR_BLENDING
         sk_sp<SkColorSpace> colorSpace = nullptr;
 #else
         sk_sp<SkColorSpace> colorSpace = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
 #endif
         SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType, colorSpace);
-        outCache->setInfo(info);
-        // TODO: Count the bitmap cache against app's java heap
-        outCache->allocPixels(info);
+        cache.bitmap = Bitmap::allocateHeapBitmap(info);
         return true;
     }
     return false;
 }
 
-bool Tree::canReuseBitmap(const SkBitmap& bitmap, int width, int height) {
-    return width == bitmap.width() && height == bitmap.height();
+bool Tree::canReuseBitmap(Bitmap* bitmap, int width, int height) {
+    return bitmap && width == bitmap->width() && height == bitmap->height();
 }
 
 void Tree::onPropertyChanged(TreeProperties* prop) {

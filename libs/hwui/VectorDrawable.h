@@ -18,6 +18,7 @@
 #define ANDROID_HWUI_VPATH_H
 
 #include "hwui/Canvas.h"
+#include "hwui/Bitmap.h"
 #include "DisplayList.h"
 
 #include <SkBitmap.h>
@@ -561,7 +562,7 @@ public:
             const SkRect& bounds, bool needsMirroring, bool canReuseCache);
     void drawStaging(Canvas* canvas);
 
-    const SkBitmap& getBitmapUpdateIfDirty();
+    Bitmap& getBitmapUpdateIfDirty();
     void setAllowCaching(bool allowCaching) {
         mAllowCaching = allowCaching;
     }
@@ -691,11 +692,15 @@ public:
     void setPropertyChangeWillBeConsumed(bool willBeConsumed) { mWillBeConsumed = willBeConsumed; }
 
 private:
+    struct Cache {
+        sk_sp<Bitmap> bitmap;
+        bool dirty = true;
+    };
 
     SkPaint* updatePaint(SkPaint* outPaint, TreeProperties* prop);
-    bool allocateBitmapIfNeeded(SkBitmap* outCache, int width, int height);
-    bool canReuseBitmap(const SkBitmap&, int width, int height);
-    void updateBitmapCache(SkBitmap* outCache, bool useStagingData);
+    bool allocateBitmapIfNeeded(Cache& cache, int width, int height);
+    bool canReuseBitmap(Bitmap*, int width, int height);
+    void updateBitmapCache(Bitmap& outCache, bool useStagingData);
     // Cap the bitmap size, such that it won't hurt the performance too much
     // and it won't crash due to a very large scale.
     // The drawable will look blurry above this size.
@@ -708,10 +713,6 @@ private:
     TreeProperties mStagingProperties = TreeProperties(this);
 
     SkPaint mPaint;
-    struct Cache {
-        SkBitmap bitmap;
-        bool dirty = true;
-    };
 
     Cache mStagingCache;
     Cache mCache;

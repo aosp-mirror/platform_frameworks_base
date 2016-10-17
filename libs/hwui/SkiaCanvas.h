@@ -125,9 +125,8 @@ public:
             const uint16_t* indices, int indexCount, const SkPaint& paint) override;
 
     virtual void drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) override;
-    virtual void drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
-            const SkPaint* paint) override;
-    virtual void drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
+    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint) override;
     virtual void drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,

@@ -125,8 +125,7 @@ public:
     static sk_sp<Bitmap> createBitmap(int width, int height,
             SkColorType colorType = kN32_SkColorType) {
         SkImageInfo info = SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType);
-        size_t size = height * info.minRowBytes();
-        return Bitmap::allocateHeapBitmap(size, info, info.minRowBytes(), nullptr);
+        return Bitmap::allocateHeapBitmap(info);
     }
 
     static sk_sp<Bitmap> createBitmap(int width, int height, SkBitmap* outBitmap) {
