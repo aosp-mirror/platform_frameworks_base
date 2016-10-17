@@ -22,6 +22,7 @@
         android:gravity="top|center_horizontal"
         android:minHeight="@dimen/alert_dialog_title_height">
     <ImageView android:id="@+id/icon"
+            android:adjustViewBounds="true"
             android:maxHeight="24dp"
             android:maxWidth="24dp"
             android:layout_marginTop="8dp"
