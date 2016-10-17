@@ -73,6 +73,13 @@
     <string name="accessibility_quick_settings_heads_up_changed_off">Heads up turned off</string>
     <string name="accessibility_quick_settings_heads_up_changed_on">Heads up turned on</string>
 
+    <!-- Navigation bar Tile -->
+    <string name="quick_settings_navigation_bar">Navigation bar</string>
+    <string name="quick_settings_smartbar">SmartBar</string>
+    <string name="quick_settings_smartbar_off">SmartBar off</string>
+    <string name="quick_settings_fling">Fling</string>
+    <string name="quick_settings_fling_off">Fling off</string>
+
     <!-- Reboot/Recovery QS Tile -->
     <string name="quick_settings_reboot_label">Reboot</string>
     <string name="quick_settings_reboot_recovery_label">Recovery</string>
