@@ -64,6 +64,11 @@ interface IWebViewUpdateService {
     String getCurrentWebViewPackageName();
 
     /**
+     * Used by public API for debugging purposes.
+     */
+    PackageInfo getCurrentWebViewPackage();
+
+    /**
      * Used by Settings to determine whether a certain package can be enabled/disabled by the user -
      * the package should not be modifiable in this way if it is a fallback package.
      */

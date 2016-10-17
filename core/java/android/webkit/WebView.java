@@ -21,6 +21,7 @@ import android.annotation.SystemApi;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -36,6 +37,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.StrictMode;
+import android.os.RemoteException;
 import android.print.PrintDocumentAdapter;
 import android.security.KeyChain;
 import android.util.AttributeSet;
@@ -2671,6 +2673,26 @@ public class WebView extends AbsoluteLayout
     @Override
     public View findFocus() {
         return mProvider.getViewDelegate().findFocus(super.findFocus());
+    }
+
+    /**
+     * If WebView has already been loaded into the current process this method will return the
+     * package that was used to load it. Otherwise, the package that would be used if the WebView
+     * was loaded right now will be returned; this does not cause WebView to be loaded, so this
+     * information may become outdated at any time.
+     * @return the current WebView package, or null if there is none.
+     */
+    public static PackageInfo getCurrentWebViewPackage() {
+        PackageInfo webviewPackage = WebViewFactory.getLoadedPackageInfo();
+        if (webviewPackage != null) {
+            return webviewPackage;
+        }
+
+        try {
+            return WebViewFactory.getUpdateService().getCurrentWebViewPackage();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

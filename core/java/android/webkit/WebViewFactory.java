@@ -135,7 +135,9 @@ public final class WebViewFactory {
     }
 
     public static PackageInfo getLoadedPackageInfo() {
-        return sPackageInfo;
+        synchronized (sProviderLock) {
+            return sPackageInfo;
+        }
     }
 
     /**
@@ -170,9 +172,8 @@ public final class WebViewFactory {
             Log.e(LOGTAG, "Couldn't find package " + packageName);
             return LIBLOAD_WRONG_PACKAGE_NAME;
         }
-        sPackageInfo = packageInfo;
 
-        int loadNativeRet = loadNativeLibrary(clazzLoader);
+        int loadNativeRet = loadNativeLibrary(clazzLoader, packageInfo);
         // If we failed waiting for relro we want to return that fact even if we successfully load
         // the relro file.
         if (loadNativeRet == LIBLOAD_SUCCESS) return response.status;
@@ -358,7 +359,7 @@ public final class WebViewFactory {
                 ClassLoader clazzLoader = webViewContext.getClassLoader();
 
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
-                loadNativeLibrary(clazzLoader);
+                loadNativeLibrary(clazzLoader, sPackageInfo);
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
 
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");
@@ -637,14 +638,14 @@ public final class WebViewFactory {
         }
     }
 
-    // Assumes that we have waited for relro creation and set sPackageInfo
-    private static int loadNativeLibrary(ClassLoader clazzLoader) {
+    // Assumes that we have waited for relro creation
+    private static int loadNativeLibrary(ClassLoader clazzLoader, PackageInfo packageInfo) {
         if (!sAddressSpaceReserved) {
             Log.e(LOGTAG, "can't load with relro file; address space not reserved");
             return LIBLOAD_ADDRESS_SPACE_NOT_RESERVED;
         }
 
-        String[] args = getWebViewNativeLibraryPaths(sPackageInfo);
+        String[] args = getWebViewNativeLibraryPaths(packageInfo);
         int result = nativeLoadWithRelroFile(args[0] /* path32 */,
                                              args[1] /* path64 */,
                                              CHROMIUM_WEBVIEW_NATIVE_RELRO_32,

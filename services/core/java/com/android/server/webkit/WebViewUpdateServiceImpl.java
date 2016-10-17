@@ -145,8 +145,8 @@ public class WebViewUpdateServiceImpl {
         return mSystemInterface.getWebViewPackages();
     }
 
-    String getCurrentWebViewPackageName() {
-        return mWebViewUpdater.getCurrentWebViewPackageName();
+    PackageInfo getCurrentWebViewPackage() {
+        return mWebViewUpdater.getCurrentWebViewPackage();
     }
 
     void enableFallbackLogic(boolean enable) {
@@ -316,6 +316,7 @@ public class WebViewUpdateServiceImpl {
                                 onWebViewProviderChanged(newPackage);
                             }
                         } catch (WebViewPackageMissingException e) {
+                            mCurrentWebViewPackage = null;
                             Slog.e(TAG, "Could not find valid WebView package to create " +
                                     "relro with " + e);
                         }
@@ -371,6 +372,7 @@ public class WebViewUpdateServiceImpl {
                     providerChanged = (oldPackage == null)
                             || !newPackage.packageName.equals(oldPackage.packageName);
                 } catch (WebViewPackageMissingException e) {
+                    mCurrentWebViewPackage = null;
                     Slog.e(TAG, "Tried to change WebView provider but failed to fetch WebView " +
                             "package " + e);
                     // If we don't perform the user change but don't have an installed WebView
@@ -548,11 +550,9 @@ public class WebViewUpdateServiceImpl {
             return new WebViewProviderResponse(webViewPackage, webViewStatus);
         }
 
-        public String getCurrentWebViewPackageName() {
+        public PackageInfo getCurrentWebViewPackage() {
             synchronized(mLock) {
-                if (mCurrentWebViewPackage == null)
-                    return null;
-                return mCurrentWebViewPackage.packageName;
+                return mCurrentWebViewPackage;
             }
         }
 
@@ -579,6 +579,7 @@ public class WebViewUpdateServiceImpl {
                         PackageInfo newPackage = findPreferredWebViewPackage();
                         onWebViewProviderChanged(newPackage);
                     } catch (WebViewPackageMissingException e) {
+                        mCurrentWebViewPackage = null;
                         // If we can't find any valid WebView package we are now in a state where
                         // mAnyWebViewInstalled is false, so loading WebView will be blocked and we
                         // should simply wait until we receive an intent declaring a new package was
