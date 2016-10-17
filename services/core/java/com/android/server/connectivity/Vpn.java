@@ -27,6 +27,8 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -76,6 +78,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.net.LegacyVpnInfo;
@@ -241,12 +244,14 @@ public class Vpn {
     /**
      * Update current state, dispaching event to listeners.
      */
-    private void updateState(DetailedState detailedState, String reason) {
+    @VisibleForTesting
+    protected void updateState(DetailedState detailedState, String reason) {
         if (LOGD) Log.d(TAG, "setting state=" + detailedState + ", reason=" + reason);
         mNetworkInfo.setDetailedState(detailedState, reason, null);
         if (mNetworkAgent != null) {
             mNetworkAgent.sendNetworkInfo(mNetworkInfo);
         }
+        updateAlwaysOnNotification(detailedState);
     }
 
     /**
@@ -280,7 +285,10 @@ public class Vpn {
         }
 
         mLockdown = (mAlwaysOn && lockdown);
-        if (!isCurrentPreparedPackage(packageName)) {
+        if (isCurrentPreparedPackage(packageName)) {
+            updateAlwaysOnNotification(mNetworkInfo.getDetailedState());
+        } else {
+            // Prepare this app. The notification will update as a side-effect of updateState().
             prepareInternal(packageName);
         }
         maybeRegisterPackageChangeReceiverLocked(packageName);
@@ -682,22 +690,19 @@ public class Vpn {
         }
     }
 
-    private void agentDisconnect(NetworkInfo networkInfo, NetworkAgent networkAgent) {
-        networkInfo.setIsAvailable(false);
-        networkInfo.setDetailedState(DetailedState.DISCONNECTED, null, null);
+    private void agentDisconnect(NetworkAgent networkAgent) {
         if (networkAgent != null) {
+            NetworkInfo networkInfo = new NetworkInfo(mNetworkInfo);
+            networkInfo.setIsAvailable(false);
+            networkInfo.setDetailedState(DetailedState.DISCONNECTED, null, null);
             networkAgent.sendNetworkInfo(networkInfo);
         }
     }
 
-    private void agentDisconnect(NetworkAgent networkAgent) {
-        NetworkInfo networkInfo = new NetworkInfo(mNetworkInfo);
-        agentDisconnect(networkInfo, networkAgent);
-    }
-
     private void agentDisconnect() {
         if (mNetworkInfo.isConnected()) {
-            agentDisconnect(mNetworkInfo, mNetworkAgent);
+            mNetworkInfo.setIsAvailable(false);
+            updateState(DetailedState.DISCONNECTED, "agentDisconnect");
             mNetworkAgent = null;
         }
     }
@@ -1247,6 +1252,43 @@ public class Vpn {
                 }
             }
             return false;
+        }
+    }
+
+    private void updateAlwaysOnNotification(DetailedState networkState) {
+        final boolean visible = (mAlwaysOn && networkState != DetailedState.CONNECTED);
+        updateAlwaysOnNotificationInternal(visible);
+    }
+
+    @VisibleForTesting
+    protected void updateAlwaysOnNotificationInternal(boolean visible) {
+        final UserHandle user = UserHandle.of(mUserHandle);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final NotificationManager notificationManager = NotificationManager.from(mContext);
+            if (!visible) {
+                notificationManager.cancelAsUser(TAG, 0, user);
+                return;
+            }
+            final Intent intent = new Intent(Settings.ACTION_VPN_SETTINGS);
+            final PendingIntent configIntent = PendingIntent.getActivityAsUser(
+                    mContext, /* request */ 0, intent,
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
+                    null, user);
+            final Notification.Builder builder = new Notification.Builder(mContext)
+                    .setDefaults(0)
+                    .setSmallIcon(R.drawable.vpn_connected)
+                    .setContentTitle(mContext.getString(R.string.vpn_lockdown_disconnected))
+                    .setContentText(mContext.getString(R.string.vpn_lockdown_config))
+                    .setContentIntent(configIntent)
+                    .setCategory(Notification.CATEGORY_SYSTEM)
+                    .setPriority(Notification.PRIORITY_LOW)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .setOngoing(true)
+                    .setColor(mContext.getColor(R.color.system_notification_accent_color));
+            notificationManager.notifyAsUser(TAG, 0, builder.build(), user);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
