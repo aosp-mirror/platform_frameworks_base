@@ -438,21 +438,11 @@ public class Contacts {
         public static final String PRIMARY_ORGANIZATION_ID = "primary_organization";
 
         /**
-         * Mark a person as having been contacted.
-         *
-         * @param resolver the ContentResolver to use
-         * @param personId the person who was contacted
-         * @deprecated see {@link android.provider.ContactsContract}
+         * This API is no longer supported as of O.
          */
         @Deprecated
         public static void markAsContacted(ContentResolver resolver, long personId) {
-            Uri uri = ContentUris.withAppendedId(CONTENT_URI, personId);
-            uri = Uri.withAppendedPath(uri, "update_contact_time");
-            ContentValues values = new ContentValues();
-            // There is a trigger in place that will update TIMES_CONTACTED when
-            // LAST_TIME_CONTACTED is modified.
-            values.put(LAST_TIME_CONTACTED, System.currentTimeMillis());
-            resolver.update(uri, values, null, null);
+            // No longer supported.
         }
 
         /**
