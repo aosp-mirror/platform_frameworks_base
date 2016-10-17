@@ -66,21 +66,6 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
         "android.bluetooth.avrcp-controller.profile.action.CONNECTION_STATE_CHANGED";
 
     /**
-     * Intent used to broadcast the change in metadata state of playing track on the AVRCP
-     * AG.
-     *
-     * <p>This intent will have the two extras:
-     * <ul>
-     *    <li> {@link #EXTRA_METADATA} - {@link MediaMetadata} containing the current metadata.</li>
-     *    <li> {@link #EXTRA_PLAYBACK} - {@link PlaybackState} containing the current playback
-     *    state. </li>
-     * </ul>
-     */
-    public static final String ACTION_TRACK_EVENT =
-        "android.bluetooth.avrcp-controller.profile.action.TRACK_EVENT";
-
-
-    /**
      * Intent used to broadcast the change in player application setting state on AVRCP AG.
      *
      * <p>This intent will have the following extras:
@@ -92,34 +77,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
     public static final String ACTION_PLAYER_SETTING =
         "android.bluetooth.avrcp-controller.profile.action.PLAYER_SETTING";
 
-    public static final String EXTRA_METADATA =
-            "android.bluetooth.avrcp-controller.profile.extra.METADATA";
-
-    public static final String EXTRA_PLAYBACK =
-            "android.bluetooth.avrcp-controller.profile.extra.PLAYBACK";
-
     public static final String EXTRA_PLAYER_SETTING =
             "android.bluetooth.avrcp-controller.profile.extra.PLAYER_SETTING";
-
-    /*
-     * KeyCoded for Pass Through Commands
-     */
-    public static final int PASS_THRU_CMD_ID_PLAY = 0x44;
-    public static final int PASS_THRU_CMD_ID_PAUSE = 0x46;
-    public static final int PASS_THRU_CMD_ID_VOL_UP = 0x41;
-    public static final int PASS_THRU_CMD_ID_VOL_DOWN = 0x42;
-    public static final int PASS_THRU_CMD_ID_STOP = 0x45;
-    public static final int PASS_THRU_CMD_ID_FF = 0x49;
-    public static final int PASS_THRU_CMD_ID_REWIND = 0x48;
-    public static final int PASS_THRU_CMD_ID_FORWARD = 0x4B;
-    public static final int PASS_THRU_CMD_ID_BACKWARD = 0x4C;
-    /* Key State Variables */
-    public static final int KEY_STATE_PRESSED = 0;
-    public static final int KEY_STATE_RELEASED = 1;
-    /* Group Navigation Key Codes */
-    public static final int PASS_THRU_CMD_ID_NEXT_GRP = 0x00;
-    public static final int PASS_THRU_CMD_ID_PREV_GRP = 0x01;
-
 
     private Context mContext;
     private ServiceListener mServiceListener;
@@ -267,20 +226,6 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
         return BluetoothProfile.STATE_DISCONNECTED;
     }
 
-    public void sendPassThroughCmd(BluetoothDevice device, int keyCode, int keyState) {
-        if (DBG) Log.d(TAG, "sendPassThroughCmd");
-        if (mService != null && isEnabled()) {
-            try {
-                mService.sendPassThroughCmd(device, keyCode, keyState);
-                return;
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error talking to BT service in sendPassThroughCmd()", e);
-                return;
-            }
-        }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
-    }
-
     /**
      * Gets the player application settings.
      *
@@ -298,49 +243,6 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
             }
         }
         return settings;
-    }
-
-    /**
-     * Gets the metadata for the current track.
-     *
-     * This should be usually called when application UI needs to be updated, eg. when the track
-     * changes or immediately after connecting and getting the current state.
-     * @return the {@link MediaMetadata} or {@link null} if there is an error.
-     */
-    public MediaMetadata getMetadata(BluetoothDevice device) {
-        if (DBG) Log.d(TAG, "getMetadata");
-        MediaMetadata metadata = null;
-        if (mService != null && isEnabled()) {
-            try {
-                metadata = mService.getMetadata(device);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error talking to BT service in getMetadata() " + e);
-                return null;
-            }
-        }
-        return metadata;
-    }
-
-    /**
-     * Gets the playback state for current track.
-     *
-     * When the application is first connecting it can use current track state to get playback info.
-     * For all further updates it should listen to notifications.
-     * @return the {@link PlaybackState} or {@link null} if there is an error.
-     */
-    public PlaybackState getPlaybackState(BluetoothDevice device) {
-        if (DBG) Log.d(TAG, "getPlaybackState");
-        PlaybackState playbackState = null;
-        if (mService != null && isEnabled()) {
-            try {
-                playbackState = mService.getPlaybackState(device);
-            } catch (RemoteException e) {
-                Log.e(TAG,
-                    "Error talking to BT service in getPlaybackState() " + e);
-                return null;
-            }
-        }
-        return playbackState;
     }
 
     /**
