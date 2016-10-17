@@ -25,7 +25,9 @@ import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 
 import android.os.UserManager;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+import dalvik.system.CloseGuard;
 
 import java.io.IOException;
 
@@ -44,6 +46,16 @@ public final class MtpDevice {
     static {
         System.loadLibrary("media_jni");
     }
+
+    /** Make sure that MTP device is closed properly */
+    @GuardedBy("mLock")
+    private CloseGuard mCloseGuard = CloseGuard.get();
+
+    /** Current connection to the {@link #mDevice}, or null if device is not connected */
+    @GuardedBy("mLock")
+    private UsbDeviceConnection mConnection;
+
+    private final Object mLock = new Object();
 
     /**
      * MtpClient constructor
@@ -68,17 +80,25 @@ public final class MtpDevice {
         boolean result = false;
 
         Context context = connection.getContext();
-        if (context != null) {
-            UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
 
-            if (!userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER)) {
-                result = native_open(mDevice.getDeviceName(), connection.getFileDescriptor());
+        synchronized (mLock) {
+            if (context != null) {
+                UserManager userManager = (UserManager) context
+                        .getSystemService(Context.USER_SERVICE);
+
+                if (!userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER)) {
+                    result = native_open(mDevice.getDeviceName(), connection.getFileDescriptor());
+                }
+            }
+
+            if (!result) {
+                connection.close();
+            } else {
+                mConnection = connection;
+                mCloseGuard.open("close");
             }
         }
 
-        if (!result) {
-            connection.close();
-        }
         return result;
     }
 
@@ -88,13 +108,23 @@ public final class MtpDevice {
      * with a new {@link android.hardware.usb.UsbDeviceConnection}.
      */
     public void close() {
-        native_close();
+        synchronized (mLock) {
+            if (mConnection != null) {
+                mCloseGuard.close();
+
+                native_close();
+
+                mConnection.close();
+                mConnection = null;
+            }
+        }
     }
 
     @Override
     protected void finalize() throws Throwable {
         try {
-            native_close();
+            mCloseGuard.warnIfOpen();
+            close();
         } finally {
             super.finalize();
         }
