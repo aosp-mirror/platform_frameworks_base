@@ -15,12 +15,11 @@
      limitations under the License.
 -->
 <resources>
-    <!-- Network traffic monitor single-line text size -->
-    <dimen name="net_traffic_single_text_size">12dp</dimen>
-
-    <!-- Network traffic monitor multi-line text size -->
-    <dimen name="net_traffic_multi_text_size">8dp</dimen>
-
-    <!-- carrier label text height -->
-    <dimen name="status_bar_carrier_height">14dp</dimen>
+    <!-- Custom Carrier Label -->
+    <style name="TextAppearance.StatusBar.CarrierLabel" parent="@*android:style/TextAppearance.StatusBar.Icon">
+        <!-- Note: must be dp to fit in status bar -->
+        <item name="android:textSize">@dimen/status_bar_carrier_height</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/status_bar_carrier_color</item>
+    </style>
 </resources>
