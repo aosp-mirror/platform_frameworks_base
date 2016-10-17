@@ -690,11 +690,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
     private LegacyTypeTracker mLegacyTypeTracker = new LegacyTypeTracker();
 
-    @VisibleForTesting
-    protected HandlerThread createHandlerThread() {
-        return new HandlerThread("ConnectivityServiceThread");
-    }
-
     public ConnectivityService(Context context, INetworkManagementService netManager,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         this(context, netManager, statsService, policyManager, new IpConnectivityLog());
@@ -715,7 +710,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mDefaultMobileDataRequest = createInternetRequestForTransport(
                 NetworkCapabilities.TRANSPORT_CELLULAR, NetworkRequest.Type.BACKGROUND_REQUEST);
 
-        mHandlerThread = createHandlerThread();
+        mHandlerThread = new HandlerThread("ConnectivityServiceThread");
         mHandlerThread.start();
         mHandler = new InternalHandler(mHandlerThread.getLooper());
         mTrackerHandler = new NetworkStateTrackerHandler(mHandlerThread.getLooper());
