@@ -219,18 +219,27 @@ final class RemoteConnectionService {
                     conference.addConnection(c);
                 }
             }
-
             if (conference.getConnections().size() == 0) {
                 // A conference was created, but none of its connections are ones that have been
                 // created by, and therefore being tracked by, this remote connection service. It
                 // is of no interest to us.
+                Log.d(this, "addConferenceCall - skipping");
                 return;
             }
 
             conference.setState(parcel.getState());
             conference.setConnectionCapabilities(parcel.getConnectionCapabilities());
             conference.setConnectionProperties(parcel.getConnectionProperties());
+            conference.putExtras(parcel.getExtras());
             mConferenceById.put(callId, conference);
+
+            // Stash the original connection ID as it exists in the source ConnectionService.
+            // Telecom will use this to avoid adding duplicates later.
+            // See comments on Connection.EXTRA_ORIGINAL_CONNECTION_ID for more information.
+            Bundle newExtras = new Bundle();
+            newExtras.putString(Connection.EXTRA_ORIGINAL_CONNECTION_ID, callId);
+            conference.putExtras(newExtras);
+
             conference.registerCallback(new RemoteConference.Callback() {
                 @Override
                 public void onDestroyed(RemoteConference c) {
@@ -342,11 +351,17 @@ final class RemoteConnectionService {
         @Override
         public void addExistingConnection(String callId, ParcelableConnection connection,
                 Session.Info sessionInfo) {
-            // TODO: add contents of this method
-            RemoteConnection remoteConnction = new RemoteConnection(callId,
+            RemoteConnection remoteConnection = new RemoteConnection(callId,
                     mOutgoingConnectionServiceRpc, connection);
-
-            mOurConnectionServiceImpl.addRemoteExistingConnection(remoteConnction);
+            mConnectionById.put(callId, remoteConnection);
+            remoteConnection.registerCallback(new RemoteConnection.Callback() {
+                @Override
+                public void onDestroyed(RemoteConnection connection) {
+                    mConnectionById.remove(callId);
+                    maybeDisconnectAdapter();
+                }
+            });
+            mOurConnectionServiceImpl.addRemoteExistingConnection(remoteConnection);
         }
 
         @Override

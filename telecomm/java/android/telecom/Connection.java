@@ -428,6 +428,31 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.extra.DISABLE_ADD_CALL";
 
     /**
+     * String connection extra key on a {@link Connection} or {@link Conference} which contains the
+     * original Connection ID associated with the connection.  Used in
+     * {@link RemoteConnectionService} to track the Connection ID which was originally assigned to a
+     * connection/conference added via
+     * {@link ConnectionService#addExistingConnection(PhoneAccountHandle, Connection)} and
+     * {@link ConnectionService#addConference(Conference)} APIs.  This is important to pass to
+     * Telecom for when it deals with RemoteConnections.  When the ConnectionManager wraps the
+     * {@link RemoteConnection} and {@link RemoteConference} and adds it to Telecom, there needs to
+     * be a way to ensure that we don't add the connection again as a duplicate.
+     * <p>
+     * For example, the TelephonyCS calls addExistingConnection for a Connection with ID
+     * {@code TelephonyCS@1}.  The ConnectionManager learns of this via
+     * {@link ConnectionService#onRemoteExistingConnectionAdded(RemoteConnection)}, and wraps this
+     * in a new {@link Connection} which it adds to Telecom via
+     * {@link ConnectionService#addExistingConnection(PhoneAccountHandle, Connection)}.  As part of
+     * this process, the wrapped RemoteConnection gets assigned a new ID (e.g. {@code ConnMan@1}).
+     * The TelephonyCS will ALSO try to add the existing connection to Telecom, except with the
+     * ID it originally referred to the connection as.  Thus Telecom needs to know that the
+     * Connection with ID {@code ConnMan@1} is really the same as {@code TelephonyCS@1}.
+     * @hide
+     */
+    public static final String EXTRA_ORIGINAL_CONNECTION_ID =
+            "android.telecom.extra.ORIGINAL_CONNECTION_ID";
+
+    /**
      * Connection event used to inform Telecom that it should play the on hold tone.  This is used
      * to play a tone when the peer puts the current call on hold.  Sent to Telecom via
      * {@link #sendConnectionEvent(String, Bundle)}.
