@@ -477,6 +477,35 @@ RENDERTHREAD_TEST(FrameBuilder, clippedMerging) {
     EXPECT_EQ(4, renderer.getIndex());
 }
 
+RENDERTHREAD_TEST(FrameBuilder, regionClipStopsMerge) {
+    class RegionClipStopsMergeTestRenderer : public TestRendererBase {
+    public:
+        void onTextOp(const TextOp& op, const BakedOpState& state) override { mIndex++; }
+    };
+    auto node = TestUtils::createNode(0, 0, 400, 400,
+            [](RenderProperties& props, TestCanvas& canvas) {
+        SkPath path;
+        path.addCircle(200, 200, 200, SkPath::kCW_Direction);
+        canvas.save(SaveFlags::MatrixClip);
+        canvas.clipPath(&path, SkRegion::kIntersect_Op);
+        SkPaint paint;
+        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+        paint.setAntiAlias(true);
+        paint.setTextSize(50);
+        TestUtils::drawUtf8ToCanvas(&canvas, "Test string1", paint, 100, 100);
+        TestUtils::drawUtf8ToCanvas(&canvas, "Test string1", paint, 100, 200);
+        canvas.restore();
+    });
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(400, 400), 400, 400,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(node));
+
+    RegionClipStopsMergeTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(2, renderer.getIndex());
+}
+
 RENDERTHREAD_TEST(FrameBuilder, textMerging) {
     class TextMergingTestRenderer : public TestRendererBase {
     public:

@@ -591,7 +591,7 @@ void FrameBuilder::deferArcOp(const ArcOp& op) {
 }
 
 static bool hasMergeableClip(const BakedOpState& state) {
-    return state.computedState.clipState
+    return !state.computedState.clipState
             || state.computedState.clipState->mode == ClipMode::Rectangle;
 }
 
