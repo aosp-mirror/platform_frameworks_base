@@ -23,6 +23,7 @@
 
 #include <linux/fuse.h>
 #include <sys/stat.h>
+#include <sys/uio.h>
 
 #include <map>
 
