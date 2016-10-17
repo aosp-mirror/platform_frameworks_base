@@ -124,6 +124,10 @@ public class InterfaceConfiguration implements Parcelable {
         return false;
     }
 
+    public boolean isUp() {
+        return hasFlag(FLAG_UP);
+    }
+
     /** {@inheritDoc} */
     public int describeContents() {
         return 0;
