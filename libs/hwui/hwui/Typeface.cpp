@@ -22,6 +22,8 @@
 
 #include "Typeface.h"
 
+#include <pthread.h>
+
 #include "MinikinSkia.h"
 #include "SkTypeface.h"
 #include "SkPaint.h"
