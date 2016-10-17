@@ -21,6 +21,7 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.DisplayInfo;
 
 import java.io.PrintWriter;
 
@@ -109,15 +110,11 @@ class WindowToken extends WindowContainer<WindowState> {
         final int count = mChildren.size();
         boolean changed = false;
         boolean delayed = false;
-        DisplayContent displayContent = null;
 
         for (int i = 0; i < count; i++) {
             final WindowState win = mChildren.get(i);
             if (win.mWinAnimator.isAnimationSet()) {
                 delayed = true;
-                // TODO: This is technically wrong as a token can have windows on multi-displays
-                // currently. That will change moving forward though.
-                displayContent = win.getDisplayContent();
             }
             changed |= win.onSetAppExiting();
         }
@@ -129,8 +126,8 @@ class WindowToken extends WindowContainer<WindowState> {
             mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /*updateInputWindows*/);
         }
 
-        if (delayed && displayContent != null) {
-            displayContent.mExitingTokens.add(this);
+        if (delayed) {
+            mDisplayContent.mExitingTokens.add(this);
         }
     }
 
@@ -174,22 +171,19 @@ class WindowToken extends WindowContainer<WindowState> {
     void addWindow(final WindowState win) {
         if (DEBUG_FOCUS) Slog.d(TAG_WM, "addWindow: win=" + win + " Callers=" + Debug.getCallers(5));
 
-        final DisplayContent dc = win.getDisplayContent();
         if (!win.isChildWindow()) {
             int tokenWindowsPos = 0;
-            if (dc != null) {
-                if (asAppWindowToken() != null) {
-                    tokenWindowsPos = dc.addAppWindowToWindowList(win);
-                } else {
-                    dc.addNonAppWindowToWindowList(win);
-                }
+            if (asAppWindowToken() != null) {
+                tokenWindowsPos = mDisplayContent.addAppWindowToWindowList(win);
+            } else {
+                mDisplayContent.addNonAppWindowToWindowList(win);
             }
             if (!mChildren.contains(win)) {
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + this);
                 addChild(win, tokenWindowsPos);
             }
-        } else if (dc != null) {
-            dc.addChildWindowToWindowList(win);
+        } else {
+            mDisplayContent.addChildWindowToWindowList(win);
         }
     }
 
@@ -289,11 +283,15 @@ class WindowToken extends WindowContainer<WindowState> {
         }
     }
 
-    void updateWallpaperVisibility(int dw, int dh, boolean visible, DisplayContent displayContent) {
+    void updateWallpaperVisibility(boolean visible) {
+        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
+        final int dw = displayInfo.logicalWidth;
+        final int dh = displayInfo.logicalHeight;
+
         if (hidden == visible) {
             hidden = !visible;
             // Need to do a layout to ensure the wallpaper now has the correct size.
-            displayContent.setLayoutNeeded();
+            mDisplayContent.setLayoutNeeded();
         }
 
         final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
@@ -316,7 +314,7 @@ class WindowToken extends WindowContainer<WindowState> {
                     "Wallpaper token " + token + " hidden=" + !visible);
             hidden = !visible;
             // Need to do a layout to ensure the wallpaper now has the correct size.
-            mService.getDefaultDisplayContentLocked().setLayoutNeeded();
+            mDisplayContent.setLayoutNeeded();
         }
 
         final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;

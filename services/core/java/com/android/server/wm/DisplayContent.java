@@ -49,6 +49,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEME
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowManagerService.localLOGV;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
@@ -63,6 +64,7 @@ import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Debug;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.util.Slog;
@@ -299,14 +301,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 changedStackList.add(stack.mStackId);
             }
         }
-    }
-
-    void checkAppWindowsReadyToShow() {
-        super.checkAppWindowsReadyToShow(mDisplayId);
-    }
-
-    void stepAppWindowsAnimation(long currentTime) {
-        super.stepAppWindowsAnimation(currentTime, mDisplayId);
     }
 
     @Override
@@ -870,15 +864,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return;
         }
         final int lostFocusUid = oldFocus.mOwnerUid;
-        WindowList windows = getWindowList();
+        final WindowList windows = getWindowList();
         final int windowCount = windows.size();
+        final Handler handler = mService.mH;
         for (int i = 0; i < windowCount; i++) {
-            WindowState window = windows.get(i);
+            final WindowState window = windows.get(i);
             if (window.mAttrs.type == TYPE_TOAST && window.mOwnerUid == lostFocusUid) {
-                if (!mService.mH.hasMessages(WindowManagerService.H.WINDOW_HIDE_TIMEOUT, window)) {
-                    mService.mH.sendMessageDelayed(
-                            mService.mH.obtainMessage(
-                                    WindowManagerService.H.WINDOW_HIDE_TIMEOUT, window),
+                if (!handler.hasMessages(WINDOW_HIDE_TIMEOUT, window)) {
+                    handler.sendMessageDelayed(handler.obtainMessage(WINDOW_HIDE_TIMEOUT, window),
                             window.mAttrs.hideTimeoutMilliseconds);
                 }
             }

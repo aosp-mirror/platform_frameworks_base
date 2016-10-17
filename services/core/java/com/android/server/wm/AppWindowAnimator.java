@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
@@ -332,7 +333,7 @@ public class AppWindowAnimator {
     }
 
     // This must be called while inside a transaction.
-    boolean stepAnimationLocked(long currentTime, final int displayId) {
+    boolean stepAnimationLocked(long currentTime) {
         if (mService.okToDisplay()) {
             // We will run animations as long as the display isn't frozen.
 
@@ -383,8 +384,7 @@ public class AppWindowAnimator {
             return false;
         }
 
-        mAppToken.setAppLayoutChanges(
-                WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM, "AppWindowToken", displayId);
+        mAppToken.setAppLayoutChanges(FINISH_LAYOUT_REDO_ANIM, "AppWindowToken");
 
         clearAnimation();
         animating = false;

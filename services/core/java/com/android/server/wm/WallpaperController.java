@@ -146,18 +146,11 @@ class WallpaperController {
     }
 
     void updateWallpaperVisibility() {
-        final DisplayContent displayContent = mWallpaperTarget.getDisplayContent();
-        if (displayContent == null) {
-            return;
-        }
         final boolean visible = isWallpaperVisible(mWallpaperTarget);
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        final int dw = displayInfo.logicalWidth;
-        final int dh = displayInfo.logicalHeight;
 
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
             final WindowToken token = mWallpaperTokens.get(curTokenNdx);
-            token.updateWallpaperVisibility(dw, dh, visible, displayContent);
+            token.updateWallpaperVisibility(visible);
         }
     }
 
@@ -309,7 +302,7 @@ class WallpaperController {
         return null;
     }
 
-    void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
+    private void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
         final DisplayContent displayContent = changingTarget.getDisplayContent();
         if (displayContent == null) {
             return;
