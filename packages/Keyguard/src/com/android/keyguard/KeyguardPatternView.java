@@ -200,7 +200,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     }
 
     private void displayDefaultSecurityMessage() {
-        mSecurityMessageDisplay.setMessage(R.string.kg_pattern_instructions, false);
+        mSecurityMessageDisplay.setMessage("");
     }
 
     @Override
@@ -219,7 +219,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         @Override
         public void onPatternStart() {
             mLockPatternView.removeCallbacks(mCancelPatternRunnable);
-            mSecurityMessageDisplay.setMessage("", false);
+            mSecurityMessageDisplay.setMessage("");
         }
 
         @Override
@@ -314,7 +314,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                     }
                 }
                 if (timeoutMs == 0) {
-                    mSecurityMessageDisplay.setMessage(R.string.kg_wrong_pattern, true);
+                    mSecurityMessageDisplay.setMessage(R.string.kg_wrong_pattern);
                     mLockPatternView.postDelayed(mCancelPatternRunnable, PATTERN_CLEAR_TIMEOUT_MS);
                 }
             }
@@ -331,8 +331,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             @Override
             public void onTick(long millisUntilFinished) {
                 final int secondsRemaining = (int) (millisUntilFinished / 1000);
-                mSecurityMessageDisplay.setMessage(
-                        R.string.kg_too_many_failed_attempts_countdown, true, secondsRemaining);
+                mSecurityMessageDisplay.formatMessage(
+                        R.string.kg_too_many_failed_attempts_countdown, secondsRemaining);
             }
 
             @Override
@@ -375,26 +375,21 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     public void showPromptReason(int reason) {
         switch (reason) {
             case PROMPT_REASON_RESTART:
-                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_restart_pattern,
-                        true /* important */);
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_restart_pattern);
                 break;
             case PROMPT_REASON_TIMEOUT:
-                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_timeout_pattern,
-                        true /* important */);
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_timeout_pattern);
                 break;
             case PROMPT_REASON_DEVICE_ADMIN:
-                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_device_admin,
-                        true /* important */);
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_device_admin);
                 break;
             case PROMPT_REASON_USER_REQUEST:
-                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_user_request,
-                        true /* important */);
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_user_request);
                 break;
             case PROMPT_REASON_NONE:
                 break;
             default:
-                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_timeout_pattern,
-                        true /* important */);
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_timeout_pattern);
                 break;
         }
     }
@@ -402,7 +397,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     @Override
     public void showMessage(String message, int color) {
         mSecurityMessageDisplay.setNextMessageColor(color);
-        mSecurityMessageDisplay.setMessage(message, true /* important */);
+        mSecurityMessageDisplay.setMessage(message);
     }
 
     @Override

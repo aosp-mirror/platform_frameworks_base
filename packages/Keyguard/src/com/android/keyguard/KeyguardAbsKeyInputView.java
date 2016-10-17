@@ -200,7 +200,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                 }
             }
             if (timeoutMs == 0) {
-                mSecurityMessageDisplay.setMessage(getWrongPasswordStringId(), true);
+                mSecurityMessageDisplay.setMessage(getWrongPasswordStringId());
             }
         }
         resetPasswordText(true /* animate */, !matched /* announce deletion if no match */);
@@ -220,13 +220,13 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
             @Override
             public void onTick(long millisUntilFinished) {
                 int secondsRemaining = (int) (millisUntilFinished / 1000);
-                mSecurityMessageDisplay.setMessage(
-                        R.string.kg_too_many_failed_attempts_countdown, true, secondsRemaining);
+                mSecurityMessageDisplay.formatMessage(
+                        R.string.kg_too_many_failed_attempts_countdown, secondsRemaining);
             }
 
             @Override
             public void onFinish() {
-                mSecurityMessageDisplay.setMessage("", false);
+                mSecurityMessageDisplay.setMessage("");
                 resetState();
             }
         }.start();
@@ -236,7 +236,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         if (mCallback != null) {
             mCallback.userActivity();
         }
-        mSecurityMessageDisplay.setMessage("", false);
+        mSecurityMessageDisplay.setMessage("");
     }
 
     @Override
@@ -273,8 +273,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         if (reason != PROMPT_REASON_NONE) {
             int promtReasonStringRes = getPromtReasonStringRes(reason);
             if (promtReasonStringRes != 0) {
-                mSecurityMessageDisplay.setMessage(promtReasonStringRes,
-                        true /* important */);
+                mSecurityMessageDisplay.setMessage(promtReasonStringRes);
             }
         }
     }
@@ -282,7 +281,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     @Override
     public void showMessage(String message, int color) {
         mSecurityMessageDisplay.setNextMessageColor(color);
-        mSecurityMessageDisplay.setMessage(message, true /* important */);
+        mSecurityMessageDisplay.setMessage(message);
     }
 
     protected abstract int getPromtReasonStringRes(int reason);

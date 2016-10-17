@@ -108,7 +108,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
             }
             resetPasswordText(true /* animate */, true /* announce */);
             if (msg != 0) {
-                mSecurityMessageDisplay.setMessage(msg, true);
+                mSecurityMessageDisplay.setMessage(msg);
             }
         }
 
@@ -133,7 +133,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
                         color = info.getIconTint();
                     }
                 }
-                mSecurityMessageDisplay.setMessage(msg, true);
+                mSecurityMessageDisplay.setMessage(msg);
                 mSimImageView.setImageTintList(ColorStateList.valueOf(color));
             }
             mPasswordEntry.requestFocus();
@@ -184,7 +184,6 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mSecurityMessageDisplay.setTimeout(0); // don't show ownerinfo/charging status by default
         if (mEcaView instanceof EmergencyCarrierArea) {
             ((EmergencyCarrierArea) mEcaView).setCarrierTextVisible(true);
         }
@@ -341,11 +340,11 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
                                     } else {
                                         // show message
                                         mSecurityMessageDisplay.setMessage(
-                                                getPukPasswordErrorMessage(attemptsRemaining), true);
+                                                getPukPasswordErrorMessage(attemptsRemaining));
                                     }
                                 } else {
                                     mSecurityMessageDisplay.setMessage(getContext().getString(
-                                            R.string.kg_password_puk_failed), true);
+                                            R.string.kg_password_puk_failed));
                                 }
                                 if (DEBUG) Log.d(LOG_TAG, "verifyPasswordAndUnlock "
                                         + " UpdateSim.onSimCheckResponse: "
