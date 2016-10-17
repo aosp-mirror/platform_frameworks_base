@@ -58,7 +58,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="@dimen/header_battery_margin_keyguard"
             android:paddingEnd="@dimen/battery_level_padding_end"
-            android:textColor="#ffffff"
+            android:textColor="@color/status_bar_battery_level_text_color"
             android:visibility="gone"
             android:textSize="@dimen/battery_level_text_size"
             android:importantForAccessibility="noHideDescendants"/>

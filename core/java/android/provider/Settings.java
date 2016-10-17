@@ -7354,6 +7354,15 @@ public final class Settings {
         public static final String ADB_PORT = "adb_port";
 
         /**
+         * Status bar battery %
+         * 0: Hide the battery percentage
+         * 1: Display the battery percentage inside the icon
+         * 2: Display the battery percentage next to the icon
+         * @hide
+         */
+        public static final String STATUS_BAR_SHOW_BATTERY_PERCENT = "status_bar_show_battery_percent";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -7437,7 +7446,8 @@ public final class Settings {
             DOZE_ENABLED,
             DOZE_PULSE_ON_PICK_UP,
             DOZE_PULSE_ON_DOUBLE_TAP,
-            NFC_PAYMENT_DEFAULT_COMPONENT
+            NFC_PAYMENT_DEFAULT_COMPONENT,
+            STATUS_BAR_SHOW_BATTERY_PERCENT
         };
 
         /**
