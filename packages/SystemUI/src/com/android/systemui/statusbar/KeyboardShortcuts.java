@@ -488,9 +488,9 @@ public final class KeyboardShortcuts {
         final Icon messagingIcon = getIconForIntentCategory(Intent.CATEGORY_APP_MESSAGING, userId);
         if (messagingIcon != null) {
             keyboardShortcutInfoAppItems.add(new KeyboardShortcutInfo(
-                    mContext.getString(R.string.keyboard_shortcut_group_applications_im),
+                    mContext.getString(R.string.keyboard_shortcut_group_applications_sms),
                     messagingIcon,
-                    KeyEvent.KEYCODE_T,
+                    KeyEvent.KEYCODE_S,
                     KeyEvent.META_META_ON));
         }
 
