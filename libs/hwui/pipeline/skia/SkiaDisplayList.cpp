@@ -24,6 +24,7 @@
 
 namespace android {
 namespace uirenderer {
+namespace skiapipeline {
 
 SkiaDisplayList::SkiaDisplayList(SkRect bounds) : mDrawable(SkLiteDL::New(bounds)) {
     SkASSERT(projectionReceiveIndex == -1);
@@ -130,5 +131,6 @@ void SkiaDisplayList::reset(GrContext* context, SkRect bounds) {
     new (&allocator) LinearAllocator();
 }
 
+}; // namespace skiapipeline
 }; // namespace uirenderer
 }; // namespace android

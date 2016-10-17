@@ -20,14 +20,14 @@
 #include "AnimationContext.h"
 #include "DamageAccumulator.h"
 #include "IContextFactory.h"
-#include "SkiaDisplayList.h"
+#include "pipeline/skia/SkiaDisplayList.h"
 #include "renderthread/CanvasContext.h"
 #include "tests/common/TestUtils.h"
-
 
 using namespace android;
 using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
+using namespace android::uirenderer::skiapipeline;
 
 TEST(SkiaDisplayList, create) {
     SkRect bounds = SkRect::MakeWH(200, 200);

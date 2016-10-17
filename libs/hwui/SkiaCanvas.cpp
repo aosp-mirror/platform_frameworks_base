@@ -21,6 +21,7 @@
 #include "VectorDrawable.h"
 #include "hwui/Bitmap.h"
 #include "hwui/MinikinUtils.h"
+#include "pipeline/skia/AnimatedDrawables.h"
 
 #include <SkDrawable.h>
 #include <SkDevice.h>
@@ -56,6 +57,8 @@ SkiaCanvas::SkiaCanvas(SkCanvas* canvas)
 SkiaCanvas::SkiaCanvas(const SkBitmap& bitmap) {
     mCanvas.reset(new SkCanvas(bitmap));
 }
+
+SkiaCanvas::~SkiaCanvas() {}
 
 void SkiaCanvas::reset(SkCanvas* skiaCanvas) {
     mCanvas.reset(SkRef(skiaCanvas));
@@ -671,62 +674,6 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeigh
                          indexCount, tmpPaint);
 }
 
-static inline int num_distinct_rects(const SkCanvas::Lattice& lattice) {
-    int xRects;
-    if (lattice.fXCount > 0) {
-        xRects = (0 == lattice.fXDivs[0]) ? lattice.fXCount : lattice.fXCount + 1;
-    } else {
-        xRects = 1;
-    }
-
-    int yRects;
-    if (lattice.fYCount > 0) {
-        yRects = (0 == lattice.fYDivs[0]) ? lattice.fYCount : lattice.fYCount + 1;
-    } else {
-        yRects = 1;
-    }
-    return xRects * yRects;
-}
-
-static inline void set_lattice_flags(SkCanvas::Lattice* lattice, SkCanvas::Lattice::Flags* flags,
-                                     int numFlags, const Res_png_9patch& chunk) {
-    lattice->fFlags = flags;
-    sk_bzero(flags, numFlags * sizeof(SkCanvas::Lattice::Flags));
-
-    bool needPadRow = lattice->fYCount > 0 && 0 == lattice->fYDivs[0];
-    bool needPadCol = lattice->fXCount > 0 && 0 == lattice->fXDivs[0];
-
-    int yCount = lattice->fYCount;
-    if (needPadRow) {
-        // Skip flags for the degenerate first row of rects.
-        flags += lattice->fXCount + 1;
-        yCount--;
-    }
-
-    int i = 0;
-    bool setFlags = false;
-    for (int y = 0; y < yCount + 1; y++) {
-        for (int x = 0; x < lattice->fXCount + 1; x++) {
-            if (0 == x && needPadCol) {
-                // First rect of each column is degenerate, skip the flag.
-                flags++;
-                continue;
-            }
-
-            if (0 == chunk.getColors()[i++]) {
-                *flags = SkCanvas::Lattice::kTransparent_Flags;
-                setFlags = true;
-            }
-
-            flags++;
-        }
-    }
-
-    if (!setFlags) {
-        lattice->fFlags = nullptr;
-    }
-}
-
 void SkiaCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch& chunk,
         float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
 
@@ -738,7 +685,7 @@ void SkiaCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch& chunk,
 
     lattice.fFlags = nullptr;
     int numFlags = 0;
-    if (chunk.numColors > 0 && chunk.numColors == num_distinct_rects(lattice)) {
+    if (chunk.numColors > 0 && chunk.numColors == NinePatchUtils::NumDistinctRects(lattice)) {
         // We can expect the framework to give us a color for every distinct rect.
         // Skia requires a flag for every rect.
         numFlags = (lattice.fXCount + 1) * (lattice.fYCount + 1);
@@ -746,7 +693,7 @@ void SkiaCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch& chunk,
 
     SkAutoSTMalloc<25, SkCanvas::Lattice::Flags> flags(numFlags);
     if (numFlags > 0) {
-        set_lattice_flags(&lattice, flags.get(), numFlags, chunk);
+        NinePatchUtils::SetLatticeFlags(&lattice, flags.get(), numFlags, chunk);
     }
 
     lattice.fBounds = nullptr;
@@ -820,69 +767,18 @@ void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, 
 // Canvas draw operations: Animations
 // ----------------------------------------------------------------------------
 
-class AnimatedRoundRect : public SkDrawable {
- public:
-    AnimatedRoundRect(uirenderer::CanvasPropertyPrimitive* left,
-            uirenderer::CanvasPropertyPrimitive* top, uirenderer::CanvasPropertyPrimitive* right,
-            uirenderer::CanvasPropertyPrimitive* bottom, uirenderer::CanvasPropertyPrimitive* rx,
-            uirenderer::CanvasPropertyPrimitive* ry, uirenderer::CanvasPropertyPaint* p) :
-            mLeft(left), mTop(top), mRight(right), mBottom(bottom), mRx(rx), mRy(ry), mPaint(p) {}
-
- protected:
-     virtual SkRect onGetBounds() override {
-         return SkRect::MakeLTRB(mLeft->value, mTop->value, mRight->value, mBottom->value);
-     }
-     virtual void onDraw(SkCanvas* canvas) override {
-         SkRect rect = SkRect::MakeLTRB(mLeft->value, mTop->value, mRight->value, mBottom->value);
-         canvas->drawRoundRect(rect, mRx->value, mRy->value, mPaint->value);
-     }
-
- private:
-    sp<uirenderer::CanvasPropertyPrimitive> mLeft;
-    sp<uirenderer::CanvasPropertyPrimitive> mTop;
-    sp<uirenderer::CanvasPropertyPrimitive> mRight;
-    sp<uirenderer::CanvasPropertyPrimitive> mBottom;
-    sp<uirenderer::CanvasPropertyPrimitive> mRx;
-    sp<uirenderer::CanvasPropertyPrimitive> mRy;
-    sp<uirenderer::CanvasPropertyPaint> mPaint;
-};
-
-class AnimatedCircle : public SkDrawable {
- public:
-    AnimatedCircle(uirenderer::CanvasPropertyPrimitive* x, uirenderer::CanvasPropertyPrimitive* y,
-            uirenderer::CanvasPropertyPrimitive* radius, uirenderer::CanvasPropertyPaint* paint) :
-            mX(x), mY(y), mRadius(radius), mPaint(paint) {}
-
- protected:
-     virtual SkRect onGetBounds() override {
-         const float x = mX->value;
-         const float y = mY->value;
-         const float radius = mRadius->value;
-         return SkRect::MakeLTRB(x - radius, y - radius, x + radius, y + radius);
-     }
-     virtual void onDraw(SkCanvas* canvas) override {
-         canvas->drawCircle(mX->value, mY->value, mRadius->value, mPaint->value);
-     }
-
- private:
-    sp<uirenderer::CanvasPropertyPrimitive> mX;
-    sp<uirenderer::CanvasPropertyPrimitive> mY;
-    sp<uirenderer::CanvasPropertyPrimitive> mRadius;
-    sp<uirenderer::CanvasPropertyPaint> mPaint;
-};
-
 void SkiaCanvas::drawRoundRect(uirenderer::CanvasPropertyPrimitive* left,
         uirenderer::CanvasPropertyPrimitive* top, uirenderer::CanvasPropertyPrimitive* right,
         uirenderer::CanvasPropertyPrimitive* bottom, uirenderer::CanvasPropertyPrimitive* rx,
         uirenderer::CanvasPropertyPrimitive* ry, uirenderer::CanvasPropertyPaint* paint) {
-    sk_sp<AnimatedRoundRect> drawable(
-            new AnimatedRoundRect(left, top, right, bottom, rx, ry, paint));
+    sk_sp<uirenderer::skiapipeline::AnimatedRoundRect> drawable(
+            new uirenderer::skiapipeline::AnimatedRoundRect(left, top, right, bottom, rx, ry, paint));
     mCanvas->drawDrawable(drawable.get());
 }
 
 void SkiaCanvas::drawCircle(uirenderer::CanvasPropertyPrimitive* x, uirenderer::CanvasPropertyPrimitive* y,
         uirenderer::CanvasPropertyPrimitive* radius, uirenderer::CanvasPropertyPaint* paint) {
-    sk_sp<AnimatedCircle> drawable(new AnimatedCircle(x, y, radius, paint));
+    sk_sp<uirenderer::skiapipeline::AnimatedCircle> drawable(new uirenderer::skiapipeline::AnimatedCircle(x, y, radius, paint));
     mCanvas->drawDrawable(drawable.get());
 }
 

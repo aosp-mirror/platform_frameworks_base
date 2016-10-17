@@ -125,5 +125,44 @@ std::unique_ptr<uint16_t[]> TestUtils::asciiToUtf16(const char* str) {
     return utf16;
 }
 
+SkColor TestUtils::getColor(const sk_sp<SkSurface>& surface, int x, int y) {
+    SkPixmap pixmap;
+    if (!surface->peekPixels(&pixmap)) {
+        return 0;
+    }
+    switch (pixmap.colorType()) {
+        case kGray_8_SkColorType: {
+            const uint8_t* addr = pixmap.addr8(x, y);
+            return SkColorSetRGB(*addr, *addr, *addr);
+        }
+        case kAlpha_8_SkColorType: {
+            const uint8_t* addr = pixmap.addr8(x, y);
+            return SkColorSetA(0, addr[0]);
+        }
+        case kRGB_565_SkColorType: {
+            const uint16_t* addr = pixmap.addr16(x, y);
+            return SkPixel16ToColor(addr[0]);
+        }
+        case kARGB_4444_SkColorType: {
+            const uint16_t* addr = pixmap.addr16(x, y);
+            SkPMColor c = SkPixel4444ToPixel32(addr[0]);
+            return SkUnPreMultiply::PMColorToColor(c);
+        }
+        case kBGRA_8888_SkColorType: {
+            const uint32_t* addr = pixmap.addr32(x, y);
+            SkPMColor c = SkSwizzle_BGRA_to_PMColor(addr[0]);
+            return SkUnPreMultiply::PMColorToColor(c);
+        }
+        case kRGBA_8888_SkColorType: {
+            const uint32_t* addr = pixmap.addr32(x, y);
+            SkPMColor c = SkSwizzle_RGBA_to_PMColor(addr[0]);
+            return SkUnPreMultiply::PMColorToColor(c);
+        }
+        default:
+            return 0;
+    }
+    return 0;
+}
+
 } /* namespace uirenderer */
 } /* namespace android */

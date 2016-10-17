@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#pragma once
+
 namespace android {
 namespace NinePatchUtils {
 
@@ -31,6 +33,62 @@ static inline void SetLatticeDivs(SkCanvas::Lattice* lattice, const Res_png_9pat
     }
     if (lattice->fYCount > 0 && height == lattice->fYDivs[lattice->fYCount - 1]) {
         lattice->fYCount--;
+    }
+}
+
+static inline int NumDistinctRects(const SkCanvas::Lattice& lattice) {
+    int xRects;
+    if (lattice.fXCount > 0) {
+        xRects = (0 == lattice.fXDivs[0]) ? lattice.fXCount : lattice.fXCount + 1;
+    } else {
+        xRects = 1;
+    }
+
+    int yRects;
+    if (lattice.fYCount > 0) {
+        yRects = (0 == lattice.fYDivs[0]) ? lattice.fYCount : lattice.fYCount + 1;
+    } else {
+        yRects = 1;
+    }
+    return xRects * yRects;
+}
+
+static inline void SetLatticeFlags(SkCanvas::Lattice* lattice, SkCanvas::Lattice::Flags* flags,
+        int numFlags, const Res_png_9patch& chunk) {
+    lattice->fFlags = flags;
+    sk_bzero(flags, numFlags * sizeof(SkCanvas::Lattice::Flags));
+
+    bool needPadRow = lattice->fYCount > 0 && 0 == lattice->fYDivs[0];
+    bool needPadCol = lattice->fXCount > 0 && 0 == lattice->fXDivs[0];
+
+    int yCount = lattice->fYCount;
+    if (needPadRow) {
+        // Skip flags for the degenerate first row of rects.
+        flags += lattice->fXCount + 1;
+        yCount--;
+    }
+
+    int i = 0;
+    bool setFlags = false;
+    for (int y = 0; y < yCount + 1; y++) {
+        for (int x = 0; x < lattice->fXCount + 1; x++) {
+            if (0 == x && needPadCol) {
+                // First rect of each column is degenerate, skip the flag.
+                flags++;
+                continue;
+            }
+
+            if (0 == chunk.getColors()[i++]) {
+                *flags = SkCanvas::Lattice::kTransparent_Flags;
+                setFlags = true;
+            }
+
+            flags++;
+        }
+    }
+
+    if (!setFlags) {
+        lattice->fFlags = nullptr;
     }
 }
 

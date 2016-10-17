@@ -260,6 +260,8 @@ public:
          int mLastMode = -1;
      };
 
+    static SkColor getColor(const sk_sp<SkSurface>& surface, int x, int y);
+
 private:
     static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {
         node->syncProperties();
