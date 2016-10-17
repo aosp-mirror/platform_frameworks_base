@@ -165,6 +165,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final GetWindowOnDisplaySearchResult mTmpGetWindowOnDisplaySearchResult =
             new GetWindowOnDisplaySearchResult();
 
+    // True if this display is in the process of being removed. Used to determine if the removal of
+    // the display's direct children should be allowed.
+    private boolean mRemovingDisplay = false;
+
     /**
      * @param display May not be null.
      * @param service You know.
@@ -433,6 +437,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @Override
     protected void removeChild(DisplayChildWindowContainer child) {
+        // Only allow removal of direct children from this display if the display is in the process
+        // of been removed.
+        if (mRemovingDisplay) {
+            super.removeChild(child);
+            return;
+        }
         throw new UnsupportedOperationException("See DisplayChildWindowContainer");
     }
 
@@ -565,12 +575,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @Override
     void removeImmediately() {
-        super.removeImmediately();
-        if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
-        mDimLayerController.close();
-        if (mDisplayId == DEFAULT_DISPLAY) {
-            mService.unregisterPointerEventListener(mTapDetector);
-            mService.unregisterPointerEventListener(mService.mMousePositionTracker);
+        mRemovingDisplay = true;
+        try {
+            super.removeImmediately();
+            if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
+            mDimLayerController.close();
+            if (mDisplayId == DEFAULT_DISPLAY) {
+                mService.unregisterPointerEventListener(mTapDetector);
+                mService.unregisterPointerEventListener(mService.mMousePositionTracker);
+            }
+        } finally {
+            mRemovingDisplay = false;
         }
     }
 
