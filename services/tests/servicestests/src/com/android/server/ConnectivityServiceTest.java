@@ -68,6 +68,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
+import android.test.FlakyTest;
 import android.test.mock.MockContentResolver;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -215,8 +216,20 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             mService.waitForIdle();
             assertEquals(i, mCm.getNetworkCapabilities(n).getSignalStrength());
         }
+    }
+
+    @FlakyTest(tolerance = 3)
+    public void testNotWaitingForIdleCausesRaceConditions() {
+        // Bring up a network that we can use to send messages to ConnectivityService.
+        ConditionVariable cv = waitForConnectivityBroadcasts(1);
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+        waitFor(cv);
+        Network n = mWiFiNetworkAgent.getNetwork();
+        assertNotNull(n);
 
         // Ensure that not calling waitForIdle causes a race condition.
+        final int attempts = 50;  // Causes the test to take about 200ms on bullhead-eng.
         for (int i = 0; i < attempts; i++) {
             mWiFiNetworkAgent.setSignalStrength(i);
             if (i != mCm.getNetworkCapabilities(n).getSignalStrength()) {
