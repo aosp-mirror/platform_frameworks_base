@@ -1578,30 +1578,30 @@ public interface WindowManager extends ViewManager {
         public float buttonBrightness = BRIGHTNESS_OVERRIDE_NONE;
 
         /**
-         * Value for {@link #rotationAnimation} to define the animation used to
-         * specify that this window will rotate in or out following a rotation.
+         * Value for {@link #rotationAnimation} which specifies that this
+         * window will visually rotate in or out following a rotation.
          */
         public static final int ROTATION_ANIMATION_ROTATE = 0;
 
         /**
-         * Value for {@link #rotationAnimation} to define the animation used to
-         * specify that this window will fade in or out following a rotation.
+         * Value for {@link #rotationAnimation} which specifies that this
+         * window will fade in or out following a rotation.
          */
         public static final int ROTATION_ANIMATION_CROSSFADE = 1;
 
         /**
-         * Value for {@link #rotationAnimation} to define the animation used to
-         * specify that this window will immediately disappear or appear following
-         * a rotation.
+         * Value for {@link #rotationAnimation} which specifies that this window
+         * will immediately disappear or appear following a rotation.
          */
         public static final int ROTATION_ANIMATION_JUMPCUT = 2;
 
         /**
          * Value for {@link #rotationAnimation} to specify seamless rotation mode.
          * This works like JUMPCUT but will fall back to CROSSFADE if rotation
-         * can't be applied without pausing the screen.
-         *
-         * @hide
+         * can't be applied without pausing the screen. For example, this is ideal
+         * for Camera apps which don't want the viewfinder contents to ever rotate
+         * or fade (and rather to be seamless) but also don't want ROTATION_ANIMATION_JUMPCUT
+         * during app transition scenarios where seamless rotation can't be applied.
          */
         public static final int ROTATION_ANIMATION_SEAMLESS = 3;
 
