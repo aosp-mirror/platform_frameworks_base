@@ -1100,7 +1100,7 @@ public class VoiceInteractionManagerService extends SystemService {
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump PowerManager from from pid="
+                pw.println("Permission Denial: can't dump voiceinteraction from from pid="
                         + Binder.getCallingPid()
                         + ", uid=" + Binder.getCallingUid());
                 return;
