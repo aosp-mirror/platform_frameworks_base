@@ -285,10 +285,9 @@ public class ApfFilter {
         mReceiveThread.start();
     }
 
-    // Returns seconds since Unix Epoch.
-    // TODO: use SystemClock.elapsedRealtime() instead
+    // Returns seconds since device boot.
     private static long curTime() {
-        return System.currentTimeMillis() / DateUtils.SECOND_IN_MILLIS;
+        return SystemClock.elapsedRealtime() / DateUtils.SECOND_IN_MILLIS;
     }
 
     public static class InvalidRaException extends Exception {
