@@ -18,11 +18,13 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.SparseBooleanArray;
 
+import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.R;
 
 import java.io.PrintWriter;
@@ -31,9 +33,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DozeParameters {
-    private static final String TAG = "DozeParameters";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-
     private static final int MAX_DURATION = 60 * 1000;
 
     private final Context mContext;
@@ -55,10 +54,8 @@ public class DozeParameters {
         pw.print("    getPulseOutDuration(): "); pw.println(getPulseOutDuration());
         pw.print("    getPulseOnSigMotion(): "); pw.println(getPulseOnSigMotion());
         pw.print("    getVibrateOnSigMotion(): "); pw.println(getVibrateOnSigMotion());
-        pw.print("    getPulseOnPickup(): "); pw.println(getPulseOnPickup());
         pw.print("    getVibrateOnPickup(): "); pw.println(getVibrateOnPickup());
         pw.print("    getProxCheckBeforePulse(): "); pw.println(getProxCheckBeforePulse());
-        pw.print("    getPulseOnNotifications(): "); pw.println(getPulseOnNotifications());
         pw.print("    getPickupVibrationThreshold(): "); pw.println(getPickupVibrationThreshold());
         pw.print("    getPickupSubtypePerformsProxCheck(): ");pw.println(
                 dumpPickupSubtypePerformsProxCheck());
@@ -106,24 +103,12 @@ public class DozeParameters {
         return SystemProperties.getBoolean("doze.vibrate.sigmotion", false);
     }
 
-    public boolean getPulseOnPickup() {
-        return getBoolean("doze.pulse.pickup", R.bool.doze_pulse_on_pick_up);
-    }
-
     public boolean getVibrateOnPickup() {
         return SystemProperties.getBoolean("doze.vibrate.pickup", false);
     }
 
-    public String getDoubleTapSensorType() {
-        return mContext.getString(R.string.doze_double_tap_sensor_type);
-    }
-
     public boolean getProxCheckBeforePulse() {
         return getBoolean("doze.pulse.proxcheck", R.bool.doze_proximity_check_before_pulse);
-    }
-
-    public boolean getPulseOnNotifications() {
-        return getBoolean("doze.pulse.notifications", R.bool.doze_pulse_on_notifications);
     }
 
     public int getPickupVibrationThreshold() {

@@ -43,6 +43,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
 
+import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.SystemUIApplication;
@@ -85,6 +86,8 @@ public class DozeService extends DreamService {
     private boolean mCarMode;
     private long mNotificationPulseTime;
 
+    private AmbientDisplayConfiguration mConfig;
+
     public DozeService() {
         if (DEBUG) Log.d(mTag, "new DozeService()");
         setDebug(DEBUG);
@@ -125,6 +128,7 @@ public class DozeService extends DreamService {
         setWindowless(true);
 
         mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
+        mConfig = new AmbientDisplayConfiguration(mContext);
         mSensors = new TriggerSensor[] {
                 new TriggerSensor(
                         mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION),
@@ -135,12 +139,12 @@ public class DozeService extends DreamService {
                 mPickupSensor = new TriggerSensor(
                         mSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE),
                         Settings.Secure.DOZE_PULSE_ON_PICK_UP,
-                        mDozeParameters.getPulseOnPickup(), mDozeParameters.getVibrateOnPickup(),
+                        mConfig.pulseOnPickupAvailable(), mDozeParameters.getVibrateOnPickup(),
                         DozeLog.PULSE_REASON_SENSOR_PICKUP),
                 new TriggerSensor(
-                        findSensorWithType(mDozeParameters.getDoubleTapSensorType()),
-                        Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
-                        mDozeParameters.getPulseOnPickup(), mDozeParameters.getVibrateOnPickup(),
+                        findSensorWithType(mConfig.doubleTapSensorType()),
+                        Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP, true,
+                        mDozeParameters.getVibrateOnPickup(),
                         DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP)
         };
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -359,7 +363,7 @@ public class DozeService extends DreamService {
 
     private void requestNotificationPulse() {
         if (DEBUG) Log.d(mTag, "requestNotificationPulse");
-        if (!mDozeParameters.getPulseOnNotifications()) return;
+        if (!mConfig.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) return;
         mNotificationPulseTime = SystemClock.elapsedRealtime();
         requestPulse(DozeLog.PULSE_REASON_NOTIFICATION);
     }
