@@ -373,7 +373,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public DetailedState getDetailedState() {
-        return mNetworkInfo != null ? mNetworkInfo.getDetailedState() : null;
+        if (mNetworkInfo != null) {
+            return mNetworkInfo.getDetailedState();
+        }
+        Log.w(TAG, "NetworkInfo is null, cannot return detailed state");
+        return null;
     }
 
     public String getSavedNetworkSummary() {
@@ -813,7 +817,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 return context.getString(R.string.wifi_connected_no_internet);
             }
         }
-
+        if (state == null) {
+            Log.w(TAG, "state is null, returning empty summary");
+            return "";
+        }
         String[] formats = context.getResources().getStringArray((ssid == null)
                 ? R.array.wifi_status : R.array.wifi_status_with_ssid);
         int index = state.ordinal();
