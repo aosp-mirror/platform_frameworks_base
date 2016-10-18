@@ -33,6 +33,7 @@ import static com.android.server.wm.AppTransition.TRANSIT_NONE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED;
+import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -296,7 +297,7 @@ public class DockedStackDividerController implements DimLayerUser {
         }
     }
 
-    boolean wasVisible() {
+    private boolean wasVisible() {
         return mLastVisibility;
     }
 
@@ -356,7 +357,7 @@ public class DockedStackDividerController implements DimLayerUser {
         mLastRect.set(frame);
     }
 
-    void notifyDockedDividerVisibilityChanged(boolean visible) {
+    private void notifyDockedDividerVisibilityChanged(boolean visible) {
         final int size = mDockedStackListeners.beginBroadcast();
         for (int i = 0; i < size; ++i) {
             final IDockedStackListener listener = mDockedStackListeners.getBroadcastItem(i);
@@ -413,7 +414,7 @@ public class DockedStackDividerController implements DimLayerUser {
         return mImeHideRequested;
     }
 
-    void notifyDockedStackMinimizedChanged(boolean minimizedDock, long animDuration) {
+    private void notifyDockedStackMinimizedChanged(boolean minimizedDock, long animDuration) {
         mService.mH.removeMessages(NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED);
         mService.mH.obtainMessage(NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED,
                 minimizedDock ? 1 : 0, 0).sendToTarget();
@@ -442,7 +443,7 @@ public class DockedStackDividerController implements DimLayerUser {
         mDockedStackListeners.finishBroadcast();
     }
 
-    void notifyAdjustedForImeChanged(boolean adjustedForIme, long animDuration) {
+    private void notifyAdjustedForImeChanged(boolean adjustedForIme, long animDuration) {
         final int size = mDockedStackListeners.beginBroadcast();
         for (int i = 0; i < size; ++i) {
             final IDockedStackListener listener = mDockedStackListeners.getBroadcastItem(i);
@@ -474,8 +475,7 @@ public class DockedStackDividerController implements DimLayerUser {
             stack.getDimBounds(mTmpRect);
             if (mTmpRect.height() > 0 && mTmpRect.width() > 0) {
                 mDimLayer.setBounds(mTmpRect);
-                mDimLayer.show(mService.mLayersController.getResizeDimLayer(),
-                        alpha, 0 /* duration */);
+                mDimLayer.show(getResizeDimLayer(), alpha, 0 /* duration */);
             } else {
                 visibleAndValid = false;
             }
@@ -484,6 +484,14 @@ public class DockedStackDividerController implements DimLayerUser {
             mDimLayer.hide();
         }
         mService.closeSurfaceTransaction();
+    }
+
+    /**
+     * @return The layer used for dimming the apps when dismissing docked/fullscreen stack. Just
+     *         above all application surfaces.
+     */
+    private int getResizeDimLayer() {
+        return (mWindow != null) ? mWindow.mLayer - 1 : LAYER_OFFSET_DIM;
     }
 
     /**
@@ -693,7 +701,7 @@ public class DockedStackDividerController implements DimLayerUser {
             return animateForIme(now);
         } else {
             if (mDimLayer != null && mDimLayer.isDimming()) {
-                mDimLayer.setLayer(mService.mLayersController.getResizeDimLayer());
+                mDimLayer.setLayer(getResizeDimLayer());
             }
             return false;
         }

@@ -532,7 +532,7 @@ class WindowSurfacePlacer {
         // TODO(multidisplay): IMEs are only supported on the default display.
         if (windows == mService.getDefaultWindowListLocked()
                 && !mService.moveInputMethodWindowsIfNeededLocked(true)) {
-            mService.mLayersController.assignLayersLocked(windows);
+            mService.getDefaultDisplayContentLocked().assignWindowLayers(false /*setLayoutNeeded*/);
         }
         mService.updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
                 true /*updateInputWindows*/);

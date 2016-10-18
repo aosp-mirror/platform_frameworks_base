@@ -425,8 +425,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         if (destroyedSomething) {
             final DisplayContent dc = getDisplayContent();
-            mService.mLayersController.assignLayersLocked(dc.getWindowList());
-            dc.setLayoutNeeded();
+            dc.assignWindowLayers(true /*setLayoutNeeded*/);
         }
     }
 

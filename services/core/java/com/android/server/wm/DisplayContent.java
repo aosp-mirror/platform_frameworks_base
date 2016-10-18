@@ -44,6 +44,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
@@ -171,13 +172,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // the display's direct children should be allowed.
     private boolean mRemovingDisplay = false;
 
+    private final WindowLayersController mLayersController;
+    int mInputMethodAnimLayerAdjustment;
+
     /**
      * @param display May not be null.
      * @param service You know.
+     * @param layersController window layer controller used to assign layer to the windows on this
+     *                         display.
      */
-    DisplayContent(Display display, WindowManagerService service) {
+    DisplayContent(Display display, WindowManagerService service,
+            WindowLayersController layersController) {
         mDisplay = display;
         mDisplayId = display.getDisplayId();
+        mLayersController = layersController;
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
@@ -691,6 +699,24 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    void setInputMethodAnimLayerAdjustment(int adj) {
+        if (DEBUG_LAYERS) Slog.v(TAG_WM, "Setting im layer adj to " + adj);
+        mInputMethodAnimLayerAdjustment = adj;
+        final WindowState imw = mService.mInputMethodWindow;
+        if (imw != null) {
+            imw.adjustAnimLayer(adj);
+        }
+        for (int i = mService.mInputMethodDialogs.size() - 1; i >= 0; i--) {
+            final WindowState dialog = mService.mInputMethodDialogs.get(i);
+            // TODO: This and other places setting mAnimLayer can probably use WS.adjustAnimLayer,
+            // but need to make sure we are not setting things twice for child windows that are
+            // already in the list.
+            dialog.mWinAnimator.mAnimLayer = dialog.mLayer + adj;
+            if (DEBUG_LAYERS) Slog.v(TAG_WM, "IM win " + imw
+                    + " anim layer: " + dialog.mWinAnimator.mAnimLayer);
+        }
+    }
+
     void prepareFreezingTaskBounds() {
         for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.get(stackNdx);
@@ -798,6 +824,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDimLayerController.dump(prefix + "  ", pw);
         pw.println();
         mDividerControllerLocked.dump(prefix + "  ", pw);
+
+        if (mInputMethodAnimLayerAdjustment != 0) {
+            pw.println(subPrefix
+                    + "mInputMethodAnimLayerAdjustment=" + mInputMethodAnimLayerAdjustment);
+        }
     }
 
     @Override
@@ -1110,6 +1141,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 addWindowToListAfter(win,
                         largestSublayer >= 0 ? windowWithLargestSublayer : parentWindow);
             }
+        }
+    }
+
+    /** Updates the layer assignment of windows on this display. */
+    void assignWindowLayers(boolean setLayoutNeeded) {
+        mLayersController.assignWindowLayers(mWindows);
+        if (setLayoutNeeded) {
+            setLayoutNeeded();
         }
     }
 
