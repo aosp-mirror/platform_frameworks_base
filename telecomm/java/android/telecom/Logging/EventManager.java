@@ -366,8 +366,6 @@ public class EventManager {
         // Now add a new entry
         mEventRecords.add(newRecord);
         mCallEventRecordMap.put(recordEntry, newRecord);
-
-        // TODO: Add Implementation of this in Telecom for Analytics
         synchronized (mSync) {
             for (EventListener l : mEventListeners) {
                 l.eventRecordAdded(newRecord);
