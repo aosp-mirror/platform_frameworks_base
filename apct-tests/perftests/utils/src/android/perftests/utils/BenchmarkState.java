@@ -43,13 +43,13 @@ import java.util.concurrent.TimeUnit;
  * }
  */
 public final class BenchmarkState {
+
     private static final String TAG = "BenchmarkState";
 
     private static final int NOT_STARTED = 0;  // The benchmark has not started yet.
     private static final int WARMUP = 1; // The benchmark is warming up.
     private static final int RUNNING = 2;  // The benchmark is running.
-    private static final int RUNNING_PAUSED = 3;  // The benchmark is temporary paused.
-    private static final int FINISHED = 4;  // The benchmark has stopped.
+    private static final int FINISHED = 3;  // The benchmark has stopped.
 
     private int mState = NOT_STARTED;  // Current benchmark state.
 
@@ -63,6 +63,7 @@ public final class BenchmarkState {
     private static final int REPEAT_COUNT = 5;
 
     private long mStartTimeNs = 0;  // Previously captured System.nanoTime().
+    private boolean mPaused;
     private long mPausedTimeNs = 0; // The System.nanoTime() when the pauseTiming() is called.
     private long mPausedDurationNs = 0;  // The duration of paused state in nano sec.
 
@@ -118,24 +119,24 @@ public final class BenchmarkState {
     // Stops the benchmark timer.
     // This method can be called only when the timer is running.
     public void pauseTiming() {
-        if (mState == RUNNING_PAUSED) {
+        if (mPaused) {
             throw new IllegalStateException(
                     "Unable to pause the benchmark. The benchmark has already paused.");
         }
         mPausedTimeNs = System.nanoTime();
-        mState = RUNNING_PAUSED;
+        mPaused = true;
     }
 
     // Starts the benchmark timer.
     // This method can be called only when the timer is stopped.
     public void resumeTiming() {
-        if (mState == RUNNING) {
+        if (!mPaused) {
             throw new IllegalStateException(
                     "Unable to resume the benchmark. The benchmark is already running.");
         }
         mPausedDurationNs += System.nanoTime() - mPausedTimeNs;
         mPausedTimeNs = 0;
-        mState = RUNNING;
+        mPaused = false;
     }
 
     private void beginWarmup() {
@@ -194,11 +195,12 @@ public final class BenchmarkState {
                 if (mIteration >= mMaxIterations) {
                     return startNextTestRun();
                 }
+                if (mPaused) {
+                    throw new IllegalStateException(
+                            "Benchmark step finished with paused state. " +
+                            "Resume the benchmark before finishing each step.");
+                }
                 return true;
-            case RUNNING_PAUSED:
-                throw new IllegalStateException(
-                        "Benchmark step finished with paused state. " +
-                        "Resume the benchmark before finishing each step.");
             case FINISHED:
                 throw new IllegalStateException("The benchmark has finished.");
             default:
