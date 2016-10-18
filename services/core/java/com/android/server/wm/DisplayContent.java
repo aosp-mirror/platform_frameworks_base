@@ -1121,8 +1121,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         for (int i = 0; i < windowCount; i++) {
             final WindowState window = mWindows.get(i);
             if (window.mAttrs.type == TYPE_TOAST && window.mOwnerUid == uid
-                    && !window.mPermanentlyHidden && !window.mAnimatingExit
-                    && !window.mRemoveOnExit) {
+                    && !window.mPermanentlyHidden && !window.mWindowRemovalAllowed) {
                 return false;
             }
         }

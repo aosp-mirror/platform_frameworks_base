@@ -488,7 +488,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * or some other higher level component said so (e.g. activity manager).
      * TODO: We should either have different booleans for the removal reason or use a bit-field.
      */
-    private boolean mWindowRemovalAllowed;
+    boolean mWindowRemovalAllowed;
 
     /**
      * Temp for keeping track of windows that have been removed when
