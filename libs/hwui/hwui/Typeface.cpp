@@ -23,10 +23,14 @@
 #include "Typeface.h"
 
 #include <pthread.h>
+#include <fcntl.h>  // For tests.
+#include <sys/stat.h>  // For tests.
+#include <sys/mman.h>  // For tests.
 
 #include "MinikinSkia.h"
 #include "SkTypeface.h"
 #include "SkPaint.h"
+#include "SkStream.h"  // Fot tests.
 
 #include <minikin/FontCollection.h>
 #include <minikin/FontFamily.h>
@@ -116,11 +120,18 @@ void Typeface::setDefault(Typeface* face) {
 
 void Typeface::setRobotoTypefaceForTest() {
     const char* kRobotoFont = "/system/fonts/Roboto-Regular.ttf";
-    sk_sp<SkTypeface> typeface = SkTypeface::MakeFromFile(kRobotoFont);
+
+    int fd = open(kRobotoFont, O_RDONLY);
+    LOG_ALWAYS_FATAL_IF(fd == -1, "Failed to open file %s", kRobotoFont);
+    struct stat st = {};
+    LOG_ALWAYS_FATAL_IF(fstat(fd, &st) == -1, "Failed to stat file %s", kRobotoFont);
+    void* data = mmap(nullptr, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
+    std::unique_ptr<SkMemoryStream> fontData(new SkMemoryStream(data, st.st_size));
+    sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(fontData.release());
     LOG_ALWAYS_FATAL_IF(typeface == nullptr, "Failed to make typeface from %s", kRobotoFont);
 
     minikin::FontFamily* family = new minikin::FontFamily();
-    minikin::MinikinFont* font = new MinikinFontSkia(std::move(typeface), nullptr, 0, 0);
+    minikin::MinikinFont* font = new MinikinFontSkia(std::move(typeface), data, st.st_size, 0);
     family->addFont(font);
     font->Unref();
 

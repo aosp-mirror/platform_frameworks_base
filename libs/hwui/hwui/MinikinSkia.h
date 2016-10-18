@@ -37,8 +37,6 @@ public:
     void GetBounds(minikin::MinikinRect* bounds, uint32_t glyph_id,
         const minikin::MinikinPaint &paint) const;
 
-    const void* GetTable(uint32_t tag, size_t* size, minikin::MinikinDestroyFunc* destroy);
-
     SkTypeface* GetSkTypeface() const;
     sk_sp<SkTypeface> RefSkTypeface() const;
 
