@@ -204,6 +204,10 @@ public class Log {
         getSessionManager().endSession();
     }
 
+    public static void registerSessionListener(SessionManager.ISessionListener l) {
+        getSessionManager().registerSessionListener(l);
+    }
+
     public static String getSessionId() {
         // If the Session logger has not been initialized, then there have been no sessions logged.
         // Don't load it now!

@@ -273,7 +273,6 @@ public class SessionManager {
                     System.currentTimeMillis() - subsession.getExecutionStartTimeMilliseconds();
             android.util.Slog.d(LOGGING_TAG, Session.END_SESSION + " (dur: " + fullSessionTimeMs
                     + " ms): " + subsession.toString());
-            // TODO: Add analytics hook
             for (ISessionListener l : mSessionListeners) {
                 l.sessionComplete(subsession.getShortMethodName(), fullSessionTimeMs);
             }
