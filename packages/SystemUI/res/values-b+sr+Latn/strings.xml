@@ -564,7 +564,8 @@
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Pregledač"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"Kontakti"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"Imejl"</string>
-    <string name="keyboard_shortcut_group_applications_im" msgid="1892749399083161405">"Razmena trenutnih poruka"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_sms (638701213803242744) -->
+    <skip />
     <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Muzika"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalendar"</string>
