@@ -33,6 +33,10 @@ public class Session {
     public static final String END_SUBSESSION = "END_SUBSESSION";
     public static final String END_SESSION = "END_SESSION";
 
+    /**
+     * Initial value of mExecutionEndTimeMs and the final value of {@link #getLocalExecutionTime()}
+     * if the Session is canceled.
+     */
     public static final int UNDEFINED = -1;
 
     private String mSessionId;
@@ -140,27 +144,6 @@ public class Session {
         return String.valueOf(mChildCounter++);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Session)) {
-            return false;
-        }
-        if (obj == this) {
-            return true;
-        }
-        Session otherSession = (Session) obj;
-        return (mSessionId.equals(otherSession.mSessionId)) &&
-                (mShortMethodName.equals(otherSession.mShortMethodName)) &&
-                mExecutionStartTimeMs == otherSession.mExecutionStartTimeMs &&
-                mParentSession == otherSession.mParentSession &&
-                mChildSessions.equals(otherSession.mChildSessions) &&
-                mIsCompleted == otherSession.mIsCompleted &&
-                mExecutionEndTimeMs == otherSession.mExecutionEndTimeMs &&
-                mChildCounter == otherSession.mChildCounter &&
-                mIsStartedFromActiveSession == otherSession.mIsStartedFromActiveSession &&
-                mOwnerInfo == otherSession.mOwnerInfo;
-    }
-
     // Builds full session id recursively
     private String getFullSessionId() {
         // Cache mParentSession locally to prevent a concurrency problem where
@@ -201,6 +184,50 @@ public class Session {
             }
             child.printSessionTree(tabI + 1, sb);
         }
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mSessionId != null ? mSessionId.hashCode() : 0;
+        result = 31 * result + (mShortMethodName != null ? mShortMethodName.hashCode() : 0);
+        result = 31 * result + (int) (mExecutionStartTimeMs ^ (mExecutionStartTimeMs >>> 32));
+        result = 31 * result + (int) (mExecutionEndTimeMs ^ (mExecutionEndTimeMs >>> 32));
+        result = 31 * result + (mParentSession != null ? mParentSession.hashCode() : 0);
+        result = 31 * result + (mChildSessions != null ? mChildSessions.hashCode() : 0);
+        result = 31 * result + (mIsCompleted ? 1 : 0);
+        result = 31 * result + mChildCounter;
+        result = 31 * result + (mIsStartedFromActiveSession ? 1 : 0);
+        result = 31 * result + (mOwnerInfo != null ? mOwnerInfo.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Session session = (Session) o;
+
+        if (mExecutionStartTimeMs != session.mExecutionStartTimeMs) return false;
+        if (mExecutionEndTimeMs != session.mExecutionEndTimeMs) return false;
+        if (mIsCompleted != session.mIsCompleted) return false;
+        if (mChildCounter != session.mChildCounter) return false;
+        if (mIsStartedFromActiveSession != session.mIsStartedFromActiveSession) return false;
+        if (mSessionId != null ?
+                !mSessionId.equals(session.mSessionId) : session.mSessionId != null)
+            return false;
+        if (mShortMethodName != null ? !mShortMethodName.equals(session.mShortMethodName)
+                : session.mShortMethodName != null)
+            return false;
+        if (mParentSession != null ? !mParentSession.equals(session.mParentSession)
+                : session.mParentSession != null)
+            return false;
+        if (mChildSessions != null ? !mChildSessions.equals(session.mChildSessions)
+                : session.mChildSessions != null)
+            return false;
+        return mOwnerInfo != null ? mOwnerInfo.equals(session.mOwnerInfo)
+                : session.mOwnerInfo == null;
+
     }
 
     @Override
