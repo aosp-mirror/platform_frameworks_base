@@ -850,7 +850,10 @@ public class ResourcesManager {
                             daj.setCompatibilityInfo(compat);
                         }
                         dm = getDisplayMetrics(displayId, daj);
-                        applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
+
+                        if (!isDefaultDisplay) {
+                            applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
+                        }
 
                         if (hasOverrideConfiguration) {
                             tmpConfig.updateFrom(key.mOverrideConfiguration);
