@@ -4231,7 +4231,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         updateKeyguardState(staying, false /* fromShadeLocked */);
 
-        if (viewToClick != null) {
+        if (viewToClick != null && viewToClick.isAttachedToWindow()) {
             viewToClick.callOnClick();
         }
 
