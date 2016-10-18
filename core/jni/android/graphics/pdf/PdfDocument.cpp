@@ -81,7 +81,7 @@ public:
         assert(mCurrentPage != NULL);
         assert(mCurrentPage->mPictureRecorder != NULL);
         assert(mCurrentPage->mPicture == NULL);
-        mCurrentPage->mPicture = mCurrentPage->mPictureRecorder->endRecording();
+        mCurrentPage->mPicture = mCurrentPage->mPictureRecorder->finishRecordingAsPicture().release();
         delete mCurrentPage->mPictureRecorder;
         mCurrentPage->mPictureRecorder = NULL;
         mCurrentPage = NULL;

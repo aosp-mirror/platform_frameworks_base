@@ -70,7 +70,7 @@ public:
     GlopBuilder& setFillBlack();
     GlopBuilder& setFillClear();
     GlopBuilder& setFillLayer(Texture& texture, const SkColorFilter* colorFilter,
-            float alpha, SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage);
+            float alpha, SkBlendMode mode, Blend::ModeOrderSwap modeUsage);
     GlopBuilder& setFillTextureLayer(Layer& layer, float alpha);
     // TODO: Texture should probably know and own its target.
     // setFillLayer() forces it to GL_TEXTURE which isn't always correct.
@@ -112,7 +112,7 @@ public:
     static void dump(const Glop& glop);
 private:
     void setFill(int color, float alphaScale,
-            SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage,
+            SkBlendMode mode, Blend::ModeOrderSwap modeUsage,
             const SkShader* shader, const SkColorFilter* colorFilter);
 
     enum StageFlags {

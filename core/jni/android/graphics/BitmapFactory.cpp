@@ -497,7 +497,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         // kSrc_Mode instructs us to overwrite the uninitialized pixels in
         // outputBitmap.  Otherwise we would blend by default, which is not
         // what we want.
-        paint.setXfermodeMode(SkXfermode::kSrc_Mode);
+        paint.setBlendMode(SkBlendMode::kSrc);
         paint.setFilterQuality(kLow_SkFilterQuality); // bilinear filtering
 
         SkCanvas canvas(outputBitmap);

@@ -26,7 +26,6 @@
 #include "Vector.h"
 
 #include <androidfw/ResourceTypes.h>
-#include <SkXfermode.h>
 
 class SkBitmap;
 class SkPaint;
@@ -257,12 +256,12 @@ struct CirclePropsOp : RecordedOp {
 
 struct ColorOp : RecordedOp {
     // Note: unbounded op that will fillclip, so no bounds/matrix needed
-    ColorOp(const ClipBase* localClip, int color, SkXfermode::Mode mode)
+    ColorOp(const ClipBase* localClip, int color, SkBlendMode mode)
             : RecordedOp(RecordedOpId::ColorOp, Rect(), Matrix4::identity(), localClip, nullptr)
             , color(color)
             , mode(mode) {}
     const int color;
-    const SkXfermode::Mode mode;
+    const SkBlendMode mode;
 };
 
 struct FunctorOp : RecordedOp {
@@ -504,7 +503,7 @@ struct LayerOp : RecordedOp {
             : SUPER_PAINTLESS(LayerOp)
             , layerHandle(layerHandle)
             , alpha(paint ? paint->getAlpha() / 255.0f : 1.0f)
-            , mode(PaintUtils::getXfermodeDirect(paint))
+            , mode(PaintUtils::getBlendModeDirect(paint))
             , colorFilter(paint ? paint->getColorFilter() : nullptr) {}
 
     explicit LayerOp(RenderNode& node)
@@ -518,7 +517,7 @@ struct LayerOp : RecordedOp {
     // constructed until after this operation is constructed.
     OffscreenBuffer** layerHandle;
     const float alpha;
-    const SkXfermode::Mode mode;
+    const SkBlendMode mode;
 
     // pointer to object owned by either LayerProperties, or a recorded Paint object in a
     // BeginLayerOp. Lives longer than LayerOp in either case, so no skia ref counting is used.

@@ -29,6 +29,7 @@
 #include "SkColorFilter.h"
 #include "SkMaskFilter.h"
 #include "SkPath.h"
+#include "SkPathEffect.h"
 #include "SkRasterizer.h"
 #include "SkShader.h"
 #include "SkXfermode.h"
@@ -791,51 +792,55 @@ namespace PaintGlue {
     static jlong setShader(jlong objHandle, jlong shaderHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         SkShader* shader = reinterpret_cast<SkShader*>(shaderHandle);
-        return reinterpret_cast<jlong>(obj->setShader(shader));
+        obj->setShader(sk_ref_sp(shader));
+        return reinterpret_cast<jlong>(obj->getShader());
     }
 
     static jlong setColorFilter(jlong objHandle, jlong filterHandle) {
         Paint* obj = reinterpret_cast<Paint *>(objHandle);
         SkColorFilter* filter  = reinterpret_cast<SkColorFilter *>(filterHandle);
-        return reinterpret_cast<jlong>(obj->setColorFilter(filter));
+        obj->setColorFilter(sk_ref_sp(filter));
+        return reinterpret_cast<jlong>(obj->getColorFilter());
     }
 
     static void setXfermode(jlong paintHandle, jint xfermodeHandle) {
         // validate that the Java enum values match our expectations
-        static_assert(0 == SkXfermode::kClear_Mode, "xfermode_mismatch");
-        static_assert(1 == SkXfermode::kSrc_Mode, "xfermode_mismatch");
-        static_assert(2 == SkXfermode::kDst_Mode, "xfermode_mismatch");
-        static_assert(3 == SkXfermode::kSrcOver_Mode, "xfermode_mismatch");
-        static_assert(4 == SkXfermode::kDstOver_Mode, "xfermode_mismatch");
-        static_assert(5 == SkXfermode::kSrcIn_Mode, "xfermode_mismatch");
-        static_assert(6 == SkXfermode::kDstIn_Mode, "xfermode_mismatch");
-        static_assert(7 == SkXfermode::kSrcOut_Mode, "xfermode_mismatch");
-        static_assert(8 == SkXfermode::kDstOut_Mode, "xfermode_mismatch");
-        static_assert(9 == SkXfermode::kSrcATop_Mode, "xfermode_mismatch");
-        static_assert(10 == SkXfermode::kDstATop_Mode, "xfermode_mismatch");
-        static_assert(11 == SkXfermode::kXor_Mode, "xfermode_mismatch");
-        static_assert(16 == SkXfermode::kDarken_Mode, "xfermode_mismatch");
-        static_assert(17 == SkXfermode::kLighten_Mode, "xfermode_mismatch");
-        static_assert(13 == SkXfermode::kModulate_Mode, "xfermode_mismatch");
-        static_assert(14 == SkXfermode::kScreen_Mode, "xfermode_mismatch");
-        static_assert(12 == SkXfermode::kPlus_Mode, "xfermode_mismatch");
-        static_assert(15 == SkXfermode::kOverlay_Mode, "xfermode_mismatch");
+        static_assert(0 == static_cast<int>(SkBlendMode::kClear), "xfermode_mismatch");
+        static_assert(1 == static_cast<int>(SkBlendMode::kSrc), "xfermode_mismatch");
+        static_assert(2 == static_cast<int>(SkBlendMode::kDst), "xfermode_mismatch");
+        static_assert(3 == static_cast<int>(SkBlendMode::kSrcOver), "xfermode_mismatch");
+        static_assert(4 == static_cast<int>(SkBlendMode::kDstOver), "xfermode_mismatch");
+        static_assert(5 == static_cast<int>(SkBlendMode::kSrcIn), "xfermode_mismatch");
+        static_assert(6 == static_cast<int>(SkBlendMode::kDstIn), "xfermode_mismatch");
+        static_assert(7 == static_cast<int>(SkBlendMode::kSrcOut), "xfermode_mismatch");
+        static_assert(8 == static_cast<int>(SkBlendMode::kDstOut), "xfermode_mismatch");
+        static_assert(9 == static_cast<int>(SkBlendMode::kSrcATop), "xfermode_mismatch");
+        static_assert(10 == static_cast<int>(SkBlendMode::kDstATop), "xfermode_mismatch");
+        static_assert(11 == static_cast<int>(SkBlendMode::kXor), "xfermode_mismatch");
+        static_assert(16 == static_cast<int>(SkBlendMode::kDarken), "xfermode_mismatch");
+        static_assert(17 == static_cast<int>(SkBlendMode::kLighten), "xfermode_mismatch");
+        static_assert(13 == static_cast<int>(SkBlendMode::kModulate), "xfermode_mismatch");
+        static_assert(14 == static_cast<int>(SkBlendMode::kScreen), "xfermode_mismatch");
+        static_assert(12 == static_cast<int>(SkBlendMode::kPlus), "xfermode_mismatch");
+        static_assert(15 == static_cast<int>(SkBlendMode::kOverlay), "xfermode_mismatch");
 
-        SkXfermode::Mode mode = static_cast<SkXfermode::Mode>(xfermodeHandle);
+        SkBlendMode mode = static_cast<SkBlendMode>(xfermodeHandle);
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        paint->setXfermodeMode(mode);
+        paint->setBlendMode(mode);
     }
 
     static jlong setPathEffect(jlong objHandle, jlong effectHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         SkPathEffect* effect  = reinterpret_cast<SkPathEffect*>(effectHandle);
-        return reinterpret_cast<jlong>(obj->setPathEffect(effect));
+        obj->setPathEffect(sk_ref_sp(effect));
+        return reinterpret_cast<jlong>(obj->getPathEffect());
     }
 
     static jlong setMaskFilter(jlong objHandle, jlong maskfilterHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         SkMaskFilter* maskfilter  = reinterpret_cast<SkMaskFilter*>(maskfilterHandle);
-        return reinterpret_cast<jlong>(obj->setMaskFilter(maskfilter));
+        obj->setMaskFilter(sk_ref_sp(maskfilter));
+        return reinterpret_cast<jlong>(obj->getMaskFilter());
     }
 
     static jlong setTypeface(jlong objHandle, jlong typefaceHandle) {
@@ -845,8 +850,8 @@ namespace PaintGlue {
 
     static jlong setRasterizer(jlong objHandle, jlong rasterizerHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
-        SkAutoTUnref<SkRasterizer> rasterizer(GraphicsJNI::refNativeRasterizer(rasterizerHandle));
-        return reinterpret_cast<jlong>(obj->setRasterizer(rasterizer));
+        obj->setRasterizer(GraphicsJNI::refNativeRasterizer(rasterizerHandle));
+        return reinterpret_cast<jlong>(obj->getRasterizer());
     }
 
     static jint getTextAlign(jlong objHandle) {
@@ -940,7 +945,7 @@ namespace PaintGlue {
         }
         else {
             SkScalar sigma = android::uirenderer::Blur::convertRadiusToSigma(radius);
-            paint->setLooper(SkBlurDrawLooper::Create((SkColor)color, sigma, dx, dy))->unref();
+            paint->setLooper(SkBlurDrawLooper::Make((SkColor)color, sigma, dx, dy));
         }
     }
 

@@ -220,9 +220,9 @@ GlopBuilder& GlopBuilder::setMeshPatchQuads(const Patch& patch) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void GlopBuilder::setFill(int color, float alphaScale,
-        SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage,
+        SkBlendMode mode, Blend::ModeOrderSwap modeUsage,
         const SkShader* shader, const SkColorFilter* colorFilter) {
-    if (mode != SkXfermode::kClear_Mode) {
+    if (mode != SkBlendMode::kClear) {
         if (!shader) {
             FloatColor c;
             c.set(color);
@@ -246,8 +246,8 @@ void GlopBuilder::setFill(int color, float alphaScale,
             || mOutGlop->roundRectClipState
             || PaintUtils::isBlendedShader(shader)
             || PaintUtils::isBlendedColorFilter(colorFilter)
-            || mode != SkXfermode::kSrcOver_Mode) {
-        if (CC_LIKELY(mode <= SkXfermode::kScreen_Mode)) {
+            || mode != SkBlendMode::kSrcOver) {
+        if (CC_LIKELY(mode <= SkBlendMode::kScreen)) {
             Blend::getFactors(mode, modeUsage,
                     &mOutGlop->blend.src, &mOutGlop->blend.dst);
         } else {
@@ -257,12 +257,12 @@ void GlopBuilder::setFill(int color, float alphaScale,
             // If the blend mode cannot be implemented using shaders, fall
             // back to the default SrcOver blend mode instead
             if (CC_UNLIKELY(mCaches.extensions().hasFramebufferFetch())) {
-                mDescription.framebufferMode = mode;
+                mDescription.framebufferMode = (SkXfermode::Mode)mode;
                 mDescription.swapSrcDst = (modeUsage == Blend::ModeOrderSwap::Swap);
                 // blending in shader, don't enable
             } else {
                 // unsupported
-                Blend::getFactors(SkXfermode::kSrcOver_Mode, modeUsage,
+                Blend::getFactors(SkBlendMode::kSrcOver, modeUsage,
                         &mOutGlop->blend.src, &mOutGlop->blend.dst);
             }
         }
@@ -271,11 +271,11 @@ void GlopBuilder::setFill(int color, float alphaScale,
 
     if (colorFilter) {
         SkColor color;
-        SkXfermode::Mode mode;
+        SkXfermode::Mode xmode;
         SkScalar srcColorMatrix[20];
-        if (colorFilter->asColorMode(&color, &mode)) {
+        if (colorFilter->asColorMode(&color, &xmode)) {
             mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::ColorFilterMode::Blend;
-            mDescription.colorMode = mode;
+            mDescription.colorMode = xmode;
             mOutGlop->fill.filter.color.set(color);
         } else if (colorFilter->asColorMatrix(srcColorMatrix)) {
             mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::ColorFilterMode::Matrix;
@@ -321,7 +321,7 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture,
             shader = nullptr;
         }
         setFill(color, alphaScale,
-                PaintUtils::getXfermode(paint->getXfermode()), Blend::ModeOrderSwap::NoSwap,
+                paint->getBlendMode(), Blend::ModeOrderSwap::NoSwap,
                 shader, paint->getColorFilter());
     } else {
         mOutGlop->fill.color = { alphaScale, alphaScale, alphaScale, alphaScale };
@@ -330,7 +330,7 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture,
                 || (mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::Alpha)
                 || texture.blend
                 || mOutGlop->roundRectClipState) {
-            Blend::getFactors(SkXfermode::kSrcOver_Mode, Blend::ModeOrderSwap::NoSwap,
+            Blend::getFactors(SkBlendMode::kSrcOver, Blend::ModeOrderSwap::NoSwap,
                     &mOutGlop->blend.src, &mOutGlop->blend.dst);
         } else {
             mOutGlop->blend = { GL_ZERO, GL_ZERO };
@@ -360,7 +360,7 @@ GlopBuilder& GlopBuilder::setFillPaint(const SkPaint& paint, float alphaScale, b
     }
 
     setFill(paint.getColor(), alphaScale,
-            PaintUtils::getXfermode(paint.getXfermode()), Blend::ModeOrderSwap::NoSwap,
+            paint.getBlendMode(), Blend::ModeOrderSwap::NoSwap,
             paint.getShader(), paint.getColorFilter());
     mDescription.useShadowAlphaInterp = shadowInterp;
     mDescription.modulate = mOutGlop->fill.color.a < 1.0f;
@@ -376,7 +376,7 @@ GlopBuilder& GlopBuilder::setFillPathTexturePaint(PathTexture& texture,
     mOutGlop->fill.texture = { &texture, GL_TEXTURE_2D, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
 
     setFill(paint.getColor(), alphaScale,
-            PaintUtils::getXfermode(paint.getXfermode()), Blend::ModeOrderSwap::NoSwap,
+            paint.getBlendMode(), Blend::ModeOrderSwap::NoSwap,
             paint.getShader(), paint.getColorFilter());
 
     mDescription.hasAlpha8Texture = true;
@@ -400,7 +400,7 @@ GlopBuilder& GlopBuilder::setFillShadowTexturePaint(ShadowTexture& texture, int 
     }
 
     setFill(shadowColor, alphaScale,
-            PaintUtils::getXfermode(paint.getXfermode()), Blend::ModeOrderSwap::NoSwap,
+            paint.getBlendMode(), Blend::ModeOrderSwap::NoSwap,
             paint.getShader(), paint.getColorFilter());
 
     mDescription.hasAlpha8Texture = true;
@@ -413,7 +413,7 @@ GlopBuilder& GlopBuilder::setFillBlack() {
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
-    setFill(SK_ColorBLACK, 1.0f, SkXfermode::kSrcOver_Mode, Blend::ModeOrderSwap::NoSwap,
+    setFill(SK_ColorBLACK, 1.0f, SkBlendMode::kSrcOver, Blend::ModeOrderSwap::NoSwap,
             nullptr, nullptr);
     return *this;
 }
@@ -423,13 +423,13 @@ GlopBuilder& GlopBuilder::setFillClear() {
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
-    setFill(SK_ColorBLACK, 1.0f, SkXfermode::kClear_Mode, Blend::ModeOrderSwap::NoSwap,
+    setFill(SK_ColorBLACK, 1.0f, SkBlendMode::kClear, Blend::ModeOrderSwap::NoSwap,
             nullptr, nullptr);
     return *this;
 }
 
 GlopBuilder& GlopBuilder::setFillLayer(Texture& texture, const SkColorFilter* colorFilter,
-        float alpha, SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage) {
+        float alpha, SkBlendMode mode, Blend::ModeOrderSwap modeUsage) {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
@@ -465,7 +465,7 @@ GlopBuilder& GlopBuilder::setFillExternalTexture(Texture& texture, Matrix4& text
             GL_TEXTURE_EXTERNAL_OES, GL_LINEAR, GL_CLAMP_TO_EDGE,
             &textureTransform };
 
-    setFill(SK_ColorWHITE, 1.0f, SkXfermode::kSrc_Mode, Blend::ModeOrderSwap::NoSwap,
+    setFill(SK_ColorWHITE, 1.0f, SkBlendMode::kSrc, Blend::ModeOrderSwap::NoSwap,
             nullptr, nullptr);
 
     mDescription.modulate = mOutGlop->fill.color.a < 1.0f;

@@ -34,19 +34,19 @@ public:
     virtual ~NativeRasterizer() {}
 
     // Can return NULL, or a ref to the skia rasterizer.
-    virtual SkRasterizer* refRasterizer() { return NULL; }
+    virtual sk_sp<SkRasterizer> refRasterizer() { return NULL; }
 };
 
 class NativeLayerRasterizer : public NativeRasterizer {
 public:
     SkLayerRasterizer::Builder fBuilder;
 
-    virtual SkRasterizer* refRasterizer() {
-        return fBuilder.snapshotRasterizer();
+    virtual sk_sp<SkRasterizer> refRasterizer() {
+        return fBuilder.snapshot();
     }
 };
 
-SkRasterizer* GraphicsJNI::refNativeRasterizer(jlong rasterizerHandle) {
+sk_sp<SkRasterizer> GraphicsJNI::refNativeRasterizer(jlong rasterizerHandle) {
     NativeRasterizer* nr = reinterpret_cast<NativeRasterizer*>(rasterizerHandle);
     return nr ? nr->refRasterizer() : NULL;
 }

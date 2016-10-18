@@ -750,7 +750,7 @@ RENDERTHREAD_TEST(FrameBuilder, deferColorOp_unbounded) {
     auto unclippedColorView = TestUtils::createNode<RecordingCanvas>(0, 0, 10, 10,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         props.setClipToBounds(false);
-        canvas.drawColor(SK_ColorWHITE, SkXfermode::Mode::kSrcOver_Mode);
+        canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     });
 
     FrameBuilder frameBuilder(SkRect::MakeWH(200, 200), 200, 200,
@@ -1003,7 +1003,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_simple) {
         void onSimpleRectsOp(const SimpleRectsOp& op, const BakedOpState& state) override {
             EXPECT_EQ(1, mIndex++);
             ASSERT_NE(nullptr, op.paint);
-            ASSERT_EQ(SkXfermode::kClear_Mode, PaintUtils::getXfermodeDirect(op.paint));
+            ASSERT_EQ(SkBlendMode::kClear, PaintUtils::getBlendModeDirect(op.paint));
         }
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
             EXPECT_EQ(2, mIndex++);
@@ -1137,7 +1137,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_clearClip) {
         void onSimpleRectsOp(const SimpleRectsOp& op, const BakedOpState& state) override {
             EXPECT_EQ(1, mIndex++);
             ASSERT_NE(nullptr, op.paint);
-            EXPECT_EQ(SkXfermode::kClear_Mode, PaintUtils::getXfermodeDirect(op.paint));
+            EXPECT_EQ(SkBlendMode::kClear, PaintUtils::getBlendModeDirect(op.paint));
             EXPECT_EQ(Rect(50, 50, 150, 150), state.computedState.clippedBounds)
                     << "Expect dirty rect as clip";
             ASSERT_NE(nullptr, state.computedState.clipState);
@@ -1462,7 +1462,7 @@ RENDERTHREAD_TEST(FrameBuilder, buildLayer) {
     auto node = TestUtils::createNode<RecordingCanvas>(10, 10, 110, 110,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         props.mutateLayerProperties().setType(LayerType::RenderLayer);
-        canvas.drawColor(SK_ColorWHITE, SkXfermode::Mode::kSrcOver_Mode);
+        canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     });
     OffscreenBuffer** layerHandle = node->getLayerHandle();
 
@@ -2225,7 +2225,7 @@ RENDERTHREAD_TEST(FrameBuilder, clip_replace) {
     auto node = TestUtils::createNode<RecordingCanvas>(20, 20, 30, 30,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.clipRect(0, -20, 10, 30, SkRegion::kReplace_Op);
-        canvas.drawColor(SK_ColorWHITE, SkXfermode::Mode::kSrcOver_Mode);
+        canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     });
 
     FrameBuilder frameBuilder(SkRect::MakeLTRB(10, 10, 40, 40), 50, 50,

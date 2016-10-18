@@ -201,10 +201,7 @@ void FullPath::drawPath(SkCanvas* outCanvas, SkPath& renderPath, float strokeSca
     SkPaint paint;
     if (properties.getFillGradient() != nullptr) {
         paint.setColor(applyAlpha(SK_ColorBLACK, properties.getFillAlpha()));
-        SkShader* newShader = properties.getFillGradient()->newWithLocalMatrix(matrix);
-        // newWithLocalMatrix(...) creates a new SkShader and returns a bare pointer. We need to
-        // remove the extra ref so that the ref count is correctly managed.
-        paint.setShader(newShader)->unref();
+        paint.setShader(properties.getFillGradient()->makeWithLocalMatrix(matrix));
         needsFill = true;
     } else if (properties.getFillColor() != SK_ColorTRANSPARENT) {
         paint.setColor(applyAlpha(properties.getFillColor(), properties.getFillAlpha()));
@@ -223,10 +220,7 @@ void FullPath::drawPath(SkCanvas* outCanvas, SkPath& renderPath, float strokeSca
     bool needsStroke = false;
     if (properties.getStrokeGradient() != nullptr) {
         paint.setColor(applyAlpha(SK_ColorBLACK, properties.getStrokeAlpha()));
-        SkShader* newShader = properties.getStrokeGradient()->newWithLocalMatrix(matrix);
-        // newWithLocalMatrix(...) creates a new SkShader and returns a bare pointer. We need to
-        // remove the extra ref so that the ref count is correctly managed.
-        paint.setShader(newShader)->unref();
+        paint.setShader(properties.getStrokeGradient()->makeWithLocalMatrix(matrix));
         needsStroke = true;
     } else if (properties.getStrokeColor() != SK_ColorTRANSPARENT) {
         paint.setColor(applyAlpha(properties.getStrokeColor(), properties.getStrokeAlpha()));
@@ -534,7 +528,7 @@ SkPaint* Tree::updatePaint(SkPaint* outPaint, TreeProperties* prop) {
     if (prop->getRootAlpha() == 1.0f && prop->getColorFilter() == nullptr) {
         return nullptr;
     } else {
-        outPaint->setColorFilter(prop->getColorFilter());
+        outPaint->setColorFilter(sk_ref_sp(prop->getColorFilter()));
         outPaint->setFilterQuality(kLow_SkFilterQuality);
         outPaint->setAlpha(prop->getRootAlpha() * 255);
         return outPaint;

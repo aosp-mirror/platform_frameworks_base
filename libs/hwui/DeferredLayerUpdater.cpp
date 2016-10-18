@@ -45,7 +45,7 @@ DeferredLayerUpdater::~DeferredLayerUpdater() {
 
 void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
     mAlpha = PaintUtils::getAlphaDirect(paint);
-    mMode = PaintUtils::getXfermodeDirect(paint);
+    mMode = PaintUtils::getBlendModeDirect(paint);
     SkColorFilter* colorFilter = (paint) ? paint->getColorFilter() : nullptr;
     SkRefCnt_SafeAssign(mColorFilter, colorFilter);
 }

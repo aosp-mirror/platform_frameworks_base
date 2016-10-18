@@ -32,9 +32,9 @@ public:
         card = TestUtils::createNode(0, 0, 200, 200,
                 [](RenderProperties& props, Canvas& canvas) {
             props.mutateLayerProperties().setType(LayerType::RenderLayer);
-            canvas.drawColor(0xFF0000FF, SkXfermode::kSrcOver_Mode);
+            canvas.drawColor(0xFF0000FF, SkBlendMode::kSrcOver);
         });
-        canvas.drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode); // background
+        canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver); // background
         canvas.drawRenderNode(card.get());
     }
     void doFrame(int frameNr) override {

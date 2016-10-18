@@ -386,7 +386,7 @@ void SkiaCanvas::setDrawFilter(SkDrawFilter* drawFilter) {
 // Canvas draw operations
 // ----------------------------------------------------------------------------
 
-void SkiaCanvas::drawColor(int color, SkXfermode::Mode mode) {
+void SkiaCanvas::drawColor(int color, SkBlendMode mode) {
     mCanvas->drawColor(color, mode);
 }
 

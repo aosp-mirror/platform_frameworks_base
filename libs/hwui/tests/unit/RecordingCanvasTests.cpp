@@ -249,7 +249,7 @@ TEST(RecordingCanvas, drawGlyphs_forceAlignLeft) {
 
 TEST(RecordingCanvas, drawColor) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
-        canvas.drawColor(Color::Black, SkXfermode::kSrcOver_Mode);
+        canvas.drawColor(Color::Black, SkBlendMode::kSrcOver);
     });
 
     ASSERT_EQ(1u, dl->getOps().size()) << "Must be exactly one op";
@@ -639,7 +639,7 @@ TEST(RecordingCanvas, replaceClipIntersectWithRoot) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
         canvas.clipRect(-10, -10, 110, 110, SkRegion::kReplace_Op);
-        canvas.drawColor(SK_ColorWHITE, SkXfermode::Mode::kSrcOver_Mode);
+        canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
         canvas.restore();
     });
     ASSERT_EQ(1u, dl->getOps().size()) << "Must have one op";
@@ -773,7 +773,7 @@ TEST(RecordingCanvas, refBitmapInShader_composeShader) {
                 SkShader::TileMode::kRepeat_TileMode);
 
         sk_sp<SkShader> composeShader = SkShader::MakeComposeShader(std::move(shader1), std::move(shader2),
-                SkXfermode::Mode::kMultiply_Mode);
+                SkXfermode::kMultiply_Mode);
         paint.setShader(std::move(composeShader));
         canvas.drawRoundRect(0, 0, 100, 100, 20.0f, 20.0f, paint);
     });

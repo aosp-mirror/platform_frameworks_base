@@ -216,7 +216,7 @@ void SpriteController::doUpdateSprites() {
                 SkCanvas surfaceCanvas(surfaceBitmap);
 
                 SkPaint paint;
-                paint.setXfermodeMode(SkXfermode::kSrc_Mode);
+                paint.setBlendMode(SkBlendMode::kSrc);
                 surfaceCanvas.drawBitmap(update.state.icon.bitmap, 0, 0, &paint);
 
                 if (outBuffer.width > update.state.icon.bitmap.width()) {

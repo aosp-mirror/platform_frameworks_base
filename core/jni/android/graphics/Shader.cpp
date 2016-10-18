@@ -79,9 +79,9 @@ static jlong Shader_setLocalMatrix(JNIEnv* env, jobject o, jlong shaderHandle, j
         if (proxyMatrix == *matrix) {
             return reinterpret_cast<jlong>(currentShader.detach());
         }
-        return reinterpret_cast<jlong>(baseShader->newWithLocalMatrix(*matrix));
+        return reinterpret_cast<jlong>(baseShader->makeWithLocalMatrix(*matrix).release());
     }
-    return reinterpret_cast<jlong>(currentShader->newWithLocalMatrix(*matrix));
+    return reinterpret_cast<jlong>(currentShader->makeWithLocalMatrix(*matrix).release());
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -126,9 +126,9 @@ static jlong LinearGradient_create1(JNIEnv* env, jobject o,
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
 
-    SkShader* shader = SkGradientShader::CreateLinear(pts,
+    SkShader* shader = SkGradientShader::MakeLinear(pts,
             reinterpret_cast<const SkColor*>(colorValues), pos, count,
-            static_cast<SkShader::TileMode>(tileMode));
+            static_cast<SkShader::TileMode>(tileMode)).release();
 
     env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
     ThrowIAE_IfNull(env, shader);
@@ -147,7 +147,7 @@ static jlong LinearGradient_create2(JNIEnv* env, jobject o,
     colors[0] = color0;
     colors[1] = color1;
 
-    SkShader* s = SkGradientShader::CreateLinear(pts, colors, NULL, 2, (SkShader::TileMode)tileMode);
+    SkShader* s = SkGradientShader::MakeLinear(pts, colors, NULL, 2, (SkShader::TileMode)tileMode).release();
 
     ThrowIAE_IfNull(env, s);
     return reinterpret_cast<jlong>(s);
@@ -170,9 +170,9 @@ static jlong RadialGradient_create1(JNIEnv* env, jobject, jfloat x, jfloat y, jf
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
 
-    SkShader* shader = SkGradientShader::CreateRadial(center, radius,
+    SkShader* shader = SkGradientShader::MakeRadial(center, radius,
             reinterpret_cast<const SkColor*>(colorValues), pos, count,
-            static_cast<SkShader::TileMode>(tileMode));
+            static_cast<SkShader::TileMode>(tileMode)).release();
     env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues),
                                  JNI_ABORT);
 
@@ -189,8 +189,8 @@ static jlong RadialGradient_create2(JNIEnv* env, jobject, jfloat x, jfloat y, jf
     colors[0] = color0;
     colors[1] = color1;
 
-    SkShader* s = SkGradientShader::CreateRadial(center, radius, colors, NULL, 2,
-            (SkShader::TileMode)tileMode);
+    SkShader* s = SkGradientShader::MakeRadial(center, radius, colors, NULL, 2,
+            (SkShader::TileMode)tileMode).release();
     ThrowIAE_IfNull(env, s);
     return reinterpret_cast<jlong>(s);
 }
@@ -209,8 +209,8 @@ static jlong SweepGradient_create1(JNIEnv* env, jobject, jfloat x, jfloat y,
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
 
-    SkShader* shader = SkGradientShader::CreateSweep(x, y,
-            reinterpret_cast<const SkColor*>(colors), pos, count);
+    SkShader* shader = SkGradientShader::MakeSweep(x, y,
+            reinterpret_cast<const SkColor*>(colors), pos, count).release();
     env->ReleaseIntArrayElements(jcolors, const_cast<jint*>(colors),
                                  JNI_ABORT);
     ThrowIAE_IfNull(env, shader);
@@ -222,7 +222,7 @@ static jlong SweepGradient_create2(JNIEnv* env, jobject, jfloat x, jfloat y,
     SkColor colors[2];
     colors[0] = color0;
     colors[1] = color1;
-    SkShader* s = SkGradientShader::CreateSweep(x, y, colors, NULL, 2);
+    SkShader* s = SkGradientShader::MakeSweep(x, y, colors, NULL, 2).release();
     ThrowIAE_IfNull(env, s);
     return reinterpret_cast<jlong>(s);
 }
@@ -234,8 +234,10 @@ static jlong ComposeShader_create(JNIEnv* env, jobject o,
 {
     SkShader* shaderA = reinterpret_cast<SkShader *>(shaderAHandle);
     SkShader* shaderB = reinterpret_cast<SkShader *>(shaderBHandle);
-    SkXfermode::Mode mode = static_cast<SkXfermode::Mode>(xfermodeHandle);
-    SkShader* shader = SkShader::CreateComposeShader(shaderA, shaderB, mode);
+    SkBlendMode mode = static_cast<SkBlendMode>(xfermodeHandle);
+    SkShader* shader = SkShader::MakeComposeShader(sk_ref_sp(shaderA),
+                                                   sk_ref_sp(shaderB),
+                                                   (SkXfermode::Mode)mode).release();
     return reinterpret_cast<jlong>(shader);
 }
 

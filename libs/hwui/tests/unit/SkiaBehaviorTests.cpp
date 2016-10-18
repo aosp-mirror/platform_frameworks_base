@@ -57,8 +57,8 @@ TEST(SkiaBehavior, genIds) {
 
 TEST(SkiaBehavior, lightingColorFilter_simplify) {
     {
-        SkAutoTUnref<SkColorFilter> filter(
-                SkColorMatrixFilter::CreateLightingFilter(0x11223344, 0));
+        sk_sp<SkColorFilter> filter(
+                SkColorMatrixFilter::MakeLightingFilter(0x11223344, 0));
 
         SkColor observedColor;
         SkXfermode::Mode observedMode;
@@ -68,20 +68,20 @@ TEST(SkiaBehavior, lightingColorFilter_simplify) {
     }
 
     {
-        SkAutoTUnref<SkColorFilter> failFilter(
-                SkColorMatrixFilter::CreateLightingFilter(0x11223344, 0x1));
+        sk_sp<SkColorFilter> failFilter(
+                SkColorMatrixFilter::MakeLightingFilter(0x11223344, 0x1));
         EXPECT_FALSE(failFilter->asColorMode(nullptr, nullptr));
     }
 }
 
 TEST(SkiaBehavior, porterDuffCreateIsCached) {
     SkPaint paint;
-    paint.setXfermodeMode(SkXfermode::kOverlay_Mode);
-    auto expected = paint.getXfermode();
-    paint.setXfermodeMode(SkXfermode::kClear_Mode);
-    ASSERT_NE(expected, paint.getXfermode());
-    paint.setXfermodeMode(SkXfermode::kOverlay_Mode);
-    ASSERT_EQ(expected, paint.getXfermode());
+    paint.setBlendMode(SkBlendMode::kOverlay);
+    auto expected = paint.getBlendMode();
+    paint.setBlendMode(SkBlendMode::kClear);
+    ASSERT_NE(expected, paint.getBlendMode());
+    paint.setBlendMode(SkBlendMode::kOverlay);
+    ASSERT_EQ(expected, paint.getBlendMode());
 }
 
 TEST(SkiaBehavior, srgbColorSpaceIsSingleton) {
