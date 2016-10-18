@@ -342,6 +342,16 @@ public class UsbDeviceManager {
                 mAdbEnabled = UsbManager.containsFunction(getDefaultFunctions(),
                         UsbManager.USB_FUNCTION_ADB);
 
+                /**
+                 * Remove MTP from persistent config, to bring usb to a good state
+                 * after fixes to b/31814300. This block can be removed after the update
+                 */
+                String persisted = SystemProperties.get(USB_PERSISTENT_CONFIG_PROPERTY);
+                if (UsbManager.containsFunction(persisted, UsbManager.USB_FUNCTION_MTP)) {
+                    SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY,
+                            UsbManager.removeFunction(persisted, UsbManager.USB_FUNCTION_MTP));
+                }
+
                 setEnabledFunctions(null, false);
 
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
@@ -456,10 +466,6 @@ public class UsbDeviceManager {
                 String newFunction = applyAdbFunction(SystemProperties.get(
                             USB_PERSISTENT_CONFIG_PROPERTY, UsbManager.USB_FUNCTION_NONE));
                 SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY, newFunction);
-
-                // Changing the persistent config also changes the normal
-                // config. Wait for this to happen before changing again.
-                waitForState(newFunction);
 
                 // Remove mtp from the config if file transfer is not enabled
                 if (oldFunctions.equals(UsbManager.USB_FUNCTION_MTP) &&
