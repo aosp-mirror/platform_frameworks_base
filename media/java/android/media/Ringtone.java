@@ -469,6 +469,7 @@ public class Ringtone {
             synchronized (sActiveRingtones) {
                 sActiveRingtones.remove(Ringtone.this);
             }
+            mp.setOnCompletionListener(null); // Help the Java GC: break the refcount cycle.
         }
     }
 }
