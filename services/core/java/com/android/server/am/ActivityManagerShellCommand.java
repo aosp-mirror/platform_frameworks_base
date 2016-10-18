@@ -141,7 +141,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 case "broadcast":
                     return runSendBroadcast(pw);
                 case "instrument":
-                    return runInstrument(pw);
+                    getOutPrintWriter().println("Error: must be invoked through 'am instrument'.");
+                    return -1;
                 case "trace-ipc":
                     return runTraceIpc(pw);
                 case "profile":
@@ -558,224 +559,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mInterface.broadcastIntent(null, intent, null, receiver, 0, null, null, requiredPermissions,
                 android.app.AppOpsManager.OP_NONE, null, true, false, mUserId);
         receiver.waitForFinish();
-        return 0;
-    }
-
-    final static class InstrumentationWatcher extends IInstrumentationWatcher.Stub {
-        private final IActivityManager mInterface;
-        private final PrintWriter mPw;
-        private boolean mFinished = false;
-        private boolean mRawMode = false;
-
-        InstrumentationWatcher(IActivityManager iam, PrintWriter pw) {
-            mInterface = iam;
-            mPw = pw;
-        }
-
-        /**
-         * Set or reset "raw mode".  In "raw mode", all bundles are dumped.  In "pretty mode",
-         * if a bundle includes Instrumentation.REPORT_KEY_STREAMRESULT, just print that.
-         * @param rawMode true for raw mode, false for pretty mode.
-         */
-        public void setRawOutput(boolean rawMode) {
-            mRawMode = rawMode;
-        }
-
-        @Override
-        public void instrumentationStatus(ComponentName name, int resultCode, Bundle results) {
-            synchronized (this) {
-                // pretty printer mode?
-                String pretty = null;
-                if (!mRawMode && results != null) {
-                    pretty = results.getString(Instrumentation.REPORT_KEY_STREAMRESULT);
-                }
-                if (pretty != null) {
-                    mPw.print(pretty);
-                } else {
-                    if (results != null) {
-                        for (String key : results.keySet()) {
-                            mPw.println(
-                                    "INSTRUMENTATION_STATUS: " + key + "=" + results.get(key));
-                        }
-                    }
-                    mPw.println("INSTRUMENTATION_STATUS_CODE: " + resultCode);
-                }
-                mPw.flush();
-                notifyAll();
-            }
-        }
-
-        @Override
-        public void instrumentationFinished(ComponentName name, int resultCode,
-                Bundle results) {
-            synchronized (this) {
-                // pretty printer mode?
-                String pretty = null;
-                if (!mRawMode && results != null) {
-                    pretty = results.getString(Instrumentation.REPORT_KEY_STREAMRESULT);
-                }
-                if (pretty != null) {
-                    mPw.println(pretty);
-                } else {
-                    if (results != null) {
-                        for (String key : results.keySet()) {
-                            mPw.println(
-                                    "INSTRUMENTATION_RESULT: " + key + "=" + results.get(key));
-                        }
-                    }
-                    mPw.println("INSTRUMENTATION_CODE: " + resultCode);
-                }
-                mPw.flush();
-                mFinished = true;
-                notifyAll();
-            }
-        }
-
-        public boolean waitForFinish() {
-            synchronized (this) {
-                while (!mFinished) {
-                    try {
-                        if (!mInterface.asBinder().pingBinder()) {
-                            return false;
-                        }
-                        wait(1000);
-                    } catch (InterruptedException e) {
-                        throw new IllegalStateException(e);
-                    }
-                }
-            }
-            return true;
-        }
-    }
-
-    int runInstrument(PrintWriter pw) throws RemoteException {
-        final PrintWriter err = getErrPrintWriter();
-        String profileFile = null;
-        boolean wait = false;
-        boolean rawMode = false;
-        boolean no_window_animation = false;
-        int userId = UserHandle.USER_CURRENT;
-        Bundle args = new Bundle();
-        String argKey = null, argValue = null;
-        IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
-        String abi = null;
-
-        String opt;
-        while ((opt=getNextOption()) != null) {
-            if (opt.equals("-p")) {
-                profileFile = getNextArgRequired();
-            } else if (opt.equals("-w")) {
-                wait = true;
-            } else if (opt.equals("-r")) {
-                rawMode = true;
-            } else if (opt.equals("-e")) {
-                argKey = getNextArgRequired();
-                argValue = getNextArgRequired();
-                args.putString(argKey, argValue);
-            } else if (opt.equals("--no_window_animation")
-                    || opt.equals("--no-window-animation")) {
-                no_window_animation = true;
-            } else if (opt.equals("--user")) {
-                userId = UserHandle.parseUserArg(getNextArgRequired());
-            } else if (opt.equals("--abi")) {
-                abi = getNextArgRequired();
-            } else {
-                err.println("Error: Unknown option: " + opt);
-                return -1;
-            }
-        }
-
-        if (userId == UserHandle.USER_ALL) {
-            err.println("Error: Can't start instrumentation with user 'all'");
-            return -1;
-        }
-
-        String cnArg = getNextArgRequired();
-
-        ComponentName cn;
-        if (cnArg.contains("/")) {
-            cn = ComponentName.unflattenFromString(cnArg);
-            if (cn == null) throw new IllegalArgumentException("Bad component name: " + cnArg);
-        } else {
-            List<InstrumentationInfo> infos = mPm.queryInstrumentation(null, 0).getList();
-
-            final int numInfos = infos == null ? 0: infos.size();
-            List<ComponentName> cns = new ArrayList<>();
-            for (int i = 0; i < numInfos; i++) {
-                InstrumentationInfo info = infos.get(i);
-
-                ComponentName c = new ComponentName(info.packageName, info.name);
-                if (cnArg.equals(info.packageName)) {
-                    cns.add(c);
-                }
-            }
-
-            if (cns.size() == 0) {
-                throw new IllegalArgumentException("No instrumentation found for: " + cnArg);
-            } else if (cns.size() == 1) {
-                cn = cns.get(0);
-            } else {
-                StringBuilder cnsStr = new StringBuilder();
-                final int numCns = cns.size();
-                for (int i = 0; i < numCns; i++) {
-                    cnsStr.append(cns.get(i).flattenToString());
-                    cnsStr.append(", ");
-                }
-
-                // Remove last ", "
-                cnsStr.setLength(cnsStr.length() - 2);
-
-                throw new IllegalArgumentException("Found multiple instrumentations: "
-                        + cnsStr.toString());
-            }
-        }
-
-        InstrumentationWatcher watcher = null;
-        UiAutomationConnection connection = null;
-        if (wait) {
-            watcher = new InstrumentationWatcher(mInterface, pw);
-            watcher.setRawOutput(rawMode);
-            // Don't yet know how to support this.
-            connection = null; //new UiAutomationConnection();
-        }
-
-        float[] oldAnims = null;
-        if (no_window_animation) {
-            oldAnims = wm.getAnimationScales();
-            wm.setAnimationScale(0, 0.0f);
-            wm.setAnimationScale(1, 0.0f);
-        }
-
-        if (abi != null) {
-            final String[] supportedAbis = Build.SUPPORTED_ABIS;
-            boolean matched = false;
-            for (String supportedAbi : supportedAbis) {
-                if (supportedAbi.equals(abi)) {
-                    matched = true;
-                    break;
-                }
-            }
-
-            if (!matched) {
-                throw new RuntimeException(
-                        "INSTRUMENTATION_FAILED: Unsupported instruction set " + abi);
-            }
-        }
-
-        if (!mInterface.startInstrumentation(cn, profileFile, 0, args, watcher, connection, userId,
-                abi)) {
-            throw new RuntimeException("INSTRUMENTATION_FAILED: " + cn.flattenToString());
-        }
-
-        if (watcher != null) {
-            if (!watcher.waitForFinish()) {
-                pw.println("INSTRUMENTATION_ABORTED: System has crashed.");
-            }
-        }
-
-        if (oldAnims != null) {
-            wm.setAnimationScales(oldAnims);
-        }
         return 0;
     }
 
@@ -2550,6 +2333,25 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --user <USER_ID> | all | current: Specify which user to send to; if not");
             pw.println("          specified then send to all users.");
             pw.println("      --receiver-permission <PERMISSION>: Require receiver to hold permission.");
+            pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
+            pw.println("          [--user <USER_ID> | current]");
+            pw.println("          [--no-window-animation] [--abi <ABI>] <COMPONENT>");
+            pw.println("      Start an Instrumentation.  Typically this target <COMPONENT> is in the");
+            pw.println("      form <TEST_PACKAGE>/<RUNNER_CLASS> or only <TEST_PACKAGE> if there");
+            pw.println("      is only one instrumentation.  Options are:");
+            pw.println("      -r: print raw results (otherwise decode REPORT_KEY_STREAMRESULT).  Use with");
+            pw.println("          [-e perf true] to generate raw output for performance measurements.");
+            pw.println("      -e <NAME> <VALUE>: set argument <NAME> to <VALUE>.  For test runners a");
+            pw.println("          common form is [-e <testrunner_flag> <value>[,<value>...]].");
+            pw.println("      -p <FILE>: write profiling data to <FILE>");
+            pw.println("      -m: Write output as protobuf (machine readable)");
+            pw.println("      -w: wait for instrumentation to finish before returning.  Required for");
+            pw.println("          test runners.");
+            pw.println("      --user <USER_ID> | current: Specify user instrumentation runs in;");
+            pw.println("          current user if not specified.");
+            pw.println("      --no-window-animation: turn off window animations while running.");
+            pw.println("      --abi <ABI>: Launch the instrumented process with the selected ABI.");
+            pw.println("          This assumes that the process supports the selected ABI.");
             pw.println("  trace-ipc [start|stop] [--dump-file <FILE>]");
             pw.println("      Trace IPC transactions.");
             pw.println("      start: start tracing IPC transactions.");
