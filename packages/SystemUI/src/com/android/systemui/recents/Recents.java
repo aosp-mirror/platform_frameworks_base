@@ -57,6 +57,7 @@ import com.android.systemui.recents.events.component.ShowUserToastEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
+import com.android.systemui.recents.grid.RecentsGridImpl;
 import com.android.systemui.recents.tv.RecentsTvImpl;
 import com.android.systemui.stackdivider.Divider;
 
@@ -83,6 +84,7 @@ public class Recents extends SystemUI
     static {
         RECENTS_ACTIVITIES.add(RecentsImpl.RECENTS_ACTIVITY);
         RECENTS_ACTIVITIES.add(RecentsTvImpl.RECENTS_TV_ACTIVITY);
+        RECENTS_ACTIVITIES.add(RecentsGridImpl.RECENTS_MOSAIC_ACTIVITY);
     }
 
     // Purely for experimentation
@@ -205,6 +207,8 @@ public class Recents extends SystemUI
                 getSystemService(Context.UI_MODE_SERVICE);
         if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
             mImpl = new RecentsTvImpl(mContext);
+        } else if (SystemProperties.getBoolean("ro.recents.grid", false) == true) {
+            mImpl = new RecentsGridImpl(mContext);
         } else {
             mImpl = new RecentsImpl(mContext);
         }
