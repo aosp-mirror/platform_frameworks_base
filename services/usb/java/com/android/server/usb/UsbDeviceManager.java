@@ -352,6 +352,16 @@ public class UsbDeviceManager {
                 mAdbEnabled = UsbManager.containsFunction(getDefaultFunctions(),
                         UsbManager.USB_FUNCTION_ADB);
 
+                /**
+                 * Remove MTP from persistent config, to bring usb to a good state
+                 * after fixes to b/31814300. This block can be removed after the update
+                 */
+                String persisted = SystemProperties.get(USB_PERSISTENT_CONFIG_PROPERTY);
+                if (UsbManager.containsFunction(persisted, UsbManager.USB_FUNCTION_MTP)) {
+                    SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY,
+                            UsbManager.removeFunction(persisted, UsbManager.USB_FUNCTION_MTP));
+                }
+
                 String buildType = SystemProperties.get(BUILD_TYPE_PROPERTY);
                 if (buildType.equals(BUILD_TYPE_USERDEBUG) || buildType.equals(BUILD_TYPE_ENG)) {
                     setAdbEnabled(true);
@@ -472,17 +482,13 @@ public class UsbDeviceManager {
                             USB_PERSISTENT_CONFIG_PROPERTY, UsbManager.USB_FUNCTION_NONE));
                 SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY, newFunction);
 
-                // Changing the persistent config also changes the normal
-                // config. Wait for this to happen before changing again.
-                waitForState(newFunction);
-
                 // Remove mtp from the config if file transfer is not enabled
                 if (oldFunctions.equals(UsbManager.USB_FUNCTION_MTP) && 
                         !mUsbDataUnlocked && enable) {
                     oldFunctions = UsbManager.USB_FUNCTION_NONE;
                 }
 
-                setEnabledFunctions(oldFunctions, false, mUsbDataUnlocked);
+                setEnabledFunctions(oldFunctions, true, mUsbDataUnlocked);
                 updateAdbNotification();
             }
 
@@ -553,6 +559,9 @@ public class UsbDeviceManager {
                 Slog.i(TAG, "Setting USB config to " + functions);
                 mCurrentFunctions = functions;
                 mCurrentFunctionsApplied = false;
+
+                // Kick the USB stack to close existing connections.
+                setUsbConfig(UsbManager.USB_FUNCTION_NONE);
 
                 // Set the new USB configuration.
                 if (!setUsbConfig(functions)) {
