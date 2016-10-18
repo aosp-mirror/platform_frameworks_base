@@ -19,15 +19,19 @@ package com.android.server.connectivity;
 import android.content.Context;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
+import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.Base64;
 import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.TokenBucket;
 import com.android.server.SystemService;
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -56,6 +60,8 @@ final public class IpConnectivityMetrics extends SystemService {
     // Maximum size of the event buffer.
     private static final int MAXIMUM_BUFFER_SIZE = DEFAULT_BUFFER_SIZE * 10;
 
+    private static final int ERROR_RATE_LIMITED = -1;
+
     // Lock ensuring that concurrent manipulations of the event buffer are correct.
     // There are three concurrent operations to synchronize:
     //  - appending events to the buffer.
@@ -73,6 +79,8 @@ final public class IpConnectivityMetrics extends SystemService {
     private int mDropped;
     @GuardedBy("mLock")
     private int mCapacity;
+    @GuardedBy("mLock")
+    private final ArrayMap<Class<?>, TokenBucket> mBuckets = makeRateLimitingBuckets();
 
     private final ToIntFunction<Context> mCapacityGetter;
 
@@ -122,6 +130,10 @@ final public class IpConnectivityMetrics extends SystemService {
             if (event == null) {
                 return left;
             }
+            if (isRateLimited(event)) {
+                // Do not count as a dropped event. TODO: consider adding separate counter
+                return ERROR_RATE_LIMITED;
+            }
             if (left == 0) {
                 mDropped++;
                 return 0;
@@ -129,6 +141,11 @@ final public class IpConnectivityMetrics extends SystemService {
             mBuffer.add(event);
             return left - 1;
         }
+    }
+
+    private boolean isRateLimited(ConnectivityMetricsEvent event) {
+        TokenBucket tb = mBuckets.get(event.data.getClass());
+        return (tb != null) && !tb.get();
     }
 
     private String flushEncodedOutput() {
@@ -256,4 +273,11 @@ final public class IpConnectivityMetrics extends SystemService {
         }
         return Math.min(size, MAXIMUM_BUFFER_SIZE);
     };
+
+    private static ArrayMap<Class<?>, TokenBucket> makeRateLimitingBuckets() {
+        ArrayMap<Class<?>, TokenBucket> map = new ArrayMap<>();
+        // one token every minute, 50 tokens max: burst of ~50 events every hour.
+        map.put(ApfProgramEvent.class, new TokenBucket((int)DateUtils.MINUTE_IN_MILLIS, 50));
+        return map;
+    }
 }

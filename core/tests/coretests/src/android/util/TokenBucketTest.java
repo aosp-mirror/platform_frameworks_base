@@ -177,4 +177,3 @@ public class TokenBucketTest extends TestCase {
 
     interface Fn { void call(); }
 }
-
