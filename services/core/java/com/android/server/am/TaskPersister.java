@@ -54,6 +54,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+
 public class TaskPersister {
     static final String TAG = "TaskPersister";
     static final boolean DEBUG = false;
@@ -450,7 +452,7 @@ public class TaskPersister {
 
                                 final int taskId = task.taskId;
                                 if (mStackSupervisor.anyTaskForIdLocked(taskId,
-                                        /* restoreFromRecents= */ false, 0) != null) {
+                                        /* restoreFromRecents= */ false, HOME_STACK_ID) != null) {
                                     // Should not happen.
                                     Slog.wtf(TAG, "Existing task with taskId " + taskId + "found");
                                 } else if (userId != task.userId) {
