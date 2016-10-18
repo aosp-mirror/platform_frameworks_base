@@ -332,22 +332,39 @@ LocationServices.GeofencingApi.removeGeofences(
 <p>This section outlines recommendations for using geofencing with the location
 APIs for Android.</p>
 
-<h3>Reduce power consumption</h3>
+<h3>
+  Reduce power consumption
+</h3>
 
-<p>You can use the following techniques to optimize power consumption in your apps that use geofencing:</p>
+<p>
+  You can use the following techniques to optimize power consumption in your
+  apps that use geofencing:
+</p>
 
 <ul>
-<li><p>Set the <a href="{@docRoot}android/reference/com/google/android/gms/location/Geofence.Builder.html#setNotificationResponsiveness(int)">
-notification responsiveness</a> to a higher value. Doing so improves power consumption by
-increasing the latency of geofence alerts. For example, if you set a responsiveness value of five
-minutes your app only checks for an entrance or exit alert once every five minutes.
-Setting lower values does not necessarily mean that users will be notified within that time period
-(for example, if you set a value of 5 seconds it may take a bit longer than that to receive the
-alert).</p></li>
-<li><p>Use a larger geofence radius for locations where a user spends a significant amount of time,
-such as home or work. While a larger radius doesn't directly reduce power consumption, it reduces
-the frequency at which the app checks for entrance or exit, effectively lowering overall power
-consumption.</p></li>
+  <li>
+    <p>
+      Set the <a href=
+      "https://developers.google.com/android/reference/com/google/android/gms/location/Geofence.Builder.html#setNotificationResponsiveness(int)">
+      notification responsiveness</a> to a higher value. Doing so improves
+      power consumption by increasing the latency of geofence alerts. For
+      example, if you set a responsiveness value of five minutes your app only
+      checks for an entrance or exit alert once every five minutes. Setting
+      lower values does not necessarily mean that users will be notified
+      within that time period (for example, if you set a value of 5 seconds it
+      may take a bit longer than that to receive the alert).
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Use a larger geofence radius for locations where a user spends a
+      significant amount of time, such as home or work. While a larger radius
+      doesn't directly reduce power consumption, it reduces the frequency at
+      which the app checks for entrance or exit, effectively lowering overall
+      power consumption.
+    </p>
+  </li>
 </ul>
 
 <h3>Choose the optimal radius for your geofence</h3>
