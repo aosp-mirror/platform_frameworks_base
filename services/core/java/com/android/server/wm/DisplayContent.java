@@ -32,9 +32,12 @@ import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_TOP;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+import static android.view.WindowManager.LayoutParams.NEEDS_MENU_SET_TRUE;
+import static android.view.WindowManager.LayoutParams.NEEDS_MENU_UNSET;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -44,11 +47,13 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
@@ -72,6 +77,8 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.IWindow;
+import android.view.WindowManager;
+import android.view.WindowManagerPolicy;
 
 import com.android.internal.util.FastPrintWriter;
 
@@ -717,6 +724,21 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    /**
+     * If a window that has an animation specifying a colored background and the current wallpaper
+     * is visible, then the color goes *below* the wallpaper so we don't cause the wallpaper to
+     * suddenly disappear.
+     */
+    int getLayerForAnimationBackground(WindowStateAnimator winAnimator) {
+        for (int i = mWindows.size() - 1; i >= 0; --i) {
+            final WindowState win = mWindows.get(i);
+            if (win.mIsWallpaper && win.isVisibleNow()) {
+                return win.mWinAnimator.mAnimLayer;
+            }
+        }
+        return winAnimator.mAnimLayer;
+    }
+
     void prepareFreezingTaskBounds() {
         for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.get(stackNdx);
@@ -1102,6 +1124,36 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mWindows.add(index, win);
     }
 
+    boolean removeFromWindowList(WindowState win) {
+        return mWindows.remove(win);
+    }
+
+    private int removeWindowAndChildrenFromWindowList(WindowState win, int interestingPos) {
+        final WindowList windows = getWindowList();
+        int wpos = windows.indexOf(win);
+        if (wpos < 0) {
+            return interestingPos;
+        }
+
+        if (wpos < interestingPos) interestingPos--;
+        if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Temp removing at " + wpos + ": " + this);
+        windows.remove(wpos);
+        mService.mWindowsChanged = true;
+        int childWinCount = win.mChildren.size();
+        while (childWinCount > 0) {
+            childWinCount--;
+            final WindowState cw = win.mChildren.get(childWinCount);
+            int cpos = windows.indexOf(cw);
+            if (cpos >= 0) {
+                if (cpos < interestingPos) interestingPos--;
+                if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM,
+                        "Temp removing child at " + cpos + ": " + cw);
+                windows.remove(cpos);
+            }
+        }
+        return interestingPos;
+    }
+
     void addChildWindowToWindowList(WindowState win) {
         final WindowState parentWindow = win.getParentWindow();
 
@@ -1255,6 +1307,371 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
         return windowList;
+    }
+
+    private void reAddToWindowList(WindowState win) {
+        win.mToken.addWindow(win);
+        // This is a hack to get all of the child windows added as well at the right position. Child
+        // windows should be rare and this case should be rare, so it shouldn't be that big a deal.
+        int wpos = mWindows.indexOf(win);
+        if (wpos >= 0) {
+            if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "ReAdd removing from " + wpos + ": " + win);
+            mWindows.remove(wpos);
+            mService.mWindowsChanged = true;
+            win.reAddWindow(wpos);
+        }
+    }
+
+    void moveInputMethodDialogs(int pos) {
+        ArrayList<WindowState> dialogs = mService.mInputMethodDialogs;
+
+        final int N = dialogs.size();
+        if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Removing " + N + " dialogs w/pos=" + pos);
+        for (int i = 0; i < N; i++) {
+            pos = removeWindowAndChildrenFromWindowList(dialogs.get(i), pos);
+        }
+        if (DEBUG_INPUT_METHOD) {
+            Slog.v(TAG_WM, "Window list w/pos=" + pos);
+            logWindowList(mWindows, "  ");
+        }
+
+        WindowState ime = mService.mInputMethodWindow;
+        if (pos >= 0) {
+            // Skip windows owned by the input method.
+            if (ime != null) {
+                while (pos < mWindows.size()) {
+                    WindowState wp = mWindows.get(pos);
+                    if (wp == ime || wp.getParentWindow() == ime) {
+                        pos++;
+                        continue;
+                    }
+                    break;
+                }
+            }
+            if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Adding " + N + " dialogs at pos=" + pos);
+            for (int i=0; i<N; i++) {
+                WindowState win = dialogs.get(i);
+                pos = win.reAddWindow(pos);
+            }
+            if (DEBUG_INPUT_METHOD) {
+                Slog.v(TAG_WM, "Final window list:");
+                logWindowList(mWindows, "  ");
+            }
+            return;
+        }
+        for (int i=0; i<N; i++) {
+            WindowState win = dialogs.get(i);
+            reAddToWindowList(win);
+            if (DEBUG_INPUT_METHOD) {
+                Slog.v(TAG_WM, "No IM target, final list:");
+                logWindowList(mWindows, "  ");
+            }
+        }
+    }
+
+    boolean moveInputMethodWindowsIfNeeded(boolean needAssignLayers) {
+        final WindowState imWin = mService.mInputMethodWindow;
+        final int DN = mService.mInputMethodDialogs.size();
+        if (imWin == null && DN == 0) {
+            return false;
+        }
+
+        // TODO(multidisplay): IMEs are only supported on the default display.
+        WindowList windows = mWindows;
+
+        int imPos = findDesiredInputMethodWindowIndex(true);
+        if (imPos >= 0) {
+            // In this case, the input method windows are to be placed
+            // immediately above the window they are targeting.
+
+            // First check to see if the input method windows are already
+            // located here, and contiguous.
+            final int N = windows.size();
+            final WindowState firstImWin = imPos < N ? windows.get(imPos) : null;
+
+            // Figure out the actual input method window that should be
+            // at the bottom of their stack.
+            WindowState baseImWin = imWin != null ? imWin : mService.mInputMethodDialogs.get(0);
+            final WindowState cw = baseImWin.getBottomChild();
+            if (cw != null && cw.mSubLayer < 0) {
+                baseImWin = cw;
+            }
+
+            if (firstImWin == baseImWin) {
+                // The windows haven't moved...  but are they still contiguous?
+                // First find the top IM window.
+                int pos = imPos+1;
+                while (pos < N) {
+                    if (!(windows.get(pos)).mIsImWindow) {
+                        break;
+                    }
+                    pos++;
+                }
+                pos++;
+                // Now there should be no more input method windows above.
+                while (pos < N) {
+                    if ((windows.get(pos)).mIsImWindow) {
+                        break;
+                    }
+                    pos++;
+                }
+                if (pos >= N) {
+                    return false;
+                }
+            }
+
+            if (imWin != null) {
+                if (DEBUG_INPUT_METHOD) {
+                    Slog.v(TAG_WM, "Moving IM from " + imPos);
+                    logWindowList(windows, "  ");
+                }
+                imPos = removeWindowAndChildrenFromWindowList(imWin, imPos);
+                if (DEBUG_INPUT_METHOD) {
+                    Slog.v(TAG_WM, "List after removing with new pos " + imPos + ":");
+                    logWindowList(windows, "  ");
+                }
+                imWin.reAddWindow(imPos);
+                if (DEBUG_INPUT_METHOD) {
+                    Slog.v(TAG_WM, "List after moving IM to " + imPos + ":");
+                    logWindowList(windows, "  ");
+                }
+                if (DN > 0) moveInputMethodDialogs(imPos+1);
+            } else {
+                moveInputMethodDialogs(imPos);
+            }
+
+        } else {
+            // In this case, the input method windows go in a fixed layer,
+            // because they aren't currently associated with a focus window.
+
+            if (imWin != null) {
+                if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Moving IM from " + imPos);
+                removeWindowAndChildrenFromWindowList(imWin, 0);
+                reAddToWindowList(imWin);
+                if (DEBUG_INPUT_METHOD) {
+                    Slog.v(TAG_WM, "List with no IM target:");
+                    logWindowList(windows, "  ");
+                }
+                if (DN > 0) moveInputMethodDialogs(-1);
+            } else {
+                moveInputMethodDialogs(-1);
+            }
+
+        }
+
+        if (needAssignLayers) {
+            assignWindowLayers(false /* setLayoutNeeded */);
+        }
+
+        return true;
+    }
+
+    /**
+     * Dig through the WindowStates and find the one that the Input Method will target.
+     * @param willMove
+     * @return The index+1 in mWindows of the discovered target.
+     */
+    int findDesiredInputMethodWindowIndex(boolean willMove) {
+        // TODO(multidisplay): Needs some serious rethought when the target and IME are not on the
+        // same display. Or even when the current IME/target are not on the same screen as the next
+        // IME/target. For now only look for input windows on the main screen.
+        final WindowList windows = getWindowList();
+        WindowState w = null;
+        int i;
+        for (i = windows.size() - 1; i >= 0; --i) {
+            WindowState win = windows.get(i);
+
+            if (DEBUG_INPUT_METHOD && willMove) Slog.i(TAG_WM, "Checking window @" + i
+                    + " " + win + " fl=0x" + Integer.toHexString(win.mAttrs.flags));
+            if (canBeImeTarget(win)) {
+                w = win;
+                //Slog.i(TAG_WM, "Putting input method here!");
+
+                // Yet more tricksyness!  If this window is a "starting" window, we do actually want
+                // to be on top of it, but it is not -really- where input will go.  So if the caller
+                // is not actually looking to move the IME, look down below for a real window to
+                // target...
+                if (!willMove && w.mAttrs.type == TYPE_APPLICATION_STARTING && i > 0) {
+                    WindowState wb = windows.get(i-1);
+                    if (wb.mAppToken == w.mAppToken && canBeImeTarget(wb)) {
+                        i--;
+                        w = wb;
+                    }
+                }
+                break;
+            }
+        }
+
+        // Now w is either mWindows[0] or an IME (or null if mWindows is empty).
+
+        if (DEBUG_INPUT_METHOD && willMove) Slog.v(TAG_WM, "Proposed new IME target: " + w);
+
+        // Now, a special case -- if the last target's window is in the process of exiting, and is
+        // above the new target, keep on the last target to avoid flicker. Consider for example a
+        // Dialog with the IME shown: when the Dialog is dismissed, we want to keep the IME above it
+        // until it is completely gone so it doesn't drop behind the dialog or its full-screen
+        // scrim.
+        final WindowState curTarget = mService.mInputMethodTarget;
+        if (curTarget != null
+                && curTarget.isDisplayedLw()
+                && curTarget.isClosing()
+                && (w == null || curTarget.mWinAnimator.mAnimLayer > w.mWinAnimator.mAnimLayer)) {
+            if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Current target higher, not changing");
+            return windows.indexOf(curTarget) + 1;
+        }
+
+        if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Desired input method target="
+                + w + " willMove=" + willMove);
+
+        if (willMove && w != null) {
+            AppWindowToken token = curTarget == null ? null : curTarget.mAppToken;
+            if (token != null) {
+
+                // Now some fun for dealing with window animations that modify the Z order. We need
+                // to look at all windows below the current target that are in this app, finding the
+                // highest visible one in layering.
+                WindowState highestTarget = null;
+                int highestPos = 0;
+                if (token.mAppAnimator.animating || token.mAppAnimator.animation != null) {
+                    WindowList curWindows = token.getDisplayContent().getWindowList();
+                    int pos = curWindows.indexOf(curTarget);
+                    while (pos >= 0) {
+                        WindowState win = curWindows.get(pos);
+                        if (win.mAppToken != token) {
+                            break;
+                        }
+                        if (!win.mRemoved) {
+                            if (highestTarget == null || win.mWinAnimator.mAnimLayer >
+                                    highestTarget.mWinAnimator.mAnimLayer) {
+                                highestTarget = win;
+                                highestPos = pos;
+                            }
+                        }
+                        pos--;
+                    }
+                }
+
+                if (highestTarget != null) {
+                    final AppTransition appTransition = mService.mAppTransition;
+                    if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, appTransition + " " + highestTarget
+                            + " animating=" + highestTarget.mWinAnimator.isAnimationSet()
+                            + " layer=" + highestTarget.mWinAnimator.mAnimLayer
+                            + " new layer=" + w.mWinAnimator.mAnimLayer);
+
+                    if (appTransition.isTransitionSet()) {
+                        // If we are currently setting up for an animation, hold everything until we
+                        // can find out what will happen.
+                        mService.mInputMethodTargetWaitingAnim = true;
+                        mService.mInputMethodTarget = highestTarget;
+                        return highestPos + 1;
+                    } else if (highestTarget.mWinAnimator.isAnimationSet() &&
+                            highestTarget.mWinAnimator.mAnimLayer > w.mWinAnimator.mAnimLayer) {
+                        // If the window we are currently targeting is involved with an animation,
+                        // and it is on top of the next target we will be over, then hold off on
+                        // moving until that is done.
+                        mService.mInputMethodTargetWaitingAnim = true;
+                        mService.mInputMethodTarget = highestTarget;
+                        return highestPos + 1;
+                    }
+                }
+            }
+        }
+
+        //Slog.i(TAG_WM, "Placing input method @" + (i+1));
+        if (w != null) {
+            if (willMove) {
+                if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget + " to "
+                        + w + (SHOW_STACK_CRAWLS ? " Callers=" + Debug.getCallers(4) : ""));
+                mService.mInputMethodTarget = w;
+                mService.mInputMethodTargetWaitingAnim = false;
+                if (w.mAppToken != null) {
+                    setInputMethodAnimLayerAdjustment(
+                            w.mAppToken.mAppAnimator.animLayerAdjustment);
+                } else {
+                    setInputMethodAnimLayerAdjustment(0);
+                }
+            }
+
+            // If the docked divider is visible, we still need to go through this whole excercise to
+            // find the appropriate input method target (used for animations and dialog
+            // adjustments), but for purposes of Z ordering we simply wish to place it above the
+            // docked divider. Unless it is already above the divider.
+            final WindowState dockedDivider = mDividerControllerLocked.getWindow();
+            if (dockedDivider != null && dockedDivider.isVisibleLw()) {
+                int dividerIndex = windows.indexOf(dockedDivider);
+                if (dividerIndex > 0 && dividerIndex > i) {
+                    return dividerIndex + 1;
+                }
+            }
+            return i+1;
+        }
+        if (willMove) {
+            if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget
+                    + " to null." + (SHOW_STACK_CRAWLS ? " Callers=" + Debug.getCallers(4) : ""));
+            mService.mInputMethodTarget = null;
+            setInputMethodAnimLayerAdjustment(0);
+        }
+        return -1;
+    }
+
+    private static boolean canBeImeTarget(WindowState w) {
+        final int fl = w.mAttrs.flags & (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM);
+        final int type = w.mAttrs.type;
+
+        if (fl != 0 && fl != (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM)
+                && type != TYPE_APPLICATION_STARTING) {
+            return false;
+        }
+
+        if (DEBUG_INPUT_METHOD) {
+            Slog.i(TAG_WM, "isVisibleOrAdding " + w + ": " + w.isVisibleOrAdding());
+            if (!w.isVisibleOrAdding()) {
+                Slog.i(TAG_WM, "  mSurfaceController=" + w.mWinAnimator.mSurfaceController
+                        + " relayoutCalled=" + w.mRelayoutCalled
+                        + " viewVis=" + w.mViewVisibility
+                        + " policyVis=" + w.mPolicyVisibility
+                        + " policyVisAfterAnim=" + w.mPolicyVisibilityAfterAnim
+                        + " parentHidden=" + w.isParentWindowHidden()
+                        + " exiting=" + w.mAnimatingExit + " destroying=" + w.mDestroying);
+                if (w.mAppToken != null) {
+                    Slog.i(TAG_WM, "  mAppToken.hiddenRequested=" + w.mAppToken.hiddenRequested);
+                }
+            }
+        }
+        return w.isVisibleOrAdding();
+    }
+
+    private void logWindowList(final WindowList windows, String prefix) {
+        int N = windows.size();
+        while (N > 0) {
+            N--;
+            Slog.v(TAG_WM, prefix + "#" + N + ": " + windows.get(N));
+        }
+    }
+
+    boolean getNeedsMenu(WindowState win, WindowManagerPolicy.WindowState bottom) {
+        int index = -1;
+        WindowList windows = getWindowList();
+        while (true) {
+            if (win.mAttrs.needsMenuKey != NEEDS_MENU_UNSET) {
+                return win.mAttrs.needsMenuKey == NEEDS_MENU_SET_TRUE;
+            }
+            // If we reached the bottom of the range of windows we are considering,
+            // assume no menu is needed.
+            if (win == bottom) {
+                return false;
+            }
+            // The current window hasn't specified whether menu key is needed; look behind it.
+            // First, we may need to determine the starting position.
+            if (index < 0) {
+                index = windows.indexOf(win);
+            }
+            index--;
+            if (index < 0) {
+                return false;
+            }
+            win = windows.get(index);
+        }
     }
 
     void setLayoutNeeded() {

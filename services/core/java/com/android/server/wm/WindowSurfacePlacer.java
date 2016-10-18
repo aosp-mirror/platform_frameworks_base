@@ -530,9 +530,11 @@ class WindowSurfacePlacer {
         displayContent.setLayoutNeeded();
 
         // TODO(multidisplay): IMEs are only supported on the default display.
-        if (windows == mService.getDefaultWindowListLocked()
-                && !mService.moveInputMethodWindowsIfNeededLocked(true)) {
-            mService.getDefaultDisplayContentLocked().assignWindowLayers(false /*setLayoutNeeded*/);
+        // TODO: Probably not needed once the window list always has the right z-ordering
+        // when the window hierarchy is updated.
+        final DisplayContent dc = mService.getDefaultDisplayContentLocked();
+        if (windows == dc.getWindowList() && !dc.moveInputMethodWindowsIfNeeded(true)) {
+            dc.assignWindowLayers(false /*setLayoutNeeded*/);
         }
         mService.updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
                 true /*updateInputWindows*/);
