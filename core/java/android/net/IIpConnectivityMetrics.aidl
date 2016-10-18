@@ -23,7 +23,8 @@ import android.net.ConnectivityMetricsEvent;
 interface IIpConnectivityMetrics {
 
     /**
-     * @return number of remaining available slots in buffer.
+     * @return the number of remaining available slots in buffer,
+     * or -1 if the event was dropped due to rate limiting.
      */
     int logEvent(in ConnectivityMetricsEvent event);
 }
