@@ -74,7 +74,7 @@ public:
     static const char* OVERLAY_DIR;
     /*
      * If OVERLAY_SKU_DIR_PROPERTY is set, search for runtime resource overlay
-     * APKs in OVERLAY_DIR/<value of OVERLAY_SKU_DIR_PROPERTY> rather than in
+     * APKs in OVERLAY_DIR/<value of OVERLAY_SKU_DIR_PROPERTY> in addition to
      * OVERLAY_DIR.
      */
     static const char* OVERLAY_SKU_DIR_PROPERTY;
