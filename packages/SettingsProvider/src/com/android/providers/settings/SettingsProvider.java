@@ -2137,7 +2137,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 132;
+            private static final int SETTINGS_VERSION = 133;
 
             private final int mUserId;
 
@@ -2477,6 +2477,19 @@ public class SettingsProvider extends ContentProvider {
                             defaultSyncParentSounds,
                             SettingsState.SYSTEM_PACKAGE_NAME);
                     currentVersion = 132;
+                }
+
+                if (currentVersion == 132) {
+                    // Version 132: Add default end button behavior
+                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
+                    if (systemSettings.getSettingLocked(Settings.System.END_BUTTON_BEHAVIOR) ==
+                            null) {
+                        String defaultEndButtonBehavior = Integer.toString(getContext()
+                                .getResources().getInteger(R.integer.def_end_button_behavior));
+                        systemSettings.insertSettingLocked(Settings.System.END_BUTTON_BEHAVIOR,
+                                defaultEndButtonBehavior, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 133;
                 }
 
                 if (currentVersion != newVersion) {
