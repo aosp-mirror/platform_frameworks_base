@@ -36,6 +36,7 @@ import static android.provider.DocumentsContract.isTreeUri;
 
 import android.Manifest;
 import android.annotation.CallSuper;
+import android.annotation.Nullable;
 import android.content.ClipDescription;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -54,8 +55,8 @@ import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.provider.DocumentsContract.Document;
-import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract.Path;
+import android.provider.DocumentsContract.Root;
 import android.util.Log;
 
 import libcore.io.IoUtils;
@@ -154,17 +155,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      */
     @Override
     public void attachInfo(Context context, ProviderInfo info) {
-        mAuthority = info.authority;
-
-        mMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        mMatcher.addURI(mAuthority, "root", MATCH_ROOTS);
-        mMatcher.addURI(mAuthority, "root/*", MATCH_ROOT);
-        mMatcher.addURI(mAuthority, "root/*/recent", MATCH_RECENT);
-        mMatcher.addURI(mAuthority, "root/*/search", MATCH_SEARCH);
-        mMatcher.addURI(mAuthority, "document/*", MATCH_DOCUMENT);
-        mMatcher.addURI(mAuthority, "document/*/children", MATCH_CHILDREN);
-        mMatcher.addURI(mAuthority, "tree/*/document/*", MATCH_DOCUMENT_TREE);
-        mMatcher.addURI(mAuthority, "tree/*/document/*/children", MATCH_CHILDREN_TREE);
+        registerAuthority(info.authority);
 
         // Sanity check our setup
         if (!info.exported) {
@@ -179,6 +170,28 @@ public abstract class DocumentsProvider extends ContentProvider {
         }
 
         super.attachInfo(context, info);
+    }
+
+    /** {@hide} */
+    @Override
+    public void attachInfoForTesting(Context context, ProviderInfo info) {
+        registerAuthority(info.authority);
+
+        super.attachInfoForTesting(context, info);
+    }
+
+    private void registerAuthority(String authority) {
+        mAuthority = authority;
+
+        mMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        mMatcher.addURI(mAuthority, "root", MATCH_ROOTS);
+        mMatcher.addURI(mAuthority, "root/*", MATCH_ROOT);
+        mMatcher.addURI(mAuthority, "root/*/recent", MATCH_RECENT);
+        mMatcher.addURI(mAuthority, "root/*/search", MATCH_SEARCH);
+        mMatcher.addURI(mAuthority, "document/*", MATCH_DOCUMENT);
+        mMatcher.addURI(mAuthority, "document/*/children", MATCH_CHILDREN);
+        mMatcher.addURI(mAuthority, "tree/*/document/*", MATCH_DOCUMENT_TREE);
+        mMatcher.addURI(mAuthority, "tree/*/document/*/children", MATCH_CHILDREN_TREE);
     }
 
     /**
@@ -326,23 +339,28 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Finds the canonical path to the root for the requested document. If there are
-     * more than one path to this document, return the most typical one.
+     * Finds the canonical path for the requested document. The path must start
+     * from the parent document if parentDocumentId is not null or the root document
+     * if parentDocumentId is null. If there are more than one path to this document,
+     * return the most typical one. Include both the parent document or root document
+     * and the requested document in the returned path.
      *
-     * <p>This API assumes that document id has enough info to infer the root.
-     * Different roots should use different document id to refer to the same
+     * <p>This API assumes that document ID has enough info to infer the root.
+     * Different roots should use different document ID to refer to the same
      * document.
      *
-     * @param documentId the document which path is requested.
-     * @return the path of the requested document to the root, or null if
-     *      such operation is not supported.
+     * @param childDocumentId the document which path is requested.
+     * @param parentDocumentId the document with which path starts if not null, or
+     *     null to indicate path to root is requested.
+     * @return the path of the requested document. If parentDocumentId is null
+     *     returned root ID must not be null. If parentDocumentId is not null
+     *     returned root ID must be null.
      *
      * @hide
      */
-    public Path findPath(String documentId)
+    public Path findPath(String childDocumentId, @Nullable String parentDocumentId)
             throws FileNotFoundException {
-        Log.w(TAG, "findPath is called on an unsupported provider.");
-        return null;
+        throw new UnsupportedOperationException("findPath not supported.");
     }
 
     /**
@@ -897,9 +915,27 @@ public abstract class DocumentsProvider extends ContentProvider {
             // It's responsibility of the provider to revoke any grants, as the document may be
             // still attached to another parents.
         } else if (METHOD_FIND_PATH.equals(method)) {
-            getContext().enforceCallingPermission(Manifest.permission.MANAGE_DOCUMENTS, null);
+            final boolean isTreeUri = isTreeUri(documentUri);
 
-            final Path path = findPath(documentId);
+            if (isTreeUri) {
+                enforceReadPermissionInner(documentUri, getCallingPackage(), null);
+            } else {
+                getContext().enforceCallingPermission(Manifest.permission.MANAGE_DOCUMENTS, null);
+            }
+
+            final String parentDocumentId = isTreeUri
+                    ? DocumentsContract.getTreeDocumentId(documentUri)
+                    : null;
+
+            final Path path = findPath(documentId, parentDocumentId);
+
+            // Ensure provider doesn't leak information to unprivileged callers.
+            if (isTreeUri
+                    && (path.getRootId() != null
+                        || !Objects.equals(path.getPath().get(0), parentDocumentId))) {
+                throw new IllegalStateException(
+                        "Provider returns an invalid result for findPath.");
+            }
 
             out.putParcelable(DocumentsContract.EXTRA_RESULT, path);
         } else {

@@ -19,6 +19,10 @@ package android.provider;
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.system.OsConstants.SEEK_SET;
 
+import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
+import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
+
 import android.annotation.Nullable;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -55,6 +59,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Defines the contract between a documents provider and the platform.
@@ -1311,21 +1316,26 @@ public final class DocumentsContract {
     }
 
     /**
-     * Finds the canonical path to the root. Document id should be unique across
-     * roots.
+     * Finds the canonical path to the top of the tree. The return value starts
+     * from the top of the tree or the root document to the requested document,
+     * both inclusive.
      *
-     * @param documentUri uri of the document which path is requested.
-     * @return the path to the root of the document, or {@code null} if failed.
-     * @see DocumentsProvider#findPath(String)
+     * Document id should be unique across roots.
+     *
+     * @param treeUri treeUri of the document which path is requested.
+     * @return a list of documents ID starting from the top of the tree to the
+     *      requested document, or {@code null} if failed.
+     * @see DocumentsProvider#findPath(String, String)
      *
      * {@hide}
      */
-    public static Path findPath(ContentResolver resolver, Uri documentUri)
-            throws RemoteException {
+    public static List<String> findPath(ContentResolver resolver, Uri treeUri) {
+        checkArgument(isTreeUri(treeUri), treeUri + " is not a tree uri.");
+
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
-                documentUri.getAuthority());
+                treeUri.getAuthority());
         try {
-            return findPath(client, documentUri);
+            return findPath(client, treeUri).getPath();
         } catch (Exception e) {
             Log.w(TAG, "Failed to find path", e);
             return null;
@@ -1334,11 +1344,24 @@ public final class DocumentsContract {
         }
     }
 
-    /** {@hide} */
-    public static Path findPath(ContentProviderClient client, Uri documentUri)
-            throws RemoteException {
+    /**
+     * Finds the canonical path. If uri is a document uri returns path to a root and
+     * its associated root id. If uri is a tree uri returns the path to the top of
+     * the tree. The {@link Path#getPath()} in the return value starts from the top of
+     * the tree or the root document to the requested document, both inclusive.
+     *
+     * Document id should be unique across roots.
+     *
+     * @param uri uri of the document which path is requested. It can be either a
+     *          plain document uri or a tree uri.
+     * @return the path of the document.
+     * @see DocumentsProvider#findPath(String, String)
+     *
+     * {@hide}
+     */
+    public static Path findPath(ContentProviderClient client, Uri uri) throws RemoteException {
         final Bundle in = new Bundle();
-        in.putParcelable(DocumentsContract.EXTRA_URI, documentUri);
+        in.putParcelable(DocumentsContract.EXTRA_URI, uri);
 
         final Bundle out = client.call(METHOD_FIND_PATH, null, in);
 
@@ -1392,18 +1415,69 @@ public final class DocumentsContract {
      */
     public static final class Path implements Parcelable {
 
-        public final String mRootId;
-        public final List<String> mPath;
+        private final @Nullable String mRootId;
+        private final List<String> mPath;
 
         /**
          * Creates a Path.
-         * @param rootId the id of the root
-         * @param path the list of document ids from the root document
-         *             at position 0 to the target document
+         *
+         * @param rootId the ID of the root. May be null.
+         * @param path the list of document ids from the parent document at
+         *          position 0 to the child document.
          */
         public Path(String rootId, List<String> path) {
+            checkCollectionNotEmpty(path, "path");
+            checkCollectionElementsNotNull(path, "path");
+
             mRootId = rootId;
             mPath = path;
+        }
+
+        /**
+         * Returns the root id or null if the calling package doesn't have
+         * permission to access root information.
+         */
+        public @Nullable String getRootId() {
+            return mRootId;
+        }
+
+        /**
+         * Returns the path. The path is trimmed to the top of tree if
+         * calling package doesn't have permission to access those
+         * documents.
+         */
+        public List<String> getPath() {
+            return mPath;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || !(o instanceof Path)) {
+                return false;
+            }
+            Path path = (Path) o;
+            return Objects.equals(mRootId, path.mRootId) &&
+                    Objects.equals(mPath, path.mPath);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mRootId, mPath);
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder()
+                    .append("DocumentsContract.Path{")
+                    .append("rootId=")
+                    .append(mRootId)
+                    .append(", path=")
+                    .append(mPath)
+                    .append("}")
+                    .toString();
         }
 
         @Override
