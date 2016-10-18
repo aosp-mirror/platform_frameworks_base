@@ -54,6 +54,7 @@ import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
@@ -762,19 +763,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
                 final boolean hasFocus = child == inputFocus;
                 final boolean isVisible = child.isVisibleLw();
-                if ((privateFlags
-                        & WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS)
-                        != 0) {
+                if ((privateFlags & PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS) != 0) {
                     disableWallpaperTouchEvents = true;
                 }
                 final boolean hasWallpaper = wallpaperController.isWallpaperTarget(child)
-                        && (privateFlags & WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD) == 0
+                        && (privateFlags & PRIVATE_FLAG_KEYGUARD) == 0
                         && !disableWallpaperTouchEvents;
-                final boolean onDefaultDisplay = (child.getDisplayId() == Display.DEFAULT_DISPLAY);
 
                 // If there's a drag in progress and 'child' is a potential drop target,
                 // make sure it's been told about the drag
-                if (inDrag && isVisible && onDefaultDisplay) {
+                if (inDrag && isVisible && dc.isDefaultDisplay) {
                     mService.mDragState.sendDragStartedIfNeededLw(child);
                 }
 

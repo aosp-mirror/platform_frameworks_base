@@ -544,7 +544,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private static final Region sEmptyRegion = new Region();
 
     /**
-     * Compares to window sub-layers and returns -1 if the first is lesser than the second in terms
+     * Compares two window sub-layers and returns -1 if the first is lesser than the second in terms
      * of z-order and 1 otherwise.
      */
     private static final Comparator<WindowState> sWindowSubLayerComparator = (w1, w2) -> {
@@ -657,8 +657,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mYOffset = 0;
         mLayer = 0;
         mInputWindowHandle = new InputWindowHandle(
-                mAppToken != null ? mAppToken.mInputApplicationHandle : null, this,
-                getDisplayContent().getDisplayId());
+                mAppToken != null ? mAppToken.mInputApplicationHandle : null, this, getDisplayId());
     }
 
     void attach() {
@@ -2984,7 +2983,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Report a focus change.  Must be called with no locks held, and consistently
      * from the same serialized thread (such as dispatched from a handler).
      */
-    public void reportFocusChangedSerialized(boolean focused, boolean inTouchMode) {
+    void reportFocusChangedSerialized(boolean focused, boolean inTouchMode) {
         try {
             mClient.windowFocusChanged(focused, inTouchMode);
         } catch (RemoteException e) {
@@ -3094,7 +3093,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (StackId.useWindowFrameForBackdrop(getStackId()) || !resizing) {
             return frame;
         }
-        DisplayInfo displayInfo = getDisplayInfo();
+        final DisplayInfo displayInfo = getDisplayInfo();
         mTmpRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
         return mTmpRect;
     }

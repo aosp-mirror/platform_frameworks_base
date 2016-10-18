@@ -1183,7 +1183,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState highestTarget = null;
                 int highestPos = 0;
                 if (token.mAppAnimator.animating || token.mAppAnimator.animation != null) {
-                    WindowList curWindows = curTarget.getWindowList();
+                    WindowList curWindows = token.getDisplayContent().getWindowList();
                     int pos = curWindows.indexOf(curTarget);
                     while (pos >= 0) {
                         WindowState win = curWindows.get(pos);

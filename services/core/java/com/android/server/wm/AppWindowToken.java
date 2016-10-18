@@ -270,7 +270,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 final WindowState window = findMainWindow();
                 //TODO (multidisplay): Magnification is supported only for the default display.
                 if (window != null && accessibilityController != null
-                        && window.getDisplayId() == DEFAULT_DISPLAY) {
+                        && getDisplayContent().getDisplayId() == DEFAULT_DISPLAY) {
                     accessibilityController.onAppWindowTransitionLocked(window, transit);
                 }
                 changed = true;
@@ -418,22 +418,15 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      * surfaces that's eligible, if the app is already stopped.
      */
     private void destroySurfaces(boolean cleanupOnResume) {
-        final ArrayList<DisplayContent> displayList = new ArrayList();
+        boolean destroyedSomething = false;
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final WindowState win = mChildren.get(i);
-            final boolean destroyed = win.destroySurface(cleanupOnResume, mAppStopped);
-
-            if (destroyed) {
-                final DisplayContent displayContent = win.getDisplayContent();
-                if (displayContent != null && !displayList.contains(displayContent)) {
-                    displayList.add(displayContent);
-                }
-            }
+            destroyedSomething |= win.destroySurface(cleanupOnResume, mAppStopped);
         }
-        for (int i = 0; i < displayList.size(); i++) {
-            final DisplayContent displayContent = displayList.get(i);
-            mService.mLayersController.assignLayersLocked(displayContent.getWindowList());
-            displayContent.setLayoutNeeded();
+        if (destroyedSomething) {
+            final DisplayContent dc = getDisplayContent();
+            mService.mLayersController.assignLayersLocked(dc.getWindowList());
+            dc.setLayoutNeeded();
         }
     }
 
@@ -700,7 +693,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
-    boolean waitingForReplacement() {
+    private boolean waitingForReplacement() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final WindowState candidate = mChildren.get(i);
             if (candidate.waitingForReplacement()) {
@@ -816,17 +809,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
-    void setAppLayoutChanges(int changes, String reason, int displayId) {
-        final WindowAnimator windowAnimator = mAppAnimator.mAnimator;
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            // Child windows will be on the same display as their parents.
-            if (displayId == (mChildren.get(i)).getDisplayId()) {
-                windowAnimator.setPendingLayoutChanges(displayId, changes);
-                if (DEBUG_LAYOUT_REPEATS) {
-                    mService.mWindowPlacerLocked.debugLayoutRepeats(
-                            reason, windowAnimator.getPendingLayoutChanges(displayId));
-                }
-                break;
+    void setAppLayoutChanges(int changes, String reason) {
+        if (!mChildren.isEmpty()) {
+            final DisplayContent dc = getDisplayContent();
+            dc.pendingLayoutChanges |= changes;
+            if (DEBUG_LAYOUT_REPEATS) {
+                mService.mWindowPlacerLocked.debugLayoutRepeats(reason, dc.pendingLayoutChanges);
             }
         }
     }
@@ -931,7 +919,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE || DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
                     "Removing starting window: " + tStartingWindow);
-            tStartingWindow.getWindowList().remove(tStartingWindow);
+            getDisplayContent().getWindowList().remove(tStartingWindow);
             mService.mWindowsChanged = true;
             if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
                     "Removing starting " + tStartingWindow + " from " + fromToken);
@@ -1028,7 +1016,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     @Override
-    void checkAppWindowsReadyToShow(int displayId) {
+    void checkAppWindowsReadyToShow() {
         if (allDrawn == mAppAnimator.allDrawn) {
             return;
         }
@@ -1047,9 +1035,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     + " numInteresting=" + mNumInterestingWindows + " numDrawn=" + mNumDrawnWindows);
             // This will set mOrientationChangeComplete and cause a pass through layout.
             setAppLayoutChanges(FINISH_LAYOUT_REDO_WALLPAPER,
-                    "checkAppWindowsReadyToShow: freezingScreen", displayId);
+                    "checkAppWindowsReadyToShow: freezingScreen");
         } else {
-            setAppLayoutChanges(FINISH_LAYOUT_REDO_ANIM, "checkAppWindowsReadyToShow", displayId);
+            setAppLayoutChanges(FINISH_LAYOUT_REDO_ANIM, "checkAppWindowsReadyToShow");
 
             // We can now show all of the drawn windows!
             if (!mService.mOpeningApps.contains(this)) {
@@ -1170,16 +1158,15 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     @Override
-    void stepAppWindowsAnimation(long currentTime, int displayId) {
+    void stepAppWindowsAnimation(long currentTime) {
         mAppAnimator.wasAnimating = mAppAnimator.animating;
-        if (mAppAnimator.stepAnimationLocked(currentTime, displayId)) {
+        if (mAppAnimator.stepAnimationLocked(currentTime)) {
             mAppAnimator.animating = true;
             mService.mAnimator.setAnimating(true);
             mService.mAnimator.mAppWindowAnimating = true;
         } else if (mAppAnimator.wasAnimating) {
             // stopped animating, do one more pass through the layout
-            setAppLayoutChanges(
-                    FINISH_LAYOUT_REDO_WALLPAPER, "appToken " + this + " done", displayId);
+            setAppLayoutChanges(FINISH_LAYOUT_REDO_WALLPAPER, "appToken " + this + " done");
             if (DEBUG_ANIM) Slog.v(TAG, "updateWindowsApps...: done animating " + this);
         }
     }

@@ -29,6 +29,7 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
+import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
@@ -1429,8 +1430,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         return super.checkCompleteDeferredRemoval();
     }
 
-    void stepAppWindowsAnimation(long currentTime, int displayId) {
-        super.stepAppWindowsAnimation(currentTime, displayId);
+    void stepAppWindowsAnimation(long currentTime) {
+        super.stepAppWindowsAnimation(currentTime);
 
         // TODO: Why aren't we just using the loop above for this? mAppAnimator.animating isn't set
         // below but is set in the loop above. See if it really matters...
@@ -1438,14 +1439,13 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         for (int i = 0; i < exitingCount; i++) {
             final AppWindowAnimator appAnimator = mExitingAppTokens.get(i).mAppAnimator;
             appAnimator.wasAnimating = appAnimator.animating;
-            if (appAnimator.stepAnimationLocked(currentTime, displayId)) {
+            if (appAnimator.stepAnimationLocked(currentTime)) {
                 mService.mAnimator.setAnimating(true);
                 mService.mAnimator.mAppWindowAnimating = true;
             } else if (appAnimator.wasAnimating) {
                 // stopped animating, do one more pass through the layout
-                appAnimator.mAppToken.setAppLayoutChanges(
-                        WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
-                        "exiting appToken " + appAnimator.mAppToken + " done", displayId);
+                appAnimator.mAppToken.setAppLayoutChanges(FINISH_LAYOUT_REDO_WALLPAPER,
+                        "exiting appToken " + appAnimator.mAppToken + " done");
                 if (DEBUG_ANIM) Slog.v(TAG_WM,
                         "updateWindowsApps...: done animating exiting " + appAnimator.mAppToken);
             }

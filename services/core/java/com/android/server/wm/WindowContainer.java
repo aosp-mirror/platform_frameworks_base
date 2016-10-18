@@ -383,22 +383,18 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
     }
 
     /** Checks if all windows in an app are all drawn and shows them if needed. */
-    // TODO: The displayId shouldn't be needed as there shouldn't be a container on more than one
-    // display. Remove once we migrate DisplayContent to use WindowContainer.
-    void checkAppWindowsReadyToShow(int displayId) {
+    void checkAppWindowsReadyToShow() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
-            wc.checkAppWindowsReadyToShow(displayId);
+            wc.checkAppWindowsReadyToShow();
         }
     }
 
     /** Step currently ongoing animation for App window containers. */
-    // TODO: The displayId shouldn't be needed as there shouldn't be a container on more than one
-    // display. Remove once we migrate DisplayContent to use WindowContainer.
-    void stepAppWindowsAnimation(long currentTime, int displayId) {
+    void stepAppWindowsAnimation(long currentTime) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
-            wc.stepAppWindowsAnimation(currentTime, displayId);
+            wc.stepAppWindowsAnimation(currentTime);
         }
     }
 
