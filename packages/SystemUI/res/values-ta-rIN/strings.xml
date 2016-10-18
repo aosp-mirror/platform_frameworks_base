@@ -651,6 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> அமைப்புகளைத் திற."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"அமைப்புகளின் வரிசை முறையைத் திருத்து."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"பக்கம் <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <!-- no translation found for cant_silence_or_block (999689262131488625) -->
-    <skip />
+    <string name="cant_silence_or_block" msgid="999689262131488625">"அறிவிப்புகளை ஒலியடக்க அல்லது தடுக்க முடியவில்லை"</string>
 </resources>

@@ -651,6 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಕ್ರಮವನ್ನು ಎಡಿಟ್ ಮಾಡಿ."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="ID_1">%1$d</xliff:g> ಪುಟ"</string>
-    <!-- no translation found for cant_silence_or_block (999689262131488625) -->
-    <skip />
+    <string name="cant_silence_or_block" msgid="999689262131488625">"ಸೂಚನೆಗಳನ್ನು ಮೌನವಾಗಿಸಲಾಗುವುದಿಲ್ಲ ಅಥವಾ ತಡೆಹಿಡಿಯಲಾಗುವುದಿಲ್ಲ"</string>
 </resources>
