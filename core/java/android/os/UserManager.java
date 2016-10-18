@@ -726,7 +726,7 @@ public class UserManager {
     /** @hide */
     public UserManager(Context context, IUserManager service) {
         mService = service;
-        mContext = context;
+        mContext = context.getApplicationContext();
     }
 
     /**
