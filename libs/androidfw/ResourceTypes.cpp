@@ -739,7 +739,7 @@ const char16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
                         ALOGW("CREATING STRING CACHE OF %zu bytes",
                                 static_cast<size_t>(mHeader->stringCount*sizeof(char16_t**)));
 #endif
-                        mCache = (char16_t**)calloc(mHeader->stringCount, sizeof(char16_t**));
+                        mCache = (char16_t**)calloc(mHeader->stringCount, sizeof(char16_t*));
                         if (mCache == NULL) {
                             ALOGW("No memory trying to allocate decode cache table of %d bytes\n",
                                     (int)(mHeader->stringCount*sizeof(char16_t**)));
@@ -4352,10 +4352,12 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
             if (set->numAttrs >= set->availAttrs) {
                 // Need to alloc more memory...
                 const size_t newAvail = set->availAttrs+N;
+                void *oldSet = set;
                 set = (bag_set*)realloc(set,
                                         sizeof(bag_set)
                                         + sizeof(bag_entry)*newAvail);
                 if (set == NULL) {
+                    free(oldSet);
                     return NO_MEMORY;
                 }
                 set->availAttrs = newAvail;
@@ -4402,7 +4404,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
         pos++;
         const size_t size = dtohs(map->value.size);
         curOff += size + sizeof(*map)-sizeof(map->value);
-    };
+    }
 
     if (curEntry > set->numAttrs) {
         set->numAttrs = curEntry;
