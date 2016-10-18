@@ -75,6 +75,8 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
@@ -132,8 +134,11 @@ final class TaskRecord extends ConfigurationContainer {
     private static final String ATTR_NON_FULLSCREEN_BOUNDS = "non_fullscreen_bounds";
     private static final String ATTR_MIN_WIDTH = "min_width";
     private static final String ATTR_MIN_HEIGHT = "min_height";
+    private static final String ATTR_PERSIST_TASK_VERSION = "persist_task_version";
 
-
+    // Current version of the task record we persist. Used to check if we need to run any upgrade
+    // code.
+    private static final int PERSIST_TASK_VERSION = 1;
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
 
     static final int INVALID_TASK_ID = -1;
@@ -1231,6 +1236,7 @@ final class TaskRecord extends ConfigurationContainer {
         }
         out.attribute(null, ATTR_MIN_WIDTH, String.valueOf(mMinWidth));
         out.attribute(null, ATTR_MIN_HEIGHT, String.valueOf(mMinHeight));
+        out.attribute(null, ATTR_PERSIST_TASK_VERSION, String.valueOf(PERSIST_TASK_VERSION));
 
         if (affinityIntent != null) {
             out.startTag(null, TAG_AFFINITYINTENT);
@@ -1297,6 +1303,7 @@ final class TaskRecord extends ConfigurationContainer {
         Rect bounds = null;
         int minWidth = INVALID_MIN_SIZE;
         int minHeight = INVALID_MIN_SIZE;
+        int persistTaskVersion = 0;
 
         for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
             final String attrName = in.getAttributeName(attrNdx);
@@ -1366,6 +1373,8 @@ final class TaskRecord extends ConfigurationContainer {
                 minWidth = Integer.parseInt(attrValue);
             } else if (ATTR_MIN_HEIGHT.equals(attrName)) {
                 minHeight = Integer.parseInt(attrValue);
+            } else if (ATTR_PERSIST_TASK_VERSION.equals(attrName)) {
+                persistTaskVersion = Integer.parseInt(attrValue);
             } else {
                 Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
             }
@@ -1418,6 +1427,16 @@ final class TaskRecord extends ConfigurationContainer {
             }
             Slog.w(TAG, "Updating task #" + taskId + " for " + checkIntent
                     + ": effectiveUid=" + effectiveUid);
+        }
+
+        if (persistTaskVersion < 1) {
+            // We need to convert the resize mode of home activities saved before version one if
+            // they are marked as RESIZE_MODE_RESIZEABLE to RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION
+            // since we didn't have that differentiation before version 1 and the system didn't
+            // resize home activities before then.
+            if (taskType == HOME_ACTIVITY_TYPE && resizeMode == RESIZE_MODE_RESIZEABLE) {
+                resizeMode = RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
+            }
         }
 
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
