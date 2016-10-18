@@ -2680,6 +2680,9 @@
   <java-symbol type="string" name="config_emergency_call_number" />
   <java-symbol type="array" name="config_emergency_mcc_codes" />
 
+  <java-symbol type="string" name="config_dozeDoubleTapSensorType" />
+  <java-symbol type="bool" name="config_dozePulsePickup" />
+
   <!-- Used for MimeIconUtils. -->
   <java-symbol type="drawable" name="ic_doc_apk" />
   <java-symbol type="drawable" name="ic_doc_audio" />

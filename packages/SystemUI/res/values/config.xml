@@ -209,9 +209,6 @@
     <!-- Doze: should the significant motion sensor be used as a pulse signal? -->
     <bool name="doze_pulse_on_significant_motion">false</bool>
 
-    <!-- Doze: should the pickup sensor be used as a pulse signal? -->
-    <bool name="doze_pulse_on_pick_up">false</bool>
-
     <!-- Doze: check proximity sensor before pulsing? -->
     <bool name="doze_proximity_check_before_pulse">true</bool>
 
@@ -239,9 +236,6 @@
                          1,,4a3   -> illegal, no empty or non-numeric terms allowed
     -->
     <string name="doze_pickup_subtype_performs_proximity_check"></string>
-
-    <!-- Type of the double tap sensor. Empty if double tap is not supported. -->
-    <string name="doze_double_tap_sensor_type" translatable="false"></string>
 
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
     <integer name="doze_pulse_duration_in">900</integer>
