@@ -560,6 +560,9 @@ public class UsbDeviceManager {
                 mCurrentFunctions = functions;
                 mCurrentFunctionsApplied = false;
 
+                // Kick the USB stack to close existing connections.
+                setUsbConfig(UsbManager.USB_FUNCTION_NONE);
+
                 // Set the new USB configuration.
                 if (!setUsbConfig(functions)) {
                     Slog.e(TAG, "Failed to switch USB config to " + functions);
