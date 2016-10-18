@@ -186,18 +186,17 @@ static void verifySystemIdmaps()
                 argv[argc++] = AssetManager::IDMAP_DIR;
 
                 // Directories to scan for overlays: if OVERLAY_SKU_DIR_PROPERTY is defined,
-                // use OVERLAY_DIR/<value of OVERLAY_SKU_DIR_PROPERTY> if exists, otherwise
-                // use OVERLAY_DIR if exists.
+                // use OVERLAY_DIR/<value of OVERLAY_SKU_DIR_PROPERTY> in addition to OVERLAY_DIR.
                 char subdir[PROP_VALUE_MAX];
                 int len = __system_property_get(AssetManager::OVERLAY_SKU_DIR_PROPERTY, subdir);
-                String8 overlayPath;
                 if (len > 0) {
-                    overlayPath = String8(AssetManager::OVERLAY_DIR) + "/" + subdir;
-                } else {
-                    overlayPath = String8(AssetManager::OVERLAY_DIR);
+                    String8 overlayPath = String8(AssetManager::OVERLAY_DIR) + "/" + subdir;
+                    if (stat(overlayPath.string(), &st) == 0) {
+                        argv[argc++] = overlayPath.string();
+                    }
                 }
-                if (stat(overlayPath.string(), &st) == 0) {
-                    argv[argc++] = overlayPath.string();
+                if (stat(AssetManager::OVERLAY_DIR, &st) == 0) {
+                    argv[argc++] = AssetManager::OVERLAY_DIR;
                 }
 
                 // Finally, invoke idmap (if any overlay directory exists)
