@@ -44,7 +44,7 @@ namespace android {
  */
 class Asset {
 public:
-    virtual ~Asset(void);
+    virtual ~Asset(void) = default;
 
     static int32_t getGlobalCount();
     static String8 getAssetAllocations();
@@ -119,6 +119,19 @@ public:
     const char* getAssetSource(void) const { return mAssetSource.string(); }
 
 protected:
+    /*
+     * Adds this Asset to the global Asset list for debugging and
+     * accounting.
+     * Concrete subclasses must call this in their constructor.
+     */
+    static void registerAsset(Asset* asset);
+
+    /*
+     * Removes this Asset from the global Asset list.
+     * Concrete subclasses must call this in their destructor.
+     */
+    static void unregisterAsset(Asset* asset);
+
     Asset(void);        // constructor; only invoked indirectly
 
     /* handle common seek() housekeeping */

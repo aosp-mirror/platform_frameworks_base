@@ -22,6 +22,7 @@ LOCAL_PATH:= $(call my-dir)
 
 testFiles := \
     AppAsLib_test.cpp \
+    Asset_test.cpp \
     AttributeFinder_test.cpp \
     ByteBucketArray_test.cpp \
     Config_test.cpp \
