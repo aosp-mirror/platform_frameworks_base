@@ -1826,8 +1826,8 @@ public class MediaPlayer extends PlayerBase
     }
 
     @Override
-    void playerSetVolume(float leftVolume, float rightVolume) {
-        _setVolume(leftVolume, rightVolume);
+    void playerSetVolume(boolean muting, float leftVolume, float rightVolume) {
+        _setVolume(muting ? 0.0f : leftVolume, muting ? 0.0f : rightVolume);
     }
 
     private native void _setVolume(float leftVolume, float rightVolume);
@@ -1900,8 +1900,8 @@ public class MediaPlayer extends PlayerBase
     }
 
     @Override
-    int playerSetAuxEffectSendLevel(float level) {
-        _setAuxEffectSendLevel(level);
+    int playerSetAuxEffectSendLevel(boolean muting, float level) {
+        _setAuxEffectSendLevel(muting ? 0.0f : level);
         return AudioSystem.SUCCESS;
     }
 
