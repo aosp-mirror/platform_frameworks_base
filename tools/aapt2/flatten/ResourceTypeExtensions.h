@@ -22,15 +22,16 @@
 namespace aapt {
 
 /**
- * An alternative struct to use instead of ResTable_map_entry. This one is a standard_layout
+ * An alternative struct to use instead of ResTable_map_entry. This one is a
+ * standard_layout
  * struct.
  */
 struct ResTable_entry_ext {
-    android::ResTable_entry entry;
-    android::ResTable_ref parent;
-    uint32_t count;
+  android::ResTable_entry entry;
+  android::ResTable_ref parent;
+  uint32_t count;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
-#endif // AAPT_RESOURCE_TYPE_EXTENSIONS_H
+#endif  // AAPT_RESOURCE_TYPE_EXTENSIONS_H

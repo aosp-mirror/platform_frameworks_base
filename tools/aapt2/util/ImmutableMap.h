@@ -26,59 +26,57 @@ namespace aapt {
 
 template <typename TKey, typename TValue>
 class ImmutableMap {
-    static_assert(is_comparable<TKey, TKey>::value, "key is not comparable");
+  static_assert(is_comparable<TKey, TKey>::value, "key is not comparable");
 
-private:
-    std::vector<std::pair<TKey, TValue>> mData;
+ private:
+  std::vector<std::pair<TKey, TValue>> mData;
 
-    explicit ImmutableMap(std::vector<std::pair<TKey, TValue>> data) : mData(std::move(data)) {
+  explicit ImmutableMap(std::vector<std::pair<TKey, TValue>> data)
+      : mData(std::move(data)) {}
+
+ public:
+  using const_iterator = typename decltype(mData)::const_iterator;
+
+  ImmutableMap(ImmutableMap&&) = default;
+  ImmutableMap& operator=(ImmutableMap&&) = default;
+
+  ImmutableMap(const ImmutableMap&) = delete;
+  ImmutableMap& operator=(const ImmutableMap&) = delete;
+
+  static ImmutableMap<TKey, TValue> createPreSorted(
+      std::initializer_list<std::pair<TKey, TValue>> list) {
+    return ImmutableMap(
+        std::vector<std::pair<TKey, TValue>>(list.begin(), list.end()));
+  }
+
+  static ImmutableMap<TKey, TValue> createAndSort(
+      std::initializer_list<std::pair<TKey, TValue>> list) {
+    std::vector<std::pair<TKey, TValue>> data(list.begin(), list.end());
+    std::sort(data.begin(), data.end());
+    return ImmutableMap(std::move(data));
+  }
+
+  template <typename TKey2, typename = typename std::enable_if<
+                                is_comparable<TKey, TKey2>::value>::type>
+  const_iterator find(const TKey2& key) const {
+    auto cmp = [](const std::pair<TKey, TValue>& candidate,
+                  const TKey2& target) -> bool {
+      return candidate.first < target;
+    };
+
+    const_iterator endIter = end();
+    auto iter = std::lower_bound(mData.begin(), endIter, key, cmp);
+    if (iter == endIter || iter->first == key) {
+      return iter;
     }
+    return endIter;
+  }
 
-public:
-    using const_iterator = typename decltype(mData)::const_iterator;
+  const_iterator begin() const { return mData.begin(); }
 
-    ImmutableMap(ImmutableMap&&) = default;
-    ImmutableMap& operator=(ImmutableMap&&) = default;
-
-    ImmutableMap(const ImmutableMap&) = delete;
-    ImmutableMap& operator=(const ImmutableMap&) = delete;
-
-    static ImmutableMap<TKey, TValue> createPreSorted(
-            std::initializer_list<std::pair<TKey, TValue>> list) {
-        return ImmutableMap(std::vector<std::pair<TKey, TValue>>(list.begin(), list.end()));
-    }
-
-    static ImmutableMap<TKey, TValue> createAndSort(
-            std::initializer_list<std::pair<TKey, TValue>> list) {
-        std::vector<std::pair<TKey, TValue>> data(list.begin(), list.end());
-        std::sort(data.begin(), data.end());
-        return ImmutableMap(std::move(data));
-    }
-
-    template <typename TKey2,
-              typename = typename std::enable_if<is_comparable<TKey, TKey2>::value>::type>
-    const_iterator find(const TKey2& key) const {
-        auto cmp = [](const std::pair<TKey, TValue>& candidate, const TKey2& target) -> bool {
-            return candidate.first < target;
-        };
-
-        const_iterator endIter = end();
-        auto iter = std::lower_bound(mData.begin(), endIter, key, cmp);
-        if (iter == endIter || iter->first == key) {
-            return iter;
-        }
-        return endIter;
-    }
-
-    const_iterator begin() const {
-        return mData.begin();
-    }
-
-    const_iterator end() const {
-        return mData.end();
-    }
+  const_iterator end() const { return mData.end(); }
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_UTIL_IMMUTABLEMAP_H */

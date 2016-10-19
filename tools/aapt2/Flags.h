@@ -29,42 +29,45 @@
 namespace aapt {
 
 class Flags {
-public:
-    Flags& requiredFlag(const StringPiece& name, const StringPiece& description,
-                        std::string* value);
-    Flags& requiredFlagList(const StringPiece& name, const StringPiece& description,
-                            std::vector<std::string>* value);
-    Flags& optionalFlag(const StringPiece& name, const StringPiece& description,
-                        Maybe<std::string>* value);
-    Flags& optionalFlagList(const StringPiece& name, const StringPiece& description,
-                            std::vector<std::string>* value);
-    Flags& optionalFlagList(const StringPiece& name, const StringPiece& description,
-                            std::unordered_set<std::string>* value);
-    Flags& optionalSwitch(const StringPiece& name, const StringPiece& description,
-                          bool* value);
+ public:
+  Flags& requiredFlag(const StringPiece& name, const StringPiece& description,
+                      std::string* value);
+  Flags& requiredFlagList(const StringPiece& name,
+                          const StringPiece& description,
+                          std::vector<std::string>* value);
+  Flags& optionalFlag(const StringPiece& name, const StringPiece& description,
+                      Maybe<std::string>* value);
+  Flags& optionalFlagList(const StringPiece& name,
+                          const StringPiece& description,
+                          std::vector<std::string>* value);
+  Flags& optionalFlagList(const StringPiece& name,
+                          const StringPiece& description,
+                          std::unordered_set<std::string>* value);
+  Flags& optionalSwitch(const StringPiece& name, const StringPiece& description,
+                        bool* value);
 
-    void usage(const StringPiece& command, std::ostream* out);
+  void usage(const StringPiece& command, std::ostream* out);
 
-    bool parse(const StringPiece& command, const std::vector<StringPiece>& args,
-               std::ostream* outError);
+  bool parse(const StringPiece& command, const std::vector<StringPiece>& args,
+             std::ostream* outError);
 
-    const std::vector<std::string>& getArgs();
+  const std::vector<std::string>& getArgs();
 
-private:
-    struct Flag {
-        std::string name;
-        std::string description;
-        std::function<bool(const StringPiece& value)> action;
-        bool required;
-        size_t numArgs;
+ private:
+  struct Flag {
+    std::string name;
+    std::string description;
+    std::function<bool(const StringPiece& value)> action;
+    bool required;
+    size_t numArgs;
 
-        bool parsed;
-    };
+    bool parsed;
+  };
 
-    std::vector<Flag> mFlags;
-    std::vector<std::string> mArgs;
+  std::vector<Flag> mFlags;
+  std::vector<std::string> mArgs;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
-#endif // AAPT_FLAGS_H
+#endif  // AAPT_FLAGS_H

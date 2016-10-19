@@ -33,79 +33,92 @@ namespace aapt {
 struct ParsedResource;
 
 struct ResourceParserOptions {
-    /**
-     * Whether the default setting for this parser is to allow translation.
-     */
-    bool translatable = true;
+  /**
+   * Whether the default setting for this parser is to allow translation.
+   */
+  bool translatable = true;
 
-    /**
-     * Whether positional arguments in formatted strings are treated as errors or warnings.
-     */
-    bool errorOnPositionalArguments = true;
+  /**
+   * Whether positional arguments in formatted strings are treated as errors or
+   * warnings.
+   */
+  bool errorOnPositionalArguments = true;
 };
 
 /*
  * Parses an XML file for resources and adds them to a ResourceTable.
  */
 class ResourceParser {
-public:
-    ResourceParser(IDiagnostics* diag, ResourceTable* table, const Source& source,
-                   const ConfigDescription& config, const ResourceParserOptions& options = {});
+ public:
+  ResourceParser(IDiagnostics* diag, ResourceTable* table, const Source& source,
+                 const ConfigDescription& config,
+                 const ResourceParserOptions& options = {});
 
-    ResourceParser(const ResourceParser&) = delete; // No copy.
+  ResourceParser(const ResourceParser&) = delete;  // No copy.
 
-    bool parse(xml::XmlPullParser* parser);
+  bool parse(xml::XmlPullParser* parser);
 
-private:
-    /*
-     * Parses the XML subtree as a StyleString (flattened XML representation for strings
-     * with formatting). If successful, `outStyleString`
-     * contains the escaped and whitespace trimmed text, while `outRawString`
-     * contains the unescaped text. Returns true on success.
-     */
-    bool flattenXmlSubtree(xml::XmlPullParser* parser, std::string* outRawString,
-                           StyleString* outStyleString);
+ private:
+  /*
+   * Parses the XML subtree as a StyleString (flattened XML representation for
+   * strings
+   * with formatting). If successful, `outStyleString`
+   * contains the escaped and whitespace trimmed text, while `outRawString`
+   * contains the unescaped text. Returns true on success.
+   */
+  bool flattenXmlSubtree(xml::XmlPullParser* parser, std::string* outRawString,
+                         StyleString* outStyleString);
 
-    /*
-     * Parses the XML subtree and returns an Item.
-     * The type of Item that can be parsed is denoted by the `typeMask`.
-     * If `allowRawValue` is true and the subtree can not be parsed as a regular Item, then a
-     * RawString is returned. Otherwise this returns false;
-     */
-    std::unique_ptr<Item> parseXml(xml::XmlPullParser* parser, const uint32_t typeMask,
-                                   const bool allowRawValue);
+  /*
+   * Parses the XML subtree and returns an Item.
+   * The type of Item that can be parsed is denoted by the `typeMask`.
+   * If `allowRawValue` is true and the subtree can not be parsed as a regular
+   * Item, then a
+   * RawString is returned. Otherwise this returns false;
+   */
+  std::unique_ptr<Item> parseXml(xml::XmlPullParser* parser,
+                                 const uint32_t typeMask,
+                                 const bool allowRawValue);
 
-    bool parseResources(xml::XmlPullParser* parser);
-    bool parseResource(xml::XmlPullParser* parser, ParsedResource* outResource);
+  bool parseResources(xml::XmlPullParser* parser);
+  bool parseResource(xml::XmlPullParser* parser, ParsedResource* outResource);
 
-    bool parseItem(xml::XmlPullParser* parser, ParsedResource* outResource, uint32_t format);
-    bool parseString(xml::XmlPullParser* parser, ParsedResource* outResource);
+  bool parseItem(xml::XmlPullParser* parser, ParsedResource* outResource,
+                 uint32_t format);
+  bool parseString(xml::XmlPullParser* parser, ParsedResource* outResource);
 
-    bool parsePublic(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parsePublicGroup(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parseSymbolImpl(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parseSymbol(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parseAddResource(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parseAttr(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parseAttrImpl(xml::XmlPullParser* parser, ParsedResource* outResource, bool weak);
-    Maybe<Attribute::Symbol> parseEnumOrFlagItem(xml::XmlPullParser* parser,
-                                                 const StringPiece& tag);
-    bool parseStyle(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parseStyleItem(xml::XmlPullParser* parser, Style* style);
-    bool parseDeclareStyleable(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parseArray(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parseIntegerArray(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parseStringArray(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parseArrayImpl(xml::XmlPullParser* parser, ParsedResource* outResource, uint32_t typeMask);
-    bool parsePlural(xml::XmlPullParser* parser, ParsedResource* outResource);
+  bool parsePublic(xml::XmlPullParser* parser, ParsedResource* outResource);
+  bool parsePublicGroup(xml::XmlPullParser* parser,
+                        ParsedResource* outResource);
+  bool parseSymbolImpl(xml::XmlPullParser* parser, ParsedResource* outResource);
+  bool parseSymbol(xml::XmlPullParser* parser, ParsedResource* outResource);
+  bool parseAddResource(xml::XmlPullParser* parser,
+                        ParsedResource* outResource);
+  bool parseAttr(xml::XmlPullParser* parser, ParsedResource* outResource);
+  bool parseAttrImpl(xml::XmlPullParser* parser, ParsedResource* outResource,
+                     bool weak);
+  Maybe<Attribute::Symbol> parseEnumOrFlagItem(xml::XmlPullParser* parser,
+                                               const StringPiece& tag);
+  bool parseStyle(xml::XmlPullParser* parser, ParsedResource* outResource);
+  bool parseStyleItem(xml::XmlPullParser* parser, Style* style);
+  bool parseDeclareStyleable(xml::XmlPullParser* parser,
+                             ParsedResource* outResource);
+  bool parseArray(xml::XmlPullParser* parser, ParsedResource* outResource);
+  bool parseIntegerArray(xml::XmlPullParser* parser,
+                         ParsedResource* outResource);
+  bool parseStringArray(xml::XmlPullParser* parser,
+                        ParsedResource* outResource);
+  bool parseArrayImpl(xml::XmlPullParser* parser, ParsedResource* outResource,
+                      uint32_t typeMask);
+  bool parsePlural(xml::XmlPullParser* parser, ParsedResource* outResource);
 
-    IDiagnostics* mDiag;
-    ResourceTable* mTable;
-    Source mSource;
-    ConfigDescription mConfig;
-    ResourceParserOptions mOptions;
+  IDiagnostics* mDiag;
+  ResourceTable* mTable;
+  Source mSource;
+  ConfigDescription mConfig;
+  ResourceParserOptions mOptions;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
-#endif // AAPT_RESOURCE_PARSER_H
+#endif  // AAPT_RESOURCE_PARSER_H

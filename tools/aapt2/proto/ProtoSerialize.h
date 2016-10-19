@@ -29,49 +29,49 @@
 namespace aapt {
 
 class CompiledFileOutputStream {
-public:
-    explicit CompiledFileOutputStream(google::protobuf::io::ZeroCopyOutputStream* out);
+ public:
+  explicit CompiledFileOutputStream(
+      google::protobuf::io::ZeroCopyOutputStream* out);
 
-    void WriteLittleEndian32(uint32_t value);
-    void WriteCompiledFile(const pb::CompiledFile* compiledFile);
-    void WriteData(const BigBuffer* buffer);
-    void WriteData(const void* data, size_t len);
-    bool HadError();
+  void WriteLittleEndian32(uint32_t value);
+  void WriteCompiledFile(const pb::CompiledFile* compiledFile);
+  void WriteData(const BigBuffer* buffer);
+  void WriteData(const void* data, size_t len);
+  bool HadError();
 
-private:
-    DISALLOW_COPY_AND_ASSIGN(CompiledFileOutputStream);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(CompiledFileOutputStream);
 
-    void ensureAlignedWrite();
+  void ensureAlignedWrite();
 
-    google::protobuf::io::CodedOutputStream mOut;
+  google::protobuf::io::CodedOutputStream mOut;
 };
 
 class CompiledFileInputStream {
-public:
-    explicit CompiledFileInputStream(const void* data, size_t size);
+ public:
+  explicit CompiledFileInputStream(const void* data, size_t size);
 
-    bool ReadLittleEndian32(uint32_t* outVal);
-    bool ReadCompiledFile(pb::CompiledFile* outVal);
-    bool ReadDataMetaData(uint64_t* outOffset, uint64_t* outLen);
+  bool ReadLittleEndian32(uint32_t* outVal);
+  bool ReadCompiledFile(pb::CompiledFile* outVal);
+  bool ReadDataMetaData(uint64_t* outOffset, uint64_t* outLen);
 
-private:
-    DISALLOW_COPY_AND_ASSIGN(CompiledFileInputStream);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(CompiledFileInputStream);
 
-    void ensureAlignedRead();
+  void ensureAlignedRead();
 
-    google::protobuf::io::CodedInputStream mIn;
+  google::protobuf::io::CodedInputStream mIn;
 };
 
 std::unique_ptr<pb::ResourceTable> serializeTableToPb(ResourceTable* table);
-std::unique_ptr<ResourceTable> deserializeTableFromPb(const pb::ResourceTable& pbTable,
-                                                      const Source& source,
-                                                      IDiagnostics* diag);
+std::unique_ptr<ResourceTable> deserializeTableFromPb(
+    const pb::ResourceTable& pbTable, const Source& source, IDiagnostics* diag);
 
-std::unique_ptr<pb::CompiledFile> serializeCompiledFileToPb(const ResourceFile& file);
-std::unique_ptr<ResourceFile> deserializeCompiledFileFromPb(const pb::CompiledFile& pbFile,
-                                                            const Source& source,
-                                                            IDiagnostics* diag);
+std::unique_ptr<pb::CompiledFile> serializeCompiledFileToPb(
+    const ResourceFile& file);
+std::unique_ptr<ResourceFile> deserializeCompiledFileFromPb(
+    const pb::CompiledFile& pbFile, const Source& source, IDiagnostics* diag);
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_FLATTEN_TABLEPROTOSERIALIZER_H */

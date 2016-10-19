@@ -20,114 +20,110 @@
 namespace aapt {
 
 TEST(ProductFilterTest, SelectTwoProducts) {
-    std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
 
-    const ConfigDescription land = test::parseConfigOrDie("land");
-    const ConfigDescription port = test::parseConfigOrDie("port");
+  const ConfigDescription land = test::parseConfigOrDie("land");
+  const ConfigDescription port = test::parseConfigOrDie("port");
 
-    ResourceTable table;
-    ASSERT_TRUE(table.addResource(test::parseNameOrDie("android:string/one"),
-                                  land, "",
-                                  test::ValueBuilder<Id>()
-                                          .setSource(Source("land/default.xml")).build(),
-                                  context->getDiagnostics()));
-    ASSERT_TRUE(table.addResource(test::parseNameOrDie("android:string/one"),
-                                  land, "tablet",
-                                  test::ValueBuilder<Id>()
-                                          .setSource(Source("land/tablet.xml")).build(),
-                                  context->getDiagnostics()));
+  ResourceTable table;
+  ASSERT_TRUE(table.addResource(
+      test::parseNameOrDie("android:string/one"), land, "",
+      test::ValueBuilder<Id>().setSource(Source("land/default.xml")).build(),
+      context->getDiagnostics()));
+  ASSERT_TRUE(table.addResource(
+      test::parseNameOrDie("android:string/one"), land, "tablet",
+      test::ValueBuilder<Id>().setSource(Source("land/tablet.xml")).build(),
+      context->getDiagnostics()));
 
-    ASSERT_TRUE(table.addResource(test::parseNameOrDie("android:string/one"),
-                                  port, "",
-                                  test::ValueBuilder<Id>()
-                                          .setSource(Source("port/default.xml")).build(),
-                                  context->getDiagnostics()));
-    ASSERT_TRUE(table.addResource(test::parseNameOrDie("android:string/one"),
-                                  port, "tablet",
-                                  test::ValueBuilder<Id>()
-                                          .setSource(Source("port/tablet.xml")).build(),
-                                  context->getDiagnostics()));
+  ASSERT_TRUE(table.addResource(
+      test::parseNameOrDie("android:string/one"), port, "",
+      test::ValueBuilder<Id>().setSource(Source("port/default.xml")).build(),
+      context->getDiagnostics()));
+  ASSERT_TRUE(table.addResource(
+      test::parseNameOrDie("android:string/one"), port, "tablet",
+      test::ValueBuilder<Id>().setSource(Source("port/tablet.xml")).build(),
+      context->getDiagnostics()));
 
-    ProductFilter filter({ "tablet" });
-    ASSERT_TRUE(filter.consume(context.get(), &table));
+  ProductFilter filter({"tablet"});
+  ASSERT_TRUE(filter.consume(context.get(), &table));
 
-    EXPECT_EQ(nullptr, test::getValueForConfigAndProduct<Id>(&table, "android:string/one",
-                                                             land, ""));
-    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<Id>(&table, "android:string/one",
-                                                             land, "tablet"));
-    EXPECT_EQ(nullptr, test::getValueForConfigAndProduct<Id>(&table, "android:string/one",
-                                                             port, ""));
-    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<Id>(&table, "android:string/one",
-                                                             port, "tablet"));
+  EXPECT_EQ(nullptr, test::getValueForConfigAndProduct<Id>(
+                         &table, "android:string/one", land, ""));
+  EXPECT_NE(nullptr, test::getValueForConfigAndProduct<Id>(
+                         &table, "android:string/one", land, "tablet"));
+  EXPECT_EQ(nullptr, test::getValueForConfigAndProduct<Id>(
+                         &table, "android:string/one", port, ""));
+  EXPECT_NE(nullptr, test::getValueForConfigAndProduct<Id>(
+                         &table, "android:string/one", port, "tablet"));
 }
 
 TEST(ProductFilterTest, SelectDefaultProduct) {
-    std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
 
-    ResourceTable table;
-    ASSERT_TRUE(table.addResource(test::parseNameOrDie("android:string/one"),
-                                  ConfigDescription::defaultConfig(), "",
-                                  test::ValueBuilder<Id>()
-                                          .setSource(Source("default.xml")).build(),
-                                  context->getDiagnostics()));
-    ASSERT_TRUE(table.addResource(test::parseNameOrDie("android:string/one"),
-                                  ConfigDescription::defaultConfig(), "tablet",
-                                  test::ValueBuilder<Id>()
-                                          .setSource(Source("tablet.xml")).build(),
-                                  context->getDiagnostics()));
+  ResourceTable table;
+  ASSERT_TRUE(table.addResource(
+      test::parseNameOrDie("android:string/one"),
+      ConfigDescription::defaultConfig(), "",
+      test::ValueBuilder<Id>().setSource(Source("default.xml")).build(),
+      context->getDiagnostics()));
+  ASSERT_TRUE(table.addResource(
+      test::parseNameOrDie("android:string/one"),
+      ConfigDescription::defaultConfig(), "tablet",
+      test::ValueBuilder<Id>().setSource(Source("tablet.xml")).build(),
+      context->getDiagnostics()));
 
-    ProductFilter filter({});
-    ASSERT_TRUE(filter.consume(context.get(), &table));
+  ProductFilter filter({});
+  ASSERT_TRUE(filter.consume(context.get(), &table));
 
-    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<Id>(&table, "android:string/one",
-                                                             ConfigDescription::defaultConfig(),
-                                                             ""));
-    EXPECT_EQ(nullptr, test::getValueForConfigAndProduct<Id>(&table, "android:string/one",
-                                                             ConfigDescription::defaultConfig(),
-                                                             "tablet"));
+  EXPECT_NE(nullptr, test::getValueForConfigAndProduct<Id>(
+                         &table, "android:string/one",
+                         ConfigDescription::defaultConfig(), ""));
+  EXPECT_EQ(nullptr, test::getValueForConfigAndProduct<Id>(
+                         &table, "android:string/one",
+                         ConfigDescription::defaultConfig(), "tablet"));
 }
 
 TEST(ProductFilterTest, FailOnAmbiguousProduct) {
-    std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
 
-    ResourceTable table;
-    ASSERT_TRUE(table.addResource(test::parseNameOrDie("android:string/one"),
-                                  ConfigDescription::defaultConfig(), "",
-                                  test::ValueBuilder<Id>()
-                                          .setSource(Source("default.xml")).build(),
-                                  context->getDiagnostics()));
-    ASSERT_TRUE(table.addResource(test::parseNameOrDie("android:string/one"),
-                                  ConfigDescription::defaultConfig(), "tablet",
-                                  test::ValueBuilder<Id>()
-                                          .setSource(Source("tablet.xml")).build(),
-                                  context->getDiagnostics()));
-    ASSERT_TRUE(table.addResource(test::parseNameOrDie("android:string/one"),
-                                  ConfigDescription::defaultConfig(), "no-sdcard",
-                                  test::ValueBuilder<Id>()
-                                          .setSource(Source("no-sdcard.xml")).build(),
-                                  context->getDiagnostics()));
+  ResourceTable table;
+  ASSERT_TRUE(table.addResource(
+      test::parseNameOrDie("android:string/one"),
+      ConfigDescription::defaultConfig(), "",
+      test::ValueBuilder<Id>().setSource(Source("default.xml")).build(),
+      context->getDiagnostics()));
+  ASSERT_TRUE(table.addResource(
+      test::parseNameOrDie("android:string/one"),
+      ConfigDescription::defaultConfig(), "tablet",
+      test::ValueBuilder<Id>().setSource(Source("tablet.xml")).build(),
+      context->getDiagnostics()));
+  ASSERT_TRUE(table.addResource(
+      test::parseNameOrDie("android:string/one"),
+      ConfigDescription::defaultConfig(), "no-sdcard",
+      test::ValueBuilder<Id>().setSource(Source("no-sdcard.xml")).build(),
+      context->getDiagnostics()));
 
-    ProductFilter filter({ "tablet", "no-sdcard" });
-    ASSERT_FALSE(filter.consume(context.get(), &table));
+  ProductFilter filter({"tablet", "no-sdcard"});
+  ASSERT_FALSE(filter.consume(context.get(), &table));
 }
 
 TEST(ProductFilterTest, FailOnMultipleDefaults) {
-    std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
 
-    ResourceTable table;
-    ASSERT_TRUE(table.addResource(test::parseNameOrDie("android:string/one"),
-                                  ConfigDescription::defaultConfig(), "",
-                                  test::ValueBuilder<Id>()
-                                          .setSource(Source(".xml")).build(),
-                                  context->getDiagnostics()));
-    ASSERT_TRUE(table.addResource(test::parseNameOrDie("android:string/one"),
-                                  ConfigDescription::defaultConfig(), "default",
-                                  test::ValueBuilder<Id>()
-                                          .setSource(Source("default.xml")).build(),
-                                  context->getDiagnostics()));
+  ResourceTable table;
+  ASSERT_TRUE(table.addResource(
+      test::parseNameOrDie("android:string/one"),
+      ConfigDescription::defaultConfig(), "",
+      test::ValueBuilder<Id>().setSource(Source(".xml")).build(),
+      context->getDiagnostics()));
+  ASSERT_TRUE(table.addResource(
+      test::parseNameOrDie("android:string/one"),
+      ConfigDescription::defaultConfig(), "default",
+      test::ValueBuilder<Id>().setSource(Source("default.xml")).build(),
+      context->getDiagnostics()));
 
-    ProductFilter filter({});
-    ASSERT_FALSE(filter.consume(context.get(), &table));
+  ProductFilter filter({});
+  ASSERT_FALSE(filter.consume(context.get(), &table));
 }
 
-} // namespace aapt
+}  // namespace aapt

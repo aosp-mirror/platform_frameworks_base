@@ -28,9 +28,9 @@ static const char* sMajorVersion = "2";
 static const char* sMinorVersion = "2";
 
 int printVersion() {
-    std::cerr << "Android Asset Packaging Tool (aapt) "
-            << sMajorVersion << "." << sMinorVersion << std::endl;
-    return 0;
+  std::cerr << "Android Asset Packaging Tool (aapt) " << sMajorVersion << "."
+            << sMinorVersion << std::endl;
+  return 0;
 }
 
 extern int compile(const std::vector<StringPiece>& args);
@@ -38,35 +38,36 @@ extern int link(const std::vector<StringPiece>& args);
 extern int dump(const std::vector<StringPiece>& args);
 extern int diff(const std::vector<StringPiece>& args);
 
-} // namespace aapt
+}  // namespace aapt
 
 int main(int argc, char** argv) {
-    if (argc >= 2) {
-        argv += 1;
-        argc -= 1;
+  if (argc >= 2) {
+    argv += 1;
+    argc -= 1;
 
-        std::vector<aapt::StringPiece> args;
-        for (int i = 1; i < argc; i++) {
-            args.push_back(argv[i]);
-        }
-
-        aapt::StringPiece command(argv[0]);
-        if (command == "compile" || command == "c") {
-            return aapt::compile(args);
-        } else if (command == "link" || command == "l") {
-            return aapt::link(args);
-        } else if (command == "dump" || command == "d") {
-            return aapt::dump(args);
-        } else if (command == "diff") {
-            return aapt::diff(args);
-        } else if (command == "version") {
-            return aapt::printVersion();
-        }
-        std::cerr << "unknown command '" << command << "'\n";
-    } else {
-        std::cerr << "no command specified\n";
+    std::vector<aapt::StringPiece> args;
+    for (int i = 1; i < argc; i++) {
+      args.push_back(argv[i]);
     }
 
-    std::cerr << "\nusage: aapt2 [compile|link|dump|diff|version] ..." << std::endl;
-    return 1;
+    aapt::StringPiece command(argv[0]);
+    if (command == "compile" || command == "c") {
+      return aapt::compile(args);
+    } else if (command == "link" || command == "l") {
+      return aapt::link(args);
+    } else if (command == "dump" || command == "d") {
+      return aapt::dump(args);
+    } else if (command == "diff") {
+      return aapt::diff(args);
+    } else if (command == "version") {
+      return aapt::printVersion();
+    }
+    std::cerr << "unknown command '" << command << "'\n";
+  } else {
+    std::cerr << "no command specified\n";
+  }
+
+  std::cerr << "\nusage: aapt2 [compile|link|dump|diff|version] ..."
+            << std::endl;
+  return 1;
 }

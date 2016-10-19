@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "ResourceValues.h"
 #include "ValueVisitor.h"
+#include "ResourceValues.h"
 #include "test/Test.h"
 #include "util/Util.h"
 
@@ -24,63 +24,63 @@
 namespace aapt {
 
 struct SingleReferenceVisitor : public ValueVisitor {
-    using ValueVisitor::visit;
+  using ValueVisitor::visit;
 
-    Reference* visited = nullptr;
+  Reference* visited = nullptr;
 
-    void visit(Reference* ref) override {
-        visited = ref;
-    }
+  void visit(Reference* ref) override { visited = ref; }
 };
 
 struct StyleVisitor : public ValueVisitor {
-    using ValueVisitor::visit;
+  using ValueVisitor::visit;
 
-    std::list<Reference*> visitedRefs;
-    Style* visitedStyle = nullptr;
+  std::list<Reference*> visitedRefs;
+  Style* visitedStyle = nullptr;
 
-    void visit(Reference* ref) override {
-        visitedRefs.push_back(ref);
-    }
+  void visit(Reference* ref) override { visitedRefs.push_back(ref); }
 
-    void visit(Style* style) override {
-        visitedStyle = style;
-        ValueVisitor::visit(style);
-    }
+  void visit(Style* style) override {
+    visitedStyle = style;
+    ValueVisitor::visit(style);
+  }
 };
 
 TEST(ValueVisitorTest, VisitsReference) {
-    Reference ref(ResourceName{"android", ResourceType::kAttr, "foo"});
-    SingleReferenceVisitor visitor;
-    ref.accept(&visitor);
+  Reference ref(ResourceName{"android", ResourceType::kAttr, "foo"});
+  SingleReferenceVisitor visitor;
+  ref.accept(&visitor);
 
-    EXPECT_EQ(visitor.visited, &ref);
+  EXPECT_EQ(visitor.visited, &ref);
 }
 
 TEST(ValueVisitorTest, VisitsReferencesInStyle) {
-    std::unique_ptr<Style> style = test::StyleBuilder()
-            .setParent("android:style/foo")
-            .addItem("android:attr/one", test::buildReference("android:id/foo"))
-            .build();
+  std::unique_ptr<Style> style =
+      test::StyleBuilder()
+          .setParent("android:style/foo")
+          .addItem("android:attr/one", test::buildReference("android:id/foo"))
+          .build();
 
-    StyleVisitor visitor;
-    style->accept(&visitor);
+  StyleVisitor visitor;
+  style->accept(&visitor);
 
-    ASSERT_EQ(style.get(), visitor.visitedStyle);
+  ASSERT_EQ(style.get(), visitor.visitedStyle);
 
-    // Entry attribute references, plus the parent reference, plus one value reference.
-    ASSERT_EQ(style->entries.size() + 2, visitor.visitedRefs.size());
+  // Entry attribute references, plus the parent reference, plus one value
+  // reference.
+  ASSERT_EQ(style->entries.size() + 2, visitor.visitedRefs.size());
 }
 
 TEST(ValueVisitorTest, ValueCast) {
-    std::unique_ptr<Reference> ref = test::buildReference("android:color/white");
-    EXPECT_NE(valueCast<Reference>(ref.get()), nullptr);
+  std::unique_ptr<Reference> ref = test::buildReference("android:color/white");
+  EXPECT_NE(valueCast<Reference>(ref.get()), nullptr);
 
-    std::unique_ptr<Style> style = test::StyleBuilder()
-            .addItem("android:attr/foo", test::buildReference("android:color/black"))
-            .build();
-    EXPECT_NE(valueCast<Style>(style.get()), nullptr);
-    EXPECT_EQ(valueCast<Reference>(style.get()), nullptr);
+  std::unique_ptr<Style> style =
+      test::StyleBuilder()
+          .addItem("android:attr/foo",
+                   test::buildReference("android:color/black"))
+          .build();
+  EXPECT_NE(valueCast<Style>(style.get()), nullptr);
+  EXPECT_EQ(valueCast<Reference>(style.get()), nullptr);
 }
 
-} // namespace aapt
+}  // namespace aapt

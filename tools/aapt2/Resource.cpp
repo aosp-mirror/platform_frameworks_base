@@ -23,74 +23,97 @@
 namespace aapt {
 
 StringPiece toString(ResourceType type) {
-    switch (type) {
-        case ResourceType::kAnim:          return "anim";
-        case ResourceType::kAnimator:      return "animator";
-        case ResourceType::kArray:         return "array";
-        case ResourceType::kAttr:          return "attr";
-        case ResourceType::kAttrPrivate:   return "^attr-private";
-        case ResourceType::kBool:          return "bool";
-        case ResourceType::kColor:         return "color";
-        case ResourceType::kDimen:         return "dimen";
-        case ResourceType::kDrawable:      return "drawable";
-        case ResourceType::kFraction:      return "fraction";
-        case ResourceType::kId:            return "id";
-        case ResourceType::kInteger:       return "integer";
-        case ResourceType::kInterpolator:  return "interpolator";
-        case ResourceType::kLayout:        return "layout";
-        case ResourceType::kMenu:          return "menu";
-        case ResourceType::kMipmap:        return "mipmap";
-        case ResourceType::kPlurals:       return "plurals";
-        case ResourceType::kRaw:           return "raw";
-        case ResourceType::kString:        return "string";
-        case ResourceType::kStyle:         return "style";
-        case ResourceType::kStyleable:     return "styleable";
-        case ResourceType::kTransition:    return "transition";
-        case ResourceType::kXml:           return "xml";
-    }
-    return {};
+  switch (type) {
+    case ResourceType::kAnim:
+      return "anim";
+    case ResourceType::kAnimator:
+      return "animator";
+    case ResourceType::kArray:
+      return "array";
+    case ResourceType::kAttr:
+      return "attr";
+    case ResourceType::kAttrPrivate:
+      return "^attr-private";
+    case ResourceType::kBool:
+      return "bool";
+    case ResourceType::kColor:
+      return "color";
+    case ResourceType::kDimen:
+      return "dimen";
+    case ResourceType::kDrawable:
+      return "drawable";
+    case ResourceType::kFraction:
+      return "fraction";
+    case ResourceType::kId:
+      return "id";
+    case ResourceType::kInteger:
+      return "integer";
+    case ResourceType::kInterpolator:
+      return "interpolator";
+    case ResourceType::kLayout:
+      return "layout";
+    case ResourceType::kMenu:
+      return "menu";
+    case ResourceType::kMipmap:
+      return "mipmap";
+    case ResourceType::kPlurals:
+      return "plurals";
+    case ResourceType::kRaw:
+      return "raw";
+    case ResourceType::kString:
+      return "string";
+    case ResourceType::kStyle:
+      return "style";
+    case ResourceType::kStyleable:
+      return "styleable";
+    case ResourceType::kTransition:
+      return "transition";
+    case ResourceType::kXml:
+      return "xml";
+  }
+  return {};
 }
 
-static const std::map<StringPiece, ResourceType> sResourceTypeMap {
-        { "anim", ResourceType::kAnim },
-        { "animator", ResourceType::kAnimator },
-        { "array", ResourceType::kArray },
-        { "attr", ResourceType::kAttr },
-        { "^attr-private", ResourceType::kAttrPrivate },
-        { "bool", ResourceType::kBool },
-        { "color", ResourceType::kColor },
-        { "dimen", ResourceType::kDimen },
-        { "drawable", ResourceType::kDrawable },
-        { "fraction", ResourceType::kFraction },
-        { "id", ResourceType::kId },
-        { "integer", ResourceType::kInteger },
-        { "interpolator", ResourceType::kInterpolator },
-        { "layout", ResourceType::kLayout },
-        { "menu", ResourceType::kMenu },
-        { "mipmap", ResourceType::kMipmap },
-        { "plurals", ResourceType::kPlurals },
-        { "raw", ResourceType::kRaw },
-        { "string", ResourceType::kString },
-        { "style", ResourceType::kStyle },
-        { "styleable", ResourceType::kStyleable },
-        { "transition", ResourceType::kTransition },
-        { "xml", ResourceType::kXml },
+static const std::map<StringPiece, ResourceType> sResourceTypeMap{
+    {"anim", ResourceType::kAnim},
+    {"animator", ResourceType::kAnimator},
+    {"array", ResourceType::kArray},
+    {"attr", ResourceType::kAttr},
+    {"^attr-private", ResourceType::kAttrPrivate},
+    {"bool", ResourceType::kBool},
+    {"color", ResourceType::kColor},
+    {"dimen", ResourceType::kDimen},
+    {"drawable", ResourceType::kDrawable},
+    {"fraction", ResourceType::kFraction},
+    {"id", ResourceType::kId},
+    {"integer", ResourceType::kInteger},
+    {"interpolator", ResourceType::kInterpolator},
+    {"layout", ResourceType::kLayout},
+    {"menu", ResourceType::kMenu},
+    {"mipmap", ResourceType::kMipmap},
+    {"plurals", ResourceType::kPlurals},
+    {"raw", ResourceType::kRaw},
+    {"string", ResourceType::kString},
+    {"style", ResourceType::kStyle},
+    {"styleable", ResourceType::kStyleable},
+    {"transition", ResourceType::kTransition},
+    {"xml", ResourceType::kXml},
 };
 
 const ResourceType* parseResourceType(const StringPiece& str) {
-    auto iter = sResourceTypeMap.find(str);
-    if (iter == std::end(sResourceTypeMap)) {
-        return nullptr;
-    }
-    return &iter->second;
+  auto iter = sResourceTypeMap.find(str);
+  if (iter == std::end(sResourceTypeMap)) {
+    return nullptr;
+  }
+  return &iter->second;
 }
 
 bool operator<(const ResourceKey& a, const ResourceKey& b) {
-    return std::tie(a.name, a.config) < std::tie(b.name, b.config);
+  return std::tie(a.name, a.config) < std::tie(b.name, b.config);
 }
 
 bool operator<(const ResourceKeyRef& a, const ResourceKeyRef& b) {
-    return std::tie(a.name, a.config) < std::tie(b.name, b.config);
+  return std::tie(a.name, a.config) < std::tie(b.name, b.config);
 }
 
-} // namespace aapt
+}  // namespace aapt

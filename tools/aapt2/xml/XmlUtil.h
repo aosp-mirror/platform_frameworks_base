@@ -26,9 +26,12 @@ namespace aapt {
 namespace xml {
 
 constexpr const char* kSchemaAuto = "http://schemas.android.com/apk/res-auto";
-constexpr const char* kSchemaPublicPrefix = "http://schemas.android.com/apk/res/";
-constexpr const char* kSchemaPrivatePrefix = "http://schemas.android.com/apk/prv/res/";
-constexpr const char* kSchemaAndroid = "http://schemas.android.com/apk/res/android";
+constexpr const char* kSchemaPublicPrefix =
+    "http://schemas.android.com/apk/res/";
+constexpr const char* kSchemaPrivatePrefix =
+    "http://schemas.android.com/apk/prv/res/";
+constexpr const char* kSchemaAndroid =
+    "http://schemas.android.com/apk/res/android";
 constexpr const char* kSchemaTools = "http://schemas.android.com/tools";
 constexpr const char* kSchemaAapt = "http://schemas.android.com/aapt";
 
@@ -36,17 +39,19 @@ constexpr const char* kSchemaAapt = "http://schemas.android.com/aapt";
  * Result of extracting a package name from a namespace URI declaration.
  */
 struct ExtractedPackage {
-    /**
-     * The name of the package. This can be the empty string, which means that the package
-     * should be assumed to be the package being compiled.
-     */
-    std::string package;
+  /**
+   * The name of the package. This can be the empty string, which means that the
+   * package
+   * should be assumed to be the package being compiled.
+   */
+  std::string package;
 
-    /**
-     * True if the package's private namespace was declared. This means that private resources
-     * are made visible.
-     */
-    bool privateNamespace;
+  /**
+   * True if the package's private namespace was declared. This means that
+   * private resources
+   * are made visible.
+   */
+  bool privateNamespace;
 };
 
 /**
@@ -57,7 +62,8 @@ struct ExtractedPackage {
  * Special case: if namespaceUri is http://schemas.android.com/apk/res-auto,
  * returns an empty package name.
  */
-Maybe<ExtractedPackage> extractPackageFromNamespace(const std::string& namespaceUri);
+Maybe<ExtractedPackage> extractPackageFromNamespace(
+    const std::string& namespaceUri);
 
 /**
  * Returns an XML Android namespace for the given package of the form:
@@ -68,31 +74,37 @@ Maybe<ExtractedPackage> extractPackageFromNamespace(const std::string& namespace
  *
  * http://schemas.android.com/apk/prv/res/<package>
  */
-std::string buildPackageNamespace(const StringPiece& package, bool privateReference=false);
+std::string buildPackageNamespace(const StringPiece& package,
+                                  bool privateReference = false);
 
 /**
- * Interface representing a stack of XML namespace declarations. When looking up the package
+ * Interface representing a stack of XML namespace declarations. When looking up
+ * the package
  * for a namespace prefix, the stack is checked from top to bottom.
  */
 struct IPackageDeclStack {
-    virtual ~IPackageDeclStack() = default;
+  virtual ~IPackageDeclStack() = default;
 
-    /**
-     * Returns an ExtractedPackage struct if the alias given corresponds with a package declaration.
-     */
-    virtual Maybe<ExtractedPackage> transformPackageAlias(
-            const StringPiece& alias, const StringPiece& localPackage) const = 0;
+  /**
+   * Returns an ExtractedPackage struct if the alias given corresponds with a
+   * package declaration.
+   */
+  virtual Maybe<ExtractedPackage> transformPackageAlias(
+      const StringPiece& alias, const StringPiece& localPackage) const = 0;
 };
 
 /**
- * Helper function for transforming the original Reference inRef to a fully qualified reference
- * via the IPackageDeclStack. This will also mark the Reference as private if the namespace of
+ * Helper function for transforming the original Reference inRef to a fully
+ * qualified reference
+ * via the IPackageDeclStack. This will also mark the Reference as private if
+ * the namespace of
  * the package declaration was private.
  */
 void transformReferenceFromNamespace(IPackageDeclStack* declStack,
-                                     const StringPiece& localPackage, Reference* inRef);
+                                     const StringPiece& localPackage,
+                                     Reference* inRef);
 
-} // namespace xml
-} // namespace aapt
+}  // namespace xml
+}  // namespace aapt
 
 #endif /* AAPT_XML_XMLUTIL_H */

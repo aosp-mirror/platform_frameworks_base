@@ -18,105 +18,95 @@
 #define AAPT_IO_DATA_H
 
 #include <android-base/macros.h>
-#include <memory>
 #include <utils/FileMap.h>
+#include <memory>
 
 namespace aapt {
 namespace io {
 
 /**
- * Interface for a block of contiguous memory. An instance of this interface owns the data.
+ * Interface for a block of contiguous memory. An instance of this interface
+ * owns the data.
  */
 class IData {
-public:
-    virtual ~IData() = default;
+ public:
+  virtual ~IData() = default;
 
-    virtual const void* data() const = 0;
-    virtual size_t size() const = 0;
+  virtual const void* data() const = 0;
+  virtual size_t size() const = 0;
 };
 
 class DataSegment : public IData {
-public:
-    explicit DataSegment(std::unique_ptr<IData> data, size_t offset, size_t len) :
-            mData(std::move(data)), mOffset(offset), mLen(len) {
-    }
+ public:
+  explicit DataSegment(std::unique_ptr<IData> data, size_t offset, size_t len)
+      : mData(std::move(data)), mOffset(offset), mLen(len) {}
 
-    const void* data() const override {
-        return static_cast<const uint8_t*>(mData->data()) + mOffset;
-    }
+  const void* data() const override {
+    return static_cast<const uint8_t*>(mData->data()) + mOffset;
+  }
 
-    size_t size() const override {
-        return mLen;
-    }
+  size_t size() const override { return mLen; }
 
-private:
-    DISALLOW_COPY_AND_ASSIGN(DataSegment);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(DataSegment);
 
-    std::unique_ptr<IData> mData;
-    size_t mOffset;
-    size_t mLen;
+  std::unique_ptr<IData> mData;
+  size_t mOffset;
+  size_t mLen;
 };
 
 /**
- * Implementation of IData that exposes a memory mapped file. The mmapped file is owned by this
+ * Implementation of IData that exposes a memory mapped file. The mmapped file
+ * is owned by this
  * object.
  */
 class MmappedData : public IData {
-public:
-    explicit MmappedData(android::FileMap&& map) : mMap(std::forward<android::FileMap>(map)) {
-    }
+ public:
+  explicit MmappedData(android::FileMap&& map)
+      : mMap(std::forward<android::FileMap>(map)) {}
 
-    const void* data() const override {
-        return mMap.getDataPtr();
-    }
+  const void* data() const override { return mMap.getDataPtr(); }
 
-    size_t size() const override {
-        return mMap.getDataLength();
-    }
+  size_t size() const override { return mMap.getDataLength(); }
 
-private:
-    android::FileMap mMap;
+ private:
+  android::FileMap mMap;
 };
 
 /**
- * Implementation of IData that exposes a block of memory that was malloc'ed (new'ed). The
+ * Implementation of IData that exposes a block of memory that was malloc'ed
+ * (new'ed). The
  * memory is owned by this object.
  */
 class MallocData : public IData {
-public:
-    MallocData(std::unique_ptr<const uint8_t[]> data, size_t size) :
-            mData(std::move(data)), mSize(size) {
-    }
+ public:
+  MallocData(std::unique_ptr<const uint8_t[]> data, size_t size)
+      : mData(std::move(data)), mSize(size) {}
 
-    const void* data() const override {
-        return mData.get();
-    }
+  const void* data() const override { return mData.get(); }
 
-    size_t size() const override {
-        return mSize;
-    }
+  size_t size() const override { return mSize; }
 
-private:
-    std::unique_ptr<const uint8_t[]> mData;
-    size_t mSize;
+ private:
+  std::unique_ptr<const uint8_t[]> mData;
+  size_t mSize;
 };
 
 /**
- * When mmap fails because the file has length 0, we use the EmptyData to simulate data of length 0.
+ * When mmap fails because the file has length 0, we use the EmptyData to
+ * simulate data of length 0.
  */
 class EmptyData : public IData {
-public:
-    const void* data() const override {
-        static const uint8_t d = 0;
-        return &d;
-    }
+ public:
+  const void* data() const override {
+    static const uint8_t d = 0;
+    return &d;
+  }
 
-    size_t size() const override {
-        return 0u;
-    }
+  size_t size() const override { return 0u; }
 };
 
-} // namespace io
-} // namespace aapt
+}  // namespace io
+}  // namespace aapt
 
 #endif /* AAPT_IO_DATA_H */

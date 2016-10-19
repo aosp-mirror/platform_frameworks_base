@@ -37,29 +37,29 @@ namespace aapt {
  * to the 'type' in package:type/entry.
  */
 enum class ResourceType {
-    kAnim,
-    kAnimator,
-    kArray,
-    kAttr,
-    kAttrPrivate,
-    kBool,
-    kColor,
-    kDimen,
-    kDrawable,
-    kFraction,
-    kId,
-    kInteger,
-    kInterpolator,
-    kLayout,
-    kMenu,
-    kMipmap,
-    kPlurals,
-    kRaw,
-    kString,
-    kStyle,
-    kStyleable,
-    kTransition,
-    kXml,
+  kAnim,
+  kAnimator,
+  kArray,
+  kAttr,
+  kAttrPrivate,
+  kBool,
+  kColor,
+  kDimen,
+  kDrawable,
+  kFraction,
+  kId,
+  kInteger,
+  kInterpolator,
+  kLayout,
+  kMenu,
+  kMipmap,
+  kPlurals,
+  kRaw,
+  kString,
+  kStyle,
+  kStyleable,
+  kTransition,
+  kXml,
 };
 
 StringPiece toString(ResourceType type);
@@ -75,17 +75,17 @@ const ResourceType* parseResourceType(const StringPiece& str);
  * a resource in the ResourceTable.
  */
 struct ResourceName {
-    std::string package;
-    ResourceType type;
-    std::string entry;
+  std::string package;
+  ResourceType type;
+  std::string entry;
 
-    ResourceName() : type(ResourceType::kRaw) {}
-    ResourceName(const StringPiece& p, ResourceType t, const StringPiece& e);
+  ResourceName() : type(ResourceType::kRaw) {}
+  ResourceName(const StringPiece& p, ResourceType t, const StringPiece& e);
 
-    int compare(const ResourceName& other) const;
+  int compare(const ResourceName& other) const;
 
-    bool isValid() const;
-    std::string toString() const;
+  bool isValid() const;
+  std::string toString() const;
 };
 
 /**
@@ -95,21 +95,21 @@ struct ResourceName {
  * of the original string.
  */
 struct ResourceNameRef {
-    StringPiece package;
-    ResourceType type;
-    StringPiece entry;
+  StringPiece package;
+  ResourceType type;
+  StringPiece entry;
 
-    ResourceNameRef() = default;
-    ResourceNameRef(const ResourceNameRef&) = default;
-    ResourceNameRef(ResourceNameRef&&) = default;
-    ResourceNameRef(const ResourceName& rhs);  // NOLINT(implicit)
-    ResourceNameRef(const StringPiece& p, ResourceType t, const StringPiece& e);
-    ResourceNameRef& operator=(const ResourceNameRef& rhs) = default;
-    ResourceNameRef& operator=(ResourceNameRef&& rhs) = default;
-    ResourceNameRef& operator=(const ResourceName& rhs);
+  ResourceNameRef() = default;
+  ResourceNameRef(const ResourceNameRef&) = default;
+  ResourceNameRef(ResourceNameRef&&) = default;
+  ResourceNameRef(const ResourceName& rhs);  // NOLINT(implicit)
+  ResourceNameRef(const StringPiece& p, ResourceType t, const StringPiece& e);
+  ResourceNameRef& operator=(const ResourceNameRef& rhs) = default;
+  ResourceNameRef& operator=(ResourceNameRef&& rhs) = default;
+  ResourceNameRef& operator=(const ResourceName& rhs);
 
-    ResourceName toResourceName() const;
-    bool isValid() const;
+  ResourceName toResourceName() const;
+  bool isValid() const;
 };
 
 /**
@@ -124,64 +124,66 @@ struct ResourceNameRef {
  * EEEE: 16 bit entry identifier.
  */
 struct ResourceId {
-    uint32_t id;
+  uint32_t id;
 
-    ResourceId();
-    ResourceId(const ResourceId& rhs);
-    ResourceId(uint32_t resId);  // NOLINT(implicit)
-    ResourceId(uint8_t p, uint8_t t, uint16_t e);
+  ResourceId();
+  ResourceId(const ResourceId& rhs);
+  ResourceId(uint32_t resId);  // NOLINT(implicit)
+  ResourceId(uint8_t p, uint8_t t, uint16_t e);
 
-    bool isValid() const;
-    uint8_t packageId() const;
-    uint8_t typeId() const;
-    uint16_t entryId() const;
+  bool isValid() const;
+  uint8_t packageId() const;
+  uint8_t typeId() const;
+  uint16_t entryId() const;
 };
 
 struct SourcedResourceName {
-    ResourceName name;
-    size_t line;
+  ResourceName name;
+  size_t line;
 };
 
 struct ResourceFile {
-    // Name
-    ResourceName name;
+  // Name
+  ResourceName name;
 
-    // Configuration
-    ConfigDescription config;
+  // Configuration
+  ConfigDescription config;
 
-    // Source
-    Source source;
+  // Source
+  Source source;
 
-    // Exported symbols
-    std::vector<SourcedResourceName> exportedSymbols;
+  // Exported symbols
+  std::vector<SourcedResourceName> exportedSymbols;
 };
 
 /**
- * Useful struct used as a key to represent a unique resource in associative containers.
+ * Useful struct used as a key to represent a unique resource in associative
+ * containers.
  */
 struct ResourceKey {
-    ResourceName name;
-    ConfigDescription config;
+  ResourceName name;
+  ConfigDescription config;
 };
 
 bool operator<(const ResourceKey& a, const ResourceKey& b);
 
 /**
- * Useful struct used as a key to represent a unique resource in associative containers.
+ * Useful struct used as a key to represent a unique resource in associative
+ * containers.
  * Holds a reference to the name, so that name better live longer than this key!
  */
 struct ResourceKeyRef {
-    ResourceNameRef name;
-    ConfigDescription config;
+  ResourceNameRef name;
+  ConfigDescription config;
 
-    ResourceKeyRef() = default;
-    ResourceKeyRef(const ResourceNameRef& n, const ConfigDescription& c) : name(n), config(c) {
-    }
+  ResourceKeyRef() = default;
+  ResourceKeyRef(const ResourceNameRef& n, const ConfigDescription& c)
+      : name(n), config(c) {}
 
-    /**
-     * Prevent taking a reference to a temporary. This is bad.
-     */
-    ResourceKeyRef(ResourceName&& n, const ConfigDescription& c) = delete;
+  /**
+   * Prevent taking a reference to a temporary. This is bad.
+   */
+  ResourceKeyRef(ResourceName&& n, const ConfigDescription& c) = delete;
 };
 
 bool operator<(const ResourceKeyRef& a, const ResourceKeyRef& b);
@@ -190,193 +192,194 @@ bool operator<(const ResourceKeyRef& a, const ResourceKeyRef& b);
 // ResourceId implementation.
 //
 
-inline ResourceId::ResourceId() : id(0) {
-}
+inline ResourceId::ResourceId() : id(0) {}
 
-inline ResourceId::ResourceId(const ResourceId& rhs) : id(rhs.id) {
-}
+inline ResourceId::ResourceId(const ResourceId& rhs) : id(rhs.id) {}
 
-inline ResourceId::ResourceId(uint32_t resId) : id(resId) {
-}
+inline ResourceId::ResourceId(uint32_t resId) : id(resId) {}
 
-inline ResourceId::ResourceId(uint8_t p, uint8_t t, uint16_t e) : id((p << 24) | (t << 16) | e) {
-}
+inline ResourceId::ResourceId(uint8_t p, uint8_t t, uint16_t e)
+    : id((p << 24) | (t << 16) | e) {}
 
 inline bool ResourceId::isValid() const {
-    return (id & 0xff000000u) != 0 && (id & 0x00ff0000u) != 0;
+  return (id & 0xff000000u) != 0 && (id & 0x00ff0000u) != 0;
 }
 
 inline uint8_t ResourceId::packageId() const {
-    return static_cast<uint8_t>(id >> 24);
+  return static_cast<uint8_t>(id >> 24);
 }
 
 inline uint8_t ResourceId::typeId() const {
-    return static_cast<uint8_t>(id >> 16);
+  return static_cast<uint8_t>(id >> 16);
 }
 
 inline uint16_t ResourceId::entryId() const {
-    return static_cast<uint16_t>(id);
+  return static_cast<uint16_t>(id);
 }
 
 inline bool operator<(const ResourceId& lhs, const ResourceId& rhs) {
-    return lhs.id < rhs.id;
+  return lhs.id < rhs.id;
 }
 
 inline bool operator>(const ResourceId& lhs, const ResourceId& rhs) {
-    return lhs.id > rhs.id;
+  return lhs.id > rhs.id;
 }
 
 inline bool operator==(const ResourceId& lhs, const ResourceId& rhs) {
-    return lhs.id == rhs.id;
+  return lhs.id == rhs.id;
 }
 
 inline bool operator!=(const ResourceId& lhs, const ResourceId& rhs) {
-    return lhs.id != rhs.id;
+  return lhs.id != rhs.id;
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out, const ResourceId& resId) {
-    std::ios_base::fmtflags oldFlags = out.flags();
-    char oldFill = out.fill();
-    out << "0x" << std::internal << std::setfill('0') << std::setw(8)
-        << std::hex << resId.id;
-    out.flags(oldFlags);
-    out.fill(oldFill);
-    return out;
+inline ::std::ostream& operator<<(::std::ostream& out,
+                                  const ResourceId& resId) {
+  std::ios_base::fmtflags oldFlags = out.flags();
+  char oldFill = out.fill();
+  out << "0x" << std::internal << std::setfill('0') << std::setw(8) << std::hex
+      << resId.id;
+  out.flags(oldFlags);
+  out.fill(oldFill);
+  return out;
 }
 
 //
 // ResourceType implementation.
 //
 
-inline ::std::ostream& operator<<(::std::ostream& out, const ResourceType& val) {
-    return out << toString(val);
+inline ::std::ostream& operator<<(::std::ostream& out,
+                                  const ResourceType& val) {
+  return out << toString(val);
 }
 
 //
 // ResourceName implementation.
 //
 
-inline ResourceName::ResourceName(const StringPiece& p, ResourceType t, const StringPiece& e) :
-        package(p.toString()), type(t), entry(e.toString()) {
-}
+inline ResourceName::ResourceName(const StringPiece& p, ResourceType t,
+                                  const StringPiece& e)
+    : package(p.toString()), type(t), entry(e.toString()) {}
 
 inline int ResourceName::compare(const ResourceName& other) const {
-    int cmp = package.compare(other.package);
-    if (cmp != 0) return cmp;
-    cmp = static_cast<int>(type) - static_cast<int>(other.type);
-    if (cmp != 0) return cmp;
-    cmp = entry.compare(other.entry);
-    return cmp;
+  int cmp = package.compare(other.package);
+  if (cmp != 0) return cmp;
+  cmp = static_cast<int>(type) - static_cast<int>(other.type);
+  if (cmp != 0) return cmp;
+  cmp = entry.compare(other.entry);
+  return cmp;
 }
 
 inline bool ResourceName::isValid() const {
-    return !package.empty() && !entry.empty();
+  return !package.empty() && !entry.empty();
 }
 
 inline bool operator<(const ResourceName& lhs, const ResourceName& rhs) {
-    return std::tie(lhs.package, lhs.type, lhs.entry)
-            < std::tie(rhs.package, rhs.type, rhs.entry);
+  return std::tie(lhs.package, lhs.type, lhs.entry) <
+         std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
 inline bool operator==(const ResourceName& lhs, const ResourceName& rhs) {
-    return std::tie(lhs.package, lhs.type, lhs.entry)
-            == std::tie(rhs.package, rhs.type, rhs.entry);
+  return std::tie(lhs.package, lhs.type, lhs.entry) ==
+         std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
 inline bool operator!=(const ResourceName& lhs, const ResourceName& rhs) {
-    return std::tie(lhs.package, lhs.type, lhs.entry)
-            != std::tie(rhs.package, rhs.type, rhs.entry);
+  return std::tie(lhs.package, lhs.type, lhs.entry) !=
+         std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out, const ResourceName& name) {
-    if (!name.package.empty()) {
-        out << name.package << ":";
-    }
-    return out << name.type << "/" << name.entry;
+inline ::std::ostream& operator<<(::std::ostream& out,
+                                  const ResourceName& name) {
+  if (!name.package.empty()) {
+    out << name.package << ":";
+  }
+  return out << name.type << "/" << name.entry;
 }
 
 inline std::string ResourceName::toString() const {
-    std::stringstream stream;
-    stream << *this;
-    return stream.str();
+  std::stringstream stream;
+  stream << *this;
+  return stream.str();
 }
 
 //
 // ResourceNameRef implementation.
 //
 
-inline ResourceNameRef::ResourceNameRef(const ResourceName& rhs) :
-        package(rhs.package), type(rhs.type), entry(rhs.entry) {
-}
+inline ResourceNameRef::ResourceNameRef(const ResourceName& rhs)
+    : package(rhs.package), type(rhs.type), entry(rhs.entry) {}
 
 inline ResourceNameRef::ResourceNameRef(const StringPiece& p, ResourceType t,
-                                        const StringPiece& e) :
-        package(p), type(t), entry(e) {
-}
+                                        const StringPiece& e)
+    : package(p), type(t), entry(e) {}
 
 inline ResourceNameRef& ResourceNameRef::operator=(const ResourceName& rhs) {
-    package = rhs.package;
-    type = rhs.type;
-    entry = rhs.entry;
-    return *this;
+  package = rhs.package;
+  type = rhs.type;
+  entry = rhs.entry;
+  return *this;
 }
 
 inline ResourceName ResourceNameRef::toResourceName() const {
-    return ResourceName(package, type, entry);
+  return ResourceName(package, type, entry);
 }
 
 inline bool ResourceNameRef::isValid() const {
-    return !package.empty() && !entry.empty();
+  return !package.empty() && !entry.empty();
 }
 
 inline bool operator<(const ResourceNameRef& lhs, const ResourceNameRef& rhs) {
-    return std::tie(lhs.package, lhs.type, lhs.entry)
-            < std::tie(rhs.package, rhs.type, rhs.entry);
+  return std::tie(lhs.package, lhs.type, lhs.entry) <
+         std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
 inline bool operator==(const ResourceNameRef& lhs, const ResourceNameRef& rhs) {
-    return std::tie(lhs.package, lhs.type, lhs.entry)
-            == std::tie(rhs.package, rhs.type, rhs.entry);
+  return std::tie(lhs.package, lhs.type, lhs.entry) ==
+         std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
 inline bool operator!=(const ResourceNameRef& lhs, const ResourceNameRef& rhs) {
-    return std::tie(lhs.package, lhs.type, lhs.entry)
-            != std::tie(rhs.package, rhs.type, rhs.entry);
+  return std::tie(lhs.package, lhs.type, lhs.entry) !=
+         std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out, const ResourceNameRef& name) {
-    if (!name.package.empty()) {
-        out << name.package << ":";
-    }
-    return out << name.type << "/" << name.entry;
+inline ::std::ostream& operator<<(::std::ostream& out,
+                                  const ResourceNameRef& name) {
+  if (!name.package.empty()) {
+    out << name.package << ":";
+  }
+  return out << name.type << "/" << name.entry;
 }
 
 inline bool operator<(const ResourceName& lhs, const ResourceNameRef& b) {
-    return ResourceNameRef(lhs) < b;
+  return ResourceNameRef(lhs) < b;
 }
 
 inline bool operator!=(const ResourceName& lhs, const ResourceNameRef& rhs) {
-    return ResourceNameRef(lhs) != rhs;
+  return ResourceNameRef(lhs) != rhs;
 }
 
-inline bool operator==(const SourcedResourceName& lhs, const SourcedResourceName& rhs) {
-    return lhs.name == rhs.name && lhs.line == rhs.line;
+inline bool operator==(const SourcedResourceName& lhs,
+                       const SourcedResourceName& rhs) {
+  return lhs.name == rhs.name && lhs.line == rhs.line;
 }
 
-} // namespace aapt
+}  // namespace aapt
 
 namespace std {
 
-template <> struct hash<aapt::ResourceName> {
-    size_t operator()(const aapt::ResourceName& name) const {
-        android::hash_t h = 0;
-        h = android::JenkinsHashMix(h, hash<string>()(name.package));
-        h = android::JenkinsHashMix(h, static_cast<uint32_t>(name.type));
-        h = android::JenkinsHashMix(h, hash<string>()(name.entry));
-        return static_cast<size_t>(h);
-    }
+template <>
+struct hash<aapt::ResourceName> {
+  size_t operator()(const aapt::ResourceName& name) const {
+    android::hash_t h = 0;
+    h = android::JenkinsHashMix(h, hash<string>()(name.package));
+    h = android::JenkinsHashMix(h, static_cast<uint32_t>(name.type));
+    h = android::JenkinsHashMix(h, hash<string>()(name.entry));
+    return static_cast<size_t>(h);
+  }
 };
 
-} // namespace std
+}  // namespace std
 
-#endif // AAPT_RESOURCE_H
+#endif  // AAPT_RESOURCE_H

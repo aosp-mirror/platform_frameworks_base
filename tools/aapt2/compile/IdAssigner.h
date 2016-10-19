@@ -26,22 +26,22 @@
 namespace aapt {
 
 /**
- * Assigns IDs to each resource in the table, respecting existing IDs and filling in gaps
+ * Assigns IDs to each resource in the table, respecting existing IDs and
+ * filling in gaps
  * in between fixed ID assignments.
  */
 class IdAssigner : public IResourceTableConsumer {
-public:
-    IdAssigner() = default;
-    explicit IdAssigner(const std::unordered_map<ResourceName, ResourceId>* map) :
-            mAssignedIdMap(map) {
-    }
+ public:
+  IdAssigner() = default;
+  explicit IdAssigner(const std::unordered_map<ResourceName, ResourceId>* map)
+      : mAssignedIdMap(map) {}
 
-    bool consume(IAaptContext* context, ResourceTable* table) override;
+  bool consume(IAaptContext* context, ResourceTable* table) override;
 
-private:
-    const std::unordered_map<ResourceName, ResourceId>* mAssignedIdMap = nullptr;
+ private:
+  const std::unordered_map<ResourceName, ResourceId>* mAssignedIdMap = nullptr;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_COMPILE_IDASSIGNER_H */

@@ -39,15 +39,15 @@ constexpr const char sDirSep = '/';
 #endif
 
 enum class FileType {
-    kUnknown = 0,
-    kNonexistant,
-    kRegular,
-    kDirectory,
-    kCharDev,
-    kBlockDev,
-    kFifo,
-    kSymlink,
-    kSocket,
+  kUnknown = 0,
+  kNonexistant,
+  kRegular,
+  kDirectory,
+  kCharDev,
+  kBlockDev,
+  kFifo,
+  kSymlink,
+  kSocket,
 };
 
 FileType getFileType(const StringPiece& path);
@@ -93,12 +93,14 @@ std::string packageToPath(const StringPiece& package);
 /**
  * Creates a FileMap for the file at path.
  */
-Maybe<android::FileMap> mmapPath(const StringPiece& path, std::string* outError);
+Maybe<android::FileMap> mmapPath(const StringPiece& path,
+                                 std::string* outError);
 
 /**
  * Reads the file at path and appends each line to the outArgList vector.
  */
-bool appendArgsFromFile(const StringPiece& path, std::vector<std::string>* outArgList,
+bool appendArgsFromFile(const StringPiece& path,
+                        std::vector<std::string>* outArgList,
                         std::string* outError);
 
 /*
@@ -108,37 +110,36 @@ bool appendArgsFromFile(const StringPiece& path, std::vector<std::string>* outAr
  * FileFilter::setPattern(const std::string&) method.
  */
 class FileFilter {
-public:
-    explicit FileFilter(IDiagnostics* diag) : mDiag(diag) {
-    }
+ public:
+  explicit FileFilter(IDiagnostics* diag) : mDiag(diag) {}
 
-    /*
-     * Patterns syntax:
-     * - Delimiter is :
-     * - Entry can start with the flag ! to avoid printing a warning
-     *   about the file being ignored.
-     * - Entry can have the flag "<dir>" to match only directories
-     *   or <file> to match only files. Default is to match both.
-     * - Entry can be a simplified glob "<prefix>*" or "*<suffix>"
-     *   where prefix/suffix must have at least 1 character (so that
-     *   we don't match a '*' catch-all pattern.)
-     * - The special filenames "." and ".." are always ignored.
-     * - Otherwise the full string is matched.
-     * - match is not case-sensitive.
-     */
-    bool setPattern(const StringPiece& pattern);
+  /*
+   * Patterns syntax:
+   * - Delimiter is :
+   * - Entry can start with the flag ! to avoid printing a warning
+   *   about the file being ignored.
+   * - Entry can have the flag "<dir>" to match only directories
+   *   or <file> to match only files. Default is to match both.
+   * - Entry can be a simplified glob "<prefix>*" or "*<suffix>"
+   *   where prefix/suffix must have at least 1 character (so that
+   *   we don't match a '*' catch-all pattern.)
+   * - The special filenames "." and ".." are always ignored.
+   * - Otherwise the full string is matched.
+   * - match is not case-sensitive.
+   */
+  bool setPattern(const StringPiece& pattern);
 
-    /**
-     * Applies the filter, returning true for pass, false for fail.
-     */
-    bool operator()(const std::string& filename, FileType type) const;
+  /**
+   * Applies the filter, returning true for pass, false for fail.
+   */
+  bool operator()(const std::string& filename, FileType type) const;
 
-private:
-    IDiagnostics* mDiag;
-    std::vector<std::string> mPatternTokens;
+ private:
+  IDiagnostics* mDiag;
+  std::vector<std::string> mPatternTokens;
 };
 
-} // namespace file
-} // namespace aapt
+}  // namespace file
+}  // namespace aapt
 
-#endif // AAPT_FILES_H
+#endif  // AAPT_FILES_H

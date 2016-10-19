@@ -56,16 +56,14 @@ StringPiece trimWhitespace(const StringPiece& str);
  * UTF-16 isspace(). It basically checks for lower range characters that are
  * whitespace.
  */
-inline bool isspace16(char16_t c) {
-    return c < 0x0080 && isspace(c);
-}
+inline bool isspace16(char16_t c) { return c < 0x0080 && isspace(c); }
 
 /**
  * Returns an iterator to the first character that is not alpha-numeric and that
  * is not in the allowedChars set.
  */
-StringPiece::const_iterator findNonAlphaNumericAndNotInSet(const StringPiece& str,
-                                                           const StringPiece& allowedChars);
+StringPiece::const_iterator findNonAlphaNumericAndNotInSet(
+    const StringPiece& str, const StringPiece& allowedChars);
 
 /**
  * Tests that the string is a valid Java class name.
@@ -78,7 +76,8 @@ bool isJavaClassName(const StringPiece& str);
 bool isJavaPackageName(const StringPiece& str);
 
 /**
- * Converts the class name to a fully qualified class name from the given `package`. Ex:
+ * Converts the class name to a fully qualified class name from the given
+ * `package`. Ex:
  *
  * asdf         --> package.asdf
  * .asdf        --> package.asdf
@@ -89,111 +88,114 @@ Maybe<std::string> getFullyQualifiedClassName(const StringPiece& package,
                                               const StringPiece& className);
 
 /**
- * Makes a std::unique_ptr<> with the template parameter inferred by the compiler.
+ * Makes a std::unique_ptr<> with the template parameter inferred by the
+ * compiler.
  * This will be present in C++14 and can be removed then.
  */
 template <typename T, class... Args>
 std::unique_ptr<T> make_unique(Args&&... args) {
-    return std::unique_ptr<T>(new T{std::forward<Args>(args)...});
+  return std::unique_ptr<T>(new T{std::forward<Args>(args)...});
 }
 
 /**
- * Writes a set of items to the std::ostream, joining the times with the provided
+ * Writes a set of items to the std::ostream, joining the times with the
+ * provided
  * separator.
  */
 template <typename Container>
-::std::function<::std::ostream&(::std::ostream&)> joiner(const Container& container,
-                                                         const char* sep) {
-    using std::begin;
-    using std::end;
-    const auto beginIter = begin(container);
-    const auto endIter = end(container);
-    return [beginIter, endIter, sep](::std::ostream& out) -> ::std::ostream& {
-        for (auto iter = beginIter; iter != endIter; ++iter) {
-            if (iter != beginIter) {
-                out << sep;
-            }
-            out << *iter;
-        }
-        return out;
-    };
+::std::function<::std::ostream&(::std::ostream&)> joiner(
+    const Container& container, const char* sep) {
+  using std::begin;
+  using std::end;
+  const auto beginIter = begin(container);
+  const auto endIter = end(container);
+  return [beginIter, endIter, sep](::std::ostream& out) -> ::std::ostream& {
+    for (auto iter = beginIter; iter != endIter; ++iter) {
+      if (iter != beginIter) {
+        out << sep;
+      }
+      out << *iter;
+    }
+    return out;
+  };
 }
 
-inline ::std::function<::std::ostream&(::std::ostream&)> formatSize(size_t size) {
-    return [size](::std::ostream& out) -> ::std::ostream& {
-        constexpr size_t K = 1024u;
-        constexpr size_t M = K * K;
-        constexpr size_t G = M * K;
-        if (size < K) {
-            out << size << "B";
-        } else if (size < M) {
-            out << (double(size) / K) << " KiB";
-        } else if (size < G) {
-            out << (double(size) / M) << " MiB";
-        } else {
-            out << (double(size) / G) << " GiB";
-        }
-        return out;
-    };
+inline ::std::function<::std::ostream&(::std::ostream&)> formatSize(
+    size_t size) {
+  return [size](::std::ostream& out) -> ::std::ostream& {
+    constexpr size_t K = 1024u;
+    constexpr size_t M = K * K;
+    constexpr size_t G = M * K;
+    if (size < K) {
+      out << size << "B";
+    } else if (size < M) {
+      out << (double(size) / K) << " KiB";
+    } else if (size < G) {
+      out << (double(size) / M) << " MiB";
+    } else {
+      out << (double(size) / G) << " GiB";
+    }
+    return out;
+  };
 }
 
 /**
- * Helper method to extract a UTF-16 string from a StringPool. If the string is stored as UTF-8,
+ * Helper method to extract a UTF-16 string from a StringPool. If the string is
+ * stored as UTF-8,
  * the conversion to UTF-16 happens within ResStringPool.
  */
 StringPiece16 getString16(const android::ResStringPool& pool, size_t idx);
 
 /**
- * Helper method to extract a UTF-8 string from a StringPool. If the string is stored as UTF-16,
- * the conversion from UTF-16 to UTF-8 does not happen in ResStringPool and is done by this method,
- * which maintains no state or cache. This means we must return an std::string copy.
+ * Helper method to extract a UTF-8 string from a StringPool. If the string is
+ * stored as UTF-16,
+ * the conversion from UTF-16 to UTF-8 does not happen in ResStringPool and is
+ * done by this method,
+ * which maintains no state or cache. This means we must return an std::string
+ * copy.
  */
 std::string getString(const android::ResStringPool& pool, size_t idx);
 
 /**
- * Checks that the Java string format contains no non-positional arguments (arguments without
- * explicitly specifying an index) when there are more than one argument. This is an error
- * because translations may rearrange the order of the arguments in the string, which will
+ * Checks that the Java string format contains no non-positional arguments
+ * (arguments without
+ * explicitly specifying an index) when there are more than one argument. This
+ * is an error
+ * because translations may rearrange the order of the arguments in the string,
+ * which will
  * break the string interpolation.
  */
 bool verifyJavaStringFormat(const StringPiece& str);
 
 class StringBuilder {
-public:
-    StringBuilder& append(const StringPiece& str);
-    const std::string& str() const;
-    const std::string& error() const;
+ public:
+  StringBuilder& append(const StringPiece& str);
+  const std::string& str() const;
+  const std::string& error() const;
 
-    // When building StyledStrings, we need UTF-16 indices into the string,
-    // which is what the Java layer expects when dealing with java String.charAt().
-    size_t utf16Len() const;
+  // When building StyledStrings, we need UTF-16 indices into the string,
+  // which is what the Java layer expects when dealing with java
+  // String.charAt().
+  size_t utf16Len() const;
 
-    operator bool() const;
+  operator bool() const;
 
-private:
-    std::string mStr;
-    size_t mUtf16Len = 0;
-    bool mQuote = false;
-    bool mTrailingSpace = false;
-    bool mLastCharWasEscape = false;
-    std::string mError;
+ private:
+  std::string mStr;
+  size_t mUtf16Len = 0;
+  bool mQuote = false;
+  bool mTrailingSpace = false;
+  bool mLastCharWasEscape = false;
+  std::string mError;
 };
 
-inline const std::string& StringBuilder::str() const {
-    return mStr;
-}
+inline const std::string& StringBuilder::str() const { return mStr; }
 
-inline const std::string& StringBuilder::error() const {
-    return mError;
-}
+inline const std::string& StringBuilder::error() const { return mError; }
 
-inline size_t StringBuilder::utf16Len() const {
-    return mUtf16Len;
-}
+inline size_t StringBuilder::utf16Len() const { return mUtf16Len; }
 
-inline StringBuilder::operator bool() const {
-    return mError.empty();
-}
+inline StringBuilder::operator bool() const { return mError.empty(); }
 
 /**
  * Converts a UTF8 string to a UTF16 string.
@@ -216,65 +218,51 @@ std::unique_ptr<uint8_t[]> copy(const BigBuffer& buffer);
  * any memory on the heap nor use standard containers.
  */
 class Tokenizer {
-public:
-    class iterator {
-    public:
-        iterator(const iterator&) = default;
-        iterator& operator=(const iterator&) = default;
+ public:
+  class iterator {
+   public:
+    iterator(const iterator&) = default;
+    iterator& operator=(const iterator&) = default;
 
-        iterator& operator++();
+    iterator& operator++();
 
-        StringPiece operator*() {
-            return mToken;
-        }
-        bool operator==(const iterator& rhs) const;
-        bool operator!=(const iterator& rhs) const;
+    StringPiece operator*() { return mToken; }
+    bool operator==(const iterator& rhs) const;
+    bool operator!=(const iterator& rhs) const;
 
-    private:
-        friend class Tokenizer;
+   private:
+    friend class Tokenizer;
 
-        iterator(StringPiece s, char sep, StringPiece tok, bool end);
+    iterator(StringPiece s, char sep, StringPiece tok, bool end);
 
-        StringPiece mStr;
-        char mSeparator;
-        StringPiece mToken;
-        bool mEnd;
-    };
+    StringPiece mStr;
+    char mSeparator;
+    StringPiece mToken;
+    bool mEnd;
+  };
 
-    Tokenizer(StringPiece str, char sep);
+  Tokenizer(StringPiece str, char sep);
 
-    iterator begin() {
-        return mBegin;
-    }
+  iterator begin() { return mBegin; }
 
-    iterator end() {
-        return mEnd;
-    }
+  iterator end() { return mEnd; }
 
-private:
-    const iterator mBegin;
-    const iterator mEnd;
+ private:
+  const iterator mBegin;
+  const iterator mEnd;
 };
 
 inline Tokenizer tokenize(const StringPiece& str, char sep) {
-    return Tokenizer(str, sep);
+  return Tokenizer(str, sep);
 }
 
-inline uint16_t hostToDevice16(uint16_t value) {
-    return htods(value);
-}
+inline uint16_t hostToDevice16(uint16_t value) { return htods(value); }
 
-inline uint32_t hostToDevice32(uint32_t value) {
-    return htodl(value);
-}
+inline uint32_t hostToDevice32(uint32_t value) { return htodl(value); }
 
-inline uint16_t deviceToHost16(uint16_t value) {
-    return dtohs(value);
-}
+inline uint16_t deviceToHost16(uint16_t value) { return dtohs(value); }
 
-inline uint32_t deviceToHost32(uint32_t value) {
-    return dtohl(value);
-}
+inline uint32_t deviceToHost32(uint32_t value) { return dtohl(value); }
 
 /**
  * Given a path like: res/xml-sw600dp/foo.xml
@@ -288,17 +276,19 @@ inline uint32_t deviceToHost32(uint32_t value) {
 bool extractResFilePathParts(const StringPiece& path, StringPiece* outPrefix,
                              StringPiece* outEntry, StringPiece* outSuffix);
 
-} // namespace util
+}  // namespace util
 
 /**
- * Stream operator for functions. Calls the function with the stream as an argument.
+ * Stream operator for functions. Calls the function with the stream as an
+ * argument.
  * In the aapt namespace for lookup.
  */
-inline ::std::ostream& operator<<(::std::ostream& out,
-                                  const ::std::function<::std::ostream&(::std::ostream&)>& f) {
-    return f(out);
+inline ::std::ostream& operator<<(
+    ::std::ostream& out,
+    const ::std::function<::std::ostream&(::std::ostream&)>& f) {
+  return f(out);
 }
 
-} // namespace aapt
+}  // namespace aapt
 
-#endif // AAPT_UTIL_H
+#endif  // AAPT_UTIL_H

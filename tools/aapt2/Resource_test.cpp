@@ -20,96 +20,96 @@
 namespace aapt {
 
 TEST(ResourceTypeTest, ParseResourceTypes) {
-    const ResourceType* type = parseResourceType("anim");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kAnim);
+  const ResourceType* type = parseResourceType("anim");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kAnim);
 
-    type = parseResourceType("animator");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kAnimator);
+  type = parseResourceType("animator");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kAnimator);
 
-    type = parseResourceType("array");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kArray);
+  type = parseResourceType("array");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kArray);
 
-    type = parseResourceType("attr");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kAttr);
+  type = parseResourceType("attr");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kAttr);
 
-    type = parseResourceType("^attr-private");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kAttrPrivate);
+  type = parseResourceType("^attr-private");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kAttrPrivate);
 
-    type = parseResourceType("bool");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kBool);
+  type = parseResourceType("bool");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kBool);
 
-    type = parseResourceType("color");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kColor);
+  type = parseResourceType("color");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kColor);
 
-    type = parseResourceType("dimen");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kDimen);
+  type = parseResourceType("dimen");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kDimen);
 
-    type = parseResourceType("drawable");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kDrawable);
+  type = parseResourceType("drawable");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kDrawable);
 
-    type = parseResourceType("fraction");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kFraction);
+  type = parseResourceType("fraction");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kFraction);
 
-    type = parseResourceType("id");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kId);
+  type = parseResourceType("id");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kId);
 
-    type = parseResourceType("integer");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kInteger);
+  type = parseResourceType("integer");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kInteger);
 
-    type = parseResourceType("interpolator");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kInterpolator);
+  type = parseResourceType("interpolator");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kInterpolator);
 
-    type = parseResourceType("layout");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kLayout);
+  type = parseResourceType("layout");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kLayout);
 
-    type = parseResourceType("menu");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kMenu);
+  type = parseResourceType("menu");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kMenu);
 
-    type = parseResourceType("mipmap");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kMipmap);
+  type = parseResourceType("mipmap");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kMipmap);
 
-    type = parseResourceType("plurals");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kPlurals);
+  type = parseResourceType("plurals");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kPlurals);
 
-    type = parseResourceType("raw");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kRaw);
+  type = parseResourceType("raw");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kRaw);
 
-    type = parseResourceType("string");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kString);
+  type = parseResourceType("string");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kString);
 
-    type = parseResourceType("style");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kStyle);
+  type = parseResourceType("style");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kStyle);
 
-    type = parseResourceType("transition");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kTransition);
+  type = parseResourceType("transition");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kTransition);
 
-    type = parseResourceType("xml");
-    ASSERT_NE(type, nullptr);
-    EXPECT_EQ(*type, ResourceType::kXml);
+  type = parseResourceType("xml");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kXml);
 
-    type = parseResourceType("blahaha");
-    EXPECT_EQ(type, nullptr);
+  type = parseResourceType("blahaha");
+  EXPECT_EQ(type, nullptr);
 }
 
-} // namespace aapt
+}  // namespace aapt

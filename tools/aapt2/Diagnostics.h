@@ -29,119 +29,112 @@
 namespace aapt {
 
 struct DiagMessageActual {
-    Source source;
-    std::string message;
+  Source source;
+  std::string message;
 };
 
 struct DiagMessage {
-private:
-    Source mSource;
-    std::stringstream mMessage;
+ private:
+  Source mSource;
+  std::stringstream mMessage;
 
-public:
-    DiagMessage() = default;
+ public:
+  DiagMessage() = default;
 
-    explicit DiagMessage(const StringPiece& src) : mSource(src) {
-    }
+  explicit DiagMessage(const StringPiece& src) : mSource(src) {}
 
-    explicit DiagMessage(const Source& src) : mSource(src) {
-    }
+  explicit DiagMessage(const Source& src) : mSource(src) {}
 
-    explicit DiagMessage(size_t line) : mSource(Source().withLine(line)) {
-    }
+  explicit DiagMessage(size_t line) : mSource(Source().withLine(line)) {}
 
-    template <typename T>
-    DiagMessage& operator<<(const T& value) {
-        mMessage << value;
-        return *this;
-    }
+  template <typename T>
+  DiagMessage& operator<<(const T& value) {
+    mMessage << value;
+    return *this;
+  }
 
-    DiagMessageActual build() const {
-        return DiagMessageActual{ mSource, mMessage.str() };
-    }
+  DiagMessageActual build() const {
+    return DiagMessageActual{mSource, mMessage.str()};
+  }
 };
 
 struct IDiagnostics {
-    virtual ~IDiagnostics() = default;
+  virtual ~IDiagnostics() = default;
 
-    enum class Level {
-        Note,
-        Warn,
-        Error
-    };
+  enum class Level { Note, Warn, Error };
 
-    virtual void log(Level level, DiagMessageActual& actualMsg) = 0;
+  virtual void log(Level level, DiagMessageActual& actualMsg) = 0;
 
-    virtual void error(const DiagMessage& message) {
-        DiagMessageActual actual = message.build();
-        log(Level::Error, actual);
-    }
+  virtual void error(const DiagMessage& message) {
+    DiagMessageActual actual = message.build();
+    log(Level::Error, actual);
+  }
 
-    virtual void warn(const DiagMessage& message) {
-        DiagMessageActual actual = message.build();
-        log(Level::Warn, actual);
-    }
+  virtual void warn(const DiagMessage& message) {
+    DiagMessageActual actual = message.build();
+    log(Level::Warn, actual);
+  }
 
-    virtual void note(const DiagMessage& message) {
-        DiagMessageActual actual = message.build();
-        log(Level::Note, actual);
-    }
+  virtual void note(const DiagMessage& message) {
+    DiagMessageActual actual = message.build();
+    log(Level::Note, actual);
+  }
 };
 
 class StdErrDiagnostics : public IDiagnostics {
-public:
-    StdErrDiagnostics() = default;
+ public:
+  StdErrDiagnostics() = default;
 
-    void log(Level level, DiagMessageActual& actualMsg) override {
-        const char* tag;
+  void log(Level level, DiagMessageActual& actualMsg) override {
+    const char* tag;
 
-        switch (level) {
-        case Level::Error:
-            mNumErrors++;
-            if (mNumErrors > 20) {
-                return;
-            }
-            tag = "error";
-            break;
-
-        case Level::Warn:
-            tag = "warn";
-            break;
-
-        case Level::Note:
-            tag = "note";
-            break;
+    switch (level) {
+      case Level::Error:
+        mNumErrors++;
+        if (mNumErrors > 20) {
+          return;
         }
+        tag = "error";
+        break;
 
-        if (!actualMsg.source.path.empty()) {
-            std::cerr << actualMsg.source << ": ";
-        }
-        std::cerr << tag << ": " << actualMsg.message << "." << std::endl;
+      case Level::Warn:
+        tag = "warn";
+        break;
+
+      case Level::Note:
+        tag = "note";
+        break;
     }
 
-private:
-    size_t mNumErrors = 0;
+    if (!actualMsg.source.path.empty()) {
+      std::cerr << actualMsg.source << ": ";
+    }
+    std::cerr << tag << ": " << actualMsg.message << "." << std::endl;
+  }
 
-    DISALLOW_COPY_AND_ASSIGN(StdErrDiagnostics);
+ private:
+  size_t mNumErrors = 0;
+
+  DISALLOW_COPY_AND_ASSIGN(StdErrDiagnostics);
 };
 
 class SourcePathDiagnostics : public IDiagnostics {
-public:
-    SourcePathDiagnostics(const Source& src, IDiagnostics* diag) : mSource(src), mDiag(diag) {
-    }
+ public:
+  SourcePathDiagnostics(const Source& src, IDiagnostics* diag)
+      : mSource(src), mDiag(diag) {}
 
-    void log(Level level, DiagMessageActual& actualMsg) override {
-        actualMsg.source.path = mSource.path;
-        mDiag->log(level, actualMsg);
-    }
+  void log(Level level, DiagMessageActual& actualMsg) override {
+    actualMsg.source.path = mSource.path;
+    mDiag->log(level, actualMsg);
+  }
 
-private:
-    Source mSource;
-    IDiagnostics* mDiag;
+ private:
+  Source mSource;
+  IDiagnostics* mDiag;
 
-    DISALLOW_COPY_AND_ASSIGN(SourcePathDiagnostics);
+  DISALLOW_COPY_AND_ASSIGN(SourcePathDiagnostics);
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_DIAGNOSTICS_H */

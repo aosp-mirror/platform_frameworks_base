@@ -24,9 +24,7 @@
 #include <gtest/gtest.h>
 
 namespace aapt {
-namespace test {
+namespace test {}  // namespace test
+}  // namespace aapt
 
-} // namespace test
-} // namespace aapt
-
-#endif // AAPT_TEST_TEST_H
+#endif  // AAPT_TEST_TEST_H

@@ -52,34 +52,36 @@ namespace aapt {
  *
  */
 class AnnotationProcessor {
-public:
-    /**
-     * Adds more comments. Since resources can have various values with different configurations,
-     * we need to collect all the comments.
-     */
-    void appendComment(const StringPiece& comment);
+ public:
+  /**
+   * Adds more comments. Since resources can have various values with different
+   * configurations,
+   * we need to collect all the comments.
+   */
+  void appendComment(const StringPiece& comment);
 
-    void appendNewLine();
+  void appendNewLine();
 
-    /**
-     * Writes the comments and annotations to the stream, with the given prefix before each line.
-     */
-    void writeToStream(std::ostream* out, const StringPiece& prefix) const;
+  /**
+   * Writes the comments and annotations to the stream, with the given prefix
+   * before each line.
+   */
+  void writeToStream(std::ostream* out, const StringPiece& prefix) const;
 
-private:
-    enum : uint32_t {
-        kDeprecated = 0x01,
-        kSystemApi = 0x02,
-    };
+ private:
+  enum : uint32_t {
+    kDeprecated = 0x01,
+    kSystemApi = 0x02,
+  };
 
-    std::stringstream mComment;
-    std::stringstream mAnnotations;
-    bool mHasComments = false;
-    uint32_t mAnnotationBitMask = 0;
+  std::stringstream mComment;
+  std::stringstream mAnnotations;
+  bool mHasComments = false;
+  uint32_t mAnnotationBitMask = 0;
 
-    void appendCommentLine(std::string& line);
+  void appendCommentLine(std::string& line);
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_JAVA_ANNOTATIONPROCESSOR_H */

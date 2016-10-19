@@ -23,9 +23,9 @@
 namespace aapt {
 
 struct XmlIdCollector : public IXmlResourceConsumer {
-    bool consume(IAaptContext* context, xml::XmlResource* xmlRes) override;
+  bool consume(IAaptContext* context, xml::XmlResource* xmlRes) override;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_XMLIDCOLLECTOR_H */

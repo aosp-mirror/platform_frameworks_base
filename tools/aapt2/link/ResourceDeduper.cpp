@@ -36,79 +36,81 @@ namespace {
  *    an equivalent entry value.
  */
 class DominatedKeyValueRemover : public DominatorTree::BottomUpVisitor {
-public:
-    using Node = DominatorTree::Node;
+ public:
+  using Node = DominatorTree::Node;
 
-    explicit DominatedKeyValueRemover(IAaptContext* context, ResourceEntry* entry) :
-            mContext(context), mEntry(entry) {
+  explicit DominatedKeyValueRemover(IAaptContext* context, ResourceEntry* entry)
+      : mContext(context), mEntry(entry) {}
+
+  void visitConfig(Node* node) {
+    Node* parent = node->parent();
+    if (!parent) {
+      return;
+    }
+    ResourceConfigValue* nodeValue = node->value();
+    ResourceConfigValue* parentValue = parent->value();
+    if (!nodeValue || !parentValue) {
+      return;
+    }
+    if (!nodeValue->value->equals(parentValue->value.get())) {
+      return;
     }
 
-    void visitConfig(Node* node) {
-        Node* parent = node->parent();
-        if (!parent) {
-            return;
-        }
-        ResourceConfigValue* nodeValue = node->value();
-        ResourceConfigValue* parentValue = parent->value();
-        if (!nodeValue || !parentValue) {
-            return;
-        }
-        if (!nodeValue->value->equals(parentValue->value.get())) {
-            return;
-        }
-
-        // Compare compatible configs for this entry and ensure the values are
-        // equivalent.
-        const ConfigDescription& nodeConfiguration = nodeValue->config;
-        for (const auto& sibling : mEntry->values) {
-            if (!sibling->value) {
-                // Sibling was already removed.
-                continue;
-            }
-            if (nodeConfiguration.isCompatibleWith(sibling->config)
-                    && !nodeValue->value->equals(sibling->value.get())) {
-                // The configurations are compatible, but the value is
-                // different, so we can't remove this value.
-                return;
-            }
-        }
-        if (mContext->verbose()) {
-            mContext->getDiagnostics()->note(
-                    DiagMessage(nodeValue->value->getSource())
-                            << "removing dominated duplicate resource with name \""
-                            << mEntry->name << "\"");
-        }
-        nodeValue->value = {};
+    // Compare compatible configs for this entry and ensure the values are
+    // equivalent.
+    const ConfigDescription& nodeConfiguration = nodeValue->config;
+    for (const auto& sibling : mEntry->values) {
+      if (!sibling->value) {
+        // Sibling was already removed.
+        continue;
+      }
+      if (nodeConfiguration.isCompatibleWith(sibling->config) &&
+          !nodeValue->value->equals(sibling->value.get())) {
+        // The configurations are compatible, but the value is
+        // different, so we can't remove this value.
+        return;
+      }
     }
+    if (mContext->verbose()) {
+      mContext->getDiagnostics()->note(
+          DiagMessage(nodeValue->value->getSource())
+          << "removing dominated duplicate resource with name \""
+          << mEntry->name << "\"");
+    }
+    nodeValue->value = {};
+  }
 
-private:
-    IAaptContext* mContext;
-    ResourceEntry* mEntry;
+ private:
+  IAaptContext* mContext;
+  ResourceEntry* mEntry;
 };
 
 static void dedupeEntry(IAaptContext* context, ResourceEntry* entry) {
-    DominatorTree tree(entry->values);
-    DominatedKeyValueRemover remover(context, entry);
-    tree.accept(&remover);
+  DominatorTree tree(entry->values);
+  DominatedKeyValueRemover remover(context, entry);
+  tree.accept(&remover);
 
-    // Erase the values that were removed.
-    entry->values.erase(std::remove_if(entry->values.begin(), entry->values.end(),
-            [](const std::unique_ptr<ResourceConfigValue>& val) -> bool {
-        return val == nullptr || val->value == nullptr;
-    }), entry->values.end());
+  // Erase the values that were removed.
+  entry->values.erase(
+      std::remove_if(
+          entry->values.begin(), entry->values.end(),
+          [](const std::unique_ptr<ResourceConfigValue>& val) -> bool {
+            return val == nullptr || val->value == nullptr;
+          }),
+      entry->values.end());
 }
 
-} // namespace
+}  // namespace
 
 bool ResourceDeduper::consume(IAaptContext* context, ResourceTable* table) {
-    for (auto& package : table->packages) {
-        for (auto& type : package->types) {
-            for (auto& entry : type->entries) {
-                dedupeEntry(context, entry.get());
-            }
-        }
+  for (auto& package : table->packages) {
+    for (auto& type : package->types) {
+      for (auto& entry : type->entries) {
+        dedupeEntry(context, entry.get());
+      }
     }
-    return true;
+  }
+  return true;
 }
 
-} // aapt
+}  // aapt

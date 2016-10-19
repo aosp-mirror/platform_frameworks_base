@@ -27,32 +27,33 @@
 namespace aapt {
 
 class PseudoMethodImpl {
-public:
-    virtual ~PseudoMethodImpl() {}
-    virtual std::string start() { return {}; }
-    virtual std::string end() { return {}; }
-    virtual std::string text(const StringPiece& text) = 0;
-    virtual std::string placeholder(const StringPiece& text) = 0;
+ public:
+  virtual ~PseudoMethodImpl() {}
+  virtual std::string start() { return {}; }
+  virtual std::string end() { return {}; }
+  virtual std::string text(const StringPiece& text) = 0;
+  virtual std::string placeholder(const StringPiece& text) = 0;
 };
 
 class Pseudolocalizer {
-public:
-    enum class Method {
-        kNone,
-        kAccent,
-        kBidi,
-    };
+ public:
+  enum class Method {
+    kNone,
+    kAccent,
+    kBidi,
+  };
 
-    explicit Pseudolocalizer(Method method);
-    void setMethod(Method method);
-    std::string start() { return mImpl->start(); }
-    std::string end() { return mImpl->end(); }
-    std::string text(const StringPiece& text);
-private:
-    std::unique_ptr<PseudoMethodImpl> mImpl;
-    size_t mLastDepth;
+  explicit Pseudolocalizer(Method method);
+  void setMethod(Method method);
+  std::string start() { return mImpl->start(); }
+  std::string end() { return mImpl->end(); }
+  std::string text(const StringPiece& text);
+
+ private:
+  std::unique_ptr<PseudoMethodImpl> mImpl;
+  size_t mLastDepth;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_COMPILE_PSEUDOLOCALIZE_H */

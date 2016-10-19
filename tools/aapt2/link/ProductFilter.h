@@ -26,24 +26,25 @@
 namespace aapt {
 
 class ProductFilter {
-public:
-    using ResourceConfigValueIter = std::vector<std::unique_ptr<ResourceConfigValue>>::iterator;
+ public:
+  using ResourceConfigValueIter =
+      std::vector<std::unique_ptr<ResourceConfigValue>>::iterator;
 
-    explicit ProductFilter(std::unordered_set<std::string> products) : mProducts(products) { }
+  explicit ProductFilter(std::unordered_set<std::string> products)
+      : mProducts(products) {}
 
-    ResourceConfigValueIter selectProductToKeep(const ResourceNameRef& name,
-                                                const ResourceConfigValueIter begin,
-                                                const ResourceConfigValueIter end,
-                                                IDiagnostics* diag);
+  ResourceConfigValueIter selectProductToKeep(
+      const ResourceNameRef& name, const ResourceConfigValueIter begin,
+      const ResourceConfigValueIter end, IDiagnostics* diag);
 
-    bool consume(IAaptContext* context, ResourceTable* table);
+  bool consume(IAaptContext* context, ResourceTable* table);
 
-private:
-    std::unordered_set<std::string> mProducts;
+ private:
+  std::unordered_set<std::string> mProducts;
 
-    DISALLOW_COPY_AND_ASSIGN(ProductFilter);
+  DISALLOW_COPY_AND_ASSIGN(ProductFilter);
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_LINK_PRODUCTFILTER_H */

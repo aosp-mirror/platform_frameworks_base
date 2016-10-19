@@ -30,29 +30,31 @@ namespace aapt {
 namespace proguard {
 
 class KeepSet {
-public:
-    inline void addClass(const Source& source, const std::string& className) {
-        mKeepSet[className].insert(source);
-    }
+ public:
+  inline void addClass(const Source& source, const std::string& className) {
+    mKeepSet[className].insert(source);
+  }
 
-    inline void addMethod(const Source& source, const std::string& methodName) {
-        mKeepMethodSet[methodName].insert(source);
-    }
+  inline void addMethod(const Source& source, const std::string& methodName) {
+    mKeepMethodSet[methodName].insert(source);
+  }
 
-private:
-    friend bool writeKeepSet(std::ostream* out, const KeepSet& keepSet);
+ private:
+  friend bool writeKeepSet(std::ostream* out, const KeepSet& keepSet);
 
-    std::map<std::string, std::set<Source>> mKeepSet;
-    std::map<std::string, std::set<Source>> mKeepMethodSet;
+  std::map<std::string, std::set<Source>> mKeepSet;
+  std::map<std::string, std::set<Source>> mKeepMethodSet;
 };
 
-bool collectProguardRulesForManifest(const Source& source, xml::XmlResource* res, KeepSet* keepSet,
+bool collectProguardRulesForManifest(const Source& source,
+                                     xml::XmlResource* res, KeepSet* keepSet,
                                      bool mainDexOnly = false);
-bool collectProguardRules(const Source& source, xml::XmlResource* res, KeepSet* keepSet);
+bool collectProguardRules(const Source& source, xml::XmlResource* res,
+                          KeepSet* keepSet);
 
 bool writeKeepSet(std::ostream* out, const KeepSet& keepSet);
 
-} // namespace proguard
-} // namespace aapt
+}  // namespace proguard
+}  // namespace aapt
 
-#endif // AAPT_PROGUARD_RULES_H
+#endif  // AAPT_PROGUARD_RULES_H

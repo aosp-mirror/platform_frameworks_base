@@ -30,20 +30,19 @@ namespace aapt {
  * showing errors.
  */
 struct Source {
-    std::string path;
-    Maybe<size_t> line;
+  std::string path;
+  Maybe<size_t> line;
 
-    Source() = default;
+  Source() = default;
 
-    inline Source(const StringPiece& path) : path(path.toString()) {  // NOLINT(implicit)
-    }
+  inline Source(const StringPiece& path)
+      : path(path.toString()) {  // NOLINT(implicit)
+  }
 
-    inline Source(const StringPiece& path, size_t line) : path(path.toString()), line(line) {
-    }
+  inline Source(const StringPiece& path, size_t line)
+      : path(path.toString()), line(line) {}
 
-    inline Source withLine(size_t line) const {
-        return Source(path, line);
-    }
+  inline Source withLine(size_t line) const { return Source(path, line); }
 };
 
 //
@@ -51,30 +50,30 @@ struct Source {
 //
 
 inline ::std::ostream& operator<<(::std::ostream& out, const Source& source) {
-    out << source.path;
-    if (source.line) {
-        out << ":" << source.line.value();
-    }
-    return out;
+  out << source.path;
+  if (source.line) {
+    out << ":" << source.line.value();
+  }
+  return out;
 }
 
 inline bool operator==(const Source& lhs, const Source& rhs) {
-    return lhs.path == rhs.path && lhs.line == rhs.line;
+  return lhs.path == rhs.path && lhs.line == rhs.line;
 }
 
 inline bool operator<(const Source& lhs, const Source& rhs) {
-    int cmp = lhs.path.compare(rhs.path);
-    if (cmp < 0) return true;
-    if (cmp > 0) return false;
-    if (lhs.line) {
-        if (rhs.line) {
-            return lhs.line.value() < rhs.line.value();
-        }
-        return false;
+  int cmp = lhs.path.compare(rhs.path);
+  if (cmp < 0) return true;
+  if (cmp > 0) return false;
+  if (lhs.line) {
+    if (rhs.line) {
+      return lhs.line.value() < rhs.line.value();
     }
-    return bool(rhs.line);
+    return false;
+  }
+  return bool(rhs.line);
 }
 
-} // namespace aapt
+}  // namespace aapt
 
-#endif // AAPT_SOURCE_H
+#endif  // AAPT_SOURCE_H

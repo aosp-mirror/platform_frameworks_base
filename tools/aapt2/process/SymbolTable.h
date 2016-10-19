@@ -34,99 +34,100 @@
 namespace aapt {
 
 inline android::hash_t hash_type(const ResourceName& name) {
-    std::hash<std::string> strHash;
-    android::hash_t hash = 0;
-    hash = android::JenkinsHashMix(hash, (uint32_t) strHash(name.package));
-    hash = android::JenkinsHashMix(hash, (uint32_t) name.type);
-    hash = android::JenkinsHashMix(hash, (uint32_t) strHash(name.entry));
-    return hash;
+  std::hash<std::string> strHash;
+  android::hash_t hash = 0;
+  hash = android::JenkinsHashMix(hash, (uint32_t)strHash(name.package));
+  hash = android::JenkinsHashMix(hash, (uint32_t)name.type);
+  hash = android::JenkinsHashMix(hash, (uint32_t)strHash(name.entry));
+  return hash;
 }
 
 inline android::hash_t hash_type(const ResourceId& id) {
-    return android::hash_type(id.id);
+  return android::hash_type(id.id);
 }
 
 class ISymbolSource;
 
 class SymbolTable {
-public:
-    struct Symbol {
-        Symbol() : Symbol(Maybe<ResourceId>{}) {
-        }
+ public:
+  struct Symbol {
+    Symbol() : Symbol(Maybe<ResourceId>{}) {}
 
-        explicit Symbol(const Maybe<ResourceId>& i) : Symbol(i, nullptr) {
-        }
+    explicit Symbol(const Maybe<ResourceId>& i) : Symbol(i, nullptr) {}
 
-        Symbol(const Maybe<ResourceId>& i, const std::shared_ptr<Attribute>& attr) :
-                Symbol(i, attr, false) {
-        }
+    Symbol(const Maybe<ResourceId>& i, const std::shared_ptr<Attribute>& attr)
+        : Symbol(i, attr, false) {}
 
-        Symbol(const Maybe<ResourceId>& i, const std::shared_ptr<Attribute>& attr, bool pub) :
-                id(i), attribute(attr), isPublic(pub) {
-        }
+    Symbol(const Maybe<ResourceId>& i, const std::shared_ptr<Attribute>& attr,
+           bool pub)
+        : id(i), attribute(attr), isPublic(pub) {}
 
-        Symbol(const Symbol&) = default;
-        Symbol(Symbol&&) = default;
-        Symbol& operator=(const Symbol&) = default;
-        Symbol& operator=(Symbol&&) = default;
+    Symbol(const Symbol&) = default;
+    Symbol(Symbol&&) = default;
+    Symbol& operator=(const Symbol&) = default;
+    Symbol& operator=(Symbol&&) = default;
 
-        Maybe<ResourceId> id;
-        std::shared_ptr<Attribute> attribute;
-        bool isPublic = false;
-    };
+    Maybe<ResourceId> id;
+    std::shared_ptr<Attribute> attribute;
+    bool isPublic = false;
+  };
 
-    SymbolTable() : mCache(200), mIdCache(200) {
-    }
+  SymbolTable() : mCache(200), mIdCache(200) {}
 
-    void appendSource(std::unique_ptr<ISymbolSource> source);
-    void prependSource(std::unique_ptr<ISymbolSource> source);
+  void appendSource(std::unique_ptr<ISymbolSource> source);
+  void prependSource(std::unique_ptr<ISymbolSource> source);
 
-    /**
-     * Never hold on to the result between calls to findByName or findById. The results
-     * are typically stored in a cache which may evict entries.
-     */
-    const Symbol* findByName(const ResourceName& name);
-    const Symbol* findById(const ResourceId& id);
+  /**
+   * Never hold on to the result between calls to findByName or findById. The
+   * results
+   * are typically stored in a cache which may evict entries.
+   */
+  const Symbol* findByName(const ResourceName& name);
+  const Symbol* findById(const ResourceId& id);
 
-    /**
-     * Let's the ISymbolSource decide whether looking up by name or ID is faster, if both
-     * are available.
-     */
-    const Symbol* findByReference(const Reference& ref);
+  /**
+   * Let's the ISymbolSource decide whether looking up by name or ID is faster,
+   * if both
+   * are available.
+   */
+  const Symbol* findByReference(const Reference& ref);
 
-private:
-    std::vector<std::unique_ptr<ISymbolSource>> mSources;
+ private:
+  std::vector<std::unique_ptr<ISymbolSource>> mSources;
 
-    // We use shared_ptr because unique_ptr is not supported and
-    // we need automatic deletion.
-    android::LruCache<ResourceName, std::shared_ptr<Symbol>> mCache;
-    android::LruCache<ResourceId, std::shared_ptr<Symbol>> mIdCache;
+  // We use shared_ptr because unique_ptr is not supported and
+  // we need automatic deletion.
+  android::LruCache<ResourceName, std::shared_ptr<Symbol>> mCache;
+  android::LruCache<ResourceId, std::shared_ptr<Symbol>> mIdCache;
 
-    DISALLOW_COPY_AND_ASSIGN(SymbolTable);
+  DISALLOW_COPY_AND_ASSIGN(SymbolTable);
 };
 
 /**
- * An interface that a symbol source implements in order to surface symbol information
+ * An interface that a symbol source implements in order to surface symbol
+ * information
  * to the symbol table.
  */
 class ISymbolSource {
-public:
-    virtual ~ISymbolSource() = default;
+ public:
+  virtual ~ISymbolSource() = default;
 
-    virtual std::unique_ptr<SymbolTable::Symbol> findByName(const ResourceName& name) = 0;
-    virtual std::unique_ptr<SymbolTable::Symbol> findById(ResourceId id) = 0;
+  virtual std::unique_ptr<SymbolTable::Symbol> findByName(
+      const ResourceName& name) = 0;
+  virtual std::unique_ptr<SymbolTable::Symbol> findById(ResourceId id) = 0;
 
-    /**
-     * Default implementation tries the name if it exists, else the ID.
-     */
-    virtual std::unique_ptr<SymbolTable::Symbol> findByReference(const Reference& ref) {
-        if (ref.name) {
-            return findByName(ref.name.value());
-        } else if (ref.id) {
-            return findById(ref.id.value());
-        }
-        return {};
+  /**
+   * Default implementation tries the name if it exists, else the ID.
+   */
+  virtual std::unique_ptr<SymbolTable::Symbol> findByReference(
+      const Reference& ref) {
+    if (ref.name) {
+      return findByName(ref.name.value());
+    } else if (ref.id) {
+      return findById(ref.id.value());
     }
+    return {};
+  }
 };
 
 /**
@@ -135,38 +136,40 @@ public:
  * Lookups by ID are ignored.
  */
 class ResourceTableSymbolSource : public ISymbolSource {
-public:
-    explicit ResourceTableSymbolSource(ResourceTable* table) : mTable(table) {
-    }
+ public:
+  explicit ResourceTableSymbolSource(ResourceTable* table) : mTable(table) {}
 
-    std::unique_ptr<SymbolTable::Symbol> findByName(const ResourceName& name) override;
+  std::unique_ptr<SymbolTable::Symbol> findByName(
+      const ResourceName& name) override;
 
-    std::unique_ptr<SymbolTable::Symbol> findById(ResourceId id) override {
-        return {};
-    }
+  std::unique_ptr<SymbolTable::Symbol> findById(ResourceId id) override {
+    return {};
+  }
 
-private:
-    ResourceTable* mTable;
+ private:
+  ResourceTable* mTable;
 
-    DISALLOW_COPY_AND_ASSIGN(ResourceTableSymbolSource);
+  DISALLOW_COPY_AND_ASSIGN(ResourceTableSymbolSource);
 };
 
 class AssetManagerSymbolSource : public ISymbolSource {
-public:
-    AssetManagerSymbolSource() = default;
+ public:
+  AssetManagerSymbolSource() = default;
 
-    bool addAssetPath(const StringPiece& path);
+  bool addAssetPath(const StringPiece& path);
 
-    std::unique_ptr<SymbolTable::Symbol> findByName(const ResourceName& name) override;
-    std::unique_ptr<SymbolTable::Symbol> findById(ResourceId id) override;
-    std::unique_ptr<SymbolTable::Symbol> findByReference(const Reference& ref) override;
+  std::unique_ptr<SymbolTable::Symbol> findByName(
+      const ResourceName& name) override;
+  std::unique_ptr<SymbolTable::Symbol> findById(ResourceId id) override;
+  std::unique_ptr<SymbolTable::Symbol> findByReference(
+      const Reference& ref) override;
 
-private:
-    android::AssetManager mAssets;
+ private:
+  android::AssetManager mAssets;
 
-    DISALLOW_COPY_AND_ASSIGN(AssetManagerSymbolSource);
+  DISALLOW_COPY_AND_ASSIGN(AssetManagerSymbolSource);
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_PROCESS_SYMBOLTABLE_H */

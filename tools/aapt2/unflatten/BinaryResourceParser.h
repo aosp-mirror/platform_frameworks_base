@@ -39,80 +39,86 @@ struct SymbolTable_entry;
  * chunks and types.
  */
 class BinaryResourceParser {
-public:
-    /*
-     * Creates a parser, which will read `len` bytes from `data`, and
-     * add any resources parsed to `table`. `source` is for logging purposes.
-     */
-    BinaryResourceParser(IAaptContext* context, ResourceTable* table, const Source& source,
-                         const void* data, size_t dataLen);
+ public:
+  /*
+   * Creates a parser, which will read `len` bytes from `data`, and
+   * add any resources parsed to `table`. `source` is for logging purposes.
+   */
+  BinaryResourceParser(IAaptContext* context, ResourceTable* table,
+                       const Source& source, const void* data, size_t dataLen);
 
-    BinaryResourceParser(const BinaryResourceParser&) = delete; // No copy.
+  BinaryResourceParser(const BinaryResourceParser&) = delete;  // No copy.
 
-    /*
-     * Parses the binary resource table and returns true if successful.
-     */
-    bool parse();
+  /*
+   * Parses the binary resource table and returns true if successful.
+   */
+  bool parse();
 
-private:
-    bool parseTable(const android::ResChunk_header* chunk);
-    bool parsePackage(const android::ResChunk_header* chunk);
-    bool parseTypeSpec(const android::ResChunk_header* chunk);
-    bool parseType(const ResourceTablePackage* package, const android::ResChunk_header* chunk);
+ private:
+  bool parseTable(const android::ResChunk_header* chunk);
+  bool parsePackage(const android::ResChunk_header* chunk);
+  bool parseTypeSpec(const android::ResChunk_header* chunk);
+  bool parseType(const ResourceTablePackage* package,
+                 const android::ResChunk_header* chunk);
 
-    std::unique_ptr<Item> parseValue(const ResourceNameRef& name, const ConfigDescription& config,
-                                     const android::Res_value* value, uint16_t flags);
+  std::unique_ptr<Item> parseValue(const ResourceNameRef& name,
+                                   const ConfigDescription& config,
+                                   const android::Res_value* value,
+                                   uint16_t flags);
 
-    std::unique_ptr<Value> parseMapEntry(const ResourceNameRef& name,
-                                         const ConfigDescription& config,
-                                         const android::ResTable_map_entry* map);
+  std::unique_ptr<Value> parseMapEntry(const ResourceNameRef& name,
+                                       const ConfigDescription& config,
+                                       const android::ResTable_map_entry* map);
 
-    std::unique_ptr<Style> parseStyle(const ResourceNameRef& name, const ConfigDescription& config,
+  std::unique_ptr<Style> parseStyle(const ResourceNameRef& name,
+                                    const ConfigDescription& config,
+                                    const android::ResTable_map_entry* map);
+
+  std::unique_ptr<Attribute> parseAttr(const ResourceNameRef& name,
+                                       const ConfigDescription& config,
+                                       const android::ResTable_map_entry* map);
+
+  std::unique_ptr<Array> parseArray(const ResourceNameRef& name,
+                                    const ConfigDescription& config,
+                                    const android::ResTable_map_entry* map);
+
+  std::unique_ptr<Plural> parsePlural(const ResourceNameRef& name,
+                                      const ConfigDescription& config,
                                       const android::ResTable_map_entry* map);
 
-    std::unique_ptr<Attribute> parseAttr(const ResourceNameRef& name,
-                                         const ConfigDescription& config,
-                                         const android::ResTable_map_entry* map);
+  /**
+   * If the mapEntry is a special type that denotes meta data (source, comment),
+   * then it is
+   * read and added to the Value.
+   * Returns true if the mapEntry was meta data.
+   */
+  bool collectMetaData(const android::ResTable_map& mapEntry, Value* value);
 
-    std::unique_ptr<Array> parseArray(const ResourceNameRef& name, const ConfigDescription& config,
-                                      const android::ResTable_map_entry* map);
+  IAaptContext* mContext;
+  ResourceTable* mTable;
 
-    std::unique_ptr<Plural> parsePlural(const ResourceNameRef& name,
-                                        const ConfigDescription& config,
-                                        const android::ResTable_map_entry* map);
+  const Source mSource;
 
-    /**
-     * If the mapEntry is a special type that denotes meta data (source, comment), then it is
-     * read and added to the Value.
-     * Returns true if the mapEntry was meta data.
-     */
-    bool collectMetaData(const android::ResTable_map& mapEntry, Value* value);
+  const void* mData;
+  const size_t mDataLen;
 
-    IAaptContext* mContext;
-    ResourceTable* mTable;
+  // The standard value string pool for resource values.
+  android::ResStringPool mValuePool;
 
-    const Source mSource;
+  // The string pool that holds the names of the types defined
+  // in this table.
+  android::ResStringPool mTypePool;
 
-    const void* mData;
-    const size_t mDataLen;
+  // The string pool that holds the names of the entries defined
+  // in this table.
+  android::ResStringPool mKeyPool;
 
-    // The standard value string pool for resource values.
-    android::ResStringPool mValuePool;
-
-    // The string pool that holds the names of the types defined
-    // in this table.
-    android::ResStringPool mTypePool;
-
-    // The string pool that holds the names of the entries defined
-    // in this table.
-    android::ResStringPool mKeyPool;
-
-    // A mapping of resource ID to resource name. When we finish parsing
-    // we use this to convert all resource IDs to symbolic references.
-    std::map<ResourceId, ResourceName> mIdIndex;
+  // A mapping of resource ID to resource name. When we finish parsing
+  // we use this to convert all resource IDs to symbolic references.
+  std::map<ResourceId, ResourceName> mIdIndex;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 namespace android {
 
@@ -121,13 +127,14 @@ namespace android {
  */
 
 inline const ResTable_map* begin(const ResTable_map_entry* map) {
-    return (const ResTable_map*)((const uint8_t*) map + aapt::util::deviceToHost32(map->size));
+  return (const ResTable_map*)((const uint8_t*)map +
+                               aapt::util::deviceToHost32(map->size));
 }
 
 inline const ResTable_map* end(const ResTable_map_entry* map) {
-    return begin(map) + aapt::util::deviceToHost32(map->count);
+  return begin(map) + aapt::util::deviceToHost32(map->count);
 }
 
-} // namespace android
+}  // namespace android
 
-#endif // AAPT_BINARY_RESOURCE_PARSER_H
+#endif  // AAPT_BINARY_RESOURCE_PARSER_H

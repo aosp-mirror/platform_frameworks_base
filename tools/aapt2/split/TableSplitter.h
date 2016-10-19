@@ -29,50 +29,49 @@
 namespace aapt {
 
 struct SplitConstraints {
-    std::set<ConfigDescription> configs;
+  std::set<ConfigDescription> configs;
 };
 
 struct TableSplitterOptions {
-    /**
-     * The preferred density to keep in the table, stripping out all others.
-     */
-    Maybe<uint16_t> preferredDensity;
+  /**
+   * The preferred density to keep in the table, stripping out all others.
+   */
+  Maybe<uint16_t> preferredDensity;
 
-    /**
-     * Configuration filter that determines which resource configuration values end up in
-     * the final table.
-     */
-    IConfigFilter* configFilter = nullptr;
+  /**
+   * Configuration filter that determines which resource configuration values
+   * end up in
+   * the final table.
+   */
+  IConfigFilter* configFilter = nullptr;
 };
 
 class TableSplitter {
-public:
-    TableSplitter(const std::vector<SplitConstraints>& splits,
-                  const TableSplitterOptions& options) :
-            mSplitConstraints(splits), mPreferredDensity(options.preferredDensity),
-            mConfigFilter(options.configFilter) {
-        for (size_t i = 0; i < mSplitConstraints.size(); i++) {
-            mSplits.push_back(util::make_unique<ResourceTable>());
-        }
+ public:
+  TableSplitter(const std::vector<SplitConstraints>& splits,
+                const TableSplitterOptions& options)
+      : mSplitConstraints(splits),
+        mPreferredDensity(options.preferredDensity),
+        mConfigFilter(options.configFilter) {
+    for (size_t i = 0; i < mSplitConstraints.size(); i++) {
+      mSplits.push_back(util::make_unique<ResourceTable>());
     }
+  }
 
-    bool verifySplitConstraints(IAaptContext* context);
+  bool verifySplitConstraints(IAaptContext* context);
 
-    void splitTable(ResourceTable* originalTable);
+  void splitTable(ResourceTable* originalTable);
 
-    std::vector<std::unique_ptr<ResourceTable>>& getSplits() {
-        return mSplits;
-    }
+  std::vector<std::unique_ptr<ResourceTable>>& getSplits() { return mSplits; }
 
-private:
-    std::vector<SplitConstraints> mSplitConstraints;
-    std::vector<std::unique_ptr<ResourceTable>> mSplits;
-    Maybe<uint16_t> mPreferredDensity;
-    IConfigFilter* mConfigFilter;
+ private:
+  std::vector<SplitConstraints> mSplitConstraints;
+  std::vector<std::unique_ptr<ResourceTable>> mSplits;
+  Maybe<uint16_t> mPreferredDensity;
+  IConfigFilter* mConfigFilter;
 
-    DISALLOW_COPY_AND_ASSIGN(TableSplitter);
+  DISALLOW_COPY_AND_ASSIGN(TableSplitter);
 };
-
 }
 
 #endif /* AAPT_SPLIT_TABLESPLITTER_H */

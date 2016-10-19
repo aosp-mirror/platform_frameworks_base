@@ -41,15 +41,18 @@ bool extractResourceName(const StringPiece& str, StringPiece* outPackage,
                          StringPiece* outType, StringPiece* outEntry);
 
 /**
- * Returns true if the string was parsed as a resource name ([*][package:]type/name), with
- * `outResource` set to the parsed resource name and `outPrivate` set to true if a '*' prefix
+ * Returns true if the string was parsed as a resource name
+ * ([*][package:]type/name), with
+ * `outResource` set to the parsed resource name and `outPrivate` set to true if
+ * a '*' prefix
  * was present.
  */
 bool parseResourceName(const StringPiece& str, ResourceNameRef* outResource,
                        bool* outPrivate = nullptr);
 
 /*
- * Returns true if the string was parsed as a reference (@[+][package:]type/name), with
+ * Returns true if the string was parsed as a reference
+ * (@[+][package:]type/name), with
  * `outReference` set to the parsed reference.
  *
  * If '+' was present in the reference, `outCreate` is set to true.
@@ -59,28 +62,34 @@ bool parseReference(const StringPiece& str, ResourceNameRef* outReference,
                     bool* outCreate = nullptr, bool* outPrivate = nullptr);
 
 /*
- * Returns true if the string is in the form of a resource reference (@[+][package:]type/name).
+ * Returns true if the string is in the form of a resource reference
+ * (@[+][package:]type/name).
  */
 bool isReference(const StringPiece& str);
 
 /*
- * Returns true if the string was parsed as an attribute reference (?[package:][type/]name),
+ * Returns true if the string was parsed as an attribute reference
+ * (?[package:][type/]name),
  * with `outReference` set to the parsed reference.
  */
-bool parseAttributeReference(const StringPiece& str, ResourceNameRef* outReference);
+bool parseAttributeReference(const StringPiece& str,
+                             ResourceNameRef* outReference);
 
 /**
- * Returns true if the string is in the form of an attribute reference(?[package:][type/]name).
+ * Returns true if the string is in the form of an attribute
+ * reference(?[package:][type/]name).
  */
 bool isAttributeReference(const StringPiece& str);
 
 /**
  * Convert an android::ResTable::resource_name to an aapt::ResourceName struct.
  */
-Maybe<ResourceName> toResourceName(const android::ResTable::resource_name& name);
+Maybe<ResourceName> toResourceName(
+    const android::ResTable::resource_name& name);
 
 /**
- * Returns a boolean value if the string is equal to TRUE, true, True, FALSE, false, or False.
+ * Returns a boolean value if the string is equal to TRUE, true, True, FALSE,
+ * false, or False.
  */
 Maybe<bool> parseBool(const StringPiece& str);
 
@@ -100,18 +109,22 @@ Maybe<ResourceId> parseResourceId(const StringPiece& str);
 Maybe<int> parseSdkVersion(const StringPiece& str);
 
 /*
- * Returns a Reference, or None Maybe instance if the string `str` was parsed as a
+ * Returns a Reference, or None Maybe instance if the string `str` was parsed as
+ * a
  * valid reference to a style.
- * The format for a style parent is slightly more flexible than a normal reference:
+ * The format for a style parent is slightly more flexible than a normal
+ * reference:
  *
  * @[package:]style/<entry> or
  * ?[package:]style/<entry> or
  * <package>:[style/]<entry>
  */
-Maybe<Reference> parseStyleParentReference(const StringPiece& str, std::string* outError);
+Maybe<Reference> parseStyleParentReference(const StringPiece& str,
+                                           std::string* outError);
 
 /*
- * Returns a Reference if the string `str` was parsed as a valid XML attribute name.
+ * Returns a Reference if the string `str` was parsed as a valid XML attribute
+ * name.
  * The valid format for an XML attribute name is:
  *
  * package:entry
@@ -119,14 +132,18 @@ Maybe<Reference> parseStyleParentReference(const StringPiece& str, std::string* 
 Maybe<Reference> parseXmlAttributeName(const StringPiece& str);
 
 /*
- * Returns a Reference object if the string was parsed as a resource or attribute reference,
- * ( @[+][package:]type/name | ?[package:]type/name ) setting outCreate to true if
+ * Returns a Reference object if the string was parsed as a resource or
+ * attribute reference,
+ * ( @[+][package:]type/name | ?[package:]type/name ) setting outCreate to true
+ * if
  * the '+' was present in the string.
  */
-std::unique_ptr<Reference> tryParseReference(const StringPiece& str, bool* outCreate = nullptr);
+std::unique_ptr<Reference> tryParseReference(const StringPiece& str,
+                                             bool* outCreate = nullptr);
 
 /*
- * Returns a BinaryPrimitve object representing @null or @empty if the string was parsed
+ * Returns a BinaryPrimitve object representing @null or @empty if the string
+ * was parsed
  * as one.
  */
 std::unique_ptr<BinaryPrimitive> tryParseNullOrEmpty(const StringPiece& str);
@@ -138,13 +155,15 @@ std::unique_ptr<BinaryPrimitive> tryParseNullOrEmpty(const StringPiece& str);
 std::unique_ptr<BinaryPrimitive> tryParseColor(const StringPiece& str);
 
 /*
- * Returns a BinaryPrimitve object representing a boolean if the string was parsed
+ * Returns a BinaryPrimitve object representing a boolean if the string was
+ * parsed
  * as one.
  */
 std::unique_ptr<BinaryPrimitive> tryParseBool(const StringPiece& str);
 
 /*
- * Returns a BinaryPrimitve object representing an integer if the string was parsed
+ * Returns a BinaryPrimitve object representing an integer if the string was
+ * parsed
  * as one.
  */
 std::unique_ptr<BinaryPrimitive> tryParseInt(const StringPiece& str);
@@ -156,45 +175,51 @@ std::unique_ptr<BinaryPrimitive> tryParseInt(const StringPiece& str);
 std::unique_ptr<BinaryPrimitive> tryParseFloat(const StringPiece& str);
 
 /*
- * Returns a BinaryPrimitve object representing an enum symbol if the string was parsed
+ * Returns a BinaryPrimitve object representing an enum symbol if the string was
+ * parsed
  * as one.
  */
 std::unique_ptr<BinaryPrimitive> tryParseEnumSymbol(const Attribute* enumAttr,
                                                     const StringPiece& str);
 
 /*
- * Returns a BinaryPrimitve object representing a flag symbol if the string was parsed
+ * Returns a BinaryPrimitve object representing a flag symbol if the string was
+ * parsed
  * as one.
  */
 std::unique_ptr<BinaryPrimitive> tryParseFlagSymbol(const Attribute* enumAttr,
                                                     const StringPiece& str);
 /*
- * Try to convert a string to an Item for the given attribute. The attribute will
+ * Try to convert a string to an Item for the given attribute. The attribute
+ * will
  * restrict what values the string can be converted to.
  * The callback function onCreateReference is called when the parsed item is a
  * reference to an ID that must be created (@+id/foo).
  */
 std::unique_ptr<Item> tryParseItemForAttribute(
-        const StringPiece& value, const Attribute* attr,
-        const std::function<void(const ResourceName&)>& onCreateReference = {});
+    const StringPiece& value, const Attribute* attr,
+    const std::function<void(const ResourceName&)>& onCreateReference = {});
 
 std::unique_ptr<Item> tryParseItemForAttribute(
-        const StringPiece& value, uint32_t typeMask,
-        const std::function<void(const ResourceName&)>& onCreateReference = {});
+    const StringPiece& value, uint32_t typeMask,
+    const std::function<void(const ResourceName&)>& onCreateReference = {});
 
 uint32_t androidTypeToAttributeTypeMask(uint16_t type);
 
 /**
- * Returns a string path suitable for use within an APK. The path will look like:
+ * Returns a string path suitable for use within an APK. The path will look
+ * like:
  *
  * res/type[-config]/<name>.<ext>
  *
- * Then name may be mangled if a NameMangler is supplied (can be nullptr) and the package
+ * Then name may be mangled if a NameMangler is supplied (can be nullptr) and
+ * the package
  * requires mangling.
  */
-std::string buildResourceFileName(const ResourceFile& resFile, const NameMangler* mangler);
+std::string buildResourceFileName(const ResourceFile& resFile,
+                                  const NameMangler* mangler);
 
-} // namespace ResourceUtils
-} // namespace aapt
+}  // namespace ResourceUtils
+}  // namespace aapt
 
 #endif /* AAPT_RESOURCEUTILS_H */
