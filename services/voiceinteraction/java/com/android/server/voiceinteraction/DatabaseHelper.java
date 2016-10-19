@@ -27,10 +27,11 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Helper to manage the database of the sound models that have been registered on the device.
@@ -123,7 +124,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS " + SoundModelContract.TABLE);
             onCreate(db);
             for (SoundModelRecord record : old_records) {
-                if (!record.violatesV6PrimaryKeyConstraint(old_records)) {
+                if (record.ifViolatesV6PrimaryKeyIsFirstOfAnyDuplicates(old_records)) {
                     try {
                         long return_value = record.writeToDatabase(6, db);
                         if (return_value == -1) {
@@ -351,19 +352,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             users = c.getString(c.getColumnIndex(SoundModelContract.KEY_USERS));
         }
 
-        // Check to see if this record conflicts with some other record in the list of records.
-        public boolean violatesV6PrimaryKeyConstraint(List<SoundModelRecord> records) {
+        private boolean V6PrimaryKeyMatches(SoundModelRecord record) {
+          return keyphraseId == record.keyphraseId && stringComparisonHelper(locale, record.locale)
+              && stringComparisonHelper(users, record.users);
+        }
+
+        // Returns true if this record is a) the only record with the same V6 primary key, or b) the
+        // first record in the list of all records that have the same primary key and equal data.
+        // It will return false if a) there are any records that have the same primary key and
+        // different data, or b) there is a previous record in the list that has the same primary
+        // key and data.
+        // Note that 'this' object must be inside the list.
+        public boolean ifViolatesV6PrimaryKeyIsFirstOfAnyDuplicates(
+                List<SoundModelRecord> records) {
+            // First pass - check to see if all the records that have the same primary key have
+            // duplicated data.
             for (SoundModelRecord record : records) {
                 if (this == record) {
                     continue;
                 }
-                if (keyphraseId == record.keyphraseId
-                        && stringComparisonHelper(locale, record.locale)
-                        && stringComparisonHelper(users, record.users)) {
-                    return true;
+                // If we have different/missing data with the same primary key, then we should drop
+                // everything.
+                if (this.V6PrimaryKeyMatches(record) && !Arrays.equals(data, record.data)) {
+                    return false;
                 }
             }
-            return false;
+
+            // We only want to return true for the first duplicated model.
+            for (SoundModelRecord record : records) {
+                if (this.V6PrimaryKeyMatches(record)) {
+                    return this == record;
+                }
+            }
+            return true;
         }
 
         public long writeToDatabase(int version, SQLiteDatabase db) {
