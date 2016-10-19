@@ -58,26 +58,25 @@ import java.io.PrintWriter;
  * This class represents an active client session.  There is generally one
  * Session object per process that is interacting with the window manager.
  */
-final class Session extends IWindowSession.Stub
+// Needs to be public and not final so we can mock during tests...sucks I know :(
+public class Session extends IWindowSession.Stub
         implements IBinder.DeathRecipient {
     final WindowManagerService mService;
     final IWindowSessionCallback mCallback;
     final IInputMethodClient mClient;
-    final IInputContext mInputContext;
     final int mUid;
     final int mPid;
-    final String mStringName;
+    private final String mStringName;
     SurfaceSession mSurfaceSession;
-    int mNumWindow = 0;
-    boolean mClientDead = false;
-    float mLastReportedAnimatorScale;
+    private int mNumWindow = 0;
+    private boolean mClientDead = false;
+    private float mLastReportedAnimatorScale;
 
     public Session(WindowManagerService service, IWindowSessionCallback callback,
             IInputMethodClient client, IInputContext inputContext) {
         mService = service;
         mCallback = callback;
         mClient = client;
-        mInputContext = inputContext;
         mUid = Binder.getCallingUid();
         mPid = Binder.getCallingPid();
         mLastReportedAnimatorScale = service.getCurrentAnimatorScale();

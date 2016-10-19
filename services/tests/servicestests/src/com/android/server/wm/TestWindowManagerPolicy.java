@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import com.android.internal.policy.IShortcutService;
+import com.android.server.input.InputManagerService;
 
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
@@ -79,7 +80,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STA
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
-public class TestWindowManagerPolicy implements WindowManagerPolicy {
+import static org.mockito.Mockito.mock;
+
+class TestWindowManagerPolicy implements WindowManagerPolicy {
     private static final String TAG = "TestWindowManagerPolicy";
 
     private static WindowManagerService sWm = null;
@@ -88,8 +91,8 @@ public class TestWindowManagerPolicy implements WindowManagerPolicy {
         if (sWm == null) {
             // We only want to do this once for the test process as we don't want WM to try to
             // register a bunch of local services again.
-            sWm = WindowManagerService.main(
-                    context, null, true, false, false, new TestWindowManagerPolicy());
+            sWm = WindowManagerService.main(context, mock(InputManagerService.class), true, false,
+                    false, new TestWindowManagerPolicy());
         }
         return sWm;
     }

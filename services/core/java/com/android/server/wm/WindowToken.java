@@ -427,11 +427,13 @@ class WindowToken extends WindowContainer<WindowState> {
 
     @Override
     void removeImmediately() {
-        super.removeImmediately();
         if (mDisplayContent != null) {
             mDisplayContent.removeWindowToken(token);
             mService.mRoot.removeWindowTokenIfPossible(token);
         }
+        // Needs to occur after the token is removed from the display above to avoid attempt at
+        // duplicate removal of this window container from it's parent.
+        super.removeImmediately();
     }
 
     void onDisplayChanged(DisplayContent dc) {
