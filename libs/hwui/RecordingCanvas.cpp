@@ -36,7 +36,7 @@ RecordingCanvas::~RecordingCanvas() {
             "Destroyed a RecordingCanvas during a record!");
 }
 
-void RecordingCanvas::resetRecording(int width, int height) {
+void RecordingCanvas::resetRecording(int width, int height, RenderNode* node) {
     LOG_ALWAYS_FATAL_IF(mDisplayList,
             "prepareDirty called a second time during a recording!");
     mDisplayList = new DisplayList();

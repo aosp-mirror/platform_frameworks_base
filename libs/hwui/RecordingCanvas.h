@@ -50,7 +50,7 @@ public:
     RecordingCanvas(size_t width, size_t height);
     virtual ~RecordingCanvas();
 
-    virtual void resetRecording(int width, int height) override;
+    virtual void resetRecording(int width, int height, RenderNode* node = nullptr) override;
     virtual WARN_UNUSED_RESULT DisplayList* finishRecording() override;
 // ----------------------------------------------------------------------------
 // MISC HWUI OPERATIONS - TODO: CATEGORIZE
