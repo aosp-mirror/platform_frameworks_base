@@ -193,6 +193,7 @@ final public class IpConnectivityMetrics extends SystemService {
         static final String CMD_FLUSH   = "flush";
         static final String CMD_LIST    = "list";
         static final String CMD_STATS   = "stats";
+        static final String CMD_DUMPSYS = "-a"; // dumpsys.cpp dumps services with "-a" as arguments
         static final String CMD_DEFAULT = CMD_STATS;
 
         @Override
@@ -210,6 +211,8 @@ final public class IpConnectivityMetrics extends SystemService {
                 case CMD_FLUSH:
                     cmdFlush(fd, pw, args);
                     return;
+                case CMD_DUMPSYS:
+                    // Fallthrough to CMD_LIST when dumpsys.cpp dumps services states (bug reports)
                 case CMD_LIST:
                     cmdList(fd, pw, args);
                     return;
