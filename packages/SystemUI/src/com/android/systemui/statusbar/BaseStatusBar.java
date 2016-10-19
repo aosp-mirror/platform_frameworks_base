@@ -2196,10 +2196,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         int visibleNotifications = 0;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
-        int maxNotifications = 0;
+        int maxNotifications = -1;
         if (onKeyguard) {
             maxNotifications = getMaxKeyguardNotifications(true /* recompute */);
         }
+        mStackScroller.setMaxDisplayedNotifications(maxNotifications);
         for (int i = 0; i < N; i++) {
             NotificationData.Entry entry = activeNotifications.get(i);
             boolean childNotification = mGroupManager.isChildInGroupWithSummary(entry.notification);
@@ -2218,8 +2219,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
             if (suppressedSummary
                     || (isLockscreenPublicMode(userId) && !mShowLockscreenNotifications)
-                    || (onKeyguard && !childWithVisibleSummary
-                            && (visibleNotifications >= maxNotifications || !showOnKeyguard))) {
+                    || (onKeyguard && !showOnKeyguard)) {
                 entry.row.setVisibility(View.GONE);
             } else {
                 boolean wasGone = entry.row.getVisibility() == View.GONE;

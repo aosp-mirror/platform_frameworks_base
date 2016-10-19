@@ -112,10 +112,7 @@ public class NotificationShelf extends ActivatableNotificationView {
     public void updateState(StackScrollState resultState,
             StackScrollAlgorithm.StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
-        int shelfIndex = ambientState.getShelfIndex();
-        shelfIndex = shelfIndex == -1
-                ? algorithmState.visibleChildren.size() - 1
-                : shelfIndex - 1;
+        int shelfIndex = ambientState.getShelfIndex() - 1;
         if (shelfIndex != -1) {
             float maxShelfEnd = ambientState.getInnerHeight() + ambientState.getTopPadding()
                     + ambientState.getStackTranslation();
@@ -134,7 +131,7 @@ public class NotificationShelf extends ActivatableNotificationView {
             mShelfState.isBottomClipped = false;
             mShelfState.hideSensitive = false;
 
-            mShelfState.resetState();
+            mShelfState.resetIcons();
             float numIconsInShelf = 0.0f;
             float viewStart;
             float maxShelfStart = maxShelfEnd - mShelfState.height;
@@ -240,6 +237,12 @@ public class NotificationShelf extends ActivatableNotificationView {
     private void setHideBackground(boolean hideBackground) {
         mHideBackground = hideBackground;
         updateBackground();
+        updateOutline();
+    }
+
+    @Override
+    protected boolean needsOutline() {
+        return !mHideBackground && super.needsOutline();
     }
 
     @Override
@@ -258,7 +261,7 @@ public class NotificationShelf extends ActivatableNotificationView {
             setHideBackground(hideBackground);
         }
 
-        public void resetState() {
+        public void resetIcons() {
             mNotificationIconContainer.resetViewStates(iconStates);
         }
     }

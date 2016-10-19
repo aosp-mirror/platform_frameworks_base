@@ -129,7 +129,7 @@ public class StackScrollAlgorithm {
 
             // The speed bump can also be gone, so equality needs to be taken when comparing
             // indices.
-            childViewState.belowShelf = shelfIndex != -1 && i >= shelfIndex;
+            childViewState.belowShelf = i >= shelfIndex;
         }
         NotificationShelf shelf = ambientState.getShelf();
         shelf.updateState(resultState, algorithmState, ambientState);
@@ -347,8 +347,7 @@ public class StackScrollAlgorithm {
         if (i == 0) {
             updateFirstChildHeight(child, childViewState, childHeight, ambientState);
         }
-        int shelfIndex = ambientState.getShelfIndex();
-        boolean belowShelf = shelfIndex != -1 && i >= shelfIndex;
+        boolean belowShelf = i >= ambientState.getShelfIndex();
 
         // The y position after this element
         float nextYPosition = currentYPosition + childHeight +

@@ -2005,6 +2005,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             currentIndex++;
         }
+        if (shelfIndex == -1) {
+            shelfIndex = currentIndex;
+        }
         mStackScroller.updateShelfIndex(shelfIndex);
     }
 

@@ -354,6 +354,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mForwardScrollable;
     private boolean mBackwardScrollable;
     private NotificationShelf mShelf;
+    private int mMaxDisplayedNotifications = -1;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -533,8 +534,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void updateShelfIndex(int newIndex) {
         mAmbientState.setShelfIndex(newIndex);
-        int iconIndex = newIndex == -1 ? getChildCount() - 3 : newIndex;
-        changeViewPosition(mShelf, iconIndex);
+        changeViewPosition(mShelf, newIndex);
     }
 
     public void setChildLocationsChangedListener(OnChildLocationsChangedListener listener) {
@@ -1847,10 +1847,17 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void updateContentHeight() {
         int height = 0;
         float previousIncreasedAmount = 0.0f;
+        int numShownItems = 0;
+        boolean finish = false;
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView expandableView = (ExpandableView) getChildAt(i);
             if (expandableView.getVisibility() != View.GONE
                     && !expandableView.hasNoContentHeight()) {
+                if (mMaxDisplayedNotifications != -1
+                        && numShownItems >= mMaxDisplayedNotifications) {
+                    expandableView = mShelf;
+                    finish = true;
+                }
                 float increasedPaddingAmount = expandableView.getIncreasedPaddingAmount();
                 if (height != 0) {
                     height += (int) NotificationUtils.interpolate(
@@ -1860,6 +1867,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
                 previousIncreasedAmount = increasedPaddingAmount;
                 height += expandableView.getIntrinsicHeight();
+                numShownItems++;
+                if (finish) {
+                    break;
+                }
             }
         }
         mContentHeight = height + mTopPadding;
@@ -3083,14 +3094,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getEmptyBottomMargin() {
-        int emptyMargin = mMaxLayoutHeight - mContentHeight - mBottomStackPeekSize
-                - mBottomStackSlowDownHeight;
+        int emptyMargin = mMaxLayoutHeight - mContentHeight;
         return Math.max(emptyMargin, 0);
-    }
-
-    public float getKeyguardBottomStackSize() {
-        return mBottomStackPeekSize + getResources().getDimensionPixelSize(
-                R.dimen.bottom_stack_slow_down_length);
     }
 
     public void onExpansionStarted() {
@@ -3756,7 +3761,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // fall through
             case android.R.id.accessibilityActionScrollUp:
                 final int viewportHeight = getHeight() - mPaddingBottom - mTopPadding - mPaddingTop
-                        - mBottomStackPeekSize - mBottomStackSlowDownHeight;
+                        - mShelf.getIntrinsicHeight();
                 final int targetScrollY = Math.max(0,
                         Math.min(mOwnScrollY + direction * viewportHeight, getScrollRange()));
                 if (targetScrollY != mOwnScrollY) {
@@ -3923,6 +3928,14 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public NotificationShelf getNotificationShelf() {
         return mShelf;
+    }
+
+    public void setMaxDisplayedNotifications(int maxDisplayedNotifications) {
+        if (mMaxDisplayedNotifications != maxDisplayedNotifications) {
+            mMaxDisplayedNotifications = maxDisplayedNotifications;
+            updateContentHeight();
+            notifyHeightChangeListener(mShelf);
+        }
     }
 
     /**
