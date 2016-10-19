@@ -2961,4 +2961,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     public boolean isRtl() {
         return mMergedConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
     }
+
+    public boolean isRemovedOrHidden() {
+        return mPermanentlyHidden || mAnimatingExit
+                || mRemoveOnExit || mWindowRemovalAllowed
+                || mViewVisibility == View.GONE;
+    }
 }
