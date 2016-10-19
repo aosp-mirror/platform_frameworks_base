@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.Context;
+import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -28,12 +29,14 @@ import android.support.test.runner.AndroidJUnit4;
 import android.view.IWindow;
 import android.view.WindowManager;
 
+import static android.app.AppOpsManager.OP_NONE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests for the {@link WindowState} class.
@@ -49,6 +52,7 @@ public class WindowTokenTests {
 
     private WindowManagerService mWm = null;
     private final IWindow mIWindow = new TestIWindow();
+    private final Session mMockSession = mock(Session.class);
 
     @Before
     public void setUp() throws Exception {
@@ -83,6 +87,28 @@ public class WindowTokenTests {
         assertFalse(token.hasWindow(window12));
         assertTrue(token.hasWindow(window2));
         assertTrue(token.hasWindow(window3));
+    }
+
+    @Test
+    public void testChildRemoval() throws Exception {
+        final TestWindowToken token = new TestWindowToken();
+        final DisplayContent dc = mWm.getDefaultDisplayContentLocked();
+
+        assertEquals(token, dc.getWindowToken(token.token));
+
+        final WindowState window1 = createWindow(null, TYPE_APPLICATION, token);
+        final WindowState window2 = createWindow(null, TYPE_APPLICATION, token);
+        token.addWindow(window1);
+        token.addWindow(window2);
+
+        window2.removeImmediately();
+        // The token should still be mapped in the display content since it still has a child.
+        assertEquals(token, dc.getWindowToken(token.token));
+
+        window1.removeImmediately();
+        // The token should have been removed from the display content since it no longer has a
+        // child.
+        assertEquals(null, dc.getWindowToken(token.token));
     }
 
     @Test
@@ -157,14 +183,14 @@ public class WindowTokenTests {
     private WindowState createWindow(WindowState parent, int type, WindowToken token) {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
 
-        return new WindowState(mWm, null, mIWindow, token, parent, 0, 0, attrs, 0, 0);
+        return new WindowState(mWm, mMockSession, mIWindow, token, parent, OP_NONE, 0, attrs, 0, 0);
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowToken} class */
     private class TestWindowToken extends WindowToken {
 
         TestWindowToken() {
-            super(mWm, null, 0, false, mWm.getDefaultDisplayContentLocked());
+            super(mWm, mock(IBinder.class), 0, false, mWm.getDefaultDisplayContentLocked());
         }
 
         int getWindowsCount() {
