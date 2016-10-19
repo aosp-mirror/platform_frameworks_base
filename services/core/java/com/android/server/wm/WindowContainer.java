@@ -71,10 +71,14 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
 
     final protected void setParent(WindowContainer parent) {
         mParent = parent;
-        // Update full configuration of this container and all its children.
-        onConfigurationChanged(mParent != null ? mParent.mFullConfiguration : Configuration.EMPTY);
-        // Update merged override configuration of this container and all its children.
-        onMergedOverrideConfigurationChanged();
+        // Removing parent usually means that we've detached this entity to destroy it or to attach
+        // to another parent. In both cases we don't need to update the configuration now.
+        if (mParent != null) {
+            // Update full configuration of this container and all its children.
+            onConfigurationChanged(mParent.mFullConfiguration);
+            // Update merged override configuration of this container and all its children.
+            onMergedOverrideConfigurationChanged();
+        }
     }
 
     // Temp. holders for a chain of containers we are currently processing.
@@ -95,22 +99,25 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
                     + " is already a child of container=" + child.getParent().getName()
                     + " can't add to container=" + getName());
         }
-        child.setParent(this);
 
-        if (mChildren.isEmpty() || comparator == null) {
-            mChildren.add(child);
-            return;
-        }
-
-        final int count = mChildren.size();
-        for (int i = 0; i < count; i++) {
-            if (comparator.compare(child, mChildren.get(i)) < 0) {
-                mChildren.add(i, child);
-                return;
+        int positionToAdd = -1;
+        if (comparator != null) {
+            final int count = mChildren.size();
+            for (int i = 0; i < count; i++) {
+                if (comparator.compare(child, mChildren.get(i)) < 0) {
+                    positionToAdd = i;
+                    break;
+                }
             }
         }
 
-        mChildren.add(child);
+        if (positionToAdd == -1) {
+            mChildren.add(child);
+        } else {
+            mChildren.add(positionToAdd, child);
+        }
+        // Set the parent after we've actually added a child in case a subclass depends on this.
+        child.setParent(this);
     }
 
     /** Adds the input window container has a child of this container at the input index. */
@@ -121,8 +128,9 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
                     + " is already a child of container=" + child.getParent().getName()
                     + " can't add to container=" + getName());
         }
-        child.setParent(this);
         mChildren.add(index, child);
+        // Set the parent after we've actually added a child in case a subclass depends on this.
+        child.setParent(this);
     }
 
     /**
