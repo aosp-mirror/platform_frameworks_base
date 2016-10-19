@@ -21,6 +21,7 @@
 #include <Matrix.h>
 #include <Rect.h>
 #include <RenderNode.h>
+#include <hwui/PixelRef.h>
 #include <renderstate/RenderState.h>
 #include <renderthread/RenderThread.h>
 #include <Snapshot.h>
@@ -128,7 +129,7 @@ public:
         SkImageInfo info = SkImageInfo::Make(width, height,
                 colorType, kPremul_SkAlphaType, colorSpace);
         bitmap.setInfo(info);
-        bitmap.allocPixels(info);
+        PixelRef::allocateHeapPixelRef(&bitmap, nullptr);
         return bitmap;
     }
 

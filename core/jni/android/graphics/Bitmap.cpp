@@ -548,7 +548,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     bitmap.setInfo(SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType,
             GraphicsJNI::defaultColorSpace()));
 
-    PixelRef* nativeBitmap = GraphicsJNI::allocateHeapPixelRef(&bitmap, NULL);
+    sk_sp<PixelRef> nativeBitmap = PixelRef::allocateHeapPixelRef(&bitmap, NULL);
     if (!nativeBitmap) {
         return NULL;
     }
@@ -558,8 +558,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
                 0, 0, width, height, bitmap);
     }
 
-    return createBitmap(env, nativeBitmap,
-            getPremulBitmapCreateFlags(isMutable));
+    return createBitmap(env, nativeBitmap.release(), getPremulBitmapCreateFlags(isMutable));
 }
 
 static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
@@ -832,7 +831,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     }
 
     // Map the bitmap in place from the ashmem region if possible otherwise copy.
-    PixelRef* nativeBitmap;
+    sk_sp<PixelRef> nativeBitmap;
     if (blob.fd() >= 0 && (blob.isMutable() || !isMutable) && (size >= ASHMEM_BITMAP_MIN_SIZE)) {
 #if DEBUG_PARCEL
         ALOGD("Bitmap.createFromParcel: mapped contents of %s bitmap from %s blob "
@@ -853,8 +852,8 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         }
 
         // Map the pixels in place and take ownership of the ashmem region.
-        nativeBitmap = GraphicsJNI::mapAshmemPixelRef(env, bitmap.get(),
-                ctable, dupFd, const_cast<void*>(blob.data()), size, !isMutable);
+        nativeBitmap = sk_sp<PixelRef>(GraphicsJNI::mapAshmemPixelRef(env, bitmap.get(),
+                ctable, dupFd, const_cast<void*>(blob.data()), size, !isMutable));
         SkSafeUnref(ctable);
         if (!nativeBitmap) {
             close(dupFd);
@@ -880,7 +879,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 #endif
 
         // Copy the pixels into a new buffer.
-        nativeBitmap = GraphicsJNI::allocateHeapPixelRef(bitmap.get(), ctable);
+        nativeBitmap = PixelRef::allocateHeapPixelRef(bitmap.get(), ctable);
         SkSafeUnref(ctable);
         if (!nativeBitmap) {
             blob.release();
@@ -895,7 +894,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         blob.release();
     }
 
-    return createBitmap(env, nativeBitmap,
+    return createBitmap(env, nativeBitmap.release(),
             getPremulBitmapCreateFlags(isMutable), NULL, NULL, density);
 }
 

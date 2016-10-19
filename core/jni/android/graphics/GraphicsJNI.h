@@ -72,11 +72,6 @@ public:
 
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
-    static android::PixelRef* allocateHeapPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
-
-    static android::PixelRef* allocateAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
-            SkColorTable* ctable);
-
     static android::PixelRef* mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
             SkColorTable* ctable, int fd, void* addr, size_t size, bool readOnly);
 

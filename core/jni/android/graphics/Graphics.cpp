@@ -399,159 +399,7 @@ jobject GraphicsJNI::createRegion(JNIEnv* env, SkRegion* region)
     return obj;
 }
 
-static JNIEnv* vm2env(JavaVM* vm)
-{
-    JNIEnv* env = NULL;
-    if (vm->GetEnv((void**)&env, JNI_VERSION_1_4) != JNI_OK || NULL == env)
-    {
-        SkDebugf("------- [%p] vm->GetEnv() failed\n", vm);
-        sk_throw();
-    }
-    return env;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
-
-static bool computeAllocationSize(const SkBitmap& bitmap, size_t* size) {
-    int32_t rowBytes32 = SkToS32(bitmap.rowBytes());
-    int64_t bigSize = (int64_t)bitmap.height() * rowBytes32;
-    if (rowBytes32 < 0 || !sk_64_isS32(bigSize)) {
-        return false; // allocation will be too large
-    }
-
-    *size = sk_64_asS32(bigSize);
-    return true;
-}
-
-android::PixelRef* GraphicsJNI::allocateHeapPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
-    const SkImageInfo& info = bitmap->info();
-    if (info.colorType() == kUnknown_SkColorType) {
-        LOG_ALWAYS_FATAL("unknown bitmap configuration");
-        return nullptr;
-    }
-
-    size_t size;
-    if (!computeAllocationSize(*bitmap, &size)) {
-        return nullptr;
-    }
-
-    // we must respect the rowBytes value already set on the bitmap instead of
-    // attempting to compute our own.
-    const size_t rowBytes = bitmap->rowBytes();
-
-    void* addr = calloc(size, 1);
-    if (!addr) {
-        return nullptr;
-    }
-
-    auto wrapper = new android::PixelRef(addr, size, info, rowBytes, ctable);
-    wrapper->getSkBitmap(bitmap);
-    // since we're already allocated, we lockPixels right away
-    // HeapAllocator behaves this way too
-    bitmap->lockPixels();
-
-    return wrapper;
-}
-
-struct AndroidPixelRefContext {
-    int32_t stableID;
-};
-
-static void allocatePixelsReleaseProc(void* ptr, void* ctx) {
-    AndroidPixelRefContext* context = (AndroidPixelRefContext*)ctx;
-    if (android::uirenderer::Caches::hasInstance()) {
-         android::uirenderer::Caches::getInstance().textureCache.releaseTexture(context->stableID);
-    }
-
-    sk_free(ptr);
-    delete context;
-}
-
-bool GraphicsJNI::allocatePixels(JNIEnv* env, SkBitmap* bitmap, SkColorTable* ctable) {
-    const SkImageInfo& info = bitmap->info();
-    if (info.colorType() == kUnknown_SkColorType) {
-        doThrowIAE(env, "unknown bitmap configuration");
-        return NULL;
-    }
-
-    size_t size;
-    if (!computeAllocationSize(*bitmap, &size)) {
-        return false;
-    }
-
-    // we must respect the rowBytes value already set on the bitmap instead of
-    // attempting to compute our own.
-    const size_t rowBytes = bitmap->rowBytes();
-
-    void* addr = sk_malloc_flags(size, 0);
-    if (NULL == addr) {
-        return false;
-    }
-
-    AndroidPixelRefContext* context = new AndroidPixelRefContext;
-    SkMallocPixelRef* pr = SkMallocPixelRef::NewWithProc(info, rowBytes, ctable, addr,
-                                                         &allocatePixelsReleaseProc, context);
-    if (!pr) {
-        delete context;
-        return false;
-    }
-
-    // set the stableID in the context so that it can be used later in
-    // allocatePixelsReleaseProc to remove the texture from the cache.
-    context->stableID = pr->getStableID();
-
-    bitmap->setPixelRef(pr)->unref();
-    // since we're already allocated, we can lockPixels right away
-    bitmap->lockPixels();
-
-    return true;
-}
-
-android::PixelRef* GraphicsJNI::allocateAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
-                                                     SkColorTable* ctable) {
-    int fd;
-
-    const SkImageInfo& info = bitmap->info();
-    if (info.colorType() == kUnknown_SkColorType) {
-        doThrowIAE(env, "unknown bitmap configuration");
-        return nullptr;
-    }
-
-    size_t size;
-    if (!computeAllocationSize(*bitmap, &size)) {
-        return nullptr;
-    }
-
-    // we must respect the rowBytes value already set on the bitmap instead of
-    // attempting to compute our own.
-    const size_t rowBytes = bitmap->rowBytes();
-
-    // Create new ashmem region with read/write priv
-    fd = ashmem_create_region("bitmap", size);
-    if (fd < 0) {
-        return nullptr;
-    }
-
-    void* addr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (addr == MAP_FAILED) {
-        close(fd);
-        return nullptr;
-    }
-
-    if (ashmem_set_prot_region(fd, PROT_READ) < 0) {
-        munmap(addr, size);
-        close(fd);
-        return nullptr;
-    }
-
-    auto wrapper = new android::PixelRef(addr, fd, size, info, rowBytes, ctable);
-    wrapper->getSkBitmap(bitmap);
-    // since we're already allocated, we lockPixels right away
-    // HeapAllocator behaves this way too
-    bitmap->lockPixels();
-
-    return wrapper;
-}
 
 android::PixelRef* GraphicsJNI::mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
         SkColorTable* ctable, int fd, void* addr, size_t size, bool readOnly) {
@@ -597,7 +445,7 @@ sk_sp<SkColorSpace> GraphicsJNI::defaultColorSpace() {
 
 ///////////////////////////////////////////////////////////////////////////////
 bool HeapAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
-    mStorage.reset(GraphicsJNI::allocateHeapPixelRef(bitmap, ctable));
+    mStorage = android::PixelRef::allocateHeapPixelRef(bitmap, ctable);
     return !!mStorage;
 }
 
@@ -702,8 +550,7 @@ AshmemPixelAllocator::AshmemPixelAllocator(JNIEnv *env) {
 }
 
 bool AshmemPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
-    JNIEnv* env = vm2env(mJavaVM);
-    mStorage.reset(GraphicsJNI::allocateAshmemPixelRef(env, bitmap, ctable));
+    mStorage = android::PixelRef::allocateAshmemPixelRef(bitmap, ctable);
     return !!mStorage;
 }
 
