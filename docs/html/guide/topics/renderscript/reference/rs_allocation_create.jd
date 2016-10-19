@@ -1,0 +1,1060 @@
+page.title=RenderScript Allocation Creation Functions
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> The functions below are used to create allocations from within a script.
+These functions can be called directly or indirectly from an invokable
+function. It is an error if any control flow can result in calling these functions
+from a RenderScript kernel function.
+</p>
+<h2>Summary</h2>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_create.html#android_rs:rsCreateAllocation'>rsCreateAllocation</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Creates an <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_allocation>rs_allocation</a> object of given <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_type>rs_type</a>
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_create.html#android_rs:rsCreateElement'>rsCreateElement</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Creates an <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_element>rs_element</a> object of the specified data type
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_create.html#android_rs:rsCreatePixelElement'>rsCreatePixelElement</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Creates an <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_element>rs_element</a> object of the specified data type and data kind
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_create.html#android_rs:rsCreateType'>rsCreateType</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Creates an <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_type>rs_type</a> object with the specified <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_element>rs_element</a> and shape attributes
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_create.html#android_rs:rsCreateVectorElement'>rsCreateVectorElement</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Creates an <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_element>rs_element</a> object of the specified data type and vector width
+    </td>
+  </tr>
+</tbody></table>
+<h2>Functions</h2>
+<a name='android_rs:rsCreateAllocation'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsCreateAllocation</span>
+    <span class='normal'>: Creates an <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_allocation>rs_allocation</a> object of given <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_type>rs_type</a></span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation(<a href='rs_object_types.html#android_rs:rs_type'>rs_type</a> type);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation(<a href='rs_object_types.html#android_rs:rs_type'>rs_type</a> type, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> usage);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_char(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_char(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_char(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_char2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_char2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_char2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_char3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_char3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_char3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_char4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_char4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_char4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_double(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_double(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_double(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_double2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_double2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_double2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_double3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_double3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_double3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_double4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_double4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_double4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_float(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_float(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_float(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_float2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_float2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_float2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_float3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_float3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_float3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_float4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_float4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_float4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_half(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_half(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_half(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_half2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_half2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_half2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_half3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_half3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_half3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_half4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_half4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_half4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_int(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_int(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_int(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_int2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_int2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_int2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_int3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_int3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_int3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_int4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_int4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_int4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_long(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_long(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_long(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_long2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_long2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_long2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_long3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_long3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_long3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_long4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_long4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_long4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_short(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_short(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_short(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_short2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_short2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_short2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_short3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_short3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_short3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_short4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_short4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_short4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uchar(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uchar(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uchar(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uchar2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uchar2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uchar2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uchar3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uchar3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uchar3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uchar4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uchar4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uchar4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uint(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uint(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uint(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uint2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uint2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uint2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uint3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uint3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uint3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uint4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uint4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_uint4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ulong(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ulong(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ulong(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ulong2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ulong2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ulong2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ulong3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ulong3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ulong3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ulong4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ulong4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ulong4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ushort(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ushort(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ushort(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ushort2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ushort2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ushort2(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ushort3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ushort3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ushort3(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ushort4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ushort4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsCreateAllocation_ushort4(<a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>type</th><td>Type of the allocation</td></tr>
+    <tr><th>usage</th><td>How the allocation should be used. A valid value is either of the following or their combination:<br>RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE,<br>RS_ALLOCATION_USAGE_SCRIPT.</td></tr>
+    <tr><th>mipmap</th><td>A boolean flag indicating if the allocation is mipmapped and has multiple levels of detail (LoD).</td></tr>
+    <tr><th>dimX</th><td>Size on dimension x. Must be non zero.</td></tr>
+    <tr><th>dimY</th><td>Size on dimension y. 0 for single-dimension allocations.</td></tr>
+    <tr><th>dimZ</th><td>Size on dimension z. 0 for single-dimension and two-dimension allocations.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p>  Creates an rs_allocation object of the given rs_type and for the specified usages.
+</p>
+
+<p>  RS_ALLOCATION_USAGE_SCRIPT and RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE are the
+ only supported usage flags for Allocations created from within a RenderScript
+ script.
+</p>
+
+<p>  You can also use rsCreateAllocation_<type><width> wrapper functions to directly
+ create allocations of scalar and vector numerical types without creating
+ intermediate rs_element or rs_type objects.
+</p>
+
+<p>  For example, rsCreateAllocation_int4() returns an Allocation of int4 data type of
+ specified dimensions.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsCreateElement'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsCreateElement</span>
+    <span class='normal'>: Creates an <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_element>rs_element</a> object of the specified data type</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_element'>rs_element</a> rsCreateElement(<a href='rs_object_types.html#android_rs:rs_data_type'>rs_data_type</a> data_type);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>data_type</th><td>Data type of the Element</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p>  Creates an rs_element object of the specified data type.  The data kind of
+ the element will be set to RS_KIND_USER and vector width will be set to 1,
+ indicating non-vector.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsCreatePixelElement'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsCreatePixelElement</span>
+    <span class='normal'>: Creates an <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_element>rs_element</a> object of the specified data type and data kind</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_element'>rs_element</a> rsCreatePixelElement(<a href='rs_object_types.html#android_rs:rs_data_type'>rs_data_type</a> data_type, <a href='rs_object_types.html#android_rs:rs_data_kind'>rs_data_kind</a> data_kind);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>data_type</th><td>Data type of the Element</td></tr>
+    <tr><th>data_kind</th><td>Data kind of the Element</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p>  Creates an rs_element object of the specified data type and data kind. The
+ vector width of the rs_element object will be set to 1, indicating non-vector.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsCreateType'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsCreateType</span>
+    <span class='normal'>: Creates an <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_type>rs_type</a> object with the specified <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_element>rs_element</a> and shape attributes</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_type'>rs_type</a> rsCreateType(<a href='rs_object_types.html#android_rs:rs_element'>rs_element</a> element, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_type'>rs_type</a> rsCreateType(<a href='rs_object_types.html#android_rs:rs_element'>rs_element</a> element, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_type'>rs_type</a> rsCreateType(<a href='rs_object_types.html#android_rs:rs_element'>rs_element</a> element, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_type'>rs_type</a> rsCreateType(<a href='rs_object_types.html#android_rs:rs_element'>rs_element</a> element, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimX, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimY, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> dimZ, bool mipmaps, bool faces, <a href='rs_object_types.html#android_rs:rs_yuv_format'>rs_yuv_format</a> yuv_format);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>element</th><td>An <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_element>rs_element</a> object that specifies the cell data type of an allocation.</td></tr>
+    <tr><th>dimX</th><td>Size on dimension x. Must be non zero.</td></tr>
+    <tr><th>dimY</th><td>Size on dimension y. 0 for single-dimension allocations.</td></tr>
+    <tr><th>dimZ</th><td>Size on dimension z. 0 for single-dimension and two-dimension allocations.</td></tr>
+    <tr><th>mipmaps</th><td>A boolean flag indicating if the allocation is mipmapped and has multiple levels of detail (LoD).</td></tr>
+    <tr><th>faces</th><td>A boolean flag indicating if the allocation is a cubemap that has cube faces.</td></tr>
+    <tr><th>yuv_format</th><td>Tye YUV layout.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p>  Creates an rs_type object with the specified element and shape attributes.
+</p>
+
+<p>  dimX specifies the size of the X dimension.
+</p>
+
+<p>  dimY, if present and non-zero, indicates that the Y dimension is present and
+ indicates its size.
+</p>
+
+<p>  dimZ, if present and non-zero, indicates that the Z dimension is present and
+ indicates its size.
+</p>
+
+<p>  mipmaps indicates the presence of level of detail (LOD).
+</p>
+
+<p>  faces indicates the  presence of cubemap faces.
+</p>
+
+<p>  yuv_format indicates the associated YUV format (or RS_YUV_NONE).
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsCreateVectorElement'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsCreateVectorElement</span>
+    <span class='normal'>: Creates an <a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_element>rs_element</a> object of the specified data type and vector width</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_element'>rs_element</a> rsCreateVectorElement(<a href='rs_object_types.html#android_rs:rs_data_type'>rs_data_type</a> data_type, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> vector_width);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>data_type</th><td>Data type of the Element</td></tr>
+    <tr><th>vector_width</th><td>Vector width</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p>  Creates an rs_element object of the specified data type and vector width.
+ Value of vector_width must be 2, 3 or 4.  The data kind of the rs_element object will
+ be set to RS_KIND_USER.
+</p>
+  </div>
+</div>
+
+</div>
