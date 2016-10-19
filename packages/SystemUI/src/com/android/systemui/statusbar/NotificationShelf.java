@@ -157,7 +157,9 @@ public class NotificationShelf extends ActivatableNotificationView {
                 }
                 if (row != null){
                     // Not in the shelf yet, Icon needs to be placed on top of the notification icon
-                    updateIconAppearance(row.getEntry(), lastViewState, mShelfState);
+                    updateIconAppearance(row.getEntry(),
+                            (ExpandableNotificationRow.NotificationViewState) lastViewState,
+                            mShelfState);
                 }
             }
             mShelfState.iconStates = mNotificationIconContainer.calculateIconStates(
@@ -171,7 +173,8 @@ public class NotificationShelf extends ActivatableNotificationView {
         }
     }
 
-    private void updateIconAppearance(NotificationData.Entry entry, ExpandableViewState rowState,
+    private void updateIconAppearance(NotificationData.Entry entry,
+            ExpandableNotificationRow.NotificationViewState rowState,
             ShelfState shelfState) {
         StatusBarIconView icon = entry.expandedIcon;
         ViewState iconState = shelfState.iconStates.get(icon);
@@ -207,6 +210,7 @@ public class NotificationShelf extends ActivatableNotificationView {
         iconState.scaleX = newSize / icon.getHeight();
         iconState.scaleY = iconState.scaleX;
         iconState.hidden = transitionAmount == 0.0f;
+        rowState.iconTransformationAmount = transitionAmount;
         if (!entry.row.isShowingIcon()) {
             iconState.alpha = transitionAmount;
         }

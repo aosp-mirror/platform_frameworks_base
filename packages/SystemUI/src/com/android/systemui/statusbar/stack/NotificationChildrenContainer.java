@@ -185,6 +185,11 @@ public class NotificationChildrenContainer extends ViewGroup {
     }
 
     @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
+    @Override
     public boolean pointInView(float localX, float localY, float slop) {
         return localX >= -slop && localY >= -slop && localX < ((mRight - mLeft) + slop) &&
                 localY < (mRealHeight + slop);
@@ -207,6 +212,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         mDividers.add(newIndex, divider);
 
         updateGroupOverflow();
+        row.setIconTransformationAmount(0);
     }
 
     public void removeNotification(ExpandableNotificationRow row) {
@@ -875,5 +881,14 @@ public class NotificationChildrenContainer extends ViewGroup {
             }
         }
         return 0;
+    }
+
+    public void setIconsVisible(boolean iconsVisible) {
+        if (mNotificationHeaderWrapper != null) {
+            NotificationHeaderView header = mNotificationHeaderWrapper.getNotificationHeader();
+            if (header != null) {
+                header.getIcon().setForceHidden(!iconsVisible);
+            }
+        }
     }
 }

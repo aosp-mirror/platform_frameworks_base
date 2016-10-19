@@ -45,6 +45,7 @@ import android.widget.ImageView;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.NotificationColorUtil;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
@@ -63,6 +64,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     private static final int DEFAULT_DIVIDER_ALPHA = 0x29;
     private static final int COLORED_DIVIDER_ALPHA = 0x7B;
+    private int mIconTransformContentShift;
     private int mNotificationMinHeightLegacy;
     private int mMaxHeadsUpHeightLegacy;
     private int mMaxHeadsUpHeight;
@@ -188,6 +190,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private View mChildAfterViewWhenDismissed;
     private View mGroupParentWhenDismissed;
     private boolean mRefocusOnDismiss;
+    private float mIconTransformationAmount;
+    private boolean mIconsVisible = true;
 
     public boolean isGroupExpansionChanging() {
         if (isChildInGroup()) {
@@ -293,6 +297,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         // The public layouts expand button is always visible
         mPublicLayout.updateExpandButtons(true);
         updateLimits();
+        updateIconVisibilities();
     }
 
     private void updateLimits() {
@@ -809,6 +814,52 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return notificationHeader != null;
     }
 
+    /**
+     * Set how much this notification is transformed into an icon.
+     *
+     * @param iconTransformationAmount A value from 0 to 1 indicating how much we are transformed
+     *                                 to an icon
+     */
+    public void setIconTransformationAmount(float iconTransformationAmount) {
+        if (mIconTransformationAmount != iconTransformationAmount) {
+            mIconTransformationAmount = iconTransformationAmount;
+            updateContentFadeOut();
+            boolean iconsVisible = mIconTransformationAmount == 0.0f;
+            if (iconsVisible != mIconsVisible) {
+                mIconsVisible = iconsVisible;
+                updateIconVisibilities();
+            }
+        }
+    }
+
+    private void updateContentFadeOut() {
+        if (!isChildInGroup()) {
+            float contentAlpha = 1.0f - mIconTransformationAmount;
+            contentAlpha = Math.max((contentAlpha - 0.5f) / 0.5f, 0.0f);
+            contentAlpha = Interpolators.ALPHA_OUT.getInterpolation(contentAlpha);
+            mPublicLayout.setAlpha(contentAlpha);
+            float translationY = - mIconTransformationAmount * mIconTransformContentShift;
+            mPublicLayout.setTranslationY(translationY);
+            mPrivateLayout.setAlpha(contentAlpha);
+            mPrivateLayout.setTranslationY(translationY);
+            if (mChildrenContainer != null) {
+                mChildrenContainer.setAlpha(contentAlpha);
+                mChildrenContainer.setTranslationY(translationY);
+                // TODO: handle children fade out better
+            }
+        }
+    }
+
+    private void updateIconVisibilities() {
+        if (!isChildInGroup()) {
+            mPublicLayout.setIconsVisible(mIconsVisible);
+            mPrivateLayout.setIconsVisible(mIconsVisible);
+            if (mChildrenContainer != null) {
+                mChildrenContainer.setIconsVisible(mIconsVisible);
+            }
+        }
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
@@ -828,6 +879,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mMaxHeadsUpHeight = getFontScaledHeight(R.dimen.notification_max_heads_up_height);
         mIncreasedPaddingBetweenElements = getResources()
                 .getDimensionPixelSize(R.dimen.notification_divider_height_increased);
+        mIconTransformContentShift = getResources().getDimensionPixelSize(
+                R.dimen.notification_icon_transform_content_shift);
     }
 
     /**
@@ -1712,6 +1765,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public static class NotificationViewState extends ExpandableViewState {
 
         private final StackScrollState mOverallState;
+        public float iconTransformationAmount;
+
 
         private NotificationViewState(StackScrollState stackScrollState) {
             mOverallState = stackScrollState;
@@ -1726,6 +1781,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                     row.setClipToActualHeight(true);
                 }
                 row.applyChildrenState(mOverallState);
+                row.setIconTransformationAmount(iconTransformationAmount);
             }
         }
     }

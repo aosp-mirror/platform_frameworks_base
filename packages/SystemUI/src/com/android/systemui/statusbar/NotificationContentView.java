@@ -122,6 +122,7 @@ public class NotificationContentView extends FrameLayout {
     private int mContentHeightAtAnimationStart = UNDEFINED;
     private boolean mFocusOnVisibilityChange;
     private boolean mHeadsupDisappearRunning;
+    private boolean mIconsVisible;
 
 
     public NotificationContentView(Context context, AttributeSet attrs) {
@@ -1190,5 +1191,31 @@ public class NotificationContentView extends FrameLayout {
 
     public void setFocusOnVisibilityChange() {
         mFocusOnVisibilityChange = true;
+    }
+
+    public void setIconsVisible(boolean iconsVisible) {
+        mIconsVisible = iconsVisible;
+        updateIconVisibilities();
+    }
+
+    private void updateIconVisibilities() {
+        if (mContractedWrapper != null) {
+            NotificationHeaderView header = mContractedWrapper.getNotificationHeader();
+            if (header != null) {
+                header.getIcon().setForceHidden(!mIconsVisible);
+            }
+        }
+        if (mHeadsUpWrapper != null) {
+            NotificationHeaderView header = mHeadsUpWrapper.getNotificationHeader();
+            if (header != null) {
+                header.getIcon().setForceHidden(!mIconsVisible);
+            }
+        }
+        if (mExpandedWrapper != null) {
+            NotificationHeaderView header = mExpandedWrapper.getNotificationHeader();
+            if (header != null) {
+                header.getIcon().setForceHidden(!mIconsVisible);
+            }
+        }
     }
 }
