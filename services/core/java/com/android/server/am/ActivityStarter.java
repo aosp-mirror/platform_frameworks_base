@@ -458,9 +458,12 @@ class ActivityStarter {
         // Instead, launch the ephemeral installer. Once the installer is finished, it
         // starts either the intent we resolved here [on install error] or the ephemeral
         // app [on install success].
-        if (rInfo != null && rInfo.ephemeralResolveInfo != null) {
+        if (rInfo != null && rInfo.ephemeralIntentInfo != null) {
+            final String packageName =
+                    rInfo.ephemeralIntentInfo.getEphemeralResolveInfo().getPackageName();
+            final String splitName = rInfo.ephemeralIntentInfo.getSplitName();
             intent = buildEphemeralInstallerIntent(intent, ephemeralIntent,
-                    rInfo.ephemeralResolveInfo.getPackageName(), callingPackage, resolvedType,
+                    packageName, splitName, callingPackage, resolvedType,
                     userId);
             resolvedType = null;
             callingUid = realCallingUid;
@@ -524,7 +527,8 @@ class ActivityStarter {
      * Builds and returns an intent to launch the ephemeral installer.
      */
     private Intent buildEphemeralInstallerIntent(Intent launchIntent, Intent origIntent,
-            String ephemeralPackage, String callingPackage, String resolvedType, int userId) {
+            String ephemeralPackageName, String ephemeralSplitName, String callingPackage,
+            String resolvedType, int userId) {
         final Intent nonEphemeralIntent = new Intent(origIntent);
         nonEphemeralIntent.setFlags(nonEphemeralIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
         // Intent that is launched if the ephemeral package couldn't be installed
@@ -540,7 +544,7 @@ class ActivityStarter {
         if (USE_DEFAULT_EPHEMERAL_LAUNCHER) {
             // Force the intent to be directed to the ephemeral package
             ephemeralIntent = new Intent(origIntent);
-            ephemeralIntent.setPackage(ephemeralPackage);
+            ephemeralIntent.setPackage(ephemeralPackageName);
         } else {
             // Success intent goes back to the installer
             ephemeralIntent = new Intent(launchIntent);
@@ -564,7 +568,8 @@ class ActivityStarter {
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK
                 | Intent.FLAG_ACTIVITY_NO_HISTORY
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, ephemeralPackage);
+        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, ephemeralPackageName);
+        intent.putExtra(Intent.EXTRA_SPLIT_NAME, ephemeralSplitName);
         intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, new IntentSender(failureIntentTarget));
         intent.putExtra(Intent.EXTRA_EPHEMERAL_SUCCESS, new IntentSender(successIntentTarget));
         // TODO: Remove when the platform has fully implemented ephemeral apps

@@ -122,6 +122,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.AppsQueryHelper;
 import android.content.pm.ComponentInfo;
 import android.content.pm.EphemeralApplicationInfo;
+import android.content.pm.EphemeralIntentFilter;
 import android.content.pm.EphemeralResolveInfo;
 import android.content.pm.EphemeralResolveInfo.EphemeralDigest;
 import android.content.pm.EphemeralResolveInfo.EphemeralResolveIntentInfo;
@@ -477,9 +478,6 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     private static final String VENDOR_OVERLAY_THEME_PERSIST_PROPERTY
             = "persist.vendor.overlay.theme";
-
-    private static int DEFAULT_EPHEMERAL_HASH_PREFIX_MASK = 0xFFFFF000;
-    private static int DEFAULT_EPHEMERAL_HASH_PREFIX_COUNT = 5;
 
     /** Permission grant: not grant the permission. */
     private static final int GRANT_DENIED = 1;
@@ -4945,19 +4943,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    private static EphemeralResolveInfo getEphemeralResolveInfo(
+    private static EphemeralResolveIntentInfo getEphemeralIntentInfo(
             Context context, EphemeralResolverConnection resolverConnection, Intent intent,
             String resolvedType, int userId, String packageName) {
-        final int ephemeralPrefixMask = Global.getInt(context.getContentResolver(),
-                Global.EPHEMERAL_HASH_PREFIX_MASK, DEFAULT_EPHEMERAL_HASH_PREFIX_MASK);
-        final int ephemeralPrefixCount = Global.getInt(context.getContentResolver(),
-                Global.EPHEMERAL_HASH_PREFIX_COUNT, DEFAULT_EPHEMERAL_HASH_PREFIX_COUNT);
-        final EphemeralDigest digest = new EphemeralDigest(intent.getData(), ephemeralPrefixMask,
-                ephemeralPrefixCount);
+        final EphemeralDigest digest =
+                new EphemeralDigest(intent.getData().getHost(), 5 /*maxDigests*/);
         final int[] shaPrefix = digest.getDigestPrefix();
         final byte[][] digestBytes = digest.getDigestBytes();
         final List<EphemeralResolveInfo> ephemeralResolveInfoList =
-                resolverConnection.getEphemeralResolveInfoList(shaPrefix, ephemeralPrefixMask);
+                resolverConnection.getEphemeralResolveInfoList(shaPrefix);
         if (ephemeralResolveInfoList == null || ephemeralResolveInfoList.size() == 0) {
             // No hash prefix match; there are no ephemeral apps for this domain.
             return null;
@@ -4969,9 +4963,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (!Arrays.equals(digestBytes[i], ephemeralApplication.getDigestBytes())) {
                     continue;
                 }
-                final List<IntentFilter> filters = ephemeralApplication.getFilters();
+                final List<EphemeralIntentFilter> ephemeralFilters =
+                        ephemeralApplication.getIntentFilters();
                 // No filters; this should never happen.
-                if (filters.isEmpty()) {
+                if (ephemeralFilters.isEmpty()) {
                     continue;
                 }
                 if (packageName != null
@@ -4980,13 +4975,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 // We have a domain match; resolve the filters to see if anything matches.
                 final EphemeralIntentResolver ephemeralResolver = new EphemeralIntentResolver();
-                for (int j = filters.size() - 1; j >= 0; --j) {
-                    final EphemeralResolveIntentInfo intentInfo =
-                            new EphemeralResolveIntentInfo(filters.get(j), ephemeralApplication);
-                    ephemeralResolver.addFilter(intentInfo);
+                for (int j = ephemeralFilters.size() - 1; j >= 0; --j) {
+                    final EphemeralIntentFilter ephemeralFilter = ephemeralFilters.get(j);
+                    final List<IntentFilter> splitFilters = ephemeralFilter.getFilters();
+                    if (splitFilters == null || splitFilters.isEmpty()) {
+                        continue;
+                    }
+                    for (int k = splitFilters.size() - 1; k >= 0; --k) {
+                        final EphemeralResolveIntentInfo intentInfo =
+                                new EphemeralResolveIntentInfo(splitFilters.get(k),
+                                        ephemeralApplication, ephemeralFilter.getSplitName());
+                        ephemeralResolver.addFilter(intentInfo);
+                    }
                 }
-                List<EphemeralResolveInfo> matchedResolveInfoList = ephemeralResolver.queryIntent(
-                        intent, resolvedType, false /*defaultOnly*/, userId);
+                List<EphemeralResolveIntentInfo> matchedResolveInfoList = ephemeralResolver
+                        .queryIntent(intent, resolvedType, false /*defaultOnly*/, userId);
                 if (!matchedResolveInfoList.isEmpty()) {
                     return matchedResolveInfoList.get(0);
                 }
@@ -5469,15 +5472,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if (addEphemeral) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
-            final EphemeralResolveInfo ai = getEphemeralResolveInfo(
+            final EphemeralResolveIntentInfo intentInfo = getEphemeralIntentInfo(
                     mContext, mEphemeralResolverConnection, intent, resolvedType, userId,
                     matchEphemeralPackage ? pkgName : null);
-            if (ai != null) {
+            if (intentInfo != null) {
                 if (DEBUG_EPHEMERAL) {
                     Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
                 }
                 final ResolveInfo ephemeralInstaller = new ResolveInfo(mEphemeralInstallerInfo);
-                ephemeralInstaller.ephemeralResolveInfo = ai;
+                ephemeralInstaller.ephemeralIntentInfo = intentInfo;
                 // make sure this resolver is the default
                 ephemeralInstaller.isDefault = true;
                 ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
@@ -11451,7 +11454,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private static final class EphemeralIntentResolver
-            extends IntentResolver<EphemeralResolveIntentInfo, EphemeralResolveInfo> {
+            extends IntentResolver<EphemeralResolveIntentInfo, EphemeralResolveIntentInfo> {
         /**
          * The result that has the highest defined order. Ordering applies on a
          * per-package basis. Mapping is from package name to Pair of order and
@@ -11476,7 +11479,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         @Override
-        protected EphemeralResolveInfo newResult(EphemeralResolveIntentInfo info, int match,
+        protected EphemeralResolveIntentInfo newResult(EphemeralResolveIntentInfo info, int match,
                 int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
@@ -11494,18 +11497,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // non-zero order, enable ordering
                 mOrderResult.put(packageName, new Pair<>(order, res));
             }
-            return res;
+            return info;
         }
 
         @Override
-        protected void filterResults(List<EphemeralResolveInfo> results) {
+        protected void filterResults(List<EphemeralResolveIntentInfo> results) {
             // only do work if ordering is enabled [most of the time it won't be]
             if (mOrderResult.size() == 0) {
                 return;
             }
             int resultSize = results.size();
             for (int i = 0; i < resultSize; i++) {
-                final EphemeralResolveInfo info = results.get(i);
+                final EphemeralResolveInfo info = results.get(i).getEphemeralResolveInfo();
                 final String packageName = info.getPackageName();
                 final Pair<Integer, EphemeralResolveInfo> savedInfo = mOrderResult.get(packageName);
                 if (savedInfo == null) {

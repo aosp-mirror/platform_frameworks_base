@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.content.ComponentName;
 import android.content.IntentFilter;
+import android.content.pm.EphemeralResolveInfo.EphemeralResolveIntentInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -65,7 +66,7 @@ public class ResolveInfo implements Parcelable {
      * only be set in specific circumstances.
      * @hide
      */
-    public EphemeralResolveInfo ephemeralResolveInfo;
+    public EphemeralResolveIntentInfo ephemeralIntentInfo;
 
     /**
      * The IntentFilter that was matched for this ResolveInfo.

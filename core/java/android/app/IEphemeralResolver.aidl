@@ -21,5 +21,8 @@ import android.os.IRemoteCallback;
 /** @hide */
 oneway interface IEphemeralResolver {
     void getEphemeralResolveInfoList(IRemoteCallback callback, in int[] digestPrefix,
-            int prefixMask, int sequence);
+            int sequence);
+
+    void getEphemeralIntentFilterList(IRemoteCallback callback, in int[] digestPrefix,
+            int sequence);
 }

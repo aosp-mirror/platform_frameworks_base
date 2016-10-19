@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -41,27 +42,54 @@ public final class EphemeralResolveInfo implements Parcelable {
     private final EphemeralDigest mDigest;
     private final String mPackageName;
     /** The filters used to match domain */
-    private final List<IntentFilter> mFilters = new ArrayList<IntentFilter>();
+    private final List<EphemeralIntentFilter> mFilters;
+    /** Filters only for legacy clients */
+    @Deprecated
+    private List<IntentFilter> mLegacyFilters;
 
+    @Deprecated
     public EphemeralResolveInfo(@NonNull Uri uri, @NonNull String packageName,
             @NonNull List<IntentFilter> filters) {
-        // validate arguments
-        if (uri == null
-                || packageName == null
-                || filters == null
-                || filters.size() == 0) {
+        if (uri == null || packageName == null || filters == null || filters.isEmpty()) {
             throw new IllegalArgumentException();
         }
-
-        mDigest = new EphemeralDigest(uri, 0xFFFFFFFF, -1);
-        mFilters.addAll(filters);
+        mDigest = new EphemeralDigest(uri.getHost());
         mPackageName = packageName;
+        mFilters = new ArrayList<EphemeralIntentFilter>();
+        mFilters.add(new EphemeralIntentFilter(packageName, filters));
+        mLegacyFilters = new ArrayList<IntentFilter>(filters.size());
+        mLegacyFilters.addAll(filters);
+    }
+
+    public EphemeralResolveInfo(@NonNull EphemeralDigest digest, @Nullable String packageName,
+            @Nullable List<EphemeralIntentFilter> filters) {
+        // validate arguments
+        if ((packageName == null && (filters != null && filters.size() != 0))
+                || (packageName != null && (filters == null || filters.size() == 0))) {
+            throw new IllegalArgumentException();
+        }
+        mDigest = digest;
+        if (filters != null) {
+            mFilters = new ArrayList<EphemeralIntentFilter>(filters.size());
+            mFilters.addAll(filters);
+        } else {
+            mFilters = null;
+        }
+        mPackageName = packageName;
+    }
+
+    public EphemeralResolveInfo(@NonNull String hostName, @Nullable String packageName,
+            @Nullable List<EphemeralIntentFilter> filters) {
+        this(new EphemeralDigest(hostName), packageName, filters);
     }
 
     EphemeralResolveInfo(Parcel in) {
         mDigest = in.readParcelable(null /*loader*/);
         mPackageName = in.readString();
+        mFilters = new ArrayList<EphemeralIntentFilter>();
         in.readList(mFilters, null /*loader*/);
+        mLegacyFilters = new ArrayList<IntentFilter>();
+        in.readList(mLegacyFilters, null /*loader*/);
     }
 
     public byte[] getDigestBytes() {
@@ -76,7 +104,12 @@ public final class EphemeralResolveInfo implements Parcelable {
         return mPackageName;
     }
 
+    @Deprecated
     public List<IntentFilter> getFilters() {
+        return mLegacyFilters;
+    }
+
+    public List<EphemeralIntentFilter> getIntentFilters() {
         return mFilters;
     }
 
@@ -90,6 +123,7 @@ public final class EphemeralResolveInfo implements Parcelable {
         out.writeParcelable(mDigest, flags);
         out.writeString(mPackageName);
         out.writeList(mFilters);
+        out.writeList(mLegacyFilters);
     }
 
     public static final Parcelable.Creator<EphemeralResolveInfo> CREATOR
@@ -106,15 +140,22 @@ public final class EphemeralResolveInfo implements Parcelable {
     /** @hide */
     public static final class EphemeralResolveIntentInfo extends IntentFilter {
         private final EphemeralResolveInfo mResolveInfo;
+        private final String mSplitName;
 
         public EphemeralResolveIntentInfo(@NonNull IntentFilter orig,
-                @NonNull EphemeralResolveInfo resolveInfo) {
+                @NonNull EphemeralResolveInfo resolveInfo,
+                @Nullable String splitName) {
             super(orig);
-            this.mResolveInfo = resolveInfo;
+            mResolveInfo = resolveInfo;
+            mSplitName = splitName;
         }
 
         public EphemeralResolveInfo getEphemeralResolveInfo() {
             return mResolveInfo;
+        }
+
+        public String getSplitName() {
+            return mSplitName;
         }
     }
 
@@ -129,17 +170,25 @@ public final class EphemeralResolveInfo implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
     public static final class EphemeralDigest implements Parcelable {
+        private static final int DIGEST_MASK = 0xfffff000;
+        private static final int DIGEST_PREFIX_COUNT = 5;
         /** Full digest of the domain hashes */
         private final byte[][] mDigestBytes;
         /** The first 4 bytes of the domain hashes */
         private final int[] mDigestPrefix;
 
-        public EphemeralDigest(@NonNull Uri uri, int digestMask, int maxDigests) {
-            if (uri == null) {
+        public EphemeralDigest(@NonNull String hostName) {
+            this(hostName, -1 /*maxDigests*/);
+        }
+
+        /** @hide */
+        public EphemeralDigest(@NonNull String hostName, int maxDigests) {
+            if (hostName == null) {
                 throw new IllegalArgumentException();
             }
-            mDigestBytes = generateDigest(uri, maxDigests);
+            mDigestBytes = generateDigest(hostName.toLowerCase(Locale.ENGLISH), maxDigests);
             mDigestPrefix = new int[mDigestBytes.length];
             for (int i = 0; i < mDigestBytes.length; i++) {
                 mDigestPrefix[i] =
@@ -147,31 +196,32 @@ public final class EphemeralResolveInfo implements Parcelable {
                                 | (mDigestBytes[i][1] & 0xFF) << 16
                                 | (mDigestBytes[i][2] & 0xFF) << 8
                                 | (mDigestBytes[i][3] & 0xFF) << 0)
-                        & digestMask;
+                        & DIGEST_MASK;
             }
         }
 
-        private static byte[][] generateDigest(Uri uri, int maxDigests) {
+        private static byte[][] generateDigest(String hostName, int maxDigests) {
             ArrayList<byte[]> digests = new ArrayList<>();
             try {
-                final String host = uri.getHost().toLowerCase(Locale.ENGLISH);
                 final MessageDigest digest = MessageDigest.getInstance(SHA_ALGORITHM);
                 if (maxDigests <= 0) {
-                    final byte[] hostBytes = host.getBytes();
+                    final byte[] hostBytes = hostName.getBytes();
                     digests.add(digest.digest(hostBytes));
                 } else {
-                    int prevDot = host.lastIndexOf('.');
-                    prevDot = host.lastIndexOf('.', prevDot - 1);
+                    int prevDot = hostName.lastIndexOf('.');
+                    prevDot = hostName.lastIndexOf('.', prevDot - 1);
                     // shortcut for short URLs
                     if (prevDot < 0) {
-                        digests.add(digest.digest(host.getBytes()));
+                        digests.add(digest.digest(hostName.getBytes()));
                     } else {
-                        byte[] hostBytes = host.substring(prevDot + 1, host.length()).getBytes();
+                        byte[] hostBytes =
+                                hostName.substring(prevDot + 1, hostName.length()).getBytes();
                         digests.add(digest.digest(hostBytes));
                         int digestCount = 1;
                         while (prevDot >= 0 && digestCount < maxDigests) {
-                            prevDot = host.lastIndexOf('.', prevDot - 1);
-                            hostBytes = host.substring(prevDot + 1, host.length()).getBytes();
+                            prevDot = hostName.lastIndexOf('.', prevDot - 1);
+                            hostBytes =
+                                    hostName.substring(prevDot + 1, hostName.length()).getBytes();
                             digests.add(digest.digest(hostBytes));
                             digestCount++;
                         }

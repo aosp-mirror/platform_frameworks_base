@@ -1713,6 +1713,16 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
 
     /**
+     * Intent extra: An app split name.
+     * <p>
+     * Type: String
+     * </p>
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_SPLIT_NAME = "android.intent.extra.SPLIT_NAME";
+
+    /**
      * Intent extra: An extra for specifying whether a result is needed.
      * <p>
      * Type: boolean

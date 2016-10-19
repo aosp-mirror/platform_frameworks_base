@@ -51,6 +51,8 @@ final class EphemeralResolverConnection {
     private final Object mLock = new Object();
     private final GetEphemeralResolveInfoCaller mGetEphemeralResolveInfoCaller =
             new GetEphemeralResolveInfoCaller();
+    private final GetEphemeralIntentFilterCaller mGetEphemeralIntentFilterCaller =
+            new GetEphemeralIntentFilterCaller();
     private final ServiceConnection mServiceConnection = new MyServiceConnection();
     private final Context mContext;
     /** Intent used to bind to the service */
@@ -64,12 +66,26 @@ final class EphemeralResolverConnection {
         mIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE).setComponent(componentName);
     }
 
-    public final List<EphemeralResolveInfo> getEphemeralResolveInfoList(
-            int hashPrefix[], int prefixMask) {
+    public final List<EphemeralResolveInfo> getEphemeralResolveInfoList(int hashPrefix[]) {
         throwIfCalledOnMainThread();
         try {
             return mGetEphemeralResolveInfoCaller.getEphemeralResolveInfoList(
-                    getRemoteInstanceLazy(), hashPrefix, prefixMask);
+                    getRemoteInstanceLazy(), hashPrefix);
+        } catch (RemoteException re) {
+        } catch (TimeoutException te) {
+        } finally {
+            synchronized (mLock) {
+                mLock.notifyAll();
+            }
+        }
+        return null;
+    }
+
+    public final List<EphemeralResolveInfo> getEphemeralIntentFilterList(int digestPrefix[]) {
+        throwIfCalledOnMainThread();
+        try {
+            return mGetEphemeralIntentFilterCaller.getEphemeralIntentFilterList(
+                    getRemoteInstanceLazy(), digestPrefix);
         } catch (RemoteException re) {
         } catch (TimeoutException te) {
         } finally {
@@ -181,10 +197,38 @@ final class EphemeralResolverConnection {
         }
 
         public List<EphemeralResolveInfo> getEphemeralResolveInfoList(
-                IEphemeralResolver target, int hashPrefix[], int prefixMask)
+                IEphemeralResolver target, int hashPrefix[])
                         throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();
-            target.getEphemeralResolveInfoList(mCallback, hashPrefix, prefixMask, sequence);
+            target.getEphemeralResolveInfoList(mCallback, hashPrefix, sequence);
+            return getResultTimed(sequence);
+        }
+    }
+
+    private static final class GetEphemeralIntentFilterCaller
+            extends TimedRemoteCaller<List<EphemeralResolveInfo>> {
+        private final IRemoteCallback mCallback;
+
+        public GetEphemeralIntentFilterCaller() {
+            super(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
+            mCallback = new IRemoteCallback.Stub() {
+                @Override
+                public void sendResult(Bundle data) throws RemoteException {
+                    final ArrayList<EphemeralResolveInfo> resolveList =
+                            data.getParcelableArrayList(
+                                    EphemeralResolverService.EXTRA_RESOLVE_INFO);
+                    int sequence =
+                            data.getInt(EphemeralResolverService.EXTRA_SEQUENCE, -1);
+                    onRemoteMethodResult(resolveList, sequence);
+                }
+            };
+        }
+
+        public List<EphemeralResolveInfo> getEphemeralIntentFilterList(
+                IEphemeralResolver target, int digestPrefix[])
+                        throws RemoteException, TimeoutException {
+            final int sequence = onBeforeRemoteCall();
+            target.getEphemeralIntentFilterList(mCallback, digestPrefix, sequence);
             return getResultTimed(sequence);
         }
     }
