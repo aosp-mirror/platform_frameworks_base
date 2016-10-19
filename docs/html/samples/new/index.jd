@@ -5,7 +5,7 @@ page.image=images/cards/samples-new_2x.png
 
 <p>The following code samples were recently published. You can
 download them in the Android SDK Manager under the <b>Samples for SDK</b>
-component for Android 6.0 (API 23).</p>
+component for Android 7.1 (API 25).</p>
 
 <p class="note">
   <strong>Note:</strong> The downloadable projects are designed
@@ -14,115 +14,67 @@ component for Android 6.0 (API 23).</p>
 
 <!-- NOTE TO EDITORS: add most recent samples first -->
 
-<h3 id="ActiveNotification">
-  <a href="{@docRoot}samples/ActiveNotifications/index.html">Active
-  Notification</a>
-</h3>
 
-<p>
-  This sample demonstrates how to use the {@link
-  android.app.NotificationManager} to tell you how many notifications your app
-  is currently showing.
-</p>
+<h3 id="app-shortcuts">App shortcuts sample</h3>
 
-<h3 id="AutomaticBackup">
-  <a href="{@docRoot}samples/AutoBackupForApps/index.html">Auto Backup for
-  Apps</a>
-</h3>
-
-<p>
-  Android 6.0 (API level 23) introduces automatic backup for app settings. This
-  sample demonstrates how to add filtering rules to an app to manage settings
-  backup.
-</p>
-
-<h3 id="Camera2Raw">
-  <a href="{@docRoot}samples/Camera2Raw/index.html">Camera 2 Raw</a>
-</h3>
-
-<p>
-  This sample demonstrates how to use the
-  <a href="{@docRoot}reference/android/hardware/camera2/package-summary.html">
-  <code>Camera2</code></a> API to capture RAW camera buffers and save them as
-  DNG files.
-</p>
-
-<h3 id="ConfirmCredential">
-  <a href="{@docRoot}samples/ConfirmCredential/index.html">Confirm
-  Credential</a>
-</h3>
-
-<p>
- This sample demonstrates how to use device credentials as an authentication method in your app.
-</p>
-
-<h3 id="DeviceOwner">
-  <a href="{@docRoot}samples/DeviceOwner/index.html">Device Owner</a>
-</h3>
-
-<p>
-  This sample demonstrates how to use the device owner features to manage and
-  configure a device.
-</p>
-
-<h3 id="DirectShare">
-  <a href="{@docRoot}samples/DirectShare/index.html">Direct Share</a>
-</h3>
-
-<p>
-  This sample demonstrates how to provide the
-  <a href="{@docRoot}about/versions/marshmallow/android-6.0.html#direct-share">Direct
-  Share</a> feature. The app shows some options directly in the list of share
-  intent candidates.
-</p>
-
-<h3 id="FingerprintDialog">
-  <a href="{@docRoot}samples/FingerprintDialog/index.html">Fingerprint
-  Dialog</a>
-</h3>
-
-<p>
-  This sample demonstrates how to recognize registered fingerprints to
-  authenticate your app's user.
-</p>
-
-<h3 id="MidiScope">
-  <a href="{@docRoot}samples/MidiScope/index.html">MidiScope</a>
-</h3>
+<!-- TBA
+<img src="sample-img.png" style="float: left; padding-right: 0.5em"
+ width="xxx"/>
+-->
 
 <p>
   This sample demonstrates how to use the <a href=
-  "{@docRoot}reference/android/media/midi/package-summary.html">MIDI API</a> to
-  receive and process MIDI signals coming from an attached input device.
+  "/preview/app-shortcuts.html">app shortcuts API</a> introduced in Android 7.1
+  (API level 25). This API allows an application to define a set of intents
+  which are displayed when a user long-presses on the app's launcher icon.
+  Examples are given for registering links both statically in XML, as well as
+  dynamically at runtime.
 </p>
 
-<h3 id="MidiSynth">
-  <a href="{@docRoot}samples/MidiSynth/index.html">MidiSynth</a>
-</h3>
-
 <p>
-  This sample demonstrates how to use the <a href=
-  "{@docRoot}reference/android/media/midi/package-summary.html">MIDI API</a> to
-  receive and play MIDI messages coming from an attached input device.
+  <a href="/samples/AppShortcuts/index.html">App shortcuts sample</a>
 </p>
 
-<h3 id="NfcProvisioning">
-  <a href="{@docRoot}samples/NfcProvisioning/index.html">NFC Provisioning</a>
-</h3>
+<h3 id="img-kbd-app">Image keyboard app sample</h3>
+
+<!-- TBA
+<img src="sample-img.png" style="float: left; padding-right: 0.5em"
+ width="xxx"/>
+-->
 
 <p>
-  This sample demonstrates how to use NFC to provision other devices with a
-  specific device owner.
+  This sample demonstrates how to implement the <a href=
+  "/reference/android/view/inputmethod/InputConnection.html#commitContent(android.view.inputmethod.InputContentInfo,%20int,%20android.os.Bundle)">
+  Commit Content API</a>, using the <a href=
+  "/topic/libraries/support-library/index.html">Android Support Library</a>.
+  This API provides a universal way for IMEs to send images and other rich
+  content directly to a text editor in an app, allowing users to compose
+  content using custom emojis, stickers, or other rich content provided by
+  other applications.
 </p>
 
-<h3 id="RuntimePermissions">
-  <a href=
-  "{@docRoot}samples/RuntimePermissions/index.html">RuntimePermissions</a>
-</h3>
+<p>
+  <a href="/samples/CommitContentSampleApp/index.html">Image keyboard app sample</a>
+</p>
+
+<h3 id="img-kbd-ime">Image keyboard IME sample</h3>
+
+<!-- TBA
+<img src="sample-img.png" style="float: left; padding-right: 0.5em"
+ width="xxx"/>
+-->
 
 <p>
-  This sample shows runtime permissions available in Android 6.0 (API level 23)
-  and higher. Display the log on screen to follow the execution. If executed on
-  an Android 6.0 device, the app displays an additional option to access
-  contacts using an 6.0-only optional permission.
+  This sample demonstrates how to write a <a href=
+  "/preview/image-keyboard.html">custom image keyboard</a> using the <a href=
+  "/reference/android/view/inputmethod/InputConnection.html#commitContent(android.view.inputmethod.InputContentInfo,%20int,%20android.os.Bundle)">
+  Commit Content API</a> and the <a href=
+  "/topic/libraries/support-library/index.html">Android Support Library</a>.
+  This keyboard will be displayed inside compatible apps (also using the Commit
+  Content API), allowing users to insert emojis, stickers, or other rich
+  content into text editors.
+</p>
+
+<p>
+  <a href="/samples/CommitContentSampleIME/index.html">Image keyboard IME sample</a>
 </p>
