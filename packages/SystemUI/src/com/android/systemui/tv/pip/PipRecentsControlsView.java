@@ -49,7 +49,6 @@ public class PipRecentsControlsView extends FrameLayout {
     }
 
     private final PipManager mPipManager = PipManager.getInstance();
-    private Listener mListener;
     private PipControlsView mPipControlsView;
     private View mScrim;
     private Animator mFocusGainAnimator;

@@ -694,4 +694,7 @@
 
     <!-- The alpha to apply to the recents row when it doesn't have focus -->
     <item name="recents_recents_row_dim_alpha" format="float" type="dimen">0.5</item>
+
+    <!-- The size of the PIP dismiss target. -->
+    <dimen name="pip_dismiss_target_size">48dp</dimen>
 </resources>
