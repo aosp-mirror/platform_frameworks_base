@@ -570,7 +570,9 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
     @Override
     public void onServiceDisconnected(ComponentName name) {
         mCallback.sessionConnectionGone(this);
-        mService = null;
+        synchronized (mLock) {
+            mService = null;
+        }
     }
 
     public void dump(String prefix, PrintWriter pw) {
