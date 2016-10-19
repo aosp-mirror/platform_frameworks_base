@@ -4464,7 +4464,9 @@ final class ActivityStack {
                     "moveTaskToBackAndShowHome");
         }
 
-        adjustFocusedActivityLocked(mResumedActivity, "moveTaskToBack");
+        // Using currently focused activity value from service instead of mResumedActivity,
+        // because if this happens when device is locked the mResumedActivity will be null.
+        adjustFocusedActivityLocked(mService.mFocusedActivity, "moveTaskToBack");
         mStackSupervisor.resumeFocusedStackTopActivityLocked();
         return true;
     }
