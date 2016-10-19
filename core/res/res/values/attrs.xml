@@ -6975,9 +6975,31 @@
              with alphabetic keys. -->
         <attr name="alphabeticShortcut" format="string" />
 
+        <!-- The alphabetic modifier key. This is the modifier when using a keyboard
+             with alphabetic keys. The values should be kept in sync with KeyEvent -->
+        <attr name="alphabeticModifiers">
+            <flag name="META" value="0x10000" />
+            <flag name="CTRL" value="0x1000" />
+            <flag name="ALT" value="0x02" />
+            <flag name="SHIFT" value="0x1" />
+            <flag name="SYM" value="0x4" />
+            <flag name="FUNCTION" value="0x8" />
+        </attr>
+
         <!-- The numeric shortcut key.  This is the shortcut when using a numeric (e.g., 12-key)
              keyboard. -->
         <attr name="numericShortcut" format="string" />
+
+        <!-- The numeric modifier key. This is the modifier when using a numeric (e.g., 12-key)
+             keyboard. The values should be kept in sync with KeyEvent -->
+        <attr name="numericModifiers">
+            <flag name="META" value="0x10000" />
+            <flag name="CTRL" value="0x1000" />
+            <flag name="ALT" value="0x02" />
+            <flag name="SHIFT" value="0x1" />
+            <flag name="SYM" value="0x4" />
+            <flag name="FUNCTION" value="0x8" />
+        </attr>
 
         <!-- Whether the item is capable of displaying a check mark. -->
         <attr name="checkable" format="boolean" />

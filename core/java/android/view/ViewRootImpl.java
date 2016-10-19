@@ -4472,9 +4472,9 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
 
-            // If the Control modifier is held, try to interpret the key as a shortcut.
+            // If a modifier is held, try to interpret the key as a shortcut.
             if (event.getAction() == KeyEvent.ACTION_DOWN
-                    && event.isCtrlPressed()
+                    && !KeyEvent.metaStateHasNoModifiers(event.getMetaState())
                     && event.getRepeatCount() == 0
                     && !KeyEvent.isModifierKey(event.getKeyCode())
                     && groupNavigationDirection == 0) {

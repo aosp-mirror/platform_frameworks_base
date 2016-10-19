@@ -305,7 +305,9 @@ public class MenuInflater {
         private CharSequence itemTitleCondensed;
         private int itemIconResId;
         private char itemAlphabeticShortcut;
+        private int itemAlphabeticModifiers;
         private char itemNumericShortcut;
+        private int itemNumericModifiers;
         /**
          * Sync to attrs.xml enum:
          * - 0: none
@@ -395,8 +397,14 @@ public class MenuInflater {
             itemIconResId = a.getResourceId(com.android.internal.R.styleable.MenuItem_icon, 0);
             itemAlphabeticShortcut =
                     getShortcut(a.getString(com.android.internal.R.styleable.MenuItem_alphabeticShortcut));
+            itemAlphabeticModifiers =
+                    a.getInt(com.android.internal.R.styleable.MenuItem_alphabeticModifiers,
+                            KeyEvent.META_CTRL_ON);
             itemNumericShortcut =
                     getShortcut(a.getString(com.android.internal.R.styleable.MenuItem_numericShortcut));
+            itemNumericModifiers =
+                    a.getInt(com.android.internal.R.styleable.MenuItem_numericModifiers,
+                            KeyEvent.META_CTRL_ON);
             if (a.hasValue(com.android.internal.R.styleable.MenuItem_checkable)) {
                 // Item has attribute checkable, use it
                 itemCheckable = a.getBoolean(com.android.internal.R.styleable.MenuItem_checkable, false) ? 1 : 0;
@@ -451,8 +459,8 @@ public class MenuInflater {
                 .setCheckable(itemCheckable >= 1)
                 .setTitleCondensed(itemTitleCondensed)
                 .setIcon(itemIconResId)
-                .setAlphabeticShortcut(itemAlphabeticShortcut)
-                .setNumericShortcut(itemNumericShortcut);
+                .setAlphabeticShortcut(itemAlphabeticShortcut, itemAlphabeticModifiers)
+                .setNumericShortcut(itemNumericShortcut, itemNumericModifiers);
 
             if (itemShowAsAction >= 0) {
                 item.setShowAsAction(itemShowAsAction);
