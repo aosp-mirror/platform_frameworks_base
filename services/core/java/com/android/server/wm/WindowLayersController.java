@@ -48,12 +48,10 @@ import static com.android.server.wm.WindowManagerService.WINDOW_LAYER_MULTIPLIER
  * <li>replaced windows, which need to live above their normal level, because they anticipate
  * an animation</li>.
  */
-public class WindowLayersController {
+class WindowLayersController {
     private final WindowManagerService mService;
 
-    private int mInputMethodAnimLayerAdjustment;
-
-    public WindowLayersController(WindowManagerService service) {
+    WindowLayersController(WindowManagerService service) {
         mService = service;
     }
 
@@ -65,7 +63,7 @@ public class WindowLayersController {
     private WindowState mDockDivider = null;
     private ArrayDeque<WindowState> mReplacingWindows = new ArrayDeque<>();
 
-    final void assignLayersLocked(WindowList windows) {
+    final void assignWindowLayers(WindowList windows) {
         if (DEBUG_LAYERS) Slog.v(TAG_WM, "Assigning layers based on windows=" + windows,
                 new RuntimeException("here").fillInStackTrace());
 
@@ -87,7 +85,7 @@ public class WindowLayersController {
 
             // TODO: Preserved old behavior of code here but not sure comparing
             // oldLayer to mAnimLayer and mLayer makes sense...though the
-            // worst case would be unintentionalp layer reassignment.
+            // worst case would be unintentional layer reassignment.
             if (w.mLayer != oldLayer || w.mWinAnimator.mAnimLayer != oldLayer) {
                 layerChanged = true;
                 anyLayerChanged = true;
@@ -113,41 +111,6 @@ public class WindowLayersController {
         }
 
         if (DEBUG_LAYERS) logDebugLayers(windows);
-    }
-
-    void setInputMethodAnimLayerAdjustment(int adj) {
-        if (DEBUG_LAYERS) Slog.v(TAG_WM, "Setting im layer adj to " + adj);
-        mInputMethodAnimLayerAdjustment = adj;
-        final WindowState imw = mService.mInputMethodWindow;
-        if (imw != null) {
-            imw.adjustAnimLayer(adj);
-        }
-        for (int i = mService.mInputMethodDialogs.size() - 1; i >= 0; i--) {
-            final WindowState dialog = mService.mInputMethodDialogs.get(i);
-            // TODO: This and other places setting mAnimLayer can probably use WS.adjustAnimLayer,
-            // but need to make sure we are not setting things twice for child windows that are
-            // already in the list.
-            dialog.mWinAnimator.mAnimLayer = dialog.mLayer + adj;
-            if (DEBUG_LAYERS) Slog.v(TAG_WM, "IM win " + imw
-                    + " anim layer: " + dialog.mWinAnimator.mAnimLayer);
-        }
-    }
-
-    int getSpecialWindowAnimLayerAdjustment(WindowState win) {
-        if (win.mIsImWindow) {
-            return mInputMethodAnimLayerAdjustment;
-        } else if (win.mIsWallpaper) {
-            return mService.mWallpaperControllerLocked.getAnimLayerAdjustment();
-        }
-        return 0;
-    }
-
-    /**
-     * @return The layer used for dimming the apps when dismissing docked/fullscreen stack. Just
-     *         above all application surfaces.
-     */
-    int getResizeDimLayer() {
-        return (mDockDivider != null) ? mDockDivider.mLayer - 1 : LAYER_OFFSET_DIM;
     }
 
     private void logDebugLayers(WindowList windows) {
@@ -250,21 +213,11 @@ public class WindowLayersController {
 
     private void assignAnimLayer(WindowState w, int layer) {
         w.mLayer = layer;
-        w.mWinAnimator.mAnimLayer = w.mLayer + w.getAnimLayerAdjustment() +
-                    getSpecialWindowAnimLayerAdjustment(w);
+        w.mWinAnimator.mAnimLayer = w.getAnimLayerAdjustment()
+                + w.getSpecialWindowAnimLayerAdjustment();
         if (w.mAppToken != null && w.mAppToken.mAppAnimator.thumbnailForceAboveLayer > 0
                 && w.mWinAnimator.mAnimLayer > w.mAppToken.mAppAnimator.thumbnailForceAboveLayer) {
             w.mAppToken.mAppAnimator.thumbnailForceAboveLayer = w.mWinAnimator.mAnimLayer;
-        }
-    }
-
-    void dump(PrintWriter pw, String s) {
-        if (mInputMethodAnimLayerAdjustment != 0 ||
-                mService.mWallpaperControllerLocked.getAnimLayerAdjustment() != 0) {
-            pw.print("  mInputMethodAnimLayerAdjustment=");
-            pw.print(mInputMethodAnimLayerAdjustment);
-            pw.print("  mWallpaperAnimLayerAdjustment=");
-            pw.println(mService.mWallpaperControllerLocked.getAnimLayerAdjustment());
         }
     }
 }

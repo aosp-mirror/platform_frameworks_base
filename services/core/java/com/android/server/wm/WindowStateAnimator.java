@@ -461,8 +461,7 @@ class WindowStateAnimator {
         if (mAnimator.mWindowDetachedWallpaper == mWin) {
             mAnimator.mWindowDetachedWallpaper = null;
         }
-        mAnimLayer = mWin.mLayer
-                + mService.mLayersController.getSpecialWindowAnimLayerAdjustment(mWin);
+        mAnimLayer = mWin.getSpecialWindowAnimLayerAdjustment();
         if (DEBUG_LAYERS) Slog.v(TAG, "Stepping win " + this + " anim layer: " + mAnimLayer);
         mHasTransformation = false;
         mHasLocalTransformation = false;

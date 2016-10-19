@@ -675,8 +675,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     WallpaperController mWallpaperControllerLocked;
 
-    final WindowLayersController mLayersController;
-
     boolean mAnimateWallpaperWithTarget;
 
     // TODO: Move to RootWindowContainer
@@ -685,19 +683,19 @@ public class WindowManagerService extends IWindowManager.Stub
     PowerManager mPowerManager;
     PowerManagerInternal mPowerManagerInternal;
 
-    float mWindowAnimationScaleSetting = 1.0f;
-    float mTransitionAnimationScaleSetting = 1.0f;
-    float mAnimatorDurationScaleSetting = 1.0f;
-    boolean mAnimationsDisabled = false;
+    private float mWindowAnimationScaleSetting = 1.0f;
+    private float mTransitionAnimationScaleSetting = 1.0f;
+    private float mAnimatorDurationScaleSetting = 1.0f;
+    private boolean mAnimationsDisabled = false;
 
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
     final DisplayManager mDisplayManager;
-    final Display[] mDisplays;
+    private final Display[] mDisplays;
 
     // Who is holding the screen on.
-    Session mHoldingScreenOn;
-    PowerManager.WakeLock mHoldingScreenWakeLock;
+    private Session mHoldingScreenOn;
+    private PowerManager.WakeLock mHoldingScreenWakeLock;
 
     boolean mTurnOnScreen;
 
@@ -708,7 +706,7 @@ public class WindowManagerService extends IWindowManager.Stub
     DragState mDragState = null;
 
     // For frozen screen animations.
-    int mExitAnimId, mEnterAnimId;
+    private int mExitAnimId, mEnterAnimId;
 
     boolean mAnimationScheduled;
 
@@ -972,7 +970,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mWallpaperControllerLocked = new WallpaperController(this);
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
-        mLayersController = new WindowLayersController(this);
         mPolicy = policy;
 
         LocalServices.addService(WindowManagerPolicy.class, mPolicy);
@@ -1120,7 +1117,8 @@ public class WindowManagerService extends IWindowManager.Stub
         // TODO(multidisplay): Needs some serious rethought when the target and IME are not on the
         // same display. Or even when the current IME/target are not on the same screen as the next
         // IME/target. For now only look for input windows on the main screen.
-        WindowList windows = getDefaultWindowListLocked();
+        final DisplayContent dc = getDefaultDisplayContentLocked();
+        final WindowList windows = dc.getWindowList();
         WindowState w = null;
         int i;
         for (i = windows.size() - 1; i >= 0; --i) {
@@ -1235,10 +1233,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInputMethodTarget = w;
                 mInputMethodTargetWaitingAnim = false;
                 if (w.mAppToken != null) {
-                    mLayersController.setInputMethodAnimLayerAdjustment(
+                    dc.setInputMethodAnimLayerAdjustment(
                             w.mAppToken.mAppAnimator.animLayerAdjustment);
                 } else {
-                    mLayersController.setInputMethodAnimLayerAdjustment(0);
+                    dc.setInputMethodAnimLayerAdjustment(0);
                 }
             }
 
@@ -1260,7 +1258,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget + " to null."
                     + (SHOW_STACK_CRAWLS ? " Callers=" + Debug.getCallers(4) : ""));
             mInputMethodTarget = null;
-            mLayersController.setInputMethodAnimLayerAdjustment(0);
+            dc.setInputMethodAnimLayerAdjustment(0);
         }
         return -1;
     }
@@ -1426,7 +1424,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (needAssignLayers) {
-            mLayersController.assignLayersLocked(windows);
+            getDefaultDisplayContentLocked().assignWindowLayers(false /* setLayoutNeeded */);
         }
 
         return true;
@@ -1804,9 +1802,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 moveInputMethodWindowsIfNeededLocked(false);
             }
 
-            mLayersController.assignLayersLocked(displayContent.getWindowList());
             // Don't do layout here, the window must call
             // relayout to be displayed, so we'll do it there.
+            displayContent.assignWindowLayers(false /* setLayoutNeeded */);
 
             if (focusChanged) {
                 mInputMonitor.setInputFocusLw(mCurrentFocus, false /*updateInputWindows*/);
@@ -2019,8 +2017,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (windows != null) {
             windows.remove(win);
             if (!mWindowPlacerLocked.isInLayout()) {
-                mLayersController.assignLayersLocked(windows);
-                win.setDisplayLayoutNeeded();
+                win.getDisplayContent().assignWindowLayers(true /* setLayoutNeeded */);
                 mWindowPlacerLocked.performSurfacePlacement();
                 if (win.mAppToken != null) {
                     win.mAppToken.updateReportedVisibilityLocked();
@@ -2398,7 +2395,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // its layer recomputed.  However, if the IME was hidden
                 // and isn't actually moved in the list, its layer may be
                 // out of data so we make sure to recompute it.
-                mLayersController.assignLayersLocked(win.getWindowList());
+                win.getDisplayContent().assignWindowLayers(false /* setLayoutNeeded */);
             }
 
             if (wallpaperMayMove) {
@@ -3719,7 +3716,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                 false /*updateInputWindows*/)) {
-            mLayersController.assignLayersLocked(displayContent.getWindowList());
+            displayContent.assignWindowLayers(false /* setLayoutNeeded */);
         }
 
         mInputMonitor.setUpdateInputWindowsNeededLw();
@@ -8098,7 +8095,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 } else if (mode == UPDATE_FOCUS_WILL_PLACE_SURFACES) {
                     // Client will do the layout, but we need to assign layers
                     // for handleNewWindowLocked() below.
-                    mLayersController.assignLayersLocked(displayContent.getWindowList());
+                    displayContent.assignWindowLayers(false /* setLayoutNeeded */);
                 }
             }
 
@@ -8758,7 +8755,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mWindowPlacerLocked.dump(pw, "  ");
             mWallpaperControllerLocked.dump(pw, "  ");
-            mLayersController.dump(pw, "  ");
             pw.print("  mSystemBooted="); pw.print(mSystemBooted);
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
 

@@ -1986,6 +1986,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return 0;
     }
 
+    int getSpecialWindowAnimLayerAdjustment() {
+        int specialAdjustment = 0;
+        if (mIsImWindow) {
+            specialAdjustment = getDisplayContent().mInputMethodAnimLayerAdjustment;
+        } else if (mIsWallpaper) {
+            specialAdjustment = mService.mWallpaperControllerLocked.getAnimLayerAdjustment();
+        }
+
+        return mLayer + specialAdjustment;
+    }
+
     void scheduleAnimationIfDimming() {
         final DisplayContent dc = getDisplayContent();
         if (dc == null) {

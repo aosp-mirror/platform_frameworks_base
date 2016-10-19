@@ -165,8 +165,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     ParcelFileDescriptor mSurfaceTraceFd;
     RemoteEventTrace mRemoteEventTrace;
 
+    private final WindowLayersController mLayersController;
+
     RootWindowContainer(WindowManagerService service) {
         mService = service;
+        mLayersController = new WindowLayersController(mService);
     }
 
     WindowState computeFocusedWindow() {
@@ -211,7 +214,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     private DisplayContent createDisplayContent(final Display display) {
-        final DisplayContent dc = new DisplayContent(display, mService);
+        final DisplayContent dc = new DisplayContent(display, mService, mLayersController);
         final int displayId = display.getDisplayId();
 
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
@@ -1171,9 +1174,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 }
             }
 
-            for (DisplayContent displayContent : displayList) {
-                mService.mLayersController.assignLayersLocked(displayContent.getWindowList());
-                displayContent.setLayoutNeeded();
+            for (int j = displayList.size() - 1; j >= 0; --j) {
+                final DisplayContent dc = displayList.get(j);
+                dc.assignWindowLayers(true /*setLayoutNeeded*/);
             }
         }
 
@@ -1250,8 +1253,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
                 if ((dc.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0
                         && mService.mWallpaperControllerLocked.adjustWallpaperWindows()) {
-                    mService.mLayersController.assignLayersLocked(windows);
-                    dc.setLayoutNeeded();
+                    dc.assignWindowLayers(true /*setLayoutNeeded*/);
                 }
 
                 if (isDefaultDisplay

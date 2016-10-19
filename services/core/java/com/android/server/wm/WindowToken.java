@@ -140,7 +140,7 @@ class WindowToken extends WindowContainer<WindowState> {
                 highestAnimLayer = winHighestAnimLayer;
             }
             if (w == mService.mInputMethodTarget && !mService.mInputMethodTargetWaitingAnim) {
-                mService.mLayersController.setInputMethodAnimLayerAdjustment(adj);
+                mDisplayContent.setInputMethodAnimLayerAdjustment(adj);
             }
         }
         return highestAnimLayer;

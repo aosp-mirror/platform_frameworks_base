@@ -742,8 +742,7 @@ class WallpaperController {
         }
 
         if (adjust && adjustWallpaperWindows()) {
-            mService.mLayersController.assignLayersLocked(windows);
-            dc.setLayoutNeeded();
+            dc.assignWindowLayers(true /*setLayoutNeeded*/);
         }
     }
 
@@ -768,6 +767,10 @@ class WallpaperController {
             pw.print(prefix);
             pw.print("mLastWallpaperDisplayOffsetX="); pw.print(mLastWallpaperDisplayOffsetX);
             pw.print(" mLastWallpaperDisplayOffsetY="); pw.println(mLastWallpaperDisplayOffsetY);
+        }
+
+        if (mWallpaperAnimLayerAdjustment != 0) {
+            pw.println(prefix + "mWallpaperAnimLayerAdjustment=" + mWallpaperAnimLayerAdjustment);
         }
     }
 
