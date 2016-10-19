@@ -22,6 +22,7 @@ import android.net.IIpConnectivityMetrics;
 import android.net.metrics.IpConnectivityLog;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -32,6 +33,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.function.ToIntFunction;
 
 import static com.android.server.connectivity.metrics.IpConnectivityLogClass.IpConnectivityEvent;
 
@@ -51,6 +53,8 @@ final public class IpConnectivityMetrics extends SystemService {
 
     // Default size of the event buffer. Once the buffer is full, incoming events are dropped.
     private static final int DEFAULT_BUFFER_SIZE = 2000;
+    // Maximum size of the event buffer.
+    private static final int MAXIMUM_BUFFER_SIZE = DEFAULT_BUFFER_SIZE * 10;
 
     // Lock ensuring that concurrent manipulations of the event buffer are correct.
     // There are three concurrent operations to synchronize:
@@ -70,9 +74,16 @@ final public class IpConnectivityMetrics extends SystemService {
     @GuardedBy("mLock")
     private int mCapacity;
 
-    public IpConnectivityMetrics(Context ctx) {
+    private final ToIntFunction<Context> mCapacityGetter;
+
+    public IpConnectivityMetrics(Context ctx, ToIntFunction<Context> capacityGetter) {
         super(ctx);
+        mCapacityGetter = capacityGetter;
         initBuffer();
+    }
+
+    public IpConnectivityMetrics(Context ctx) {
+        this(ctx, READ_BUFFER_SIZE);
     }
 
     @Override
@@ -93,7 +104,7 @@ final public class IpConnectivityMetrics extends SystemService {
 
     @VisibleForTesting
     public int bufferCapacity() {
-        return DEFAULT_BUFFER_SIZE; // TODO: read from config
+        return mCapacityGetter.applyAsInt(getContext());
     }
 
     private void initBuffer() {
@@ -235,5 +246,14 @@ final public class IpConnectivityMetrics extends SystemService {
         private void enforcePermission(String what) {
             getContext().enforceCallingOrSelfPermission(what, "IpConnectivityMetrics");
         }
+    };
+
+    private static final ToIntFunction<Context> READ_BUFFER_SIZE = (ctx) -> {
+        int size = Settings.Global.getInt(ctx.getContentResolver(),
+                Settings.Global.CONNECTIVITY_METRICS_BUFFER_SIZE, DEFAULT_BUFFER_SIZE);
+        if (size <= 0) {
+            return DEFAULT_BUFFER_SIZE;
+        }
+        return Math.min(size, MAXIMUM_BUFFER_SIZE);
     };
 }
