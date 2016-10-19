@@ -22,6 +22,7 @@ import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
 
+import static com.android.internal.logging.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -130,6 +131,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
@@ -316,6 +318,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * i.e. the user has to use a strong authentication method like password, PIN or pattern.
      */
     private static final long MINIMUM_STRONG_AUTH_TIMEOUT_MS = 1 * 60 * 60 * 1000; // 1h
+
+    /**
+     * Strings logged with {@link #PROVISIONING_ENTRY_POINT_ADB}.
+     */
+    private static final String LOG_TAG_PROFILE_OWNER = "profile-owner";
+    private static final String LOG_TAG_DEVICE_OWNER = "device-owner";
 
     final Context mContext;
     final Injector mInjector;
@@ -5891,6 +5899,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
 
+            if (isAdb()) {
+                // Log device owner provisioning was started using adb.
+                MetricsLogger.action(mContext, PROVISIONING_ENTRY_POINT_ADB, LOG_TAG_DEVICE_OWNER);
+            }
+
             mOwners.setDeviceOwner(admin, ownerName, userId);
             mOwners.writeDeviceOwner();
             updateDeviceOwnerLocked();
@@ -6073,6 +6086,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new IllegalArgumentException("Not active admin: " + who);
             }
 
+            if (isAdb()) {
+                // Log profile owner provisioning was started using adb.
+                MetricsLogger.action(mContext, PROVISIONING_ENTRY_POINT_ADB, LOG_TAG_PROFILE_OWNER);
+            }
+
             mOwners.setProfileOwner(who, ownerName, userHandle);
             mOwners.writeProfileOwner(userHandle);
             Slog.i(LOG_TAG, "Profile owner set: " + who + " on user " + userHandle);
@@ -6206,8 +6224,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             boolean transitionCheckNeeded = true;
 
             // Calling identity/permission checks.
-            final int callingUid = mInjector.binderGetCallingUid();
-            if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
+            if (isAdb()) {
                 // ADB shell can only move directly from un-managed to finalized as part of directly
                 // setting profile-owner or device-owner.
                 if (getUserProvisioningState(userHandle) !=
@@ -6410,8 +6427,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalStateException("Trying to set the profile owner, but the user "
                     + "already has a device owner.");
         }
-        int callingUid = mInjector.binderGetCallingUid();
-        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
+        if (isAdb()) {
             if (hasUserSetupCompleted(userHandle)
                     && hasIncompatibleAccountsLocked(userHandle, owner)) {
                 throw new IllegalStateException("Not allowed to set the profile owner because "
@@ -6431,13 +6447,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * permission.
      */
     private void enforceCanSetDeviceOwnerLocked(@Nullable ComponentName owner, int userId) {
-        int callingUid = mInjector.binderGetCallingUid();
-        boolean isAdb = callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID;
-        if (!isAdb) {
+        if (!isAdb()) {
             enforceCanManageProfileAndDeviceOwners();
         }
 
-        final int code = checkSetDeviceOwnerPreConditionLocked(owner, userId, isAdb);
+        final int code = checkSetDeviceOwnerPreConditionLocked(owner, userId, isAdb());
         switch (code) {
             case CODE_OK:
                 return;
@@ -9482,5 +9496,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Log.w(LOG_TAG, "Failed to get account feature", e);
             return false;
         }
+    }
+
+    private boolean isAdb() {
+        final int callingUid = mInjector.binderGetCallingUid();
+        return callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID;
     }
 }
