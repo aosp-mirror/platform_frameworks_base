@@ -3983,7 +3983,7 @@ public class BackupManagerService {
     boolean deviceIsEncrypted() {
         try {
             return mMountService.getEncryptionState()
-                     != IMountService.ENCRYPTION_STATE_NONE
+                     != StorageManager.ENCRYPTION_STATE_NONE
                 && mMountService.getPasswordType()
                      != StorageManager.CRYPT_TYPE_DEFAULT;
         } catch (Exception e) {

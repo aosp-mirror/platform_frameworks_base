@@ -2535,11 +2535,11 @@ class MountService extends IMountService.Stub
         } catch (NumberFormatException e) {
             // Bad result - unexpected.
             Slog.w(TAG, "Unable to parse result from cryptfs cryptocomplete");
-            return ENCRYPTION_STATE_ERROR_UNKNOWN;
+            return StorageManager.ENCRYPTION_STATE_ERROR_UNKNOWN;
         } catch (NativeDaemonConnectorException e) {
             // Something bad happened.
             Slog.w(TAG, "Error in communicating with cryptfs in validating");
-            return ENCRYPTION_STATE_ERROR_UNKNOWN;
+            return StorageManager.ENCRYPTION_STATE_ERROR_UNKNOWN;
         }
     }
 
