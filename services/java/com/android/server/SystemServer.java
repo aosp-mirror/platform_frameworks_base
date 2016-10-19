@@ -732,7 +732,7 @@ public final class SystemServer {
 
             traceBeginAndSlog("IpConnectivityMetrics");
             mSystemServiceManager.startService(IpConnectivityMetrics.class);
-            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+            traceEnd();
 
             traceBeginAndSlog("PinnerService");
             mSystemServiceManager.startService(PinnerService.class);
