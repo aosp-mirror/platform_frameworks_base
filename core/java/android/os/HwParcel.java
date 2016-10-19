@@ -16,6 +16,9 @@
 
 package android.os;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import libcore.util.NativeAllocationRegistry;
 
 /** @hide */
@@ -53,14 +56,88 @@ public class HwParcel {
     public native final void writeDouble(double val);
     public native final void writeString(String val);
 
-    public native final void writeBoolVector(boolean[] val);
-    public native final void writeInt8Vector(byte[] val);
-    public native final void writeInt16Vector(short[] val);
-    public native final void writeInt32Vector(int[] val);
-    public native final void writeInt64Vector(long[] val);
-    public native final void writeFloatVector(float[] val);
-    public native final void writeDoubleVector(double[] val);
-    public native final void writeStringVector(String[] val);
+    private native final void writeBoolVector(boolean[] val);
+    private native final void writeInt8Vector(byte[] val);
+    private native final void writeInt16Vector(short[] val);
+    private native final void writeInt32Vector(int[] val);
+    private native final void writeInt64Vector(long[] val);
+    private native final void writeFloatVector(float[] val);
+    private native final void writeDoubleVector(double[] val);
+    private native final void writeStringVector(String[] val);
+
+    public final void writeBoolVector(ArrayList<Boolean> val) {
+        final int n = val.size();
+        boolean[] array = new boolean[n];
+        for (int i = 0; i < n; ++i) {
+            array[i] = val.get(i);
+        }
+
+        writeBoolVector(array);
+    }
+
+    public final void writeInt8Vector(ArrayList<Byte> val) {
+        final int n = val.size();
+        byte[] array = new byte[n];
+        for (int i = 0; i < n; ++i) {
+            array[i] = val.get(i);
+        }
+
+        writeInt8Vector(array);
+    }
+
+    public final void writeInt16Vector(ArrayList<Short> val) {
+        final int n = val.size();
+        short[] array = new short[n];
+        for (int i = 0; i < n; ++i) {
+            array[i] = val.get(i);
+        }
+
+        writeInt16Vector(array);
+    }
+
+    public final void writeInt32Vector(ArrayList<Integer> val) {
+        final int n = val.size();
+        int[] array = new int[n];
+        for (int i = 0; i < n; ++i) {
+            array[i] = val.get(i);
+        }
+
+        writeInt32Vector(array);
+    }
+
+    public final void writeInt64Vector(ArrayList<Long> val) {
+        final int n = val.size();
+        long[] array = new long[n];
+        for (int i = 0; i < n; ++i) {
+            array[i] = val.get(i);
+        }
+
+        writeInt64Vector(array);
+    }
+
+    public final void writeFloatVector(ArrayList<Float> val) {
+        final int n = val.size();
+        float[] array = new float[n];
+        for (int i = 0; i < n; ++i) {
+            array[i] = val.get(i);
+        }
+
+        writeFloatVector(array);
+    }
+
+    public final void writeDoubleVector(ArrayList<Double> val) {
+        final int n = val.size();
+        double[] array = new double[n];
+        for (int i = 0; i < n; ++i) {
+            array[i] = val.get(i);
+        }
+
+        writeDoubleVector(array);
+    }
+
+    public final void writeStringVector(ArrayList<String> val) {
+        writeStringVector(val.toArray(new String[val.size()]));
+    }
 
     public native final void writeStrongBinder(IHwBinder binder);
 
@@ -74,14 +151,60 @@ public class HwParcel {
     public native final double readDouble();
     public native final String readString();
 
-    public native final boolean[] readBoolVector();
-    public native final byte[] readInt8Vector();
-    public native final short[] readInt16Vector();
-    public native final int[] readInt32Vector();
-    public native final long[] readInt64Vector();
-    public native final float[] readFloatVector();
-    public native final double[] readDoubleVector();
-    public native final String[] readStringVector();
+    private native final boolean[] readBoolVectorAsArray();
+    private native final byte[] readInt8VectorAsArray();
+    private native final short[] readInt16VectorAsArray();
+    private native final int[] readInt32VectorAsArray();
+    private native final long[] readInt64VectorAsArray();
+    private native final float[] readFloatVectorAsArray();
+    private native final double[] readDoubleVectorAsArray();
+    private native final String[] readStringVectorAsArray();
+
+    public final ArrayList<Boolean> readBoolVector() {
+        Boolean[] array = HwBlob.wrapArray(readBoolVectorAsArray());
+
+        return new ArrayList<Boolean>(Arrays.asList(array));
+    }
+
+    public final ArrayList<Byte> readInt8Vector() {
+        Byte[] array = HwBlob.wrapArray(readInt8VectorAsArray());
+
+        return new ArrayList<Byte>(Arrays.asList(array));
+    }
+
+    public final ArrayList<Short> readInt16Vector() {
+        Short[] array = HwBlob.wrapArray(readInt16VectorAsArray());
+
+        return new ArrayList<Short>(Arrays.asList(array));
+    }
+
+    public final ArrayList<Integer> readInt32Vector() {
+        Integer[] array = HwBlob.wrapArray(readInt32VectorAsArray());
+
+        return new ArrayList<Integer>(Arrays.asList(array));
+    }
+
+    public final ArrayList<Long> readInt64Vector() {
+        Long[] array = HwBlob.wrapArray(readInt64VectorAsArray());
+
+        return new ArrayList<Long>(Arrays.asList(array));
+    }
+
+    public final ArrayList<Float> readFloatVector() {
+        Float[] array = HwBlob.wrapArray(readFloatVectorAsArray());
+
+        return new ArrayList<Float>(Arrays.asList(array));
+    }
+
+    public final ArrayList<Double> readDoubleVector() {
+        Double[] array = HwBlob.wrapArray(readDoubleVectorAsArray());
+
+        return new ArrayList<Double>(Arrays.asList(array));
+    }
+
+    public final ArrayList<String> readStringVector() {
+        return new ArrayList<String>(Arrays.asList(readStringVectorAsArray()));
+    }
 
     public native final IHwBinder readStrongBinder();
 
