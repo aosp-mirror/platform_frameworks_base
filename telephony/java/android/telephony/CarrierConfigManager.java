@@ -123,6 +123,13 @@ public class CarrierConfigManager {
     public static final String KEY_ALLOW_LOCAL_DTMF_TONES_BOOL = "allow_local_dtmf_tones_bool";
 
     /**
+     * Determines if the carrier requires converting the destination number before sending out an
+     * SMS. Certain networks and numbering plans require different formats.
+     */
+    public static final String KEY_SMS_REQUIRES_DESTINATION_NUMBER_CONVERSION_BOOL=
+            "sms_requires_destination_number_conversion_bool";
+
+    /**
      * If true, show an onscreen "Dial" button in the dialer. In practice this is used on all
      * platforms, even the ones with hard SEND/END keys, but for maximum flexibility it's controlled
      * by a flag here (which can be overridden on a per-product basis.)
@@ -1113,6 +1120,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_PREFER_2G_BOOL, true);
         sDefaults.putBoolean(KEY_SHOW_APN_SETTING_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CDMA_CHOICES_BOOL, false);
+        sDefaults.putBoolean(KEY_SMS_REQUIRES_DESTINATION_NUMBER_CONVERSION_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_ONSCREEN_DIAL_BUTTON_BOOL, true);
         sDefaults.putBoolean(KEY_SIM_NETWORK_UNLOCK_ALLOW_DISMISS_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_PAUSE_IMS_VIDEO_CALLS_BOOL, false);
