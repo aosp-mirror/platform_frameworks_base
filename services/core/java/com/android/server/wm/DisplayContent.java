@@ -28,15 +28,11 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 
 import android.app.ActivityManager.StackId;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Region.Op;
-import android.os.Build;
-import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
@@ -728,8 +724,7 @@ class DisplayContent {
         for (int i = 0; i < windowCount; i++) {
             WindowState window = windows.get(i);
             if (window.mAttrs.type == TYPE_TOAST && window.mOwnerUid == uid
-                    && !window.mPermanentlyHidden && !window.mAnimatingExit
-                    && !window.mRemoveOnExit) {
+                    && !window.isRemovedOrHidden()) {
                 return false;
             }
         }
