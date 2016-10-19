@@ -977,8 +977,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
         LocalServices.addService(WindowManagerPolicy.class, mPolicy);
 
-        mPointerEventDispatcher = mInputManager != null
-                ? new PointerEventDispatcher(mInputManager.monitorInput(TAG_WM)) : null;
+        if(mInputManager != null) {
+            final InputChannel inputChannel = mInputManager.monitorInput(TAG_WM);
+            mPointerEventDispatcher = inputChannel != null
+                    ? new PointerEventDispatcher(inputChannel) : null;
+        } else {
+            mPointerEventDispatcher = null;
+        }
 
         mFxSession = new SurfaceSession();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
