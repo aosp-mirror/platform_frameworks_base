@@ -69,6 +69,8 @@ interface INotificationManager
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
     boolean areNotificationsEnabled(String pkg);
     int getPackageImportance(String pkg);
+    void setNotificationSoundTimeout(String pkg, int uid, long timeout);
+    long getNotificationSoundTimeout(String pkg, int uid);
 
     List<String> getAllowedAssistantAdjustments(String pkg);
     void allowAssistantAdjustment(String adjustmentType);
