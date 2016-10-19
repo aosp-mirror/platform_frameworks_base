@@ -15155,7 +15155,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (lastTask != r.task) {
                     lastTask = r.task;
                     pw.print("TASK "); pw.print(lastTask.affinity);
-                            pw.print(" id="); pw.println(lastTask.taskId);
+                            pw.print(" id="); pw.print(lastTask.taskId);
+                            pw.print(" userId="); pw.println(lastTask.userId);
                     if (dumpAll) {
                         lastTask.dump(pw, "  ");
                     }
