@@ -17506,12 +17506,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     public List<ActivityManager.RunningServiceInfo> getServices(int maxNum,
             int flags) {
         enforceNotIsolatedCaller("getServices");
-        synchronized (this) {
-            final int callingUid = Binder.getCallingUid();
-            final boolean allowed = isGetTasksAllowed("getServices", Binder.getCallingPid(),
-                callingUid);
 
-            return mServices.getRunningServiceInfoLocked(maxNum, flags, callingUid, allowed);
+        final int callingUid = Binder.getCallingUid();
+        final boolean canInteractAcrossUsers = (ActivityManager.checkUidPermission(
+            INTERACT_ACROSS_USERS_FULL, callingUid) == PERMISSION_GRANTED);
+        final boolean allowed = isGetTasksAllowed("getServices", Binder.getCallingPid(),
+            callingUid);
+        synchronized (this) {
+            return mServices.getRunningServiceInfoLocked(maxNum, flags, callingUid,
+                allowed, canInteractAcrossUsers);
         }
     }
 
