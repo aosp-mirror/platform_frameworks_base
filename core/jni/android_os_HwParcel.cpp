@@ -888,15 +888,28 @@ static JNINativeMethod gMethods[] = {
     { "readString", "()Ljava/lang/String;",
         (void *)JHwParcel_native_readString },
 
-    { "readBoolVector", "()[Z", (void *)JHwParcel_native_readBoolVector },
-    { "readInt8Vector", "()[B", (void *)JHwParcel_native_readInt8Vector },
-    { "readInt16Vector", "()[S", (void *)JHwParcel_native_readInt16Vector },
-    { "readInt32Vector", "()[I", (void *)JHwParcel_native_readInt32Vector },
-    { "readInt64Vector", "()[J", (void *)JHwParcel_native_readInt64Vector },
-    { "readFloatVector", "()[F", (void *)JHwParcel_native_readFloatVector },
-    { "readDoubleVector", "()[D", (void *)JHwParcel_native_readDoubleVector },
+    { "readBoolVectorAsArray", "()[Z",
+        (void *)JHwParcel_native_readBoolVector },
 
-    { "readStringVector", "()[Ljava/lang/String;",
+    { "readInt8VectorAsArray", "()[B",
+        (void *)JHwParcel_native_readInt8Vector },
+
+    { "readInt16VectorAsArray", "()[S",
+        (void *)JHwParcel_native_readInt16Vector },
+
+    { "readInt32VectorAsArray", "()[I",
+        (void *)JHwParcel_native_readInt32Vector },
+
+    { "readInt64VectorAsArray", "()[J",
+        (void *)JHwParcel_native_readInt64Vector },
+
+    { "readFloatVectorAsArray", "()[F",
+        (void *)JHwParcel_native_readFloatVector },
+
+    { "readDoubleVectorAsArray", "()[D",
+        (void *)JHwParcel_native_readDoubleVector },
+
+    { "readStringVectorAsArray", "()[Ljava/lang/String;",
         (void *)JHwParcel_native_readStringVector },
 
     { "readStrongBinder", "()L" PACKAGE_PATH "/IHwBinder;",
