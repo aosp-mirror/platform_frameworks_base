@@ -2575,6 +2575,9 @@ message MetricsEvent {
     // ACTION: Logs extra passed by the dpc while provisioning.
     PROVISIONING_EXTRA = 612;
 
+    // OPEN Settings > Bluetooth > Attempt to connect to device that shows dialog
+    BLUETOOTH_DIALOG_FRAGMENT = 613;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
