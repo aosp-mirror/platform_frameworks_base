@@ -166,6 +166,38 @@ android_hardware_UsbRequest_queue_direct(JNIEnv *env, jobject thiz,
     return JNI_TRUE;
 }
 
+static jboolean
+android_hardware_UsbRequest_enqueue(JNIEnv *env, jobject thiz, jobject buffer, jint offset,
+        jint length)
+{
+    struct usb_request* request = get_request_from_object(env, thiz);
+    if (!request) {
+        ALOGE("request is closed in native_queue");
+        return JNI_FALSE;
+    }
+
+    if (buffer == NULL) {
+        request->buffer = NULL;
+        request->buffer_length = 0;
+    } else {
+        request->buffer = (void *)((char *)env->GetDirectBufferAddress(buffer) + offset);
+        request->buffer_length = length;
+    }
+
+    // Save a reference to ourselves so UsbDeviceConnection.waitRequest() can find us.
+    // We also need this to make sure our native buffer is not deallocated while IO is active.
+    request->client_data = (void *)env->NewGlobalRef(thiz);
+
+    int err = usb_request_queue(request);
+
+    if (err != 0) {
+        request->buffer = NULL;
+        env->DeleteGlobalRef((jobject)request->client_data);
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
 static jint
 android_hardware_UsbRequest_dequeue_direct(JNIEnv *env, jobject thiz)
 {
@@ -194,6 +226,8 @@ static const JNINativeMethod method_table[] = {
     {"native_init",             "(Landroid/hardware/usb/UsbDeviceConnection;IIII)Z",
                                             (void *)android_hardware_UsbRequest_init},
     {"native_close",            "()V",      (void *)android_hardware_UsbRequest_close},
+    {"native_enqueue",         "(Ljava/nio/ByteBuffer;II)Z",
+                                            (void *)android_hardware_UsbRequest_enqueue},
     {"native_queue_array",      "([BIZ)Z",  (void *)android_hardware_UsbRequest_queue_array},
     {"native_dequeue_array",    "([BIZ)I",  (void *)android_hardware_UsbRequest_dequeue_array},
     {"native_queue_direct",     "(Ljava/nio/ByteBuffer;IZ)Z",
