@@ -41,7 +41,7 @@ public class PipUI extends SystemUI {
             return;
         }
         if (mIsLeanBackOnly) {
-            com.android.systemui.tv.pip.PipManager.getInstance().initialize(mContext);
+            com.android.systemui.pip.tv.PipManager.getInstance().initialize(mContext);
         } else {
             com.android.systemui.pip.phone.PipManager.getInstance().initialize(mContext);
         }
@@ -54,7 +54,7 @@ public class PipUI extends SystemUI {
             return;
         }
         if (mIsLeanBackOnly) {
-            com.android.systemui.tv.pip.PipManager.getInstance().onConfigurationChanged();
+            com.android.systemui.pip.tv.PipManager.getInstance().onConfigurationChanged();
         } else {
             com.android.systemui.pip.phone.PipManager.getInstance().onConfigurationChanged();
         }

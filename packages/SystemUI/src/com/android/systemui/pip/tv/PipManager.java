@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.tv.pip;
+package com.android.systemui.pip.tv;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
@@ -38,7 +38,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.IWindowManager;
-import android.view.WindowManagerGlobal;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;

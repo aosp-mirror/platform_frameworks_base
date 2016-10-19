@@ -58,8 +58,8 @@ import com.android.systemui.recents.tv.views.TaskCardView;
 import com.android.systemui.recents.tv.views.TaskStackHorizontalGridView;
 import com.android.systemui.recents.tv.views.TaskStackHorizontalViewAdapter;
 import com.android.systemui.statusbar.BaseStatusBar;
-import com.android.systemui.tv.pip.PipManager;
-import com.android.systemui.tv.pip.PipRecentsOverlayManager;
+import com.android.systemui.pip.tv.PipManager;
+import com.android.systemui.pip.tv.PipRecentsOverlayManager;
 
 import java.util.ArrayList;
 import java.util.Collections;

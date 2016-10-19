@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.tv.pip;
+package com.android.systemui.pip.tv;
 
 import android.content.Context;
 import android.media.session.MediaController;
@@ -22,9 +22,6 @@ import android.media.session.PlaybackState;
 import android.view.View;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.View.OnFocusChangeListener;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.LinearLayout;
 import android.util.AttributeSet;
 
@@ -32,10 +29,6 @@ import com.android.systemui.R;
 
 import static android.media.session.PlaybackState.ACTION_PAUSE;
 import static android.media.session.PlaybackState.ACTION_PLAY;
-
-import static com.android.systemui.tv.pip.PipManager.PLAYBACK_STATE_PLAYING;
-import static com.android.systemui.tv.pip.PipManager.PLAYBACK_STATE_PAUSED;
-import static com.android.systemui.tv.pip.PipManager.PLAYBACK_STATE_UNAVAILABLE;
 
 
 /**
@@ -145,9 +138,9 @@ public class PipControlsView extends LinearLayout {
                 }
                 long actions = mMediaController.getPlaybackState().getActions();
                 int state = mMediaController.getPlaybackState().getState();
-                if (mPipManager.getPlaybackState() == PLAYBACK_STATE_PAUSED) {
+                if (mPipManager.getPlaybackState() == PipManager.PLAYBACK_STATE_PAUSED) {
                     mMediaController.getTransportControls().play();
-                } else if (mPipManager.getPlaybackState() == PLAYBACK_STATE_PLAYING) {
+                } else if (mPipManager.getPlaybackState() == PipManager.PLAYBACK_STATE_PLAYING) {
                     mMediaController.getTransportControls().pause();
                 }
                 // View will be updated later in {@link mMediaControllerCallback}
@@ -188,11 +181,11 @@ public class PipControlsView extends LinearLayout {
 
     private void updatePlayPauseView() {
         int state = mPipManager.getPlaybackState();
-        if (state == PLAYBACK_STATE_UNAVAILABLE) {
+        if (state == PipManager.PLAYBACK_STATE_UNAVAILABLE) {
             mPlayPauseButtonView.setVisibility(View.GONE);
         } else {
             mPlayPauseButtonView.setVisibility(View.VISIBLE);
-            if (state == PLAYBACK_STATE_PLAYING) {
+            if (state == PipManager.PLAYBACK_STATE_PLAYING) {
                 mPlayPauseButtonView.setImageResource(R.drawable.ic_pause_white_24dp);
                 mPlayPauseButtonView.setText(R.string.pip_pause);
             } else {

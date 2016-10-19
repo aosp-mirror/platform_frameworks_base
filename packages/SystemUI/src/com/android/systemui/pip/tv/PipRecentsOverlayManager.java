@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.tv.pip;
+package com.android.systemui.pip.tv;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,9 +31,6 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import static android.view.Gravity.CENTER_HORIZONTAL;
 import static android.view.Gravity.TOP;
 import static android.view.View.MeasureSpec.UNSPECIFIED;
-import static com.android.systemui.tv.pip.PipManager.STATE_PIP_OVERLAY;
-import static com.android.systemui.tv.pip.PipManager.STATE_PIP_RECENTS;
-import static com.android.systemui.tv.pip.PipManager.STATE_PIP_RECENTS_FOCUSED;
 
 public class PipRecentsOverlayManager {
     private static final String TAG = "PipRecentsOverlayManager";
@@ -158,7 +154,7 @@ public class PipRecentsOverlayManager {
         mIsPipFocusedInRecent = true;
         mPipControlsView.startFocusGainAnimation();
         mWindowManager.updateViewLayout(mOverlayView, mPipRecentsControlsViewFocusedLayoutParams);
-        mPipManager.resizePinnedStack(STATE_PIP_RECENTS_FOCUSED);
+        mPipManager.resizePinnedStack(PipManager.STATE_PIP_RECENTS_FOCUSED);
         if (mTalkBackEnabled) {
             mPipControlsView.requestFocus();
             mPipControlsView.sendAccessibilityEvent(
@@ -177,7 +173,7 @@ public class PipRecentsOverlayManager {
         mIsPipFocusedInRecent = false;
         mPipControlsView.startFocusLossAnimation();
         mWindowManager.updateViewLayout(mOverlayView, mPipRecentsControlsViewLayoutParams);
-        mPipManager.resizePinnedStack(STATE_PIP_RECENTS);
+        mPipManager.resizePinnedStack(PipManager.STATE_PIP_RECENTS);
         if (mCallback != null) {
             mCallback.onRecentsFocused();
         }
@@ -198,7 +194,7 @@ public class PipRecentsOverlayManager {
         }
         mIsRecentsShown = true;
         mIsPipFocusedInRecent = true;
-        mPipManager.resizePinnedStack(STATE_PIP_RECENTS_FOCUSED);
+        mPipManager.resizePinnedStack(PipManager.STATE_PIP_RECENTS_FOCUSED);
         // Overlay view will be added after the resize animation ends, if any.
     }
 
@@ -212,7 +208,7 @@ public class PipRecentsOverlayManager {
         removePipRecentsOverlayView();
 
         if (mPipManager.isPipShown()) {
-            mPipManager.resizePinnedStack(STATE_PIP_OVERLAY);
+            mPipManager.resizePinnedStack(PipManager.STATE_PIP_OVERLAY);
         }
     }
 
