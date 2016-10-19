@@ -1001,7 +1001,12 @@ public class SyncManager {
         }
     }
 
-    public int computeSyncable(Account account, int userId, String authority) {
+    private int computeSyncable(Account account, int userId, String authority) {
+        return computeSyncable(account, userId, authority, true);
+    }
+
+    public int computeSyncable(Account account, int userId, String authority,
+            boolean checkAccountAccess) {
         final int status = getIsSyncable(account, userId, authority);
         if (status == AuthorityInfo.NOT_SYNCABLE) {
             return AuthorityInfo.NOT_SYNCABLE;
@@ -1025,7 +1030,7 @@ public class SyncManager {
         } catch (RemoteException e) {
             /* ignore - local call */
         }
-        if (!canAccessAccount(account, owningPackage, owningUid)) {
+        if (checkAccountAccess && !canAccessAccount(account, owningPackage, owningUid)) {
             Log.w(TAG, "Access to " + account + " denied for package "
                     + owningPackage + " in UID " + syncAdapterInfo.uid);
             return AuthorityInfo.SYNCABLE_NO_ACCOUNT_ACCESS;

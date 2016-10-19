@@ -838,7 +838,7 @@ public final class ContentService extends IContentService.Stub {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
                 return syncManager.computeSyncable(
-                        account, userId, providerName);
+                        account, userId, providerName, false);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -853,6 +853,8 @@ public final class ContentService extends IContentService.Stub {
         }
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
+
+        syncable = normalizeSyncable(syncable);
 
         int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
@@ -1154,6 +1156,15 @@ public final class ContentService extends IContentService.Stub {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
         }
+    }
+
+    private static int normalizeSyncable(int syncable) {
+        if (syncable > 0) {
+            return SyncStorageEngine.AuthorityInfo.SYNCABLE;
+        } else if (syncable == 0) {
+            return SyncStorageEngine.AuthorityInfo.NOT_SYNCABLE;
+        }
+        return SyncStorageEngine.AuthorityInfo.UNDEFINED;
     }
 
     /**
