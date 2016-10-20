@@ -42,7 +42,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
@@ -53,6 +52,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SELinux;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
@@ -62,6 +62,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
@@ -75,6 +76,7 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -114,7 +116,7 @@ import java.util.regex.Pattern;
  */
 @SuppressWarnings("deprecation")
 public class SettingsProvider extends ContentProvider {
-    private static final boolean DEBUG = false;
+    static final boolean DEBUG = false;
 
     private static final boolean DROP_DATABASE_ON_MIGRATION = true;
 
@@ -264,6 +266,7 @@ public class SettingsProvider extends ContentProvider {
         }
         registerBroadcastReceivers();
         startWatchingUserRestrictionChanges();
+        ServiceManager.addService("settings", new SettingsService(this));
         return true;
     }
 
@@ -560,16 +563,14 @@ public class SettingsProvider extends ContentProvider {
         return cacheDir;
     }
 
-    @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dumpInternal(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mLock) {
             final long identity = Binder.clearCallingIdentity();
             try {
-                List<UserInfo> users = mUserManager.getUsers(true);
+                SparseBooleanArray users = mSettingsRegistry.getKnownUsersLocked();
                 final int userCount = users.size();
                 for (int i = 0; i < userCount; i++) {
-                    UserInfo user = users.get(i);
-                    dumpForUserLocked(user.id, pw);
+                    dumpForUserLocked(users.keyAt(i), pw);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -580,49 +581,53 @@ public class SettingsProvider extends ContentProvider {
     private void dumpForUserLocked(int userId, PrintWriter pw) {
         if (userId == UserHandle.USER_SYSTEM) {
             pw.println("GLOBAL SETTINGS (user " + userId + ")");
-            Cursor globalCursor = getAllGlobalSettings(ALL_COLUMNS);
-            dumpSettings(globalCursor, pw);
-            pw.println();
-
             SettingsState globalSettings = mSettingsRegistry.getSettingsLocked(
                     SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
+            if (globalSettings != null) {
+                dumpSettingsLocked(globalSettings, pw);
+            }
+            pw.println();
+
             globalSettings.dumpHistoricalOperations(pw);
         }
 
         pw.println("SECURE SETTINGS (user " + userId + ")");
-        Cursor secureCursor = getAllSecureSettings(userId, ALL_COLUMNS);
-        dumpSettings(secureCursor, pw);
-        pw.println();
-
         SettingsState secureSettings = mSettingsRegistry.getSettingsLocked(
                 SETTINGS_TYPE_SECURE, userId);
+        if (secureSettings != null) {
+            dumpSettingsLocked(secureSettings, pw);
+        }
+        pw.println();
+
         secureSettings.dumpHistoricalOperations(pw);
 
         pw.println("SYSTEM SETTINGS (user " + userId + ")");
-        Cursor systemCursor = getAllSystemSettings(userId, ALL_COLUMNS);
-        dumpSettings(systemCursor, pw);
-        pw.println();
-
         SettingsState systemSettings = mSettingsRegistry.getSettingsLocked(
                 SETTINGS_TYPE_SYSTEM, userId);
+        if (systemSettings != null) {
+            dumpSettingsLocked(systemSettings, pw);
+        }
+        pw.println();
+
         systemSettings.dumpHistoricalOperations(pw);
     }
 
-    private void dumpSettings(Cursor cursor, PrintWriter pw) {
-        if (cursor == null || !cursor.moveToFirst()) {
-            return;
-        }
+    private void dumpSettingsLocked(SettingsState settingsState, PrintWriter pw) {
+        List<String> names = settingsState.getSettingNamesLocked();
 
-        final int idColumnIdx = cursor.getColumnIndex(Settings.NameValueTable._ID);
-        final int nameColumnIdx = cursor.getColumnIndex(Settings.NameValueTable.NAME);
-        final int valueColumnIdx = cursor.getColumnIndex(Settings.NameValueTable.VALUE);
+        final int nameCount = names.size();
 
-        do {
-            pw.append("_id:").append(toDumpString(cursor.getString(idColumnIdx)));
-            pw.append(" name:").append(toDumpString(cursor.getString(nameColumnIdx)));
-            pw.append(" value:").append(toDumpString(cursor.getString(valueColumnIdx)));
+        for (int i = 0; i < nameCount; i++) {
+            String name = names.get(i);
+            Setting setting = settingsState.getSettingLocked(name);
+            pw.print("_id:"); pw.print(toDumpString(setting.getId()));
+            pw.print(" name:"); pw.print(toDumpString(name));
+            if (setting.getPackageName() != null) {
+                pw.print(" pkg:"); pw.print(toDumpString(setting.getPackageName()));
+            }
+            pw.print(" value:"); pw.print(toDumpString(setting.getValue()));
             pw.println();
-        } while (cursor.moveToNext());
+        }
     }
 
     private static String toDumpString(String s) {
@@ -916,8 +921,9 @@ public class SettingsProvider extends ContentProvider {
 
         // Special case for location (sigh).
         if (isLocationProvidersAllowedRestricted(name, callingUserId, owningUserId)) {
-            return mSettingsRegistry.getSettingsLocked(SETTINGS_TYPE_SECURE,
-                    owningUserId).getNullSetting();
+            SettingsState settings = mSettingsRegistry.getSettingsLocked(SETTINGS_TYPE_SECURE,
+                    owningUserId);
+            return settings != null ? settings.getNullSetting() : null;
         }
 
         // Get the value.
@@ -1267,7 +1273,8 @@ public class SettingsProvider extends ContentProvider {
                 && (parentId = getGroupParentLocked(userId)) != userId) {
             // The setting has a dependency and the profile has a parent
             String dependency = sSystemCloneFromParentOnDependency.get(setting);
-            if (getSecureSetting(dependency, userId).getValue().equals("1")) {
+            Setting settingObj = getSecureSetting(dependency, userId);
+            if (settingObj != null && settingObj.getValue().equals("1")) {
                 return parentId;
             }
         }
@@ -1405,6 +1412,9 @@ public class SettingsProvider extends ContentProvider {
 
         Setting settingValue = getSecureSetting(
                 Settings.Secure.LOCATION_PROVIDERS_ALLOWED, owningUserId);
+        if (settingValue == null) {
+            return false;
+        }
 
         String oldProviders = (settingValue != null) ? settingValue.getValue() : "";
 
@@ -1491,14 +1501,14 @@ public class SettingsProvider extends ContentProvider {
     private Bundle packageValueForCallResult(Setting setting,
             boolean trackingGeneration) {
         if (!trackingGeneration) {
-            if (setting.isNull()) {
+            if (setting == null || setting.isNull()) {
                 return NULL_SETTING_BUNDLE;
             }
             return Bundle.forPair(Settings.NameValueTable.VALUE, setting.getValue());
         }
         Bundle result = new Bundle();
         result.putString(Settings.NameValueTable.VALUE,
-                !setting.isNull() ? setting.getValue() : null);
+                setting != null && !setting.isNull() ? setting.getValue() : null);
         mSettingsRegistry.mGenerationRegistry.addGenerationData(result, setting.getkey());
         return result;
     }
@@ -1554,7 +1564,7 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private static void appendSettingToCursor(MatrixCursor cursor, Setting setting) {
-        if (setting.isNull()) {
+        if (setting == null || setting.isNull()) {
             return;
         }
         final int columnCount = cursor.getColumnCount();
@@ -1700,7 +1710,18 @@ public class SettingsProvider extends ContentProvider {
         public List<String> getSettingsNamesLocked(int type, int userId) {
             final int key = makeKey(type, userId);
             SettingsState settingsState = peekSettingsStateLocked(key);
+            if (settingsState == null) {
+                return new ArrayList<String>();
+            }
             return settingsState.getSettingNamesLocked();
+        }
+
+        public SparseBooleanArray getKnownUsersLocked() {
+            SparseBooleanArray users = new SparseBooleanArray();
+            for (int i = mSettingsStates.size()-1; i >= 0; i--) {
+                users.put(getUserIdFromKey(mSettingsStates.keyAt(i)), true);
+            }
+            return users;
         }
 
         public SettingsState getSettingsLocked(int type, int userId) {
@@ -1708,7 +1729,13 @@ public class SettingsProvider extends ContentProvider {
             return peekSettingsStateLocked(key);
         }
 
-        public void ensureSettingsForUserLocked(int userId) {
+        public boolean ensureSettingsForUserLocked(int userId) {
+            // First make sure this user actually exists.
+            if (mUserManager.getUserInfo(userId) == null) {
+                Slog.wtf(LOG_TAG, "Requested user " + userId + " does not exist");
+                return false;
+            }
+
             // Migrate the setting for this user if needed.
             migrateLegacySettingsForUserIfNeededLocked(userId);
 
@@ -1733,6 +1760,7 @@ public class SettingsProvider extends ContentProvider {
             // Upgrade the settings to the latest version.
             UpgradeController upgrader = new UpgradeController(userId);
             upgrader.upgradeIfNeededLocked();
+            return true;
         }
 
         private void ensureSettingsStateLocked(int key) {
@@ -1790,7 +1818,8 @@ public class SettingsProvider extends ContentProvider {
             final int key = makeKey(type, userId);
 
             SettingsState settingsState = peekSettingsStateLocked(key);
-            final boolean success = settingsState.insertSettingLocked(name, value, packageName);
+            final boolean success = settingsState != null
+                    && settingsState.insertSettingLocked(name, value, packageName);
 
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
@@ -1802,6 +1831,9 @@ public class SettingsProvider extends ContentProvider {
             final int key = makeKey(type, userId);
 
             SettingsState settingsState = peekSettingsStateLocked(key);
+            if (settingsState == null) {
+                return false;
+            }
             final boolean success = settingsState.deleteSettingLocked(name);
 
             if (forceNotify || success) {
@@ -1814,6 +1846,9 @@ public class SettingsProvider extends ContentProvider {
             final int key = makeKey(type, userId);
 
             SettingsState settingsState = peekSettingsStateLocked(key);
+            if (settingsState == null) {
+                return null;
+            }
             return settingsState.getSettingLocked(name);
         }
 
@@ -1822,7 +1857,8 @@ public class SettingsProvider extends ContentProvider {
             final int key = makeKey(type, userId);
 
             SettingsState settingsState = peekSettingsStateLocked(key);
-            final boolean success = settingsState.updateSettingLocked(name, value, packageName);
+            final boolean success = settingsState != null
+                    && settingsState.updateSettingLocked(name, value, packageName);
 
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
@@ -1850,7 +1886,9 @@ public class SettingsProvider extends ContentProvider {
                 return settingsState;
             }
 
-            ensureSettingsForUserLocked(getUserIdFromKey(key));
+            if (!ensureSettingsForUserLocked(getUserIdFromKey(key))) {
+                return null;
+            }
             return mSettingsStates.get(key);
         }
 
