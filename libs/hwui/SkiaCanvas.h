@@ -129,9 +129,9 @@ public:
     virtual void drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint) override;
-    virtual void drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
+    virtual void drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) override;
-    virtual void drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
+    virtual void drawNinePatch(Bitmap& bitmap, const android::Res_png_9patch& chunk,
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             const SkPaint* paint) override;
 

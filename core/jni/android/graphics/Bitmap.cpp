@@ -212,6 +212,12 @@ Bitmap& toBitmap(JNIEnv* env, jobject bitmap) {
     return localBitmap->bitmap();
 }
 
+Bitmap& toBitmap(JNIEnv* env, jlong bitmapHandle) {
+    SkASSERT(env);
+    LocalScopedBitmap localBitmap(bitmapHandle);
+    return localBitmap->bitmap();
+}
+
 } // namespace bitmap
 
 } // namespace android

@@ -42,6 +42,7 @@ jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
 void toSkBitmap(jlong bitmapHandle, SkBitmap* outBitmap);
 
 Bitmap& toBitmap(JNIEnv* env, jobject bitmap);
+Bitmap& toBitmap(JNIEnv* env, jlong bitmapHandle);
 
 /** Reinitialize a bitmap. bitmap must already have its SkAlphaType set in
     sync with isPremultiplied

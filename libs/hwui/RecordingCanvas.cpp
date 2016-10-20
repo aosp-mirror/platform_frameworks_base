@@ -527,8 +527,10 @@ void RecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, float srcLeft, float srcTop
     }
 }
 
-void RecordingCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
+void RecordingCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) {
+    SkBitmap bitmap;
+    hwuiBitmap.getSkBitmap(&bitmap);
     int vertexCount = (meshWidth + 1) * (meshHeight + 1);
     addOp(alloc().create_trivial<BitmapMeshOp>(
             calcBoundsOfPoints(vertices, vertexCount * 2),
@@ -539,9 +541,11 @@ void RecordingCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int 
             refBuffer<int>(colors, vertexCount))); // 1 color per vertex
 }
 
-void RecordingCanvas::drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& patch,
+void RecordingCanvas::drawNinePatch(Bitmap& hwuiBitmap, const android::Res_png_9patch& patch,
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             const SkPaint* paint) {
+    SkBitmap bitmap;
+    hwuiBitmap.getSkBitmap(&bitmap);
     addOp(alloc().create_trivial<PatchOp>(
             Rect(dstLeft, dstTop, dstRight, dstBottom),
             *(mState.currentSnapshot()->transform),
