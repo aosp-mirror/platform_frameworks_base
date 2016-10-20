@@ -17,19 +17,24 @@
 
 package android.util.jar;
 
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
+
 import dalvik.system.CloseGuard;
+import java.io.FileDescriptor;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.jar.JarFile;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 import java.util.zip.ZipEntry;
-import java.util.jar.JarFile;
+import libcore.io.IoBridge;
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
@@ -46,7 +51,7 @@ public final class StrictJarFile {
 
     // NOTE: It's possible to share a file descriptor with the native
     // code, at the cost of some additional complexity.
-    private final RandomAccessFile raf;
+    private final FileDescriptor fd;
 
     private final StrictJarManifest manifest;
     private final StrictJarVerifier verifier;
@@ -61,8 +66,30 @@ public final class StrictJarFile {
         this(fileName, true, true);
     }
 
+    public StrictJarFile(FileDescriptor fd)
+            throws IOException, SecurityException {
+        this(fd, true, true);
+    }
+
+    public StrictJarFile(FileDescriptor fd,
+            boolean verify,
+            boolean signatureSchemeRollbackProtectionsEnforced)
+                    throws IOException, SecurityException {
+        this("[fd:" + fd.getInt$() + "]", fd, verify,
+                signatureSchemeRollbackProtectionsEnforced);
+    }
+
+    public StrictJarFile(String fileName,
+            boolean verify,
+            boolean signatureSchemeRollbackProtectionsEnforced)
+                    throws IOException, SecurityException {
+        this(fileName, IoBridge.open(fileName, OsConstants.O_RDONLY),
+                verify, signatureSchemeRollbackProtectionsEnforced);
+    }
+
     /**
-     *
+     * @param name of the archive (not necessarily a path).
+     * @param fd seekable file descriptor for the JAR file.
      * @param verify whether to verify the file's JAR signatures and collect the corresponding
      *        signer certificates.
      * @param signatureSchemeRollbackProtectionsEnforced {@code true} to enforce protections against
@@ -70,12 +97,13 @@ public final class StrictJarFile {
      *        {@code false} to ignore any such protections. This parameter is ignored when
      *        {@code verify} is {@code false}.
      */
-    public StrictJarFile(String fileName,
+    private StrictJarFile(String name,
+            FileDescriptor fd,
             boolean verify,
             boolean signatureSchemeRollbackProtectionsEnforced)
                     throws IOException, SecurityException {
-        this.nativeHandle = nativeOpenJarFile(fileName);
-        this.raf = new RandomAccessFile(fileName, "r");
+        this.nativeHandle = nativeOpenJarFile(name, fd.getInt$());
+        this.fd = fd;
 
         try {
             // Read the MANIFEST and signature files up front and try to
@@ -86,14 +114,14 @@ public final class StrictJarFile {
                 this.manifest = new StrictJarManifest(metaEntries.get(JarFile.MANIFEST_NAME), true);
                 this.verifier =
                         new StrictJarVerifier(
-                                fileName,
+                                name,
                                 manifest,
                                 metaEntries,
                                 signatureSchemeRollbackProtectionsEnforced);
                 Set<String> files = manifest.getEntries().keySet();
                 for (String file : files) {
                     if (findEntry(file) == null) {
-                        throw new SecurityException(fileName + ": File " + file + " in manifest does not exist");
+                        throw new SecurityException("File " + file + " in manifest does not exist");
                     }
                 }
 
@@ -105,7 +133,7 @@ public final class StrictJarFile {
             }
         } catch (IOException | SecurityException e) {
             nativeClose(this.nativeHandle);
-            IoUtils.closeQuietly(this.raf);
+            IoUtils.closeQuietly(fd);
             throw e;
         }
 
@@ -192,10 +220,12 @@ public final class StrictJarFile {
 
     public void close() throws IOException {
         if (!closed) {
-            guard.close();
+            if (guard != null) {
+                guard.close();
+            }
 
             nativeClose(nativeHandle);
-            IoUtils.closeQuietly(raf);
+            IoUtils.closeQuietly(fd);
             closed = true;
         }
     }
@@ -214,11 +244,11 @@ public final class StrictJarFile {
 
     private InputStream getZipInputStream(ZipEntry ze) {
         if (ze.getMethod() == ZipEntry.STORED) {
-            return new RAFStream(raf, ze.getDataOffset(),
+            return new FDStream(fd, ze.getDataOffset(),
                     ze.getDataOffset() + ze.getSize());
         } else {
-            final RAFStream wrapped = new RAFStream(
-                    raf, ze.getDataOffset(), ze.getDataOffset() + ze.getCompressedSize());
+            final FDStream wrapped = new FDStream(
+                    fd, ze.getDataOffset(), ze.getDataOffset() + ze.getCompressedSize());
 
             int bufSize = Math.max(1024, (int) Math.min(ze.getSize(), 65535L));
             return new ZipInflaterInputStream(wrapped, new Inflater(true), bufSize, ze);
@@ -396,7 +426,7 @@ public final class StrictJarFile {
     }
 
     /**
-     * Wrap a stream around a RandomAccessFile.  The RandomAccessFile is shared
+     * Wrap a stream around a FileDescriptor.  The file descriptor is shared
      * among all streams returned by getInputStream(), so we have to synchronize
      * access to it.  (We can optimize this by adding buffering here to reduce
      * collisions.)
@@ -405,20 +435,15 @@ public final class StrictJarFile {
      *
      * @hide
      */
-    public static class RAFStream extends InputStream {
-        private final RandomAccessFile sharedRaf;
+    public static class FDStream extends InputStream {
+        private final FileDescriptor fd;
         private long endOffset;
         private long offset;
 
-
-        public RAFStream(RandomAccessFile raf, long initialOffset, long endOffset) {
-            sharedRaf = raf;
+        public FDStream(FileDescriptor fd, long initialOffset, long endOffset) {
+            this.fd = fd;
             offset = initialOffset;
             this.endOffset = endOffset;
-        }
-
-        public RAFStream(RandomAccessFile raf, long initialOffset) throws IOException {
-            this(raf, initialOffset, raf.length());
         }
 
         @Override public int available() throws IOException {
@@ -430,13 +455,17 @@ public final class StrictJarFile {
         }
 
         @Override public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
-            synchronized (sharedRaf) {
+            synchronized (this.fd) {
                 final long length = endOffset - offset;
                 if (byteCount > length) {
                     byteCount = (int) length;
                 }
-                sharedRaf.seek(offset);
-                int count = sharedRaf.read(buffer, byteOffset, byteCount);
+                try {
+                    Os.lseek(fd, offset, OsConstants.SEEK_SET);
+                } catch (ErrnoException e) {
+                    throw new IOException(e);
+                }
+                int count = IoBridge.read(fd, buffer, byteOffset, byteCount);
                 if (count > 0) {
                     offset += count;
                     return count;
@@ -455,8 +484,8 @@ public final class StrictJarFile {
         }
     }
 
-
-    private static native long nativeOpenJarFile(String fileName) throws IOException;
+    private static native long nativeOpenJarFile(String name, int fd)
+            throws IOException;
     private static native long nativeStartIteration(long nativeHandle, String prefix);
     private static native ZipEntry nativeNextEntry(long iterationHandle);
     private static native ZipEntry nativeFindEntry(long nativeHandle, String entryName);
