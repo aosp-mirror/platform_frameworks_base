@@ -2566,6 +2566,13 @@ public class WebView extends AbsoluteLayout
         mProvider.getViewDelegate().onConfigurationChanged(newConfig);
     }
 
+    /**
+     * Creates a new InputConnection for an InputMethod to interact with the WebView.
+     * This is similar to {@link View#onCreateInputConnection} but note that WebView
+     * calls InputConnection methods on a thread other than the UI thread.
+     * If these methods are overridden, then the overriding methods should respect
+     * thread restrictions when calling View methods or accessing data.
+     */
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         return mProvider.getViewDelegate().onCreateInputConnection(outAttrs);
