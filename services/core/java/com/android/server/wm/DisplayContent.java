@@ -202,6 +202,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private boolean mRemovingDisplay = false;
 
     private final WindowLayersController mLayersController;
+    final WallpaperController mWallpaperController;
     int mInputMethodAnimLayerAdjustment;
 
     /**
@@ -209,12 +210,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @param service You know.
      * @param layersController window layer controller used to assign layer to the windows on this
      *                         display.
+     * @param wallpaperController wallpaper windows controller used to adjust the positioning of the
+     *                            wallpaper windows in the window list.
      */
     DisplayContent(Display display, WindowManagerService service,
-            WindowLayersController layersController) {
+            WindowLayersController layersController, WallpaperController wallpaperController) {
         mDisplay = display;
         mDisplayId = display.getDisplayId();
         mLayersController = layersController;
+        mWallpaperController = wallpaperController;
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
@@ -1226,6 +1230,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    void adjustWallpaperWindows() {
+        if (mWallpaperController.adjustWallpaperWindows(mWindows)) {
+            assignWindowLayers(true /*setLayoutNeeded*/);
+        }
+    }
+
     /**
      * Z-orders the display window list so that:
      * <ul>
@@ -1888,7 +1898,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         boolean startingInUnForceHiding = false;
         ArrayList<WindowStateAnimator> unForceHiding = null;
         WindowState wallpaper = null;
-        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
+        final WallpaperController wallpaperController = mWallpaperController;
         for (int i = mWindows.size() - 1; i >= 0; i--) {
             WindowState win = mWindows.get(i);
             WindowStateAnimator winAnimator = win.mWinAnimator;

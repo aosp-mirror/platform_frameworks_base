@@ -262,7 +262,7 @@ class WindowStateAnimator {
         mSession = win.mSession;
         mAttrType = win.mAttrs.type;
         mIsWallpaper = win.mIsWallpaper;
-        mWallpaperControllerLocked = mService.mWallpaperControllerLocked;
+        mWallpaperControllerLocked = mService.mRoot.mWallpaperController;
     }
 
     public void setAnimation(Animation anim, long startTime, int stackClip) {

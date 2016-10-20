@@ -684,8 +684,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    WallpaperController mWallpaperControllerLocked;
-
     boolean mAnimateWallpaperWithTarget;
 
     // TODO: Move to RootWindowContainer
@@ -979,7 +977,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplaySettings = new DisplaySettings();
         mDisplaySettings.readSettingsLocked();
 
-        mWallpaperControllerLocked = new WallpaperController(this);
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mPolicy = policy;
 
@@ -1397,11 +1394,11 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 win.mToken.addWindow(win);
                 if (type == TYPE_WALLPAPER) {
-                    mWallpaperControllerLocked.clearLastWallpaperTimeoutTime();
+                    displayContent.mWallpaperController.clearLastWallpaperTimeoutTime();
                     displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                 } else if ((attrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
                     displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-                } else if (mWallpaperControllerLocked.isBelowWallpaperTarget(win)) {
+                } else if (displayContent.mWallpaperController.isBelowWallpaperTarget(win)) {
                     // If there is currently a wallpaper being shown, and
                     // the base layer of the new window is below the current
                     // layer of the target window, then adjust the wallpaper.
@@ -1675,14 +1672,14 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.postWindowRemoveStartingWindowCleanup(win);
         }
 
+        final DisplayContent dc = win.getDisplayContent();
         if (win.mAttrs.type == TYPE_WALLPAPER) {
-            mWallpaperControllerLocked.clearLastWallpaperTimeoutTime();
-            getDefaultDisplayContentLocked().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+            dc.mWallpaperController.clearLastWallpaperTimeoutTime();
+            dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
         } else if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
-            getDefaultDisplayContentLocked().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+            dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
         }
 
-        final DisplayContent dc = win.getDisplayContent();
         if (dc != null && dc.removeFromWindowList(win)) {
             if (!mWindowPlacerLocked.isInLayout()) {
                 dc.assignWindowLayers(true /* setLayoutNeeded */);
@@ -2079,7 +2076,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mWindowPlacerLocked.performSurfacePlacement();
             if (toBeDisplayed && win.mIsWallpaper) {
                 DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
-                mWallpaperControllerLocked.updateWallpaperOffset(
+                dc.mWallpaperController.updateWallpaperOffset(
                         win, displayInfo.logicalWidth, displayInfo.logicalHeight, false);
             }
             if (win.mAppToken != null) {
@@ -2147,7 +2144,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // an exit.
             win.mAnimatingExit = true;
             win.mWinAnimator.mAnimating = true;
-        } else if (mWallpaperControllerLocked.isWallpaperTarget(win)) {
+        } else if (win.getDisplayContent().mWallpaperController.isWallpaperTarget(win)) {
             // If the wallpaper is currently behind this
             // window, we need to change both of them inside
             // of a transaction to avoid artifacts.
@@ -2418,7 +2415,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     final WindowToken wtoken = removedTokens.get(i);
                     wtoken.setExiting();
                     if (wtoken.windowType == TYPE_WALLPAPER) {
-                        mWallpaperControllerLocked.removeWallpaperToken(wtoken);
+                        wtoken.getDisplayContent().mWallpaperController.removeWallpaperToken(wtoken);
                     }
 
                     mInputMonitor.updateInputWindowsLw(true /*force*/);
@@ -3035,7 +3032,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     return false;
                 }
                 if (windowShowWallpaper) {
-                    if (mWallpaperControllerLocked.getWallpaperTarget() == null) {
+                    if (wtoken.getDisplayContent().mWallpaperController.getWallpaperTarget()
+                            == null) {
                         // If this theme is requesting a wallpaper, and the wallpaper
                         // is not currently visible, then this effectively serves as
                         // an opaque window and our starting window transition animation
@@ -7004,7 +7002,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case WALLPAPER_DRAW_PENDING_TIMEOUT: {
                     synchronized (mWindowMap) {
-                        if (mWallpaperControllerLocked.processWallpaperDrawPendingTimeout()) {
+                        if (mRoot.mWallpaperController.processWallpaperDrawPendingTimeout()) {
                             mWindowPlacerLocked.performSurfacePlacement();
                         }
                     }
@@ -7628,10 +7626,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         mNoAnimationNotifyOnTransitionFinished.clear();
 
-        mWallpaperControllerLocked.hideDeferredWallpapersIfNeeded();
-
         // TODO: multi-display.
         final DisplayContent dc = getDefaultDisplayContentLocked();
+
+        dc.mWallpaperController.hideDeferredWallpapersIfNeeded();
+
         dc.onAppTransitionDone();
 
         changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_LAYOUT;
@@ -8229,7 +8228,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private void dumpTokensLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER TOKENS (dumpsys window tokens)");
         mRoot.dumpTokens(pw, dumpAll);
-        mWallpaperControllerLocked.dumpTokens(pw, "  ", dumpAll);
+        mRoot.mWallpaperController.dumpTokens(pw, "  ", dumpAll);
         if (!mFinishedStarting.isEmpty()) {
             pw.println();
             pw.println("  Finishing start of application tokens:");
@@ -8413,7 +8412,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print("  mInputMethodWindow="); pw.println(mInputMethodWindow);
             }
             mWindowPlacerLocked.dump(pw, "  ");
-            mWallpaperControllerLocked.dump(pw, "  ");
+            mRoot.mWallpaperController.dump(pw, "  ");
             pw.print("  mSystemBooted="); pw.print(mSystemBooted);
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
 

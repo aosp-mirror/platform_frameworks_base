@@ -166,10 +166,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     RemoteEventTrace mRemoteEventTrace;
 
     private final WindowLayersController mLayersController;
+    final WallpaperController mWallpaperController;
 
     RootWindowContainer(WindowManagerService service) {
         mService = service;
         mLayersController = new WindowLayersController(mService);
+        mWallpaperController = new WallpaperController(mService);
     }
 
     WindowState computeFocusedWindow() {
@@ -214,7 +216,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     private DisplayContent createDisplayContent(final Display display) {
-        final DisplayContent dc = new DisplayContent(display, mService, mLayersController);
+        final DisplayContent dc = new DisplayContent(display, mService, mLayersController,
+                mWallpaperController);
         final int displayId = display.getDisplayId();
 
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
@@ -442,10 +445,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         // TODO(multi-display): By default we add this to the default display, but maybe we
         // should provide an API for a token to be added to any display?
-        final WindowToken token = new WindowToken(mService, binder, type, true,
-                getDisplayContent(DEFAULT_DISPLAY));
+        final DisplayContent dc = getDisplayContent(DEFAULT_DISPLAY);
+        final WindowToken token = new WindowToken(mService, binder, type, true, dc);
         if (type == TYPE_WALLPAPER) {
-            mService.mWallpaperControllerLocked.addWallpaperToken(token);
+            dc.mWallpaperController.addWallpaperToken(token);
         }
     }
 
@@ -718,7 +721,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         boolean addPipInputConsumerHandle = pipInputConsumer != null;
         boolean addWallpaperInputConsumerHandle = wallpaperInputConsumer != null;
         final Rect pipTouchableBounds = addPipInputConsumerHandle ? new Rect() : null;
-        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
         boolean disableWallpaperTouchEvents = false;
 
         final int count = mChildren.size();
@@ -769,7 +771,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 if ((privateFlags & PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS) != 0) {
                     disableWallpaperTouchEvents = true;
                 }
-                final boolean hasWallpaper = wallpaperController.isWallpaperTarget(child)
+                final boolean hasWallpaper = dc.mWallpaperController.isWallpaperTarget(child)
                         && (privateFlags & PRIVATE_FLAG_KEYGUARD) == 0
                         && !disableWallpaperTouchEvents;
 
@@ -951,14 +953,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
         }
 
-        final WindowList defaultWindows = defaultDisplay.getWindowList();
         final WindowSurfacePlacer surfacePlacer = mService.mWindowPlacerLocked;
 
         // If we are ready to perform an app transition, check through all of the app tokens to be
         // shown and see if they are ready to go.
         if (mService.mAppTransition.isReady()) {
             defaultDisplay.pendingLayoutChanges |=
-                    surfacePlacer.handleAppTransitionReadyLocked(defaultWindows);
+                    surfacePlacer.handleAppTransitionReadyLocked();
             if (DEBUG_LAYOUT_REPEATS)
                 surfacePlacer.debugLayoutRepeats("after handleAppTransitionReadyLocked",
                         defaultDisplay.pendingLayoutChanges);
@@ -1046,7 +1047,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 if (mService.mInputMethodWindow == win) {
                     mService.mInputMethodWindow = null;
                 }
-                if (mService.mWallpaperControllerLocked.isWallpaperTarget(win)) {
+                if (win.getDisplayContent().mWallpaperController.isWallpaperTarget(win)) {
                     wallpaperDestroyed = true;
                 }
                 win.destroyOrSaveSurface();
@@ -1063,7 +1064,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 if (!token.hasVisible) {
                     exitingTokens.remove(i);
                     if (token.windowType == TYPE_WALLPAPER) {
-                        mService.mWallpaperControllerLocked.removeWallpaperToken(token);
+                        displayContent.mWallpaperController.removeWallpaperToken(token);
                     }
                 }
             }
@@ -1251,9 +1252,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats(
                         "On entry to LockedInner", dc.pendingLayoutChanges);
 
-                if ((dc.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0
-                        && mService.mWallpaperControllerLocked.adjustWallpaperWindows()) {
-                    dc.assignWindowLayers(true /*setLayoutNeeded*/);
+                if ((dc.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
+                    dc.adjustWallpaperWindows();
                 }
 
                 if (isDefaultDisplay
@@ -1318,10 +1318,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 w.applyDimLayerIfNeeded();
 
                 if (isDefaultDisplay && obscuredChanged && w.isVisibleLw()
-                        && mService.mWallpaperControllerLocked.isWallpaperTarget(w)) {
+                        && dc.mWallpaperController.isWallpaperTarget(w)) {
                     // This is the wallpaper target and its obscured state changed... make sure the
                     // current wallpaper's visibility has been updated accordingly.
-                    mService.mWallpaperControllerLocked.updateWallpaperVisibility();
+                    dc.mWallpaperController.updateWallpaperVisibility();
                 }
 
                 w.handleWindowMovedIfNeeded();

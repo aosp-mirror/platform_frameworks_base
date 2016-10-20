@@ -942,7 +942,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final DisplayContent displayContent = getDisplayContent();
             if (displayContent != null) {
                 final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-                mService.mWallpaperControllerLocked.updateWallpaperOffset(
+                getDisplayContent().mWallpaperController.updateWallpaperOffset(
                         this, displayInfo.logicalWidth, displayInfo.logicalHeight, false);
             }
         }
@@ -1969,7 +1969,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mIsImWindow) {
             specialAdjustment = getDisplayContent().mInputMethodAnimLayerAdjustment;
         } else if (mIsWallpaper) {
-            specialAdjustment = mService.mWallpaperControllerLocked.getAnimLayerAdjustment();
+            specialAdjustment = getDisplayContent().mWallpaperController.getAnimLayerAdjustment();
         }
 
         return mLayer + specialAdjustment;
@@ -2551,7 +2551,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         clearAnimatingWithSavedSurface();
         mDestroying = true;
         mWinAnimator.hide("stopUsingSavedSurface");
-        mService.mWallpaperControllerLocked.hideWallpapers(this);
+        getDisplayContent().mWallpaperController.hideWallpapers(this);
     }
 
     void markSavedSurfaceExiting() {
@@ -3959,7 +3959,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
         mAnimatingExit = false;
-        mService.mWallpaperControllerLocked.hideWallpapers(this);
+        getDisplayContent().mWallpaperController.hideWallpapers(this);
     }
 
     boolean clearAnimatingFlags() {
@@ -4026,7 +4026,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void dispatchWallpaperVisibility(final boolean visible) {
         final boolean hideAllowed =
-                mService.mWallpaperControllerLocked.mDeferredHideWallpaper == null;
+                getDisplayContent().mWallpaperController.mDeferredHideWallpaper == null;
 
         // Only send notification if the visibility actually changed and we are not trying to hide
         // the wallpaper when we are deferring hiding of the wallpaper.
