@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "PixelRef.h"
+#include "Bitmap.h"
 
 #include "Caches.h"
 
@@ -34,10 +34,10 @@ static bool computeAllocationSize(const SkBitmap& bitmap, size_t* size) {
     return true;
 }
 
-typedef sk_sp<PixelRef> (*AllocPixeRef)(size_t allocSize, const SkImageInfo& info, size_t rowBytes,
+typedef sk_sp<Bitmap> (*AllocPixeRef)(size_t allocSize, const SkImageInfo& info, size_t rowBytes,
         SkColorTable* ctable);
 
-static sk_sp<PixelRef> allocatePixelRef(SkBitmap* bitmap, SkColorTable* ctable, AllocPixeRef alloc) {
+static sk_sp<Bitmap> allocateBitmap(SkBitmap* bitmap, SkColorTable* ctable, AllocPixeRef alloc) {
     const SkImageInfo& info = bitmap->info();
     if (info.colorType() == kUnknown_SkColorType) {
         LOG_ALWAYS_FATAL("unknown bitmap configuration");
@@ -62,24 +62,24 @@ static sk_sp<PixelRef> allocatePixelRef(SkBitmap* bitmap, SkColorTable* ctable, 
     return wrapper;
 }
 
-sk_sp<PixelRef> PixelRef::allocateHeapPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
-   return allocatePixelRef(bitmap, ctable, &PixelRef::allocateHeapPixelRef);
+sk_sp<Bitmap> Bitmap::allocateHeapBitmap(SkBitmap* bitmap, SkColorTable* ctable) {
+   return allocateBitmap(bitmap, ctable, &Bitmap::allocateHeapBitmap);
 }
 
-sk_sp<PixelRef> PixelRef::allocateAshmemPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
-   return allocatePixelRef(bitmap, ctable, &PixelRef::allocateAshmemPixelRef);
+sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(SkBitmap* bitmap, SkColorTable* ctable) {
+   return allocateBitmap(bitmap, ctable, &Bitmap::allocateAshmemBitmap);
 }
 
-sk_sp<PixelRef> PixelRef::allocateHeapPixelRef(size_t size, const SkImageInfo& info, size_t rowBytes,
+sk_sp<Bitmap> Bitmap::allocateHeapBitmap(size_t size, const SkImageInfo& info, size_t rowBytes,
         SkColorTable* ctable) {
     void* addr = calloc(size, 1);
     if (!addr) {
         return nullptr;
     }
-    return sk_sp<PixelRef>(new PixelRef(addr, size, info, rowBytes, ctable));
+    return sk_sp<Bitmap>(new Bitmap(addr, size, info, rowBytes, ctable));
 }
 
-sk_sp<PixelRef> PixelRef::allocateAshmemPixelRef(size_t size, const SkImageInfo& info,
+sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info,
         size_t rowBytes, SkColorTable* ctable) {
     // Create new ashmem region with read/write priv
     int fd = ashmem_create_region("bitmap", size);
@@ -98,10 +98,10 @@ sk_sp<PixelRef> PixelRef::allocateAshmemPixelRef(size_t size, const SkImageInfo&
         close(fd);
         return nullptr;
     }
-    return sk_sp<PixelRef>(new PixelRef(addr, fd, size, info, rowBytes, ctable));
+    return sk_sp<Bitmap>(new Bitmap(addr, fd, size, info, rowBytes, ctable));
 }
 
-void PixelRef::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTable* ctable) {
+void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTable* ctable) {
     if (kIndex_8_SkColorType != newInfo.colorType()) {
         ctable = nullptr;
     }
@@ -132,7 +132,7 @@ void PixelRef::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorT
     setPreLocked(getStorage(), mRowBytes, mColorTable.get());
 }
 
-PixelRef::PixelRef(void* address, size_t size, const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
+Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
             : SkPixelRef(info)
             , mPixelStorageType(PixelStorageType::Heap) {
     mPixelStorage.heap.address = address;
@@ -140,7 +140,7 @@ PixelRef::PixelRef(void* address, size_t size, const SkImageInfo& info, size_t r
     reconfigure(info, rowBytes, ctable);
 }
 
-PixelRef::PixelRef(void* address, void* context, FreeFunc freeFunc,
+Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc,
                 const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
             : SkPixelRef(info)
             , mPixelStorageType(PixelStorageType::External) {
@@ -150,7 +150,7 @@ PixelRef::PixelRef(void* address, void* context, FreeFunc freeFunc,
     reconfigure(info, rowBytes, ctable);
 }
 
-PixelRef::PixelRef(void* address, int fd, size_t mappedSize,
+Bitmap::Bitmap(void* address, int fd, size_t mappedSize,
                 const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
             : SkPixelRef(info)
             , mPixelStorageType(PixelStorageType::Ashmem) {
@@ -160,7 +160,7 @@ PixelRef::PixelRef(void* address, int fd, size_t mappedSize,
     reconfigure(info, rowBytes, ctable);
 }
 
-PixelRef::~PixelRef() {
+Bitmap::~Bitmap() {
     switch (mPixelStorageType) {
     case PixelStorageType::External:
         mPixelStorage.external.freeFunc(mPixelStorage.external.address,
@@ -180,15 +180,15 @@ PixelRef::~PixelRef() {
     }
 }
 
-bool PixelRef::hasHardwareMipMap() const {
+bool Bitmap::hasHardwareMipMap() const {
     return mHasHardwareMipMap;
 }
 
-void PixelRef::setHasHardwareMipMap(bool hasMipMap) {
+void Bitmap::setHasHardwareMipMap(bool hasMipMap) {
     mHasHardwareMipMap = hasMipMap;
 }
 
-void* PixelRef::getStorage() const {
+void* Bitmap::getStorage() const {
     switch (mPixelStorageType) {
     case PixelStorageType::External:
         return mPixelStorage.external.address;
@@ -199,18 +199,18 @@ void* PixelRef::getStorage() const {
     }
 }
 
-bool PixelRef::onNewLockPixels(LockRec* rec) {
+bool Bitmap::onNewLockPixels(LockRec* rec) {
     rec->fPixels = getStorage();
     rec->fRowBytes = mRowBytes;
     rec->fColorTable = mColorTable.get();
     return true;
 }
 
-size_t PixelRef::getAllocatedSizeInBytes() const {
+size_t Bitmap::getAllocatedSizeInBytes() const {
     return info().getSafeSize(mRowBytes);
 }
 
-int PixelRef::getAshmemFd() const {
+int Bitmap::getAshmemFd() const {
     switch (mPixelStorageType) {
     case PixelStorageType::Ashmem:
         return mPixelStorage.ashmem.fd;
@@ -219,7 +219,7 @@ int PixelRef::getAshmemFd() const {
     }
 }
 
-size_t PixelRef::getAllocationByteCount() const {
+size_t Bitmap::getAllocationByteCount() const {
     switch (mPixelStorageType) {
     case PixelStorageType::Heap:
         return mPixelStorage.heap.size;
@@ -228,11 +228,11 @@ size_t PixelRef::getAllocationByteCount() const {
     }
 }
 
-void PixelRef::reconfigure(const SkImageInfo& info) {
+void Bitmap::reconfigure(const SkImageInfo& info) {
     reconfigure(info, info.minRowBytes(), nullptr);
 }
 
-void PixelRef::setAlphaType(SkAlphaType alphaType) {
+void Bitmap::setAlphaType(SkAlphaType alphaType) {
     if (!SkColorTypeValidateAlphaType(info().colorType(), alphaType, &alphaType)) {
         return;
     }
@@ -240,7 +240,7 @@ void PixelRef::setAlphaType(SkAlphaType alphaType) {
     changeAlphaType(alphaType);
 }
 
-void PixelRef::getSkBitmap(SkBitmap* outBitmap) {
+void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
     outBitmap->setInfo(info(), rowBytes());
     outBitmap->setPixelRef(this);
     outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);

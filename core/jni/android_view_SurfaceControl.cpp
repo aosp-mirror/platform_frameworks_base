@@ -186,14 +186,13 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         return NULL;
     }
 
-    auto pixelRef = new PixelRef(
+    auto bitmap = new Bitmap(
             (void*) screenshot->getPixels(), (void*) screenshot.get(), DeleteScreenshot,
             screenshotInfo, rowBytes, nullptr);
     screenshot.release();
-    pixelRef->setImmutable();
-
-    return bitmap::createBitmap(env, pixelRef,
-            bitmap::kBitmapCreateFlag_Premultiplied, NULL);
+    bitmap->setImmutable();
+    return bitmap::createBitmap(env, bitmap,
+            android::bitmap::kBitmapCreateFlag_Premultiplied, NULL);
 }
 
 static void nativeScreenshot(JNIEnv* env, jclass clazz, jobject displayTokenObj,

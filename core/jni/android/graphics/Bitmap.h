@@ -24,7 +24,7 @@
 
 namespace android {
 
-class PixelRef;
+class Bitmap;
 
 namespace bitmap {
 
@@ -34,14 +34,14 @@ enum BitmapCreateFlags {
     kBitmapCreateFlag_Premultiplied = 0x2,
 };
 
-jobject createBitmap(JNIEnv* env, PixelRef* bitmap,
+jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
             int bitmapCreateFlags, jbyteArray ninePatchChunk = NULL,
             jobject ninePatchInsets = NULL, int density = -1);
 
 
 void toSkBitmap(jlong bitmapHandle, SkBitmap* outBitmap);
 
-PixelRef* toPixelRef(JNIEnv* env, jobject bitmap);
+Bitmap* toBitmap(JNIEnv* env, jobject bitmap);
 
 /** Reinitialize a bitmap. bitmap must already have its SkAlphaType set in
     sync with isPremultiplied

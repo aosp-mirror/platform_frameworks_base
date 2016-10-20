@@ -337,11 +337,11 @@ SkColorType GraphicsJNI::legacyBitmapConfigToColorType(jint legacyConfig) {
 }
 
 void GraphicsJNI::getSkBitmap(JNIEnv* env, jobject bitmap, SkBitmap* outBitmap) {
-    android::bitmap::toPixelRef(env, bitmap)->getSkBitmap(outBitmap);
+    android::bitmap::toBitmap(env, bitmap)->getSkBitmap(outBitmap);
 }
 
 SkPixelRef* GraphicsJNI::refSkPixelRef(JNIEnv* env, jobject bitmap) {
-    SkPixelRef* pixelRef = android::bitmap::toPixelRef(env, bitmap);
+    SkPixelRef* pixelRef = android::bitmap::toBitmap(env, bitmap);
     pixelRef->ref();
     return pixelRef;
 }
@@ -401,7 +401,7 @@ jobject GraphicsJNI::createRegion(JNIEnv* env, SkRegion* region)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-android::PixelRef* GraphicsJNI::mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
+android::Bitmap* GraphicsJNI::mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
         SkColorTable* ctable, int fd, void* addr, size_t size, bool readOnly) {
     const SkImageInfo& info = bitmap->info();
     if (info.colorType() == kUnknown_SkColorType) {
@@ -423,7 +423,7 @@ android::PixelRef* GraphicsJNI::mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
     // attempting to compute our own.
     const size_t rowBytes = bitmap->rowBytes();
 
-    auto wrapper = new android::PixelRef(addr, fd, size, info, rowBytes, ctable);
+    auto wrapper = new android::Bitmap(addr, fd, size, info, rowBytes, ctable);
     wrapper->getSkBitmap(bitmap);
     if (readOnly) {
         bitmap->pixelRef()->setImmutable();
@@ -445,14 +445,14 @@ sk_sp<SkColorSpace> GraphicsJNI::defaultColorSpace() {
 
 ///////////////////////////////////////////////////////////////////////////////
 bool HeapAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
-    mStorage = android::PixelRef::allocateHeapPixelRef(bitmap, ctable);
+    mStorage = android::Bitmap::allocateHeapBitmap(bitmap, ctable);
     return !!mStorage;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 RecyclingClippingPixelAllocator::RecyclingClippingPixelAllocator(
-        android::PixelRef* recycledBitmap, size_t recycledBytes)
+        android::Bitmap* recycledBitmap, size_t recycledBytes)
     : mRecycledBitmap(recycledBitmap)
     , mRecycledBytes(recycledBytes)
     , mSkiaBitmap(nullptr)
@@ -550,7 +550,7 @@ AshmemPixelAllocator::AshmemPixelAllocator(JNIEnv *env) {
 }
 
 bool AshmemPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
-    mStorage = android::PixelRef::allocateAshmemPixelRef(bitmap, ctable);
+    mStorage = android::Bitmap::allocateAshmemBitmap(bitmap, ctable);
     return !!mStorage;
 }
 

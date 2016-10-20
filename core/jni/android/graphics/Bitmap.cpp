@@ -17,7 +17,7 @@
 #include "android_nio_utils.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 #include <hwui/Paint.h>
-#include <hwui/PixelRef.h>
+#include <hwui/Bitmap.h>
 #include <renderthread/RenderProxy.h>
 
 #include "core_jni_helpers.h"
@@ -37,25 +37,25 @@ static jmethodID gBitmap_getAllocationByteCountMethodID;
 
 namespace android {
 
-class Bitmap {
+class BitmapWrapper {
 public:
-    Bitmap(PixelRef* pixelRef)
-        : mPixelRef(pixelRef) { }
+    BitmapWrapper(Bitmap* bitmap)
+        : mBitmap(bitmap) { }
 
     void freePixels() {
-        mInfo = mPixelRef->info();
-        mHasHardwareMipMap = mPixelRef->hasHardwareMipMap();
-        mAllocationSize = mPixelRef->getAllocationByteCount();
-        mRowBytes = mPixelRef->rowBytes();
-        mGenerationId = mPixelRef->getGenerationID();
-        mPixelRef.reset();
+        mInfo = mBitmap->info();
+        mHasHardwareMipMap = mBitmap->hasHardwareMipMap();
+        mAllocationSize = mBitmap->getAllocationByteCount();
+        mRowBytes = mBitmap->rowBytes();
+        mGenerationId = mBitmap->getGenerationID();
+        mBitmap.reset();
     }
 
     bool valid() {
-        return !!mPixelRef;
+        return !!mBitmap;
     }
 
-    PixelRef* pixelRef() { return mPixelRef.get(); }
+    Bitmap* bitmap() { return mBitmap.get(); }
 
     void assertValid() {
         LOG_ALWAYS_FATAL_IF(!valid(), "Error, cannot access an invalid/free'd bitmap here!");
@@ -63,58 +63,58 @@ public:
 
     void getSkBitmap(SkBitmap* outBitmap) {
         assertValid();
-        mPixelRef->getSkBitmap(outBitmap);
+        mBitmap->getSkBitmap(outBitmap);
     }
 
     bool hasHardwareMipMap() {
-        if (mPixelRef) {
-            return mPixelRef->hasHardwareMipMap();
+        if (mBitmap) {
+            return mBitmap->hasHardwareMipMap();
         }
         return mHasHardwareMipMap;
     }
 
     void setHasHardwareMipMap(bool hasMipMap) {
         assertValid();
-        mPixelRef->setHasHardwareMipMap(hasMipMap);
+        mBitmap->setHasHardwareMipMap(hasMipMap);
     }
 
     void setAlphaType(SkAlphaType alphaType) {
         assertValid();
-        mPixelRef->setAlphaType(alphaType);
+        mBitmap->setAlphaType(alphaType);
     }
 
     const SkImageInfo& info() {
-        if (mPixelRef) {
-            return mPixelRef->info();
+        if (mBitmap) {
+            return mBitmap->info();
         }
         return mInfo;
     }
 
     size_t getAllocationByteCount() const {
-        if (mPixelRef) {
-            return mPixelRef->getAllocationByteCount();
+        if (mBitmap) {
+            return mBitmap->getAllocationByteCount();
         }
         return mAllocationSize;
     }
 
     size_t rowBytes() const {
-        if (mPixelRef) {
-            return mPixelRef->rowBytes();
+        if (mBitmap) {
+            return mBitmap->rowBytes();
         }
         return mRowBytes;
     }
 
     uint32_t getGenerationID() const {
-        if (mPixelRef) {
-            return mPixelRef->getGenerationID();
+        if (mBitmap) {
+            return mBitmap->getGenerationID();
         }
         return mGenerationId;
     }
 
-    ~Bitmap() { }
+    ~BitmapWrapper() { }
 
 private:
-    sk_sp<PixelRef> mPixelRef;
+    sk_sp<Bitmap> mBitmap;
     SkImageInfo mInfo;
     bool mHasHardwareMipMap;
     size_t mAllocationSize;
@@ -127,22 +127,22 @@ private:
 class LocalScopedBitmap {
 public:
     explicit LocalScopedBitmap(jlong bitmapHandle)
-            : mBitmap(reinterpret_cast<Bitmap*>(bitmapHandle)) {}
+            : mBitmapWrapper(reinterpret_cast<BitmapWrapper*>(bitmapHandle)) {}
 
-    Bitmap* operator->() {
-        return mBitmap;
+    BitmapWrapper* operator->() {
+        return mBitmapWrapper;
     }
 
     void* pixels() {
-        return mBitmap->pixelRef()->pixels();
+        return mBitmapWrapper->bitmap()->pixels();
     }
 
     bool valid() {
-        return mBitmap && mBitmap->valid();
+        return mBitmapWrapper && mBitmapWrapper->valid();
     }
 
 private:
-    Bitmap* mBitmap;
+    BitmapWrapper* mBitmapWrapper;
 };
 
 namespace bitmap {
@@ -175,18 +175,18 @@ int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap)
     return env->CallIntMethod(javaBitmap, gBitmap_getAllocationByteCountMethodID);
 }
 
-jobject createBitmap(JNIEnv* env, PixelRef* pixelRef,
+jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
         int bitmapCreateFlags, jbyteArray ninePatchChunk, jobject ninePatchInsets,
         int density) {
     bool isMutable = bitmapCreateFlags & kBitmapCreateFlag_Mutable;
     bool isPremultiplied = bitmapCreateFlags & kBitmapCreateFlag_Premultiplied;
     // The caller needs to have already set the alpha type properly, so the
     // native SkBitmap stays in sync with the Java Bitmap.
-    assert_premultiplied(pixelRef->info(), isPremultiplied);
-    Bitmap* bitmap = new Bitmap(pixelRef);
+    assert_premultiplied(bitmap->info(), isPremultiplied);
+    BitmapWrapper* bitmapWrapper = new BitmapWrapper(bitmap);
     jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
-            reinterpret_cast<jlong>(bitmap), pixelRef->width(), pixelRef->height(), density, isMutable,
-            isPremultiplied, ninePatchChunk, ninePatchInsets);
+            reinterpret_cast<jlong>(bitmapWrapper), bitmap->width(), bitmap->height(), density,
+            isMutable, isPremultiplied, ninePatchChunk, ninePatchInsets);
 
     if (env->ExceptionCheck() != 0) {
         ALOGE("*** Uncaught exception returned from Java call!\n");
@@ -200,14 +200,14 @@ void toSkBitmap(jlong bitmapHandle, SkBitmap* outBitmap) {
     bitmap->getSkBitmap(outBitmap);
 }
 
-PixelRef* toPixelRef(JNIEnv* env, jobject bitmap) {
+Bitmap* toBitmap(JNIEnv* env, jobject bitmap) {
     SkASSERT(env);
     SkASSERT(bitmap);
     SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
     jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
     LocalScopedBitmap localBitmap(bitmapHandle);
     localBitmap->assertValid();
-    return localBitmap->pixelRef();
+    return localBitmap->bitmap();
 }
 
 } // namespace bitmap
@@ -548,7 +548,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     bitmap.setInfo(SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType,
             GraphicsJNI::defaultColorSpace()));
 
-    sk_sp<PixelRef> nativeBitmap = PixelRef::allocateHeapPixelRef(&bitmap, NULL);
+    sk_sp<Bitmap> nativeBitmap = Bitmap::allocateHeapBitmap(&bitmap, NULL);
     if (!nativeBitmap) {
         return NULL;
     }
@@ -564,7 +564,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
 static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
                            jint dstConfigHandle, jboolean isMutable) {
     SkBitmap src;
-    reinterpret_cast<Bitmap*>(srcHandle)->getSkBitmap(&src);
+    reinterpret_cast<BitmapWrapper*>(srcHandle)->getSkBitmap(&src);
     SkColorType dstCT = GraphicsJNI::legacyBitmapConfigToColorType(dstConfigHandle);
     SkBitmap result;
     HeapAllocator allocator;
@@ -572,41 +572,41 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
     if (!src.copyTo(&result, dstCT, &allocator)) {
         return NULL;
     }
-    auto pixelRef = allocator.getStorageObjAndReset();
-    return createBitmap(env, pixelRef, getPremulBitmapCreateFlags(isMutable));
+    auto bitmap = allocator.getStorageObjAndReset();
+    return createBitmap(env, bitmap, getPremulBitmapCreateFlags(isMutable));
 }
 
-static PixelRef* Bitmap_copyAshmemImpl(JNIEnv* env, SkBitmap& src, SkColorType& dstCT) {
+static Bitmap* Bitmap_copyAshmemImpl(JNIEnv* env, SkBitmap& src, SkColorType& dstCT) {
     SkBitmap result;
 
     AshmemPixelAllocator allocator(env);
     if (!src.copyTo(&result, dstCT, &allocator)) {
         return NULL;
     }
-    auto pixelRef = allocator.getStorageObjAndReset();
-    pixelRef->setImmutable();
-    return pixelRef;
+    auto bitmap = allocator.getStorageObjAndReset();
+    bitmap->setImmutable();
+    return bitmap;
 }
 
 static jobject Bitmap_copyAshmem(JNIEnv* env, jobject, jlong srcHandle) {
     SkBitmap src;
-    reinterpret_cast<Bitmap*>(srcHandle)->getSkBitmap(&src);
+    reinterpret_cast<BitmapWrapper*>(srcHandle)->getSkBitmap(&src);
     SkColorType dstCT = src.colorType();
-    auto pixelRef = Bitmap_copyAshmemImpl(env, src, dstCT);
-    jobject ret = createBitmap(env, pixelRef, getPremulBitmapCreateFlags(false));
+    auto bitmap = Bitmap_copyAshmemImpl(env, src, dstCT);
+    jobject ret = createBitmap(env, bitmap, getPremulBitmapCreateFlags(false));
     return ret;
 }
 
 static jobject Bitmap_copyAshmemConfig(JNIEnv* env, jobject, jlong srcHandle, jint dstConfigHandle) {
     SkBitmap src;
-    reinterpret_cast<Bitmap*>(srcHandle)->getSkBitmap(&src);
+    reinterpret_cast<BitmapWrapper*>(srcHandle)->getSkBitmap(&src);
     SkColorType dstCT = GraphicsJNI::legacyBitmapConfigToColorType(dstConfigHandle);
-    auto pixelRef = Bitmap_copyAshmemImpl(env, src, dstCT);
-    jobject ret = createBitmap(env, pixelRef, getPremulBitmapCreateFlags(false));
+    auto bitmap = Bitmap_copyAshmemImpl(env, src, dstCT);
+    jobject ret = createBitmap(env, bitmap, getPremulBitmapCreateFlags(false));
     return ret;
 }
 
-static void Bitmap_destruct(Bitmap* bitmap) {
+static void Bitmap_destruct(BitmapWrapper* bitmap) {
     delete bitmap;
 }
 
@@ -646,7 +646,7 @@ static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         // Otherwise respect the premultiplied request.
         alphaType = requestPremul ? kPremul_SkAlphaType : kUnpremul_SkAlphaType;
     }
-    bitmap->pixelRef()->reconfigure(SkImageInfo::Make(width, height, colorType, alphaType,
+    bitmap->bitmap()->reconfigure(SkImageInfo::Make(width, height, colorType, alphaType,
             sk_sp<SkColorSpace>(bitmap->info().colorSpace())));
 }
 
@@ -831,7 +831,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     }
 
     // Map the bitmap in place from the ashmem region if possible otherwise copy.
-    sk_sp<PixelRef> nativeBitmap;
+    sk_sp<Bitmap> nativeBitmap;
     if (blob.fd() >= 0 && (blob.isMutable() || !isMutable) && (size >= ASHMEM_BITMAP_MIN_SIZE)) {
 #if DEBUG_PARCEL
         ALOGD("Bitmap.createFromParcel: mapped contents of %s bitmap from %s blob "
@@ -852,7 +852,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         }
 
         // Map the pixels in place and take ownership of the ashmem region.
-        nativeBitmap = sk_sp<PixelRef>(GraphicsJNI::mapAshmemPixelRef(env, bitmap.get(),
+        nativeBitmap = sk_sp<Bitmap>(GraphicsJNI::mapAshmemBitmap(env, bitmap.get(),
                 ctable, dupFd, const_cast<void*>(blob.data()), size, !isMutable));
         SkSafeUnref(ctable);
         if (!nativeBitmap) {
@@ -879,7 +879,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 #endif
 
         // Copy the pixels into a new buffer.
-        nativeBitmap = PixelRef::allocateHeapPixelRef(bitmap.get(), ctable);
+        nativeBitmap = Bitmap::allocateHeapBitmap(bitmap.get(), ctable);
         SkSafeUnref(ctable);
         if (!nativeBitmap) {
             blob.release();
@@ -910,8 +910,8 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
     SkBitmap bitmap;
 
-    auto androidBitmap = reinterpret_cast<Bitmap*>(bitmapHandle);
-    androidBitmap->getSkBitmap(&bitmap);
+    auto bitmapWrapper = reinterpret_cast<BitmapWrapper*>(bitmapHandle);
+    bitmapWrapper->getSkBitmap(&bitmap);
 
     sk_sp<SkColorSpace> sRGB = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
     bool isSRGB = bitmap.colorSpace() == sRGB.get();
@@ -941,7 +941,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
 
     // Transfer the underlying ashmem region if we have one and it's immutable.
     android::status_t status;
-    int fd = androidBitmap->pixelRef()->getAshmemFd();
+    int fd = bitmapWrapper->bitmap()->getAshmemFd();
     if (fd >= 0 && !isMutable && p->allowFds()) {
 #if DEBUG_PARCEL
         ALOGD("Bitmap.writeToParcel: transferring immutable bitmap's ashmem fd as "
@@ -991,7 +991,7 @@ static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
                                    jlong srcHandle, jlong paintHandle,
                                    jintArray offsetXY) {
     SkBitmap src;
-    reinterpret_cast<Bitmap*>(srcHandle)->getSkBitmap(&src);
+    reinterpret_cast<BitmapWrapper*>(srcHandle)->getSkBitmap(&src);
     const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     SkIPoint  offset;
     SkBitmap dst;
@@ -1020,7 +1020,7 @@ static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
 static jint Bitmap_getPixel(JNIEnv* env, jobject, jlong bitmapHandle,
         jint x, jint y) {
     SkBitmap bitmap;
-    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
+    reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
     SkAutoLockPixels alp(bitmap);
 
     ToColorProc proc = ChooseToColorProc(bitmap);
@@ -1041,7 +1041,7 @@ static void Bitmap_getPixels(JNIEnv* env, jobject, jlong bitmapHandle,
         jintArray pixelArray, jint offset, jint stride,
         jint x, jint y, jint width, jint height) {
     SkBitmap bitmap;
-    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
+    reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
     SkAutoLockPixels alp(bitmap);
 
     ToColorProc proc = ChooseToColorProc(bitmap);
@@ -1069,7 +1069,7 @@ static void Bitmap_getPixels(JNIEnv* env, jobject, jlong bitmapHandle,
 static void Bitmap_setPixel(JNIEnv* env, jobject, jlong bitmapHandle,
         jint x, jint y, jint colorHandle) {
     SkBitmap bitmap;
-    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
+    reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
     SkColor color = static_cast<SkColor>(colorHandle);
     SkAutoLockPixels alp(bitmap);
     if (NULL == bitmap.getPixels()) {
@@ -1089,7 +1089,7 @@ static void Bitmap_setPixels(JNIEnv* env, jobject, jlong bitmapHandle,
         jintArray pixelArray, jint offset, jint stride,
         jint x, jint y, jint width, jint height) {
     SkBitmap bitmap;
-    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
+    reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
     GraphicsJNI::SetPixels(env, pixelArray, offset, stride,
             x, y, width, height, bitmap);
 }
@@ -1097,7 +1097,7 @@ static void Bitmap_setPixels(JNIEnv* env, jobject, jlong bitmapHandle,
 static void Bitmap_copyPixelsToBuffer(JNIEnv* env, jobject,
                                       jlong bitmapHandle, jobject jbuffer) {
     SkBitmap bitmap;
-    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
+    reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
     SkAutoLockPixels alp(bitmap);
     const void* src = bitmap.getPixels();
 
@@ -1112,7 +1112,7 @@ static void Bitmap_copyPixelsToBuffer(JNIEnv* env, jobject,
 static void Bitmap_copyPixelsFromBuffer(JNIEnv* env, jobject,
                                         jlong bitmapHandle, jobject jbuffer) {
     SkBitmap bitmap;
-    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
+    reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
     SkAutoLockPixels alp(bitmap);
     void* dst = bitmap.getPixels();
 
@@ -1128,8 +1128,8 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
                               jlong bm1Handle) {
     SkBitmap bm0;
     SkBitmap bm1;
-    reinterpret_cast<Bitmap*>(bm0Handle)->getSkBitmap(&bm0);
-    reinterpret_cast<Bitmap*>(bm1Handle)->getSkBitmap(&bm1);
+    reinterpret_cast<BitmapWrapper*>(bm0Handle)->getSkBitmap(&bm0);
+    reinterpret_cast<BitmapWrapper*>(bm1Handle)->getSkBitmap(&bm1);
     if (bm0.width() != bm1.width() ||
         bm0.height() != bm1.height() ||
         bm0.colorType() != bm1.colorType() ||
@@ -1189,7 +1189,7 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
 
 static jlong Bitmap_refPixelRef(JNIEnv* env, jobject, jlong bitmapHandle) {
     LocalScopedBitmap bitmap(bitmapHandle);
-    SkPixelRef* pixelRef = bitmap->pixelRef();
+    SkPixelRef* pixelRef = bitmap->bitmap();
     SkSafeRef(pixelRef);
     return reinterpret_cast<jlong>(pixelRef);
 }
