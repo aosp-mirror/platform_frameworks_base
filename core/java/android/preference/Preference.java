@@ -708,7 +708,8 @@ public class Preference implements Comparable<Preference> {
     public void setIcon(@DrawableRes int iconResId) {
         if (mIconResId != iconResId) {
             mIconResId = iconResId;
-            setIcon(mContext.getDrawable(iconResId));
+            if (iconResId != 0)
+                setIcon(mContext.getDrawable(iconResId));
         }
     }
 
