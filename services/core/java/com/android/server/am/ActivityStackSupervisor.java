@@ -3393,6 +3393,10 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
         mHandler.sendMessage(mHandler.obtainMessage(HANDLE_DISPLAY_CHANGED, displayId, 0));
     }
 
+    DisplayInfo getDisplayInfo(int displayId) {
+        return mActivityDisplays.get(displayId).mDisplayInfo;
+    }
+
     private void handleDisplayAdded(int displayId) {
         boolean newDisplay;
         synchronized (mService) {

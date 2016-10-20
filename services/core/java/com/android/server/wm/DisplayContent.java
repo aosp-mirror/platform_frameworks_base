@@ -36,6 +36,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.NEEDS_MENU_SET_TRUE;
 import static android.view.WindowManager.LayoutParams.NEEDS_MENU_UNSET;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -43,22 +44,40 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
+import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
+import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
+import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
+import static com.android.server.wm.WindowAnimator.KEYGUARD_ANIMATING_OUT;
+import static com.android.server.wm.WindowAnimator.KEYGUARD_ANIM_TIMEOUT_MS;
+import static com.android.server.wm.WindowAnimator.KEYGUARD_NOT_SHOWN;
+import static com.android.server.wm.WindowAnimator.KEYGUARD_SHOWN;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEYGUARD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowManagerService.localLOGV;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
+import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
+import static com.android.server.wm.WindowSurfacePlacer.SET_FORCE_HIDING_CHANGED;
+import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager.StackId;
@@ -79,6 +98,8 @@ import android.view.DisplayInfo;
 import android.view.IWindow;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 
 import com.android.internal.util.FastPrintWriter;
 
@@ -100,6 +121,7 @@ import java.util.List;
  * WindowManagerService.mWindowMap.
  */
 class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowContainer> {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayContent" : TAG_WM;
 
     /** Unique identifier of this stack. */
     private final int mDisplayId;
@@ -1797,6 +1819,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    void dumpWindowAnimators(PrintWriter pw, String subPrefix) {
+        final int count = mWindows.size();
+        for (int j = 0; j < count; j++) {
+            final WindowStateAnimator wAnim = mWindows.get(j).mWinAnimator;
+            pw.println(subPrefix + "Window #" + j + ": " + wAnim);
+        }
+    }
+
     void enableSurfaceTrace(FileDescriptor fd) {
         for (int i = mWindows.size() - 1; i >= 0; i--) {
             final WindowState win = mWindows.get(i);
@@ -1808,6 +1838,365 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         for (int i = mWindows.size() - 1; i >= 0; i--) {
             final WindowState win = mWindows.get(i);
             win.mWinAnimator.disableSurfaceTrace();
+        }
+    }
+
+    void updateWindowsForAnimator(WindowAnimator animator) {
+        final WindowManagerPolicy policy = animator.mPolicy;
+        final int keyguardGoingAwayFlags = animator.mKeyguardGoingAwayFlags;
+        final boolean keyguardGoingAwayToShade =
+                (keyguardGoingAwayFlags & KEYGUARD_GOING_AWAY_FLAG_TO_SHADE) != 0;
+        final boolean keyguardGoingAwayNoAnimation =
+                (keyguardGoingAwayFlags & KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS) != 0;
+        final boolean keyguardGoingAwayWithWallpaper =
+                (keyguardGoingAwayFlags & KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER) != 0;
+
+        if (animator.mKeyguardGoingAway) {
+            for (int i = mWindows.size() - 1; i >= 0; i--) {
+                WindowState win = mWindows.get(i);
+                if (!policy.isKeyguardHostWindow(win.mAttrs)) {
+                    continue;
+                }
+                final WindowStateAnimator winAnimator = win.mWinAnimator;
+                if (policy.isKeyguardShowingAndNotOccluded()) {
+                    if (!winAnimator.mAnimating) {
+                        if (DEBUG_KEYGUARD) Slog.d(TAG,
+                                "updateWindowsForAnimator: creating delay animation");
+
+                        // Create a new animation to delay until keyguard is gone on its own.
+                        winAnimator.mAnimation = new AlphaAnimation(1.0f, 1.0f);
+                        winAnimator.mAnimation.setDuration(KEYGUARD_ANIM_TIMEOUT_MS);
+                        winAnimator.mAnimationIsEntrance = false;
+                        winAnimator.mAnimationStartTime = -1;
+                        winAnimator.mKeyguardGoingAwayAnimation = true;
+                        winAnimator.mKeyguardGoingAwayWithWallpaper
+                                = keyguardGoingAwayWithWallpaper;
+                    }
+                } else {
+                    if (DEBUG_KEYGUARD) Slog.d(TAG,
+                            "updateWindowsForAnimator: StatusBar is no longer keyguard");
+                    animator.mKeyguardGoingAway = false;
+                    winAnimator.clearAnimation();
+                }
+                break;
+            }
+        }
+
+        animator.mForceHiding = KEYGUARD_NOT_SHOWN;
+
+        boolean wallpaperInUnForceHiding = false;
+        boolean startingInUnForceHiding = false;
+        ArrayList<WindowStateAnimator> unForceHiding = null;
+        WindowState wallpaper = null;
+        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
+        for (int i = mWindows.size() - 1; i >= 0; i--) {
+            WindowState win = mWindows.get(i);
+            WindowStateAnimator winAnimator = win.mWinAnimator;
+            final int flags = win.mAttrs.flags;
+            boolean canBeForceHidden = policy.canBeForceHidden(win, win.mAttrs);
+            boolean shouldBeForceHidden = animator.shouldForceHide(win);
+            if (winAnimator.hasSurface()) {
+                final boolean wasAnimating = winAnimator.mWasAnimating;
+                final boolean nowAnimating = winAnimator.stepAnimationLocked(animator.mCurrentTime);
+                winAnimator.mWasAnimating = nowAnimating;
+                animator.orAnimating(nowAnimating);
+
+                if (DEBUG_WALLPAPER) Slog.v(TAG,
+                        win + ": wasAnimating=" + wasAnimating + ", nowAnimating=" + nowAnimating);
+
+                if (wasAnimating && !winAnimator.mAnimating
+                        && wallpaperController.isWallpaperTarget(win)) {
+                    animator.mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
+                    pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+                    if (DEBUG_LAYOUT_REPEATS) {
+                        mService.mWindowPlacerLocked.debugLayoutRepeats(
+                                "updateWindowsAndWallpaperLocked 2", pendingLayoutChanges);
+                    }
+                }
+
+                if (policy.isForceHiding(win.mAttrs)) {
+                    if (!wasAnimating && nowAnimating) {
+                        if (DEBUG_KEYGUARD || DEBUG_ANIM || DEBUG_VISIBILITY) Slog.v(TAG,
+                                "Animation started that could impact force hide: " + win);
+                        animator.mBulkUpdateParams |= SET_FORCE_HIDING_CHANGED;
+                        pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+                        if (DEBUG_LAYOUT_REPEATS) {
+                            mService.mWindowPlacerLocked.debugLayoutRepeats(
+                                    "updateWindowsAndWallpaperLocked 3", pendingLayoutChanges);
+                        }
+                        mService.mFocusMayChange = true;
+                    } else if (animator.mKeyguardGoingAway && !nowAnimating) {
+                        // Timeout!!
+                        Slog.e(TAG, "Timeout waiting for animation to startup");
+                        policy.startKeyguardExitAnimation(0, 0);
+                        animator.mKeyguardGoingAway = false;
+                    }
+                    if (win.isReadyForDisplay()) {
+                        if (nowAnimating && win.mWinAnimator.mKeyguardGoingAwayAnimation) {
+                            animator.mForceHiding = KEYGUARD_ANIMATING_OUT;
+                        } else {
+                            animator.mForceHiding = win.isDrawnLw()
+                                    ? KEYGUARD_SHOWN : KEYGUARD_NOT_SHOWN;
+                        }
+                    }
+                    if (DEBUG_KEYGUARD || DEBUG_VISIBILITY) Slog.v(TAG,
+                            "Force hide " + animator.forceHidingToString()
+                                    + " hasSurface=" + win.mHasSurface
+                                    + " policyVis=" + win.mPolicyVisibility
+                                    + " destroying=" + win.mDestroying
+                                    + " parentHidden=" + win.isParentWindowHidden()
+                                    + " vis=" + win.mViewVisibility
+                                    + " hidden=" + win.mToken.hidden
+                                    + " anim=" + win.mWinAnimator.mAnimation);
+                } else if (canBeForceHidden) {
+                    if (shouldBeForceHidden) {
+                        if (!win.hideLw(false, false)) {
+                            // Was already hidden
+                            continue;
+                        }
+                        if (DEBUG_KEYGUARD || DEBUG_VISIBILITY) Slog.v(TAG,
+                                "Now policy hidden: " + win);
+                    } else {
+                        final Animation postKeyguardExitAnimation =
+                                animator.mPostKeyguardExitAnimation;
+                        boolean applyExistingExitAnimation = postKeyguardExitAnimation != null
+                                && !postKeyguardExitAnimation.hasEnded()
+                                && !winAnimator.mKeyguardGoingAwayAnimation
+                                && win.hasDrawnLw()
+                                && !win.isChildWindow()
+                                && !win.mIsImWindow
+                                && isDefaultDisplay;
+
+                        // If the window is already showing and we don't need to apply an existing
+                        // Keyguard exit animation, skip.
+                        if (!win.showLw(false, false) && !applyExistingExitAnimation) {
+                            continue;
+                        }
+                        final boolean visibleNow = win.isVisibleNow();
+                        if (!visibleNow) {
+                            // Couldn't really show, must showLw() again when win becomes visible.
+                            win.hideLw(false, false);
+                            continue;
+                        }
+                        if (DEBUG_KEYGUARD || DEBUG_VISIBILITY) Slog.v(TAG,
+                                "Now policy shown: " + win);
+                        if ((animator.mBulkUpdateParams & SET_FORCE_HIDING_CHANGED) != 0
+                                && !win.isChildWindow()) {
+                            if (unForceHiding == null) {
+                                unForceHiding = new ArrayList<>();
+                            }
+                            unForceHiding.add(winAnimator);
+                            if ((flags & FLAG_SHOW_WALLPAPER) != 0) {
+                                wallpaperInUnForceHiding = true;
+                            }
+                            if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
+                                startingInUnForceHiding = true;
+                            }
+                        } else if (applyExistingExitAnimation) {
+                            // We're already in the middle of an animation. Use the existing
+                            // animation to bring in this window.
+                            if (DEBUG_KEYGUARD) Slog.v(TAG,
+                                    "Applying existing Keyguard exit animation to new window: win="
+                                            + win);
+
+                            final Animation a = policy.createForceHideEnterAnimation(false,
+                                    keyguardGoingAwayToShade);
+                            winAnimator.setAnimation(a, postKeyguardExitAnimation.getStartTime(),
+                                    STACK_CLIP_BEFORE_ANIM);
+                            winAnimator.mKeyguardGoingAwayAnimation = true;
+                            winAnimator.mKeyguardGoingAwayWithWallpaper
+                                    = keyguardGoingAwayWithWallpaper;
+                        }
+                        final WindowState currentFocus = mService.mCurrentFocus;
+                        if (currentFocus == null || currentFocus.mLayer < win.mLayer) {
+                            // We are showing on top of the current
+                            // focus, so re-evaluate focus to make
+                            // sure it is correct.
+                            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG,
+                                    "updateWindowsForAnimator: setting mFocusMayChange true");
+                            mService.mFocusMayChange = true;
+                        }
+                    }
+                    if ((flags & FLAG_SHOW_WALLPAPER) != 0) {
+                        animator.mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
+                        pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+                        if (DEBUG_LAYOUT_REPEATS) {
+                            mService.mWindowPlacerLocked.debugLayoutRepeats(
+                                    "updateWindowsAndWallpaperLocked 4", pendingLayoutChanges);
+                        }
+                    }
+                }
+            }
+
+            // If the window doesn't have a surface, the only thing we care about is the correct
+            // policy visibility.
+            else if (canBeForceHidden) {
+                if (shouldBeForceHidden) {
+                    win.hideLw(false, false);
+                } else {
+                    win.showLw(false, false);
+                }
+            }
+
+            final AppWindowToken atoken = win.mAppToken;
+            if (winAnimator.mDrawState == READY_TO_SHOW) {
+                if (atoken == null || atoken.allDrawn) {
+                    if (win.performShowLocked()) {
+                        pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
+                        if (DEBUG_LAYOUT_REPEATS) {
+                            mService.mWindowPlacerLocked.debugLayoutRepeats(
+                                    "updateWindowsAndWallpaperLocked 5", pendingLayoutChanges);
+                        }
+                    }
+                }
+            }
+            final AppWindowAnimator appAnimator = winAnimator.mAppAnimator;
+            if (appAnimator != null && appAnimator.thumbnail != null) {
+                if (appAnimator.thumbnailTransactionSeq != animator.mAnimTransactionSequence) {
+                    appAnimator.thumbnailTransactionSeq = animator.mAnimTransactionSequence;
+                    appAnimator.thumbnailLayer = 0;
+                }
+                if (appAnimator.thumbnailLayer < winAnimator.mAnimLayer) {
+                    appAnimator.thumbnailLayer = winAnimator.mAnimLayer;
+                }
+            }
+            if (win.mIsWallpaper) {
+                wallpaper = win;
+            }
+        } // end forall windows
+
+        // If we have windows that are being shown due to them no longer being force-hidden, apply
+        // the appropriate animation to them if animations are not disabled.
+        if (unForceHiding != null) {
+            if (!keyguardGoingAwayNoAnimation) {
+                boolean first = true;
+                for (int i=unForceHiding.size()-1; i>=0; i--) {
+                    final WindowStateAnimator winAnimator = unForceHiding.get(i);
+                    final Animation a = policy.createForceHideEnterAnimation(
+                            wallpaperInUnForceHiding && !startingInUnForceHiding,
+                            keyguardGoingAwayToShade);
+                    if (a != null) {
+                        if (DEBUG_KEYGUARD) Slog.v(TAG,
+                                "Starting keyguard exit animation on window " + winAnimator.mWin);
+                        winAnimator.setAnimation(a, STACK_CLIP_BEFORE_ANIM);
+                        winAnimator.mKeyguardGoingAwayAnimation = true;
+                        winAnimator.mKeyguardGoingAwayWithWallpaper
+                                = keyguardGoingAwayWithWallpaper;
+                        if (first) {
+                            animator.mPostKeyguardExitAnimation = a;
+                            animator.mPostKeyguardExitAnimation.setStartTime(animator.mCurrentTime);
+                            first = false;
+                        }
+                    }
+                }
+            } else if (animator.mKeyguardGoingAway) {
+                policy.startKeyguardExitAnimation(animator.mCurrentTime, 0 /* duration */);
+                animator.mKeyguardGoingAway = false;
+            }
+
+
+            // Wallpaper is going away in un-force-hide motion, animate it as well.
+            if (!wallpaperInUnForceHiding && wallpaper != null && !keyguardGoingAwayNoAnimation) {
+                if (DEBUG_KEYGUARD) Slog.d(TAG,
+                        "updateWindowsForAnimator: wallpaper animating away");
+                final Animation a = policy.createForceHideWallpaperExitAnimation(
+                        keyguardGoingAwayToShade);
+                if (a != null) {
+                    wallpaper.mWinAnimator.setAnimation(a);
+                }
+            }
+        }
+
+        if (animator.mPostKeyguardExitAnimation != null) {
+            // We're in the midst of a keyguard exit animation.
+            if (animator.mKeyguardGoingAway) {
+                policy.startKeyguardExitAnimation(animator.mCurrentTime +
+                                animator.mPostKeyguardExitAnimation.getStartOffset(),
+                        animator.mPostKeyguardExitAnimation.getDuration());
+                animator.mKeyguardGoingAway = false;
+            }
+            // mPostKeyguardExitAnimation might either be ended normally, cancelled, or "orphaned",
+            // meaning that the window it was running on was removed. We check for hasEnded() for
+            // ended normally and cancelled case, and check the time for the "orphaned" case.
+            else if (animator.mPostKeyguardExitAnimation.hasEnded()
+                    || animator.mCurrentTime - animator.mPostKeyguardExitAnimation.getStartTime()
+                    > animator.mPostKeyguardExitAnimation.getDuration()) {
+                // Done with the animation, reset.
+                if (DEBUG_KEYGUARD) Slog.v(TAG, "Done with Keyguard exit animations.");
+                animator.mPostKeyguardExitAnimation = null;
+            }
+        }
+
+        final WindowState winShowWhenLocked = (WindowState) policy.getWinShowWhenLockedLw();
+        if (winShowWhenLocked != null) {
+            animator.mLastShowWinWhenLocked = winShowWhenLocked;
+        }
+    }
+
+    void updateWallpaperForAnimator(WindowAnimator animator) {
+        final WindowList windows = mWindows;
+        WindowState detachedWallpaper = null;
+
+        for (int i = windows.size() - 1; i >= 0; i--) {
+            final WindowState win = windows.get(i);
+            final WindowStateAnimator winAnimator = win.mWinAnimator;
+            if (winAnimator.mSurfaceController == null || !winAnimator.hasSurface()) {
+                continue;
+            }
+
+            final int flags = win.mAttrs.flags;
+
+            // If this window is animating, make a note that we have an animating window and take
+            // care of a request to run a detached wallpaper animation.
+            if (winAnimator.mAnimating) {
+                if (winAnimator.mAnimation != null) {
+                    if ((flags & FLAG_SHOW_WALLPAPER) != 0
+                            && winAnimator.mAnimation.getDetachWallpaper()) {
+                        detachedWallpaper = win;
+                    }
+                    final int color = winAnimator.mAnimation.getBackgroundColor();
+                    if (color != 0) {
+                        final TaskStack stack = win.getStack();
+                        if (stack != null) {
+                            stack.setAnimationBackground(winAnimator, color);
+                        }
+                    }
+                }
+                animator.setAnimating(true);
+            }
+
+            // If this window's app token is running a detached wallpaper animation, make a note so
+            // we can ensure the wallpaper is displayed behind it.
+            final AppWindowAnimator appAnimator = winAnimator.mAppAnimator;
+            if (appAnimator != null && appAnimator.animation != null
+                    && appAnimator.animating) {
+                if ((flags & FLAG_SHOW_WALLPAPER) != 0
+                        && appAnimator.animation.getDetachWallpaper()) {
+                    detachedWallpaper = win;
+                }
+
+                final int color = appAnimator.animation.getBackgroundColor();
+                if (color != 0) {
+                    final TaskStack stack = win.getStack();
+                    if (stack != null) {
+                        stack.setAnimationBackground(winAnimator, color);
+                    }
+                }
+            }
+        } // end forall windows
+
+        if (animator.mWindowDetachedWallpaper != detachedWallpaper) {
+            if (DEBUG_WALLPAPER) Slog.v(TAG, "Detached wallpaper changed from "
+                    + animator.mWindowDetachedWallpaper + " to " + detachedWallpaper);
+            animator.mWindowDetachedWallpaper = detachedWallpaper;
+            animator.mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
+        }
+    }
+
+    void prepareWindowSurfaces() {
+        final int count = mWindows.size();
+        for (int j = 0; j < count; j++) {
+            mWindows.get(j).mWinAnimator.prepareSurfaceLocked(true);
         }
     }
 
