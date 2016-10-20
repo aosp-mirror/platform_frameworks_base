@@ -1204,6 +1204,14 @@ public class CameraDeviceImpl extends CameraDevice
         }
 
         /**
+         * This method is called when camera device's non-repeating request queue is empty,
+         * and is ready to start capturing next image.
+         */
+        public void onRequestQueueEmpty() {
+            // Default empty implementation
+        }
+
+        /**
          * The method called when the camera device has finished preparing
          * an output Surface
          */
@@ -1904,6 +1912,23 @@ public class CameraDeviceImpl extends CameraDevice
             final Surface surface = output.getSurface();
 
             sessionCallback.onSurfacePrepared(surface);
+        }
+
+        @Override
+        public void onRequestQueueEmpty() {
+            final StateCallbackKK sessionCallback;
+
+            if (DEBUG) {
+                Log.v(TAG, "Request queue becomes empty");
+            }
+
+            synchronized(mInterfaceLock) {
+                sessionCallback = mSessionStateCallback;
+            }
+
+            if (sessionCallback == null) return;
+
+            sessionCallback.onRequestQueueEmpty();
         }
 
         /**

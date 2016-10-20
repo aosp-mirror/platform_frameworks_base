@@ -173,6 +173,11 @@ public class CallbackProxies {
         }
 
         @Override
+        public void onCaptureQueueEmpty(CameraCaptureSession session) {
+            mProxy.invoke("onCaptureQueueEmpty", session);
+        }
+
+        @Override
         public void onClosed(CameraCaptureSession session) {
             mProxy.invoke("onClosed", session);
         }

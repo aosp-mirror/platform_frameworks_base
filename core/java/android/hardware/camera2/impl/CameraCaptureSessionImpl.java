@@ -604,11 +604,16 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             }
 
             @Override
-            public void onSurfacePrepared(Surface surface) {
-                if (DEBUG) Log.v(TAG, mIdString + "onPrepared");
-                mStateCallback.onSurfacePrepared(session, surface);
+            public void onRequestQueueEmpty() {
+                if (DEBUG) Log.v(TAG, mIdString + "onRequestQueueEmpty");
+                mStateCallback.onCaptureQueueEmpty(session);
             }
 
+            @Override
+            public void onSurfacePrepared(Surface surface) {
+                if (DEBUG) Log.v(TAG, mIdString + "onSurfacePrepared");
+                mStateCallback.onSurfacePrepared(session, surface);
+            }
         };
 
     }

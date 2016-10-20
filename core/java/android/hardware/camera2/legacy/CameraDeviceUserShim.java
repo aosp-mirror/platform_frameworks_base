@@ -206,6 +206,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         private static final int RESULT_RECEIVED = 3;
         private static final int PREPARED = 4;
         private static final int REPEATING_REQUEST_ERROR = 5;
+        private static final int REQUEST_QUEUE_EMPTY = 6;
 
         private final HandlerThread mHandlerThread;
         private Handler mHandler;
@@ -262,12 +263,18 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
             getHandler().sendMessage(msg);
         }
 
-
         @Override
         public void onRepeatingRequestError(long lastFrameNumber) {
             Message msg = getHandler().obtainMessage(REPEATING_REQUEST_ERROR,
                     /*arg1*/ (int) (lastFrameNumber & 0xFFFFFFFFL),
                     /*arg2*/ (int) ( (lastFrameNumber >> 32) & 0xFFFFFFFFL));
+            getHandler().sendMessage(msg);
+        }
+
+        @Override
+        public void onRequestQueueEmpty() {
+            Message msg = getHandler().obtainMessage(REQUEST_QUEUE_EMPTY,
+                    /* arg1 */ 0, /* arg2 */ 0);
             getHandler().sendMessage(msg);
         }
 
@@ -325,6 +332,10 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
                             long lastFrameNumber = msg.arg2 & 0xFFFFFFFFL;
                             lastFrameNumber = (lastFrameNumber << 32) | (msg.arg1 & 0xFFFFFFFFL);
                             mCallbacks.onRepeatingRequestError(lastFrameNumber);
+                            break;
+                        }
+                        case REQUEST_QUEUE_EMPTY: {
+                            mCallbacks.onRequestQueueEmpty();
                             break;
                         }
                         default:
