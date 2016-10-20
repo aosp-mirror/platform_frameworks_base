@@ -889,8 +889,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             getDisplayContent().getLogicalDisplayRect(mTmpRect);
             // Override right and/or bottom insets in case if the frame doesn't fit the screen in
             // non-fullscreen mode.
-            boolean overrideRightInset = !fullscreenTask && mFrame.right > mTmpRect.right;
-            boolean overrideBottomInset = !fullscreenTask && mFrame.bottom > mTmpRect.bottom;
+            boolean overrideRightInset = !windowsAreFloating && !fullscreenTask &&
+                    mFrame.right > mTmpRect.right;
+            boolean overrideBottomInset = !windowsAreFloating && !fullscreenTask &&
+                    mFrame.bottom > mTmpRect.bottom;
             mContentInsets.set(mContentFrame.left - mFrame.left,
                     mContentFrame.top - mFrame.top,
                     overrideRightInset ? mTmpRect.right - mContentFrame.right
