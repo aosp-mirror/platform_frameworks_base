@@ -3324,8 +3324,7 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
                 try {
                     TransferPipe tp = new TransferPipe();
                     try {
-                        r.app.thread.dumpActivity(tp.getWriteFd().getFileDescriptor(),
-                                r.appToken, innerPrefix, args);
+                        r.app.thread.dumpActivity(tp.getWriteFd(), r.appToken, innerPrefix, args);
                         // Short timeout, since blocking here can
                         // deadlock with the application.
                         tp.go(fd, 2000);

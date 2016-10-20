@@ -405,7 +405,7 @@ public final class ProviderMap {
                 TransferPipe tp = new TransferPipe();
                 try {
                     r.proc.thread.dumpProvider(
-                            tp.getWriteFd().getFileDescriptor(), r.provider.asBinder(), args);
+                            tp.getWriteFd(), r.provider.asBinder(), args);
                     tp.setBufferPrefix("      ");
                     // Short timeout, since blocking here can
                     // deadlock with the application.

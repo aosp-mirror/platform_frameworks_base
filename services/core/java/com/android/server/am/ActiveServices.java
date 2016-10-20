@@ -3070,7 +3070,7 @@ public final class ActiveServices {
             try {
                 TransferPipe tp = new TransferPipe();
                 try {
-                    thread.dumpService(tp.getWriteFd().getFileDescriptor(), r, args);
+                    thread.dumpService(tp.getWriteFd(), r, args);
                     tp.setBufferPrefix("      ");
                     // Short timeout, since blocking here can
                     // deadlock with the application.
@@ -3338,7 +3338,7 @@ public final class ActiveServices {
             try {
                 TransferPipe tp = new TransferPipe();
                 try {
-                    r.app.thread.dumpService(tp.getWriteFd().getFileDescriptor(), r, args);
+                    r.app.thread.dumpService(tp.getWriteFd(), r, args);
                     tp.setBufferPrefix(prefix + "    ");
                     tp.go(fd);
                 } finally {
