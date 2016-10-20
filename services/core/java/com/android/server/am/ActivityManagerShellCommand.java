@@ -2481,6 +2481,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    p[rocesses] [PACKAGE_NAME]: process state");
             pw.println("    o[om]: out of memory management");
             pw.println("    perm[issions]: URI permission grant state");
+            pw.println("    pip: PIP state");
             pw.println("    prov[iders] [COMP_SPEC ...]: content provider state");
             pw.println("    provider [COMP_SPEC]: provider client-side state");
             pw.println("    s[ervices] [COMP_SPEC ...]: service state");
@@ -2682,6 +2683,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("           Test command for sizing <TASK_ID> by <STEP_SIZE>");
             pw.println("           increments within the screen applying the optional [DELAY_MS] between");
             pw.println("           each step.");
+            pw.println("  pip");
+            pw.println("      Gets the current PIP state.");
             pw.println("  write");
             pw.println("      Write all pending state to storage.");
             pw.println();

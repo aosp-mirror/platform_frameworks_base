@@ -647,6 +647,16 @@ public interface IActivityManager extends IInterface {
 
     public void enterPictureInPictureMode(IBinder token) throws RemoteException;
 
+    /**
+     * @return the default bounds of the PIP on the default display.
+     */
+    public Rect getDefaultPictureInPictureBounds() throws RemoteException;
+
+    /**
+     * @return the movement bounds of the PIP on the default display.
+     */
+    public Rect getPictureInPictureMovementBounds() throws RemoteException;
+
     public int setVrMode(IBinder token, boolean enabled, ComponentName packageName)
             throws RemoteException;
 
@@ -1091,4 +1101,6 @@ public interface IActivityManager extends IInterface {
 
     // Start of O transactions
     int REQUEST_ACTIVITY_RELAUNCH = IBinder.FIRST_CALL_TRANSACTION+400;
+    int GET_DEFAULT_PICTURE_IN_PICTURE_BOUNDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 401;
+    int GET_PICTURE_IN_PICTURE_MOVEMENT_BOUNDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 402;
 }

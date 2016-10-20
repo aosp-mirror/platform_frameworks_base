@@ -2931,6 +2931,20 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+        case GET_DEFAULT_PICTURE_IN_PICTURE_BOUNDS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            Rect r = getDefaultPictureInPictureBounds();
+            reply.writeNoException();
+            r.writeToParcel(reply, 0);
+            return true;
+        }
+        case GET_PICTURE_IN_PICTURE_MOVEMENT_BOUNDS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            Rect r = getPictureInPictureMovementBounds();
+            reply.writeNoException();
+            r.writeToParcel(reply, 0);
+            return true;
+        }
         case SET_VR_MODE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final IBinder token = data.readStrongBinder();
@@ -6986,6 +7000,34 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    @Override
+    public Rect getDefaultPictureInPictureBounds() throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_DEFAULT_PICTURE_IN_PICTURE_BOUNDS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        Rect rect = Rect.CREATOR.createFromParcel(reply);
+        data.recycle();
+        reply.recycle();
+        return rect;
+    }
+
+    @Override
+    public Rect getPictureInPictureMovementBounds() throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_PICTURE_IN_PICTURE_MOVEMENT_BOUNDS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        Rect rect = Rect.CREATOR.createFromParcel(reply);
+        data.recycle();
+        reply.recycle();
+        return rect;
     }
 
     @Override
