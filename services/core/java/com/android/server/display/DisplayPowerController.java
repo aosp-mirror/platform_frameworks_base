@@ -286,7 +286,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     + mScreenBrightnessDarkConfig + ") to be less than or equal to "
                     + "config_screenBrightnessDim (" + mScreenBrightnessDimConfig + ").");
         }
-        if (mScreenBrightnessDarkConfig > mScreenBrightnessDimConfig) {
+        if (mScreenBrightnessDarkConfig > screenBrightnessSettingMinimum) {
             Slog.w(TAG, "Expected config_screenBrightnessDark ("
                     + mScreenBrightnessDarkConfig + ") to be less than or equal to "
                     + "config_screenBrightnessSettingMinimum ("
