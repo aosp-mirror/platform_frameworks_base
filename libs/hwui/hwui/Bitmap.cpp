@@ -23,9 +23,9 @@
 
 namespace android {
 
-static bool computeAllocationSize(const SkBitmap& bitmap, size_t* size) {
-    int32_t rowBytes32 = SkToS32(bitmap.rowBytes());
-    int64_t bigSize = (int64_t)bitmap.height() * rowBytes32;
+static bool computeAllocationSize(size_t rowBytes, int height, size_t* size) {
+    int32_t rowBytes32 = SkToS32(rowBytes);
+    int64_t bigSize = (int64_t) height * rowBytes32;
     if (rowBytes32 < 0 || !sk_64_isS32(bigSize)) {
         return false; // allocation will be too large
     }
@@ -45,13 +45,14 @@ static sk_sp<Bitmap> allocateBitmap(SkBitmap* bitmap, SkColorTable* ctable, Allo
     }
 
     size_t size;
-    if (!computeAllocationSize(*bitmap, &size)) {
-        return nullptr;
-    }
 
     // we must respect the rowBytes value already set on the bitmap instead of
     // attempting to compute our own.
     const size_t rowBytes = bitmap->rowBytes();
+    if (!computeAllocationSize(rowBytes, bitmap->height(), &size)) {
+        return nullptr;
+    }
+
     auto wrapper = alloc(size, info, rowBytes, ctable);
     if (wrapper) {
         wrapper->getSkBitmap(bitmap);
@@ -62,21 +63,30 @@ static sk_sp<Bitmap> allocateBitmap(SkBitmap* bitmap, SkColorTable* ctable, Allo
     return wrapper;
 }
 
-sk_sp<Bitmap> Bitmap::allocateHeapBitmap(SkBitmap* bitmap, SkColorTable* ctable) {
-   return allocateBitmap(bitmap, ctable, &Bitmap::allocateHeapBitmap);
-}
-
 sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(SkBitmap* bitmap, SkColorTable* ctable) {
    return allocateBitmap(bitmap, ctable, &Bitmap::allocateAshmemBitmap);
 }
 
-sk_sp<Bitmap> Bitmap::allocateHeapBitmap(size_t size, const SkImageInfo& info, size_t rowBytes,
+static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& info, size_t rowBytes,
         SkColorTable* ctable) {
     void* addr = calloc(size, 1);
     if (!addr) {
         return nullptr;
     }
     return sk_sp<Bitmap>(new Bitmap(addr, size, info, rowBytes, ctable));
+}
+
+sk_sp<Bitmap> Bitmap::allocateHeapBitmap(SkBitmap* bitmap, SkColorTable* ctable) {
+   return allocateBitmap(bitmap, ctable, &android::allocateHeapBitmap);
+}
+
+sk_sp<Bitmap> Bitmap::allocateHeapBitmap(const SkImageInfo& info) {
+    size_t size;
+    if (!computeAllocationSize(info.minRowBytes(), info.height(), &size)) {
+        LOG_ALWAYS_FATAL("trying to allocate too large bitmap");
+        return nullptr;
+    }
+    return android::allocateHeapBitmap(size, info, info.minRowBytes(), nullptr);
 }
 
 sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info,

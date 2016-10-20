@@ -34,8 +34,7 @@ typedef void (*FreeFunc)(void* addr, void* context);
 class ANDROID_API Bitmap : public SkPixelRef {
 public:
     static sk_sp<Bitmap> allocateHeapBitmap(SkBitmap* bitmap, SkColorTable* ctable);
-    static sk_sp<Bitmap> allocateHeapBitmap(size_t allocSize, const SkImageInfo& info,
-        size_t rowBytes, SkColorTable* ctable);
+    static sk_sp<Bitmap> allocateHeapBitmap(const SkImageInfo& info);
 
     static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap, SkColorTable* ctable);
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t allocSize, const SkImageInfo& info,

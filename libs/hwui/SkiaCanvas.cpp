@@ -497,15 +497,19 @@ void SkiaCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint
     mCanvas->drawBitmap(skBitmap, left, top, paint);
 }
 
-void SkiaCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) {
+void SkiaCanvas::drawBitmap(Bitmap& hwuiBitmap, const SkMatrix& matrix, const SkPaint* paint) {
+    SkBitmap bitmap;
+    hwuiBitmap.getSkBitmap(&bitmap);
     SkAutoCanvasRestore acr(mCanvas.get(), true);
     mCanvas->concat(matrix);
     mCanvas->drawBitmap(bitmap, 0, 0, paint);
 }
 
-void SkiaCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
+void SkiaCanvas::drawBitmap(Bitmap& hwuiBitmap, float srcLeft, float srcTop,
                             float srcRight, float srcBottom, float dstLeft, float dstTop,
                             float dstRight, float dstBottom, const SkPaint* paint) {
+    SkBitmap bitmap;
+    hwuiBitmap.getSkBitmap(&bitmap);
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
     mCanvas->drawBitmapRect(bitmap, srcRect, dstRect, paint);

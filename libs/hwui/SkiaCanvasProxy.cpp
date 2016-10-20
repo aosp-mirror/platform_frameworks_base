@@ -107,16 +107,12 @@ void SkiaCanvasProxy::onDrawPath(const SkPath& path, const SkPaint& paint) {
 
 void SkiaCanvasProxy::onDrawBitmap(const SkBitmap& bitmap, SkScalar left, SkScalar top,
         const SkPaint* paint) {
-    SkPixelRef* pxRef = bitmap.pixelRef();
-
+    sk_sp<Bitmap> hwuiBitmap = Bitmap::createFrom(bitmap.info(), *bitmap.pixelRef());
     // HWUI doesn't support extractSubset(), so convert any subsetted bitmap into
     // a drawBitmapRect(); pass through an un-subsetted bitmap.
-    if (pxRef && bitmap.dimensions() != pxRef->info().dimensions()) {
-        SkBitmap fullBitmap;
-        fullBitmap.setInfo(pxRef->info());
-        fullBitmap.setPixelRef(pxRef, 0, 0);
+    if (hwuiBitmap && bitmap.dimensions() != hwuiBitmap->info().dimensions()) {
         SkIPoint origin = bitmap.pixelRefOrigin();
-        mCanvas->drawBitmap(fullBitmap, origin.fX, origin.fY,
+        mCanvas->drawBitmap(*hwuiBitmap, origin.fX, origin.fY,
                             origin.fX + bitmap.dimensions().width(),
                             origin.fY + bitmap.dimensions().height(),
                             left, top,
@@ -124,16 +120,16 @@ void SkiaCanvasProxy::onDrawBitmap(const SkBitmap& bitmap, SkScalar left, SkScal
                             top + bitmap.dimensions().height(),
                             paint);
     } else {
-        auto hwuiBitmap= Bitmap::createFrom(bitmap.info(), *pxRef);
         mCanvas->drawBitmap(*hwuiBitmap, left, top, paint);
     }
 }
 
-void SkiaCanvasProxy::onDrawBitmapRect(const SkBitmap& bitmap, const SkRect* srcPtr,
+void SkiaCanvasProxy::onDrawBitmapRect(const SkBitmap& skBitmap, const SkRect* srcPtr,
         const SkRect& dst, const SkPaint* paint, SrcRectConstraint) {
-    SkRect src = (srcPtr) ? *srcPtr : SkRect::MakeWH(bitmap.width(), bitmap.height());
+    SkRect src = (srcPtr) ? *srcPtr : SkRect::MakeWH(skBitmap.width(), skBitmap.height());
     // TODO: if bitmap is a subset, do we need to add pixelRefOrigin to src?
-    mCanvas->drawBitmap(bitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,
+   Bitmap* bitmap = reinterpret_cast<Bitmap*>(skBitmap.pixelRef());
+   mCanvas->drawBitmap(*bitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,
                         dst.fLeft, dst.fTop, dst.fRight, dst.fBottom, paint);
 }
 

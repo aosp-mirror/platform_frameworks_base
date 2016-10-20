@@ -220,9 +220,9 @@ public:
     // Bitmap-based
     virtual void drawBitmap(Bitmap& bitmap, float left, float top,
             const SkPaint* paint) = 0;
-    virtual void drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
+    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix,
             const SkPaint* paint) = 0;
-    virtual void drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
+    virtual void drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint) = 0;
     virtual void drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
