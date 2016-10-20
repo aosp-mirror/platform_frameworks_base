@@ -291,7 +291,7 @@ public class EventManager {
             msg = (args == null || args.length == 0) ? format
                     : String.format(Locale.US, format, args);
         } catch (IllegalFormatException ife) {
-            Log.e("Log", ife, "IllegalFormatException: formatString='%s' numArgs=%d", format,
+            Log.e(this, ife, "IllegalFormatException: formatString='%s' numArgs=%d", format,
                     args.length);
             msg = format + " (An error occurred while formatting the message.)";
         }
@@ -366,8 +366,6 @@ public class EventManager {
         // Now add a new entry
         mEventRecords.add(newRecord);
         mCallEventRecordMap.put(recordEntry, newRecord);
-
-        // TODO: Add Implementation of this in Telecom for Analytics
         synchronized (mSync) {
             for (EventListener l : mEventListeners) {
                 l.eventRecordAdded(newRecord);
