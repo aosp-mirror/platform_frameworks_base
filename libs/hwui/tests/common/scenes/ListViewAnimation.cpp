@@ -29,10 +29,11 @@ static TestScene::Registrar _ListView(TestScene::Info{
 });
 
 class ListViewAnimation : public TestListViewSceneBase {
-    SkBitmap createRandomCharIcon(int cardHeight) {
+    sk_sp<Bitmap> createRandomCharIcon(int cardHeight) {
+        SkBitmap skBitmap;
         int size = cardHeight - (dp(10) * 2);
-        SkBitmap bitmap = TestUtils::createSkBitmap(size, size);
-        SkCanvas canvas(bitmap);
+        sk_sp<Bitmap> bitmap(TestUtils::createBitmap(size, size, &skBitmap));
+        SkCanvas canvas(skBitmap);
         canvas.clear(0);
 
         SkPaint paint;
@@ -54,11 +55,12 @@ class ListViewAnimation : public TestListViewSceneBase {
         return bitmap;
     }
 
-    static SkBitmap createBoxBitmap(bool filled) {
+    static sk_sp<Bitmap> createBoxBitmap(bool filled) {
         int size = dp(20);
         int stroke = dp(2);
-        SkBitmap bitmap = TestUtils::createSkBitmap(size, size);
-        SkCanvas canvas(bitmap);
+        SkBitmap skBitmap;
+        auto bitmap = TestUtils::createBitmap(size, size, &skBitmap);
+        SkCanvas canvas(skBitmap);
         canvas.clear(Color::Transparent);
 
         SkPaint paint;
@@ -72,8 +74,8 @@ class ListViewAnimation : public TestListViewSceneBase {
 
     void createListItem(RenderProperties& props, Canvas& canvas, int cardId,
             int itemWidth, int itemHeight) override {
-        static SkBitmap filledBox = createBoxBitmap(true);
-        static SkBitmap strokedBox = createBoxBitmap(false);
+        static sk_sp<Bitmap> filledBox(createBoxBitmap(true));
+        static sk_sp<Bitmap> strokedBox(createBoxBitmap(false));
         // TODO: switch to using round rect clipping, once merging correctly handles that
         SkPaint roundRectPaint;
         roundRectPaint.setAntiAlias(true);
@@ -92,9 +94,10 @@ class ListViewAnimation : public TestListViewSceneBase {
         TestUtils::drawUtf8ToCanvas(&canvas, "This is some more text on the card", textPaint,
                 itemHeight, dp(45));
 
-        canvas.drawBitmap(createRandomCharIcon(itemHeight), dp(10), dp(10), nullptr);
+        auto randomIcon = createRandomCharIcon(itemHeight);
+        canvas.drawBitmap(*randomIcon, dp(10), dp(10), nullptr);
 
-        const SkBitmap& boxBitmap = rand() % 2 ? filledBox : strokedBox;
-        canvas.drawBitmap(boxBitmap, itemWidth - dp(10) - boxBitmap.width(), dp(10), nullptr);
+        auto box = rand() % 2 ? filledBox : strokedBox;
+        canvas.drawBitmap(*box, itemWidth - dp(10) - box->width(), dp(10), nullptr);
     }
 };

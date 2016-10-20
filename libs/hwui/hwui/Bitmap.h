@@ -41,6 +41,7 @@ public:
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t allocSize, const SkImageInfo& info,
         size_t rowBytes, SkColorTable* ctable);
 
+    static sk_sp<Bitmap> createFrom(const SkImageInfo&, SkPixelRef&);
     Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes,
             SkColorTable* ctable);
     Bitmap(void* address, void* context, FreeFunc freeFunc,

@@ -176,7 +176,7 @@ public:
     virtual void drawVectorDrawable(VectorDrawableRoot* tree) override;
 
     // Bitmap-based
-    virtual void drawBitmap(const SkBitmap& bitmap, float left, float top, const SkPaint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) override;
     virtual void drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
                             const SkPaint* paint) override;
     virtual void drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
