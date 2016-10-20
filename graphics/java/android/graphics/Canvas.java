@@ -979,12 +979,11 @@ public class Canvas extends BaseCanvas {
     /**
      * Draw the picture, stretched to fit into the dst rectangle.
      */
-    public void drawPicture(@NonNull Picture picture, @NonNull Rect dst) {
+    public void drawPicture(@NonNull Picture picture, @NonNull RectF dst) {
         save();
         translate(dst.left, dst.top);
         if (picture.getWidth() > 0 && picture.getHeight() > 0) {
-            scale((float) dst.width() / picture.getWidth(),
-                    (float) dst.height() / picture.getHeight());
+            scale(dst.width() / picture.getWidth(), dst.height() / picture.getHeight());
         }
         drawPicture(picture);
         restore();
@@ -993,11 +992,12 @@ public class Canvas extends BaseCanvas {
     /**
      * Draw the picture, stretched to fit into the dst rectangle.
      */
-    public void drawPicture(@NonNull Picture picture, @NonNull RectF dst) {
+    public void drawPicture(@NonNull Picture picture, @NonNull Rect dst) {
         save();
         translate(dst.left, dst.top);
         if (picture.getWidth() > 0 && picture.getHeight() > 0) {
-            scale(dst.width() / picture.getWidth(), dst.height() / picture.getHeight());
+            scale((float) dst.width() / picture.getWidth(),
+                    (float) dst.height() / picture.getHeight());
         }
         drawPicture(picture);
         restore();
@@ -1136,53 +1136,29 @@ public class Canvas extends BaseCanvas {
                                                      float right, float bottom);
 
     /**
-     * <p>Draw the specified arc, which will be scaled to fit inside the
-     * specified oval.</p>
+     * <p>
+     * Draw the specified arc, which will be scaled to fit inside the specified oval.
+     * </p>
+     * <p>
+     * If the start angle is negative or >= 360, the start angle is treated as start angle modulo
+     * 360.
+     * </p>
+     * <p>
+     * If the sweep angle is >= 360, then the oval is drawn completely. Note that this differs
+     * slightly from SkPath::arcTo, which treats the sweep angle modulo 360. If the sweep angle is
+     * negative, the sweep angle is treated as sweep angle modulo 360
+     * </p>
+     * <p>
+     * The arc is drawn clockwise. An angle of 0 degrees correspond to the geometric angle of 0
+     * degrees (3 o'clock on a watch.)
+     * </p>
      *
-     * <p>If the start angle is negative or >= 360, the start angle is treated
-     * as start angle modulo 360.</p>
-     *
-     * <p>If the sweep angle is >= 360, then the oval is drawn
-     * completely. Note that this differs slightly from SkPath::arcTo, which
-     * treats the sweep angle modulo 360. If the sweep angle is negative,
-     * the sweep angle is treated as sweep angle modulo 360</p>
-     *
-     * <p>The arc is drawn clockwise. An angle of 0 degrees correspond to the
-     * geometric angle of 0 degrees (3 o'clock on a watch.)</p>
-     *
+     * @param oval The bounds of oval used to define the shape and size of the arc
      * @param startAngle Starting angle (in degrees) where the arc begins
      * @param sweepAngle Sweep angle (in degrees) measured clockwise
-     * @param useCenter If true, include the center of the oval in the arc, and
-                        close it if it is being stroked. This will draw a wedge
-     * @param paint      The paint used to draw the arc
-     */
-    public void drawArc(float left, float top, float right, float bottom, float startAngle,
-            float sweepAngle, boolean useCenter, @NonNull Paint paint) {
-        super.drawArc(left, top, right, bottom, startAngle, sweepAngle, useCenter, paint);
-    }
-
-    /**
-     * <p>Draw the specified arc, which will be scaled to fit inside the
-     * specified oval.</p>
-     *
-     * <p>If the start angle is negative or >= 360, the start angle is treated
-     * as start angle modulo 360.</p>
-     *
-     * <p>If the sweep angle is >= 360, then the oval is drawn
-     * completely. Note that this differs slightly from SkPath::arcTo, which
-     * treats the sweep angle modulo 360. If the sweep angle is negative,
-     * the sweep angle is treated as sweep angle modulo 360</p>
-     *
-     * <p>The arc is drawn clockwise. An angle of 0 degrees correspond to the
-     * geometric angle of 0 degrees (3 o'clock on a watch.)</p>
-     *
-     * @param oval       The bounds of oval used to define the shape and size
-     *                   of the arc
-     * @param startAngle Starting angle (in degrees) where the arc begins
-     * @param sweepAngle Sweep angle (in degrees) measured clockwise
-     * @param useCenter If true, include the center of the oval in the arc, and
-                        close it if it is being stroked. This will draw a wedge
-     * @param paint      The paint used to draw the arc
+     * @param useCenter If true, include the center of the oval in the arc, and close it if it is
+     *            being stroked. This will draw a wedge
+     * @param paint The paint used to draw the arc
      */
     public void drawArc(@NonNull RectF oval, float startAngle, float sweepAngle, boolean useCenter,
             @NonNull Paint paint) {
@@ -1190,8 +1166,37 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Fill the entire canvas' bitmap (restricted to the current clip) with the
-     * specified ARGB color, using srcover porterduff mode.
+     * <p>
+     * Draw the specified arc, which will be scaled to fit inside the specified oval.
+     * </p>
+     * <p>
+     * If the start angle is negative or >= 360, the start angle is treated as start angle modulo
+     * 360.
+     * </p>
+     * <p>
+     * If the sweep angle is >= 360, then the oval is drawn completely. Note that this differs
+     * slightly from SkPath::arcTo, which treats the sweep angle modulo 360. If the sweep angle is
+     * negative, the sweep angle is treated as sweep angle modulo 360
+     * </p>
+     * <p>
+     * The arc is drawn clockwise. An angle of 0 degrees correspond to the geometric angle of 0
+     * degrees (3 o'clock on a watch.)
+     * </p>
+     *
+     * @param startAngle Starting angle (in degrees) where the arc begins
+     * @param sweepAngle Sweep angle (in degrees) measured clockwise
+     * @param useCenter If true, include the center of the oval in the arc, and close it if it is
+     *            being stroked. This will draw a wedge
+     * @param paint The paint used to draw the arc
+     */
+    public void drawArc(float left, float top, float right, float bottom, float startAngle,
+            float sweepAngle, boolean useCenter, @NonNull Paint paint) {
+        super.drawArc(left, top, right, bottom, startAngle, sweepAngle, useCenter, paint);
+    }
+
+    /**
+     * Fill the entire canvas' bitmap (restricted to the current clip) with the specified ARGB
+     * color, using srcover porterduff mode.
      *
      * @param a alpha component (0..255) of the color to draw onto the canvas
      * @param r red component (0..255) of the color to draw onto the canvas
@@ -1203,60 +1208,68 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draw the specified bitmap, with its top/left corner at (x,y), using
-     * the specified paint, transformed by the current matrix.
-     *
-     * <p>Note: if the paint contains a maskfilter that generates a mask which
-     * extends beyond the bitmap's original width/height (e.g. BlurMaskFilter),
-     * then the bitmap will be drawn as if it were in a Shader with CLAMP mode.
-     * Thus the color outside of the original width/height will be the edge
-     * color replicated.
-     *
-     * <p>If the bitmap and canvas have different densities, this function
-     * will take care of automatically scaling the bitmap to draw at the
-     * same density as the canvas.
+     * Draw the specified bitmap, with its top/left corner at (x,y), using the specified paint,
+     * transformed by the current matrix.
+     * <p>
+     * Note: if the paint contains a maskfilter that generates a mask which extends beyond the
+     * bitmap's original width/height (e.g. BlurMaskFilter), then the bitmap will be drawn as if it
+     * were in a Shader with CLAMP mode. Thus the color outside of the original width/height will be
+     * the edge color replicated.
+     * <p>
+     * If the bitmap and canvas have different densities, this function will take care of
+     * automatically scaling the bitmap to draw at the same density as the canvas.
      *
      * @param bitmap The bitmap to be drawn
-     * @param left   The position of the left side of the bitmap being drawn
-     * @param top    The position of the top side of the bitmap being drawn
-     * @param paint  The paint used to draw the bitmap (may be null)
+     * @param left The position of the left side of the bitmap being drawn
+     * @param top The position of the top side of the bitmap being drawn
+     * @param paint The paint used to draw the bitmap (may be null)
      */
     public void drawBitmap(@NonNull Bitmap bitmap, float left, float top, @Nullable Paint paint) {
         super.drawBitmap(bitmap, left, top, paint);
     }
 
     /**
-     * Draw the bitmap using the specified matrix.
+     * Draw the specified bitmap, scaling/translating automatically to fill the destination
+     * rectangle. If the source rectangle is not null, it specifies the subset of the bitmap to
+     * draw.
+     * <p>
+     * Note: if the paint contains a maskfilter that generates a mask which extends beyond the
+     * bitmap's original width/height (e.g. BlurMaskFilter), then the bitmap will be drawn as if it
+     * were in a Shader with CLAMP mode. Thus the color outside of the original width/height will be
+     * the edge color replicated.
+     * <p>
+     * This function <em>ignores the density associated with the bitmap</em>. This is because the
+     * source and destination rectangle coordinate spaces are in their respective densities, so must
+     * already have the appropriate scaling factor applied.
      *
-     * @param bitmap The bitmap to draw
-     * @param matrix The matrix used to transform the bitmap when it is drawn
-     * @param paint  May be null. The paint used to draw the bitmap
+     * @param bitmap The bitmap to be drawn
+     * @param src May be null. The subset of the bitmap to be drawn
+     * @param dst The rectangle that the bitmap will be scaled/translated to fit into
+     * @param paint May be null. The paint used to draw the bitmap
      */
-    public void drawBitmap(@NonNull Bitmap bitmap, @NonNull Matrix matrix, @Nullable Paint paint) {
-        super.drawBitmap(bitmap, matrix, paint);
+    public void drawBitmap(@NonNull Bitmap bitmap, @Nullable Rect src, @NonNull RectF dst,
+            @Nullable Paint paint) {
+        super.drawBitmap(bitmap, src, dst, paint);
     }
 
     /**
-     * Draw the specified bitmap, scaling/translating automatically to fill
-     * the destination rectangle. If the source rectangle is not null, it
-     * specifies the subset of the bitmap to draw.
-     *
-     * <p>Note: if the paint contains a maskfilter that generates a mask which
-     * extends beyond the bitmap's original width/height (e.g. BlurMaskFilter),
-     * then the bitmap will be drawn as if it were in a Shader with CLAMP mode.
-     * Thus the color outside of the original width/height will be the edge
-     * color replicated.
-     *
-     * <p>This function <em>ignores the density associated with the bitmap</em>.
-     * This is because the source and destination rectangle coordinate
-     * spaces are in their respective densities, so must already have the
-     * appropriate scaling factor applied.
+     * Draw the specified bitmap, scaling/translating automatically to fill the destination
+     * rectangle. If the source rectangle is not null, it specifies the subset of the bitmap to
+     * draw.
+     * <p>
+     * Note: if the paint contains a maskfilter that generates a mask which extends beyond the
+     * bitmap's original width/height (e.g. BlurMaskFilter), then the bitmap will be drawn as if it
+     * were in a Shader with CLAMP mode. Thus the color outside of the original width/height will be
+     * the edge color replicated.
+     * <p>
+     * This function <em>ignores the density associated with the bitmap</em>. This is because the
+     * source and destination rectangle coordinate spaces are in their respective densities, so must
+     * already have the appropriate scaling factor applied.
      *
      * @param bitmap The bitmap to be drawn
-     * @param src    May be null. The subset of the bitmap to be drawn
-     * @param dst    The rectangle that the bitmap will be scaled/translated
-     *               to fit into
-     * @param paint  May be null. The paint used to draw the bitmap
+     * @param src May be null. The subset of the bitmap to be drawn
+     * @param dst The rectangle that the bitmap will be scaled/translated to fit into
+     * @param paint May be null. The paint used to draw the bitmap
      */
     public void drawBitmap(@NonNull Bitmap bitmap, @Nullable Rect src, @NonNull Rect dst,
             @Nullable Paint paint) {
@@ -1264,55 +1277,25 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-         * Draw the specified bitmap, scaling/translating automatically to fill
-         * the destination rectangle. If the source rectangle is not null, it
-         * specifies the subset of the bitmap to draw.
-         *
-         * <p>Note: if the paint contains a maskfilter that generates a mask which
-         * extends beyond the bitmap's original width/height (e.g. BlurMaskFilter),
-         * then the bitmap will be drawn as if it were in a Shader with CLAMP mode.
-         * Thus the color outside of the original width/height will be the edge
-         * color replicated.
-         *
-         * <p>This function <em>ignores the density associated with the bitmap</em>.
-         * This is because the source and destination rectangle coordinate
-         * spaces are in their respective densities, so must already have the
-         * appropriate scaling factor applied.
-         *
-         * @param bitmap The bitmap to be drawn
-         * @param src    May be null. The subset of the bitmap to be drawn
-         * @param dst    The rectangle that the bitmap will be scaled/translated
-         *               to fit into
-         * @param paint  May be null. The paint used to draw the bitmap
-         */
-        public void drawBitmap(@NonNull Bitmap bitmap, @Nullable Rect src, @NonNull RectF dst,
-                @Nullable Paint paint) {
-          super.drawBitmap(bitmap, src, dst, paint);
-      }
-
-    /**
-     * Treat the specified array of colors as a bitmap, and draw it. This gives
-     * the same result as first creating a bitmap from the array, and then
-     * drawing it, but this method avoids explicitly creating a bitmap object
-     * which can be more efficient if the colors are changing often.
+     * Treat the specified array of colors as a bitmap, and draw it. This gives the same result as
+     * first creating a bitmap from the array, and then drawing it, but this method avoids
+     * explicitly creating a bitmap object which can be more efficient if the colors are changing
+     * often.
      *
      * @param colors Array of colors representing the pixels of the bitmap
      * @param offset Offset into the array of colors for the first pixel
-     * @param stride The number of colors in the array between rows (must be
-     *               >= width or <= -width).
+     * @param stride The number of colors in the array between rows (must be >= width or <= -width).
      * @param x The X coordinate for where to draw the bitmap
      * @param y The Y coordinate for where to draw the bitmap
      * @param width The width of the bitmap
      * @param height The height of the bitmap
-     * @param hasAlpha True if the alpha channel of the colors contains valid
-     *                 values. If false, the alpha byte is ignored (assumed to
-     *                 be 0xFF for every pixel).
-     * @param paint  May be null. The paint used to draw the bitmap
-     *
+     * @param hasAlpha True if the alpha channel of the colors contains valid values. If false, the
+     *            alpha byte is ignored (assumed to be 0xFF for every pixel).
+     * @param paint May be null. The paint used to draw the bitmap
      * @deprecated Usage with a {@link #isHardwareAccelerated() hardware accelerated} canvas
-     * requires an internal copy of color buffer contents every time this method is called. Using a
-     * Bitmap avoids this copy, and allows the application to more explicitly control the lifetime
-     * and copies of pixel data.
+     *             requires an internal copy of color buffer contents every time this method is
+     *             called. Using a Bitmap avoids this copy, and allows the application to more
+     *             explicitly control the lifetime and copies of pixel data.
      */
     @Deprecated
     public void drawBitmap(@NonNull int[] colors, int offset, int stride, float x, float y,
@@ -1324,9 +1307,9 @@ public class Canvas extends BaseCanvas {
      * Legacy version of drawBitmap(int[] colors, ...) that took ints for x,y
      *
      * @deprecated Usage with a {@link #isHardwareAccelerated() hardware accelerated} canvas
-     * requires an internal copy of color buffer contents every time this method is called. Using a
-     * Bitmap avoids this copy, and allows the application to more explicitly control the lifetime
-     * and copies of pixel data.
+     *             requires an internal copy of color buffer contents every time this method is
+     *             called. Using a Bitmap avoids this copy, and allows the application to more
+     *             explicitly control the lifetime and copies of pixel data.
      */
     @Deprecated
     public void drawBitmap(@NonNull int[] colors, int offset, int stride, int x, int y,
@@ -1335,30 +1318,35 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draw the bitmap through the mesh, where mesh vertices are evenly
-     * distributed across the bitmap. There are meshWidth+1 vertices across, and
-     * meshHeight+1 vertices down. The verts array is accessed in row-major
-     * order, so that the first meshWidth+1 vertices are distributed across the
-     * top of the bitmap from left to right. A more general version of this
-     * method is drawVertices().
+     * Draw the bitmap using the specified matrix.
+     *
+     * @param bitmap The bitmap to draw
+     * @param matrix The matrix used to transform the bitmap when it is drawn
+     * @param paint May be null. The paint used to draw the bitmap
+     */
+    public void drawBitmap(@NonNull Bitmap bitmap, @NonNull Matrix matrix, @Nullable Paint paint) {
+        super.drawBitmap(bitmap, matrix, paint);
+    }
+
+    /**
+     * Draw the bitmap through the mesh, where mesh vertices are evenly distributed across the
+     * bitmap. There are meshWidth+1 vertices across, and meshHeight+1 vertices down. The verts
+     * array is accessed in row-major order, so that the first meshWidth+1 vertices are distributed
+     * across the top of the bitmap from left to right. A more general version of this method is
+     * drawVertices().
      *
      * @param bitmap The bitmap to draw using the mesh
-     * @param meshWidth The number of columns in the mesh. Nothing is drawn if
-     *                  this is 0
-     * @param meshHeight The number of rows in the mesh. Nothing is drawn if
-     *                   this is 0
-     * @param verts Array of x,y pairs, specifying where the mesh should be
-     *              drawn. There must be at least
-     *              (meshWidth+1) * (meshHeight+1) * 2 + vertOffset values
-     *              in the array
+     * @param meshWidth The number of columns in the mesh. Nothing is drawn if this is 0
+     * @param meshHeight The number of rows in the mesh. Nothing is drawn if this is 0
+     * @param verts Array of x,y pairs, specifying where the mesh should be drawn. There must be at
+     *            least (meshWidth+1) * (meshHeight+1) * 2 + vertOffset values in the array
      * @param vertOffset Number of verts elements to skip before drawing
-     * @param colors May be null. Specifies a color at each vertex, which is
-     *               interpolated across the cell, and whose values are
-     *               multiplied by the corresponding bitmap colors. If not null,
-     *               there must be at least (meshWidth+1) * (meshHeight+1) +
-     *               colorOffset values in the array.
+     * @param colors May be null. Specifies a color at each vertex, which is interpolated across the
+     *            cell, and whose values are multiplied by the corresponding bitmap colors. If not
+     *            null, there must be at least (meshWidth+1) * (meshHeight+1) + colorOffset values
+     *            in the array.
      * @param colorOffset Number of color elements to skip before drawing
-     * @param paint  May be null. The paint used to draw the bitmap
+     * @param paint May be null. The paint used to draw the bitmap
      */
     public void drawBitmapMesh(@NonNull Bitmap bitmap, int meshWidth, int meshHeight,
             @NonNull float[] verts, int vertOffset, @Nullable int[] colors, int colorOffset,
@@ -1368,22 +1356,21 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draw the specified circle using the specified paint. If radius is <= 0,
-     * then nothing will be drawn. The circle will be filled or framed based
-     * on the Style in the paint.
+     * Draw the specified circle using the specified paint. If radius is <= 0, then nothing will be
+     * drawn. The circle will be filled or framed based on the Style in the paint.
      *
-     * @param cx     The x-coordinate of the center of the cirle to be drawn
-     * @param cy     The y-coordinate of the center of the cirle to be drawn
+     * @param cx The x-coordinate of the center of the cirle to be drawn
+     * @param cy The y-coordinate of the center of the cirle to be drawn
      * @param radius The radius of the cirle to be drawn
-     * @param paint  The paint used to draw the circle
+     * @param paint The paint used to draw the circle
      */
     public void drawCircle(float cx, float cy, float radius, @NonNull Paint paint) {
         super.drawCircle(cx, cy, radius, paint);
     }
 
     /**
-     * Fill the entire canvas' bitmap (restricted to the current clip) with the
-     * specified color, using srcover porterduff mode.
+     * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color,
+     * using srcover porterduff mode.
      *
      * @param color the color to draw onto the canvas
      */
@@ -1392,27 +1379,29 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Fill the entire canvas' bitmap (restricted to the current clip) with the
-     * specified color and porter-duff xfermode.
+     * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color and
+     * porter-duff xfermode.
      *
      * @param color the color to draw with
-     * @param mode  the porter-duff mode to apply to the color
+     * @param mode the porter-duff mode to apply to the color
      */
     public void drawColor(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
         super.drawColor(color, mode);
     }
 
     /**
-     * Draw a line segment with the specified start and stop x,y coordinates,
-     * using the specified paint.
-     *
-     * <p>Note that since a line is always "framed", the Style is ignored in the paint.</p>
-     *
-     * <p>Degenerate lines (length is 0) will not be drawn.</p>
+     * Draw a line segment with the specified start and stop x,y coordinates, using the specified
+     * paint.
+     * <p>
+     * Note that since a line is always "framed", the Style is ignored in the paint.
+     * </p>
+     * <p>
+     * Degenerate lines (length is 0) will not be drawn.
+     * </p>
      *
      * @param startX The x-coordinate of the start point of the line
      * @param startY The y-coordinate of the start point of the line
-     * @param paint  The paint used to draw the line
+     * @param paint The paint used to draw the line
      */
     public void drawLine(float startX, float startY, float stopX, float stopY,
             @NonNull Paint paint) {
@@ -1420,40 +1409,30 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draw a series of lines. Each line is taken from 4 consecutive values
-     * in the pts array. Thus to draw 1 line, the array must contain at least 4
-     * values. This is logically the same as drawing the array as follows:
-     * drawLine(pts[0], pts[1], pts[2], pts[3]) followed by
+     * Draw a series of lines. Each line is taken from 4 consecutive values in the pts array. Thus
+     * to draw 1 line, the array must contain at least 4 values. This is logically the same as
+     * drawing the array as follows: drawLine(pts[0], pts[1], pts[2], pts[3]) followed by
      * drawLine(pts[4], pts[5], pts[6], pts[7]) and so on.
      *
-     * @param pts      Array of points to draw [x0 y0 x1 y1 x2 y2 ...]
-     * @param offset   Number of values in the array to skip before drawing.
-     * @param count    The number of values in the array to process, after
-     *                 skipping "offset" of them. Since each line uses 4 values,
-     *                 the number of "lines" that are drawn is really
-     *                 (count >> 2).
-     * @param paint    The paint used to draw the points
+     * @param pts Array of points to draw [x0 y0 x1 y1 x2 y2 ...]
+     * @param offset Number of values in the array to skip before drawing.
+     * @param count The number of values in the array to process, after skipping "offset" of them.
+     *            Since each line uses 4 values, the number of "lines" that are drawn is really
+     *            (count >> 2).
+     * @param paint The paint used to draw the points
      */
-    public void drawLines(@Size(multiple=4) @NonNull float[] pts, int offset, int count,
+    public void drawLines(@Size(multiple = 4) @NonNull float[] pts, int offset, int count,
             @NonNull Paint paint) {
         super.drawLines(pts, offset, count, paint);
     }
 
-    public void drawLines(@Size(multiple=4) @NonNull float[] pts, @NonNull Paint paint) {
+    public void drawLines(@Size(multiple = 4) @NonNull float[] pts, @NonNull Paint paint) {
         super.drawLines(pts, paint);
     }
 
     /**
-     * Draw the specified oval using the specified paint. The oval will be
-     * filled or framed based on the Style in the paint.
-     */
-    public void drawOval(float left, float top, float right, float bottom, @NonNull Paint paint) {
-        super.drawOval(left, top, right, bottom, paint);
-    }
-
-    /**
-     * Draw the specified oval using the specified paint. The oval will be
-     * filled or framed based on the Style in the paint.
+     * Draw the specified oval using the specified paint. The oval will be filled or framed based on
+     * the Style in the paint.
      *
      * @param oval The rectangle bounds of the oval to be drawn
      */
@@ -1462,9 +1441,17 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Fill the entire canvas' bitmap (restricted to the current clip) with
-     * the specified paint. This is equivalent (but faster) to drawing an
-     * infinitely large rectangle with the specified paint.
+     * Draw the specified oval using the specified paint. The oval will be filled or framed based on
+     * the Style in the paint.
+     */
+    public void drawOval(float left, float top, float right, float bottom, @NonNull Paint paint) {
+        super.drawOval(left, top, right, bottom, paint);
+    }
+
+    /**
+     * Fill the entire canvas' bitmap (restricted to the current clip) with the specified paint.
+     * This is equivalent (but faster) to drawing an infinitely large rectangle with the specified
+     * paint.
      *
      * @param paint The paint used to draw onto the canvas
      */
@@ -1478,7 +1465,6 @@ public class Canvas extends BaseCanvas {
      * @param patch The ninepatch object to render
      * @param dst The destination rectangle.
      * @param paint The paint to draw the bitmap with. may be null
-     *
      * @hide
      */
     public void drawPatch(@NonNull NinePatch patch, @NonNull Rect dst, @Nullable Paint paint) {
@@ -1491,7 +1477,6 @@ public class Canvas extends BaseCanvas {
      * @param patch The ninepatch object to render
      * @param dst The destination rectangle.
      * @param paint The paint to draw the bitmap with. may be null
-     *
      * @hide
      */
     public void drawPatch(@NonNull NinePatch patch, @NonNull RectF dst, @Nullable Paint paint) {
@@ -1499,10 +1484,10 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draw the specified path using the specified paint. The path will be
-     * filled or framed based on the Style in the paint.
+     * Draw the specified path using the specified paint. The path will be filled or framed based on
+     * the Style in the paint.
      *
-     * @param path  The path to be drawn
+     * @param path The path to be drawn
      * @param paint The paint used to draw the path
      */
     public void drawPath(@NonNull Path path, @NonNull Paint paint) {
@@ -1517,22 +1502,19 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draw a series of points. Each point is centered at the coordinate
-     * specified by pts[], and its diameter is specified by the paint's stroke
-     * width (as transformed by the canvas' CTM), with special treatment for
-     * a stroke width of 0, which always draws exactly 1 pixel (or at most 4
-     * if antialiasing is enabled). The shape of the point is controlled by
-     * the paint's Cap type. The shape is a square, unless the cap type is
-     * Round, in which case the shape is a circle.
+     * Draw a series of points. Each point is centered at the coordinate specified by pts[], and its
+     * diameter is specified by the paint's stroke width (as transformed by the canvas' CTM), with
+     * special treatment for a stroke width of 0, which always draws exactly 1 pixel (or at most 4
+     * if antialiasing is enabled). The shape of the point is controlled by the paint's Cap type.
+     * The shape is a square, unless the cap type is Round, in which case the shape is a circle.
      *
-     * @param pts      Array of points to draw [x0 y0 x1 y1 x2 y2 ...]
-     * @param offset   Number of values to skip before starting to draw.
-     * @param count    The number of values to process, after skipping offset
-     *                 of them. Since one point uses two values, the number of
-     *                 "points" that are drawn is really (count >> 1).
-     * @param paint    The paint used to draw the points
+     * @param pts Array of points to draw [x0 y0 x1 y1 x2 y2 ...]
+     * @param offset Number of values to skip before starting to draw.
+     * @param count The number of values to process, after skipping offset of them. Since one point
+     *            uses two values, the number of "points" that are drawn is really (count >> 1).
+     * @param paint The paint used to draw the points
      */
-    public void drawPoints(@Size(multiple=2) float[] pts, int offset, int count,
+    public void drawPoints(@Size(multiple = 2) float[] pts, int offset, int count,
             @NonNull Paint paint) {
         super.drawPoints(pts, offset, count, paint);
     }
@@ -1540,80 +1522,50 @@ public class Canvas extends BaseCanvas {
     /**
      * Helper for drawPoints() that assumes you want to draw the entire array
      */
-    public void drawPoints(@Size(multiple=2) @NonNull float[] pts, @NonNull Paint paint) {
+    public void drawPoints(@Size(multiple = 2) @NonNull float[] pts, @NonNull Paint paint) {
         super.drawPoints(pts, paint);
     }
 
     /**
-     * Draw the text in the array, with each character's origin specified by
-     * the pos array.
+     * Draw the text in the array, with each character's origin specified by the pos array.
      *
-     * @param text     The text to be drawn
-     * @param index    The index of the first character to draw
-     * @param count    The number of characters to draw, starting from index.
-     * @param pos      Array of [x,y] positions, used to position each
-     *                 character
-     * @param paint    The paint used for the text (e.g. color, size, style)
-     *
-     * @deprecated This method does not support glyph composition and decomposition and
-     * should therefore not be used to render complex scripts. It also doesn't
-     * handle supplementary characters (eg emoji).
+     * @param text The text to be drawn
+     * @param index The index of the first character to draw
+     * @param count The number of characters to draw, starting from index.
+     * @param pos Array of [x,y] positions, used to position each character
+     * @param paint The paint used for the text (e.g. color, size, style)
+     * @deprecated This method does not support glyph composition and decomposition and should
+     *             therefore not be used to render complex scripts. It also doesn't handle
+     *             supplementary characters (eg emoji).
      */
     @Deprecated
     public void drawPosText(@NonNull char[] text, int index, int count,
-            @NonNull @Size(multiple=2) float[] pos,
+            @NonNull @Size(multiple = 2) float[] pos,
             @NonNull Paint paint) {
         super.drawPosText(text, index, count, pos, paint);
     }
 
     /**
-     * Draw the text in the array, with each character's origin specified by
-     * the pos array.
+     * Draw the text in the array, with each character's origin specified by the pos array.
      *
-     * @param text  The text to be drawn
-     * @param pos   Array of [x,y] positions, used to position each character
+     * @param text The text to be drawn
+     * @param pos Array of [x,y] positions, used to position each character
      * @param paint The paint used for the text (e.g. color, size, style)
-     *
-     * @deprecated This method does not support glyph composition and decomposition and
-     * should therefore not be used to render complex scripts. It also doesn't
-     * handle supplementary characters (eg emoji).
+     * @deprecated This method does not support glyph composition and decomposition and should
+     *             therefore not be used to render complex scripts. It also doesn't handle
+     *             supplementary characters (eg emoji).
      */
     @Deprecated
-    public void drawPosText(@NonNull String text, @NonNull @Size(multiple=2) float[] pos,
+    public void drawPosText(@NonNull String text, @NonNull @Size(multiple = 2) float[] pos,
             @NonNull Paint paint) {
         super.drawPosText(text, pos, paint);
     }
 
     /**
-     * Draw the specified Rect using the specified paint. The rectangle will
-     * be filled or framed based on the Style in the paint.
+     * Draw the specified Rect using the specified paint. The rectangle will be filled or framed
+     * based on the Style in the paint.
      *
-     * @param left   The left side of the rectangle to be drawn
-     * @param top    The top side of the rectangle to be drawn
-     * @param right  The right side of the rectangle to be drawn
-     * @param bottom The bottom side of the rectangle to be drawn
-     * @param paint  The paint used to draw the rect
-     */
-    public void drawRect(float left, float top, float right, float bottom, @NonNull Paint paint) {
-        super.drawRect(left, top, right, bottom, paint);
-    }
-
-    /**
-     * Draw the specified Rect using the specified Paint. The rectangle
-     * will be filled or framed based on the Style in the paint.
-     *
-     * @param r        The rectangle to be drawn.
-     * @param paint    The paint used to draw the rectangle
-     */
-    public void drawRect(@NonNull Rect r, @NonNull Paint paint) {
-        super.drawRect(r, paint);
-    }
-
-    /**
-     * Draw the specified Rect using the specified paint. The rectangle will
-     * be filled or framed based on the Style in the paint.
-     *
-     * @param rect  The rect to be drawn
+     * @param rect The rect to be drawn
      * @param paint The paint used to draw the rect
      */
     public void drawRect(@NonNull RectF rect, @NonNull Paint paint) {
@@ -1621,8 +1573,33 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Fill the entire canvas' bitmap (restricted to the current clip) with the
-     * specified RGB color, using srcover porterduff mode.
+     * Draw the specified Rect using the specified Paint. The rectangle will be filled or framed
+     * based on the Style in the paint.
+     *
+     * @param r The rectangle to be drawn.
+     * @param paint The paint used to draw the rectangle
+     */
+    public void drawRect(@NonNull Rect r, @NonNull Paint paint) {
+        super.drawRect(r, paint);
+    }
+
+    /**
+     * Draw the specified Rect using the specified paint. The rectangle will be filled or framed
+     * based on the Style in the paint.
+     *
+     * @param left The left side of the rectangle to be drawn
+     * @param top The top side of the rectangle to be drawn
+     * @param right The right side of the rectangle to be drawn
+     * @param bottom The bottom side of the rectangle to be drawn
+     * @param paint The paint used to draw the rect
+     */
+    public void drawRect(float left, float top, float right, float bottom, @NonNull Paint paint) {
+        super.drawRect(left, top, right, bottom, paint);
+    }
+
+    /**
+     * Fill the entire canvas' bitmap (restricted to the current clip) with the specified RGB color,
+     * using srcover porterduff mode.
      *
      * @param r red component (0..255) of the color to draw onto the canvas
      * @param g green component (0..255) of the color to draw onto the canvas
@@ -1633,11 +1610,24 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draw the specified round-rect using the specified paint. The roundrect
-     * will be filled or framed based on the Style in the paint.
+     * Draw the specified round-rect using the specified paint. The roundrect will be filled or
+     * framed based on the Style in the paint.
      *
-     * @param rx    The x-radius of the oval used to round the corners
-     * @param ry    The y-radius of the oval used to round the corners
+     * @param rect The rectangular bounds of the roundRect to be drawn
+     * @param rx The x-radius of the oval used to round the corners
+     * @param ry The y-radius of the oval used to round the corners
+     * @param paint The paint used to draw the roundRect
+     */
+    public void drawRoundRect(@NonNull RectF rect, float rx, float ry, @NonNull Paint paint) {
+        super.drawRoundRect(rect, rx, ry, paint);
+    }
+
+    /**
+     * Draw the specified round-rect using the specified paint. The roundrect will be filled or
+     * framed based on the Style in the paint.
+     *
+     * @param rx The x-radius of the oval used to round the corners
+     * @param ry The y-radius of the oval used to round the corners
      * @param paint The paint used to draw the roundRect
      */
     public void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
@@ -1646,25 +1636,12 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draw the specified round-rect using the specified paint. The roundrect
-     * will be filled or framed based on the Style in the paint.
+     * Draw the text, with origin at (x,y), using the specified paint. The origin is interpreted
+     * based on the Align setting in the paint.
      *
-     * @param rect  The rectangular bounds of the roundRect to be drawn
-     * @param rx    The x-radius of the oval used to round the corners
-     * @param ry    The y-radius of the oval used to round the corners
-     * @param paint The paint used to draw the roundRect
-     */
-    public void drawRoundRect(@NonNull RectF rect, float rx, float ry, @NonNull Paint paint) {
-        super.drawRoundRect(rect, rx, ry, paint);
-    }
-
-    /**
-     * Draw the text, with origin at (x,y), using the specified paint. The
-     * origin is interpreted based on the Align setting in the paint.
-     *
-     * @param text  The text to be drawn
-     * @param x     The x-coordinate of the origin of the text being drawn
-     * @param y     The y-coordinate of the baseline of the text being drawn
+     * @param text The text to be drawn
+     * @param x The x-coordinate of the origin of the text being drawn
+     * @param y The y-coordinate of the baseline of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     public void drawText(@NonNull char[] text, int index, int count, float x, float y,
@@ -1673,30 +1650,12 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draw the specified range of text, specified by start/end, with its
-     * origin at (x,y), in the specified Paint. The origin is interpreted
-     * based on the Align setting in the Paint.
+     * Draw the text, with origin at (x,y), using the specified paint. The origin is interpreted
+     * based on the Align setting in the paint.
      *
-     * @param text     The text to be drawn
-     * @param start    The index of the first character in text to draw
-     * @param end      (end - 1) is the index of the last character in text
-     *                 to draw
-     * @param x        The x-coordinate of origin for where to draw the text
-     * @param y        The y-coordinate of origin for where to draw the text
-     * @param paint The paint used for the text (e.g. color, size, style)
-     */
-    public void drawText(@NonNull CharSequence text, int start, int end, float x, float y,
-            @NonNull Paint paint) {
-        super.drawText(text, start, end, x, y, paint);
-    }
-
-    /**
-     * Draw the text, with origin at (x,y), using the specified paint. The
-     * origin is interpreted based on the Align setting in the paint.
-     *
-     * @param text  The text to be drawn
-     * @param x     The x-coordinate of the origin of the text being drawn
-     * @param y     The y-coordinate of the baseline of the text being drawn
+     * @param text The text to be drawn
+     * @param x The x-coordinate of the origin of the text being drawn
+     * @param y The y-coordinate of the baseline of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     public void drawText(@NonNull String text, float x, float y, @NonNull Paint paint) {
@@ -1704,14 +1663,14 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draw the text, with origin at (x,y), using the specified paint.
-     * The origin is interpreted based on the Align setting in the paint.
+     * Draw the text, with origin at (x,y), using the specified paint. The origin is interpreted
+     * based on the Align setting in the paint.
      *
-     * @param text  The text to be drawn
+     * @param text The text to be drawn
      * @param start The index of the first character in text to draw
-     * @param end   (end - 1) is the index of the last character in text to draw
-     * @param x     The x-coordinate of the origin of the text being drawn
-     * @param y     The y-coordinate of the baseline of the text being drawn
+     * @param end (end - 1) is the index of the last character in text to draw
+     * @param x The x-coordinate of the origin of the text being drawn
+     * @param y The y-coordinate of the baseline of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     public void drawText(@NonNull String text, int start, int end, float x, float y,
@@ -1720,17 +1679,30 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draw the text, with origin at (x,y), using the specified paint, along
-     * the specified path. The paint's Align setting determins where along the
-     * path to start the text.
+     * Draw the specified range of text, specified by start/end, with its origin at (x,y), in the
+     * specified Paint. The origin is interpreted based on the Align setting in the Paint.
      *
-     * @param text     The text to be drawn
-     * @param path     The path the text should follow for its baseline
-     * @param hOffset  The distance along the path to add to the text's
-     *                 starting position
-     * @param vOffset  The distance above(-) or below(+) the path to position
-     *                 the text
-     * @param paint    The paint used for the text (e.g. color, size, style)
+     * @param text The text to be drawn
+     * @param start The index of the first character in text to draw
+     * @param end (end - 1) is the index of the last character in text to draw
+     * @param x The x-coordinate of origin for where to draw the text
+     * @param y The y-coordinate of origin for where to draw the text
+     * @param paint The paint used for the text (e.g. color, size, style)
+     */
+    public void drawText(@NonNull CharSequence text, int start, int end, float x, float y,
+            @NonNull Paint paint) {
+        super.drawText(text, start, end, x, y, paint);
+    }
+
+    /**
+     * Draw the text, with origin at (x,y), using the specified paint, along the specified path. The
+     * paint's Align setting determins where along the path to start the text.
+     *
+     * @param text The text to be drawn
+     * @param path The path the text should follow for its baseline
+     * @param hOffset The distance along the path to add to the text's starting position
+     * @param vOffset The distance above(-) or below(+) the path to position the text
+     * @param paint The paint used for the text (e.g. color, size, style)
      */
     public void drawTextOnPath(@NonNull char[] text, int index, int count, @NonNull Path path,
             float hOffset, float vOffset, @NonNull Paint paint) {
@@ -1738,17 +1710,14 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draw the text, with origin at (x,y), using the specified paint, along
-     * the specified path. The paint's Align setting determins where along the
-     * path to start the text.
+     * Draw the text, with origin at (x,y), using the specified paint, along the specified path. The
+     * paint's Align setting determins where along the path to start the text.
      *
-     * @param text     The text to be drawn
-     * @param path     The path the text should follow for its baseline
-     * @param hOffset  The distance along the path to add to the text's
-     *                 starting position
-     * @param vOffset  The distance above(-) or below(+) the path to position
-     *                 the text
-     * @param paint    The paint used for the text (e.g. color, size, style)
+     * @param text The text to be drawn
+     * @param path The path the text should follow for its baseline
+     * @param hOffset The distance along the path to add to the text's starting position
+     * @param vOffset The distance above(-) or below(+) the path to position the text
+     * @param paint The paint used for the text (e.g. color, size, style)
      */
     public void drawTextOnPath(@NonNull String text, @NonNull Path path, float hOffset,
             float vOffset, @NonNull Paint paint) {
@@ -1758,21 +1727,20 @@ public class Canvas extends BaseCanvas {
     /**
      * Draw a run of text, all in a single direction, with optional context for complex text
      * shaping.
-     *
-     * <p>See {@link #drawTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)}
-     * for more details. This method uses a character array rather than CharSequence to
-     * represent the string. Also, to be consistent with the pattern established in
-     * {@link #drawText}, in this method {@code count} and {@code contextCount} are used rather
-     * than offsets of the end position; {@code count = end - start, contextCount = contextEnd -
+     * <p>
+     * See {@link #drawTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)} for
+     * more details. This method uses a character array rather than CharSequence to represent the
+     * string. Also, to be consistent with the pattern established in {@link #drawText}, in this
+     * method {@code count} and {@code contextCount} are used rather than offsets of the end
+     * position; {@code count = end - start, contextCount = contextEnd -
      * contextStart}.
      *
      * @param text the text to render
      * @param index the start of the text to render
      * @param count the count of chars to render
-     * @param contextIndex the start of the context for shaping.  Must be
-     *         no greater than index.
-     * @param contextCount the number of characters in the context for shaping.
-     *         contexIndex + contextCount must be no less than index + count.
+     * @param contextIndex the start of the context for shaping. Must be no greater than index.
+     * @param contextCount the number of characters in the context for shaping. contexIndex +
+     *            contextCount must be no less than index + count.
      * @param x the x position at which to draw the text
      * @param y the y position at which to draw the text
      * @param isRtl whether the run is in RTL direction
@@ -1786,36 +1754,34 @@ public class Canvas extends BaseCanvas {
     /**
      * Draw a run of text, all in a single direction, with optional context for complex text
      * shaping.
-     *
-     * <p>The run of text includes the characters from {@code start} to {@code end} in the text. In
+     * <p>
+     * The run of text includes the characters from {@code start} to {@code end} in the text. In
      * addition, the range {@code contextStart} to {@code contextEnd} is used as context for the
      * purpose of complex text shaping, such as Arabic text potentially shaped differently based on
      * the text next to it.
-     *
-     * <p>All text outside the range {@code contextStart..contextEnd} is ignored. The text between
+     * <p>
+     * All text outside the range {@code contextStart..contextEnd} is ignored. The text between
      * {@code start} and {@code end} will be laid out and drawn.
-     *
-     * <p>The direction of the run is explicitly specified by {@code isRtl}. Thus, this method is
+     * <p>
+     * The direction of the run is explicitly specified by {@code isRtl}. Thus, this method is
      * suitable only for runs of a single direction. Alignment of the text is as determined by the
      * Paint's TextAlign value. Further, {@code 0 <= contextStart <= start <= end <= contextEnd
      * <= text.length} must hold on entry.
-     *
-     * <p>Also see {@link android.graphics.Paint#getRunAdvance} for a corresponding method to
-     * measure the text; the advance width of the text drawn matches the value obtained from that
-     * method.
+     * <p>
+     * Also see {@link android.graphics.Paint#getRunAdvance} for a corresponding method to measure
+     * the text; the advance width of the text drawn matches the value obtained from that method.
      *
      * @param text the text to render
-     * @param start the start of the text to render. Data before this position
-     *            can be used for shaping context.
-     * @param end the end of the text to render. Data at or after this
-     *            position can be used for shaping context.
+     * @param start the start of the text to render. Data before this position can be used for
+     *            shaping context.
+     * @param end the end of the text to render. Data at or after this position can be used for
+     *            shaping context.
      * @param contextStart the index of the start of the shaping context
      * @param contextEnd the index of the end of the shaping context
      * @param x the x position at which to draw the text
      * @param y the y position at which to draw the text
      * @param isRtl whether the run is in RTL direction
      * @param paint the paint
-     *
      * @see #drawTextRun(char[], int, int, int, int, float, float, boolean, Paint)
      */
     public void drawTextRun(@NonNull CharSequence text, int start, int end, int contextStart,
@@ -1824,32 +1790,30 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draw the array of vertices, interpreted as triangles (based on mode). The
-     * verts array is required, and specifies the x,y pairs for each vertex. If
-     * texs is non-null, then it is used to specify the coordinate in shader
-     * coordinates to use at each vertex (the paint must have a shader in this
-     * case). If there is no texs array, but there is a color array, then each
-     * color is interpolated across its corresponding triangle in a gradient. If
-     * both texs and colors arrays are present, then they behave as before, but
-     * the resulting color at each pixels is the result of multiplying the
-     * colors from the shader and the color-gradient together. The indices array
-     * is optional, but if it is present, then it is used to specify the index
-     * of each triangle, rather than just walking through the arrays in order.
+     * Draw the array of vertices, interpreted as triangles (based on mode). The verts array is
+     * required, and specifies the x,y pairs for each vertex. If texs is non-null, then it is used
+     * to specify the coordinate in shader coordinates to use at each vertex (the paint must have a
+     * shader in this case). If there is no texs array, but there is a color array, then each color
+     * is interpolated across its corresponding triangle in a gradient. If both texs and colors
+     * arrays are present, then they behave as before, but the resulting color at each pixels is the
+     * result of multiplying the colors from the shader and the color-gradient together. The indices
+     * array is optional, but if it is present, then it is used to specify the index of each
+     * triangle, rather than just walking through the arrays in order.
      *
      * @param mode How to interpret the array of vertices
-     * @param vertexCount The number of values in the vertices array (and
-     *      corresponding texs and colors arrays if non-null). Each logical
-     *      vertex is two values (x, y), vertexCount must be a multiple of 2.
+     * @param vertexCount The number of values in the vertices array (and corresponding texs and
+     *            colors arrays if non-null). Each logical vertex is two values (x, y), vertexCount
+     *            must be a multiple of 2.
      * @param verts Array of vertices for the mesh
      * @param vertOffset Number of values in the verts to skip before drawing.
-     * @param texs May be null. If not null, specifies the coordinates to sample
-     *      into the current shader (e.g. bitmap tile or gradient)
+     * @param texs May be null. If not null, specifies the coordinates to sample into the current
+     *            shader (e.g. bitmap tile or gradient)
      * @param texOffset Number of values in texs to skip before drawing.
-     * @param colors May be null. If not null, specifies a color for each
-     *      vertex, to be interpolated across the triangle.
+     * @param colors May be null. If not null, specifies a color for each vertex, to be interpolated
+     *            across the triangle.
      * @param colorOffset Number of values in colors to skip before drawing.
-     * @param indices If not null, array of indices to reference into the
-     *      vertex (texs, colors) array.
+     * @param indices If not null, array of indices to reference into the vertex (texs, colors)
+     *            array.
      * @param indexCount number of entries in the indices array (if not null).
      * @param paint Specifies the shader to use if the texs array is non-null.
      */
