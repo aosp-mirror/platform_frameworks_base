@@ -1888,22 +1888,32 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         updateBackgroundBounds();
         if (!mCurrentBounds.equals(mBackgroundBounds)) {
-            if (mAnimateNextBackgroundTop || mAnimateNextBackgroundBottom || areBoundsAnimating()) {
+            boolean animate = mAnimateNextBackgroundTop || mAnimateNextBackgroundBottom
+                    || areBoundsAnimating();
+            if (!isExpanded()) {
+                abortBackgroundAnimators();
+                animate = false;
+            }
+            if (animate) {
                 startBackgroundAnimation();
             } else {
                 mCurrentBounds.set(mBackgroundBounds);
                 applyCurrentBackgroundBounds();
             }
         } else {
-            if (mBottomAnimator != null) {
-                mBottomAnimator.cancel();
-            }
-            if (mTopAnimator != null) {
-                mTopAnimator.cancel();
-            }
+            abortBackgroundAnimators();
         }
         mAnimateNextBackgroundBottom = false;
         mAnimateNextBackgroundTop = false;
+    }
+
+    private void abortBackgroundAnimators() {
+        if (mBottomAnimator != null) {
+            mBottomAnimator.cancel();
+        }
+        if (mTopAnimator != null) {
+            mTopAnimator.cancel();
+        }
     }
 
     private boolean areBoundsAnimating() {
