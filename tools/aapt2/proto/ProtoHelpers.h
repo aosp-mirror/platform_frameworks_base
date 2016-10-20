@@ -30,14 +30,18 @@ namespace aapt {
 
 void serializeStringPoolToPb(const StringPool& pool, pb::StringPool* outPbPool);
 
-void serializeSourceToPb(const Source& source, StringPool* srcPool, pb::Source* outPbSource);
-void deserializeSourceFromPb(const pb::Source& pbSource, const android::ResStringPool& srcPool,
+void serializeSourceToPb(const Source& source, StringPool* srcPool,
+                         pb::Source* outPbSource);
+void deserializeSourceFromPb(const pb::Source& pbSource,
+                             const android::ResStringPool& srcPool,
                              Source* outSource);
 
 pb::SymbolStatus_Visibility serializeVisibilityToPb(SymbolState state);
-SymbolState deserializeVisibilityFromPb(pb::SymbolStatus_Visibility pbVisibility);
+SymbolState deserializeVisibilityFromPb(
+    pb::SymbolStatus_Visibility pbVisibility);
 
-void serializeConfig(const ConfigDescription& config, pb::ConfigDescription* outPbConfig);
+void serializeConfig(const ConfigDescription& config,
+                     pb::ConfigDescription* outPbConfig);
 bool deserializeConfigDescriptionFromPb(const pb::ConfigDescription& pbConfig,
                                         ConfigDescription* outConfig);
 
@@ -47,6 +51,6 @@ Reference::Type deserializeReferenceTypeFromPb(pb::Reference_Type pbType);
 pb::Plural_Arity serializePluralEnumToPb(size_t pluralIdx);
 size_t deserializePluralEnumFromPb(pb::Plural_Arity arity);
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_PROTO_PROTOHELPERS_H */

@@ -20,64 +20,66 @@
 #include "io/File.h"
 #include "util/StringPiece.h"
 
-#include <map>
 #include <ziparchive/zip_archive.h>
+#include <map>
 
 namespace aapt {
 namespace io {
 
 /**
- * An IFile representing a file within a ZIP archive. If the file is compressed, it is uncompressed
- * and copied into memory when opened. Otherwise it is mmapped from the ZIP archive.
+ * An IFile representing a file within a ZIP archive. If the file is compressed,
+ * it is uncompressed
+ * and copied into memory when opened. Otherwise it is mmapped from the ZIP
+ * archive.
  */
 class ZipFile : public IFile {
-public:
-    ZipFile(ZipArchiveHandle handle, const ZipEntry& entry, const Source& source);
+ public:
+  ZipFile(ZipArchiveHandle handle, const ZipEntry& entry, const Source& source);
 
-    std::unique_ptr<IData> openAsData() override;
-    const Source& getSource() const override;
+  std::unique_ptr<IData> openAsData() override;
+  const Source& getSource() const override;
 
-private:
-    ZipArchiveHandle mZipHandle;
-    ZipEntry mZipEntry;
-    Source mSource;
+ private:
+  ZipArchiveHandle mZipHandle;
+  ZipEntry mZipEntry;
+  Source mSource;
 };
 
 class ZipFileCollection;
 
 class ZipFileCollectionIterator : public IFileCollectionIterator {
-public:
-    explicit ZipFileCollectionIterator(ZipFileCollection* collection);
+ public:
+  explicit ZipFileCollectionIterator(ZipFileCollection* collection);
 
-    bool hasNext() override;
-    io::IFile* next() override;
+  bool hasNext() override;
+  io::IFile* next() override;
 
-private:
-    std::map<std::string, std::unique_ptr<IFile>>::const_iterator mCurrent, mEnd;
+ private:
+  std::map<std::string, std::unique_ptr<IFile>>::const_iterator mCurrent, mEnd;
 };
 
 /**
  * An IFileCollection that represents a ZIP archive and the entries within it.
  */
 class ZipFileCollection : public IFileCollection {
-public:
-    static std::unique_ptr<ZipFileCollection> create(const StringPiece& path,
-                                                     std::string* outError);
+ public:
+  static std::unique_ptr<ZipFileCollection> create(const StringPiece& path,
+                                                   std::string* outError);
 
-    io::IFile* findFile(const StringPiece& path) override;
-    std::unique_ptr<IFileCollectionIterator> iterator() override;
+  io::IFile* findFile(const StringPiece& path) override;
+  std::unique_ptr<IFileCollectionIterator> iterator() override;
 
-    ~ZipFileCollection() override;
+  ~ZipFileCollection() override;
 
-private:
-    friend class ZipFileCollectionIterator;
-    ZipFileCollection();
+ private:
+  friend class ZipFileCollectionIterator;
+  ZipFileCollection();
 
-    ZipArchiveHandle mHandle;
-    std::map<std::string, std::unique_ptr<IFile>> mFiles;
+  ZipArchiveHandle mHandle;
+  std::map<std::string, std::unique_ptr<IFile>> mFiles;
 };
 
-} // namespace io
-} // namespace aapt
+}  // namespace io
+}  // namespace aapt
 
 #endif /* AAPT_IO_ZIPARCHIVE_H */

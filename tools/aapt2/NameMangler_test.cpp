@@ -22,25 +22,25 @@
 namespace aapt {
 
 TEST(NameManglerTest, MangleName) {
-    std::string package = "android.appcompat";
-    std::string name = "Platform.AppCompat";
+  std::string package = "android.appcompat";
+  std::string name = "Platform.AppCompat";
 
-    std::string mangledName = NameMangler::mangleEntry(package, name);
-    EXPECT_EQ(mangledName, "android.appcompat$Platform.AppCompat");
+  std::string mangledName = NameMangler::mangleEntry(package, name);
+  EXPECT_EQ(mangledName, "android.appcompat$Platform.AppCompat");
 
-    std::string unmangledPackage;
-    std::string unmangledName = mangledName;
-    ASSERT_TRUE(NameMangler::unmangle(&unmangledName, &unmangledPackage));
-    EXPECT_EQ(unmangledName, "Platform.AppCompat");
-    EXPECT_EQ(unmangledPackage, "android.appcompat");
+  std::string unmangledPackage;
+  std::string unmangledName = mangledName;
+  ASSERT_TRUE(NameMangler::unmangle(&unmangledName, &unmangledPackage));
+  EXPECT_EQ(unmangledName, "Platform.AppCompat");
+  EXPECT_EQ(unmangledPackage, "android.appcompat");
 }
 
 TEST(NameManglerTest, IgnoreUnmangledName) {
-    std::string package;
-    std::string name = "foo_bar";
+  std::string package;
+  std::string name = "foo_bar";
 
-    EXPECT_FALSE(NameMangler::unmangle(&name, &package));
-    EXPECT_EQ(name, "foo_bar");
+  EXPECT_FALSE(NameMangler::unmangle(&name, &package));
+  EXPECT_EQ(name, "foo_bar");
 }
 
-} // namespace aapt
+}  // namespace aapt

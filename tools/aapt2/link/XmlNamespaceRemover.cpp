@@ -27,57 +27,59 @@ namespace {
  * Visits each xml Node, removing URI references and nested namespaces.
  */
 class XmlVisitor : public xml::Visitor {
-public:
-    XmlVisitor(bool keepUris) : mKeepUris(keepUris) {
-    }
+ public:
+  XmlVisitor(bool keepUris) : mKeepUris(keepUris) {}
 
-    void visit(xml::Element* el) override {
-        // Strip namespaces
-        for (auto& child : el->children) {
-            while (child && xml::nodeCast<xml::Namespace>(child.get())) {
-                if (child->children.empty()) {
-                    child = {};
-                } else {
-                    child = std::move(child->children.front());
-                    child->parent = el;
-                }
-            }
+  void visit(xml::Element* el) override {
+    // Strip namespaces
+    for (auto& child : el->children) {
+      while (child && xml::nodeCast<xml::Namespace>(child.get())) {
+        if (child->children.empty()) {
+          child = {};
+        } else {
+          child = std::move(child->children.front());
+          child->parent = el;
         }
-        el->children.erase(std::remove_if(el->children.begin(), el->children.end(),
-                [](const std::unique_ptr<xml::Node>& child) -> bool {
-            return child == nullptr;
-        }), el->children.end());
-
-        if (!mKeepUris) {
-            for (xml::Attribute& attr : el->attributes) {
-                attr.namespaceUri = std::string();
-            }
-            el->namespaceUri = std::string();
-        }
-        xml::Visitor::visit(el);
+      }
     }
+    el->children.erase(
+        std::remove_if(el->children.begin(), el->children.end(),
+                       [](const std::unique_ptr<xml::Node>& child) -> bool {
+                         return child == nullptr;
+                       }),
+        el->children.end());
 
-private:
-    bool mKeepUris;
+    if (!mKeepUris) {
+      for (xml::Attribute& attr : el->attributes) {
+        attr.namespaceUri = std::string();
+      }
+      el->namespaceUri = std::string();
+    }
+    xml::Visitor::visit(el);
+  }
+
+ private:
+  bool mKeepUris;
 };
 
-} // namespace
+}  // namespace
 
-bool XmlNamespaceRemover::consume(IAaptContext* context, xml::XmlResource* resource) {
-    if (!resource->root) {
-        return false;
+bool XmlNamespaceRemover::consume(IAaptContext* context,
+                                  xml::XmlResource* resource) {
+  if (!resource->root) {
+    return false;
+  }
+  // Replace any root namespaces until the root is a non-namespace node
+  while (xml::nodeCast<xml::Namespace>(resource->root.get())) {
+    if (resource->root->children.empty()) {
+      break;
     }
-    // Replace any root namespaces until the root is a non-namespace node
-    while (xml::nodeCast<xml::Namespace>(resource->root.get())) {
-        if (resource->root->children.empty()) {
-            break;
-        }
-        resource->root = std::move(resource->root->children.front());
-        resource->root->parent = nullptr;
-    }
-    XmlVisitor visitor(mKeepUris);
-    resource->root->accept(&visitor);
-    return true;
+    resource->root = std::move(resource->root->children.front());
+    resource->root->parent = nullptr;
+  }
+  XmlVisitor visitor(mKeepUris);
+  resource->root->accept(&visitor);
+  return true;
 }
 
-} // namespace aapt
+}  // namespace aapt

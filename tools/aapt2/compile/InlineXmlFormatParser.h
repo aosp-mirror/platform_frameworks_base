@@ -41,25 +41,28 @@ namespace aapt {
  *   </aapt:attr>
  * </animated-vector>
  *
- * The <vector> will be extracted into its own XML file and <animated-vector> will
- * gain an attribute 'android:drawable' set to a reference to the extracted <vector> resource.
+ * The <vector> will be extracted into its own XML file and <animated-vector>
+ * will
+ * gain an attribute 'android:drawable' set to a reference to the extracted
+ * <vector> resource.
  */
 class InlineXmlFormatParser : public IXmlResourceConsumer {
-public:
-    explicit InlineXmlFormatParser() = default;
+ public:
+  explicit InlineXmlFormatParser() = default;
 
-    bool consume(IAaptContext* context, xml::XmlResource* doc) override;
+  bool consume(IAaptContext* context, xml::XmlResource* doc) override;
 
-    std::vector<std::unique_ptr<xml::XmlResource>>& getExtractedInlineXmlDocuments() {
-        return mQueue;
-    }
+  std::vector<std::unique_ptr<xml::XmlResource>>&
+  getExtractedInlineXmlDocuments() {
+    return mQueue;
+  }
 
-private:
-    DISALLOW_COPY_AND_ASSIGN(InlineXmlFormatParser);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(InlineXmlFormatParser);
 
-    std::vector<std::unique_ptr<xml::XmlResource>> mQueue;
+  std::vector<std::unique_ptr<xml::XmlResource>> mQueue;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_COMPILE_INLINEXMLFORMATPARSER_H */

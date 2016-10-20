@@ -24,32 +24,31 @@
 namespace aapt {
 
 struct XmlFlattenerOptions {
-    /**
-     * Keep attribute raw string values along with typed values.
-     */
-    bool keepRawValues = false;
+  /**
+   * Keep attribute raw string values along with typed values.
+   */
+  bool keepRawValues = false;
 
-    /**
-     * If set, the max SDK level of attribute to flatten. All others are ignored.
-     */
-    Maybe<size_t> maxSdkLevel;
+  /**
+   * If set, the max SDK level of attribute to flatten. All others are ignored.
+   */
+  Maybe<size_t> maxSdkLevel;
 };
 
 class XmlFlattener : public IXmlResourceConsumer {
-public:
-    XmlFlattener(BigBuffer* buffer, XmlFlattenerOptions options) :
-            mBuffer(buffer), mOptions(options) {
-    }
+ public:
+  XmlFlattener(BigBuffer* buffer, XmlFlattenerOptions options)
+      : mBuffer(buffer), mOptions(options) {}
 
-    bool consume(IAaptContext* context, xml::XmlResource* resource) override;
+  bool consume(IAaptContext* context, xml::XmlResource* resource) override;
 
-private:
-    BigBuffer* mBuffer;
-    XmlFlattenerOptions mOptions;
+ private:
+  BigBuffer* mBuffer;
+  XmlFlattenerOptions mOptions;
 
-    bool flatten(IAaptContext* context, xml::Node* node);
+  bool flatten(IAaptContext* context, xml::Node* node);
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_FLATTEN_XMLFLATTENER_H */

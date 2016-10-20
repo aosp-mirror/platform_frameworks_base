@@ -28,47 +28,47 @@ namespace io {
  * A regular file from the file system. Uses mmap to open the data.
  */
 class RegularFile : public IFile {
-public:
-    explicit RegularFile(const Source& source);
+ public:
+  explicit RegularFile(const Source& source);
 
-    std::unique_ptr<IData> openAsData() override;
-    const Source& getSource() const override;
+  std::unique_ptr<IData> openAsData() override;
+  const Source& getSource() const override;
 
-private:
-    Source mSource;
+ private:
+  Source mSource;
 };
 
 class FileCollection;
 
 class FileCollectionIterator : public IFileCollectionIterator {
-public:
-    explicit FileCollectionIterator(FileCollection* collection);
+ public:
+  explicit FileCollectionIterator(FileCollection* collection);
 
-    bool hasNext() override;
-    io::IFile* next() override;
+  bool hasNext() override;
+  io::IFile* next() override;
 
-private:
-    std::map<std::string, std::unique_ptr<IFile>>::const_iterator mCurrent, mEnd;
+ private:
+  std::map<std::string, std::unique_ptr<IFile>>::const_iterator mCurrent, mEnd;
 };
 
 /**
  * An IFileCollection representing the file system.
  */
 class FileCollection : public IFileCollection {
-public:
-    /**
-     * Adds a file located at path. Returns the IFile representation of that file.
-     */
-    IFile* insertFile(const StringPiece& path);
-    IFile* findFile(const StringPiece& path) override;
-    std::unique_ptr<IFileCollectionIterator> iterator() override;
+ public:
+  /**
+   * Adds a file located at path. Returns the IFile representation of that file.
+   */
+  IFile* insertFile(const StringPiece& path);
+  IFile* findFile(const StringPiece& path) override;
+  std::unique_ptr<IFileCollectionIterator> iterator() override;
 
-private:
-    friend class FileCollectionIterator;
-    std::map<std::string, std::unique_ptr<IFile>> mFiles;
+ private:
+  friend class FileCollectionIterator;
+  std::map<std::string, std::unique_ptr<IFile>> mFiles;
 };
 
-} // namespace io
-} // namespace aapt
+}  // namespace io
+}  // namespace aapt
 
-#endif // AAPT_IO_FILESYSTEM_H
+#endif  // AAPT_IO_FILESYSTEM_H

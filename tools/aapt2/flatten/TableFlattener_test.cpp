@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "ResourceUtils.h"
 #include "flatten/TableFlattener.h"
+#include "ResourceUtils.h"
 #include "test/Test.h"
 #include "unflatten/BinaryResourceParser.h"
 #include "util/Util.h"
@@ -25,195 +25,207 @@ using namespace android;
 namespace aapt {
 
 class TableFlattenerTest : public ::testing::Test {
-public:
-    void SetUp() override {
-        mContext = test::ContextBuilder()
-                .setCompilationPackage("com.app.test")
-                .setPackageId(0x7f)
-                .build();
+ public:
+  void SetUp() override {
+    mContext = test::ContextBuilder()
+                   .setCompilationPackage("com.app.test")
+                   .setPackageId(0x7f)
+                   .build();
+  }
+
+  ::testing::AssertionResult flatten(ResourceTable* table, ResTable* outTable) {
+    BigBuffer buffer(1024);
+    TableFlattener flattener(&buffer);
+    if (!flattener.consume(mContext.get(), table)) {
+      return ::testing::AssertionFailure() << "failed to flatten ResourceTable";
     }
 
-    ::testing::AssertionResult flatten(ResourceTable* table, ResTable* outTable) {
-        BigBuffer buffer(1024);
-        TableFlattener flattener(&buffer);
-        if (!flattener.consume(mContext.get(), table)) {
-            return ::testing::AssertionFailure() << "failed to flatten ResourceTable";
-        }
+    std::unique_ptr<uint8_t[]> data = util::copy(buffer);
+    if (outTable->add(data.get(), buffer.size(), -1, true) != NO_ERROR) {
+      return ::testing::AssertionFailure() << "flattened ResTable is corrupt";
+    }
+    return ::testing::AssertionSuccess();
+  }
 
-        std::unique_ptr<uint8_t[]> data = util::copy(buffer);
-        if (outTable->add(data.get(), buffer.size(), -1, true) != NO_ERROR) {
-            return ::testing::AssertionFailure() << "flattened ResTable is corrupt";
-        }
-        return ::testing::AssertionSuccess();
+  ::testing::AssertionResult flatten(ResourceTable* table,
+                                     ResourceTable* outTable) {
+    BigBuffer buffer(1024);
+    TableFlattener flattener(&buffer);
+    if (!flattener.consume(mContext.get(), table)) {
+      return ::testing::AssertionFailure() << "failed to flatten ResourceTable";
     }
 
-    ::testing::AssertionResult flatten(ResourceTable* table, ResourceTable* outTable) {
-        BigBuffer buffer(1024);
-        TableFlattener flattener(&buffer);
-        if (!flattener.consume(mContext.get(), table)) {
-            return ::testing::AssertionFailure() << "failed to flatten ResourceTable";
-        }
+    std::unique_ptr<uint8_t[]> data = util::copy(buffer);
+    BinaryResourceParser parser(mContext.get(), outTable, {}, data.get(),
+                                buffer.size());
+    if (!parser.parse()) {
+      return ::testing::AssertionFailure() << "flattened ResTable is corrupt";
+    }
+    return ::testing::AssertionSuccess();
+  }
 
-        std::unique_ptr<uint8_t[]> data = util::copy(buffer);
-        BinaryResourceParser parser(mContext.get(), outTable, {}, data.get(), buffer.size());
-        if (!parser.parse()) {
-            return ::testing::AssertionFailure() << "flattened ResTable is corrupt";
-        }
-        return ::testing::AssertionSuccess();
+  ::testing::AssertionResult exists(ResTable* table,
+                                    const StringPiece& expectedName,
+                                    const ResourceId& expectedId,
+                                    const ConfigDescription& expectedConfig,
+                                    const uint8_t expectedDataType,
+                                    const uint32_t expectedData,
+                                    const uint32_t expectedSpecFlags) {
+    const ResourceName expectedResName = test::parseNameOrDie(expectedName);
+
+    table->setParameters(&expectedConfig);
+
+    ResTable_config config;
+    Res_value val;
+    uint32_t specFlags;
+    if (table->getResource(expectedId.id, &val, false, 0, &specFlags, &config) <
+        0) {
+      return ::testing::AssertionFailure() << "could not find resource with";
     }
 
-    ::testing::AssertionResult exists(ResTable* table,
-                                      const StringPiece& expectedName,
-                                      const ResourceId& expectedId,
-                                      const ConfigDescription& expectedConfig,
-                                      const uint8_t expectedDataType, const uint32_t expectedData,
-                                      const uint32_t expectedSpecFlags) {
-        const ResourceName expectedResName = test::parseNameOrDie(expectedName);
-
-        table->setParameters(&expectedConfig);
-
-        ResTable_config config;
-        Res_value val;
-        uint32_t specFlags;
-        if (table->getResource(expectedId.id, &val, false, 0, &specFlags, &config) < 0) {
-            return ::testing::AssertionFailure() << "could not find resource with";
-        }
-
-        if (expectedDataType != val.dataType) {
-            return ::testing::AssertionFailure()
-                    << "expected data type "
-                    << std::hex << (int) expectedDataType << " but got data type "
-                    << (int) val.dataType << std::dec << " instead";
-        }
-
-        if (expectedData != val.data) {
-            return ::testing::AssertionFailure()
-                    << "expected data "
-                    << std::hex << expectedData << " but got data "
-                    << val.data << std::dec << " instead";
-        }
-
-        if (expectedSpecFlags != specFlags) {
-            return ::testing::AssertionFailure()
-                    << "expected specFlags "
-                    << std::hex << expectedSpecFlags << " but got specFlags "
-                    << specFlags << std::dec << " instead";
-        }
-
-        ResTable::resource_name actualName;
-        if (!table->getResourceName(expectedId.id, false, &actualName)) {
-            return ::testing::AssertionFailure() << "failed to find resource name";
-        }
-
-        Maybe<ResourceName> resName = ResourceUtils::toResourceName(actualName);
-        if (!resName) {
-            return ::testing::AssertionFailure()
-                    << "expected name '" << expectedResName << "' but got '"
-                    << StringPiece16(actualName.package, actualName.packageLen)
-                    << ":"
-                    << StringPiece16(actualName.type, actualName.typeLen)
-                    << "/"
-                    << StringPiece16(actualName.name, actualName.nameLen)
-                    << "'";
-        }
-
-        if (expectedConfig != config) {
-            return ::testing::AssertionFailure()
-                    << "expected config '" << expectedConfig << "' but got '"
-                    << ConfigDescription(config) << "'";
-        }
-        return ::testing::AssertionSuccess();
+    if (expectedDataType != val.dataType) {
+      return ::testing::AssertionFailure()
+             << "expected data type " << std::hex << (int)expectedDataType
+             << " but got data type " << (int)val.dataType << std::dec
+             << " instead";
     }
 
-private:
-    std::unique_ptr<IAaptContext> mContext;
+    if (expectedData != val.data) {
+      return ::testing::AssertionFailure()
+             << "expected data " << std::hex << expectedData << " but got data "
+             << val.data << std::dec << " instead";
+    }
+
+    if (expectedSpecFlags != specFlags) {
+      return ::testing::AssertionFailure()
+             << "expected specFlags " << std::hex << expectedSpecFlags
+             << " but got specFlags " << specFlags << std::dec << " instead";
+    }
+
+    ResTable::resource_name actualName;
+    if (!table->getResourceName(expectedId.id, false, &actualName)) {
+      return ::testing::AssertionFailure() << "failed to find resource name";
+    }
+
+    Maybe<ResourceName> resName = ResourceUtils::toResourceName(actualName);
+    if (!resName) {
+      return ::testing::AssertionFailure()
+             << "expected name '" << expectedResName << "' but got '"
+             << StringPiece16(actualName.package, actualName.packageLen) << ":"
+             << StringPiece16(actualName.type, actualName.typeLen) << "/"
+             << StringPiece16(actualName.name, actualName.nameLen) << "'";
+    }
+
+    if (expectedConfig != config) {
+      return ::testing::AssertionFailure() << "expected config '"
+                                           << expectedConfig << "' but got '"
+                                           << ConfigDescription(config) << "'";
+    }
+    return ::testing::AssertionSuccess();
+  }
+
+ private:
+  std::unique_ptr<IAaptContext> mContext;
 };
 
 TEST_F(TableFlattenerTest, FlattenFullyLinkedTable) {
-    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId("com.app.test", 0x7f)
-            .addSimple("com.app.test:id/one", ResourceId(0x7f020000))
-            .addSimple("com.app.test:id/two", ResourceId(0x7f020001))
-            .addValue("com.app.test:id/three", ResourceId(0x7f020002),
-                      test::buildReference("com.app.test:id/one", ResourceId(0x7f020000)))
-            .addValue("com.app.test:integer/one", ResourceId(0x7f030000),
-                      util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC), 1u))
-            .addValue("com.app.test:integer/one", test::parseConfigOrDie("v1"),
-                      ResourceId(0x7f030000),
-                      util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC), 2u))
-            .addString("com.app.test:string/test", ResourceId(0x7f040000), "foo")
-            .addString("com.app.test:layout/bar", ResourceId(0x7f050000), "res/layout/bar.xml")
-            .build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .setPackageId("com.app.test", 0x7f)
+          .addSimple("com.app.test:id/one", ResourceId(0x7f020000))
+          .addSimple("com.app.test:id/two", ResourceId(0x7f020001))
+          .addValue("com.app.test:id/three", ResourceId(0x7f020002),
+                    test::buildReference("com.app.test:id/one",
+                                         ResourceId(0x7f020000)))
+          .addValue("com.app.test:integer/one", ResourceId(0x7f030000),
+                    util::make_unique<BinaryPrimitive>(
+                        uint8_t(Res_value::TYPE_INT_DEC), 1u))
+          .addValue("com.app.test:integer/one", test::parseConfigOrDie("v1"),
+                    ResourceId(0x7f030000),
+                    util::make_unique<BinaryPrimitive>(
+                        uint8_t(Res_value::TYPE_INT_DEC), 2u))
+          .addString("com.app.test:string/test", ResourceId(0x7f040000), "foo")
+          .addString("com.app.test:layout/bar", ResourceId(0x7f050000),
+                     "res/layout/bar.xml")
+          .build();
 
-    ResTable resTable;
-    ASSERT_TRUE(flatten(table.get(), &resTable));
+  ResTable resTable;
+  ASSERT_TRUE(flatten(table.get(), &resTable));
 
-    EXPECT_TRUE(exists(&resTable, "com.app.test:id/one", ResourceId(0x7f020000), {},
-                       Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
+  EXPECT_TRUE(exists(&resTable, "com.app.test:id/one", ResourceId(0x7f020000),
+                     {}, Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
 
-    EXPECT_TRUE(exists(&resTable, "com.app.test:id/two", ResourceId(0x7f020001), {},
-                       Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
+  EXPECT_TRUE(exists(&resTable, "com.app.test:id/two", ResourceId(0x7f020001),
+                     {}, Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
 
-    EXPECT_TRUE(exists(&resTable, "com.app.test:id/three", ResourceId(0x7f020002), {},
-                       Res_value::TYPE_REFERENCE, 0x7f020000u, 0u));
+  EXPECT_TRUE(exists(&resTable, "com.app.test:id/three", ResourceId(0x7f020002),
+                     {}, Res_value::TYPE_REFERENCE, 0x7f020000u, 0u));
 
-    EXPECT_TRUE(exists(&resTable, "com.app.test:integer/one", ResourceId(0x7f030000),
-                       {}, Res_value::TYPE_INT_DEC, 1u,
-                       ResTable_config::CONFIG_VERSION));
+  EXPECT_TRUE(exists(&resTable, "com.app.test:integer/one",
+                     ResourceId(0x7f030000), {}, Res_value::TYPE_INT_DEC, 1u,
+                     ResTable_config::CONFIG_VERSION));
 
-    EXPECT_TRUE(exists(&resTable, "com.app.test:integer/one", ResourceId(0x7f030000),
-                       test::parseConfigOrDie("v1"), Res_value::TYPE_INT_DEC, 2u,
-                       ResTable_config::CONFIG_VERSION));
+  EXPECT_TRUE(exists(&resTable, "com.app.test:integer/one",
+                     ResourceId(0x7f030000), test::parseConfigOrDie("v1"),
+                     Res_value::TYPE_INT_DEC, 2u,
+                     ResTable_config::CONFIG_VERSION));
 
-    std::u16string fooStr = u"foo";
-    ssize_t idx = resTable.getTableStringBlock(0)->indexOfString(fooStr.data(), fooStr.size());
-    ASSERT_GE(idx, 0);
-    EXPECT_TRUE(exists(&resTable, "com.app.test:string/test", ResourceId(0x7f040000),
-                       {}, Res_value::TYPE_STRING, (uint32_t) idx, 0u));
+  std::u16string fooStr = u"foo";
+  ssize_t idx = resTable.getTableStringBlock(0)->indexOfString(fooStr.data(),
+                                                               fooStr.size());
+  ASSERT_GE(idx, 0);
+  EXPECT_TRUE(exists(&resTable, "com.app.test:string/test",
+                     ResourceId(0x7f040000), {}, Res_value::TYPE_STRING,
+                     (uint32_t)idx, 0u));
 
-    std::u16string barPath = u"res/layout/bar.xml";
-    idx = resTable.getTableStringBlock(0)->indexOfString(barPath.data(), barPath.size());
-    ASSERT_GE(idx, 0);
-    EXPECT_TRUE(exists(&resTable, "com.app.test:layout/bar", ResourceId(0x7f050000), {},
-                       Res_value::TYPE_STRING, (uint32_t) idx, 0u));
+  std::u16string barPath = u"res/layout/bar.xml";
+  idx = resTable.getTableStringBlock(0)->indexOfString(barPath.data(),
+                                                       barPath.size());
+  ASSERT_GE(idx, 0);
+  EXPECT_TRUE(exists(&resTable, "com.app.test:layout/bar",
+                     ResourceId(0x7f050000), {}, Res_value::TYPE_STRING,
+                     (uint32_t)idx, 0u));
 }
 
 TEST_F(TableFlattenerTest, FlattenEntriesWithGapsInIds) {
-    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId("com.app.test", 0x7f)
-            .addSimple("com.app.test:id/one", ResourceId(0x7f020001))
-            .addSimple("com.app.test:id/three", ResourceId(0x7f020003))
-            .build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .setPackageId("com.app.test", 0x7f)
+          .addSimple("com.app.test:id/one", ResourceId(0x7f020001))
+          .addSimple("com.app.test:id/three", ResourceId(0x7f020003))
+          .build();
 
-    ResTable resTable;
-    ASSERT_TRUE(flatten(table.get(), &resTable));
+  ResTable resTable;
+  ASSERT_TRUE(flatten(table.get(), &resTable));
 
-    EXPECT_TRUE(exists(&resTable, "com.app.test:id/one", ResourceId(0x7f020001), {},
-                       Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
-    EXPECT_TRUE(exists(&resTable, "com.app.test:id/three", ResourceId(0x7f020003), {},
-                       Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
+  EXPECT_TRUE(exists(&resTable, "com.app.test:id/one", ResourceId(0x7f020001),
+                     {}, Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
+  EXPECT_TRUE(exists(&resTable, "com.app.test:id/three", ResourceId(0x7f020003),
+                     {}, Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
 }
 
 TEST_F(TableFlattenerTest, FlattenMinMaxAttributes) {
-    Attribute attr(false);
-    attr.typeMask = android::ResTable_map::TYPE_INTEGER;
-    attr.minInt = 10;
-    attr.maxInt = 23;
-    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId("android", 0x01)
-            .addValue("android:attr/foo", ResourceId(0x01010000),
-                      util::make_unique<Attribute>(attr))
-            .build();
+  Attribute attr(false);
+  attr.typeMask = android::ResTable_map::TYPE_INTEGER;
+  attr.minInt = 10;
+  attr.maxInt = 23;
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .setPackageId("android", 0x01)
+          .addValue("android:attr/foo", ResourceId(0x01010000),
+                    util::make_unique<Attribute>(attr))
+          .build();
 
-    ResourceTable result;
-    ASSERT_TRUE(flatten(table.get(), &result));
+  ResourceTable result;
+  ASSERT_TRUE(flatten(table.get(), &result));
 
-    Attribute* actualAttr = test::getValue<Attribute>(&result, "android:attr/foo");
-    ASSERT_NE(nullptr, actualAttr);
-    EXPECT_EQ(attr.isWeak(), actualAttr->isWeak());
-    EXPECT_EQ(attr.typeMask, actualAttr->typeMask);
-    EXPECT_EQ(attr.minInt, actualAttr->minInt);
-    EXPECT_EQ(attr.maxInt, actualAttr->maxInt);
+  Attribute* actualAttr =
+      test::getValue<Attribute>(&result, "android:attr/foo");
+  ASSERT_NE(nullptr, actualAttr);
+  EXPECT_EQ(attr.isWeak(), actualAttr->isWeak());
+  EXPECT_EQ(attr.typeMask, actualAttr->typeMask);
+  EXPECT_EQ(attr.minInt, actualAttr->minInt);
+  EXPECT_EQ(attr.maxInt, actualAttr->maxInt);
 }
 
-} // namespace aapt
+}  // namespace aapt

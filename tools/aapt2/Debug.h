@@ -27,17 +27,18 @@
 namespace aapt {
 
 struct DebugPrintTableOptions {
-    bool showSources = false;
+  bool showSources = false;
 };
 
 struct Debug {
-    static void printTable(ResourceTable* table, const DebugPrintTableOptions& options = {});
-    static void printStyleGraph(ResourceTable* table,
-                                const ResourceName& targetStyle);
-    static void dumpHex(const void* data, size_t len);
-    static void dumpXml(xml::XmlResource* doc);
+  static void printTable(ResourceTable* table,
+                         const DebugPrintTableOptions& options = {});
+  static void printStyleGraph(ResourceTable* table,
+                              const ResourceName& targetStyle);
+  static void dumpHex(const void* data, size_t len);
+  static void dumpXml(xml::XmlResource* doc);
 };
 
-} // namespace aapt
+}  // namespace aapt
 
-#endif // AAPT_DEBUG_H
+#endif  // AAPT_DEBUG_H

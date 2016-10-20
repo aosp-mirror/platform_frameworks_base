@@ -31,51 +31,48 @@
 namespace aapt {
 
 struct PngOptions {
-    int grayScaleTolerance = 0;
+  int grayScaleTolerance = 0;
 };
 
 class Png {
-public:
-    explicit Png(IDiagnostics* diag) : mDiag(diag) {
-    }
+ public:
+  explicit Png(IDiagnostics* diag) : mDiag(diag) {}
 
-    bool process(const Source& source, std::istream* input, BigBuffer* outBuffer,
-                 const PngOptions& options);
+  bool process(const Source& source, std::istream* input, BigBuffer* outBuffer,
+               const PngOptions& options);
 
-private:
-    IDiagnostics* mDiag;
+ private:
+  IDiagnostics* mDiag;
 
-    DISALLOW_COPY_AND_ASSIGN(Png);
+  DISALLOW_COPY_AND_ASSIGN(Png);
 };
 
 /**
  * An InputStream that filters out unimportant PNG chunks.
  */
 class PngChunkFilter : public io::InputStream {
-public:
-    explicit PngChunkFilter(const StringPiece& data);
+ public:
+  explicit PngChunkFilter(const StringPiece& data);
 
-    bool Next(const void** buffer, int* len) override;
-    void BackUp(int count) override;
-    bool Skip(int count) override;
+  bool Next(const void** buffer, int* len) override;
+  void BackUp(int count) override;
+  bool Skip(int count) override;
 
-    int64_t ByteCount() const override {
-        return static_cast<int64_t>(mWindowStart);
-    }
+  int64_t ByteCount() const override {
+    return static_cast<int64_t>(mWindowStart);
+  }
 
-    bool HadError() const override {
-        return mError;
-    }
+  bool HadError() const override { return mError; }
 
-private:
-    bool consumeWindow(const void** buffer, int* len);
+ private:
+  bool consumeWindow(const void** buffer, int* len);
 
-    StringPiece mData;
-    size_t mWindowStart = 0;
-    size_t mWindowEnd = 0;
-    bool mError = false;
+  StringPiece mData;
+  size_t mWindowStart = 0;
+  size_t mWindowEnd = 0;
+  bool mError = false;
 
-    DISALLOW_COPY_AND_ASSIGN(PngChunkFilter);
+  DISALLOW_COPY_AND_ASSIGN(PngChunkFilter);
 };
 
 /**
@@ -84,11 +81,13 @@ private:
 std::unique_ptr<Image> readPng(IAaptContext* context, io::InputStream* in);
 
 /**
- * Writes the RGBA Image, with optional 9-patch meta-data, into the OutputStream as a PNG.
+ * Writes the RGBA Image, with optional 9-patch meta-data, into the OutputStream
+ * as a PNG.
  */
-bool writePng(IAaptContext* context, const Image* image, const NinePatch* ninePatch,
-              io::OutputStream* out, const PngOptions& options);
+bool writePng(IAaptContext* context, const Image* image,
+              const NinePatch* ninePatch, io::OutputStream* out,
+              const PngOptions& options);
 
-} // namespace aapt
+}  // namespace aapt
 
-#endif // AAPT_PNG_H
+#endif  // AAPT_PNG_H

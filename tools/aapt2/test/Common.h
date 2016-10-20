@@ -30,7 +30,8 @@
 #include <iostream>
 
 //
-// GTEST 1.7 doesn't explicitly cast to bool, which causes explicit operators to fail to compile.
+// GTEST 1.7 doesn't explicitly cast to bool, which causes explicit operators to
+// fail to compile.
 //
 #define AAPT_ASSERT_TRUE(v) ASSERT_TRUE(bool(v))
 #define AAPT_ASSERT_FALSE(v) ASSERT_FALSE(bool(v))
@@ -41,81 +42,83 @@ namespace aapt {
 namespace test {
 
 struct DummyDiagnosticsImpl : public IDiagnostics {
-    void log(Level level, DiagMessageActual& actualMsg) override {
-        switch (level) {
-        case Level::Note:
-            return;
+  void log(Level level, DiagMessageActual& actualMsg) override {
+    switch (level) {
+      case Level::Note:
+        return;
 
-        case Level::Warn:
-            std::cerr << actualMsg.source << ": warn: " << actualMsg.message << "." << std::endl;
-            break;
+      case Level::Warn:
+        std::cerr << actualMsg.source << ": warn: " << actualMsg.message << "."
+                  << std::endl;
+        break;
 
-        case Level::Error:
-            std::cerr << actualMsg.source << ": error: " << actualMsg.message << "." << std::endl;
-            break;
-        }
+      case Level::Error:
+        std::cerr << actualMsg.source << ": error: " << actualMsg.message << "."
+                  << std::endl;
+        break;
     }
+  }
 };
 
 inline IDiagnostics* getDiagnostics() {
-    static DummyDiagnosticsImpl diag;
-    return &diag;
+  static DummyDiagnosticsImpl diag;
+  return &diag;
 }
 
 inline ResourceName parseNameOrDie(const StringPiece& str) {
-    ResourceNameRef ref;
-    bool result = ResourceUtils::parseResourceName(str, &ref);
-    assert(result && "invalid resource name");
-    return ref.toResourceName();
+  ResourceNameRef ref;
+  bool result = ResourceUtils::parseResourceName(str, &ref);
+  assert(result && "invalid resource name");
+  return ref.toResourceName();
 }
 
 inline ConfigDescription parseConfigOrDie(const StringPiece& str) {
-    ConfigDescription config;
-    bool result = ConfigDescription::parse(str, &config);
-    assert(result && "invalid configuration");
-    return config;
+  ConfigDescription config;
+  bool result = ConfigDescription::parse(str, &config);
+  assert(result && "invalid configuration");
+  return config;
 }
 
-template <typename T> T* getValueForConfigAndProduct(ResourceTable* table,
-                                                     const StringPiece& resName,
-                                                     const ConfigDescription& config,
-                                                     const StringPiece& product) {
-    Maybe<ResourceTable::SearchResult> result = table->findResource(parseNameOrDie(resName));
-    if (result) {
-        ResourceConfigValue* configValue = result.value().entry->findValue(config, product);
-        if (configValue) {
-            return valueCast<T>(configValue->value.get());
-        }
+template <typename T>
+T* getValueForConfigAndProduct(ResourceTable* table, const StringPiece& resName,
+                               const ConfigDescription& config,
+                               const StringPiece& product) {
+  Maybe<ResourceTable::SearchResult> result =
+      table->findResource(parseNameOrDie(resName));
+  if (result) {
+    ResourceConfigValue* configValue =
+        result.value().entry->findValue(config, product);
+    if (configValue) {
+      return valueCast<T>(configValue->value.get());
     }
-    return nullptr;
+  }
+  return nullptr;
 }
 
-template <typename T> T* getValueForConfig(ResourceTable* table, const StringPiece& resName,
-                                           const ConfigDescription& config) {
-    return getValueForConfigAndProduct<T>(table, resName, config, {});
+template <typename T>
+T* getValueForConfig(ResourceTable* table, const StringPiece& resName,
+                     const ConfigDescription& config) {
+  return getValueForConfigAndProduct<T>(table, resName, config, {});
 }
 
-template <typename T> T* getValue(ResourceTable* table, const StringPiece& resName) {
-    return getValueForConfig<T>(table, resName, {});
+template <typename T>
+T* getValue(ResourceTable* table, const StringPiece& resName) {
+  return getValueForConfig<T>(table, resName, {});
 }
 
 class TestFile : public io::IFile {
-private:
-    Source mSource;
+ private:
+  Source mSource;
 
-public:
-    explicit TestFile(const StringPiece& path) : mSource(path) {}
+ public:
+  explicit TestFile(const StringPiece& path) : mSource(path) {}
 
-    std::unique_ptr<io::IData> openAsData() override {
-        return {};
-    }
+  std::unique_ptr<io::IData> openAsData() override { return {}; }
 
-    const Source& getSource() const override {
-        return mSource;
-    }
+  const Source& getSource() const override { return mSource; }
 };
 
-} // namespace test
-} // namespace aapt
+}  // namespace test
+}  // namespace aapt
 
 #endif /* AAPT_TEST_COMMON_H */

@@ -31,37 +31,37 @@
 namespace aapt {
 
 struct ArchiveEntry {
-    enum : uint32_t {
-        kCompress = 0x01,
-        kAlign    = 0x02,
-    };
+  enum : uint32_t {
+    kCompress = 0x01,
+    kAlign = 0x02,
+  };
 
-    std::string path;
-    uint32_t flags;
-    size_t uncompressedSize;
+  std::string path;
+  uint32_t flags;
+  size_t uncompressedSize;
 };
 
 class IArchiveWriter : public google::protobuf::io::CopyingOutputStream {
-public:
-    virtual ~IArchiveWriter() = default;
+ public:
+  virtual ~IArchiveWriter() = default;
 
-    virtual bool startEntry(const StringPiece& path, uint32_t flags) = 0;
-    virtual bool writeEntry(const BigBuffer& buffer) = 0;
-    virtual bool writeEntry(const void* data, size_t len) = 0;
-    virtual bool finishEntry() = 0;
+  virtual bool startEntry(const StringPiece& path, uint32_t flags) = 0;
+  virtual bool writeEntry(const BigBuffer& buffer) = 0;
+  virtual bool writeEntry(const void* data, size_t len) = 0;
+  virtual bool finishEntry() = 0;
 
-    // CopyingOutputStream implementations.
-    bool Write(const void* buffer, int size) override {
-        return writeEntry(buffer, size);
-    }
+  // CopyingOutputStream implementations.
+  bool Write(const void* buffer, int size) override {
+    return writeEntry(buffer, size);
+  }
 };
 
-std::unique_ptr<IArchiveWriter> createDirectoryArchiveWriter(IDiagnostics* diag,
-                                                             const StringPiece& path);
+std::unique_ptr<IArchiveWriter> createDirectoryArchiveWriter(
+    IDiagnostics* diag, const StringPiece& path);
 
-std::unique_ptr<IArchiveWriter> createZipFileArchiveWriter(IDiagnostics* diag,
-                                                           const StringPiece& path);
+std::unique_ptr<IArchiveWriter> createZipFileArchiveWriter(
+    IDiagnostics* diag, const StringPiece& path);
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_FLATTEN_ARCHIVE_H */

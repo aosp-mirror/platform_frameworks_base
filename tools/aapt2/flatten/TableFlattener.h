@@ -25,16 +25,15 @@ class BigBuffer;
 class ResourceTable;
 
 class TableFlattener : public IResourceTableConsumer {
-public:
-    explicit TableFlattener(BigBuffer* buffer) : mBuffer(buffer) {
-    }
+ public:
+  explicit TableFlattener(BigBuffer* buffer) : mBuffer(buffer) {}
 
-    bool consume(IAaptContext* context, ResourceTable* table) override;
+  bool consume(IAaptContext* context, ResourceTable* table) override;
 
-private:
-    BigBuffer* mBuffer;
+ private:
+  BigBuffer* mBuffer;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_FLATTEN_TABLEFLATTENER_H */

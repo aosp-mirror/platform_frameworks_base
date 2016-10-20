@@ -29,232 +29,242 @@ namespace aapt {
 namespace test {
 
 class ResourceTableBuilder {
-private:
-    DummyDiagnosticsImpl mDiagnostics;
-    std::unique_ptr<ResourceTable> mTable = util::make_unique<ResourceTable>();
+ private:
+  DummyDiagnosticsImpl mDiagnostics;
+  std::unique_ptr<ResourceTable> mTable = util::make_unique<ResourceTable>();
 
-public:
-    ResourceTableBuilder() = default;
+ public:
+  ResourceTableBuilder() = default;
 
-    StringPool* getStringPool() {
-        return &mTable->stringPool;
-    }
+  StringPool* getStringPool() { return &mTable->stringPool; }
 
-    ResourceTableBuilder& setPackageId(const StringPiece& packageName, uint8_t id) {
-        ResourceTablePackage* package = mTable->createPackage(packageName, id);
-        assert(package);
-        return *this;
-    }
+  ResourceTableBuilder& setPackageId(const StringPiece& packageName,
+                                     uint8_t id) {
+    ResourceTablePackage* package = mTable->createPackage(packageName, id);
+    assert(package);
+    return *this;
+  }
 
-    ResourceTableBuilder& addSimple(const StringPiece& name, const ResourceId& id = {}) {
-        return addValue(name, id, util::make_unique<Id>());
-    }
+  ResourceTableBuilder& addSimple(const StringPiece& name,
+                                  const ResourceId& id = {}) {
+    return addValue(name, id, util::make_unique<Id>());
+  }
 
-    ResourceTableBuilder& addSimple(const StringPiece& name, const ConfigDescription& config,
-                                    const ResourceId& id = {}) {
-        return addValue(name, config, id, util::make_unique<Id>());
-    }
+  ResourceTableBuilder& addSimple(const StringPiece& name,
+                                  const ConfigDescription& config,
+                                  const ResourceId& id = {}) {
+    return addValue(name, config, id, util::make_unique<Id>());
+  }
 
-    ResourceTableBuilder& addReference(const StringPiece& name, const StringPiece& ref) {
-        return addReference(name, {}, ref);
-    }
+  ResourceTableBuilder& addReference(const StringPiece& name,
+                                     const StringPiece& ref) {
+    return addReference(name, {}, ref);
+  }
 
-    ResourceTableBuilder& addReference(const StringPiece& name, const ResourceId& id,
-                                       const StringPiece& ref) {
-        return addValue(name, id, util::make_unique<Reference>(parseNameOrDie(ref)));
-    }
+  ResourceTableBuilder& addReference(const StringPiece& name,
+                                     const ResourceId& id,
+                                     const StringPiece& ref) {
+    return addValue(name, id,
+                    util::make_unique<Reference>(parseNameOrDie(ref)));
+  }
 
-    ResourceTableBuilder& addString(const StringPiece& name, const StringPiece& str) {
-        return addString(name, {}, str);
-    }
+  ResourceTableBuilder& addString(const StringPiece& name,
+                                  const StringPiece& str) {
+    return addString(name, {}, str);
+  }
 
-    ResourceTableBuilder& addString(const StringPiece& name, const ResourceId& id,
-                                    const StringPiece& str) {
-        return addValue(name, id, util::make_unique<String>(mTable->stringPool.makeRef(str)));
-    }
+  ResourceTableBuilder& addString(const StringPiece& name, const ResourceId& id,
+                                  const StringPiece& str) {
+    return addValue(name, id,
+                    util::make_unique<String>(mTable->stringPool.makeRef(str)));
+  }
 
-    ResourceTableBuilder& addString(const StringPiece& name, const ResourceId& id,
-                                    const ConfigDescription& config, const StringPiece& str) {
-        return addValue(name, config, id,
-                        util::make_unique<String>(mTable->stringPool.makeRef(str)));
-    }
+  ResourceTableBuilder& addString(const StringPiece& name, const ResourceId& id,
+                                  const ConfigDescription& config,
+                                  const StringPiece& str) {
+    return addValue(name, config, id,
+                    util::make_unique<String>(mTable->stringPool.makeRef(str)));
+  }
 
-    ResourceTableBuilder& addFileReference(const StringPiece& name, const StringPiece& path) {
-        return addFileReference(name, {}, path);
-    }
+  ResourceTableBuilder& addFileReference(const StringPiece& name,
+                                         const StringPiece& path) {
+    return addFileReference(name, {}, path);
+  }
 
-    ResourceTableBuilder& addFileReference(const StringPiece& name, const ResourceId& id,
-                                           const StringPiece& path) {
-        return addValue(name, id,
-                        util::make_unique<FileReference>(mTable->stringPool.makeRef(path)));
-    }
+  ResourceTableBuilder& addFileReference(const StringPiece& name,
+                                         const ResourceId& id,
+                                         const StringPiece& path) {
+    return addValue(name, id, util::make_unique<FileReference>(
+                                  mTable->stringPool.makeRef(path)));
+  }
 
-    ResourceTableBuilder& addFileReference(const StringPiece& name, const StringPiece& path,
-                                           const ConfigDescription& config) {
-        return addValue(name, config, {},
-                        util::make_unique<FileReference>(mTable->stringPool.makeRef(path)));
-    }
+  ResourceTableBuilder& addFileReference(const StringPiece& name,
+                                         const StringPiece& path,
+                                         const ConfigDescription& config) {
+    return addValue(name, config, {}, util::make_unique<FileReference>(
+                                          mTable->stringPool.makeRef(path)));
+  }
 
-    ResourceTableBuilder& addValue(const StringPiece& name,
-                                   std::unique_ptr<Value> value) {
-        return addValue(name, {}, std::move(value));
-    }
+  ResourceTableBuilder& addValue(const StringPiece& name,
+                                 std::unique_ptr<Value> value) {
+    return addValue(name, {}, std::move(value));
+  }
 
-    ResourceTableBuilder& addValue(const StringPiece& name, const ResourceId& id,
-                                   std::unique_ptr<Value> value) {
-        return addValue(name, {}, id, std::move(value));
-    }
+  ResourceTableBuilder& addValue(const StringPiece& name, const ResourceId& id,
+                                 std::unique_ptr<Value> value) {
+    return addValue(name, {}, id, std::move(value));
+  }
 
-    ResourceTableBuilder& addValue(const StringPiece& name, const ConfigDescription& config,
-                                   const ResourceId& id, std::unique_ptr<Value> value) {
-        ResourceName resName = parseNameOrDie(name);
-        bool result = mTable->addResourceAllowMangled(resName, id, config, {},
-                                                      std::move(value), &mDiagnostics);
-        assert(result);
-        return *this;
-    }
+  ResourceTableBuilder& addValue(const StringPiece& name,
+                                 const ConfigDescription& config,
+                                 const ResourceId& id,
+                                 std::unique_ptr<Value> value) {
+    ResourceName resName = parseNameOrDie(name);
+    bool result = mTable->addResourceAllowMangled(
+        resName, id, config, {}, std::move(value), &mDiagnostics);
+    assert(result);
+    return *this;
+  }
 
-    ResourceTableBuilder& setSymbolState(const StringPiece& name, const ResourceId& id,
-                                         SymbolState state) {
-        ResourceName resName = parseNameOrDie(name);
-        Symbol symbol;
-        symbol.state = state;
-        bool result = mTable->setSymbolStateAllowMangled(resName, id, symbol, &mDiagnostics);
-        assert(result);
-        return *this;
-    }
+  ResourceTableBuilder& setSymbolState(const StringPiece& name,
+                                       const ResourceId& id,
+                                       SymbolState state) {
+    ResourceName resName = parseNameOrDie(name);
+    Symbol symbol;
+    symbol.state = state;
+    bool result =
+        mTable->setSymbolStateAllowMangled(resName, id, symbol, &mDiagnostics);
+    assert(result);
+    return *this;
+  }
 
-    std::unique_ptr<ResourceTable> build() {
-        return std::move(mTable);
-    }
+  std::unique_ptr<ResourceTable> build() { return std::move(mTable); }
 };
 
-inline std::unique_ptr<Reference> buildReference(const StringPiece& ref,
-                                                 const Maybe<ResourceId>& id = {}) {
-    std::unique_ptr<Reference> reference = util::make_unique<Reference>(parseNameOrDie(ref));
-    reference->id = id;
-    return reference;
+inline std::unique_ptr<Reference> buildReference(
+    const StringPiece& ref, const Maybe<ResourceId>& id = {}) {
+  std::unique_ptr<Reference> reference =
+      util::make_unique<Reference>(parseNameOrDie(ref));
+  reference->id = id;
+  return reference;
 }
 
-inline std::unique_ptr<BinaryPrimitive> buildPrimitive(uint8_t type, uint32_t data) {
-    android::Res_value value = {};
-    value.size = sizeof(value);
-    value.dataType = type;
-    value.data = data;
-    return util::make_unique<BinaryPrimitive>(value);
+inline std::unique_ptr<BinaryPrimitive> buildPrimitive(uint8_t type,
+                                                       uint32_t data) {
+  android::Res_value value = {};
+  value.size = sizeof(value);
+  value.dataType = type;
+  value.data = data;
+  return util::make_unique<BinaryPrimitive>(value);
 }
 
 template <typename T>
 class ValueBuilder {
-private:
-    std::unique_ptr<Value> mValue;
+ private:
+  std::unique_ptr<Value> mValue;
 
-public:
-    template <typename... Args>
-    explicit ValueBuilder(Args&&... args) : mValue(new T{ std::forward<Args>(args)... }) {
-    }
+ public:
+  template <typename... Args>
+  explicit ValueBuilder(Args&&... args)
+      : mValue(new T{std::forward<Args>(args)...}) {}
 
-    template <typename... Args>
-    ValueBuilder& setSource(Args&&... args) {
-        mValue->setSource(Source{ std::forward<Args>(args)... });
-        return *this;
-    }
+  template <typename... Args>
+  ValueBuilder& setSource(Args&&... args) {
+    mValue->setSource(Source{std::forward<Args>(args)...});
+    return *this;
+  }
 
-    ValueBuilder& setComment(const StringPiece& str) {
-        mValue->setComment(str);
-        return *this;
-    }
+  ValueBuilder& setComment(const StringPiece& str) {
+    mValue->setComment(str);
+    return *this;
+  }
 
-    std::unique_ptr<Value> build() {
-        return std::move(mValue);
-    }
+  std::unique_ptr<Value> build() { return std::move(mValue); }
 };
 
 class AttributeBuilder {
-private:
-    std::unique_ptr<Attribute> mAttr;
+ private:
+  std::unique_ptr<Attribute> mAttr;
 
-public:
-    explicit AttributeBuilder(bool weak = false) : mAttr(util::make_unique<Attribute>(weak)) {
-        mAttr->typeMask = android::ResTable_map::TYPE_ANY;
-    }
+ public:
+  explicit AttributeBuilder(bool weak = false)
+      : mAttr(util::make_unique<Attribute>(weak)) {
+    mAttr->typeMask = android::ResTable_map::TYPE_ANY;
+  }
 
-    AttributeBuilder& setTypeMask(uint32_t typeMask) {
-        mAttr->typeMask = typeMask;
-        return *this;
-    }
+  AttributeBuilder& setTypeMask(uint32_t typeMask) {
+    mAttr->typeMask = typeMask;
+    return *this;
+  }
 
-    AttributeBuilder& addItem(const StringPiece& name, uint32_t value) {
-        mAttr->symbols.push_back(Attribute::Symbol{
-                Reference(ResourceName({}, ResourceType::kId, name)),
-                value});
-        return *this;
-    }
+  AttributeBuilder& addItem(const StringPiece& name, uint32_t value) {
+    mAttr->symbols.push_back(Attribute::Symbol{
+        Reference(ResourceName({}, ResourceType::kId, name)), value});
+    return *this;
+  }
 
-    std::unique_ptr<Attribute> build() {
-        return std::move(mAttr);
-    }
+  std::unique_ptr<Attribute> build() { return std::move(mAttr); }
 };
 
 class StyleBuilder {
-private:
-    std::unique_ptr<Style> mStyle = util::make_unique<Style>();
+ private:
+  std::unique_ptr<Style> mStyle = util::make_unique<Style>();
 
-public:
-    StyleBuilder& setParent(const StringPiece& str) {
-        mStyle->parent = Reference(parseNameOrDie(str));
-        return *this;
-    }
+ public:
+  StyleBuilder& setParent(const StringPiece& str) {
+    mStyle->parent = Reference(parseNameOrDie(str));
+    return *this;
+  }
 
-    StyleBuilder& addItem(const StringPiece& str, std::unique_ptr<Item> value) {
-        mStyle->entries.push_back(Style::Entry{ Reference(parseNameOrDie(str)), std::move(value) });
-        return *this;
-    }
+  StyleBuilder& addItem(const StringPiece& str, std::unique_ptr<Item> value) {
+    mStyle->entries.push_back(
+        Style::Entry{Reference(parseNameOrDie(str)), std::move(value)});
+    return *this;
+  }
 
-    StyleBuilder& addItem(const StringPiece& str, const ResourceId& id, std::unique_ptr<Item> value) {
-        addItem(str, std::move(value));
-        mStyle->entries.back().key.id = id;
-        return *this;
-    }
+  StyleBuilder& addItem(const StringPiece& str, const ResourceId& id,
+                        std::unique_ptr<Item> value) {
+    addItem(str, std::move(value));
+    mStyle->entries.back().key.id = id;
+    return *this;
+  }
 
-    std::unique_ptr<Style> build() {
-        return std::move(mStyle);
-    }
+  std::unique_ptr<Style> build() { return std::move(mStyle); }
 };
 
 class StyleableBuilder {
-private:
-    std::unique_ptr<Styleable> mStyleable = util::make_unique<Styleable>();
+ private:
+  std::unique_ptr<Styleable> mStyleable = util::make_unique<Styleable>();
 
-public:
-    StyleableBuilder& addItem(const StringPiece& str, const Maybe<ResourceId>& id = {}) {
-        mStyleable->entries.push_back(Reference(parseNameOrDie(str)));
-        mStyleable->entries.back().id = id;
-        return *this;
-    }
+ public:
+  StyleableBuilder& addItem(const StringPiece& str,
+                            const Maybe<ResourceId>& id = {}) {
+    mStyleable->entries.push_back(Reference(parseNameOrDie(str)));
+    mStyleable->entries.back().id = id;
+    return *this;
+  }
 
-    std::unique_ptr<Styleable> build() {
-        return std::move(mStyleable);
-    }
+  std::unique_ptr<Styleable> build() { return std::move(mStyleable); }
 };
 
 inline std::unique_ptr<xml::XmlResource> buildXmlDom(const StringPiece& str) {
-    std::stringstream in;
-    in << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" << str;
-    StdErrDiagnostics diag;
-    std::unique_ptr<xml::XmlResource> doc = xml::inflate(&in, &diag, Source("test.xml"));
-    assert(doc);
-    return doc;
+  std::stringstream in;
+  in << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" << str;
+  StdErrDiagnostics diag;
+  std::unique_ptr<xml::XmlResource> doc =
+      xml::inflate(&in, &diag, Source("test.xml"));
+  assert(doc);
+  return doc;
 }
 
-inline std::unique_ptr<xml::XmlResource> buildXmlDomForPackageName(IAaptContext* context,
-                                                                   const StringPiece& str) {
-    std::unique_ptr<xml::XmlResource> doc = buildXmlDom(str);
-    doc->file.name.package = context->getCompilationPackage();
-    return doc;
+inline std::unique_ptr<xml::XmlResource> buildXmlDomForPackageName(
+    IAaptContext* context, const StringPiece& str) {
+  std::unique_ptr<xml::XmlResource> doc = buildXmlDom(str);
+  doc->file.name.package = context->getCompilationPackage();
+  return doc;
 }
 
-} // namespace test
-} // namespace aapt
+}  // namespace test
+}  // namespace aapt
 
 #endif /* AAPT_TEST_BUILDERS_H */

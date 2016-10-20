@@ -28,27 +28,27 @@ namespace aapt {
  * will come from the app's AndroidManifest.
  */
 struct AppInfo {
-    /**
-     * App's package name.
-     */
-    std::string package;
+  /**
+   * App's package name.
+   */
+  std::string package;
 
-    /**
-     * The App's minimum SDK version.
-     */
-    Maybe<std::string> minSdkVersion;
+  /**
+   * The App's minimum SDK version.
+   */
+  Maybe<std::string> minSdkVersion;
 
-    /**
-     * The Version code of the app.
-     */
-    Maybe<uint32_t> versionCode;
+  /**
+   * The Version code of the app.
+   */
+  Maybe<uint32_t> versionCode;
 
-    /**
-     * The revision code of the app.
-     */
-    Maybe<uint32_t> revisionCode;
+  /**
+   * The revision code of the app.
+   */
+  Maybe<uint32_t> revisionCode;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
-#endif // AAPT_APP_INFO_H
+#endif  // AAPT_APP_INFO_H

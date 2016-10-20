@@ -30,12 +30,10 @@ namespace io {
  * The code style here matches the protobuf style.
  */
 class InputStream : public google::protobuf::io::ZeroCopyInputStream {
-public:
-    virtual std::string GetError() const {
-        return {};
-    }
+ public:
+  virtual std::string GetError() const { return {}; }
 
-    virtual bool HadError() const = 0;
+  virtual bool HadError() const = 0;
 };
 
 /**
@@ -45,12 +43,10 @@ public:
  * The code style here matches the protobuf style.
  */
 class OutputStream : public google::protobuf::io::ZeroCopyOutputStream {
-public:
-    virtual std::string GetError() const {
-        return {};
-    }
+ public:
+  virtual std::string GetError() const { return {}; }
 
-    virtual bool HadError() const = 0;
+  virtual bool HadError() const = 0;
 };
 
 /**
@@ -60,7 +56,7 @@ public:
  */
 bool copy(OutputStream* out, InputStream* in);
 
-} // namespace io
-} // namespace aapt
+}  // namespace io
+}  // namespace aapt
 
 #endif /* AAPT_IO_IO_H */

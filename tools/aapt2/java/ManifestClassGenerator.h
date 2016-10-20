@@ -26,8 +26,9 @@
 
 namespace aapt {
 
-std::unique_ptr<ClassDefinition> generateManifestClass(IDiagnostics* diag, xml::XmlResource* res);
+std::unique_ptr<ClassDefinition> generateManifestClass(IDiagnostics* diag,
+                                                       xml::XmlResource* res);
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_JAVA_MANIFESTCLASSGENERATOR_H */

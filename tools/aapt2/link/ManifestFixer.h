@@ -27,12 +27,12 @@
 namespace aapt {
 
 struct ManifestFixerOptions {
-    Maybe<std::string> minSdkVersionDefault;
-    Maybe<std::string> targetSdkVersionDefault;
-    Maybe<std::string> renameManifestPackage;
-    Maybe<std::string> renameInstrumentationTargetPackage;
-    Maybe<std::string> versionNameDefault;
-    Maybe<std::string> versionCodeDefault;
+  Maybe<std::string> minSdkVersionDefault;
+  Maybe<std::string> targetSdkVersionDefault;
+  Maybe<std::string> renameManifestPackage;
+  Maybe<std::string> renameInstrumentationTargetPackage;
+  Maybe<std::string> versionNameDefault;
+  Maybe<std::string> versionCodeDefault;
 };
 
 /**
@@ -40,18 +40,18 @@ struct ManifestFixerOptions {
  * where specified with ManifestFixerOptions.
  */
 class ManifestFixer : public IXmlResourceConsumer {
-public:
-    explicit ManifestFixer(const ManifestFixerOptions& options) : mOptions(options) {
-    }
+ public:
+  explicit ManifestFixer(const ManifestFixerOptions& options)
+      : mOptions(options) {}
 
-    bool consume(IAaptContext* context, xml::XmlResource* doc) override;
+  bool consume(IAaptContext* context, xml::XmlResource* doc) override;
 
-private:
-    bool buildRules(xml::XmlActionExecutor* executor, IDiagnostics* diag);
+ private:
+  bool buildRules(xml::XmlActionExecutor* executor, IDiagnostics* diag);
 
-    ManifestFixerOptions mOptions;
+  ManifestFixerOptions mOptions;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_LINK_MANIFESTFIXER_H */

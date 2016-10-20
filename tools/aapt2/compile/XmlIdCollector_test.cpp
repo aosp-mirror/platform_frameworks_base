@@ -18,15 +18,15 @@
 #include "test/Builders.h"
 #include "test/Context.h"
 
-#include <algorithm>
 #include <gtest/gtest.h>
+#include <algorithm>
 
 namespace aapt {
 
 TEST(XmlIdCollectorTest, CollectsIds) {
-    std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
 
-    std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom(R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom(R"EOF(
             <View xmlns:android="http://schemas.android.com/apk/res/android"
                   android:id="@+id/foo"
                   text="@+id/bar">
@@ -34,28 +34,35 @@ TEST(XmlIdCollectorTest, CollectsIds) {
                        class="@+id/bar"/>
             </View>)EOF");
 
-    XmlIdCollector collector;
-    ASSERT_TRUE(collector.consume(context.get(), doc.get()));
+  XmlIdCollector collector;
+  ASSERT_TRUE(collector.consume(context.get(), doc.get()));
 
-    EXPECT_EQ(1, std::count(doc->file.exportedSymbols.begin(), doc->file.exportedSymbols.end(),
-                             SourcedResourceName{ test::parseNameOrDie("id/foo"), 3u }));
+  EXPECT_EQ(
+      1, std::count(doc->file.exportedSymbols.begin(),
+                    doc->file.exportedSymbols.end(),
+                    SourcedResourceName{test::parseNameOrDie("id/foo"), 3u}));
 
-    EXPECT_EQ(1, std::count(doc->file.exportedSymbols.begin(), doc->file.exportedSymbols.end(),
-                             SourcedResourceName{ test::parseNameOrDie("id/bar"), 3u }));
+  EXPECT_EQ(
+      1, std::count(doc->file.exportedSymbols.begin(),
+                    doc->file.exportedSymbols.end(),
+                    SourcedResourceName{test::parseNameOrDie("id/bar"), 3u}));
 
-    EXPECT_EQ(1, std::count(doc->file.exportedSymbols.begin(), doc->file.exportedSymbols.end(),
-                             SourcedResourceName{ test::parseNameOrDie("id/car"), 6u }));
+  EXPECT_EQ(
+      1, std::count(doc->file.exportedSymbols.begin(),
+                    doc->file.exportedSymbols.end(),
+                    SourcedResourceName{test::parseNameOrDie("id/car"), 6u}));
 }
 
 TEST(XmlIdCollectorTest, DontCollectNonIds) {
-    std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
 
-    std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom("<View foo=\"@+string/foo\"/>");
+  std::unique_ptr<xml::XmlResource> doc =
+      test::buildXmlDom("<View foo=\"@+string/foo\"/>");
 
-    XmlIdCollector collector;
-    ASSERT_TRUE(collector.consume(context.get(), doc.get()));
+  XmlIdCollector collector;
+  ASSERT_TRUE(collector.consume(context.get(), doc.get()));
 
-    EXPECT_TRUE(doc->file.exportedSymbols.empty());
+  EXPECT_TRUE(doc->file.exportedSymbols.empty());
 }
 
-} // namespace aapt
+}  // namespace aapt

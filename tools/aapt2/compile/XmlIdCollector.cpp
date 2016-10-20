@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+#include "compile/XmlIdCollector.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
-#include "compile/XmlIdCollector.h"
 #include "xml/XmlDom.h"
 
 #include <algorithm>
@@ -27,44 +27,44 @@ namespace aapt {
 namespace {
 
 static bool cmpName(const SourcedResourceName& a, const ResourceNameRef& b) {
-    return a.name < b;
+  return a.name < b;
 }
 
 struct IdCollector : public xml::Visitor {
-    using xml::Visitor::visit;
+  using xml::Visitor::visit;
 
-    std::vector<SourcedResourceName>* mOutSymbols;
+  std::vector<SourcedResourceName>* mOutSymbols;
 
-    explicit IdCollector(std::vector<SourcedResourceName>* outSymbols) : mOutSymbols(outSymbols) {
-    }
+  explicit IdCollector(std::vector<SourcedResourceName>* outSymbols)
+      : mOutSymbols(outSymbols) {}
 
-    void visit(xml::Element* element) override {
-        for (xml::Attribute& attr : element->attributes) {
-            ResourceNameRef name;
-            bool create = false;
-            if (ResourceUtils::parseReference(attr.value, &name, &create, nullptr)) {
-                if (create && name.type == ResourceType::kId) {
-                    auto iter = std::lower_bound(mOutSymbols->begin(), mOutSymbols->end(),
-                                                 name, cmpName);
-                    if (iter == mOutSymbols->end() || iter->name != name) {
-                        mOutSymbols->insert(iter, SourcedResourceName{ name.toResourceName(),
-                                                                       element->lineNumber });
-                    }
-                }
-            }
+  void visit(xml::Element* element) override {
+    for (xml::Attribute& attr : element->attributes) {
+      ResourceNameRef name;
+      bool create = false;
+      if (ResourceUtils::parseReference(attr.value, &name, &create, nullptr)) {
+        if (create && name.type == ResourceType::kId) {
+          auto iter = std::lower_bound(mOutSymbols->begin(), mOutSymbols->end(),
+                                       name, cmpName);
+          if (iter == mOutSymbols->end() || iter->name != name) {
+            mOutSymbols->insert(iter, SourcedResourceName{name.toResourceName(),
+                                                          element->lineNumber});
+          }
         }
-
-        xml::Visitor::visit(element);
+      }
     }
+
+    xml::Visitor::visit(element);
+  }
 };
 
-} // namespace
+}  // namespace
 
 bool XmlIdCollector::consume(IAaptContext* context, xml::XmlResource* xmlRes) {
-    xmlRes->file.exportedSymbols.clear();
-    IdCollector collector(&xmlRes->file.exportedSymbols);
-    xmlRes->root->accept(&collector);
-    return true;
+  xmlRes->file.exportedSymbols.clear();
+  IdCollector collector(&xmlRes->file.exportedSymbols);
+  xmlRes->root->accept(&collector);
+  return true;
 }
 
-} // namespace aapt
+}  // namespace aapt
