@@ -44,13 +44,17 @@ public final class BluetoothGatt implements BluetoothProfile {
     private IBluetoothGatt mService;
     private BluetoothGattCallback mCallback;
     private int mClientIf;
-    private boolean mAuthRetry = false;
     private BluetoothDevice mDevice;
     private boolean mAutoConnect;
+    private int mAuthRetryState;
     private int mConnState;
     private final Object mStateLock = new Object();
     private Boolean mDeviceBusy = false;
     private int mTransport;
+
+    private static final int AUTH_RETRY_STATE_IDLE = 0;
+    private static final int AUTH_RETRY_STATE_NO_MITM = 1;
+    private static final int AUTH_RETRY_STATE_MITM = 2;
 
     private static final int CONN_STATE_IDLE = 0;
     private static final int CONN_STATE_CONNECTING = 1;
@@ -262,17 +266,19 @@ public final class BluetoothGatt implements BluetoothProfile {
 
                 if ((status == GATT_INSUFFICIENT_AUTHENTICATION
                   || status == GATT_INSUFFICIENT_ENCRYPTION)
-                  && mAuthRetry == false) {
+                  && (mAuthRetryState != AUTH_RETRY_STATE_MITM)) {
                     try {
-                        mAuthRetry = true;
-                        mService.readCharacteristic(mClientIf, address, handle, AUTHENTICATION_MITM);
+                        final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE) ?
+                                AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
+                        mService.readCharacteristic(mClientIf, address, handle, authReq);
+                        mAuthRetryState++;
                         return;
                     } catch (RemoteException e) {
                         Log.e(TAG,"",e);
                     }
                 }
 
-                mAuthRetry = false;
+                mAuthRetryState = AUTH_RETRY_STATE_IDLE;
 
                 BluetoothGattCharacteristic characteristic = getCharacteristicById(mDevice, handle);
                 if (characteristic == null) {
@@ -311,19 +317,20 @@ public final class BluetoothGatt implements BluetoothProfile {
 
                 if ((status == GATT_INSUFFICIENT_AUTHENTICATION
                   || status == GATT_INSUFFICIENT_ENCRYPTION)
-                  && mAuthRetry == false) {
+                  && (mAuthRetryState != AUTH_RETRY_STATE_MITM)) {
                     try {
-                        mAuthRetry = true;
+                        final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE) ?
+                                AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
                         mService.writeCharacteristic(mClientIf, address, handle,
-                            characteristic.getWriteType(), AUTHENTICATION_MITM,
-                            characteristic.getValue());
+                            characteristic.getWriteType(), authReq, characteristic.getValue());
+                        mAuthRetryState++;
                         return;
                     } catch (RemoteException e) {
                         Log.e(TAG,"",e);
                     }
                 }
 
-                mAuthRetry = false;
+                mAuthRetryState = AUTH_RETRY_STATE_IDLE;
 
                 try {
                     mCallback.onCharacteristicWrite(BluetoothGatt.this, characteristic, status);
@@ -378,17 +385,19 @@ public final class BluetoothGatt implements BluetoothProfile {
 
                 if ((status == GATT_INSUFFICIENT_AUTHENTICATION
                   || status == GATT_INSUFFICIENT_ENCRYPTION)
-                  && mAuthRetry == false) {
+                  && (mAuthRetryState != AUTH_RETRY_STATE_MITM)) {
                     try {
-                        mAuthRetry = true;
-                        mService.readDescriptor(mClientIf, address, handle, AUTHENTICATION_MITM);
+                        final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE) ?
+                                AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
+                        mService.readDescriptor(mClientIf, address, handle, authReq);
+                        mAuthRetryState++;
                         return;
                     } catch (RemoteException e) {
                         Log.e(TAG,"",e);
                     }
                 }
 
-                mAuthRetry = true;
+                mAuthRetryState = AUTH_RETRY_STATE_IDLE;
 
                 try {
                     mCallback.onDescriptorRead(BluetoothGatt.this, descriptor, status);
@@ -417,19 +426,21 @@ public final class BluetoothGatt implements BluetoothProfile {
 
                 if ((status == GATT_INSUFFICIENT_AUTHENTICATION
                   || status == GATT_INSUFFICIENT_ENCRYPTION)
-                  && mAuthRetry == false) {
+                  && (mAuthRetryState != AUTH_RETRY_STATE_MITM)) {
                     try {
-                        mAuthRetry = true;
+                        final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE) ?
+                                AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
                         mService.writeDescriptor(mClientIf, address, handle,
                             BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT,
-                            AUTHENTICATION_MITM, descriptor.getValue());
+                            authReq, descriptor.getValue());
+                        mAuthRetryState++;
                         return;
                     } catch (RemoteException e) {
                         Log.e(TAG,"",e);
                     }
                 }
 
-                mAuthRetry = false;
+                mAuthRetryState = AUTH_RETRY_STATE_IDLE;
 
                 try {
                     mCallback.onDescriptorWrite(BluetoothGatt.this, descriptor, status);
@@ -503,6 +514,7 @@ public final class BluetoothGatt implements BluetoothProfile {
         mServices = new ArrayList<BluetoothGattService>();
 
         mConnState = CONN_STATE_IDLE;
+        mAuthRetryState = AUTH_RETRY_STATE_IDLE;
     }
 
     /**
@@ -516,6 +528,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
         unregisterApp();
         mConnState = CONN_STATE_CLOSED;
+        mAuthRetryState = AUTH_RETRY_STATE_IDLE;
     }
 
     /**
