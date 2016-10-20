@@ -366,33 +366,79 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @Override
     int getOrientation() {
-        if (mService.isStackVisibleLocked(DOCKED_STACK_ID)
-                || mService.isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID)) {
-            // Apps and their containers are not allowed to specify an orientation while the docked
-            // or freeform stack is visible...except for the home stack/task if the docked stack is
-            // minimized and it actually set something.
-            if (mHomeStack != null && mHomeStack.isVisible()
-                    && mDividerControllerLocked.isMinimizedDock()) {
-                final int orientation = mHomeStack.getOrientation();
-                if (orientation != SCREEN_ORIENTATION_UNSET) {
-                    return orientation;
-                }
+        final WindowManagerPolicy policy = mService.mPolicy;
+
+        // TODO: All the logic before the last return statement in this method should really go in
+        // #NonAppWindowContainer.getOrientation() since it is trying to decide orientation based
+        // on non-app windows. But, we can not do that until the window list is always correct in
+        // terms of z-ordering based on layers.
+        if (mService.mDisplayFrozen) {
+            if (mService.mLastWindowForcedOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
+                        "Display is frozen, return " + mService.mLastWindowForcedOrientation);
+                // If the display is frozen, some activities may be in the middle of restarting, and
+                // thus have removed their old window. If the window has the flag to hide the lock
+                // screen, then the lock screen can re-appear and inflict its own orientation on us.
+                // Keep the orientation stable until this all settles down.
+                return mService.mLastWindowForcedOrientation;
+            } else if (policy.isKeyguardLocked()) {
+                // Use the last orientation the while the display is frozen with the keyguard
+                // locked. This could be the keyguard forced orientation or from a SHOW_WHEN_LOCKED
+                // window. We don't want to check the show when locked window directly though as
+                // things aren't stable while the display is frozen, for example the window could be
+                // momentarily unavailable due to activity relaunch.
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display is frozen while keyguard locked, "
+                        + "return " + mService.mLastOrientation);
+                return mService.mLastOrientation;
             }
-            return SCREEN_ORIENTATION_UNSPECIFIED;
+        } else {
+            for (int pos = mWindows.size() - 1; pos >= 0; --pos) {
+                final WindowState win = mWindows.get(pos);
+                if (win.mAppToken != null) {
+                    // We hit an application window. so the orientation will be determined by the
+                    // app window. No point in continuing further.
+                    break;
+                }
+                if (!win.isVisibleLw() || !win.mPolicyVisibilityAfterAnim) {
+                    continue;
+                }
+                int req = win.mAttrs.screenOrientation;
+                if(req == SCREEN_ORIENTATION_UNSPECIFIED || req == SCREEN_ORIENTATION_BEHIND) {
+                    continue;
+                }
+
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, win + " forcing orientation to " + req);
+                if (policy.isKeyguardHostWindow(win.mAttrs)) {
+                    mService.mLastKeyguardForcedOrientation = req;
+                }
+                return (mService.mLastWindowForcedOrientation = req);
+            }
+            mService.mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
+            if (policy.isKeyguardLocked()) {
+                // The screen is locked and no top system window is requesting an orientation.
+                // Return either the orientation of the show-when-locked app (if there is any) or
+                // the orientation of the keyguard. No point in searching from the rest of apps.
+                WindowState winShowWhenLocked = (WindowState) policy.getWinShowWhenLockedLw();
+                AppWindowToken appShowWhenLocked = winShowWhenLocked == null
+                        ? null : winShowWhenLocked.mAppToken;
+                if (appShowWhenLocked != null) {
+                    int req = appShowWhenLocked.getOrientation();
+                    if (req == SCREEN_ORIENTATION_BEHIND) {
+                        req = mService.mLastKeyguardForcedOrientation;
+                    }
+                    if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Done at " + appShowWhenLocked
+                            + " -- show when locked, return " + req);
+                    return req;
+                }
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
+                        "No one is requesting an orientation when the screen is locked");
+                return mService.mLastKeyguardForcedOrientation;
+            }
         }
 
-        final int orientation = super.getOrientation();
-        if (orientation != SCREEN_ORIENTATION_UNSET && orientation != SCREEN_ORIENTATION_BEHIND) {
-            if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                    "App is requesting an orientation, return " + orientation);
-            return orientation;
-        }
-
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                "No app is requesting an orientation, return " + mService.mLastOrientation);
-        // The next app has not been requested to be visible, so we keep the current orientation
-        // to prevent freezing/unfreezing the display too early.
-        return mService.mLastOrientation;
+        // Top system windows are not requesting an orientation. Start searching from apps.
+        return mTaskStackContainers.getOrientation();
     }
 
     void updateDisplayInfo() {
@@ -2306,6 +2352,37 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             setLayoutNeeded();
         }
 
+        @Override
+        int getOrientation() {
+            if (mService.isStackVisibleLocked(DOCKED_STACK_ID)
+                    || mService.isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID)) {
+                // Apps and their containers are not allowed to specify an orientation while the
+                // docked or freeform stack is visible...except for the home stack/task if the
+                // docked stack is minimized and it actually set something.
+                if (mHomeStack != null && mHomeStack.isVisible()
+                        && mDividerControllerLocked.isMinimizedDock()) {
+                    final int orientation = mHomeStack.getOrientation();
+                    if (orientation != SCREEN_ORIENTATION_UNSET) {
+                        return orientation;
+                    }
+                }
+                return SCREEN_ORIENTATION_UNSPECIFIED;
+            }
+
+            final int orientation = super.getOrientation();
+            if (orientation != SCREEN_ORIENTATION_UNSET
+                    && orientation != SCREEN_ORIENTATION_BEHIND) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
+                        "App is requesting an orientation, return " + orientation);
+                return orientation;
+            }
+
+            if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
+                    "No app is requesting an orientation, return " + mService.mLastOrientation);
+            // The next app has not been requested to be visible, so we keep the current orientation
+            // to prevent freezing/unfreezing the display too early.
+            return mService.mLastOrientation;
+        }
     }
 
     /**
