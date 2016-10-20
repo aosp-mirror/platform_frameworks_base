@@ -44,16 +44,20 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
+
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
+import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.plugins.statusbar.phone.NavGesture;
+import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.policy.DeadZone;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-public class NavigationBarView extends FrameLayout {
+public class NavigationBarView extends FrameLayout implements PluginListener<NavGesture> {
     final static boolean DEBUG = false;
     final static String TAG = "StatusBar/NavBarView";
 
@@ -83,7 +87,7 @@ public class NavigationBarView extends FrameLayout {
     private Drawable mImeIcon;
     private Drawable mMenuIcon;
 
-    private NavigationBarGestureHelper mGestureHelper;
+    private GestureHelper mGestureHelper;
     private DeadZone mDeadZone;
     private final NavigationBarTransitions mBarTransitions;
 
@@ -105,6 +109,8 @@ public class NavigationBarView extends FrameLayout {
     private Configuration mConfiguration;
 
     private NavigationBarInflaterView mNavigationInflaterView;
+    private RecentsComponent mRecentsComponent;
+    private Divider mDivider;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -212,7 +218,12 @@ public class NavigationBarView extends FrameLayout {
     }
 
     public void setComponents(RecentsComponent recentsComponent, Divider divider) {
-        mGestureHelper.setComponents(recentsComponent, divider, this);
+        mRecentsComponent = recentsComponent;
+        mDivider = divider;
+        if (mGestureHelper instanceof NavigationBarGestureHelper) {
+            ((NavigationBarGestureHelper) mGestureHelper).setComponents(
+                    recentsComponent, divider, this);
+        }
     }
 
     public void setOnVerticalChangedListener(OnVerticalChangedListener onVerticalChangedListener) {
@@ -698,6 +709,33 @@ public class NavigationBarView extends FrameLayout {
             default:
                 return "VISIBLE";
         }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        PluginManager.getInstance(getContext()).addPluginListener(NavGesture.ACTION, this,
+                NavGesture.VERSION, false /* Only one */);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        PluginManager.getInstance(getContext()).removePluginListener(this);
+    }
+
+    @Override
+    public void onPluginConnected(NavGesture plugin) {
+        mGestureHelper = plugin.getGestureHelper();
+        updateTaskSwitchHelper();
+    }
+
+    @Override
+    public void onPluginDisconnected(NavGesture plugin) {
+        NavigationBarGestureHelper defaultHelper = new NavigationBarGestureHelper(getContext());
+        defaultHelper.setComponents(mRecentsComponent, mDivider, this);
+        mGestureHelper = defaultHelper;
+        updateTaskSwitchHelper();
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
