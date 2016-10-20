@@ -40,7 +40,7 @@ androidfw_test_cflags := \
     -Werror \
     -Wunused \
     -Wunreachable-code \
-    -Wno-missing-field-initializers \
+    -Wno-missing-field-initializers
 
 # gtest is broken.
 androidfw_test_cflags += -Wno-unnamed-type-template-args
@@ -52,9 +52,10 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := libandroidfw_tests
 LOCAL_CFLAGS := $(androidfw_test_cflags)
-LOCAL_SRC_FILES := $(testFiles)
+LOCAL_SRC_FILES := $(testFiles) AttributeResolution_test.cpp
 LOCAL_STATIC_LIBRARIES := \
     libandroidfw \
+    libbase \
     libutils \
     libcutils \
     liblog \
@@ -76,6 +77,7 @@ LOCAL_SRC_FILES := $(testFiles) \
 
 LOCAL_SHARED_LIBRARIES := \
     libandroidfw \
+    libbase \
     libcutils \
     libutils \
     libui \

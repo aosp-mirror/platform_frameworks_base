@@ -97,16 +97,6 @@ jclass g_stringClass = NULL;
 
 // ----------------------------------------------------------------------------
 
-enum {
-    STYLE_NUM_ENTRIES = 6,
-    STYLE_TYPE = 0,
-    STYLE_DATA = 1,
-    STYLE_ASSET_COOKIE = 2,
-    STYLE_RESOURCE_ID = 3,
-    STYLE_CHANGING_CONFIGURATIONS = 4,
-    STYLE_DENSITY = 5
-};
-
 static jint copyValue(JNIEnv* env, jobject outValue, const ResTable* table,
                       const Res_value& value, uint32_t ref, ssize_t block,
                       uint32_t typeSpecFlags, ResTable_config* config = NULL);
@@ -1170,7 +1160,7 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
     }
 
     ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeToken);
-    bool result = resolveAttrs(theme, defStyleAttr, defStyleRes,
+    bool result = ResolveAttrs(theme, defStyleAttr, defStyleRes,
                                (uint32_t*) srcValues, NSV,
                                (uint32_t*) src, NI,
                                (uint32_t*) baseDest,
@@ -1234,7 +1224,7 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
 
     ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeToken);
     ResXMLParser* xmlParser = reinterpret_cast<ResXMLParser*>(xmlParserToken);
-    bool result = applyStyle(theme, xmlParser,
+    bool result = ApplyStyle(theme, xmlParser,
                              defStyleAttr, defStyleRes,
                              (uint32_t*) src, NI,
                              (uint32_t*) baseDest,
@@ -1299,7 +1289,7 @@ static jboolean android_content_AssetManager_retrieveAttributes(JNIEnv* env, job
         }
     }
 
-    bool result = retrieveAttributes(&res, xmlParser,
+    bool result = RetrieveAttributes(&res, xmlParser,
                                      (uint32_t*) src, NI,
                                      (uint32_t*) baseDest,
                                      (uint32_t*) indices);
