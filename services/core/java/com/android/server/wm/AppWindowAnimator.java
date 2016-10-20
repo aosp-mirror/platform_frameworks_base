@@ -31,7 +31,6 @@ import android.util.TimeUtils;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.SurfaceControl;
-import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
@@ -394,7 +393,7 @@ public class AppWindowAnimator {
         }
         if (mService.mInputMethodTarget != null
                 && mService.mInputMethodTarget.mAppToken == mAppToken) {
-            mService.moveInputMethodWindowsIfNeededLocked(true);
+            mAppToken.getDisplayContent().moveInputMethodWindowsIfNeeded(true);
         }
 
         if (DEBUG_ANIM) Slog.v(TAG, "Animation done in " + mAppToken

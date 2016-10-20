@@ -86,7 +86,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
@@ -1009,30 +1008,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public boolean getNeedsMenuLw(WindowManagerPolicy.WindowState bottom) {
-        int index = -1;
-        WindowState ws = this;
-        WindowList windows = getWindowList();
-        while (true) {
-            if (ws.mAttrs.needsMenuKey != WindowManager.LayoutParams.NEEDS_MENU_UNSET) {
-                return ws.mAttrs.needsMenuKey == WindowManager.LayoutParams.NEEDS_MENU_SET_TRUE;
-            }
-            // If we reached the bottom of the range of windows we are considering,
-            // assume no menu is needed.
-            if (ws == bottom) {
-                return false;
-            }
-            // The current window hasn't specified whether menu key is needed;
-            // look behind it.
-            // First, we may need to determine the starting position.
-            if (index < 0) {
-                index = windows.indexOf(ws);
-            }
-            index--;
-            if (index < 0) {
-                return false;
-            }
-            ws = windows.get(index);
-        }
+        return getDisplayContent().getNeedsMenu(this, bottom);
     }
 
     @Override
@@ -1784,14 +1760,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mReplacementWindow.mSkipEnterAnimationForSeamlessReplacement = false;
         }
 
+        final DisplayContent dc = getDisplayContent();
         if (mService.mInputMethodTarget == this) {
-            mService.moveInputMethodWindowsIfNeededLocked(false);
+            dc.moveInputMethodWindowsIfNeeded(false);
         }
 
         final int type = mAttrs.type;
         if (WindowManagerService.excludeWindowTypeFromTapOutTask(type)) {
-            final DisplayContent displaycontent = getDisplayContent();
-            displaycontent.mTapExcludedWindows.remove(this);
+            dc.mTapExcludedWindows.remove(this);
         }
         mPolicy.removeWindowLw(this);
 
@@ -2959,8 +2935,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 applyInsets(outRegion, frame, mGivenVisibleInsets);
                 break;
             case TOUCHABLE_INSETS_REGION: {
-                final Region givenTouchableRegion = mGivenTouchableRegion;
-                outRegion.set(givenTouchableRegion);
+                outRegion.set(mGivenTouchableRegion);
                 outRegion.translate(frame.left, frame.top);
                 break;
             }
@@ -2968,7 +2943,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         cropRegionToStackBoundsIfNeeded(outRegion);
     }
 
-    void cropRegionToStackBoundsIfNeeded(Region region) {
+    private void cropRegionToStackBoundsIfNeeded(Region region) {
         final Task task = getTask();
         if (task == null || !task.cropWindowsToStackBounds()) {
             return;
@@ -2981,13 +2956,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         stack.getDimBounds(mTmpRect);
         region.op(mTmpRect, Region.Op.INTERSECT);
-    }
-
-    // TODO: This is one reason why WindowList are bad...prime candidate for removal once we
-    // figure-out a good way to replace WindowList with WindowContainer hierarchy.
-    WindowList getWindowList() {
-        final DisplayContent displayContent = getDisplayContent();
-        return displayContent == null ? null : displayContent.getWindowList();
     }
 
     /**
@@ -3878,7 +3846,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // Or, it is probably not going to matter anyways if we are successful in getting rid of
     // the WindowList concept.
     int reAddWindow(int index) {
-        final WindowList windows = getWindowList();
+        final DisplayContent dc = getDisplayContent();
         // Adding child windows relies on child windows being ordered by mSubLayer using
         // {@link #sWindowSubLayerComparator}.
         final int childCount = mChildren.size();
@@ -3889,49 +3857,23 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM,
                         "Re-adding child window at " + index + ": " + child);
                 mRebuilding = false;
-                windows.add(index, this);
+                dc.addToWindowList(this, index);
                 index++;
                 winAdded = true;
             }
             if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Re-adding window at " + index + ": " + child);
             child.mRebuilding = false;
-            windows.add(index, child);
+            dc.addToWindowList(child, index);
             index++;
         }
         if (!winAdded) {
             if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Re-adding window at " + index + ": " + this);
             mRebuilding = false;
-            windows.add(index, this);
+            dc.addToWindowList(this, index);
             index++;
         }
         mService.mWindowsChanged = true;
         return index;
-    }
-
-    int removeFromWindowList(int interestingPos) {
-        final WindowList windows = getWindowList();
-        int wpos = windows.indexOf(this);
-        if (wpos < 0) {
-            return interestingPos;
-        }
-
-        if (wpos < interestingPos) interestingPos--;
-        if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Temp removing at " + wpos + ": " + this);
-        windows.remove(wpos);
-        mService.mWindowsChanged = true;
-        int childCount = mChildren.size();
-        while (childCount > 0) {
-            childCount--;
-            final WindowState cw = mChildren.get(childCount);
-            int cpos = windows.indexOf(cw);
-            if (cpos >= 0) {
-                if (cpos < interestingPos) interestingPos--;
-                if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM,
-                        "Temp removing child at " + cpos + ": " + cw);
-                windows.remove(cpos);
-            }
-        }
-        return interestingPos;
     }
 
     boolean isWindowAnimationSet() {

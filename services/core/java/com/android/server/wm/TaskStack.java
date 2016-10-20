@@ -35,6 +35,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
+import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
 
 import android.app.ActivityManager.StackId;
 import android.content.res.Configuration;
@@ -802,8 +803,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         if (mAnimationBackgroundAnimator == null
                 || animLayer < mAnimationBackgroundAnimator.mAnimLayer) {
             mAnimationBackgroundAnimator = winAnimator;
-            animLayer = mService.adjustAnimationBackground(winAnimator);
-            mAnimationBackgroundSurface.show(animLayer - WindowManagerService.LAYER_OFFSET_DIM,
+            animLayer = mDisplayContent.getLayerForAnimationBackground(winAnimator);
+            mAnimationBackgroundSurface.show(animLayer - LAYER_OFFSET_DIM,
                     ((color >> 24) & 0xff) / 255f, 0);
         }
     }

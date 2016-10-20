@@ -188,11 +188,11 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     void addImeWindow(WindowState win) {
-        int pos = mService.findDesiredInputMethodWindowIndexLocked(true);
+        int pos = mDisplayContent.findDesiredInputMethodWindowIndex(true);
 
         if (pos < 0) {
             addWindow(win);
-            mService.moveInputMethodDialogsLocked(pos);
+            mDisplayContent.moveInputMethodDialogs(pos);
             return;
         }
 
@@ -203,7 +203,7 @@ class WindowToken extends WindowContainer<WindowState> {
             addChild(win, null);
         }
         mService.mWindowsChanged = true;
-        mService.moveInputMethodDialogsLocked(pos + 1);
+        mDisplayContent.moveInputMethodDialogs(pos + 1);
     }
 
     /** Return the first window in the token window list that isn't a starting window or null. */
