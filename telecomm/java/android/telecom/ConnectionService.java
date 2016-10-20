@@ -1347,7 +1347,13 @@ public abstract class ConnectionService extends Service {
      */
     private String addExistingConnectionInternal(PhoneAccountHandle handle, Connection connection) {
         String id;
-        if (handle == null) {
+
+        if (connection.getExtras() != null && connection.getExtras()
+                .containsKey(Connection.EXTRA_ORIGINAL_CONNECTION_ID)) {
+            id = connection.getExtras().getString(Connection.EXTRA_ORIGINAL_CONNECTION_ID);
+            Log.d(this, "addExistingConnectionInternal - conn %s reusing original id %s",
+                    connection.getTelecomCallId(), id);
+        } else if (handle == null) {
             // If no phone account handle was provided, we cannot be sure the call ID is unique,
             // so just use a random UUID.
             id = UUID.randomUUID().toString();
@@ -1381,13 +1387,21 @@ public abstract class ConnectionService extends Service {
     }
 
     private String addConferenceInternal(Conference conference) {
+        String originalId = null;
+        if (conference.getExtras() != null && conference.getExtras()
+                .containsKey(Connection.EXTRA_ORIGINAL_CONNECTION_ID)) {
+            originalId = conference.getExtras().getString(Connection.EXTRA_ORIGINAL_CONNECTION_ID);
+            Log.d(this, "addConferenceInternal: conf %s reusing original id %s",
+                    conference.getTelecomCallId(),
+                    originalId);
+        }
         if (mIdByConference.containsKey(conference)) {
             Log.w(this, "Re-adding an existing conference: %s.", conference);
         } else if (conference != null) {
             // Conferences do not (yet) have a PhoneAccountHandle associated with them, so we
             // cannot determine a ConnectionService class name to associate with the ID, so use
             // a unique UUID (for now).
-            String id = UUID.randomUUID().toString();
+            String id = originalId == null ? UUID.randomUUID().toString() : originalId;
             mConferenceById.put(id, conference);
             mIdByConference.put(conference, id);
             conference.addListener(mConferenceListener);
