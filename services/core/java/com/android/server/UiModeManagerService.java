@@ -466,9 +466,8 @@ final class UiModeManagerService extends SystemService {
         if (mCarModeEnabled) {
             if (mLastBroadcastState != Intent.EXTRA_DOCK_STATE_CAR) {
                 adjustStatusBarCarModeLocked();
-
                 if (oldAction != null) {
-                    getContext().sendBroadcastAsUser(new Intent(oldAction), UserHandle.ALL);
+                    sendForegroundBroadcastToAllUsers(oldAction);
                 }
                 mLastBroadcastState = Intent.EXTRA_DOCK_STATE_CAR;
                 action = UiModeManager.ACTION_ENTER_CAR_MODE;
@@ -476,7 +475,7 @@ final class UiModeManagerService extends SystemService {
         } else if (isDeskDockState(mDockState)) {
             if (!isDeskDockState(mLastBroadcastState)) {
                 if (oldAction != null) {
-                    getContext().sendBroadcastAsUser(new Intent(oldAction), UserHandle.ALL);
+                    sendForegroundBroadcastToAllUsers(oldAction);
                 }
                 mLastBroadcastState = mDockState;
                 action = UiModeManager.ACTION_ENTER_DESK_MODE;
@@ -502,6 +501,7 @@ final class UiModeManagerService extends SystemService {
             Intent intent = new Intent(action);
             intent.putExtra("enableFlags", enableFlags);
             intent.putExtra("disableFlags", disableFlags);
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             getContext().sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT, null,
                     mResultReceiver, null, Activity.RESULT_OK, null, null);
 
@@ -548,6 +548,11 @@ final class UiModeManagerService extends SystemService {
                 mWakeLock.release();
             }
         }
+    }
+
+    private void sendForegroundBroadcastToAllUsers(String action) {
+        getContext().sendBroadcastAsUser(new Intent(action)
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND), UserHandle.ALL);
     }
 
     private void updateAfterBroadcastLocked(String action, int enableFlags, int disableFlags) {
