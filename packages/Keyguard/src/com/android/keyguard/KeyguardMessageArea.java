@@ -41,20 +41,11 @@ class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
     private static final long ANNOUNCEMENT_DELAY = 250;
     private static final int DEFAULT_COLOR = -1;
 
-    private final KeyguardUpdateMonitor mUpdateMonitor;
     private final Handler mHandler;
     private final int mDefaultColor;
 
-    CharSequence mMessage;
+    private CharSequence mMessage;
     private int mNextMessageColor = DEFAULT_COLOR;
-
-    private final Runnable mClearMessageRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mMessage = null;
-            update();
-        }
-    };
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         public void onFinishedGoingToSleep(int why) {
@@ -70,11 +61,14 @@ class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
     }
 
     public KeyguardMessageArea(Context context, AttributeSet attrs) {
+        this(context, attrs, KeyguardUpdateMonitor.getInstance(context));
+    }
+
+    public KeyguardMessageArea(Context context, AttributeSet attrs, KeyguardUpdateMonitor monitor) {
         super(context, attrs);
         setLayerType(LAYER_TYPE_HARDWARE, null); // work around nested unclipped SaveLayer bug
 
-        mUpdateMonitor = KeyguardUpdateMonitor.getInstance(getContext());
-        mUpdateMonitor.registerCallback(mInfoCallback);
+        monitor.registerCallback(mInfoCallback);
         mHandler = new Handler(Looper.myLooper());
 
         mDefaultColor = getCurrentTextColor();
@@ -137,8 +131,8 @@ class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
     }
 
     private void clearMessage() {
-        mHandler.removeCallbacks(mClearMessageRunnable);
-        mHandler.post(mClearMessageRunnable);
+        mMessage = null;
+        update();
     }
 
     private void update() {
