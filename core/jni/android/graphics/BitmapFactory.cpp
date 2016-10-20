@@ -162,7 +162,7 @@ private:
 
 class RecyclingPixelAllocator : public SkBitmap::Allocator {
 public:
-    RecyclingPixelAllocator(android::PixelRef* bitmap, unsigned int size)
+    RecyclingPixelAllocator(android::Bitmap* bitmap, unsigned int size)
             : mBitmap(bitmap), mSize(size) {
     }
 
@@ -200,7 +200,7 @@ public:
     }
 
 private:
-    android::PixelRef* const mBitmap;
+    android::Bitmap* const mBitmap;
     const unsigned int mSize;
 };
 
@@ -327,10 +327,10 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         scaledHeight = static_cast<int>(scaledHeight * scale + 0.5f);
     }
 
-    android::PixelRef* reuseBitmap = nullptr;
+    android::Bitmap* reuseBitmap = nullptr;
     unsigned int existingBufferSize = 0;
     if (javaBitmap != NULL) {
-        reuseBitmap = bitmap::toPixelRef(env, javaBitmap);
+        reuseBitmap = bitmap::toBitmap(env, javaBitmap);
         if (reuseBitmap->isImmutable()) {
             ALOGW("Unable to reuse an immutable bitmap as an image decoder target.");
             javaBitmap = NULL;

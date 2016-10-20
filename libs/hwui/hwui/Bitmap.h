@@ -31,21 +31,21 @@ enum class PixelStorageType {
 
 typedef void (*FreeFunc)(void* addr, void* context);
 
-class ANDROID_API PixelRef : public SkPixelRef {
+class ANDROID_API Bitmap : public SkPixelRef {
 public:
-    static sk_sp<PixelRef> allocateHeapPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
-    static sk_sp<PixelRef> allocateHeapPixelRef(size_t allocSize, const SkImageInfo& info,
+    static sk_sp<Bitmap> allocateHeapBitmap(SkBitmap* bitmap, SkColorTable* ctable);
+    static sk_sp<Bitmap> allocateHeapBitmap(size_t allocSize, const SkImageInfo& info,
         size_t rowBytes, SkColorTable* ctable);
 
-    static sk_sp<PixelRef> allocateAshmemPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
-    static sk_sp<PixelRef> allocateAshmemPixelRef(size_t allocSize, const SkImageInfo& info,
+    static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap, SkColorTable* ctable);
+    static sk_sp<Bitmap> allocateAshmemBitmap(size_t allocSize, const SkImageInfo& info,
         size_t rowBytes, SkColorTable* ctable);
 
-    PixelRef(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes,
+    Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes,
             SkColorTable* ctable);
-    PixelRef(void* address, void* context, FreeFunc freeFunc,
+    Bitmap(void* address, void* context, FreeFunc freeFunc,
             const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
-    PixelRef(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
+    Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
             size_t rowBytes, SkColorTable* ctable);
 
     int width() const { return info().width(); }
@@ -54,7 +54,7 @@ public:
     // Can't mark as override since SkPixelRef::rowBytes isn't virtual
     // but that's OK since we just want Bitmap to be able to rely
     // on calling rowBytes() on an unlocked pixelref, which it will be
-    // doing on a PixelRef type, not a SkPixelRef, so static
+    // doing on a Bitmap type, not a SkPixelRef, so static
     // dispatching will do what we want.
     size_t rowBytes() const { return mRowBytes; }
     void reconfigure(const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
@@ -66,17 +66,17 @@ public:
     int getAshmemFd() const;
     size_t getAllocationByteCount() const;
 
+    void setHasHardwareMipMap(bool hasMipMap);
+    bool hasHardwareMipMap() const;
+
 protected:
     virtual bool onNewLockPixels(LockRec* rec) override;
     virtual void onUnlockPixels() override { };
     virtual size_t getAllocatedSizeInBytes() const override;
 private:
-    friend class Bitmap;
-    virtual ~PixelRef();
+    virtual ~Bitmap();
     void doFreePixels();
     void* getStorage() const;
-    void setHasHardwareMipMap(bool hasMipMap);
-    bool hasHardwareMipMap() const;
 
     PixelStorageType mPixelStorageType;
 

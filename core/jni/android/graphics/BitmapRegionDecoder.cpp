@@ -148,10 +148,10 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     }
 
     // Recycle a bitmap if possible.
-    android::PixelRef* recycledBitmap = nullptr;
+    android::Bitmap* recycledBitmap = nullptr;
     size_t recycledBytes = 0;
     if (javaBitmap) {
-        recycledBitmap = bitmap::toPixelRef(env, javaBitmap);
+        recycledBitmap = bitmap::toBitmap(env, javaBitmap);
         if (recycledBitmap->isImmutable()) {
             ALOGW("Warning: Reusing an immutable bitmap as an image decoder target.");
         }

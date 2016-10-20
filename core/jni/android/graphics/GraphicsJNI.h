@@ -13,7 +13,7 @@
 #include "SkColorSpace.h"
 #include <jni.h>
 #include <hwui/Canvas.h>
-#include <hwui/PixelRef.h>
+#include <hwui/Bitmap.h>
 
 class SkBitmapRegionDecoder;
 class SkCanvas;
@@ -72,7 +72,7 @@ public:
 
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
-    static android::PixelRef* mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
+    static android::Bitmap* mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
             SkColorTable* ctable, int fd, void* addr, size_t size, bool readOnly);
 
     /**
@@ -104,13 +104,13 @@ public:
     /**
      * Fetches the backing allocation object. Must be called!
      */
-    android::PixelRef* getStorageObjAndReset() {
+    android::Bitmap* getStorageObjAndReset() {
         return mStorage.release();
     };
 
     SkCodec::ZeroInitialized zeroInit() const override { return SkCodec::kYes_ZeroInitialized; }
 private:
-    sk_sp<android::PixelRef> mStorage;
+    sk_sp<android::Bitmap> mStorage;
 };
 
 /**
@@ -143,7 +143,7 @@ private:
 class RecyclingClippingPixelAllocator : public SkBRDAllocator {
 public:
 
-    RecyclingClippingPixelAllocator(android::PixelRef* recycledBitmap,
+    RecyclingClippingPixelAllocator(android::Bitmap* recycledBitmap,
             size_t recycledBytes);
 
     ~RecyclingClippingPixelAllocator();
@@ -168,7 +168,7 @@ public:
     SkCodec::ZeroInitialized zeroInit() const override { return SkCodec::kNo_ZeroInitialized; }
 
 private:
-    android::PixelRef* mRecycledBitmap;
+    android::Bitmap* mRecycledBitmap;
     const size_t     mRecycledBytes;
     SkBitmap*        mSkiaBitmap;
     bool             mNeedsCopy;
@@ -179,13 +179,13 @@ public:
     explicit AshmemPixelAllocator(JNIEnv* env);
     ~AshmemPixelAllocator() { };
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
-    android::PixelRef* getStorageObjAndReset() {
+    android::Bitmap* getStorageObjAndReset() {
         return mStorage.release();
     };
 
 private:
     JavaVM* mJavaVM;
-    sk_sp<android::PixelRef> mStorage;
+    sk_sp<android::Bitmap> mStorage;
 };
 
 

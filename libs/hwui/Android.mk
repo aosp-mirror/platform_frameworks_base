@@ -10,13 +10,13 @@ BUGREPORT_FONT_CACHE_USAGE := false
 HWUI_ENABLE_OPENGL_VALIDATION := false
 
 hwui_src_files := \
+    hwui/Bitmap.cpp \
     font/CacheTexture.cpp \
     font/Font.cpp \
     hwui/Canvas.cpp \
     hwui/MinikinSkia.cpp \
     hwui/MinikinUtils.cpp \
     hwui/PaintImpl.cpp \
-    hwui/PixelRef.cpp \
     hwui/Typeface.cpp \
     renderstate/Blend.cpp \
     renderstate/MeshState.cpp \
