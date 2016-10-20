@@ -41,6 +41,8 @@ StringPiece ToString(ResourceType type) {
       return "dimen";
     case ResourceType::kDrawable:
       return "drawable";
+    case ResourceType::kFont:
+      return "font";
     case ResourceType::kFraction:
       return "fraction";
     case ResourceType::kId:
@@ -83,6 +85,7 @@ static const std::map<StringPiece, ResourceType> sResourceTypeMap{
     {"color", ResourceType::kColor},
     {"dimen", ResourceType::kDimen},
     {"drawable", ResourceType::kDrawable},
+    {"font", ResourceType::kFont},
     {"fraction", ResourceType::kFraction},
     {"id", ResourceType::kId},
     {"integer", ResourceType::kInteger},

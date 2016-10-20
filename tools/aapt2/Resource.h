@@ -46,6 +46,7 @@ enum class ResourceType {
   kColor,
   kDimen,
   kDrawable,
+  kFont,
   kFraction,
   kId,
   kInteger,

@@ -1,5 +1,9 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.3
+### `aapt2`
+- Support new `font` resource type.
+
 ## Version 2.2
 ### `aapt2 compile ...`
 - Added support for inline complex XML resources. See
