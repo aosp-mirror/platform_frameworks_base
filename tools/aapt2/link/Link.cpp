@@ -1299,6 +1299,17 @@ class LinkCommand {
         }
       }
       return true;
+    } else if (util::stringEndsWith(src.path, ".xml") ||
+               util::stringEndsWith(src.path, ".png")) {
+      // Since AAPT compiles these file types and appends .flat to them, seeing
+      // their raw extensions is a sign that they weren't compiled.
+      const StringPiece fileType =
+          util::stringEndsWith(src.path, ".xml") ? "XML" : "PNG";
+      mContext->getDiagnostics()->error(DiagMessage(src)
+                                        << "uncompiled " << fileType
+                                        << " file passed as argument. Must be "
+                                           "compiled first into .flat file.");
+      return false;
     }
 
     // Ignore non .flat files. This could be classes.dex or something else that
