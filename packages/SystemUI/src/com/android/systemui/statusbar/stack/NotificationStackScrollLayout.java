@@ -264,14 +264,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     private final ArrayList<Pair<ExpandableNotificationRow, Boolean>> mTmpList = new ArrayList<>();
     private FalsingManager mFalsingManager;
     private boolean mAnimationRunning;
-    private ViewTreeObserver.OnPreDrawListener mBackgroundUpdater
+    private ViewTreeObserver.OnPreDrawListener mRunningAnimationUpdater
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
         public boolean onPreDraw() {
-            // if it needs animation
-            if (!mNeedsAnimation && !mChildrenUpdateRequested) {
-                updateBackground();
-            }
+            onPreDrawDuringAnimation();
             return true;
         }
     };
@@ -592,6 +589,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         } else {
             startAnimationToState();
         }
+    }
+
+    private void onPreDrawDuringAnimation() {
+        if (!mNeedsAnimation && !mChildrenUpdateRequested) {
+            updateBackground();
+        }
+        mShelf.updateAppearance();
     }
 
     private void updateScrollStateForAddedChildren() {
@@ -3873,9 +3877,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setAnimationRunning(boolean animationRunning) {
         if (animationRunning != mAnimationRunning) {
             if (animationRunning) {
-                getViewTreeObserver().addOnPreDrawListener(mBackgroundUpdater);
+                getViewTreeObserver().addOnPreDrawListener(mRunningAnimationUpdater);
             } else {
-                getViewTreeObserver().removeOnPreDrawListener(mBackgroundUpdater);
+                getViewTreeObserver().removeOnPreDrawListener(mRunningAnimationUpdater);
             }
             mAnimationRunning = animationRunning;
             updateContinuousShadowDrawing();
@@ -3950,6 +3954,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         addView(mShelf, index);
         mAmbientState.setShelf(shelf);
+        shelf.bind(mAmbientState, this);
     }
 
     public NotificationShelf getNotificationShelf() {

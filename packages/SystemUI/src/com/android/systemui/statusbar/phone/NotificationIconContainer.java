@@ -34,7 +34,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
 
     private boolean mShowAllIcons = true;
     private int mIconTint;
-    private WeakHashMap<View, ViewState> mIconStates = new WeakHashMap<>();
+    private WeakHashMap<View, IconState> mIconStates = new WeakHashMap<>();
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -54,16 +54,16 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             child.layout(0, top, width, top + height);
         }
         if (mShowAllIcons) {
-            resetViewStates(mIconStates);
-            calculateIconStates(getChildCount());
-            applyIconStates(mIconStates);
+            resetViewStates();
+            calculateIconTranslations();
+            applyIconStates();
         }
     }
 
-    public void applyIconStates(WeakHashMap<View, ViewState> iconStates) {
+    public void applyIconStates() {
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            ViewState childState = iconStates.get(child);
+            ViewState childState = mIconStates.get(child);
             if (childState != null) {
                 childState.applyToView(child);
             }
@@ -73,7 +73,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     @Override
     public void onViewAdded(View child) {
         super.onViewAdded(child);
-        mIconStates.put(child, new ViewState());
+        mIconStates.put(child, new IconState());
     }
 
     @Override
@@ -86,39 +86,30 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mIconTint = iconTint;
     }
 
-    public void resetViewStates(WeakHashMap<View, ViewState> viewStates) {
+    public WeakHashMap<View, IconState> resetViewStates() {
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
             ViewState iconState = mIconStates.get(view);
             iconState.initFrom(view);
         }
-    }
-
-    /**
-     * Gets a new state based on the number of visible icons starting from the right.
-     * If this is not a whole number, the fraction means by how much the icon is appearing.
-     */
-    public WeakHashMap<View, ViewState> calculateIconStates(float numberOfVisibleIcons) {
-        int childCount = getChildCount();
-        float visibleIconStart = childCount - numberOfVisibleIcons;
-        int firstIconIndex = (int) visibleIconStart;
-        float translationX = 0.0f;
-        for (int i = 0; i < childCount; i++) {
-            View view = getChildAt(i);
-            ViewState iconState = mIconStates.get(view);
-            if (i >= firstIconIndex) {
-                iconState.xTranslation = translationX;
-                float appearAmount = 1.0f;
-                if (i == firstIconIndex) {
-                    appearAmount = 1.0f - (visibleIconStart - firstIconIndex);
-                }
-                translationX += appearAmount * view.getWidth();
-            }
-        }
         return mIconStates;
     }
 
-    public WeakHashMap<View, ViewState> getIconStates() {
+    /**
+     * Calulate the horizontal translations for each notification based on how much the icons
+     * are inserted into the notification container.
+     * If this is not a whole number, the fraction means by how much the icon is appearing.
+     */
+    public WeakHashMap<View, IconState> calculateIconTranslations() {
+        int childCount = getChildCount();
+        float visibleIconStart = childCount - numberOfVisibleIcons;
+        float translationX = 0.0f;
+        for (int i = 0; i < childCount; i++) {
+            View view = getChildAt(i);
+            IconState iconState = mIconStates.get(view);
+            iconState.xTranslation = translationX;
+            translationX += iconState.iconAppearAmount * view.getWidth();
+        }
         return mIconStates;
     }
 
@@ -130,5 +121,14 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
      */
     public void setShowAllIcons(boolean showAllIcons) {
         mShowAllIcons = showAllIcons;
+    }
+
+    public static class IconState extends ViewState {
+        public float iconAppearAmount = 1.0f;
+
+        @Override
+        public void applyToView(View view) {
+            super.applyToView(view);
+        }
     }
 }

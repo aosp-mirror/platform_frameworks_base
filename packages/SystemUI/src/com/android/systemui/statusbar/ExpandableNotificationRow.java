@@ -1765,7 +1765,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public static class NotificationViewState extends ExpandableViewState {
 
         private final StackScrollState mOverallState;
-        public float iconTransformationAmount;
 
 
         private NotificationViewState(StackScrollState stackScrollState) {
@@ -1781,7 +1780,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                     row.setClipToActualHeight(true);
                 }
                 row.applyChildrenState(mOverallState);
-                row.setIconTransformationAmount(iconTransformationAmount);
             }
         }
     }

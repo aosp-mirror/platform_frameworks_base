@@ -506,6 +506,9 @@ public class StackScrollAlgorithm {
             }
             childViewState.height = (int) newHeight;
         }
+        if (childViewState.yTranslation >= shelfStart) {
+            childViewState.hidden = true;
+        }
     }
 
     protected int getMaxAllowedChildHeight(View child) {
