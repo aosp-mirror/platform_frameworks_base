@@ -46,7 +46,7 @@ void BakedOpDispatcher::onMergedBitmapOps(BakedOpRenderer& renderer,
         const MergedBakedOpList& opList) {
 
     const BakedOpState& firstState = *(opList.states[0]);
-    const SkBitmap* bitmap = (static_cast<const BitmapOp*>(opList.states[0]->op))->bitmap;
+    Bitmap* bitmap = (static_cast<const BitmapOp*>(opList.states[0]->op))->bitmap;
 
     Texture* texture = renderer.caches().textureCache.get(bitmap);
     if (!texture) return;

@@ -631,15 +631,13 @@ void FrameBuilder::deferBitmapRectOp(const BitmapRectOp& op) {
 }
 
 void FrameBuilder::deferVectorDrawableOp(const VectorDrawableOp& op) {
-    SkBitmap bitmap;
-    op.vectorDrawable->getBitmapUpdateIfDirty().getSkBitmap(&bitmap);
-    SkBitmap* localBitmap = mAllocator.create<SkBitmap>(bitmap);
+    Bitmap& bitmap = op.vectorDrawable->getBitmapUpdateIfDirty();
     SkPaint* paint = op.vectorDrawable->getPaint();
     const BitmapRectOp* resolvedOp = mAllocator.create_trivial<BitmapRectOp>(op.unmappedBounds,
             op.localMatrix,
             op.localClip,
             paint,
-            localBitmap,
+            &bitmap,
             Rect(bitmap.width(), bitmap.height()));
     deferBitmapRectOp(*resolvedOp);
 }

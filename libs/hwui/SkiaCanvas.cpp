@@ -515,9 +515,10 @@ void SkiaCanvas::drawBitmap(Bitmap& hwuiBitmap, float srcLeft, float srcTop,
     mCanvas->drawBitmapRect(bitmap, srcRect, dstRect, paint);
 }
 
-void SkiaCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
+void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeight,
         const float* vertices, const int* colors, const SkPaint* paint) {
-
+    SkBitmap bitmap;
+    hwuiBitmap.getSkBitmap(&bitmap);
     const int ptCount = (meshWidth + 1) * (meshHeight + 1);
     const int indexCount = meshWidth * meshHeight * 6;
 
@@ -615,8 +616,10 @@ void SkiaCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshH
                          indexCount, tmpPaint);
 }
 
-void SkiaCanvas::drawNinePatch(const SkBitmap& bitmap, const Res_png_9patch& chunk,
+void SkiaCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch& chunk,
         float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
+    SkBitmap bitmap;
+    hwuiBitmap.getSkBitmap(&bitmap);
     SkRect bounds = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
     NinePatch::Draw(mCanvas.get(), bounds, bitmap, chunk, paint, nullptr);
 }

@@ -736,10 +736,12 @@ TEST(RecordingCanvas, refBitmap) {
 }
 
 TEST(RecordingCanvas, refBitmapInShader_bitmapShader) {
-    SkBitmap bitmap = TestUtils::createSkBitmap(100, 100);
+    sk_sp<Bitmap> bitmap = TestUtils::createBitmap(100, 100);
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [&bitmap](RecordingCanvas& canvas) {
         SkPaint paint;
-        sk_sp<SkShader> shader = SkMakeBitmapShader(bitmap,
+        SkBitmap skBitmap;
+        bitmap->getSkBitmap(&skBitmap);
+        sk_sp<SkShader> shader = SkMakeBitmapShader(skBitmap,
                 SkShader::TileMode::kClamp_TileMode,
                 SkShader::TileMode::kClamp_TileMode,
                 nullptr,
@@ -753,10 +755,12 @@ TEST(RecordingCanvas, refBitmapInShader_bitmapShader) {
 }
 
 TEST(RecordingCanvas, refBitmapInShader_composeShader) {
-    SkBitmap bitmap = TestUtils::createSkBitmap(100, 100);
+    sk_sp<Bitmap> bitmap = TestUtils::createBitmap(100, 100);
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [&bitmap](RecordingCanvas& canvas) {
         SkPaint paint;
-        sk_sp<SkShader> shader1 = SkMakeBitmapShader(bitmap,
+        SkBitmap skBitmap;
+        bitmap->getSkBitmap(&skBitmap);
+        sk_sp<SkShader> shader1 = SkMakeBitmapShader(skBitmap,
                 SkShader::TileMode::kClamp_TileMode,
                 SkShader::TileMode::kClamp_TileMode,
                 nullptr,

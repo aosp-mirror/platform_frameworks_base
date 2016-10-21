@@ -128,7 +128,7 @@ public:
 
     ANDROID_API static int copySurfaceInto(sp<Surface>& surface,
             int left, int top, int right, int bottom, SkBitmap* bitmap);
-    ANDROID_API static void prepareToDraw(const SkBitmap& bitmap);
+    ANDROID_API static void prepareToDraw(Bitmap& bitmap);
 
 private:
     RenderThread& mRenderThread;

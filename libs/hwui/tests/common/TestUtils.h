@@ -134,17 +134,6 @@ public:
         return Bitmap::allocateHeapBitmap(outBitmap, nullptr);
     }
 
-    static SkBitmap createSkBitmap(int width, int height,
-            SkColorType colorType = kN32_SkColorType) {
-        SkBitmap bitmap;
-        sk_sp<SkColorSpace> colorSpace = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
-        SkImageInfo info = SkImageInfo::Make(width, height,
-                colorType, kPremul_SkAlphaType, colorSpace);
-        bitmap.setInfo(info);
-        Bitmap::allocateHeapBitmap(&bitmap, nullptr);
-        return bitmap;
-    }
-
     static sp<DeferredLayerUpdater> createTextureLayerUpdater(
             renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,
             const SkMatrix& transform);

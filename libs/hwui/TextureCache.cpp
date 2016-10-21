@@ -23,6 +23,7 @@
 #include "TextureCache.h"
 #include "Properties.h"
 #include "utils/TraceUtils.h"
+#include "hwui/Bitmap.h"
 
 namespace android {
 namespace uirenderer {
@@ -91,7 +92,7 @@ void TextureCache::resetMarkInUse(void* ownerToken) {
     }
 }
 
-bool TextureCache::canMakeTextureFromBitmap(const SkBitmap* bitmap) {
+bool TextureCache::canMakeTextureFromBitmap(Bitmap* bitmap) {
     if (bitmap->width() > mMaxTextureSize || bitmap->height() > mMaxTextureSize) {
         ALOGW("Bitmap too large to be uploaded into a texture (%dx%d, max=%dx%d)",
                 bitmap->width(), bitmap->height(), mMaxTextureSize, mMaxTextureSize);
@@ -102,8 +103,8 @@ bool TextureCache::canMakeTextureFromBitmap(const SkBitmap* bitmap) {
 
 // Returns a prepared Texture* that either is already in the cache or can fit
 // in the cache (and is thus added to the cache)
-Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
-    Texture* texture = mCache.get(bitmap->pixelRef()->getStableID());
+Texture* TextureCache::getCachedTexture(Bitmap* bitmap) {
+    Texture* texture = mCache.get(bitmap->getStableID());
 
     if (!texture) {
         if (!canMakeTextureFromBitmap(bitmap)) {
@@ -126,7 +127,9 @@ Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
             texture = new Texture(Caches::getInstance());
             texture->bitmapSize = size;
             texture->generation = bitmap->getGenerationID();
-            texture->upload(*bitmap);
+            SkBitmap skBitmap;
+            bitmap->getSkBitmap(&skBitmap);
+            texture->upload(skBitmap);
 
             mSize += size;
             TEXTURE_LOGD("TextureCache::get: create texture(%p): name, size, mSize = %d, %d, %d",
@@ -134,19 +137,21 @@ Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
             if (mDebugEnabled) {
                 ALOGD("Texture created, size = %d", size);
             }
-            mCache.put(bitmap->pixelRef()->getStableID(), texture);
+            mCache.put(bitmap->getStableID(), texture);
         }
     } else if (!texture->isInUse && bitmap->getGenerationID() != texture->generation) {
         // Texture was in the cache but is dirty, re-upload
         // TODO: Re-adjust the cache size if the bitmap's dimensions have changed
-        texture->upload(*bitmap);
+        SkBitmap skBitmap;
+        bitmap->getSkBitmap(&skBitmap);
+        texture->upload(skBitmap);
         texture->generation = bitmap->getGenerationID();
     }
 
     return texture;
 }
 
-bool TextureCache::prefetchAndMarkInUse(void* ownerToken, const SkBitmap* bitmap) {
+bool TextureCache::prefetchAndMarkInUse(void* ownerToken, Bitmap* bitmap) {
     Texture* texture = getCachedTexture(bitmap);
     if (texture) {
         texture->isInUse = ownerToken;
@@ -154,11 +159,11 @@ bool TextureCache::prefetchAndMarkInUse(void* ownerToken, const SkBitmap* bitmap
     return texture;
 }
 
-bool TextureCache::prefetch(const SkBitmap* bitmap) {
+bool TextureCache::prefetch(Bitmap* bitmap) {
     return getCachedTexture(bitmap);
 }
 
-Texture* TextureCache::get(const SkBitmap* bitmap) {
+Texture* TextureCache::get(Bitmap* bitmap) {
     Texture* texture = getCachedTexture(bitmap);
 
     if (!texture) {
@@ -169,7 +174,9 @@ Texture* TextureCache::get(const SkBitmap* bitmap) {
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
         texture = new Texture(Caches::getInstance());
         texture->bitmapSize = size;
-        texture->upload(*bitmap);
+        SkBitmap skBitmap;
+        bitmap->getSkBitmap(&skBitmap);
+        texture->upload(skBitmap);
         texture->generation = bitmap->getGenerationID();
         texture->cleanup = true;
     }

@@ -341,13 +341,12 @@ static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmap
         jlong paintHandle, jint dstDensity, jint srcDensity) {
 
     Canvas* canvas = get_canvas(canvasHandle);
-    SkBitmap skiaBitmap;
-    bitmap::toSkBitmap(bitmapHandle, &skiaBitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(env, bitmapHandle);
     const android::Res_png_9patch* chunk = reinterpret_cast<android::Res_png_9patch*>(chunkHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
     if (CC_LIKELY(dstDensity == srcDensity || dstDensity == 0 || srcDensity == 0)) {
-        canvas->drawNinePatch(skiaBitmap, *chunk, left, top, right, bottom, paint);
+        canvas->drawNinePatch(bitmap, *chunk, left, top, right, bottom, paint);
     } else {
         canvas->save(SaveFlags::MatrixClip);
 
@@ -361,7 +360,7 @@ static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmap
         }
         filteredPaint.setFilterQuality(kLow_SkFilterQuality);
 
-        canvas->drawNinePatch(skiaBitmap, *chunk, 0, 0, (right-left)/scale, (bottom-top)/scale,
+        canvas->drawNinePatch(bitmap, *chunk, 0, 0, (right-left)/scale, (bottom-top)/scale,
                 &filteredPaint);
 
         canvas->restore();
@@ -464,8 +463,7 @@ static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbi
     AutoJavaIntArray colorA(env, jcolors, colorIndex + ptCount);
 
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
     get_canvas(canvasHandle)->drawBitmapMesh(bitmap, meshWidth, meshHeight,
                                              vertA.ptr(), colorA.ptr(), paint);
 }

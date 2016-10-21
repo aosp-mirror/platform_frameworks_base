@@ -106,9 +106,9 @@ void DisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) {
 bool DisplayList::prepareListAndChildren(TreeInfo& info, bool functorsNeedLayer,
         std::function<void(RenderNode*, TreeInfo&, bool)> childFn) {
     TextureCache& cache = Caches::getInstance().textureCache;
-    for (auto&& bitmapResource : bitmapResources) {
+    for (auto& bitmapResource : bitmapResources) {
         void* ownerToken = &info.canvasContext;
-        info.prepareTextures = cache.prefetchAndMarkInUse(ownerToken, bitmapResource);
+        info.prepareTextures = cache.prefetchAndMarkInUse(ownerToken, bitmapResource.get());
     }
     for (auto&& op : children) {
         RenderNode* childNode = op->renderNode;

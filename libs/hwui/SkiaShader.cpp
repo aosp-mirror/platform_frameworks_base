@@ -21,6 +21,7 @@
 #include "Layer.h"
 #include "Matrix.h"
 #include "Texture.h"
+#include "hwui/Bitmap.h"
 
 #include <SkMatrix.h>
 #include <utils/Log.h>
@@ -206,7 +207,9 @@ bool tryStoreBitmap(Caches& caches, const SkShader& shader, const Matrix4& model
         return false;
     }
 
-    outData->bitmapTexture = caches.textureCache.get(&bitmap);
+    // TODO: create  hwui-owned BitmapShader.
+    Bitmap* hwuiBitmap = static_cast<Bitmap*>(bitmap.pixelRef());
+    outData->bitmapTexture = caches.textureCache.get(hwuiBitmap);
     if (!outData->bitmapTexture) return false;
 
     outData->bitmapSampler = (*textureUnit)++;

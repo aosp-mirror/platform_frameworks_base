@@ -38,6 +38,7 @@
 #include "Matrix.h"
 #include "RenderProperties.h"
 #include "TreeInfo.h"
+#include "hwui/Bitmap.h"
 
 #include <vector>
 
@@ -101,7 +102,7 @@ public:
 
     const LsaVector<NodeOpType*>& getChildren() const { return children; }
 
-    const LsaVector<const SkBitmap*>& getBitmapResources() const { return bitmapResources; }
+    const LsaVector<sk_sp<Bitmap>>& getBitmapResources() const { return bitmapResources; }
 
     size_t addChild(NodeOpType* childOp);
 
@@ -140,7 +141,7 @@ private:
     LsaVector<NodeOpType*> children;
 
     // Resources - Skia objects + 9 patches referred to by this DisplayList
-    LsaVector<const SkBitmap*> bitmapResources;
+    LsaVector<sk_sp<Bitmap>> bitmapResources;
     LsaVector<const SkPath*> pathResources;
     LsaVector<const Res_png_9patch*> patchResources;
     LsaVector<std::unique_ptr<const SkPaint>> paints;

@@ -269,4 +269,9 @@ void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
     outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
 }
 
+void Bitmap::getBounds(SkRect* bounds) const {
+    SkASSERT(bounds);
+    bounds->set(0, 0, SkIntToScalar(info().width()), SkIntToScalar(info().height()));
+}
+
 } // namespace android

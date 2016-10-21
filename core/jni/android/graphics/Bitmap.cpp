@@ -212,6 +212,12 @@ Bitmap& toBitmap(JNIEnv* env, jobject bitmap) {
     return localBitmap->bitmap();
 }
 
+Bitmap& toBitmap(JNIEnv* env, jlong bitmapHandle) {
+    SkASSERT(env);
+    LocalScopedBitmap localBitmap(bitmapHandle);
+    return localBitmap->bitmap();
+}
+
 } // namespace bitmap
 
 } // namespace android
@@ -1199,9 +1205,7 @@ static jlong Bitmap_refPixelRef(JNIEnv* env, jobject, jlong bitmapHandle) {
 static void Bitmap_prepareToDraw(JNIEnv* env, jobject, jlong bitmapPtr) {
     LocalScopedBitmap bitmapHandle(bitmapPtr);
     if (!bitmapHandle.valid()) return;
-    SkBitmap bitmap;
-    bitmapHandle->getSkBitmap(&bitmap);
-    android::uirenderer::renderthread::RenderProxy::prepareToDraw(bitmap);
+    android::uirenderer::renderthread::RenderProxy::prepareToDraw(bitmapHandle->bitmap());
 }
 
 static jint Bitmap_getAllocationByteCount(JNIEnv* env, jobject, jlong bitmapPtr) {
