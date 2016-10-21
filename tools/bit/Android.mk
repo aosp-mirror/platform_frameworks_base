@@ -22,6 +22,9 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := bit
 
+# This tool doesn't build on darwin.
+LOCAL_MODULE_HOST_OS := linux
+
 LOCAL_SRC_FILES := \
     aapt.cpp \
     adb.cpp \
