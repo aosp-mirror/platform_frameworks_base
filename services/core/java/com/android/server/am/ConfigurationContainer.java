@@ -114,10 +114,14 @@ abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      */
     void onParentChanged() {
         final ConfigurationContainer parent = getParent();
-        // Update full configuration of this container and all its children.
-        onConfigurationChanged(parent != null ? parent.mFullConfiguration : Configuration.EMPTY);
-        // Update merged override configuration of this container and all its children.
-        onMergedOverrideConfigurationChanged();
+        // Removing parent usually means that we've detached this entity to destroy it or to attach
+        // to another parent. In both cases we don't need to update the configuration now.
+        if (parent != null) {
+            // Update full configuration of this container and all its children.
+            onConfigurationChanged(parent.mFullConfiguration);
+            // Update merged override configuration of this container and all its children.
+            onMergedOverrideConfigurationChanged();
+        }
     }
 
     abstract protected int getChildCount();

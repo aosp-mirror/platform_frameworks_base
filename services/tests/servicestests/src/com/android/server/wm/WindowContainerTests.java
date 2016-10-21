@@ -434,22 +434,30 @@ public class WindowContainerTests {
         final Configuration childOverrideConfig = new Configuration();
         childOverrideConfig.densityDpi = 320;
         child.onOverrideConfigurationChanged(childOverrideConfig);
+        final Configuration mergedOverrideConfig = new Configuration(root.getConfiguration());
+        mergedOverrideConfig.updateFrom(childOverrideConfig);
 
-        // Check configuration update when child is removed from parent.
+        // Check configuration update when child is removed from parent - it should remain same.
         root.removeChild(child);
         assertEquals(childOverrideConfig, child.getOverrideConfiguration());
-        assertEquals(childOverrideConfig, child.getMergedOverrideConfiguration());
-        assertEquals(childOverrideConfig, child.getConfiguration());
+        assertEquals(mergedOverrideConfig, child.getMergedOverrideConfiguration());
+        assertEquals(mergedOverrideConfig, child.getConfiguration());
 
         // It may be paranoia... but let's check if parent's config didn't change after removal.
         assertEquals(rootOverrideConfig, root.getOverrideConfiguration());
         assertEquals(rootOverrideConfig, root.getMergedOverrideConfiguration());
         assertEquals(rootOverrideConfig, root.getConfiguration());
 
-        // Check configuration update when child is added to parent.
-        final Configuration mergedOverrideConfig = new Configuration(root.getConfiguration());
+        // Init different root
+        final TestWindowContainer root2 = builder.setLayer(0).build();
+        final Configuration rootOverrideConfig2 = new Configuration();
+        rootOverrideConfig2.fontScale = 1.1f;
+        root2.onOverrideConfigurationChanged(rootOverrideConfig2);
+
+        // Check configuration update when child is added to different parent.
+        mergedOverrideConfig.setTo(rootOverrideConfig2);
         mergedOverrideConfig.updateFrom(childOverrideConfig);
-        root.addChildWindow(child);
+        root2.addChildWindow(child);
         assertEquals(childOverrideConfig, child.getOverrideConfiguration());
         assertEquals(mergedOverrideConfig, child.getMergedOverrideConfiguration());
         assertEquals(mergedOverrideConfig, child.getConfiguration());
