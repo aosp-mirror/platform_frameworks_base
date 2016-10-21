@@ -308,7 +308,7 @@ run_instrumentation_test(const string& packageName, const string& runner, const 
         const char* prog = cmd.GetProg();
         char* const* argv = cmd.GetArgv();
         char* const* env = cmd.GetEnv();
-        execvpe(prog, argv, env);
+        exec_with_path_search(prog, argv, env);
         print_error("Unable to run command: %s", prog);
         exit(1);
     } else {

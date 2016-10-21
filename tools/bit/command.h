@@ -54,5 +54,8 @@ string get_command_output(const Command& command, int* err, bool quiet=false);
  */
 int run_command(const Command& command);
 
+// Mac OS doesn't have execvpe. This is the same as execvpe.
+int exec_with_path_search(const char* prog, char const* const* argv, char const* const* envp);
+
 #endif // COMMAND_H
 
