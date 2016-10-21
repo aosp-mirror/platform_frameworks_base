@@ -31,6 +31,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
+import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.ui.HideIncompatibleAppOverlayEvent;
 import com.android.systemui.recents.events.ui.ShowIncompatibleAppOverlayEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
@@ -139,7 +140,10 @@ public class RecentsViewTouchHandler {
     /** Handles touch events once we have intercepted them */
     public boolean onTouchEvent(MotionEvent ev) {
         handleTouchEvent(ev);
-        return mDragRequested;
+        if (ev.getAction() == MotionEvent.ACTION_UP && mRv.getStack().getStackTaskCount() == 0) {
+            EventBus.getDefault().send(new HideRecentsEvent(false, true));
+        }
+        return true;
     }
 
     /**** Events ****/
