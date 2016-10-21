@@ -460,7 +460,7 @@ public class Session extends IWindowSession.Stub
         synchronized(mService.mWindowMap) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mService.mWallpaperControllerLocked.setWindowWallpaperPosition(
+                mService.mRoot.mWallpaperController.setWindowWallpaperPosition(
                         mService.windowForClientLocked(this, window, true),
                         x, y, xStep, yStep);
             } finally {
@@ -471,7 +471,7 @@ public class Session extends IWindowSession.Stub
 
     public void wallpaperOffsetsComplete(IBinder window) {
         synchronized (mService.mWindowMap) {
-            mService.mWallpaperControllerLocked.wallpaperOffsetsComplete(window);
+            mService.mRoot.mWallpaperController.wallpaperOffsetsComplete(window);
         }
     }
 
@@ -479,7 +479,7 @@ public class Session extends IWindowSession.Stub
         synchronized(mService.mWindowMap) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mService.mWallpaperControllerLocked.setWindowWallpaperDisplayOffset(
+                mService.mRoot.mWallpaperController.setWindowWallpaperDisplayOffset(
                         mService.windowForClientLocked(this, window, true), x, y);
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -492,7 +492,7 @@ public class Session extends IWindowSession.Stub
         synchronized(mService.mWindowMap) {
             long ident = Binder.clearCallingIdentity();
             try {
-                return mService.mWallpaperControllerLocked.sendWindowWallpaperCommand(
+                return mService.mRoot.mWallpaperController.sendWindowWallpaperCommand(
                         mService.windowForClientLocked(this, window, true),
                         action, x, y, z, extras, sync);
             } finally {
@@ -503,7 +503,7 @@ public class Session extends IWindowSession.Stub
 
     public void wallpaperCommandComplete(IBinder window, Bundle result) {
         synchronized (mService.mWindowMap) {
-            mService.mWallpaperControllerLocked.wallpaperCommandComplete(window);
+            mService.mRoot.mWallpaperController.wallpaperCommandComplete(window);
         }
     }
 

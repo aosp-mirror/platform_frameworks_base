@@ -628,10 +628,9 @@ class WallpaperController {
         return changed;
     }
 
-    boolean adjustWallpaperWindows() {
+    boolean adjustWallpaperWindows(WindowList windows) {
         mService.mRoot.mWallpaperMayChange = false;
 
-        final WindowList windows = mService.getDefaultWindowListLocked();
         // First find top-most window that has asked to be on top of the wallpaper;
         // all wallpapers go behind it.
         findWallpaperTarget(windows, mFindResults);
@@ -726,8 +725,8 @@ class WallpaperController {
      * Adjusts the wallpaper windows if the input display has a pending wallpaper layout or one of
      * the opening apps should be a wallpaper target.
      */
-    void adjustWallpaperWindowsForAppTransitionIfNeeded(
-            DisplayContent dc, ArraySet<AppWindowToken> openingApps, WindowList windows) {
+    void adjustWallpaperWindowsForAppTransitionIfNeeded(DisplayContent dc,
+            ArraySet<AppWindowToken> openingApps) {
         boolean adjust = false;
         if ((dc.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
             adjust = true;
@@ -741,8 +740,8 @@ class WallpaperController {
             }
         }
 
-        if (adjust && adjustWallpaperWindows()) {
-            dc.assignWindowLayers(true /*setLayoutNeeded*/);
+        if (adjust) {
+            dc.adjustWallpaperWindows();
         }
     }
 

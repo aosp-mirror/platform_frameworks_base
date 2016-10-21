@@ -269,7 +269,7 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     void updateWallpaperOffset(int dw, int dh, boolean sync) {
-        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
+        final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
             if (wallpaperController.updateWallpaperOffset(wallpaper, dw, dh, sync)) {
@@ -294,7 +294,7 @@ class WindowToken extends WindowContainer<WindowState> {
             mDisplayContent.setLayoutNeeded();
         }
 
-        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
+        final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
             if (visible) {
@@ -317,7 +317,7 @@ class WindowToken extends WindowContainer<WindowState> {
             mDisplayContent.setLayoutNeeded();
         }
 
-        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
+        final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
 

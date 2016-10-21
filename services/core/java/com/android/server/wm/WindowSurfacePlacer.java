@@ -96,7 +96,7 @@ class WindowSurfacePlacer {
 
     public WindowSurfacePlacer(WindowManagerService service) {
         mService = service;
-        mWallpaperControllerLocked = mService.mWallpaperControllerLocked;
+        mWallpaperControllerLocked = mService.mRoot.mWallpaperController;
     }
 
     /**
@@ -383,10 +383,9 @@ class WindowSurfacePlacer {
     }
 
     /**
-     * @param windows List of windows on default display.
      * @return bitmap indicating if another pass through layout must be made.
      */
-    int handleAppTransitionReadyLocked(WindowList windows) {
+    int handleAppTransitionReadyLocked() {
         int appsCount = mService.mOpeningApps.size();
         if (!transitionGoodToGo(appsCount)) {
             return 0;
@@ -429,7 +428,7 @@ class WindowSurfacePlacer {
         // (like the clearAnimatingFlags() above) might affect wallpaper target result.
         // Or, the opening app window should be a wallpaper target.
         mWallpaperControllerLocked.adjustWallpaperWindowsForAppTransitionIfNeeded(displayContent,
-                mService.mOpeningApps, windows);
+                mService.mOpeningApps);
 
         final WindowState lowerWallpaperTarget =
                 mWallpaperControllerLocked.getLowerWallpaperTarget();
@@ -533,7 +532,7 @@ class WindowSurfacePlacer {
         // TODO: Probably not needed once the window list always has the right z-ordering
         // when the window hierarchy is updated.
         final DisplayContent dc = mService.getDefaultDisplayContentLocked();
-        if (windows == dc.getWindowList() && !dc.moveInputMethodWindowsIfNeeded(true)) {
+        if (!dc.moveInputMethodWindowsIfNeeded(true)) {
             dc.assignWindowLayers(false /*setLayoutNeeded*/);
         }
         mService.updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,

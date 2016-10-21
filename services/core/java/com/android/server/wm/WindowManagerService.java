@@ -190,6 +190,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static android.view.WindowManager.LayoutParams.TYPE_DRAG;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -515,9 +516,9 @@ public class WindowManagerService extends IWindowManager.Stub
     // The root of the device window hierarchy.
     RootWindowContainer mRoot;
 
-    // TODO: Move several of this states to the RootWindowContainer
+    // TODO: Move several of this states to the RootWindowContainer or DisplayContent
     int mRotation = 0;
-    int mLastOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+    int mLastOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mAltOrientation = false;
 
     private boolean mKeyguardWaitingForActivityDrawn;
@@ -530,8 +531,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mForceResizableTasks = false;
 
     int getDragLayerLocked() {
-        return mPolicy.windowTypeToLayerLw(LayoutParams.TYPE_DRAG) * TYPE_LAYER_MULTIPLIER
-                + TYPE_LAYER_OFFSET;
+        return mPolicy.windowTypeToLayerLw(TYPE_DRAG) * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
     }
 
     class RotationWatcher {
@@ -562,8 +562,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mClientFreezingScreen = false;
     int mAppsFreezingScreen = 0;
-    int mLastWindowForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-    int mLastKeyguardForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+    int mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+    int mLastKeyguardForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
     int mLayoutSeq = 0;
 
@@ -683,8 +683,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
     }
-
-    WallpaperController mWallpaperControllerLocked;
 
     boolean mAnimateWallpaperWithTarget;
 
@@ -979,7 +977,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplaySettings = new DisplaySettings();
         mDisplaySettings.readSettingsLocked();
 
-        mWallpaperControllerLocked = new WallpaperController(this);
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mPolicy = policy;
 
@@ -1397,11 +1394,11 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 win.mToken.addWindow(win);
                 if (type == TYPE_WALLPAPER) {
-                    mWallpaperControllerLocked.clearLastWallpaperTimeoutTime();
+                    displayContent.mWallpaperController.clearLastWallpaperTimeoutTime();
                     displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                 } else if ((attrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
                     displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-                } else if (mWallpaperControllerLocked.isBelowWallpaperTarget(win)) {
+                } else if (displayContent.mWallpaperController.isBelowWallpaperTarget(win)) {
                     // If there is currently a wallpaper being shown, and
                     // the base layer of the new window is below the current
                     // layer of the target window, then adjust the wallpaper.
@@ -1675,14 +1672,14 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.postWindowRemoveStartingWindowCleanup(win);
         }
 
+        final DisplayContent dc = win.getDisplayContent();
         if (win.mAttrs.type == TYPE_WALLPAPER) {
-            mWallpaperControllerLocked.clearLastWallpaperTimeoutTime();
-            getDefaultDisplayContentLocked().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+            dc.mWallpaperController.clearLastWallpaperTimeoutTime();
+            dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
         } else if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
-            getDefaultDisplayContentLocked().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+            dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
         }
 
-        final DisplayContent dc = win.getDisplayContent();
         if (dc != null && dc.removeFromWindowList(win)) {
             if (!mWindowPlacerLocked.isInLayout()) {
                 dc.assignWindowLayers(true /* setLayoutNeeded */);
@@ -2079,7 +2076,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mWindowPlacerLocked.performSurfacePlacement();
             if (toBeDisplayed && win.mIsWallpaper) {
                 DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
-                mWallpaperControllerLocked.updateWallpaperOffset(
+                dc.mWallpaperController.updateWallpaperOffset(
                         win, displayInfo.logicalWidth, displayInfo.logicalHeight, false);
             }
             if (win.mAppToken != null) {
@@ -2147,7 +2144,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // an exit.
             win.mAnimatingExit = true;
             win.mWinAnimator.mAnimating = true;
-        } else if (mWallpaperControllerLocked.isWallpaperTarget(win)) {
+        } else if (win.getDisplayContent().mWallpaperController.isWallpaperTarget(win)) {
             // If the wallpaper is currently behind this
             // window, we need to change both of them inside
             // of a transaction to avoid artifacts.
@@ -2418,7 +2415,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     final WindowToken wtoken = removedTokens.get(i);
                     wtoken.setExiting();
                     if (wtoken.windowType == TYPE_WALLPAPER) {
-                        mWallpaperControllerLocked.removeWallpaperToken(wtoken);
+                        wtoken.getDisplayContent().mWallpaperController.removeWallpaperToken(wtoken);
                     }
 
                     mInputMonitor.updateInputWindowsLw(true /*force*/);
@@ -2532,80 +2529,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public int getOrientationLocked() {
-        if (mDisplayFrozen) {
-            if (mLastWindowForcedOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                        "Display is frozen, return " + mLastWindowForcedOrientation);
-                // If the display is frozen, some activities may be in the middle
-                // of restarting, and thus have removed their old window.  If the
-                // window has the flag to hide the lock screen, then the lock screen
-                // can re-appear and inflict its own orientation on us.  Keep the
-                // orientation stable until this all settles down.
-                return mLastWindowForcedOrientation;
-            } else if (mPolicy.isKeyguardLocked()) {
-                // Use the last orientation the while the display is frozen with the
-                // keyguard locked. This could be the keyguard forced orientation or
-                // from a SHOW_WHEN_LOCKED window. We don't want to check the show when
-                // locked window directly though as things aren't stable while
-                // the display is frozen, for example the window could be momentarily unavailable
-                // due to activity relaunch.
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display is frozen while keyguard locked, "
-                        + "return " + mLastOrientation);
-                return mLastOrientation;
-            }
-        } else {
-            // TODO(multidisplay): Change to the correct display.
-            final WindowList windows = getDefaultWindowListLocked();
-            for (int pos = windows.size() - 1; pos >= 0; --pos) {
-                WindowState win = windows.get(pos);
-                if (win.mAppToken != null) {
-                    // We hit an application window. so the orientation will be determined by the
-                    // app window. No point in continuing further.
-                    break;
-                }
-                if (!win.isVisibleLw() || !win.mPolicyVisibilityAfterAnim) {
-                    continue;
-                }
-                int req = win.mAttrs.screenOrientation;
-                if(req == SCREEN_ORIENTATION_UNSPECIFIED || req == SCREEN_ORIENTATION_BEHIND) {
-                    continue;
-                }
-
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, win + " forcing orientation to " + req);
-                if (mPolicy.isKeyguardHostWindow(win.mAttrs)) {
-                    mLastKeyguardForcedOrientation = req;
-                }
-                return (mLastWindowForcedOrientation = req);
-            }
-            mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
-
-            if (mPolicy.isKeyguardLocked()) {
-                // The screen is locked and no top system window is requesting an orientation.
-                // Return either the orientation of the show-when-locked app (if there is any) or
-                // the orientation of the keyguard. No point in searching from the rest of apps.
-                WindowState winShowWhenLocked = (WindowState) mPolicy.getWinShowWhenLockedLw();
-                AppWindowToken appShowWhenLocked = winShowWhenLocked == null ?
-                        null : winShowWhenLocked.mAppToken;
-                if (appShowWhenLocked != null) {
-                    int req = appShowWhenLocked.getOrientation();
-                    if (req == SCREEN_ORIENTATION_BEHIND) {
-                        req = mLastKeyguardForcedOrientation;
-                    }
-                    if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Done at " + appShowWhenLocked
-                            + " -- show when locked, return " + req);
-                    return req;
-                }
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                        "No one is requesting an orientation when the screen is locked");
-                return mLastKeyguardForcedOrientation;
-            }
-        }
-
-        // Top system windows are not requesting an orientation. Start searching from apps.
-        return getDefaultDisplayContentLocked().getOrientation();
-    }
-
     @Override
     public Configuration updateOrientationFromAppTokens(
             Configuration currentConfig, IBinder freezeThisOneIfNeeded) {
@@ -2687,7 +2610,8 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean updateOrientationFromAppTokensLocked(boolean inTransaction) {
         long ident = Binder.clearCallingIdentity();
         try {
-            int req = getOrientationLocked();
+            // TODO: multi-display
+            int req = getDefaultDisplayContentLocked().getOrientation();
             if (req != mLastOrientation) {
                 mLastOrientation = req;
                 //send a message to Policy indicating orientation change to take
@@ -3035,7 +2959,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     return false;
                 }
                 if (windowShowWallpaper) {
-                    if (mWallpaperControllerLocked.getWallpaperTarget() == null) {
+                    if (wtoken.getDisplayContent().mWallpaperController.getWallpaperTarget()
+                            == null) {
                         // If this theme is requesting a wallpaper, and the wallpaper
                         // is not currently visible, then this effectively serves as
                         // an opaque window and our starting window transition animation
@@ -4217,64 +4142,7 @@ public class WindowManagerService extends IWindowManager.Stub
         performEnableScreen();
     }
 
-    private boolean checkWaitingForWindowsLocked() {
-
-        boolean haveBootMsg = false;
-        boolean haveApp = false;
-        // if the wallpaper service is disabled on the device, we're never going to have
-        // wallpaper, don't bother waiting for it
-        boolean haveWallpaper = false;
-        boolean wallpaperEnabled = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_enableWallpaperService)
-                && !mOnlyCore;
-        boolean haveKeyguard = true;
-        // TODO(multidisplay): Expand to all displays?
-        final WindowList windows = getDefaultWindowListLocked();
-        final int N = windows.size();
-        for (int i=0; i<N; i++) {
-            WindowState w = windows.get(i);
-            if (w.isVisibleLw() && !w.mObscured && !w.isDrawnLw()) {
-                return true;
-            }
-            if (w.isDrawnLw()) {
-                if (w.mAttrs.type == TYPE_BOOT_PROGRESS) {
-                    haveBootMsg = true;
-                } else if (w.mAttrs.type == TYPE_APPLICATION
-                        || w.mAttrs.type == TYPE_DRAWN_APPLICATION) {
-                    haveApp = true;
-                } else if (w.mAttrs.type == TYPE_WALLPAPER) {
-                    haveWallpaper = true;
-                } else if (w.mAttrs.type == TYPE_STATUS_BAR) {
-                    haveKeyguard = mPolicy.isKeyguardDrawnLw();
-                }
-            }
-        }
-
-        if (DEBUG_SCREEN_ON || DEBUG_BOOT) {
-            Slog.i(TAG_WM, "******** booted=" + mSystemBooted + " msg=" + mShowingBootMessages
-                    + " haveBoot=" + haveBootMsg + " haveApp=" + haveApp
-                    + " haveWall=" + haveWallpaper + " wallEnabled=" + wallpaperEnabled
-                    + " haveKeyguard=" + haveKeyguard);
-        }
-
-        // If we are turning on the screen to show the boot message,
-        // don't do it until the boot message is actually displayed.
-        if (!mSystemBooted && !haveBootMsg) {
-            return true;
-        }
-
-        // If we are turning on the screen after the boot is completed
-        // normally, don't do so until we have the application and
-        // wallpaper.
-        if (mSystemBooted && ((!haveApp && !haveKeyguard) ||
-                (wallpaperEnabled && !haveWallpaper))) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public void performEnableScreen() {
+    private void performEnableScreen() {
         synchronized(mWindowMap) {
             if (DEBUG_BOOT) Slog.i(TAG_WM, "performEnableScreen: mDisplayEnabled=" + mDisplayEnabled
                     + " mForceDisplayEnabled=" + mForceDisplayEnabled
@@ -4290,7 +4158,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // Don't enable the screen until all existing windows have been drawn.
-            if (!mForceDisplayEnabled && checkWaitingForWindowsLocked()) {
+            if (!mForceDisplayEnabled
+                    // TODO(multidisplay): Expand to all displays?
+                    && getDefaultDisplayContentLocked().checkWaitingForWindows()) {
                 return;
             }
 
@@ -6689,21 +6559,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 case WINDOW_FREEZE_TIMEOUT: {
                     // TODO(multidisplay): Can non-default displays rotate?
                     synchronized (mWindowMap) {
-                        Slog.w(TAG_WM, "Window freeze timeout expired.");
-                        mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_TIMEOUT;
-                        final WindowList windows = getDefaultWindowListLocked();
-                        int i = windows.size();
-                        while (i > 0) {
-                            i--;
-                            WindowState w = windows.get(i);
-                            if (w.mOrientationChanging) {
-                                w.mOrientationChanging = false;
-                                w.mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
-                                        - mDisplayFreezeTime);
-                                Slog.w(TAG_WM, "Force clearing orientation change: " + w);
-                            }
-                        }
-                        mWindowPlacerLocked.performSurfacePlacement();
+                        getDefaultDisplayContentLocked().onWindowFreezeTimeout();
                     }
                     break;
                 }
@@ -7004,7 +6860,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case WALLPAPER_DRAW_PENDING_TIMEOUT: {
                     synchronized (mWindowMap) {
-                        if (mWallpaperControllerLocked.processWallpaperDrawPendingTimeout()) {
+                        if (mRoot.mWallpaperController.processWallpaperDrawPendingTimeout()) {
                             mWindowPlacerLocked.performSurfacePlacement();
                         }
                     }
@@ -7150,45 +7006,9 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public boolean inputMethodClientHasFocus(IInputMethodClient client) {
         synchronized (mWindowMap) {
-            // The focus for the client is the window immediately below
-            // where we would place the input method window.
             // TODO: multi-display
-            int idx = getDefaultDisplayContentLocked().findDesiredInputMethodWindowIndex(false);
-            if (idx > 0) {
-                // TODO(multidisplay): IMEs are only supported on the default display.
-                WindowState imFocus = getDefaultWindowListLocked().get(idx-1);
-                if (DEBUG_INPUT_METHOD) {
-                    Slog.i(TAG_WM, "Desired input method target: " + imFocus);
-                    Slog.i(TAG_WM, "Current focus: " + mCurrentFocus);
-                    Slog.i(TAG_WM, "Last focus: " + mLastFocus);
-                }
-                if (imFocus != null) {
-                    // This may be a starting window, in which case we still want
-                    // to count it as okay.
-                    if (imFocus.mAttrs.type == TYPE_APPLICATION_STARTING
-                            && imFocus.mAppToken != null) {
-                        // The client has definitely started, so it really should
-                        // have a window in this app token.  Let's look for it.
-                        final WindowState w = imFocus.mAppToken.getFirstNonStartingWindow();
-                        if (w != null) {
-                            if (DEBUG_INPUT_METHOD) Slog.i(TAG_WM,
-                                    "Switching to real app window: " + w);
-                            imFocus = w;
-                        }
-                    }
-                    if (DEBUG_INPUT_METHOD) {
-                        Slog.i(TAG_WM, "IM target client: " + imFocus.mSession.mClient);
-                        if (imFocus.mSession.mClient != null) {
-                            Slog.i(TAG_WM, "IM target client binder: "
-                                    + imFocus.mSession.mClient.asBinder());
-                            Slog.i(TAG_WM, "Requesting client binder: " + client.asBinder());
-                        }
-                    }
-                    if (imFocus.mSession.mClient != null &&
-                            imFocus.mSession.mClient.asBinder() == client.asBinder()) {
-                        return true;
-                    }
-                }
+            if (getDefaultDisplayContentLocked().inputMethodClientHasFocus(client)) {
+                return true;
             }
 
             // Okay, how about this...  what is the current focus?
@@ -7628,10 +7448,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         mNoAnimationNotifyOnTransitionFinished.clear();
 
-        mWallpaperControllerLocked.hideDeferredWallpapersIfNeeded();
-
         // TODO: multi-display.
         final DisplayContent dc = getDefaultDisplayContentLocked();
+
+        dc.mWallpaperController.hideDeferredWallpapersIfNeeded();
+
         dc.onAppTransitionDone();
 
         changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_LAYOUT;
@@ -7836,16 +7657,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // Check whether the current screen contains any secure content.
-            boolean isSecure = false;
-            final WindowList windows = getDefaultWindowListLocked();
-            final int N = windows.size();
-            for (int i = 0; i < N; i++) {
-                WindowState ws = windows.get(i);
-                if (ws.isOnScreen() && (ws.mAttrs.flags & FLAG_SECURE) != 0) {
-                    isSecure = true;
-                    break;
-                }
-            }
+            boolean isSecure = displayContent.hasSecureWindowOnScreen();
 
             // TODO(multidisplay): rotation on main screen only.
             displayContent.updateDisplayInfo();
@@ -8051,8 +7863,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    // TOOD(multidisplay): StatusBar on multiple screens?
-    boolean updateStatusBarVisibilityLocked(int visibility) {
+    // TODO(multidisplay): StatusBar on multiple screens?
+    private boolean updateStatusBarVisibilityLocked(int visibility) {
         if (mLastDispatchedSystemUiVisibility == visibility) {
             return false;
         }
@@ -8065,26 +7877,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mLastDispatchedSystemUiVisibility = visibility;
         mInputManager.setSystemUiVisibility(visibility);
-        final WindowList windows = getDefaultWindowListLocked();
-        final int N = windows.size();
-        for (int i = 0; i < N; i++) {
-            WindowState ws = windows.get(i);
-            try {
-                int curValue = ws.mSystemUiVisibility;
-                int diff = (curValue ^ visibility) & globalDiff;
-                int newValue = (curValue&~diff) | (visibility&diff);
-                if (newValue != curValue) {
-                    ws.mSeq++;
-                    ws.mSystemUiVisibility = newValue;
-                }
-                if (newValue != curValue || ws.mAttrs.hasSystemUiListeners) {
-                    ws.mClient.dispatchSystemUiVisibilityChanged(ws.mSeq,
-                            visibility, newValue, diff);
-                }
-            } catch (RemoteException e) {
-                // so sorry
-            }
-        }
+        getDefaultDisplayContentLocked().updateSystemUiVisibility(visibility, globalDiff);
         return true;
     }
 
@@ -8229,7 +8022,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private void dumpTokensLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER TOKENS (dumpsys window tokens)");
         mRoot.dumpTokens(pw, dumpAll);
-        mWallpaperControllerLocked.dumpTokens(pw, "  ", dumpAll);
+        mRoot.mWallpaperController.dumpTokens(pw, "  ", dumpAll);
         if (!mFinishedStarting.isEmpty()) {
             pw.println();
             pw.println("  Finishing start of application tokens:");
@@ -8413,7 +8206,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print("  mInputMethodWindow="); pw.println(mInputMethodWindow);
             }
             mWindowPlacerLocked.dump(pw, "  ");
-            mWallpaperControllerLocked.dump(pw, "  ");
+            mRoot.mWallpaperController.dump(pw, "  ");
             pw.print("  mSystemBooted="); pw.print(mSystemBooted);
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
 
@@ -8687,10 +8480,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // There is an inherent assumption that this will never return null.
     DisplayContent getDefaultDisplayContentLocked() {
         return mRoot.getDisplayContentOrCreate(DEFAULT_DISPLAY);
-    }
-
-    WindowList getDefaultWindowListLocked() {
-        return getDefaultDisplayContentLocked().getWindowList();
     }
 
     private DisplayInfo getDefaultDisplayInfoLocked() {
@@ -9226,24 +9015,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean allWindowsDrawn = false;
             synchronized (mWindowMap) {
                 mWaitingForDrawnCallback = callback;
-                final WindowList windows = getDefaultWindowListLocked();
-                for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                    final WindowState win = windows.get(winNdx);
-                    final boolean isForceHiding = mPolicy.isForceHiding(win.mAttrs);
-                    final boolean keyguard = mPolicy.isKeyguardHostWindow(win.mAttrs);
-                    if (win.isVisibleLw()
-                            && (win.mAppToken != null || isForceHiding || keyguard)) {
-                        win.mWinAnimator.mDrawState = DRAW_PENDING;
-                        // Force add to mResizingWindows.
-                        win.mLastContentInsets.set(-1, -1, -1, -1);
-                        mWaitingForDrawn.add(win);
-
-                        // No need to wait for the windows below Keyguard.
-                        if (isForceHiding) {
-                            break;
-                        }
-                    }
-                }
+                getDefaultDisplayContentLocked().waitForAllWindowsDrawn();
                 mWindowPlacerLocked.requestTraversal();
                 mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT);
                 if (mWaitingForDrawn.isEmpty()) {
