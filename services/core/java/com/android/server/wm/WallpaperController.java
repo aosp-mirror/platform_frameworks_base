@@ -386,7 +386,14 @@ class WallpaperController {
 
     Bundle sendWindowWallpaperCommand(
             WindowState window, String action, int x, int y, int z, Bundle extras, boolean sync) {
-        if (window == mWallpaperTarget || window == mPrevWallpaperTarget) {
+
+        // HACK(ewol): Custom whitelist for Wear Home app, to allow it to update the wallpaper
+        // regardless of what window is targeted.
+        // http://b/32172459
+        final boolean hackWearWhitelisted = (window != null) && (window.mAttrs != null)
+                && "com.google.android.wearable.app".equals(window.mAttrs.packageName);
+
+        if (hackWearWhitelisted || window == mWallpaperTarget || window == mPrevWallpaperTarget) {
             boolean doWait = sync;
             for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
                 final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
