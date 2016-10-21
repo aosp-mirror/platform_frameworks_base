@@ -2102,7 +2102,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 130;
+            private static final int SETTINGS_VERSION = 131;
 
             private final int mUserId;
 
@@ -2414,6 +2414,21 @@ public class SettingsProvider extends ContentProvider {
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 130;
+                }
+
+                if (currentVersion == 130) {
+                    // Split Ambient settings
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    boolean dozeExplicitlyDisabled = "0".equals(secureSettings.
+                            getSettingLocked(Settings.Secure.DOZE_ENABLED).getValue());
+
+                    if (dozeExplicitlyDisabled) {
+                        secureSettings.insertSettingLocked(Settings.Secure.DOZE_PULSE_ON_PICK_UP,
+                                "0", SettingsState.SYSTEM_PACKAGE_NAME);
+                        secureSettings.insertSettingLocked(Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
+                                "0", SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 131;
                 }
 
                 if (currentVersion != newVersion) {
