@@ -188,7 +188,8 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
                         profileOwner, profileVpn, primaryVpn);
             } else {
                 if (isBranded) {
-                    return mContext.getString(R.string.branded_monitoring_description_app_personal);
+                    return mContext.getString(R.string.branded_monitoring_description_app_personal,
+                            primaryVpn);
                 } else {
                     return mContext.getString(R.string.monitoring_description_app_personal,
                             primaryVpn);
