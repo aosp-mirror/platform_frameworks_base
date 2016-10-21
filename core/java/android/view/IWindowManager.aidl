@@ -191,10 +191,10 @@ interface IWindowManager
     // If there is a change, the new Configuration is returned and the
     // caller must call setNewConfiguration() sometime later.
     Configuration updateOrientationFromAppTokens(in Configuration currentConfig,
-            IBinder freezeThisOneIfNeeded);
-    // Notify window manager of the new configuration. Returns an array of stack ids that's
-    // affected by the update, ActivityManager should resize these stacks.
-    int[] setNewConfiguration(in Configuration config);
+            IBinder freezeThisOneIfNeeded, int displayId);
+    // Notify window manager of the new display override configuration. Returns an array of stack
+    // ids that were affected by the update, ActivityManager should resize these stacks.
+    int[] setNewDisplayOverrideConfiguration(in Configuration overrideConfig, int displayId);
 
     // Retrieves the new bounds after the configuration update evaluated by window manager.
     Rect getBoundsForNewConfiguration(int stackId);

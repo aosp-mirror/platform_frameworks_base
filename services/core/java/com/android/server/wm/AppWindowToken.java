@@ -949,7 +949,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             mService.updateFocusedWindowLocked(
                     UPDATE_FOCUS_WILL_PLACE_SURFACES, true /*updateInputWindows*/);
-            mService.getDefaultDisplayContentLocked().setLayoutNeeded();
+            getDisplayContent().setLayoutNeeded();
             mService.mWindowPlacerLocked.performSurfacePlacement();
             Binder.restoreCallingIdentity(origId);
             return true;

@@ -219,7 +219,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.Xml;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -256,6 +255,7 @@ import dalvik.system.VMRuntime;
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 
+import static android.Manifest.permission.CHANGE_CONFIGURATION;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
@@ -279,6 +279,7 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
+import static android.os.Build.VERSION_CODES.N;
 import static android.os.Process.PROC_CHAR;
 import static android.os.Process.PROC_OUT_LONG;
 import static android.os.Process.PROC_PARENS;
@@ -293,6 +294,7 @@ import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.provider.Settings.System.FONT_SCALE;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
@@ -1130,10 +1132,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     private int mConfigurationSeq;
 
     /**
-     * Temp object used when global configuration is updated. It is also sent to outer world
-     * instead of {@link #getGlobalConfiguration} because we don't trust anyone...
+     * Temp object used when global and/or display override configuration is updated. It is also
+     * sent to outer world instead of {@link #getGlobalConfiguration} because we don't trust
+     * anyone...
      */
-    private Configuration mTempGlobalConfig = new Configuration();
+    private Configuration mTempConfig = new Configuration();
 
     private final UpdateConfigurationResult mTmpUpdateConfigurationResult =
             new UpdateConfigurationResult();
@@ -2717,14 +2720,14 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mTrackingAssociations = "1".equals(SystemProperties.get("debug.track-associations"));
 
-        mTempGlobalConfig.setToDefaults();
-        mTempGlobalConfig.setLocales(LocaleList.getDefault());
-        mConfigurationSeq = mTempGlobalConfig.seq = 1;
+        mTempConfig.setToDefaults();
+        mTempConfig.setLocales(LocaleList.getDefault());
+        mConfigurationSeq = mTempConfig.seq = 1;
 
         mProcessCpuTracker.init();
 
         mStackSupervisor = new ActivityStackSupervisor(this);
-        mStackSupervisor.onConfigurationChanged(mTempGlobalConfig);
+        mStackSupervisor.onConfigurationChanged(mTempConfig);
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
         mActivityStarter = new ActivityStarter(this, mStackSupervisor);
@@ -4762,23 +4765,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (r == null) {
                 return;
             }
-            TaskRecord task = r.task;
-            if (task != null && (!task.mFullscreen || !task.getStack().mFullscreen)) {
-                // Fixed screen orientation isn't supported when activities aren't in full screen
-                // mode.
-                return;
-            }
             final long origId = Binder.clearCallingIdentity();
-            mWindowManager.setAppOrientation(r.appToken, requestedOrientation);
-            Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                    getGlobalConfiguration(), r.mayFreezeScreenLocked(r.app) ? r.appToken : null);
-            if (config != null) {
-                r.frozenBeforeDestroy = true;
-                if (!updateConfigurationLocked(config, r, false)) {
-                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
-                }
+            try {
+                r.setRequestedOrientation(requestedOrientation);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
-            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -14877,6 +14869,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if (dumpPackage == null) {
             pw.println("  mGlobalConfiguration: " + getGlobalConfiguration());
+            mStackSupervisor.dumpDisplayConfigs(pw, "  ");
         }
         if (dumpAll) {
             pw.println("  mConfigWillChange: " + getFocusedStack().mConfigWillChange);
@@ -18939,8 +18932,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void updatePersistentConfiguration(Configuration values) {
-        enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
-                "updatePersistentConfiguration()");
+        enforceCallingPermission(CHANGE_CONFIGURATION, "updatePersistentConfiguration()");
         enforceWriteSettingsPermission("updatePersistentConfiguration()");
         if (values == null) {
             throw new NullPointerException("Configuration must not be null");
@@ -18965,12 +18957,16 @@ public final class ActivityManagerService extends ActivityManagerNative
     private void updateFontScaleIfNeeded(@UserIdInt int userId) {
         final float scaleFactor = Settings.System.getFloatForUser(mContext.getContentResolver(),
                 FONT_SCALE, 1.0f, userId);
-        if (getGlobalConfiguration().fontScale != scaleFactor) {
-            final Configuration configuration = mWindowManager.computeNewConfiguration();
-            configuration.fontScale = scaleFactor;
-            synchronized (this) {
-                updatePersistentConfigurationLocked(configuration, userId);
+
+        synchronized (this) {
+            if (getGlobalConfiguration().fontScale == scaleFactor) {
+                return;
             }
+
+            final Configuration configuration
+                    = mWindowManager.computeNewConfiguration(DEFAULT_DISPLAY);
+            configuration.fontScale = scaleFactor;
+            updatePersistentConfigurationLocked(configuration, userId);
         }
     }
 
@@ -18995,21 +18991,20 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public boolean updateConfiguration(Configuration values) {
-        enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
-                "updateConfiguration()");
+        enforceCallingPermission(CHANGE_CONFIGURATION, "updateConfiguration()");
 
         synchronized(this) {
             if (values == null && mWindowManager != null) {
                 // sentinel: fetch the current configuration from the window manager
-                values = mWindowManager.computeNewConfiguration();
+                values = mWindowManager.computeNewConfiguration(DEFAULT_DISPLAY);
             }
 
             if (mWindowManager != null) {
+                // Update OOM levels based on display size.
                 mProcessList.applyDisplaySize(mWindowManager);
             }
 
             final long origId = Binder.clearCallingIdentity();
-
             try {
                 if (values != null) {
                     Settings.System.clearConfiguration(values);
@@ -19096,8 +19091,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     /** Update default (global) configuration and notify listeners about changes. */
     private int updateGlobalConfiguration(@NonNull Configuration values, boolean initLocale,
             boolean persistent, int userId, boolean deferResume) {
-        mTempGlobalConfig.setTo(getGlobalConfiguration());
-        final int changes = mTempGlobalConfig.updateFrom(values);
+        mTempConfig.setTo(getGlobalConfiguration());
+        final int changes = mTempConfig.updateFrom(values);
         if (changes == 0) {
             return 0;
         }
@@ -19124,48 +19119,38 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         mConfigurationSeq = Math.max(++mConfigurationSeq, 1);
-        mTempGlobalConfig.seq = mConfigurationSeq;
+        mTempConfig.seq = mConfigurationSeq;
 
         // Update stored global config and notify everyone about the change.
-        mStackSupervisor.onConfigurationChanged(mTempGlobalConfig);
+        mStackSupervisor.onConfigurationChanged(mTempConfig);
 
-        Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + mTempGlobalConfig);
+        Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + mTempConfig);
         // TODO(multi-display): Update UsageEvents#Event to include displayId.
-        mUsageStatsService.reportConfigurationChange(mTempGlobalConfig,
+        mUsageStatsService.reportConfigurationChange(mTempConfig,
                 mUserController.getCurrentUserIdLocked());
 
         // TODO: If our config changes, should we auto dismiss any currently showing dialogs?
-        mShowDialogs = shouldShowDialogs(mTempGlobalConfig, mInVrMode);
+        mShowDialogs = shouldShowDialogs(mTempConfig, mInVrMode);
 
         AttributeCache ac = AttributeCache.instance();
         if (ac != null) {
-            ac.updateConfiguration(mTempGlobalConfig);
+            ac.updateConfiguration(mTempConfig);
         }
 
         // Make sure all resources in our process are updated right now, so that anyone who is going
         // to retrieve resource values after we return will be sure to get the new ones. This is
         // especially important during boot, where the first config change needs to guarantee all
         // resources have that config before following boot code is executed.
-        mSystemThread.applyConfigurationToResources(mTempGlobalConfig);
+        mSystemThread.applyConfigurationToResources(mTempConfig);
 
         // We need another copy of global config because we're scheduling some calls instead of
         // running them in place. We need to be sure that object we send will be handled unchanged.
-        final Configuration configCopy = new Configuration(mTempGlobalConfig);
+        final Configuration configCopy = new Configuration(mTempConfig);
         if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
             Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
             msg.obj = configCopy;
             msg.arg1 = userId;
             mHandler.sendMessage(msg);
-        }
-
-        // TODO(multi-display): Clear also on secondary display density change?
-        final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
-        if (isDensityChange) {
-            // Reset the unsupported display size dialog.
-            mUiHandler.sendEmptyMessage(SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG);
-
-            killAllBackgroundProcessesExcept(Build.VERSION_CODES.N,
-                    ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
         }
 
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
@@ -19197,13 +19182,116 @@ public final class ActivityManagerService extends ActivityManagerNative
                     UserHandle.USER_ALL);
         }
 
+        // Override configuration of the default display duplicates global config, so we need to
+        // update it also. This will also notify WindowManager about changes.
+        performDisplayOverrideConfigUpdate(mStackSupervisor.getConfiguration(), deferResume,
+                DEFAULT_DISPLAY);
+
+        return changes;
+    }
+
+    @Override
+    public boolean updateDisplayOverrideConfiguration(Configuration values, int displayId) {
+        enforceCallingPermission(CHANGE_CONFIGURATION, "updateDisplayOverrideConfiguration()");
+
+        synchronized (this) {
+            if (values == null && mWindowManager != null) {
+                // sentinel: fetch the current configuration from the window manager
+                values = mWindowManager.computeNewConfiguration(displayId);
+            }
+
+            if (mWindowManager != null) {
+                // Update OOM levels based on display size.
+                mProcessList.applyDisplaySize(mWindowManager);
+            }
+
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                if (values != null) {
+                    Settings.System.clearConfiguration(values);
+                }
+                updateDisplayOverrideConfigurationLocked(values, null /* starting */,
+                        false /* deferResume */, displayId, mTmpUpdateConfigurationResult);
+                return mTmpUpdateConfigurationResult.changes != 0;
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
+    boolean updateDisplayOverrideConfigurationLocked(Configuration values, ActivityRecord starting,
+            boolean deferResume, int displayId) {
+        return updateDisplayOverrideConfigurationLocked(values, starting, deferResume /* deferResume */,
+                displayId, null /* result */);
+    }
+
+    /**
+     * Updates override configuration specific for the selected display. If no config is provided,
+     * new one will be computed in WM based on current display info.
+     */
+    private boolean updateDisplayOverrideConfigurationLocked(Configuration values,
+            ActivityRecord starting, boolean deferResume, int displayId,
+            UpdateConfigurationResult result) {
+        int changes = 0;
+        boolean kept = true;
+
+        if (mWindowManager != null) {
+            mWindowManager.deferSurfaceLayout();
+        }
+        try {
+            if (values != null) {
+                if (displayId == DEFAULT_DISPLAY) {
+                    // Override configuration of the default display duplicates global config, so
+                    // we're calling global config update instead for default display. It will also
+                    // apply the correct override config.
+                    changes = updateGlobalConfiguration(values, false /* initLocale */,
+                            false /* persistent */, UserHandle.USER_NULL /* userId */, deferResume);
+                } else {
+                    changes = performDisplayOverrideConfigUpdate(values, deferResume, displayId);
+                }
+            }
+
+            kept = ensureConfigAndVisibilityAfterUpdate(starting, changes);
+        } finally {
+            if (mWindowManager != null) {
+                mWindowManager.continueSurfaceLayout();
+            }
+        }
+
+        if (result != null) {
+            result.changes = changes;
+            result.activityRelaunched = !kept;
+        }
+        return kept;
+    }
+
+    private int performDisplayOverrideConfigUpdate(Configuration values, boolean deferResume,
+            int displayId) {
+        mTempConfig.setTo(mStackSupervisor.getDisplayOverrideConfiguration(displayId));
+        final int changes = mTempConfig.updateFrom(values);
+        if (changes == 0) {
+            return 0;
+        }
+
+        Slog.i(TAG, "Override config changes=" + Integer.toHexString(changes) + " " + mTempConfig
+                + " for displayId=" + displayId);
+        mStackSupervisor.setDisplayOverrideConfiguration(mTempConfig, displayId);
+
+        final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
+        if (isDensityChange) {
+            // Reset the unsupported display size dialog.
+            mUiHandler.sendEmptyMessage(SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG);
+
+            killAllBackgroundProcessesExcept(N, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        }
+
         // Update the configuration with WM first and check if any of the stacks need to be resized
         // due to the configuration change. If so, resize the stacks now and do any relaunches if
         // necessary. This way we don't need to relaunch again afterwards in
         // ensureActivityConfigurationLocked().
         if (mWindowManager != null) {
             final int[] resizedStacks =
-                    mWindowManager.setNewConfiguration(mTempGlobalConfig);
+                    mWindowManager.setNewDisplayOverrideConfiguration(mTempConfig, displayId);
             if (resizedStacks != null) {
                 for (int stackId : resizedStacks) {
                     resizeStackWithBoundsFromWindowManager(stackId, deferResume);

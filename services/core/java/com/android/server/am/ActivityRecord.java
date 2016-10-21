@@ -1646,6 +1646,17 @@ final class ActivityRecord {
         return null;
     }
 
+    /**
+     * @return display id to which this record is attached, -1 if not attached.
+     */
+    int getDisplayId() {
+        final ActivityStack stack = getStack();
+        if (stack == null) {
+            return -1;
+        }
+        return stack.mDisplayId;
+    }
+
     final boolean isDestroyable() {
         if (finishing || app == null || state == ActivityState.DESTROYING
                 || state == ActivityState.DESTROYED) {
@@ -1701,6 +1712,26 @@ final class ActivityRecord {
                 logo, windowFlags, prev != null ? prev.appToken : null, createIfNeeded);
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;
+        }
+    }
+
+    void setRequestedOrientation(int requestedOrientation) {
+        if (task != null && (!task.mFullscreen || !task.getStack().mFullscreen)) {
+            // Fixed screen orientation isn't supported when activities aren't in full screen mode.
+            return;
+        }
+
+        service.mWindowManager.setAppOrientation(appToken, requestedOrientation);
+        final int displayId = getDisplayId();
+        final Configuration config = service.mWindowManager.updateOrientationFromAppTokens(
+                mStackSupervisor.getDisplayOverrideConfiguration(displayId),
+                mayFreezeScreenLocked(app) ? appToken : null, displayId);
+        if (config != null) {
+            frozenBeforeDestroy = true;
+            if (!service.updateDisplayOverrideConfigurationLocked(config, this,
+                    false /* deferResume */, displayId)) {
+                mStackSupervisor.resumeFocusedStackTopActivityLocked();
+            }
         }
     }
 

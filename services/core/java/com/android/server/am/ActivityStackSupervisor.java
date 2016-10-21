@@ -419,13 +419,31 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
     }
 
     @Override
-    protected ConfigurationContainer getChildAt(int index) {
+    protected ActivityDisplay getChildAt(int index) {
         return mActivityDisplays.valueAt(index);
     }
 
     @Override
     protected ConfigurationContainer getParent() {
         return null;
+    }
+
+    Configuration getDisplayOverrideConfiguration(int displayId) {
+        final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+        if (activityDisplay == null) {
+            throw new IllegalArgumentException("No display found with id: " + displayId);
+        }
+
+        return activityDisplay.getOverrideConfiguration();
+    }
+
+    void setDisplayOverrideConfiguration(Configuration overrideConfiguration, int displayId) {
+        final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+        if (activityDisplay == null) {
+            throw new IllegalArgumentException("No display found with id: " + displayId);
+        }
+
+        activityDisplay.onOverrideConfigurationChanged(overrideConfiguration);
     }
 
     static class FindTaskResult {
@@ -1190,20 +1208,20 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
             r.startLaunchTickingLocked();
         }
 
-        // Have the window manager re-evaluate the orientation of
-        // the screen based on the new activity order.  Note that
-        // as a result of this, it can call back into the activity
-        // manager with a new orientation.  We don't care about that,
-        // because the activity is not currently running so we are
-        // just restarting it anyway.
+        // Have the window manager re-evaluate the orientation of the screen based on the new
+        // activity order.  Note that as a result of this, it can call back into the activity
+        // manager with a new orientation.  We don't care about that, because the activity is not
+        // currently running so we are just restarting it anyway.
         if (checkConfig) {
-            Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                    mService.getGlobalConfiguration(),
-                    r.mayFreezeScreenLocked(app) ? r.appToken : null);
+            final int displayId = r.getDisplayId();
+            final Configuration config = mWindowManager.updateOrientationFromAppTokens(
+                    getDisplayOverrideConfiguration(displayId),
+                    r.mayFreezeScreenLocked(app) ? r.appToken : null, displayId);
             // Deferring resume here because we're going to launch new activity shortly.
             // We don't want to perform a redundant launch of the same record while ensuring
             // configurations and trying to resume top activity of focused stack.
-            mService.updateConfigurationLocked(config, r, false, true /* deferResume */);
+            mService.updateDisplayOverrideConfigurationLocked(config, r, true /* deferResume */,
+                    displayId);
         }
 
         r.app = app;
@@ -3153,6 +3171,20 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
                     }
                 }
                 pw.println(" mLockTaskModeTasks" + mLockTaskModeTasks);
+    }
+
+    /**
+     * Dump all connected displays' configurations.
+     * @param prefix Prefix to apply to each line of the dump.
+     */
+    void dumpDisplayConfigs(PrintWriter pw, String prefix) {
+        pw.print(prefix); pw.println("Display override configurations:");
+        final int displayCount = mActivityDisplays.size();
+        for (int i = 0; i < displayCount; i++) {
+            final ActivityDisplay activityDisplay = mActivityDisplays.valueAt(i);
+            pw.print(prefix); pw.print("  "); pw.print(activityDisplay.mDisplayId); pw.print(": ");
+                    pw.println(activityDisplay.getOverrideConfiguration());
+        }
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
@@ -384,7 +385,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     /* Notifies that the input device configuration has changed. */
     @Override
     public void notifyConfigurationChanged() {
-        mService.sendNewConfiguration();
+        // TODO(multi-display): Notify proper displays that are associated with this input device.
+        mService.sendNewConfiguration(DEFAULT_DISPLAY);
 
         synchronized (mInputDevicesReadyMonitor) {
             if (!mInputDevicesReady) {

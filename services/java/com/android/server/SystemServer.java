@@ -118,6 +118,8 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 public final class SystemServer {
     private static final String TAG = "SystemServer";
 
@@ -1403,7 +1405,7 @@ public final class SystemServer {
         // Update the configuration for this context by hand, because we're going
         // to start using it before the config change done in wm.systemReady() will
         // propagate to it.
-        Configuration config = wm.computeNewConfiguration();
+        final Configuration config = wm.computeNewConfiguration(DEFAULT_DISPLAY);
         DisplayMetrics metrics = new DisplayMetrics();
         WindowManager w = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         w.getDefaultDisplay().getMetrics(metrics);

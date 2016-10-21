@@ -327,8 +327,9 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
      *                    the adjusted bounds's top.
      */
     void alignToAdjustedBounds(Rect adjustedBounds, Rect tempInsetBounds, boolean alignBottom) {
-        final Configuration overrideConfig = getOverrideConfiguration();
-        if (!isResizeable() || Configuration.EMPTY.equals(overrideConfig)) {
+        // Task override config might be empty, while display or stack override config isn't, so
+        // we have to check merged override config here.
+        if (!isResizeable() || Configuration.EMPTY.equals(getMergedOverrideConfiguration())) {
             return;
         }
 
@@ -340,7 +341,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
             mTmpRect2.offsetTo(adjustedBounds.left, adjustedBounds.top);
         }
         setTempInsetBounds(tempInsetBounds);
-        resizeLocked(mTmpRect2, overrideConfig, false /* forced */);
+        resizeLocked(mTmpRect2, getOverrideConfiguration(), false /* forced */);
     }
 
     /** Return true if the current bound can get outputted to the rest of the system as-is. */

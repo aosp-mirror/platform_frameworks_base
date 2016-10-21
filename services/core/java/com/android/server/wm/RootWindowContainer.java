@@ -236,7 +236,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             mService.configureDisplayPolicyLocked(dc);
 
             // TODO(multi-display): Create an input channel for each display with touch capability.
-            if (displayId == Display.DEFAULT_DISPLAY) {
+            if (displayId == DEFAULT_DISPLAY) {
                 dc.mTapDetector = new TaskTapPointerEventListener(
                         mService, dc);
                 mService.registerPointerEventListener(dc.mTapDetector);
@@ -274,8 +274,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
             mService.mStackIdToStack.put(stackId, stack);
             if (stackId == DOCKED_STACK_ID) {
-                mService.getDefaultDisplayContentLocked().mDividerControllerLocked
-                        .notifyDockedStackExistsChanged(true);
+                dc.mDividerControllerLocked.notifyDockedStackExistsChanged(true);
             }
         }
 
@@ -569,8 +568,33 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
     }
 
-    /** Set new config and return array of ids of stacks that were changed during update. */
-    int[] setGlobalConfigurationIfNeeded(Configuration newConfiguration) {
+    /**
+     * Set new display override config and return array of ids of stacks that were changed during
+     * update. If called for the default display, global configuration will also be updated.
+     */
+    int[] setDisplayOverrideConfigurationIfNeeded(Configuration newConfiguration, int displayId) {
+        final DisplayContent displayContent = getDisplayContent(displayId);
+        if (displayContent == null) {
+            throw new IllegalArgumentException("Display not found for id: " + displayId);
+        }
+
+        final Configuration currentConfig = displayContent.getOverrideConfiguration();
+        final boolean configChanged = currentConfig.diff(newConfiguration) != 0;
+        if (!configChanged) {
+            return null;
+        }
+        displayContent.onOverrideConfigurationChanged(currentConfig);
+
+        if (displayId == DEFAULT_DISPLAY) {
+            // Override configuration of the default display duplicates global config. In this case
+            // we also want to update the global config.
+            return setGlobalConfigurationIfNeeded(newConfiguration);
+        } else {
+            return updateStackBoundsAfterConfigChange(displayId);
+        }
+    }
+
+    private int[] setGlobalConfigurationIfNeeded(Configuration newConfiguration) {
         final boolean configChanged = getConfiguration().diff(newConfiguration) != 0;
         if (!configChanged) {
             return null;
@@ -599,6 +623,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             final DisplayContent dc = mChildren.get(i);
             dc.updateStackBoundsAfterConfigChange(mChangedStackList);
         }
+
+        return mChangedStackList.isEmpty() ? null : ArrayUtils.convertToIntArray(mChangedStackList);
+    }
+
+    /** Same as {@link #updateStackBoundsAfterConfigChange()} but only for a specific display. */
+    private int[] updateStackBoundsAfterConfigChange(int displayId) {
+        mChangedStackList.clear();
+
+        final DisplayContent dc = getDisplayContent(displayId);
+        dc.updateStackBoundsAfterConfigChange(mChangedStackList);
 
         return mChangedStackList.isEmpty() ? null : ArrayUtils.convertToIntArray(mChangedStackList);
     }
@@ -1145,8 +1179,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         if (mUpdateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
-            if (mService.updateRotationUncheckedLocked(false)) {
-                mService.mH.sendEmptyMessage(SEND_NEW_CONFIGURATION);
+            // TODO(multi-display): Update rotation for different displays separately.
+            final int displayId = defaultDisplay.getDisplayId();
+            if (mService.updateRotationUncheckedLocked(false, displayId)) {
+                mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
             } else {
                 mUpdateRotation = false;
             }
@@ -1231,7 +1267,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             final int displayId = dc.getDisplayId();
             final int dw = displayInfo.logicalWidth;
             final int dh = displayInfo.logicalHeight;
-            final boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
+            final boolean isDefaultDisplay = (displayId == DEFAULT_DISPLAY);
             final WindowSurfacePlacer surfacePlacer = mService.mWindowPlacerLocked;
 
             // Reset for each display.
@@ -1259,9 +1295,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 if (isDefaultDisplay
                         && (dc.pendingLayoutChanges & FINISH_LAYOUT_REDO_CONFIG) != 0) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
-                    if (mService.updateOrientationFromAppTokensLocked(true)) {
+                    if (mService.updateOrientationFromAppTokensLocked(true, displayId)) {
                         dc.setLayoutNeeded();
-                        mService.mH.sendEmptyMessage(SEND_NEW_CONFIGURATION);
+                        mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
                     }
                 }
 

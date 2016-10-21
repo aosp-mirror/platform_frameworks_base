@@ -371,6 +371,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     void notifyDockedStackExistsChanged(boolean exists) {
+        // TODO(multi-display): Perform all actions only for current display.
         final int size = mDockedStackListeners.beginBroadcast();
         for (int i = 0; i < size; ++i) {
             final IDockedStackListener listener = mDockedStackListeners.getBroadcastItem(i);
