@@ -297,7 +297,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
                 whichHeap = HEAP_TTF;
                 is_swappable = true;
             } else if ((nameLen > 4 && strstr(name, ".dex") != NULL) ||
-                       (nameLen > 5 && strcmp(name+nameLen-5, ".odex") == 0)) {
+                       (nameLen > 5 && strcmp(name+nameLen-5, ".odex") == 0) ||
+                       (nameLen > 5 && strcmp(name+nameLen-5, ".vdex") == 0)) {
                 whichHeap = HEAP_DEX;
                 is_swappable = true;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".oat") == 0) {
