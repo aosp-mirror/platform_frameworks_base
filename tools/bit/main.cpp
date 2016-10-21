@@ -518,14 +518,17 @@ get_out_dir()
             // makes all the filenames long when being pretty printed.
             return "out";
         } else {
-            char* pwd = get_current_dir_name();
+            char pwd[PATH_MAX];
+            if (getcwd(pwd, PATH_MAX) == NULL) {
+                fprintf(stderr, "Your pwd is too long.\n");
+                exit(1);
+            }
             const char* slash = strrchr(pwd, '/');
             if (slash == NULL) {
                 slash = "";
             }
             string result(common_base);
             result += slash;
-            free(pwd);
             return result;
         }
     }
