@@ -22,9 +22,12 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <sys/wait.h>
+
+extern char **environ;
 
 Command::Command(const string& prog)
     :prog(prog)
@@ -118,7 +121,7 @@ get_command_output(const Command& command, int* err, bool quiet)
         const char* prog = command.GetProg();
         char* const* argv = command.GetArgv();
         char* const* env = command.GetEnv();
-        execvpe(prog, argv, env);
+        exec_with_path_search(prog, argv, env);
         if (!quiet) {
             print_error("Unable to run command: %s", prog);
         }
@@ -166,7 +169,7 @@ run_command(const Command& command)
         const char* prog = command.GetProg();
         char* const* argv = command.GetArgv();
         char* const* env = command.GetEnv();
-        execvpe(prog, argv, env);
+        exec_with_path_search(prog, argv, env);
         print_error("Unable to run command: %s", prog);
         exit(1);
     } else {
@@ -178,6 +181,37 @@ run_command(const Command& command)
         } else {
             return -1;
         }
+    }
+}
+
+int
+exec_with_path_search(const char* prog, char const* const* argv, char const* const* envp)
+{
+    if (prog[0] == '/') {
+        return execve(prog, (char*const*)argv, (char*const*)envp);
+    } else {
+        char* pathEnv = strdup(getenv("PATH"));
+        if (pathEnv == NULL) {
+            return 1;
+        }
+        char* dir = pathEnv;
+        while (dir) {
+            char* next = strchr(dir, ':');
+            if (next != NULL) {
+                *next = '\0';
+                next++;
+            }
+            if (dir[0] == '/') {
+                struct stat st;
+                string executable = string(dir) + "/" + prog;
+                if (stat(executable.c_str(), &st) == 0) {
+                    execve(executable.c_str(), (char*const*)argv, (char*const*)envp);
+                }
+            }
+            dir = next;
+        }
+        free(pathEnv);
+        return 1;
     }
 }
 
