@@ -36,12 +36,17 @@ import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.NEEDS_MENU_SET_TRUE;
 import static android.view.WindowManager.LayoutParams.NEEDS_MENU_UNSET;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
@@ -55,6 +60,7 @@ import static com.android.server.wm.WindowAnimator.KEYGUARD_NOT_SHOWN;
 import static com.android.server.wm.WindowAnimator.KEYGUARD_SHOWN;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
@@ -63,6 +69,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEYGUARD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
@@ -71,9 +78,11 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
+import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowManagerService.localLOGV;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
+import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowSurfacePlacer.SET_FORCE_HIDING_CHANGED;
@@ -91,6 +100,8 @@ import android.hardware.display.DisplayManagerInternal;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
@@ -102,6 +113,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.view.IInputMethodClient;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -1897,6 +1909,60 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    boolean checkWaitingForWindows() {
+
+        boolean haveBootMsg = false;
+        boolean haveApp = false;
+        // if the wallpaper service is disabled on the device, we're never going to have
+        // wallpaper, don't bother waiting for it
+        boolean haveWallpaper = false;
+        boolean wallpaperEnabled = mService.mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableWallpaperService)
+                && !mService.mOnlyCore;
+        boolean haveKeyguard = true;
+        final int count = mWindows.size();
+        for (int i = 0; i < count; i++) {
+            final WindowState w = mWindows.get(i);
+            if (w.isVisibleLw() && !w.mObscured && !w.isDrawnLw()) {
+                return true;
+            }
+            if (w.isDrawnLw()) {
+                if (w.mAttrs.type == TYPE_BOOT_PROGRESS) {
+                    haveBootMsg = true;
+                } else if (w.mAttrs.type == TYPE_APPLICATION
+                        || w.mAttrs.type == TYPE_DRAWN_APPLICATION) {
+                    haveApp = true;
+                } else if (w.mAttrs.type == TYPE_WALLPAPER) {
+                    haveWallpaper = true;
+                } else if (w.mAttrs.type == TYPE_STATUS_BAR) {
+                    haveKeyguard = mService.mPolicy.isKeyguardDrawnLw();
+                }
+            }
+        }
+
+        if (DEBUG_SCREEN_ON || DEBUG_BOOT) Slog.i(TAG_WM,
+                "******** booted=" + mService.mSystemBooted
+                + " msg=" + mService.mShowingBootMessages
+                + " haveBoot=" + haveBootMsg + " haveApp=" + haveApp
+                + " haveWall=" + haveWallpaper + " wallEnabled=" + wallpaperEnabled
+                + " haveKeyguard=" + haveKeyguard);
+
+        // If we are turning on the screen to show the boot message, don't do it until the boot
+        // message is actually displayed.
+        if (!mService.mSystemBooted && !haveBootMsg) {
+            return true;
+        }
+
+        // If we are turning on the screen after the boot is completed normally, don't do so until
+        // we have the application and wallpaper.
+        if (mService.mSystemBooted && ((!haveApp && !haveKeyguard) ||
+                (wallpaperEnabled && !haveWallpaper))) {
+            return true;
+        }
+
+        return false;
+    }
+
     void updateWindowsForAnimator(WindowAnimator animator) {
         final WindowManagerPolicy policy = animator.mPolicy;
         final int keyguardGoingAwayFlags = animator.mKeyguardGoingAwayFlags;
@@ -2253,6 +2319,116 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int count = mWindows.size();
         for (int j = 0; j < count; j++) {
             mWindows.get(j).mWinAnimator.prepareSurfaceLocked(true);
+        }
+    }
+
+    boolean inputMethodClientHasFocus(IInputMethodClient client) {
+        // The focus for the client is the window immediately below where we would place the input
+        // method window.
+        int idx = findDesiredInputMethodWindowIndex(false);
+        if (idx <= 0) {
+            return false;
+        }
+
+        WindowState imFocus = mWindows.get(idx - 1);
+        if (DEBUG_INPUT_METHOD) {
+            Slog.i(TAG_WM, "Desired input method target: " + imFocus);
+            Slog.i(TAG_WM, "Current focus: " + mService.mCurrentFocus);
+            Slog.i(TAG_WM, "Last focus: " + mService.mLastFocus);
+        }
+
+        if (imFocus == null) {
+            return false;
+        }
+
+        // This may be a starting window, in which case we still want to count it as okay.
+        if (imFocus.mAttrs.type == TYPE_APPLICATION_STARTING && imFocus.mAppToken != null) {
+            // The client has definitely started, so it really should have a window in this app
+            // token. Let's look for it.
+            final WindowState w = imFocus.mAppToken.getFirstNonStartingWindow();
+            if (w != null) {
+                if (DEBUG_INPUT_METHOD) Slog.i(TAG_WM, "Switching to real app window: " + w);
+                imFocus = w;
+            }
+        }
+
+        final IInputMethodClient imeClient = imFocus.mSession.mClient;
+
+        if (DEBUG_INPUT_METHOD) {
+            Slog.i(TAG_WM, "IM target client: " + imeClient);
+            if (imeClient != null) {
+                Slog.i(TAG_WM, "IM target client binder: " + imeClient.asBinder());
+                Slog.i(TAG_WM, "Requesting client binder: " + client.asBinder());
+            }
+        }
+
+        return imeClient != null && imeClient.asBinder() == client.asBinder();
+    }
+
+    boolean hasSecureWindowOnScreen() {
+        for (int i = mWindows.size() - 1; i >= 0; --i) {
+            final WindowState ws = mWindows.get(i);
+            if (ws.isOnScreen() && (ws.mAttrs.flags & FLAG_SECURE) != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void updateSystemUiVisibility(int visibility, int globalDiff) {
+        for (int i = mWindows.size() - 1; i >= 0; --i) {
+            final WindowState ws = mWindows.get(i);
+            try {
+                int curValue = ws.mSystemUiVisibility;
+                int diff = (curValue ^ visibility) & globalDiff;
+                int newValue = (curValue & ~diff) | (visibility & diff);
+                if (newValue != curValue) {
+                    ws.mSeq++;
+                    ws.mSystemUiVisibility = newValue;
+                }
+                if (newValue != curValue || ws.mAttrs.hasSystemUiListeners) {
+                    ws.mClient.dispatchSystemUiVisibilityChanged(ws.mSeq,
+                            visibility, newValue, diff);
+                }
+            } catch (RemoteException e) {
+                // so sorry
+            }
+        }
+    }
+
+    void onWindowFreezeTimeout() {
+        Slog.w(TAG_WM, "Window freeze timeout expired.");
+        mService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_TIMEOUT;
+        for (int i = mWindows.size() - 1; i >= 0; --i) {
+            final WindowState w = mWindows.get(i);
+            if (!w.mOrientationChanging) {
+                continue;
+            }
+            w.mOrientationChanging = false;
+            w.mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
+                    - mService.mDisplayFreezeTime);
+            Slog.w(TAG_WM, "Force clearing orientation change: " + w);
+        }
+        mService.mWindowPlacerLocked.performSurfacePlacement();
+    }
+
+    void waitForAllWindowsDrawn() {
+        final WindowManagerPolicy policy = mService.mPolicy;
+        for (int winNdx = mWindows.size() - 1; winNdx >= 0; --winNdx) {
+            final WindowState win = mWindows.get(winNdx);
+            final boolean isForceHiding = policy.isForceHiding(win.mAttrs);
+            final boolean keyguard = policy.isKeyguardHostWindow(win.mAttrs);
+            if (win.isVisibleLw() && (win.mAppToken != null || isForceHiding || keyguard)) {
+                win.mWinAnimator.mDrawState = DRAW_PENDING;
+                // Force add to mResizingWindows.
+                win.mLastContentInsets.set(-1, -1, -1, -1);
+                mService.mWaitingForDrawn.add(win);
+
+                // No need to wait for the windows below Keyguard.
+                if (isForceHiding) {
+                    return;
+                }
+            }
         }
     }
 
