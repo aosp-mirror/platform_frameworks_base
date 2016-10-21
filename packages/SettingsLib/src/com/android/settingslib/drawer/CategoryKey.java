@@ -24,6 +24,8 @@ public final class CategoryKey {
     public static final String CATEGORY_NETWORK = "com.android.settings.category.ia.wireless";
     public static final String CATEGORY_DEVICE = "com.android.settings.category.ia.device";
     public static final String CATEGORY_APPS = "com.android.settings.category.ia.apps";
+    public static final String CATEGORY_APPS_DEFAULT =
+            "com.android.settings.category.ia.apps.default";
     public static final String CATEGORY_BATTERY = "com.android.settings.category.ia.battery";
     public static final String CATEGORY_DISPLAY = "com.android.settings.category.ia.display";
     public static final String CATEGORY_SOUND = "com.android.settings.category.ia.sound";
