@@ -211,14 +211,14 @@ struct ArcOp : RecordedOp {
 };
 
 struct BitmapOp : RecordedOp {
-    BitmapOp(BASE_PARAMS, const SkBitmap* bitmap)
+    BitmapOp(BASE_PARAMS, Bitmap* bitmap)
             : SUPER(BitmapOp)
             , bitmap(bitmap) {}
-    const SkBitmap* bitmap;
+    Bitmap* bitmap;
 };
 
 struct BitmapMeshOp : RecordedOp {
-    BitmapMeshOp(BASE_PARAMS, const SkBitmap* bitmap, int meshWidth, int meshHeight,
+    BitmapMeshOp(BASE_PARAMS, Bitmap* bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors)
             : SUPER(BitmapMeshOp)
             , bitmap(bitmap)
@@ -226,7 +226,7 @@ struct BitmapMeshOp : RecordedOp {
             , meshHeight(meshHeight)
             , vertices(vertices)
             , colors(colors) {}
-    const SkBitmap* bitmap;
+    Bitmap* bitmap;
     const int meshWidth;
     const int meshHeight;
     const float* vertices;
@@ -234,11 +234,11 @@ struct BitmapMeshOp : RecordedOp {
 };
 
 struct BitmapRectOp : RecordedOp {
-    BitmapRectOp(BASE_PARAMS, const SkBitmap* bitmap, const Rect& src)
+    BitmapRectOp(BASE_PARAMS, Bitmap* bitmap, const Rect& src)
             : SUPER(BitmapRectOp)
             , bitmap(bitmap)
             , src(src) {}
-    const SkBitmap* bitmap;
+    Bitmap* bitmap;
     const Rect src;
 };
 
@@ -288,11 +288,11 @@ struct OvalOp : RecordedOp {
 };
 
 struct PatchOp : RecordedOp {
-    PatchOp(BASE_PARAMS, const SkBitmap* bitmap, const Res_png_9patch* patch)
+    PatchOp(BASE_PARAMS, Bitmap* bitmap, const Res_png_9patch* patch)
             : SUPER(PatchOp)
             , bitmap(bitmap)
             , patch(patch) {}
-    const SkBitmap* bitmap;
+    Bitmap* bitmap;
     const Res_png_9patch* patch;
 };
 

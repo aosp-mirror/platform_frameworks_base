@@ -21,7 +21,6 @@
 #include "RenderNode.h"
 #include "VectorDrawable.h"
 #include "hwui/MinikinUtils.h"
-#include "hwui/Bitmap.h"
 
 namespace android {
 namespace uirenderer {
@@ -470,20 +469,16 @@ void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 
 // Bitmap-based
 void RecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
-    SkBitmap skBitmap;
-    bitmap.getSkBitmap(&skBitmap);
     save(SaveFlags::Matrix);
     translate(left, top);
-    drawBitmap(&skBitmap, paint);
+    drawBitmap(bitmap, paint);
     restore();
 }
 
-void RecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, const SkMatrix& matrix,
+void RecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix,
                             const SkPaint* paint) {
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
     if (matrix.isIdentity()) {
-        drawBitmap(&bitmap, paint);
+        drawBitmap(bitmap, paint);
     } else if (!(matrix.getType() & ~(SkMatrix::kScale_Mask | SkMatrix::kTranslate_Mask))
             && MathUtils::isPositive(matrix.getScaleX())
             && MathUtils::isPositive(matrix.getScaleY())) {
@@ -492,21 +487,19 @@ void RecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, const SkMatrix& matrix,
         SkRect dst;
         bitmap.getBounds(&src);
         matrix.mapRect(&dst, src);
-        drawBitmap(hwuiBitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,
+        drawBitmap(bitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,
                    dst.fLeft, dst.fTop, dst.fRight, dst.fBottom, paint);
     } else {
         save(SaveFlags::Matrix);
         concat(matrix);
-        drawBitmap(&bitmap, paint);
+        drawBitmap(bitmap, paint);
         restore();
     }
 }
 
-void RecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, float srcLeft, float srcTop,
+void RecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint) {
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
     if (srcLeft == 0 && srcTop == 0
             && srcRight == bitmap.width()
             && srcBottom == bitmap.height()
@@ -515,7 +508,7 @@ void RecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, float srcLeft, float srcTop
         // transform simple rect to rect drawing case into position bitmap ops, since they merge
         save(SaveFlags::Matrix);
         translate(dstLeft, dstTop);
-        drawBitmap(&bitmap, paint);
+        drawBitmap(bitmap, paint);
         restore();
     } else {
         addOp(alloc().create_trivial<BitmapRectOp>(
@@ -527,10 +520,8 @@ void RecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, float srcLeft, float srcTop
     }
 }
 
-void RecordingCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeight,
+void RecordingCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) {
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
     int vertexCount = (meshWidth + 1) * (meshHeight + 1);
     addOp(alloc().create_trivial<BitmapMeshOp>(
             calcBoundsOfPoints(vertices, vertexCount * 2),
@@ -541,11 +532,9 @@ void RecordingCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int mesh
             refBuffer<int>(colors, vertexCount))); // 1 color per vertex
 }
 
-void RecordingCanvas::drawNinePatch(Bitmap& hwuiBitmap, const android::Res_png_9patch& patch,
+void RecordingCanvas::drawNinePatch(Bitmap& bitmap, const android::Res_png_9patch& patch,
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             const SkPaint* paint) {
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
     addOp(alloc().create_trivial<PatchOp>(
             Rect(dstLeft, dstTop, dstRight, dstBottom),
             *(mState.currentSnapshot()->transform),
@@ -586,12 +575,12 @@ void RecordingCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOff
     }
 }
 
-void RecordingCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
+void RecordingCanvas::drawBitmap(Bitmap& bitmap, const SkPaint* paint) {
     addOp(alloc().create_trivial<BitmapOp>(
-            Rect(bitmap->width(), bitmap->height()),
+            Rect(bitmap.width(), bitmap.height()),
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
-            refPaint(paint), refBitmap(*bitmap)));
+            refPaint(paint), refBitmap(bitmap)));
 }
 
 void RecordingCanvas::drawRenderNode(RenderNode* renderNode) {
@@ -677,7 +666,9 @@ void RecordingCanvas::refBitmapsInShader(const SkShader* shader) {
     SkBitmap bitmap;
     SkShader::TileMode xy[2];
     if (shader->isABitmap(&bitmap, nullptr, xy)) {
-        refBitmap(bitmap);
+        // TODO: create  hwui-owned BitmapShader.
+        Bitmap* hwuiBitmap = static_cast<Bitmap*>(bitmap.pixelRef());
+        refBitmap(*hwuiBitmap);
         return;
     }
     SkShader::ComposeRec rec;

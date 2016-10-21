@@ -181,7 +181,7 @@ void BakedOpRenderer::clearColorBuffer(const Rect& rect) {
     if (!mRenderTarget.frameBufferId) mHasDrawn = true;
 }
 
-Texture* BakedOpRenderer::getTexture(const SkBitmap* bitmap) {
+Texture* BakedOpRenderer::getTexture(Bitmap* bitmap) {
     return mCaches.textureCache.get(bitmap);
 }
 

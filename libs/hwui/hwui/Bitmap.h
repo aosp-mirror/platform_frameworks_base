@@ -69,6 +69,10 @@ public:
     void setHasHardwareMipMap(bool hasMipMap);
     bool hasHardwareMipMap() const;
 
+    bool isOpaque() const {return info().isOpaque(); }
+    SkColorType colorType() const { return info().colorType(); }
+    void getBounds(SkRect* bounds) const;
+
 protected:
     virtual bool onNewLockPixels(LockRec* rec) override;
     virtual void onUnlockPixels() override { };

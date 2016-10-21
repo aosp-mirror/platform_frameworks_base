@@ -403,10 +403,10 @@ RENDERTHREAD_TEST(FrameBuilder, avoidOverdraw_bitmaps) {
         void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
             switch(mIndex++) {
             case 0:
-                EXPECT_EQ(opaqueBitmap.get(), op.bitmap->pixelRef());
+                EXPECT_EQ(opaqueBitmap.get(), op.bitmap);
                 break;
             case 1:
-                EXPECT_EQ(transpBitmap.get(), op.bitmap->pixelRef());
+                EXPECT_EQ(transpBitmap.get(), op.bitmap);
                 break;
             default:
                 ADD_FAILURE() << "Only two ops expected.";

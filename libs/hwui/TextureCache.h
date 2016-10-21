@@ -28,6 +28,9 @@
 #include <unordered_map>
 
 namespace android {
+
+class Bitmap;
+
 namespace uirenderer {
 
 class Texture;
@@ -73,20 +76,20 @@ public:
      * acquired for the bitmap, false otherwise. If a Texture was acquired it is
      * marked as in use.
      */
-    bool prefetchAndMarkInUse(void* ownerToken, const SkBitmap* bitmap);
+    bool prefetchAndMarkInUse(void* ownerToken, Bitmap* bitmap);
 
     /**
      * Attempts to precache the SkBitmap. Returns true if a Texture was successfully
      * acquired for the bitmap, false otherwise. Does not mark the Texture
      * as in use and won't update currently in-use Textures.
      */
-    bool prefetch(const SkBitmap* bitmap);
+    bool prefetch(Bitmap* bitmap);
 
     /**
      * Returns the texture associated with the specified bitmap from within the cache.
      * If the texture cannot be found in the cache, a new texture is generated.
      */
-    Texture* get(const SkBitmap* bitmap);
+    Texture* get(Bitmap* bitmap);
 
     /**
      * Removes the texture associated with the specified pixelRef. This is meant
@@ -119,9 +122,9 @@ public:
     void flush();
 
 private:
-    bool canMakeTextureFromBitmap(const SkBitmap* bitmap);
+    bool canMakeTextureFromBitmap(Bitmap* bitmap);
 
-    Texture* getCachedTexture(const SkBitmap* bitmap);
+    Texture* getCachedTexture(Bitmap* bitmap);
 
     LruCache<uint32_t, Texture*> mCache;
 

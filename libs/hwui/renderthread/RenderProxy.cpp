@@ -617,17 +617,17 @@ int RenderProxy::copySurfaceInto(sp<Surface>& surface, int left, int top,
             reinterpret_cast<intptr_t>( staticPostAndWait(task) ));
 }
 
-CREATE_BRIDGE2(prepareToDraw, RenderThread* thread, SkBitmap* bitmap) {
+CREATE_BRIDGE2(prepareToDraw, RenderThread* thread, Bitmap* bitmap) {
     if (Caches::hasInstance() && args->thread->eglManager().hasEglContext()) {
         ATRACE_NAME("Bitmap#prepareToDraw task");
         Caches::getInstance().textureCache.prefetch(args->bitmap);
     }
-    delete args->bitmap;
+    args->bitmap->unref();
     args->bitmap = nullptr;
     return nullptr;
 }
 
-void RenderProxy::prepareToDraw(const SkBitmap& bitmap) {
+void RenderProxy::prepareToDraw(Bitmap& bitmap) {
     // If we haven't spun up a hardware accelerated window yet, there's no
     // point in precaching these bitmaps as it can't impact jank.
     // We also don't know if we even will spin up a hardware-accelerated
@@ -636,7 +636,8 @@ void RenderProxy::prepareToDraw(const SkBitmap& bitmap) {
     RenderThread* renderThread = &RenderThread::getInstance();
     SETUP_TASK(prepareToDraw);
     args->thread = renderThread;
-    args->bitmap = new SkBitmap(bitmap);
+    bitmap.ref();
+    args->bitmap = &bitmap;
     nsecs_t lastVsync = renderThread->timeLord().latestVsync();
     nsecs_t estimatedNextVsync = lastVsync + renderThread->timeLord().frameIntervalNanos();
     nsecs_t timeToNextVsync = estimatedNextVsync - systemTime(CLOCK_MONOTONIC);

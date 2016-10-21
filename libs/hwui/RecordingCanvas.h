@@ -22,6 +22,7 @@
 #include "ResourceCache.h"
 #include "SkiaCanvasProxy.h"
 #include "Snapshot.h"
+#include "hwui/Bitmap.h"
 #include "hwui/Canvas.h"
 #include "utils/LinearAllocator.h"
 #include "utils/Macros.h"
@@ -203,7 +204,7 @@ private:
         return mState.writableSnapshot()->mutateClipArea().serializeClip(alloc());
     }
 
-    void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
+    void drawBitmap(Bitmap& bitmap, const SkPaint* paint);
     void drawSimpleRects(const float* rects, int vertexCount, const SkPaint* paint);
 
 
@@ -285,14 +286,17 @@ private:
         return cachedRegion;
     }
 
-    inline const SkBitmap* refBitmap(const SkBitmap& bitmap) {
+    inline Bitmap* refBitmap(Bitmap& bitmap) {
         // Note that this assumes the bitmap is immutable. There are cases this won't handle
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
         // contents, and drawing again. The only fix would be to always copy it the first time,
         // which doesn't seem worth the extra cycles for this unlikely case.
-        SkBitmap* localBitmap = alloc().create<SkBitmap>(bitmap);
-        mDisplayList->bitmapResources.push_back(localBitmap);
-        return localBitmap;
+
+        // this is required because sk_sp's ctor adopts the pointer,
+        // but does not increment the refcount,
+        bitmap.ref();
+        mDisplayList->bitmapResources.emplace_back(&bitmap);
+        return &bitmap;
     }
 
     inline const Res_png_9patch* refPatch(const Res_png_9patch* patch) {
