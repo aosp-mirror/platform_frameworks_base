@@ -2102,7 +2102,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 131;
+            private static final int SETTINGS_VERSION = 132;
 
             private final int mUserId;
 
@@ -2417,6 +2417,21 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 130) {
+                    // Split Ambient settings
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    boolean dozeExplicitlyDisabled = "0".equals(secureSettings.
+                            getSettingLocked(Settings.Secure.DOZE_ENABLED).getValue());
+
+                    if (dozeExplicitlyDisabled) {
+                        secureSettings.insertSettingLocked(Settings.Secure.DOZE_PULSE_ON_PICK_UP,
+                                "0", SettingsState.SYSTEM_PACKAGE_NAME);
+                        secureSettings.insertSettingLocked(Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
+                                "0", SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 131;
+                }
+
+                if (currentVersion == 131) {
                     // Initialize new multi-press timeout to default value
                     final SettingsState systemSecureSettings = getSecureSettingsLocked(userId);
                     final String oldValue = systemSecureSettings.getSettingLocked(
@@ -2429,7 +2444,7 @@ public class SettingsProvider extends ContentProvider {
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
 
-                    currentVersion = 131;
+                    currentVersion = 132;
                 }
 
                 if (currentVersion != newVersion) {
