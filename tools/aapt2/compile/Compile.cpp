@@ -738,7 +738,7 @@ int compile(const std::vector<StringPiece>& args) {
   }
 
   if (!archiveWriter) {
-    return false;
+    return 1;
   }
 
   bool error = false;
