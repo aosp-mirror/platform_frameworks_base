@@ -172,6 +172,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -1789,7 +1790,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mAccessibilityController != null) {
                 WindowState window = mWindowMap.get(token);
                 //TODO (multidisplay): Magnification is supported only for the default display.
-                if (window != null && window.getDisplayId() == Display.DEFAULT_DISPLAY) {
+                if (window != null && window.getDisplayId() == DEFAULT_DISPLAY) {
                     mAccessibilityController.onRectangleOnScreenRequestedLocked(rectangle);
                 }
             }
@@ -2160,7 +2161,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         //TODO (multidisplay): Magnification is supported only for the default
         if (mAccessibilityController != null
-                && win.getDisplayId() == Display.DEFAULT_DISPLAY) {
+                && win.getDisplayId() == DEFAULT_DISPLAY) {
             mAccessibilityController.onWindowTransitionLocked(win, transit);
         }
         return focusMayChange;
@@ -4565,7 +4566,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         try {
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenshotWallpaper");
-            return screenshotApplicationsInner(null, Display.DEFAULT_DISPLAY, -1, -1, true, 1f,
+            return screenshotApplicationsInner(null, DEFAULT_DISPLAY, -1, -1, true, 1f,
                     Bitmap.Config.ARGB_8888, true);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
@@ -4587,7 +4588,7 @@ public class WindowManagerService extends IWindowManager.Stub
         FgThread.getHandler().post(new Runnable() {
             @Override
             public void run() {
-                Bitmap bm = screenshotApplicationsInner(null, Display.DEFAULT_DISPLAY, -1, -1,
+                Bitmap bm = screenshotApplicationsInner(null, DEFAULT_DISPLAY, -1, -1,
                         true, 1f, Bitmap.Config.ARGB_8888, false);
                 try {
                     receiver.send(bm);
@@ -4859,7 +4860,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             ScreenRotationAnimation screenRotationAnimation =
-                    mAnimator.getScreenRotationAnimationLocked(Display.DEFAULT_DISPLAY);
+                    mAnimator.getScreenRotationAnimationLocked(DEFAULT_DISPLAY);
             final boolean inRotation = screenRotationAnimation != null &&
                     screenRotationAnimation.isAnimating();
             if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG_WM,
@@ -5044,7 +5045,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         ScreenRotationAnimation screenRotationAnimation =
-                mAnimator.getScreenRotationAnimationLocked(Display.DEFAULT_DISPLAY);
+                mAnimator.getScreenRotationAnimationLocked(DEFAULT_DISPLAY);
         if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
             // Rotation updates cannot be performed while the previous rotation change
             // animation is still in progress.  Skip this update.  We will try updating
@@ -5146,7 +5147,7 @@ public class WindowManagerService extends IWindowManager.Stub
             startFreezingDisplayLocked(inTransaction, anim[0], anim[1]);
             // startFreezingDisplayLocked can reset the ScreenRotationAnimation.
             screenRotationAnimation =
-                mAnimator.getScreenRotationAnimationLocked(Display.DEFAULT_DISPLAY);
+                mAnimator.getScreenRotationAnimationLocked(DEFAULT_DISPLAY);
         } else {
             // The screen rotation animation uses a screenshot to freeze the screen
             // while windows resize underneath.
@@ -5232,7 +5233,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // Announce rotation only if we will not animate as we already have the
         // windows in final state. Otherwise, we make this call at the rotation end.
         if (screenRotationAnimation == null && mAccessibilityController != null
-                && displayContent.getDisplayId() == Display.DEFAULT_DISPLAY) {
+                && displayContent.getDisplayId() == DEFAULT_DISPLAY) {
             mAccessibilityController.onRotationChangedLocked(getDefaultDisplayContentLocked(),
                     rotation);
         }
@@ -6469,7 +6470,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized(mWindowMap) {
                         // TODO(multidisplay): Accessibility supported only of default desiplay.
                         if (mAccessibilityController != null && getDefaultDisplayContentLocked()
-                                .getDisplayId() == Display.DEFAULT_DISPLAY) {
+                                .getDisplayId() == DEFAULT_DISPLAY) {
                             accessibilityController = mAccessibilityController;
                         }
 
@@ -7236,7 +7237,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        if (displayId != Display.DEFAULT_DISPLAY) {
+        if (displayId != DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
         final long ident = Binder.clearCallingIdentity();
@@ -7271,7 +7272,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        if (displayId != Display.DEFAULT_DISPLAY) {
+        if (displayId != DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
         final long ident = Binder.clearCallingIdentity();
@@ -7354,7 +7355,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        if (displayId != Display.DEFAULT_DISPLAY) {
+        if (displayId != DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
         final long ident = Binder.clearCallingIdentity();
@@ -7403,7 +7404,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        if (displayId != Display.DEFAULT_DISPLAY) {
+        if (displayId != DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
 
@@ -7434,7 +7435,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Must hold permission " +
                     android.Manifest.permission.WRITE_SECURE_SETTINGS);
         }
-        if (displayId != Display.DEFAULT_DISPLAY) {
+        if (displayId != DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
 
@@ -8676,7 +8677,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     // TODO: All the display method below should probably be moved into the RootWindowContainer...
-    public void createDisplayContentLocked(final Display display) {
+    private void createDisplayContentLocked(final Display display) {
         if (display == null) {
             throw new IllegalArgumentException("getDisplayContent: display must not be null");
         }
@@ -8684,26 +8685,16 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     // There is an inherent assumption that this will never return null.
-    public DisplayContent getDefaultDisplayContentLocked() {
-        return mRoot.getDisplayContentOrCreate(Display.DEFAULT_DISPLAY);
+    DisplayContent getDefaultDisplayContentLocked() {
+        return mRoot.getDisplayContentOrCreate(DEFAULT_DISPLAY);
     }
 
-    public WindowList getDefaultWindowListLocked() {
+    WindowList getDefaultWindowListLocked() {
         return getDefaultDisplayContentLocked().getWindowList();
     }
 
-    public DisplayInfo getDefaultDisplayInfoLocked() {
+    private DisplayInfo getDefaultDisplayInfoLocked() {
         return getDefaultDisplayContentLocked().getDisplayInfo();
-    }
-
-    /**
-     * Return the list of WindowStates associated on the passed display.
-     * @param displayId The screen to return windows from.
-     * @return The list of WindowStates on the screen, or null if the there is no screen.
-     */
-    WindowList getWindowListLocked(final int displayId) {
-        final DisplayContent displayContent = mRoot.getDisplayContentOrCreate(displayId);
-        return displayContent != null ? displayContent.getWindowList() : null;
     }
 
     public void onDisplayAdded(int displayId) {

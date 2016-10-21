@@ -292,6 +292,7 @@ import static android.provider.Settings.Global.LENIENT_BACKGROUND_CHECK;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.provider.Settings.System.FONT_SCALE;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
@@ -7681,7 +7682,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mDefaultPinnedStackScreenEdgeInsetsDp.getHeight(), dm);
         try {
             final Rect insets = new Rect();
-            final DisplayInfo info = mWindowManager.getDefaultDisplayInfoLocked();
+            final DisplayInfo info = mStackSupervisor.getDisplayInfo(DEFAULT_DISPLAY);
             mWindowManager.getStableInsets(insets);
 
             // Calculate the insets from the system decorations and apply the gravity
@@ -9899,7 +9900,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (stack != null && stack.mActivityContainer.isAttachedLocked()) {
                 return stack.mActivityContainer.getDisplayId();
             }
-            return Display.DEFAULT_DISPLAY;
+            return DEFAULT_DISPLAY;
         }
     }
 
