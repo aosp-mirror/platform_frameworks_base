@@ -63,7 +63,7 @@ struct XmlFlattenerVisitor : public xml::Visitor {
       dest->index = util::deviceToHost32(-1);
     } else {
       mStringRefs.push_back(StringFlattenDest{
-          mPool.makeRef(str, StringPool::Context{priority}), dest});
+          mPool.makeRef(str, StringPool::Context(priority)), dest});
     }
   }
 
@@ -256,7 +256,7 @@ struct XmlFlattenerVisitor : public xml::Visitor {
 
         StringPool::Ref nameRef =
             mPackagePools[aaptAttr.id.value().packageId()].makeRef(
-                xmlAttr->name, StringPool::Context{aaptAttr.id.value().id});
+                xmlAttr->name, StringPool::Context(aaptAttr.id.value().id));
 
         // Add it to the list of strings to flatten.
         addString(nameRef, &flatAttr->name);
