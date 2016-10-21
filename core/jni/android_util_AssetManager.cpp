@@ -175,7 +175,7 @@ static void verifySystemIdmaps()
                 }
 
                 // Generic idmap parameters
-                const char* argv[7];
+                const char* argv[8];
                 int argc = 0;
                 struct stat st;
 
@@ -203,7 +203,7 @@ static void verifySystemIdmaps()
                 // Finally, invoke idmap (if any overlay directory exists)
                 if (argc > 5) {
                     execv(AssetManager::IDMAP_BIN, (char* const*)argv);
-                    ALOGE("failed to execl for idmap: %s", strerror(errno));
+                    ALOGE("failed to execv for idmap: %s", strerror(errno));
                     exit(1); // should never get here
                 } else {
                     exit(0);
