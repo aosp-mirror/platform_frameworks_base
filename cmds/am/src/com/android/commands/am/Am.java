@@ -1,20 +1,18 @@
 /*
-**
-** Copyright 2007, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License");
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
-** limitations under the License.
-*/
-
+ * Copyright (C) 2007 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.commands.am;
 
@@ -235,6 +233,7 @@ public class Am extends BaseCommand {
                 "    -e <NAME> <VALUE>: set argument <NAME> to <VALUE>.  For test runners a\n" +
                 "        common form is [-e <testrunner_flag> <value>[,<value>...]].\n" +
                 "    -p <FILE>: write profiling data to <FILE>\n" +
+                "    -m: Write output as protobuf (machine readable)\n" +
                 "    -w: wait for instrumentation to finish before returning.  Required for\n" +
                 "        test runners.\n" +
                 "    --user <USER_ID> | current: Specify user instrumentation runs in;\n" +
@@ -543,208 +542,43 @@ public class Am extends BaseCommand {
         receiver.waitForFinish();
     }
 
-    private void runInstrument() throws Exception {
-        String profileFile = null;
-        boolean wait = false;
-        boolean rawMode = false;
-        boolean no_window_animation = false;
-        int userId = UserHandle.USER_CURRENT;
-        Bundle args = new Bundle();
-        String argKey = null, argValue = null;
-        IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
-        String abi = null;
+    public void runInstrument() throws Exception {
+        Instrument instrument = new Instrument(mAm, mPm);
 
         String opt;
         while ((opt=nextOption()) != null) {
             if (opt.equals("-p")) {
-                profileFile = nextArgRequired();
+                instrument.profileFile = nextArgRequired();
             } else if (opt.equals("-w")) {
-                wait = true;
+                instrument.wait = true;
             } else if (opt.equals("-r")) {
-                rawMode = true;
+                instrument.rawMode = true;
+            } else if (opt.equals("-m")) {
+                instrument.proto = true;
             } else if (opt.equals("-e")) {
-                argKey = nextArgRequired();
-                argValue = nextArgRequired();
-                args.putString(argKey, argValue);
+                final String argKey = nextArgRequired();
+                final String argValue = nextArgRequired();
+                instrument.args.putString(argKey, argValue);
             } else if (opt.equals("--no_window_animation")
                     || opt.equals("--no-window-animation")) {
-                no_window_animation = true;
+                instrument.noWindowAnimation = true;
             } else if (opt.equals("--user")) {
-                userId = parseUserArg(nextArgRequired());
+                instrument.userId = parseUserArg(nextArgRequired());
             } else if (opt.equals("--abi")) {
-                abi = nextArgRequired();
+                instrument.abi = nextArgRequired();
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return;
             }
         }
 
-        if (userId == UserHandle.USER_ALL) {
+        if (instrument.userId == UserHandle.USER_ALL) {
             System.err.println("Error: Can't start instrumentation with user 'all'");
             return;
         }
 
-        String cnArg = nextArgRequired();
+        instrument.componentNameArg = nextArgRequired();
 
-        ComponentName cn;
-        if (cnArg.contains("/")) {
-            cn = ComponentName.unflattenFromString(cnArg);
-            if (cn == null) throw new IllegalArgumentException("Bad component name: " + cnArg);
-        } else {
-            List<InstrumentationInfo> infos = mPm.queryInstrumentation(null, 0).getList();
-
-            final int numInfos = infos == null ? 0: infos.size();
-            List<ComponentName> cns = new ArrayList<>();
-            for (int i = 0; i < numInfos; i++) {
-                InstrumentationInfo info = infos.get(i);
-
-                ComponentName c = new ComponentName(info.packageName, info.name);
-                if (cnArg.equals(info.packageName)) {
-                    cns.add(c);
-                }
-            }
-
-            if (cns.size() == 0) {
-                throw new IllegalArgumentException("No instrumentation found for: " + cnArg);
-            } else if (cns.size() == 1) {
-                cn = cns.get(0);
-            } else {
-                StringBuilder cnsStr = new StringBuilder();
-                final int numCns = cns.size();
-                for (int i = 0; i < numCns; i++) {
-                    cnsStr.append(cns.get(i).flattenToString());
-                    cnsStr.append(", ");
-                }
-
-                // Remove last ", "
-                cnsStr.setLength(cnsStr.length() - 2);
-
-                throw new IllegalArgumentException("Found multiple instrumentations: "
-                        + cnsStr.toString());
-            }
-        }
-
-        InstrumentationWatcher watcher = null;
-        UiAutomationConnection connection = null;
-        if (wait) {
-            watcher = new InstrumentationWatcher();
-            watcher.setRawOutput(rawMode);
-            connection = new UiAutomationConnection();
-        }
-
-        float[] oldAnims = null;
-        if (no_window_animation) {
-            oldAnims = wm.getAnimationScales();
-            wm.setAnimationScale(0, 0.0f);
-            wm.setAnimationScale(1, 0.0f);
-        }
-
-        if (abi != null) {
-            final String[] supportedAbis = Build.SUPPORTED_ABIS;
-            boolean matched = false;
-            for (String supportedAbi : supportedAbis) {
-                if (supportedAbi.equals(abi)) {
-                    matched = true;
-                    break;
-                }
-            }
-
-            if (!matched) {
-                throw new AndroidException(
-                        "INSTRUMENTATION_FAILED: Unsupported instruction set " + abi);
-            }
-        }
-
-        if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher, connection, userId, abi)) {
-            throw new AndroidException("INSTRUMENTATION_FAILED: " + cn.flattenToString());
-        }
-
-        if (watcher != null) {
-            if (!watcher.waitForFinish()) {
-                System.out.println("INSTRUMENTATION_ABORTED: System has crashed.");
-            }
-        }
-
-        if (oldAnims != null) {
-            wm.setAnimationScales(oldAnims);
-        }
-    }
-
-    private class InstrumentationWatcher extends IInstrumentationWatcher.Stub {
-        private boolean mFinished = false;
-        private boolean mRawMode = false;
-
-        /**
-         * Set or reset "raw mode".  In "raw mode", all bundles are dumped.  In "pretty mode",
-         * if a bundle includes Instrumentation.REPORT_KEY_STREAMRESULT, just print that.
-         * @param rawMode true for raw mode, false for pretty mode.
-         */
-        public void setRawOutput(boolean rawMode) {
-            mRawMode = rawMode;
-        }
-
-        @Override
-        public void instrumentationStatus(ComponentName name, int resultCode, Bundle results) {
-            synchronized (this) {
-                // pretty printer mode?
-                String pretty = null;
-                if (!mRawMode && results != null) {
-                    pretty = results.getString(Instrumentation.REPORT_KEY_STREAMRESULT);
-                }
-                if (pretty != null) {
-                    System.out.print(pretty);
-                } else {
-                    if (results != null) {
-                        for (String key : results.keySet()) {
-                            System.out.println(
-                                    "INSTRUMENTATION_STATUS: " + key + "=" + results.get(key));
-                        }
-                    }
-                    System.out.println("INSTRUMENTATION_STATUS_CODE: " + resultCode);
-                }
-                notifyAll();
-            }
-        }
-
-        @Override
-        public void instrumentationFinished(ComponentName name, int resultCode,
-                Bundle results) {
-            synchronized (this) {
-                // pretty printer mode?
-                String pretty = null;
-                if (!mRawMode && results != null) {
-                    pretty = results.getString(Instrumentation.REPORT_KEY_STREAMRESULT);
-                }
-                if (pretty != null) {
-                    System.out.println(pretty);
-                } else {
-                    if (results != null) {
-                        for (String key : results.keySet()) {
-                            System.out.println(
-                                    "INSTRUMENTATION_RESULT: " + key + "=" + results.get(key));
-                        }
-                    }
-                    System.out.println("INSTRUMENTATION_CODE: " + resultCode);
-                }
-                mFinished = true;
-                notifyAll();
-            }
-        }
-
-        public boolean waitForFinish() {
-            synchronized (this) {
-                while (!mFinished) {
-                    try {
-                        if (!mAm.asBinder().pingBinder()) {
-                            return false;
-                        }
-                        wait(1000);
-                    } catch (InterruptedException e) {
-                        throw new IllegalStateException(e);
-                    }
-                }
-            }
-            return true;
-        }
+        instrument.run();
     }
 }

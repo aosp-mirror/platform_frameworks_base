@@ -191,38 +191,55 @@ get_field_id(const FieldDescriptorProto& field)
     switch (field.type()) {
         case FieldDescriptorProto::TYPE_DOUBLE:
             result |= FIELD_TYPE_DOUBLE;
+            break;
         case FieldDescriptorProto::TYPE_FLOAT:
             result |= FIELD_TYPE_FLOAT;
+            break;
         case FieldDescriptorProto::TYPE_INT64:
             result |= FIELD_TYPE_INT64;
+            break;
         case FieldDescriptorProto::TYPE_UINT64:
             result |= FIELD_TYPE_UINT64;
+            break;
         case FieldDescriptorProto::TYPE_INT32:
             result |= FIELD_TYPE_INT32;
+            break;
         case FieldDescriptorProto::TYPE_FIXED64:
             result |= FIELD_TYPE_FIXED64;
+            break;
         case FieldDescriptorProto::TYPE_FIXED32:
             result |= FIELD_TYPE_FIXED32;
+            break;
         case FieldDescriptorProto::TYPE_BOOL:
             result |= FIELD_TYPE_BOOL;
+            break;
         case FieldDescriptorProto::TYPE_STRING:
             result |= FIELD_TYPE_STRING;
+            break;
         case FieldDescriptorProto::TYPE_MESSAGE:
             result |= FIELD_TYPE_OBJECT;
+            break;
         case FieldDescriptorProto::TYPE_BYTES:
             result |= FIELD_TYPE_BYTES;
+            break;
         case FieldDescriptorProto::TYPE_UINT32:
             result |= FIELD_TYPE_UINT32;
+            break;
         case FieldDescriptorProto::TYPE_ENUM:
             result |= FIELD_TYPE_ENUM;
+            break;
         case FieldDescriptorProto::TYPE_SFIXED32:
             result |= FIELD_TYPE_SFIXED32;
+            break;
         case FieldDescriptorProto::TYPE_SFIXED64:
             result |= FIELD_TYPE_SFIXED64;
+            break;
         case FieldDescriptorProto::TYPE_SINT32:
             result |= FIELD_TYPE_SINT32;
+            break;
         case FieldDescriptorProto::TYPE_SINT64:
             result |= FIELD_TYPE_SINT64;
+            break;
         default:
             ;
     }
