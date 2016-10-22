@@ -20,7 +20,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
+import android.content.ContentResolver;
+import android.database.ContentObserver;
+import android.net.Uri;
+import android.os.Handler;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Base64;
 import android.util.Slog;
 import android.webkit.WebViewFactory;
@@ -42,6 +47,7 @@ public class WebViewUpdateServiceImpl {
 
     private SystemInterface mSystemInterface;
     private WebViewUpdater mWebViewUpdater;
+    private SettingsObserver mSettingsObserver;
     private Context mContext;
 
     public WebViewUpdateServiceImpl(Context context, SystemInterface systemInterface) {
@@ -61,6 +67,10 @@ public class WebViewUpdateServiceImpl {
     void prepareWebViewInSystemServer() {
         updateFallbackStateOnBoot();
         mWebViewUpdater.prepareWebViewInSystemServer();
+
+        // Register for changes in the multiprocess developer option. This has to be done
+        // here, since the update service gets created before the ContentResolver service.
+        mSettingsObserver = new SettingsObserver();
     }
 
     private boolean existsValidNonFallbackProvider(WebViewProviderInfo[] providers) {
@@ -667,4 +677,41 @@ public class WebViewUpdateServiceImpl {
                         & ApplicationInfo.PRIVATE_FLAG_HIDDEN) == 0));
     }
 
+    /**
+     * Watches for changes in the WEBVIEW_MULTIPROCESS setting and lets
+     * the WebViewZygote know, so it can start or stop the zygote process
+     * appropriately.
+     */
+    private class SettingsObserver extends ContentObserver {
+        private final ContentResolver mResolver;
+
+        SettingsObserver() {
+            super(new Handler());
+
+            mResolver = mContext.getContentResolver();
+            mResolver.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.WEBVIEW_MULTIPROCESS),
+                    false, this);
+
+            // Push the current value of the setting immediately.
+            notifyZygote();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            notifyZygote();
+        }
+
+        private void notifyZygote() {
+            boolean enableMultiprocess = false;
+
+            try {
+                enableMultiprocess = Settings.Global.getInt(mResolver,
+                        Settings.Global.WEBVIEW_MULTIPROCESS) == 1;
+            } catch (Settings.SettingNotFoundException ex) {
+            }
+
+            mSystemInterface.setMultiprocessEnabled(enableMultiprocess);
+        }
+    }
 }
