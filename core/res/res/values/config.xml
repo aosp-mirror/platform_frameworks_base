@@ -1178,9 +1178,13 @@
     <integer-array name="config_dynamicHysteresisLuxLevels">
     </integer-array>
 
-    <!-- This flag requires config_dozeSensorLuxLevels to have one or more entries and only affects
-         the screen brightness while dozing. The screen brightness of a device is based off of a
-         ring buffer of the last n seconds of ambient light sensor sample readings.
+    <!-- This flag requires config_dozeBrightnessBacklightValues to have two or more entries; it is
+         recommended that config_screenBrightnessDoze be greater than or equal to all these entries
+         since this value is used as the doze screen brightness until a new sensor sample is
+         acquired. This flag only affects the screen brightness while dozing.
+
+         The screen brightness of a device is based off of a ring buffer of the last n seconds of
+         ambient light sensor sample readings.
 
          If this flag is true, then this buffer is cleared and the screen brightness is based off of
          ambient light sensor readings that are obtained while the device is dozing.  This mode may
