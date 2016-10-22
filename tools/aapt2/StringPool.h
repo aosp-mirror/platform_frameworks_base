@@ -42,9 +42,22 @@ struct StyleString {
 
 class StringPool {
  public:
-  struct Context {
-    uint32_t priority;
+  class Context {
+   public:
+    enum : uint32_t {
+      kStylePriority = 0u,
+      kHighPriority = 1u,
+      kNormalPriority = 0x7fffffffu,
+      kLowPriority = 0xffffffffu,
+    };
+    uint32_t priority = kNormalPriority;
     ConfigDescription config;
+
+    Context() = default;
+    Context(uint32_t p, const ConfigDescription& c) : priority(p), config(c) {}
+    explicit Context(uint32_t p) : priority(p) {}
+    explicit Context(const ConfigDescription& c)
+        : priority(kNormalPriority), config(c) {}
   };
 
   class Entry;

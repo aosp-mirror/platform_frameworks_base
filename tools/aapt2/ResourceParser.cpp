@@ -533,7 +533,8 @@ std::unique_ptr<Item> ResourceParser::parseXml(xml::XmlPullParser* parser,
   if (!styleString.spans.empty()) {
     // This can only be a StyledString.
     return util::make_unique<StyledString>(mTable->stringPool.makeRef(
-        styleString, StringPool::Context{1, mConfig}));
+        styleString,
+        StringPool::Context(StringPool::Context::kStylePriority, mConfig)));
   }
 
   auto onCreateReference = [&](const ResourceName& name) {
@@ -559,13 +560,13 @@ std::unique_ptr<Item> ResourceParser::parseXml(xml::XmlPullParser* parser,
   if (typeMask & android::ResTable_map::TYPE_STRING) {
     // Use the trimmed, escaped string.
     return util::make_unique<String>(mTable->stringPool.makeRef(
-        styleString.str, StringPool::Context{1, mConfig}));
+        styleString.str, StringPool::Context(mConfig)));
   }
 
   if (allowRawValue) {
     // We can't parse this so return a RawString if we are allowed.
     return util::make_unique<RawString>(
-        mTable->stringPool.makeRef(rawValue, StringPool::Context{1, mConfig}));
+        mTable->stringPool.makeRef(rawValue, StringPool::Context(mConfig)));
   }
   return {};
 }
