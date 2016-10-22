@@ -344,7 +344,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Ricerca"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Su per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"A sinistra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Non verrai disturbato da suoni e vibrazioni, ad eccezione di sveglie, promemoria, eventi e chiamate da contatti da te specificati."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Non ti disturberanno: suoni e vibrazioni, ad eccezione di sveglie, promemoria, eventi e chiamate da contatti da te specificati."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalizza"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Verranno bloccati TUTTI i suoni e le vibrazioni, anche di sveglie, musica, video e giochi. Potrai ancora telefonare."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Verranno bloccati TUTTI i suoni e le vibrazioni, anche di sveglie, musica, video e giochi."</string>
@@ -564,8 +564,7 @@
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Browser"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"Contatti"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"Email"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (638701213803242744) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_sms" msgid="638701213803242744">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Musica"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Calendario"</string>
