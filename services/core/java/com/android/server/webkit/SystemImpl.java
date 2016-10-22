@@ -36,6 +36,7 @@ import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
+import android.webkit.WebViewZygote;
 
 import com.android.internal.util.XmlUtils;
 
@@ -266,6 +267,11 @@ public class SystemImpl implements SystemInterface {
             throws NameNotFoundException {
         PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
         return pm.getPackageInfo(configInfo.packageName, PACKAGE_FLAGS);
+    }
+
+    @Override
+    public void setMultiprocessEnabled(boolean enabled) {
+        WebViewZygote.setMultiprocessEnabled(enabled);
     }
 
     // flags declaring we want extra info from the package manager for webview providers

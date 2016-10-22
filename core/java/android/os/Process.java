@@ -20,6 +20,7 @@ import android.annotation.TestApi;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.Log;
+import android.webkit.WebViewZygote;
 import dalvik.system.VMRuntime;
 
 /**
@@ -131,6 +132,12 @@ public class Process {
      * @hide
      */
     public static final int CAMERASERVER_UID = 1047;
+
+    /**
+     * Defines the UID/GID for the WebView zygote process.
+     * @hide
+     */
+    public static final int WEBVIEW_ZYGOTE_UID = 1051;
 
     /**
      * Defines the start of a range of UIDs (and GIDs), going from this
@@ -421,6 +428,22 @@ public class Process {
                                   String appDataDir,
                                   String[] zygoteArgs) {
         return zygoteProcess.start(processClass, niceName, uid, gid, gids,
+                    debugFlags, mountExternal, targetSdkVersion, seInfo,
+                    abi, instructionSet, appDataDir, zygoteArgs);
+    }
+
+    /** @hide */
+    public static final ProcessStartResult startWebView(final String processClass,
+                                  final String niceName,
+                                  int uid, int gid, int[] gids,
+                                  int debugFlags, int mountExternal,
+                                  int targetSdkVersion,
+                                  String seInfo,
+                                  String abi,
+                                  String instructionSet,
+                                  String appDataDir,
+                                  String[] zygoteArgs) {
+        return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
                     debugFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, zygoteArgs);
     }

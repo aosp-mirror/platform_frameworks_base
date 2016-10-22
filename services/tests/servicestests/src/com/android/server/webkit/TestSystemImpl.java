@@ -118,4 +118,7 @@ public class TestSystemImpl implements SystemInterface {
         }
         throw new NameNotFoundException();
     }
+
+    @Override
+    public void setMultiprocessEnabled(boolean enabled) {}
 }
