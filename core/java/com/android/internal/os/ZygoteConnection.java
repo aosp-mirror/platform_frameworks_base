@@ -43,6 +43,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import libcore.io.IoUtils;
 
 /**
@@ -169,6 +170,11 @@ class ZygoteConnection {
                 return handleAbiListQuery();
             }
 
+            if (parsedArgs.preloadPackage != null) {
+                return handlePreloadPackage(parsedArgs.preloadPackage,
+                        parsedArgs.preloadPackageLibs);
+            }
+
             if (parsedArgs.permittedCapabilities != 0 || parsedArgs.effectiveCapabilities != 0) {
                 throw new ZygoteSecurityException("Client may not specify capabilities: " +
                         "permitted=0x" + Long.toHexString(parsedArgs.permittedCapabilities) +
@@ -268,6 +274,10 @@ class ZygoteConnection {
             Log.e(TAG, "Error writing to command socket", ioe);
             return true;
         }
+    }
+
+    protected boolean handlePreloadPackage(String packagePath, String libsPath) {
+        throw new RuntimeException("Zyogte does not support package preloading");
     }
 
     /**
@@ -373,6 +383,12 @@ class ZygoteConnection {
          * not be reliable in the case of process-sharing apps.
          */
         String appDataDir;
+
+        /**
+         * Whether to preload a package, with the package path in the remainingArgs.
+         */
+        String preloadPackage;
+        String preloadPackageLibs;
 
         /**
          * Constructs instance and parses args
@@ -532,6 +548,9 @@ class ZygoteConnection {
                     instructionSet = arg.substring(arg.indexOf('=') + 1);
                 } else if (arg.startsWith("--app-data-dir=")) {
                     appDataDir = arg.substring(arg.indexOf('=') + 1);
+                } else if (arg.equals("--preload-package")) {
+                    preloadPackage = args[++curArg];
+                    preloadPackageLibs = args[++curArg];
                 } else {
                     break;
                 }
@@ -540,6 +559,11 @@ class ZygoteConnection {
             if (abiListQuery) {
                 if (args.length - curArg > 0) {
                     throw new IllegalArgumentException("Unexpected arguments after --query-abi-list.");
+                }
+            } else if (preloadPackage != null) {
+                if (args.length - curArg > 0) {
+                    throw new IllegalArgumentException(
+                            "Unexpected arguments after --preload-package.");
                 }
             } else {
                 if (!seenRuntimeArgs) {

@@ -113,4 +113,7 @@ public class TestSystemImpl implements SystemInterface {
     public int getFactoryPackageVersion(String packageName) {
         return 0;
     }
+
+    @Override
+    public void setMultiprocessEnabled(boolean enabled) {}
 }
