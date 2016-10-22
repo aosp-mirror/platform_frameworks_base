@@ -19,6 +19,7 @@ package com.android.internal.os;
 import static android.system.OsConstants.POLLIN;
 
 import android.net.LocalServerSocket;
+import android.net.LocalSocket;
 import android.system.Os;
 import android.system.ErrnoException;
 import android.system.StructPollfd;
@@ -80,11 +81,16 @@ class ZygoteServer {
      */
     private ZygoteConnection acceptCommandPeer(String abiList) {
         try {
-            return new ZygoteConnection(mServerSocket.accept(), abiList);
+            return createNewConnection(mServerSocket.accept(), abiList);
         } catch (IOException ex) {
             throw new RuntimeException(
                     "IOException during accept()", ex);
         }
+    }
+
+    protected ZygoteConnection createNewConnection(LocalSocket socket, String abiList)
+            throws IOException {
+        return new ZygoteConnection(socket, abiList);
     }
 
     /**

@@ -472,6 +472,9 @@ public final class WebViewFactory {
             // Log and discard errors at this stage as we must not crash the system server.
             Log.e(LOGTAG, "error preparing webview native library", t);
         }
+
+        WebViewZygote.onWebViewProviderChanged(packageInfo);
+
         return prepareWebViewInSystemServer(nativeLibs);
     }
 

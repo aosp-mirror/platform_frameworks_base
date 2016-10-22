@@ -19,7 +19,9 @@ package android.os;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.util.Log;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.Zygote;
+import com.android.internal.util.Preconditions;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -110,7 +112,8 @@ public class ZygoteProcess {
             }
 
             String abiListString = getAbiList(zygoteWriter, zygoteInputStream);
-            Log.i("Zygote", "Process: zygote socket opened, supported ABIS: " + abiListString);
+            Log.i("Zygote", "Process: zygote socket " + socketAddress + " opened, supported ABIS: "
+                    + abiListString);
 
             return new ZygoteState(zygoteSocket, zygoteInputStream, zygoteWriter,
                     Arrays.asList(abiListString.split(",")));
@@ -134,6 +137,13 @@ public class ZygoteProcess {
             return mClosed;
         }
     }
+
+    /**
+     * Lock object to protect access to the two ZygoteStates below. This lock must be
+     * acquired while communicating over the ZygoteState's socket, to prevent
+     * interleaved access.
+     */
+    private final Object mLock = new Object();
 
     /**
      * The state of the connection to the primary zygote.
@@ -207,6 +217,7 @@ public class ZygoteProcess {
      *
      * @throws ZygoteStartFailedEx if the query failed.
      */
+    @GuardedBy("mLock")
     private static String getAbiList(BufferedWriter writer, DataInputStream inputStream)
             throws IOException {
         // Each query starts with the argument count (1 in this case)
@@ -233,6 +244,7 @@ public class ZygoteProcess {
      *
      * @throws ZygoteStartFailedEx if process start failed for any reason
      */
+    @GuardedBy("mLock")
     private static Process.ProcessStartResult zygoteSendArgsAndGetResult(
             ZygoteState zygoteState, ArrayList<String> args)
             throws ZygoteStartFailedEx {
@@ -311,90 +323,90 @@ public class ZygoteProcess {
                                                       String appDataDir,
                                                       String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
-        synchronized(Process.class) {
-            ArrayList<String> argsForZygote = new ArrayList<String>();
+        ArrayList<String> argsForZygote = new ArrayList<String>();
 
-            // --runtime-args, --setuid=, --setgid=,
-            // and --setgroups= must go first
-            argsForZygote.add("--runtime-args");
-            argsForZygote.add("--setuid=" + uid);
-            argsForZygote.add("--setgid=" + gid);
-            if ((debugFlags & Zygote.DEBUG_ENABLE_JNI_LOGGING) != 0) {
-                argsForZygote.add("--enable-jni-logging");
-            }
-            if ((debugFlags & Zygote.DEBUG_ENABLE_SAFEMODE) != 0) {
-                argsForZygote.add("--enable-safemode");
-            }
-            if ((debugFlags & Zygote.DEBUG_ENABLE_DEBUGGER) != 0) {
-                argsForZygote.add("--enable-debugger");
-            }
-            if ((debugFlags & Zygote.DEBUG_ENABLE_CHECKJNI) != 0) {
-                argsForZygote.add("--enable-checkjni");
-            }
-            if ((debugFlags & Zygote.DEBUG_GENERATE_DEBUG_INFO) != 0) {
-                argsForZygote.add("--generate-debug-info");
-            }
-            if ((debugFlags & Zygote.DEBUG_ALWAYS_JIT) != 0) {
-                argsForZygote.add("--always-jit");
-            }
-            if ((debugFlags & Zygote.DEBUG_NATIVE_DEBUGGABLE) != 0) {
-                argsForZygote.add("--native-debuggable");
-            }
-            if ((debugFlags & Zygote.DEBUG_ENABLE_ASSERT) != 0) {
-                argsForZygote.add("--enable-assert");
-            }
-            if (mountExternal == Zygote.MOUNT_EXTERNAL_DEFAULT) {
-                argsForZygote.add("--mount-external-default");
-            } else if (mountExternal == Zygote.MOUNT_EXTERNAL_READ) {
-                argsForZygote.add("--mount-external-read");
-            } else if (mountExternal == Zygote.MOUNT_EXTERNAL_WRITE) {
-                argsForZygote.add("--mount-external-write");
-            }
-            argsForZygote.add("--target-sdk-version=" + targetSdkVersion);
+        // --runtime-args, --setuid=, --setgid=,
+        // and --setgroups= must go first
+        argsForZygote.add("--runtime-args");
+        argsForZygote.add("--setuid=" + uid);
+        argsForZygote.add("--setgid=" + gid);
+        if ((debugFlags & Zygote.DEBUG_ENABLE_JNI_LOGGING) != 0) {
+            argsForZygote.add("--enable-jni-logging");
+        }
+        if ((debugFlags & Zygote.DEBUG_ENABLE_SAFEMODE) != 0) {
+            argsForZygote.add("--enable-safemode");
+        }
+        if ((debugFlags & Zygote.DEBUG_ENABLE_DEBUGGER) != 0) {
+            argsForZygote.add("--enable-debugger");
+        }
+        if ((debugFlags & Zygote.DEBUG_ENABLE_CHECKJNI) != 0) {
+            argsForZygote.add("--enable-checkjni");
+        }
+        if ((debugFlags & Zygote.DEBUG_GENERATE_DEBUG_INFO) != 0) {
+            argsForZygote.add("--generate-debug-info");
+        }
+        if ((debugFlags & Zygote.DEBUG_ALWAYS_JIT) != 0) {
+            argsForZygote.add("--always-jit");
+        }
+        if ((debugFlags & Zygote.DEBUG_NATIVE_DEBUGGABLE) != 0) {
+            argsForZygote.add("--native-debuggable");
+        }
+        if ((debugFlags & Zygote.DEBUG_ENABLE_ASSERT) != 0) {
+            argsForZygote.add("--enable-assert");
+        }
+        if (mountExternal == Zygote.MOUNT_EXTERNAL_DEFAULT) {
+            argsForZygote.add("--mount-external-default");
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_READ) {
+            argsForZygote.add("--mount-external-read");
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_WRITE) {
+            argsForZygote.add("--mount-external-write");
+        }
+        argsForZygote.add("--target-sdk-version=" + targetSdkVersion);
 
-            //TODO optionally enable debuger
-            //argsForZygote.add("--enable-debugger");
+        //TODO optionally enable debuger
+        //argsForZygote.add("--enable-debugger");
 
-            // --setgroups is a comma-separated list
-            if (gids != null && gids.length > 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("--setgroups=");
+        // --setgroups is a comma-separated list
+        if (gids != null && gids.length > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("--setgroups=");
 
-                int sz = gids.length;
-                for (int i = 0; i < sz; i++) {
-                    if (i != 0) {
-                        sb.append(',');
-                    }
-                    sb.append(gids[i]);
+            int sz = gids.length;
+            for (int i = 0; i < sz; i++) {
+                if (i != 0) {
+                    sb.append(',');
                 }
-
-                argsForZygote.add(sb.toString());
+                sb.append(gids[i]);
             }
 
-            if (niceName != null) {
-                argsForZygote.add("--nice-name=" + niceName);
+            argsForZygote.add(sb.toString());
+        }
+
+        if (niceName != null) {
+            argsForZygote.add("--nice-name=" + niceName);
+        }
+
+        if (seInfo != null) {
+            argsForZygote.add("--seinfo=" + seInfo);
+        }
+
+        if (instructionSet != null) {
+            argsForZygote.add("--instruction-set=" + instructionSet);
+        }
+
+        if (appDataDir != null) {
+            argsForZygote.add("--app-data-dir=" + appDataDir);
+        }
+
+        argsForZygote.add(processClass);
+
+        if (extraArgs != null) {
+            for (String arg : extraArgs) {
+                argsForZygote.add(arg);
             }
+        }
 
-            if (seInfo != null) {
-                argsForZygote.add("--seinfo=" + seInfo);
-            }
-
-            if (instructionSet != null) {
-                argsForZygote.add("--instruction-set=" + instructionSet);
-            }
-
-            if (appDataDir != null) {
-                argsForZygote.add("--app-data-dir=" + appDataDir);
-            }
-
-            argsForZygote.add(processClass);
-
-            if (extraArgs != null) {
-                for (String arg : extraArgs) {
-                    argsForZygote.add(arg);
-                }
-            }
-
+        synchronized(mLock) {
             return zygoteSendArgsAndGetResult(openZygoteSocketIfNeeded(abi), argsForZygote);
         }
     }
@@ -406,7 +418,9 @@ public class ZygoteProcess {
      */
     public void establishZygoteConnectionForAbi(String abi) {
         try {
-            openZygoteSocketIfNeeded(abi);
+            synchronized(mLock) {
+                openZygoteSocketIfNeeded(abi);
+            }
         } catch (ZygoteStartFailedEx ex) {
             throw new RuntimeException("Unable to connect to zygote for abi: " + abi, ex);
         }
@@ -414,9 +428,12 @@ public class ZygoteProcess {
 
     /**
      * Tries to open socket to Zygote process if not already open. If
-     * already open, does nothing.  May block and retry.
+     * already open, does nothing.  May block and retry.  Requires that mLock be held.
      */
+    @GuardedBy("mLock")
     private ZygoteState openZygoteSocketIfNeeded(String abi) throws ZygoteStartFailedEx {
+        Preconditions.checkState(Thread.holdsLock(mLock), "ZygoteProcess lock not held");
+
         if (primaryZygoteState == null || primaryZygoteState.isClosed()) {
             try {
                 primaryZygoteState = ZygoteState.connect(mSocket);
@@ -443,5 +460,29 @@ public class ZygoteProcess {
         }
 
         throw new ZygoteStartFailedEx("Unsupported zygote ABI: " + abi);
+    }
+
+    /**
+     * Instructs the zygote to pre-load the classes and native libraries at the given paths
+     * for the specified abi. Not all zygotes support this function.
+     */
+    public void preloadPackageForAbi(String packagePath, String libsPath, String abi)
+            throws ZygoteStartFailedEx, IOException {
+        synchronized(mLock) {
+            ZygoteState state = openZygoteSocketIfNeeded(abi);
+            state.writer.write("3");
+            state.writer.newLine();
+
+            state.writer.write("--preload-package");
+            state.writer.newLine();
+
+            state.writer.write(packagePath);
+            state.writer.newLine();
+
+            state.writer.write(libsPath);
+            state.writer.newLine();
+
+            state.writer.flush();
+        }
     }
 }
