@@ -17,6 +17,11 @@
 #ifndef AAPT_PNG_H
 #define AAPT_PNG_H
 
+#include <iostream>
+#include <string>
+
+#include "android-base/macros.h"
+
 #include "Diagnostics.h"
 #include "Source.h"
 #include "compile/Image.h"
@@ -24,16 +29,15 @@
 #include "process/IResourceTableConsumer.h"
 #include "util/BigBuffer.h"
 
-#include <android-base/macros.h>
-#include <iostream>
-#include <string>
-
 namespace aapt {
 
 struct PngOptions {
-  int grayScaleTolerance = 0;
+  int grayscale_tolerance = 0;
 };
 
+/**
+ * Deprecated. Removing once new PNG crunching code is proved to be correct.
+ */
 class Png {
  public:
   explicit Png(IDiagnostics* diag) : mDiag(diag) {}
@@ -59,18 +63,18 @@ class PngChunkFilter : public io::InputStream {
   bool Skip(int count) override;
 
   int64_t ByteCount() const override {
-    return static_cast<int64_t>(mWindowStart);
+    return static_cast<int64_t>(window_start_);
   }
 
-  bool HadError() const override { return mError; }
+  bool HadError() const override { return error_; }
 
  private:
-  bool consumeWindow(const void** buffer, int* len);
+  bool ConsumeWindow(const void** buffer, int* len);
 
-  StringPiece mData;
-  size_t mWindowStart = 0;
-  size_t mWindowEnd = 0;
-  bool mError = false;
+  StringPiece data_;
+  size_t window_start_ = 0;
+  size_t window_end_ = 0;
+  bool error_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(PngChunkFilter);
 };
@@ -78,14 +82,14 @@ class PngChunkFilter : public io::InputStream {
 /**
  * Reads a PNG from the InputStream into memory as an RGBA Image.
  */
-std::unique_ptr<Image> readPng(IAaptContext* context, io::InputStream* in);
+std::unique_ptr<Image> ReadPng(IAaptContext* context, io::InputStream* in);
 
 /**
  * Writes the RGBA Image, with optional 9-patch meta-data, into the OutputStream
  * as a PNG.
  */
-bool writePng(IAaptContext* context, const Image* image,
-              const NinePatch* ninePatch, io::OutputStream* out,
+bool WritePng(IAaptContext* context, const Image* image,
+              const NinePatch* nine_patch, io::OutputStream* out,
               const PngOptions& options);
 
 }  // namespace aapt

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#include "ResourceTable.h"
 #include "link/Linkers.h"
 
 #include <algorithm>
+
+#include "ResourceTable.h"
 
 namespace aapt {
 
@@ -28,12 +29,12 @@ namespace {
  */
 class XmlVisitor : public xml::Visitor {
  public:
-  XmlVisitor(bool keepUris) : mKeepUris(keepUris) {}
+  explicit XmlVisitor(bool keep_uris) : keep_uris_(keep_uris) {}
 
-  void visit(xml::Element* el) override {
+  void Visit(xml::Element* el) override {
     // Strip namespaces
     for (auto& child : el->children) {
-      while (child && xml::nodeCast<xml::Namespace>(child.get())) {
+      while (child && xml::NodeCast<xml::Namespace>(child.get())) {
         if (child->children.empty()) {
           child = {};
         } else {
@@ -49,36 +50,38 @@ class XmlVisitor : public xml::Visitor {
                        }),
         el->children.end());
 
-    if (!mKeepUris) {
+    if (!keep_uris_) {
       for (xml::Attribute& attr : el->attributes) {
-        attr.namespaceUri = std::string();
+        attr.namespace_uri = std::string();
       }
-      el->namespaceUri = std::string();
+      el->namespace_uri = std::string();
     }
-    xml::Visitor::visit(el);
+    xml::Visitor::Visit(el);
   }
 
  private:
-  bool mKeepUris;
+  DISALLOW_COPY_AND_ASSIGN(XmlVisitor);
+
+  bool keep_uris_;
 };
 
 }  // namespace
 
-bool XmlNamespaceRemover::consume(IAaptContext* context,
+bool XmlNamespaceRemover::Consume(IAaptContext* context,
                                   xml::XmlResource* resource) {
   if (!resource->root) {
     return false;
   }
   // Replace any root namespaces until the root is a non-namespace node
-  while (xml::nodeCast<xml::Namespace>(resource->root.get())) {
+  while (xml::NodeCast<xml::Namespace>(resource->root.get())) {
     if (resource->root->children.empty()) {
       break;
     }
     resource->root = std::move(resource->root->children.front());
     resource->root->parent = nullptr;
   }
-  XmlVisitor visitor(mKeepUris);
-  resource->root->accept(&visitor);
+  XmlVisitor visitor(keep_uris_);
+  resource->root->Accept(&visitor);
   return true;
 }
 

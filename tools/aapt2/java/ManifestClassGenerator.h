@@ -19,14 +19,11 @@
 
 #include "Diagnostics.h"
 #include "java/ClassDefinition.h"
-#include "util/StringPiece.h"
 #include "xml/XmlDom.h"
-
-#include <iostream>
 
 namespace aapt {
 
-std::unique_ptr<ClassDefinition> generateManifestClass(IDiagnostics* diag,
+std::unique_ptr<ClassDefinition> GenerateManifestClass(IDiagnostics* diag,
                                                        xml::XmlResource* res);
 
 }  // namespace aapt

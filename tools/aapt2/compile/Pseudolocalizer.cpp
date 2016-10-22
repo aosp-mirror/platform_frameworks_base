@@ -15,77 +15,78 @@
  */
 
 #include "compile/Pseudolocalizer.h"
+
 #include "util/Util.h"
 
 namespace aapt {
 
 // String basis to generate expansion
-static const std::string k_expansion_string =
+static const std::string kExpansionString =
     "one two three "
     "four five six seven eight nine ten eleven twelve thirteen "
     "fourteen fiveteen sixteen seventeen nineteen twenty";
 
 // Special unicode characters to override directionality of the words
-static const std::string k_rlm = "\u200f";
-static const std::string k_rlo = "\u202e";
-static const std::string k_pdf = "\u202c";
+static const std::string kRlm = "\u200f";
+static const std::string kRlo = "\u202e";
+static const std::string kPdf = "\u202c";
 
 // Placeholder marks
-static const std::string k_placeholder_open = "\u00bb";
-static const std::string k_placeholder_close = "\u00ab";
+static const std::string kPlaceholderOpen = "\u00bb";
+static const std::string kPlaceholderClose = "\u00ab";
 
-static const char k_arg_start = '{';
-static const char k_arg_end = '}';
+static const char kArgStart = '{';
+static const char kArgEnd = '}';
 
 class PseudoMethodNone : public PseudoMethodImpl {
  public:
-  std::string text(const StringPiece& text) override { return text.toString(); }
-  std::string placeholder(const StringPiece& text) override {
-    return text.toString();
+  std::string Text(const StringPiece& text) override { return text.ToString(); }
+  std::string Placeholder(const StringPiece& text) override {
+    return text.ToString();
   }
 };
 
 class PseudoMethodBidi : public PseudoMethodImpl {
  public:
-  std::string text(const StringPiece& text) override;
-  std::string placeholder(const StringPiece& text) override;
+  std::string Text(const StringPiece& text) override;
+  std::string Placeholder(const StringPiece& text) override;
 };
 
 class PseudoMethodAccent : public PseudoMethodImpl {
  public:
-  PseudoMethodAccent() : mDepth(0), mWordCount(0), mLength(0) {}
-  std::string start() override;
-  std::string end() override;
-  std::string text(const StringPiece& text) override;
-  std::string placeholder(const StringPiece& text) override;
+  PseudoMethodAccent() : depth_(0), word_count_(0), length_(0) {}
+  std::string Start() override;
+  std::string End() override;
+  std::string Text(const StringPiece& text) override;
+  std::string Placeholder(const StringPiece& text) override;
 
  private:
-  size_t mDepth;
-  size_t mWordCount;
-  size_t mLength;
+  size_t depth_;
+  size_t word_count_;
+  size_t length_;
 };
 
-Pseudolocalizer::Pseudolocalizer(Method method) : mLastDepth(0) {
-  setMethod(method);
+Pseudolocalizer::Pseudolocalizer(Method method) : last_depth_(0) {
+  SetMethod(method);
 }
 
-void Pseudolocalizer::setMethod(Method method) {
+void Pseudolocalizer::SetMethod(Method method) {
   switch (method) {
     case Method::kNone:
-      mImpl = util::make_unique<PseudoMethodNone>();
+      impl_ = util::make_unique<PseudoMethodNone>();
       break;
     case Method::kAccent:
-      mImpl = util::make_unique<PseudoMethodAccent>();
+      impl_ = util::make_unique<PseudoMethodAccent>();
       break;
     case Method::kBidi:
-      mImpl = util::make_unique<PseudoMethodBidi>();
+      impl_ = util::make_unique<PseudoMethodBidi>();
       break;
   }
 }
 
-std::string Pseudolocalizer::text(const StringPiece& text) {
+std::string Pseudolocalizer::Text(const StringPiece& text) {
   std::string out;
-  size_t depth = mLastDepth;
+  size_t depth = last_depth_;
   size_t lastpos, pos;
   const size_t length = text.size();
   const char* str = text.data();
@@ -101,42 +102,41 @@ std::string Pseudolocalizer::text(const StringPiece& text) {
       continue;
     }
 
-    if (c == k_arg_start) {
+    if (c == kArgStart) {
       depth++;
-    } else if (c == k_arg_end && depth) {
+    } else if (c == kArgEnd && depth) {
       depth--;
     }
 
-    if (mLastDepth != depth || pos == length - 1) {
-      bool pseudo = ((mLastDepth % 2) == 0);
+    if (last_depth_ != depth || pos == length - 1) {
+      bool pseudo = ((last_depth_ % 2) == 0);
       size_t nextpos = pos;
-      if (!pseudo || depth == mLastDepth) {
+      if (!pseudo || depth == last_depth_) {
         nextpos++;
       }
       size_t size = nextpos - lastpos;
       if (size) {
-        std::string chunk = text.substr(lastpos, size).toString();
+        std::string chunk = text.substr(lastpos, size).ToString();
         if (pseudo) {
-          chunk = mImpl->text(chunk);
-        } else if (str[lastpos] == k_arg_start &&
-                   str[nextpos - 1] == k_arg_end) {
-          chunk = mImpl->placeholder(chunk);
+          chunk = impl_->Text(chunk);
+        } else if (str[lastpos] == kArgStart && str[nextpos - 1] == kArgEnd) {
+          chunk = impl_->Placeholder(chunk);
         }
         out.append(chunk);
       }
-      if (pseudo && depth < mLastDepth) {  // End of message
-        out.append(mImpl->end());
-      } else if (!pseudo && depth > mLastDepth) {  // Start of message
-        out.append(mImpl->start());
+      if (pseudo && depth < last_depth_) {  // End of message
+        out.append(impl_->End());
+      } else if (!pseudo && depth > last_depth_) {  // Start of message
+        out.append(impl_->Start());
       }
       lastpos = nextpos;
-      mLastDepth = depth;
+      last_depth_ = depth;
     }
   }
   return out;
 }
 
-static const char* pseudolocalizeChar(const char c) {
+static const char* PseudolocalizeChar(const char c) {
   switch (c) {
     case 'a':
       return "\u00e5";
@@ -251,7 +251,7 @@ static const char* pseudolocalizeChar(const char c) {
   }
 }
 
-static bool isPossibleNormalPlaceholderEnd(const char c) {
+static bool IsPossibleNormalPlaceholderEnd(const char c) {
   switch (c) {
     case 's':
       return true;
@@ -300,12 +300,12 @@ static bool isPossibleNormalPlaceholderEnd(const char c) {
   }
 }
 
-static std::string pseudoGenerateExpansion(const unsigned int length) {
-  std::string result = k_expansion_string;
+static std::string PseudoGenerateExpansion(const unsigned int length) {
+  std::string result = kExpansionString;
   const char* s = result.data();
   if (result.size() < length) {
     result += " ";
-    result += pseudoGenerateExpansion(length - result.size());
+    result += PseudoGenerateExpansion(length - result.size());
   } else {
     int ext = 0;
     // Should contain only whole words, so looking for a space
@@ -320,25 +320,25 @@ static std::string pseudoGenerateExpansion(const unsigned int length) {
   return result;
 }
 
-std::string PseudoMethodAccent::start() {
+std::string PseudoMethodAccent::Start() {
   std::string result;
-  if (mDepth == 0) {
+  if (depth_ == 0) {
     result = "[";
   }
-  mWordCount = mLength = 0;
-  mDepth++;
+  word_count_ = length_ = 0;
+  depth_++;
   return result;
 }
 
-std::string PseudoMethodAccent::end() {
+std::string PseudoMethodAccent::End() {
   std::string result;
-  if (mLength) {
+  if (length_) {
     result += " ";
-    result += pseudoGenerateExpansion(mWordCount > 3 ? mLength : mLength / 2);
+    result += PseudoGenerateExpansion(word_count_ > 3 ? length_ : length_ / 2);
   }
-  mWordCount = mLength = 0;
-  mDepth--;
-  if (mDepth == 0) {
+  word_count_ = length_ = 0;
+  depth_--;
+  if (depth_ == 0) {
     result += "]";
   }
   return result;
@@ -349,7 +349,7 @@ std::string PseudoMethodAccent::end() {
  *
  * Note: This leaves placeholder syntax untouched.
  */
-std::string PseudoMethodAccent::text(const StringPiece& source) {
+std::string PseudoMethodAccent::Text(const StringPiece& source) {
   const char* s = source.data();
   std::string result;
   const size_t I = source.size();
@@ -365,7 +365,7 @@ std::string PseudoMethodAccent::text(const StringPiece& source) {
         ++i;
         c = s[i];
         chunk.append(&c, 1);
-        if (isPossibleNormalPlaceholderEnd(c)) {
+        if (IsPossibleNormalPlaceholderEnd(c)) {
           end = true;
         } else if (i + 1 < I && c == 't') {
           ++i;
@@ -375,24 +375,24 @@ std::string PseudoMethodAccent::text(const StringPiece& source) {
         }
       }
       // Treat chunk as a placeholder unless it ends with %.
-      result += ((c == '%') ? chunk : placeholder(chunk));
+      result += ((c == '%') ? chunk : Placeholder(chunk));
     } else if (c == '<' || c == '&') {
       // html syntax, no need to pseudolocalize
       bool tag_closed = false;
       while (!tag_closed && i < I) {
         if (c == '&') {
-          std::string escapeText;
-          escapeText.append(&c, 1);
+          std::string escape_text;
+          escape_text.append(&c, 1);
           bool end = false;
-          size_t htmlCodePos = i;
-          while (!end && htmlCodePos < I) {
-            ++htmlCodePos;
-            c = s[htmlCodePos];
-            escapeText.append(&c, 1);
+          size_t html_code_pos = i;
+          while (!end && html_code_pos < I) {
+            ++html_code_pos;
+            c = s[html_code_pos];
+            escape_text.append(&c, 1);
             // Valid html code
             if (c == ';') {
               end = true;
-              i = htmlCodePos;
+              i = html_code_pos;
             }
             // Wrong html code
             else if (!((c == '#' || (c >= 'a' && c <= 'z') ||
@@ -400,8 +400,8 @@ std::string PseudoMethodAccent::text(const StringPiece& source) {
               end = true;
             }
           }
-          result += escapeText;
-          if (escapeText != "&lt;") {
+          result += escape_text;
+          if (escape_text != "&lt;") {
             tag_closed = true;
           }
           continue;
@@ -417,30 +417,30 @@ std::string PseudoMethodAccent::text(const StringPiece& source) {
       }
     } else {
       // This is a pure text that should be pseudolocalized
-      const char* p = pseudolocalizeChar(c);
+      const char* p = PseudolocalizeChar(c);
       if (p != nullptr) {
         result += p;
       } else {
         bool space = isspace(c);
         if (lastspace && !space) {
-          mWordCount++;
+          word_count_++;
         }
         lastspace = space;
         result.append(&c, 1);
       }
       // Count only pseudolocalizable chars and delimiters
-      mLength++;
+      length_++;
     }
   }
   return result;
 }
 
-std::string PseudoMethodAccent::placeholder(const StringPiece& source) {
+std::string PseudoMethodAccent::Placeholder(const StringPiece& source) {
   // Surround a placeholder with brackets
-  return k_placeholder_open + source.toString() + k_placeholder_close;
+  return kPlaceholderOpen + source.ToString() + kPlaceholderClose;
 }
 
-std::string PseudoMethodBidi::text(const StringPiece& source) {
+std::string PseudoMethodBidi::Text(const StringPiece& source) {
   const char* s = source.data();
   std::string result;
   bool lastspace = true;
@@ -450,24 +450,24 @@ std::string PseudoMethodBidi::text(const StringPiece& source) {
     space = isspace(c);
     if (lastspace && !space) {
       // Word start
-      result += k_rlm + k_rlo;
+      result += kRlm + kRlo;
     } else if (!lastspace && space) {
       // Word end
-      result += k_pdf + k_rlm;
+      result += kPdf + kRlm;
     }
     lastspace = space;
     result.append(&c, 1);
   }
   if (!lastspace) {
     // End of last word
-    result += k_pdf + k_rlm;
+    result += kPdf + kRlm;
   }
   return result;
 }
 
-std::string PseudoMethodBidi::placeholder(const StringPiece& source) {
+std::string PseudoMethodBidi::Placeholder(const StringPiece& source) {
   // Surround a placeholder with directionality change sequence
-  return k_rlm + k_rlo + source.toString() + k_pdf + k_rlm;
+  return kRlm + kRlo + source.ToString() + kPdf + kRlm;
 }
 
 }  // namespace aapt

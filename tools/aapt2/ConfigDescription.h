@@ -17,10 +17,11 @@
 #ifndef AAPT_CONFIG_DESCRIPTION_H
 #define AAPT_CONFIG_DESCRIPTION_H
 
-#include "util/StringPiece.h"
-
-#include <androidfw/ResourceTypes.h>
 #include <ostream>
+
+#include "androidfw/ResourceTypes.h"
+
+#include "util/StringPiece.h"
 
 namespace aapt {
 
@@ -32,7 +33,7 @@ struct ConfigDescription : public android::ResTable_config {
   /**
    * Returns an immutable default config.
    */
-  static const ConfigDescription& defaultConfig();
+  static const ConfigDescription& DefaultConfig();
 
   /*
    * Parse a string of the form 'fr-sw600dp-land' and fill in the
@@ -41,14 +42,14 @@ struct ConfigDescription : public android::ResTable_config {
    * The resulting configuration has the appropriate sdkVersion defined
    * for backwards compatibility.
    */
-  static bool parse(const StringPiece& str, ConfigDescription* out = nullptr);
+  static bool Parse(const StringPiece& str, ConfigDescription* out = nullptr);
 
   /**
    * If the configuration uses an axis that was added after
    * the original Android release, make sure the SDK version
    * is set accordingly.
    */
-  static void applyVersionForCompatibility(ConfigDescription* config);
+  static void ApplyVersionForCompatibility(ConfigDescription* config);
 
   ConfigDescription();
   ConfigDescription(const android::ResTable_config& o);  // NOLINT(implicit)
@@ -59,7 +60,7 @@ struct ConfigDescription : public android::ResTable_config {
   ConfigDescription& operator=(const ConfigDescription& o);
   ConfigDescription& operator=(ConfigDescription&& o);
 
-  ConfigDescription copyWithoutSdkVersion() const;
+  ConfigDescription CopyWithoutSdkVersion() const;
 
   /**
    * A configuration X dominates another configuration Y, if X has at least the
@@ -70,14 +71,14 @@ struct ConfigDescription : public android::ResTable_config {
    * For example, the configuration 'en-w800dp' dominates 'en-rGB-w1024dp'. It
    * does not dominate 'fr', 'en-w720dp', or 'mcc001-en-w800dp'.
    */
-  bool dominates(const ConfigDescription& o) const;
+  bool Dominates(const ConfigDescription& o) const;
 
   /**
    * Returns true if this configuration defines a more important configuration
    * parameter than o. For example, "en" has higher precedence than "v23",
    * whereas "en" has the same precedence as "en-v23".
    */
-  bool hasHigherPrecedenceThan(const ConfigDescription& o) const;
+  bool HasHigherPrecedenceThan(const ConfigDescription& o) const;
 
   /**
    * A configuration conflicts with another configuration if both
@@ -85,7 +86,7 @@ struct ConfigDescription : public android::ResTable_config {
    * incompatible configuration parameter is a non-range, non-density parameter
    * that is defined in both configurations as a different, non-default value.
    */
-  bool conflictsWith(const ConfigDescription& o) const;
+  bool ConflictsWith(const ConfigDescription& o) const;
 
   /**
    * A configuration is compatible with another configuration if both
@@ -93,9 +94,9 @@ struct ConfigDescription : public android::ResTable_config {
    * unrelated by domination. For example, land-v11 conflicts with port-v21
    * but is compatible with v21 (both land-v11 and v21 would match en-land-v23).
    */
-  bool isCompatibleWith(const ConfigDescription& o) const;
+  bool IsCompatibleWith(const ConfigDescription& o) const;
 
-  bool matchWithDensity(const ConfigDescription& o) const;
+  bool MatchWithDensity(const ConfigDescription& o) const;
 
   bool operator<(const ConfigDescription& o) const;
   bool operator<=(const ConfigDescription& o) const;
@@ -141,7 +142,7 @@ inline ConfigDescription& ConfigDescription::operator=(ConfigDescription&& o) {
   return *this;
 }
 
-inline bool ConfigDescription::matchWithDensity(
+inline bool ConfigDescription::MatchWithDensity(
     const ConfigDescription& o) const {
   return match(o) && (density == 0 || density == o.density);
 }

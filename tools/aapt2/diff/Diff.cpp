@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "android-base/macros.h"
+
 #include "Flags.h"
 #include "ResourceTable.h"
 #include "ValueVisitor.h"
@@ -22,74 +24,72 @@
 #include "process/SymbolTable.h"
 #include "unflatten/BinaryResourceParser.h"
 
-#include <android-base/macros.h>
-
 namespace aapt {
 
 class DiffContext : public IAaptContext {
  public:
-  const std::string& getCompilationPackage() override { return mEmpty; }
+  const std::string& GetCompilationPackage() override { return empty_; }
 
-  uint8_t getPackageId() override { return 0x0; }
+  uint8_t GetPackageId() override { return 0x0; }
 
-  IDiagnostics* getDiagnostics() override { return &mDiagnostics; }
+  IDiagnostics* GetDiagnostics() override { return &diagnostics_; }
 
-  NameMangler* getNameMangler() override { return &mNameMangler; }
+  NameMangler* GetNameMangler() override { return &name_mangler_; }
 
-  SymbolTable* getExternalSymbols() override { return &mSymbolTable; }
+  SymbolTable* GetExternalSymbols() override { return &symbol_table_; }
 
-  bool verbose() override { return false; }
+  bool IsVerbose() override { return false; }
 
-  int getMinSdkVersion() override { return 0; }
+  int GetMinSdkVersion() override { return 0; }
 
  private:
-  std::string mEmpty;
-  StdErrDiagnostics mDiagnostics;
-  NameMangler mNameMangler = NameMangler(NameManglerPolicy{});
-  SymbolTable mSymbolTable;
+  std::string empty_;
+  StdErrDiagnostics diagnostics_;
+  NameMangler name_mangler_ = NameMangler(NameManglerPolicy{});
+  SymbolTable symbol_table_;
 };
 
 class LoadedApk {
  public:
   LoadedApk(const Source& source, std::unique_ptr<io::IFileCollection> apk,
             std::unique_ptr<ResourceTable> table)
-      : mSource(source), mApk(std::move(apk)), mTable(std::move(table)) {}
+      : source_(source), apk_(std::move(apk)), table_(std::move(table)) {}
 
-  io::IFileCollection* getFileCollection() { return mApk.get(); }
+  io::IFileCollection* GetFileCollection() { return apk_.get(); }
 
-  ResourceTable* getResourceTable() { return mTable.get(); }
+  ResourceTable* GetResourceTable() { return table_.get(); }
 
-  const Source& getSource() { return mSource; }
+  const Source& GetSource() { return source_; }
 
  private:
-  Source mSource;
-  std::unique_ptr<io::IFileCollection> mApk;
-  std::unique_ptr<ResourceTable> mTable;
+  Source source_;
+  std::unique_ptr<io::IFileCollection> apk_;
+  std::unique_ptr<ResourceTable> table_;
 
   DISALLOW_COPY_AND_ASSIGN(LoadedApk);
 };
 
-static std::unique_ptr<LoadedApk> loadApkFromPath(IAaptContext* context,
+static std::unique_ptr<LoadedApk> LoadApkFromPath(IAaptContext* context,
                                                   const StringPiece& path) {
   Source source(path);
   std::string error;
   std::unique_ptr<io::ZipFileCollection> apk =
-      io::ZipFileCollection::create(path, &error);
+      io::ZipFileCollection::Create(path, &error);
   if (!apk) {
-    context->getDiagnostics()->error(DiagMessage(source) << error);
+    context->GetDiagnostics()->Error(DiagMessage(source) << error);
     return {};
   }
 
-  io::IFile* file = apk->findFile("resources.arsc");
+  io::IFile* file = apk->FindFile("resources.arsc");
   if (!file) {
-    context->getDiagnostics()->error(DiagMessage(source)
+    context->GetDiagnostics()->Error(DiagMessage(source)
                                      << "no resources.arsc found");
     return {};
   }
 
-  std::unique_ptr<io::IData> data = file->openAsData();
+  std::unique_ptr<io::IData> data = file->OpenAsData();
   if (!data) {
-    context->getDiagnostics()->error(DiagMessage(source)
+    context->GetDiagnostics()->Error(DiagMessage(source)
                                      << "could not open resources.arsc");
     return {};
   }
@@ -97,276 +97,281 @@ static std::unique_ptr<LoadedApk> loadApkFromPath(IAaptContext* context,
   std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
   BinaryResourceParser parser(context, table.get(), source, data->data(),
                               data->size());
-  if (!parser.parse()) {
+  if (!parser.Parse()) {
     return {};
   }
 
   return util::make_unique<LoadedApk>(source, std::move(apk), std::move(table));
 }
 
-static void emitDiffLine(const Source& source, const StringPiece& message) {
+static void EmitDiffLine(const Source& source, const StringPiece& message) {
   std::cerr << source << ": " << message << "\n";
 }
 
-static bool isSymbolVisibilityDifferent(const Symbol& symbolA,
-                                        const Symbol& symbolB) {
-  return symbolA.state != symbolB.state;
+static bool IsSymbolVisibilityDifferent(const Symbol& symbol_a,
+                                        const Symbol& symbol_b) {
+  return symbol_a.state != symbol_b.state;
 }
 
 template <typename Id>
-static bool isIdDiff(const Symbol& symbolA, const Maybe<Id>& idA,
-                     const Symbol& symbolB, const Maybe<Id>& idB) {
-  if (symbolA.state == SymbolState::kPublic ||
-      symbolB.state == SymbolState::kPublic) {
-    return idA != idB;
+static bool IsIdDiff(const Symbol& symbol_a, const Maybe<Id>& id_a,
+                     const Symbol& symbol_b, const Maybe<Id>& id_b) {
+  if (symbol_a.state == SymbolState::kPublic ||
+      symbol_b.state == SymbolState::kPublic) {
+    return id_a != id_b;
   }
   return false;
 }
 
-static bool emitResourceConfigValueDiff(
-    IAaptContext* context, LoadedApk* apkA, ResourceTablePackage* pkgA,
-    ResourceTableType* typeA, ResourceEntry* entryA,
-    ResourceConfigValue* configValueA, LoadedApk* apkB,
-    ResourceTablePackage* pkgB, ResourceTableType* typeB, ResourceEntry* entryB,
-    ResourceConfigValue* configValueB) {
-  Value* valueA = configValueA->value.get();
-  Value* valueB = configValueB->value.get();
-  if (!valueA->equals(valueB)) {
-    std::stringstream strStream;
-    strStream << "value " << pkgA->name << ":" << typeA->type << "/"
-              << entryA->name << " config=" << configValueA->config
-              << " does not match:\n";
-    valueA->print(&strStream);
-    strStream << "\n vs \n";
-    valueB->print(&strStream);
-    emitDiffLine(apkB->getSource(), strStream.str());
+static bool EmitResourceConfigValueDiff(
+    IAaptContext* context, LoadedApk* apk_a, ResourceTablePackage* pkg_a,
+    ResourceTableType* type_a, ResourceEntry* entry_a,
+    ResourceConfigValue* config_value_a, LoadedApk* apk_b,
+    ResourceTablePackage* pkg_b, ResourceTableType* type_b,
+    ResourceEntry* entry_b, ResourceConfigValue* config_value_b) {
+  Value* value_a = config_value_a->value.get();
+  Value* value_b = config_value_b->value.get();
+  if (!value_a->Equals(value_b)) {
+    std::stringstream str_stream;
+    str_stream << "value " << pkg_a->name << ":" << type_a->type << "/"
+               << entry_a->name << " config=" << config_value_a->config
+               << " does not match:\n";
+    value_a->Print(&str_stream);
+    str_stream << "\n vs \n";
+    value_b->Print(&str_stream);
+    EmitDiffLine(apk_b->GetSource(), str_stream.str());
     return true;
   }
   return false;
 }
 
-static bool emitResourceEntryDiff(IAaptContext* context, LoadedApk* apkA,
-                                  ResourceTablePackage* pkgA,
-                                  ResourceTableType* typeA,
-                                  ResourceEntry* entryA, LoadedApk* apkB,
-                                  ResourceTablePackage* pkgB,
-                                  ResourceTableType* typeB,
-                                  ResourceEntry* entryB) {
+static bool EmitResourceEntryDiff(IAaptContext* context, LoadedApk* apk_a,
+                                  ResourceTablePackage* pkg_a,
+                                  ResourceTableType* type_a,
+                                  ResourceEntry* entry_a, LoadedApk* apk_b,
+                                  ResourceTablePackage* pkg_b,
+                                  ResourceTableType* type_b,
+                                  ResourceEntry* entry_b) {
   bool diff = false;
-  for (std::unique_ptr<ResourceConfigValue>& configValueA : entryA->values) {
-    ResourceConfigValue* configValueB = entryB->findValue(configValueA->config);
-    if (!configValueB) {
-      std::stringstream strStream;
-      strStream << "missing " << pkgA->name << ":" << typeA->type << "/"
-                << entryA->name << " config=" << configValueA->config;
-      emitDiffLine(apkB->getSource(), strStream.str());
+  for (std::unique_ptr<ResourceConfigValue>& config_value_a : entry_a->values) {
+    ResourceConfigValue* config_value_b =
+        entry_b->FindValue(config_value_a->config);
+    if (!config_value_b) {
+      std::stringstream str_stream;
+      str_stream << "missing " << pkg_a->name << ":" << type_a->type << "/"
+                 << entry_a->name << " config=" << config_value_a->config;
+      EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     } else {
-      diff |= emitResourceConfigValueDiff(context, apkA, pkgA, typeA, entryA,
-                                          configValueA.get(), apkB, pkgB, typeB,
-                                          entryB, configValueB);
+      diff |= EmitResourceConfigValueDiff(
+          context, apk_a, pkg_a, type_a, entry_a, config_value_a.get(), apk_b,
+          pkg_b, type_b, entry_b, config_value_b);
     }
   }
 
   // Check for any newly added config values.
-  for (std::unique_ptr<ResourceConfigValue>& configValueB : entryB->values) {
-    ResourceConfigValue* configValueA = entryA->findValue(configValueB->config);
-    if (!configValueA) {
-      std::stringstream strStream;
-      strStream << "new config " << pkgB->name << ":" << typeB->type << "/"
-                << entryB->name << " config=" << configValueB->config;
-      emitDiffLine(apkB->getSource(), strStream.str());
+  for (std::unique_ptr<ResourceConfigValue>& config_value_b : entry_b->values) {
+    ResourceConfigValue* config_value_a =
+        entry_a->FindValue(config_value_b->config);
+    if (!config_value_a) {
+      std::stringstream str_stream;
+      str_stream << "new config " << pkg_b->name << ":" << type_b->type << "/"
+                 << entry_b->name << " config=" << config_value_b->config;
+      EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     }
   }
   return false;
 }
 
-static bool emitResourceTypeDiff(IAaptContext* context, LoadedApk* apkA,
-                                 ResourceTablePackage* pkgA,
-                                 ResourceTableType* typeA, LoadedApk* apkB,
-                                 ResourceTablePackage* pkgB,
-                                 ResourceTableType* typeB) {
+static bool EmitResourceTypeDiff(IAaptContext* context, LoadedApk* apk_a,
+                                 ResourceTablePackage* pkg_a,
+                                 ResourceTableType* type_a, LoadedApk* apk_b,
+                                 ResourceTablePackage* pkg_b,
+                                 ResourceTableType* type_b) {
   bool diff = false;
-  for (std::unique_ptr<ResourceEntry>& entryA : typeA->entries) {
-    ResourceEntry* entryB = typeB->findEntry(entryA->name);
-    if (!entryB) {
-      std::stringstream strStream;
-      strStream << "missing " << pkgA->name << ":" << typeA->type << "/"
-                << entryA->name;
-      emitDiffLine(apkB->getSource(), strStream.str());
+  for (std::unique_ptr<ResourceEntry>& entry_a : type_a->entries) {
+    ResourceEntry* entry_b = type_b->FindEntry(entry_a->name);
+    if (!entry_b) {
+      std::stringstream str_stream;
+      str_stream << "missing " << pkg_a->name << ":" << type_a->type << "/"
+                 << entry_a->name;
+      EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     } else {
-      if (isSymbolVisibilityDifferent(entryA->symbolStatus,
-                                      entryB->symbolStatus)) {
-        std::stringstream strStream;
-        strStream << pkgA->name << ":" << typeA->type << "/" << entryA->name
-                  << " has different visibility (";
-        if (entryB->symbolStatus.state == SymbolState::kPublic) {
-          strStream << "PUBLIC";
+      if (IsSymbolVisibilityDifferent(entry_a->symbol_status,
+                                      entry_b->symbol_status)) {
+        std::stringstream str_stream;
+        str_stream << pkg_a->name << ":" << type_a->type << "/" << entry_a->name
+                   << " has different visibility (";
+        if (entry_b->symbol_status.state == SymbolState::kPublic) {
+          str_stream << "PUBLIC";
         } else {
-          strStream << "PRIVATE";
+          str_stream << "PRIVATE";
         }
-        strStream << " vs ";
-        if (entryA->symbolStatus.state == SymbolState::kPublic) {
-          strStream << "PUBLIC";
+        str_stream << " vs ";
+        if (entry_a->symbol_status.state == SymbolState::kPublic) {
+          str_stream << "PUBLIC";
         } else {
-          strStream << "PRIVATE";
+          str_stream << "PRIVATE";
         }
-        strStream << ")";
-        emitDiffLine(apkB->getSource(), strStream.str());
+        str_stream << ")";
+        EmitDiffLine(apk_b->GetSource(), str_stream.str());
         diff = true;
-      } else if (isIdDiff(entryA->symbolStatus, entryA->id,
-                          entryB->symbolStatus, entryB->id)) {
-        std::stringstream strStream;
-        strStream << pkgA->name << ":" << typeA->type << "/" << entryA->name
-                  << " has different public ID (";
-        if (entryB->id) {
-          strStream << "0x" << std::hex << entryB->id.value();
+      } else if (IsIdDiff(entry_a->symbol_status, entry_a->id,
+                          entry_b->symbol_status, entry_b->id)) {
+        std::stringstream str_stream;
+        str_stream << pkg_a->name << ":" << type_a->type << "/" << entry_a->name
+                   << " has different public ID (";
+        if (entry_b->id) {
+          str_stream << "0x" << std::hex << entry_b->id.value();
         } else {
-          strStream << "none";
+          str_stream << "none";
         }
-        strStream << " vs ";
-        if (entryA->id) {
-          strStream << "0x " << std::hex << entryA->id.value();
+        str_stream << " vs ";
+        if (entry_a->id) {
+          str_stream << "0x " << std::hex << entry_a->id.value();
         } else {
-          strStream << "none";
+          str_stream << "none";
         }
-        strStream << ")";
-        emitDiffLine(apkB->getSource(), strStream.str());
+        str_stream << ")";
+        EmitDiffLine(apk_b->GetSource(), str_stream.str());
         diff = true;
       }
-      diff |= emitResourceEntryDiff(context, apkA, pkgA, typeA, entryA.get(),
-                                    apkB, pkgB, typeB, entryB);
+      diff |=
+          EmitResourceEntryDiff(context, apk_a, pkg_a, type_a, entry_a.get(),
+                                apk_b, pkg_b, type_b, entry_b);
     }
   }
 
   // Check for any newly added entries.
-  for (std::unique_ptr<ResourceEntry>& entryB : typeB->entries) {
-    ResourceEntry* entryA = typeA->findEntry(entryB->name);
-    if (!entryA) {
-      std::stringstream strStream;
-      strStream << "new entry " << pkgB->name << ":" << typeB->type << "/"
-                << entryB->name;
-      emitDiffLine(apkB->getSource(), strStream.str());
+  for (std::unique_ptr<ResourceEntry>& entry_b : type_b->entries) {
+    ResourceEntry* entry_a = type_a->FindEntry(entry_b->name);
+    if (!entry_a) {
+      std::stringstream str_stream;
+      str_stream << "new entry " << pkg_b->name << ":" << type_b->type << "/"
+                 << entry_b->name;
+      EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     }
   }
   return diff;
 }
 
-static bool emitResourcePackageDiff(IAaptContext* context, LoadedApk* apkA,
-                                    ResourceTablePackage* pkgA, LoadedApk* apkB,
-                                    ResourceTablePackage* pkgB) {
+static bool EmitResourcePackageDiff(IAaptContext* context, LoadedApk* apk_a,
+                                    ResourceTablePackage* pkg_a,
+                                    LoadedApk* apk_b,
+                                    ResourceTablePackage* pkg_b) {
   bool diff = false;
-  for (std::unique_ptr<ResourceTableType>& typeA : pkgA->types) {
-    ResourceTableType* typeB = pkgB->findType(typeA->type);
-    if (!typeB) {
-      std::stringstream strStream;
-      strStream << "missing " << pkgA->name << ":" << typeA->type;
-      emitDiffLine(apkA->getSource(), strStream.str());
+  for (std::unique_ptr<ResourceTableType>& type_a : pkg_a->types) {
+    ResourceTableType* type_b = pkg_b->FindType(type_a->type);
+    if (!type_b) {
+      std::stringstream str_stream;
+      str_stream << "missing " << pkg_a->name << ":" << type_a->type;
+      EmitDiffLine(apk_a->GetSource(), str_stream.str());
       diff = true;
     } else {
-      if (isSymbolVisibilityDifferent(typeA->symbolStatus,
-                                      typeB->symbolStatus)) {
-        std::stringstream strStream;
-        strStream << pkgA->name << ":" << typeA->type
-                  << " has different visibility (";
-        if (typeB->symbolStatus.state == SymbolState::kPublic) {
-          strStream << "PUBLIC";
+      if (IsSymbolVisibilityDifferent(type_a->symbol_status,
+                                      type_b->symbol_status)) {
+        std::stringstream str_stream;
+        str_stream << pkg_a->name << ":" << type_a->type
+                   << " has different visibility (";
+        if (type_b->symbol_status.state == SymbolState::kPublic) {
+          str_stream << "PUBLIC";
         } else {
-          strStream << "PRIVATE";
+          str_stream << "PRIVATE";
         }
-        strStream << " vs ";
-        if (typeA->symbolStatus.state == SymbolState::kPublic) {
-          strStream << "PUBLIC";
+        str_stream << " vs ";
+        if (type_a->symbol_status.state == SymbolState::kPublic) {
+          str_stream << "PUBLIC";
         } else {
-          strStream << "PRIVATE";
+          str_stream << "PRIVATE";
         }
-        strStream << ")";
-        emitDiffLine(apkB->getSource(), strStream.str());
+        str_stream << ")";
+        EmitDiffLine(apk_b->GetSource(), str_stream.str());
         diff = true;
-      } else if (isIdDiff(typeA->symbolStatus, typeA->id, typeB->symbolStatus,
-                          typeB->id)) {
-        std::stringstream strStream;
-        strStream << pkgA->name << ":" << typeA->type
-                  << " has different public ID (";
-        if (typeB->id) {
-          strStream << "0x" << std::hex << typeB->id.value();
+      } else if (IsIdDiff(type_a->symbol_status, type_a->id,
+                          type_b->symbol_status, type_b->id)) {
+        std::stringstream str_stream;
+        str_stream << pkg_a->name << ":" << type_a->type
+                   << " has different public ID (";
+        if (type_b->id) {
+          str_stream << "0x" << std::hex << type_b->id.value();
         } else {
-          strStream << "none";
+          str_stream << "none";
         }
-        strStream << " vs ";
-        if (typeA->id) {
-          strStream << "0x " << std::hex << typeA->id.value();
+        str_stream << " vs ";
+        if (type_a->id) {
+          str_stream << "0x " << std::hex << type_a->id.value();
         } else {
-          strStream << "none";
+          str_stream << "none";
         }
-        strStream << ")";
-        emitDiffLine(apkB->getSource(), strStream.str());
+        str_stream << ")";
+        EmitDiffLine(apk_b->GetSource(), str_stream.str());
         diff = true;
       }
-      diff |= emitResourceTypeDiff(context, apkA, pkgA, typeA.get(), apkB, pkgB,
-                                   typeB);
+      diff |= EmitResourceTypeDiff(context, apk_a, pkg_a, type_a.get(), apk_b,
+                                   pkg_b, type_b);
     }
   }
 
   // Check for any newly added types.
-  for (std::unique_ptr<ResourceTableType>& typeB : pkgB->types) {
-    ResourceTableType* typeA = pkgA->findType(typeB->type);
-    if (!typeA) {
-      std::stringstream strStream;
-      strStream << "new type " << pkgB->name << ":" << typeB->type;
-      emitDiffLine(apkB->getSource(), strStream.str());
+  for (std::unique_ptr<ResourceTableType>& type_b : pkg_b->types) {
+    ResourceTableType* type_a = pkg_a->FindType(type_b->type);
+    if (!type_a) {
+      std::stringstream str_stream;
+      str_stream << "new type " << pkg_b->name << ":" << type_b->type;
+      EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     }
   }
   return diff;
 }
 
-static bool emitResourceTableDiff(IAaptContext* context, LoadedApk* apkA,
-                                  LoadedApk* apkB) {
-  ResourceTable* tableA = apkA->getResourceTable();
-  ResourceTable* tableB = apkB->getResourceTable();
+static bool EmitResourceTableDiff(IAaptContext* context, LoadedApk* apk_a,
+                                  LoadedApk* apk_b) {
+  ResourceTable* table_a = apk_a->GetResourceTable();
+  ResourceTable* table_b = apk_b->GetResourceTable();
 
   bool diff = false;
-  for (std::unique_ptr<ResourceTablePackage>& pkgA : tableA->packages) {
-    ResourceTablePackage* pkgB = tableB->findPackage(pkgA->name);
-    if (!pkgB) {
-      std::stringstream strStream;
-      strStream << "missing package " << pkgA->name;
-      emitDiffLine(apkB->getSource(), strStream.str());
+  for (std::unique_ptr<ResourceTablePackage>& pkg_a : table_a->packages) {
+    ResourceTablePackage* pkg_b = table_b->FindPackage(pkg_a->name);
+    if (!pkg_b) {
+      std::stringstream str_stream;
+      str_stream << "missing package " << pkg_a->name;
+      EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     } else {
-      if (pkgA->id != pkgB->id) {
-        std::stringstream strStream;
-        strStream << "package '" << pkgA->name << "' has different id (";
-        if (pkgB->id) {
-          strStream << "0x" << std::hex << pkgB->id.value();
+      if (pkg_a->id != pkg_b->id) {
+        std::stringstream str_stream;
+        str_stream << "package '" << pkg_a->name << "' has different id (";
+        if (pkg_b->id) {
+          str_stream << "0x" << std::hex << pkg_b->id.value();
         } else {
-          strStream << "none";
+          str_stream << "none";
         }
-        strStream << " vs ";
-        if (pkgA->id) {
-          strStream << "0x" << std::hex << pkgA->id.value();
+        str_stream << " vs ";
+        if (pkg_a->id) {
+          str_stream << "0x" << std::hex << pkg_a->id.value();
         } else {
-          strStream << "none";
+          str_stream << "none";
         }
-        strStream << ")";
-        emitDiffLine(apkB->getSource(), strStream.str());
+        str_stream << ")";
+        EmitDiffLine(apk_b->GetSource(), str_stream.str());
         diff = true;
       }
-      diff |= emitResourcePackageDiff(context, apkA, pkgA.get(), apkB, pkgB);
+      diff |=
+          EmitResourcePackageDiff(context, apk_a, pkg_a.get(), apk_b, pkg_b);
     }
   }
 
   // Check for any newly added packages.
-  for (std::unique_ptr<ResourceTablePackage>& pkgB : tableB->packages) {
-    ResourceTablePackage* pkgA = tableA->findPackage(pkgB->name);
-    if (!pkgA) {
-      std::stringstream strStream;
-      strStream << "new package " << pkgB->name;
-      emitDiffLine(apkB->getSource(), strStream.str());
+  for (std::unique_ptr<ResourceTablePackage>& pkg_b : table_b->packages) {
+    ResourceTablePackage* pkg_a = table_a->FindPackage(pkg_b->name);
+    if (!pkg_a) {
+      std::stringstream str_stream;
+      str_stream << "new package " << pkg_b->name;
+      EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     }
   }
@@ -375,49 +380,49 @@ static bool emitResourceTableDiff(IAaptContext* context, LoadedApk* apkA,
 
 class ZeroingReferenceVisitor : public ValueVisitor {
  public:
-  using ValueVisitor::visit;
+  using ValueVisitor::Visit;
 
-  void visit(Reference* ref) override {
+  void Visit(Reference* ref) override {
     if (ref->name && ref->id) {
-      if (ref->id.value().packageId() == 0x7f) {
+      if (ref->id.value().package_id() == 0x7f) {
         ref->id = {};
       }
     }
   }
 };
 
-static void zeroOutAppReferences(ResourceTable* table) {
+static void ZeroOutAppReferences(ResourceTable* table) {
   ZeroingReferenceVisitor visitor;
-  visitAllValuesInTable(table, &visitor);
+  VisitAllValuesInTable(table, &visitor);
 }
 
-int diff(const std::vector<StringPiece>& args) {
+int Diff(const std::vector<StringPiece>& args) {
   DiffContext context;
 
   Flags flags;
-  if (!flags.parse("aapt2 diff", args, &std::cerr)) {
+  if (!flags.Parse("aapt2 diff", args, &std::cerr)) {
     return 1;
   }
 
-  if (flags.getArgs().size() != 2u) {
+  if (flags.GetArgs().size() != 2u) {
     std::cerr << "must have two apks as arguments.\n\n";
-    flags.usage("aapt2 diff", &std::cerr);
+    flags.Usage("aapt2 diff", &std::cerr);
     return 1;
   }
 
-  std::unique_ptr<LoadedApk> apkA =
-      loadApkFromPath(&context, flags.getArgs()[0]);
-  std::unique_ptr<LoadedApk> apkB =
-      loadApkFromPath(&context, flags.getArgs()[1]);
-  if (!apkA || !apkB) {
+  std::unique_ptr<LoadedApk> apk_a =
+      LoadApkFromPath(&context, flags.GetArgs()[0]);
+  std::unique_ptr<LoadedApk> apk_b =
+      LoadApkFromPath(&context, flags.GetArgs()[1]);
+  if (!apk_a || !apk_b) {
     return 1;
   }
 
   // Zero out Application IDs in references.
-  zeroOutAppReferences(apkA->getResourceTable());
-  zeroOutAppReferences(apkB->getResourceTable());
+  ZeroOutAppReferences(apk_a->GetResourceTable());
+  ZeroOutAppReferences(apk_b->GetResourceTable());
 
-  if (emitResourceTableDiff(&context, apkA.get(), apkB.get())) {
+  if (EmitResourceTableDiff(&context, apk_a.get(), apk_b.get())) {
     // We emitted a diff, so return 1 (failure).
     return 1;
   }

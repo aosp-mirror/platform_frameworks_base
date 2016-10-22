@@ -15,80 +15,81 @@
  */
 
 #include "process/SymbolTable.h"
+
+#include "androidfw/AssetManager.h"
+#include "androidfw/ResourceTypes.h"
+
 #include "ConfigDescription.h"
 #include "Resource.h"
 #include "ResourceUtils.h"
 #include "ValueVisitor.h"
 #include "util/Util.h"
 
-#include <androidfw/AssetManager.h>
-#include <androidfw/ResourceTypes.h>
-
 namespace aapt {
 
-void SymbolTable::appendSource(std::unique_ptr<ISymbolSource> source) {
-  mSources.push_back(std::move(source));
+void SymbolTable::AppendSource(std::unique_ptr<ISymbolSource> source) {
+  sources_.push_back(std::move(source));
 
   // We do not clear the cache, because sources earlier in the list take
   // precedent.
 }
 
-void SymbolTable::prependSource(std::unique_ptr<ISymbolSource> source) {
-  mSources.insert(mSources.begin(), std::move(source));
+void SymbolTable::PrependSource(std::unique_ptr<ISymbolSource> source) {
+  sources_.insert(sources_.begin(), std::move(source));
 
   // We must clear the cache in case we did a lookup before adding this
   // resource.
-  mCache.clear();
+  cache_.clear();
 }
 
-const SymbolTable::Symbol* SymbolTable::findByName(const ResourceName& name) {
-  if (const std::shared_ptr<Symbol>& s = mCache.get(name)) {
+const SymbolTable::Symbol* SymbolTable::FindByName(const ResourceName& name) {
+  if (const std::shared_ptr<Symbol>& s = cache_.get(name)) {
     return s.get();
   }
 
   // We did not find it in the cache, so look through the sources.
-  for (auto& symbolSource : mSources) {
-    std::unique_ptr<Symbol> symbol = symbolSource->findByName(name);
+  for (auto& symbolSource : sources_) {
+    std::unique_ptr<Symbol> symbol = symbolSource->FindByName(name);
     if (symbol) {
       // Take ownership of the symbol into a shared_ptr. We do this because
       // LruCache
       // doesn't support unique_ptr.
-      std::shared_ptr<Symbol> sharedSymbol =
+      std::shared_ptr<Symbol> shared_symbol =
           std::shared_ptr<Symbol>(symbol.release());
-      mCache.put(name, sharedSymbol);
+      cache_.put(name, shared_symbol);
 
-      if (sharedSymbol->id) {
+      if (shared_symbol->id) {
         // The symbol has an ID, so we can also cache this!
-        mIdCache.put(sharedSymbol->id.value(), sharedSymbol);
+        id_cache_.put(shared_symbol->id.value(), shared_symbol);
       }
-      return sharedSymbol.get();
+      return shared_symbol.get();
     }
   }
   return nullptr;
 }
 
-const SymbolTable::Symbol* SymbolTable::findById(const ResourceId& id) {
-  if (const std::shared_ptr<Symbol>& s = mIdCache.get(id)) {
+const SymbolTable::Symbol* SymbolTable::FindById(const ResourceId& id) {
+  if (const std::shared_ptr<Symbol>& s = id_cache_.get(id)) {
     return s.get();
   }
 
   // We did not find it in the cache, so look through the sources.
-  for (auto& symbolSource : mSources) {
-    std::unique_ptr<Symbol> symbol = symbolSource->findById(id);
+  for (auto& symbolSource : sources_) {
+    std::unique_ptr<Symbol> symbol = symbolSource->FindById(id);
     if (symbol) {
       // Take ownership of the symbol into a shared_ptr. We do this because
       // LruCache
       // doesn't support unique_ptr.
-      std::shared_ptr<Symbol> sharedSymbol =
+      std::shared_ptr<Symbol> shared_symbol =
           std::shared_ptr<Symbol>(symbol.release());
-      mIdCache.put(id, sharedSymbol);
-      return sharedSymbol.get();
+      id_cache_.put(id, shared_symbol);
+      return shared_symbol.get();
     }
   }
   return nullptr;
 }
 
-const SymbolTable::Symbol* SymbolTable::findByReference(const Reference& ref) {
+const SymbolTable::Symbol* SymbolTable::FindByReference(const Reference& ref) {
   // First try the ID. This is because when we lookup by ID, we only fill in the
   // ID cache.
   // Looking up by name fills in the name and ID cache. So a cache miss will
@@ -102,22 +103,22 @@ const SymbolTable::Symbol* SymbolTable::findByReference(const Reference& ref) {
   // succeeded to lookup by ID. Subsequent lookups will miss then hit.
   const SymbolTable::Symbol* symbol = nullptr;
   if (ref.id) {
-    symbol = findById(ref.id.value());
+    symbol = FindById(ref.id.value());
   }
 
   if (ref.name && !symbol) {
-    symbol = findByName(ref.name.value());
+    symbol = FindByName(ref.name.value());
   }
   return symbol;
 }
 
-std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::findByName(
+std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::FindByName(
     const ResourceName& name) {
-  Maybe<ResourceTable::SearchResult> result = mTable->findResource(name);
+  Maybe<ResourceTable::SearchResult> result = table_->FindResource(name);
   if (!result) {
     if (name.type == ResourceType::kAttr) {
       // Recurse and try looking up a private attribute.
-      return findByName(
+      return FindByName(
           ResourceName(name.package, ResourceType::kAttrPrivate, name.entry));
     }
     return {};
@@ -127,7 +128,7 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::findByName(
 
   std::unique_ptr<SymbolTable::Symbol> symbol =
       util::make_unique<SymbolTable::Symbol>();
-  symbol->isPublic = (sr.entry->symbolStatus.state == SymbolState::kPublic);
+  symbol->is_public = (sr.entry->symbol_status.state == SymbolState::kPublic);
 
   if (sr.package->id && sr.type->id && sr.entry->id) {
     symbol->id = ResourceId(sr.package->id.value(), sr.type->id.value(),
@@ -137,10 +138,10 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::findByName(
   if (name.type == ResourceType::kAttr ||
       name.type == ResourceType::kAttrPrivate) {
     const ConfigDescription kDefaultConfig;
-    ResourceConfigValue* configValue = sr.entry->findValue(kDefaultConfig);
-    if (configValue) {
+    ResourceConfigValue* config_value = sr.entry->FindValue(kDefaultConfig);
+    if (config_value) {
       // This resource has an Attribute.
-      if (Attribute* attr = valueCast<Attribute>(configValue->value.get())) {
+      if (Attribute* attr = ValueCast<Attribute>(config_value->value.get())) {
         symbol->attribute = std::make_shared<Attribute>(*attr);
       } else {
         return {};
@@ -150,13 +151,13 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::findByName(
   return symbol;
 }
 
-bool AssetManagerSymbolSource::addAssetPath(const StringPiece& path) {
+bool AssetManagerSymbolSource::AddAssetPath(const StringPiece& path) {
   int32_t cookie = 0;
-  return mAssets.addAssetPath(android::String8(path.data(), path.size()),
+  return assets_.addAssetPath(android::String8(path.data(), path.size()),
                               &cookie);
 }
 
-static std::unique_ptr<SymbolTable::Symbol> lookupAttributeInTable(
+static std::unique_ptr<SymbolTable::Symbol> LookupAttributeInTable(
     const android::ResTable& table, ResourceId id) {
   // Try as a bag.
   const android::ResTable::bag_entry* entry;
@@ -175,41 +176,42 @@ static std::unique_ptr<SymbolTable::Symbol> lookupAttributeInTable(
   for (size_t i = 0; i < (size_t)count; i++) {
     if (entry[i].map.name.ident == android::ResTable_map::ATTR_TYPE) {
       s->attribute = std::make_shared<Attribute>(false);
-      s->attribute->typeMask = entry[i].map.value.data;
+      s->attribute->type_mask = entry[i].map.value.data;
       break;
     }
   }
 
   if (s->attribute) {
     for (size_t i = 0; i < (size_t)count; i++) {
-      const android::ResTable_map& mapEntry = entry[i].map;
-      if (Res_INTERNALID(mapEntry.name.ident)) {
-        switch (mapEntry.name.ident) {
+      const android::ResTable_map& map_entry = entry[i].map;
+      if (Res_INTERNALID(map_entry.name.ident)) {
+        switch (map_entry.name.ident) {
           case android::ResTable_map::ATTR_MIN:
-            s->attribute->minInt = static_cast<int32_t>(mapEntry.value.data);
+            s->attribute->min_int = static_cast<int32_t>(map_entry.value.data);
             break;
           case android::ResTable_map::ATTR_MAX:
-            s->attribute->maxInt = static_cast<int32_t>(mapEntry.value.data);
+            s->attribute->max_int = static_cast<int32_t>(map_entry.value.data);
             break;
         }
         continue;
       }
 
-      android::ResTable::resource_name entryName;
-      if (!table.getResourceName(mapEntry.name.ident, false, &entryName)) {
+      android::ResTable::resource_name entry_name;
+      if (!table.getResourceName(map_entry.name.ident, false, &entry_name)) {
         table.unlockBag(entry);
         return nullptr;
       }
 
-      Maybe<ResourceName> parsedName = ResourceUtils::toResourceName(entryName);
-      if (!parsedName) {
+      Maybe<ResourceName> parsed_name =
+          ResourceUtils::ToResourceName(entry_name);
+      if (!parsed_name) {
         return nullptr;
       }
 
       Attribute::Symbol symbol;
-      symbol.symbol.name = parsedName.value();
-      symbol.symbol.id = ResourceId(mapEntry.name.ident);
-      symbol.value = mapEntry.value.data;
+      symbol.symbol.name = parsed_name.value();
+      symbol.symbol.id = ResourceId(map_entry.name.ident);
+      symbol.value = map_entry.value.data;
       s->attribute->symbols.push_back(std::move(symbol));
     }
   }
@@ -217,81 +219,81 @@ static std::unique_ptr<SymbolTable::Symbol> lookupAttributeInTable(
   return s;
 }
 
-std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::findByName(
+std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
     const ResourceName& name) {
-  const android::ResTable& table = mAssets.getResources(false);
+  const android::ResTable& table = assets_.getResources(false);
 
-  const std::u16string package16 = util::utf8ToUtf16(name.package);
-  const std::u16string type16 = util::utf8ToUtf16(toString(name.type));
-  const std::u16string entry16 = util::utf8ToUtf16(name.entry);
+  const std::u16string package16 = util::Utf8ToUtf16(name.package);
+  const std::u16string type16 = util::Utf8ToUtf16(ToString(name.type));
+  const std::u16string entry16 = util::Utf8ToUtf16(name.entry);
 
-  uint32_t typeSpecFlags = 0;
-  ResourceId resId = table.identifierForName(
+  uint32_t type_spec_flags = 0;
+  ResourceId res_id = table.identifierForName(
       entry16.data(), entry16.size(), type16.data(), type16.size(),
-      package16.data(), package16.size(), &typeSpecFlags);
-  if (!resId.isValid()) {
+      package16.data(), package16.size(), &type_spec_flags);
+  if (!res_id.is_valid()) {
     return {};
   }
 
   std::unique_ptr<SymbolTable::Symbol> s;
   if (name.type == ResourceType::kAttr) {
-    s = lookupAttributeInTable(table, resId);
+    s = LookupAttributeInTable(table, res_id);
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
-    s->id = resId;
+    s->id = res_id;
   }
 
   if (s) {
-    s->isPublic =
-        (typeSpecFlags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
+    s->is_public =
+        (type_spec_flags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
     return s;
   }
   return {};
 }
 
-static Maybe<ResourceName> getResourceName(const android::ResTable& table,
+static Maybe<ResourceName> GetResourceName(const android::ResTable& table,
                                            ResourceId id) {
-  android::ResTable::resource_name resName = {};
-  if (!table.getResourceName(id.id, true, &resName)) {
+  android::ResTable::resource_name res_name = {};
+  if (!table.getResourceName(id.id, true, &res_name)) {
     return {};
   }
-  return ResourceUtils::toResourceName(resName);
+  return ResourceUtils::ToResourceName(res_name);
 }
 
-std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::findById(
+std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
     ResourceId id) {
-  const android::ResTable& table = mAssets.getResources(false);
-  Maybe<ResourceName> maybeName = getResourceName(table, id);
-  if (!maybeName) {
+  const android::ResTable& table = assets_.getResources(false);
+  Maybe<ResourceName> maybe_name = GetResourceName(table, id);
+  if (!maybe_name) {
     return {};
   }
 
-  uint32_t typeSpecFlags = 0;
-  table.getResourceFlags(id.id, &typeSpecFlags);
+  uint32_t type_spec_flags = 0;
+  table.getResourceFlags(id.id, &type_spec_flags);
 
   std::unique_ptr<SymbolTable::Symbol> s;
-  if (maybeName.value().type == ResourceType::kAttr) {
-    s = lookupAttributeInTable(table, id);
+  if (maybe_name.value().type == ResourceType::kAttr) {
+    s = LookupAttributeInTable(table, id);
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
     s->id = id;
   }
 
   if (s) {
-    s->isPublic =
-        (typeSpecFlags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
+    s->is_public =
+        (type_spec_flags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
     return s;
   }
   return {};
 }
 
-std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::findByReference(
+std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByReference(
     const Reference& ref) {
   // AssetManager always prefers IDs.
   if (ref.id) {
-    return findById(ref.id.value());
+    return FindById(ref.id.value());
   } else if (ref.name) {
-    return findByName(ref.name.value());
+    return FindByName(ref.name.value());
   }
   return {};
 }

@@ -89,7 +89,7 @@ static void readDataFromStream(png_structp readPtr, png_bytep data,
 static void writeDataToStream(png_structp writePtr, png_bytep data,
                               png_size_t length) {
   BigBuffer* outBuffer = reinterpret_cast<BigBuffer*>(png_get_io_ptr(writePtr));
-  png_bytep buf = outBuffer->nextBlock<png_byte>(length);
+  png_bytep buf = outBuffer->NextBlock<png_byte>(length);
   memcpy(buf, data, length);
 }
 
@@ -98,13 +98,13 @@ static void flushDataToStream(png_structp /*writePtr*/) {}
 static void logWarning(png_structp readPtr, png_const_charp warningMessage) {
   IDiagnostics* diag =
       reinterpret_cast<IDiagnostics*>(png_get_error_ptr(readPtr));
-  diag->warn(DiagMessage() << warningMessage);
+  diag->Warn(DiagMessage() << warningMessage);
 }
 
 static bool readPng(IDiagnostics* diag, png_structp readPtr, png_infop infoPtr,
                     PngInfo* outInfo) {
   if (setjmp(png_jmpbuf(readPtr))) {
-    diag->error(DiagMessage() << "failed reading png");
+    diag->Error(DiagMessage() << "failed reading png");
     return false;
   }
 
@@ -373,7 +373,7 @@ static void analyze_image(IDiagnostics* diag, const PngInfo& imageInfo,
     *colorType = PNG_COLOR_TYPE_PALETTE;
   } else {
     if (maxGrayDeviation <= grayscaleTolerance) {
-      diag->note(DiagMessage() << "forcing image to gray (max deviation = "
+      diag->Note(DiagMessage() << "forcing image to gray (max deviation = "
                                << maxGrayDeviation << ")");
       *colorType = isOpaque ? PNG_COLOR_TYPE_GRAY : PNG_COLOR_TYPE_GRAY_ALPHA;
     } else {
@@ -424,7 +424,7 @@ static void analyze_image(IDiagnostics* diag, const PngInfo& imageInfo,
 static bool writePng(IDiagnostics* diag, png_structp writePtr,
                      png_infop infoPtr, PngInfo* info, int grayScaleTolerance) {
   if (setjmp(png_jmpbuf(writePtr))) {
-    diag->error(DiagMessage() << "failed to write png");
+    diag->Error(DiagMessage() << "failed to write png");
     return false;
   }
 
@@ -453,7 +453,7 @@ static bool writePng(IDiagnostics* diag, png_structp writePtr,
   png_set_compression_level(writePtr, Z_BEST_COMPRESSION);
 
   if (kDebug) {
-    diag->note(DiagMessage() << "writing image: w = " << info->width
+    diag->Note(DiagMessage() << "writing image: w = " << info->width
                              << ", h = " << info->height);
   }
 
@@ -476,23 +476,23 @@ static bool writePng(IDiagnostics* diag, png_structp writePtr,
   if (kDebug) {
     switch (colorType) {
       case PNG_COLOR_TYPE_PALETTE:
-        diag->note(DiagMessage() << "has " << paletteEntries << " colors"
+        diag->Note(DiagMessage() << "has " << paletteEntries << " colors"
                                  << (hasTransparency ? " (with alpha)" : "")
                                  << ", using PNG_COLOR_TYPE_PALLETTE");
         break;
       case PNG_COLOR_TYPE_GRAY:
-        diag->note(DiagMessage()
+        diag->Note(DiagMessage()
                    << "is opaque gray, using PNG_COLOR_TYPE_GRAY");
         break;
       case PNG_COLOR_TYPE_GRAY_ALPHA:
-        diag->note(DiagMessage()
+        diag->Note(DiagMessage()
                    << "is gray + alpha, using PNG_COLOR_TYPE_GRAY_ALPHA");
         break;
       case PNG_COLOR_TYPE_RGB:
-        diag->note(DiagMessage() << "is opaque RGB, using PNG_COLOR_TYPE_RGB");
+        diag->Note(DiagMessage() << "is opaque RGB, using PNG_COLOR_TYPE_RGB");
         break;
       case PNG_COLOR_TYPE_RGB_ALPHA:
-        diag->note(DiagMessage()
+        diag->Note(DiagMessage()
                    << "is RGB + alpha, using PNG_COLOR_TYPE_RGB_ALPHA");
         break;
     }
@@ -527,7 +527,7 @@ static bool writePng(IDiagnostics* diag, png_structp writePtr,
 
     // base 9 patch data
     if (kDebug) {
-      diag->note(DiagMessage() << "adding 9-patch info..");
+      diag->Note(DiagMessage() << "adding 9-patch info..");
     }
     strcpy((char*)unknowns[pIndex].name, "npTc");
     unknowns[pIndex].data = (png_byte*)info->serialize9Patch();
@@ -604,7 +604,7 @@ static bool writePng(IDiagnostics* diag, png_structp writePtr,
                &interlaceType, &compressionType, nullptr);
 
   if (kDebug) {
-    diag->note(DiagMessage() << "image written: w = " << width
+    diag->Note(DiagMessage() << "image written: w = " << width
                              << ", h = " << height << ", d = " << bitDepth
                              << ", colors = " << colorType
                              << ", inter = " << interlaceType
@@ -1228,13 +1228,13 @@ bool Png::process(const Source& source, std::istream* input,
 
   // Read the PNG signature first.
   if (!input->read(reinterpret_cast<char*>(signature), kPngSignatureSize)) {
-    mDiag->error(DiagMessage() << strerror(errno));
+    mDiag->Error(DiagMessage() << strerror(errno));
     return false;
   }
 
   // If the PNG signature doesn't match, bail early.
   if (png_sig_cmp(signature, 0, kPngSignatureSize) != 0) {
-    mDiag->error(DiagMessage() << "not a valid png file");
+    mDiag->Error(DiagMessage() << "not a valid png file");
     return false;
   }
 
@@ -1247,13 +1247,13 @@ bool Png::process(const Source& source, std::istream* input,
 
   readPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, nullptr, nullptr);
   if (!readPtr) {
-    mDiag->error(DiagMessage() << "failed to allocate read ptr");
+    mDiag->Error(DiagMessage() << "failed to allocate read ptr");
     goto bail;
   }
 
   infoPtr = png_create_info_struct(readPtr);
   if (!infoPtr) {
-    mDiag->error(DiagMessage() << "failed to allocate info ptr");
+    mDiag->Error(DiagMessage() << "failed to allocate info ptr");
     goto bail;
   }
 
@@ -1267,10 +1267,10 @@ bool Png::process(const Source& source, std::istream* input,
     goto bail;
   }
 
-  if (util::stringEndsWith(source.path, ".9.png")) {
+  if (util::EndsWith(source.path, ".9.png")) {
     std::string errorMsg;
     if (!do9Patch(&pngInfo, &errorMsg)) {
-      mDiag->error(DiagMessage() << errorMsg);
+      mDiag->Error(DiagMessage() << errorMsg);
       goto bail;
     }
   }
@@ -1278,13 +1278,13 @@ bool Png::process(const Source& source, std::istream* input,
   writePtr =
       png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, nullptr, nullptr);
   if (!writePtr) {
-    mDiag->error(DiagMessage() << "failed to allocate write ptr");
+    mDiag->Error(DiagMessage() << "failed to allocate write ptr");
     goto bail;
   }
 
   writeInfoPtr = png_create_info_struct(writePtr);
   if (!writeInfoPtr) {
-    mDiag->error(DiagMessage() << "failed to allocate write info ptr");
+    mDiag->Error(DiagMessage() << "failed to allocate write info ptr");
     goto bail;
   }
 
@@ -1295,7 +1295,7 @@ bool Png::process(const Source& source, std::istream* input,
                    flushDataToStream);
 
   if (!writePng(mDiag, writePtr, writeInfoPtr, &pngInfo,
-                options.grayScaleTolerance)) {
+                options.grayscale_tolerance)) {
     goto bail;
   }
 

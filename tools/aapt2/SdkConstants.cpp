@@ -48,17 +48,17 @@ static const std::vector<std::pair<uint16_t, size_t>> sAttrIdMap = {
     {0x04ce, SDK_LOLLIPOP},
 };
 
-static bool lessEntryId(const std::pair<uint16_t, size_t>& p,
+static bool less_entry_id(const std::pair<uint16_t, size_t>& p,
                         uint16_t entryId) {
   return p.first < entryId;
 }
 
-size_t findAttributeSdkLevel(const ResourceId& id) {
-  if (id.packageId() != 0x01 && id.typeId() != 0x01) {
+size_t FindAttributeSdkLevel(const ResourceId& id) {
+  if (id.package_id() != 0x01 && id.type_id() != 0x01) {
     return 0;
   }
   auto iter = std::lower_bound(sAttrIdMap.begin(), sAttrIdMap.end(),
-                               id.entryId(), lessEntryId);
+                               id.entry_id(), less_entry_id);
   if (iter == sAttrIdMap.end()) {
     return SDK_LOLLIPOP_MR1;
   }
@@ -727,7 +727,7 @@ static const std::unordered_map<std::string, size_t> sAttrMap = {
     {"windowActivityTransitions", 21},
     {"colorEdgeEffect", 21}};
 
-size_t findAttributeSdkLevel(const ResourceName& name) {
+size_t FindAttributeSdkLevel(const ResourceName& name) {
   if (name.package != "android" && name.type != ResourceType::kAttr) {
     return 0;
   }
@@ -739,7 +739,7 @@ size_t findAttributeSdkLevel(const ResourceName& name) {
   return SDK_LOLLIPOP_MR1;
 }
 
-std::pair<StringPiece, int> getDevelopmentSdkCodeNameAndVersion() {
+std::pair<StringPiece, int> GetDevelopmentSdkCodeNameAndVersion() {
   return std::make_pair(StringPiece(sDevelopmentSdkCodeName),
                         sDevelopmentSdkLevel);
 }

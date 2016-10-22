@@ -17,14 +17,15 @@
 #ifndef AAPT_JAVA_CLASSDEFINITION_H
 #define AAPT_JAVA_CLASSDEFINITION_H
 
+#include <ostream>
+#include <string>
+
+#include "android-base/macros.h"
+
 #include "Resource.h"
 #include "java/AnnotationProcessor.h"
 #include "util/StringPiece.h"
 #include "util/Util.h"
-
-#include <android-base/macros.h>
-#include <sstream>
-#include <string>
 
 namespace aapt {
 
@@ -36,38 +37,38 @@ class ClassMember {
  public:
   virtual ~ClassMember() = default;
 
-  AnnotationProcessor* getCommentBuilder() { return &mProcessor; }
+  AnnotationProcessor* GetCommentBuilder() { return &processor_; }
 
   virtual bool empty() const = 0;
 
-  virtual void writeToStream(const StringPiece& prefix, bool final,
+  virtual void WriteToStream(const StringPiece& prefix, bool final,
                              std::ostream* out) const {
-    mProcessor.writeToStream(out, prefix);
+    processor_.WriteToStream(out, prefix);
   }
 
  private:
-  AnnotationProcessor mProcessor;
+  AnnotationProcessor processor_;
 };
 
 template <typename T>
 class PrimitiveMember : public ClassMember {
  public:
   PrimitiveMember(const StringPiece& name, const T& val)
-      : mName(name.toString()), mVal(val) {}
+      : name_(name.ToString()), val_(val) {}
 
   bool empty() const override { return false; }
 
-  void writeToStream(const StringPiece& prefix, bool final,
+  void WriteToStream(const StringPiece& prefix, bool final,
                      std::ostream* out) const override {
-    ClassMember::writeToStream(prefix, final, out);
+    ClassMember::WriteToStream(prefix, final, out);
 
     *out << prefix << "public static " << (final ? "final " : "") << "int "
-         << mName << "=" << mVal << ";";
+         << name_ << "=" << val_ << ";";
   }
 
  private:
-  std::string mName;
-  T mVal;
+  std::string name_;
+  T val_;
 
   DISALLOW_COPY_AND_ASSIGN(PrimitiveMember);
 };
@@ -79,21 +80,21 @@ template <>
 class PrimitiveMember<std::string> : public ClassMember {
  public:
   PrimitiveMember(const StringPiece& name, const std::string& val)
-      : mName(name.toString()), mVal(val) {}
+      : name_(name.ToString()), val_(val) {}
 
   bool empty() const override { return false; }
 
-  void writeToStream(const StringPiece& prefix, bool final,
+  void WriteToStream(const StringPiece& prefix, bool final,
                      std::ostream* out) const override {
-    ClassMember::writeToStream(prefix, final, out);
+    ClassMember::WriteToStream(prefix, final, out);
 
     *out << prefix << "public static " << (final ? "final " : "") << "String "
-         << mName << "=\"" << mVal << "\";";
+         << name_ << "=\"" << val_ << "\";";
   }
 
  private:
-  std::string mName;
-  std::string mVal;
+  std::string name_;
+  std::string val_;
 
   DISALLOW_COPY_AND_ASSIGN(PrimitiveMember);
 };
@@ -106,20 +107,20 @@ template <typename T>
 class PrimitiveArrayMember : public ClassMember {
  public:
   explicit PrimitiveArrayMember(const StringPiece& name)
-      : mName(name.toString()) {}
+      : name_(name.ToString()) {}
 
-  void addElement(const T& val) { mElements.push_back(val); }
+  void AddElement(const T& val) { elements_.push_back(val); }
 
   bool empty() const override { return false; }
 
-  void writeToStream(const StringPiece& prefix, bool final,
+  void WriteToStream(const StringPiece& prefix, bool final,
                      std::ostream* out) const override {
-    ClassMember::writeToStream(prefix, final, out);
+    ClassMember::WriteToStream(prefix, final, out);
 
-    *out << prefix << "public static final int[] " << mName << "={";
+    *out << prefix << "public static final int[] " << name_ << "={";
 
-    const auto begin = mElements.begin();
-    const auto end = mElements.end();
+    const auto begin = elements_.begin();
+    const auto end = elements_.end();
     for (auto current = begin; current != end; ++current) {
       if (std::distance(begin, current) % kAttribsPerLine == 0) {
         *out << "\n" << prefix << kIndent << kIndent;
@@ -134,8 +135,8 @@ class PrimitiveArrayMember : public ClassMember {
   }
 
  private:
-  std::string mName;
-  std::vector<T> mElements;
+  std::string name_;
+  std::vector<T> elements_;
 
   DISALLOW_COPY_AND_ASSIGN(PrimitiveArrayMember);
 };
@@ -146,29 +147,29 @@ enum class ClassQualifier { None, Static };
 
 class ClassDefinition : public ClassMember {
  public:
-  static bool writeJavaFile(const ClassDefinition* def,
+  static bool WriteJavaFile(const ClassDefinition* def,
                             const StringPiece& package, bool final,
                             std::ostream* out);
 
   ClassDefinition(const StringPiece& name, ClassQualifier qualifier,
                   bool createIfEmpty)
-      : mName(name.toString()),
-        mQualifier(qualifier),
-        mCreateIfEmpty(createIfEmpty) {}
+      : name_(name.ToString()),
+        qualifier_(qualifier),
+        create_if_empty_(createIfEmpty) {}
 
-  void addMember(std::unique_ptr<ClassMember> member) {
-    mMembers.push_back(std::move(member));
+  void AddMember(std::unique_ptr<ClassMember> member) {
+    members_.push_back(std::move(member));
   }
 
   bool empty() const override;
-  void writeToStream(const StringPiece& prefix, bool final,
+  void WriteToStream(const StringPiece& prefix, bool final,
                      std::ostream* out) const override;
 
  private:
-  std::string mName;
-  ClassQualifier mQualifier;
-  bool mCreateIfEmpty;
-  std::vector<std::unique_ptr<ClassMember>> mMembers;
+  std::string name_;
+  ClassQualifier qualifier_;
+  bool create_if_empty_;
+  std::vector<std::unique_ptr<ClassMember>> members_;
 
   DISALLOW_COPY_AND_ASSIGN(ClassDefinition);
 };

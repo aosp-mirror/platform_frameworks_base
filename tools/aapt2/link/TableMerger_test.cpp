@@ -15,139 +15,137 @@
  */
 
 #include "link/TableMerger.h"
+
 #include "filter/ConfigFilter.h"
 #include "io/FileSystem.h"
-#include "test/Builders.h"
-#include "test/Context.h"
-
-#include <gtest/gtest.h>
+#include "test/Test.h"
 
 namespace aapt {
 
 struct TableMergerTest : public ::testing::Test {
-  std::unique_ptr<IAaptContext> mContext;
+  std::unique_ptr<IAaptContext> context_;
 
   void SetUp() override {
-    mContext =
+    context_ =
         test::ContextBuilder()
             // We are compiling this package.
-            .setCompilationPackage("com.app.a")
+            .SetCompilationPackage("com.app.a")
 
             // Merge all packages that have this package ID.
-            .setPackageId(0x7f)
+            .SetPackageId(0x7f)
 
             // Mangle all packages that do not have this package name.
-            .setNameManglerPolicy(NameManglerPolicy{"com.app.a", {"com.app.b"}})
+            .SetNameManglerPolicy(NameManglerPolicy{"com.app.a", {"com.app.b"}})
 
-            .build();
+            .Build();
   }
 };
 
 TEST_F(TableMergerTest, SimpleMerge) {
-  std::unique_ptr<ResourceTable> tableA =
+  std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
-          .setPackageId("com.app.a", 0x7f)
-          .addReference("com.app.a:id/foo", "com.app.a:id/bar")
-          .addReference("com.app.a:id/bar", "com.app.b:id/foo")
-          .addValue(
+          .SetPackageId("com.app.a", 0x7f)
+          .AddReference("com.app.a:id/foo", "com.app.a:id/bar")
+          .AddReference("com.app.a:id/bar", "com.app.b:id/foo")
+          .AddValue(
               "com.app.a:styleable/view",
-              test::StyleableBuilder().addItem("com.app.b:id/foo").build())
-          .build();
+              test::StyleableBuilder().AddItem("com.app.b:id/foo").Build())
+          .Build();
 
-  std::unique_ptr<ResourceTable> tableB = test::ResourceTableBuilder()
-                                              .setPackageId("com.app.b", 0x7f)
-                                              .addSimple("com.app.b:id/foo")
-                                              .build();
+  std::unique_ptr<ResourceTable> table_b = test::ResourceTableBuilder()
+                                               .SetPackageId("com.app.b", 0x7f)
+                                               .AddSimple("com.app.b:id/foo")
+                                               .Build();
 
-  ResourceTable finalTable;
-  TableMerger merger(mContext.get(), &finalTable, TableMergerOptions{});
+  ResourceTable final_table;
+  TableMerger merger(context_.get(), &final_table, TableMergerOptions{});
   io::FileCollection collection;
 
-  ASSERT_TRUE(merger.merge({}, tableA.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get()));
   ASSERT_TRUE(
-      merger.mergeAndMangle({}, "com.app.b", tableB.get(), &collection));
+      merger.MergeAndMangle({}, "com.app.b", table_b.get(), &collection));
 
-  EXPECT_TRUE(merger.getMergedPackages().count("com.app.b") != 0);
+  EXPECT_TRUE(merger.merged_packages().count("com.app.b") != 0);
 
   // Entries from com.app.a should not be mangled.
   AAPT_EXPECT_TRUE(
-      finalTable.findResource(test::parseNameOrDie("com.app.a:id/foo")));
+      final_table.FindResource(test::ParseNameOrDie("com.app.a:id/foo")));
   AAPT_EXPECT_TRUE(
-      finalTable.findResource(test::parseNameOrDie("com.app.a:id/bar")));
-  AAPT_EXPECT_TRUE(finalTable.findResource(
-      test::parseNameOrDie("com.app.a:styleable/view")));
+      final_table.FindResource(test::ParseNameOrDie("com.app.a:id/bar")));
+  AAPT_EXPECT_TRUE(final_table.FindResource(
+      test::ParseNameOrDie("com.app.a:styleable/view")));
 
   // The unmangled name should not be present.
   AAPT_EXPECT_FALSE(
-      finalTable.findResource(test::parseNameOrDie("com.app.b:id/foo")));
+      final_table.FindResource(test::ParseNameOrDie("com.app.b:id/foo")));
 
   // Look for the mangled name.
-  AAPT_EXPECT_TRUE(finalTable.findResource(
-      test::parseNameOrDie("com.app.a:id/com.app.b$foo")));
+  AAPT_EXPECT_TRUE(final_table.FindResource(
+      test::ParseNameOrDie("com.app.a:id/com.app.b$foo")));
 }
 
 TEST_F(TableMergerTest, MergeFile) {
-  ResourceTable finalTable;
+  ResourceTable final_table;
   TableMergerOptions options;
-  options.autoAddOverlay = false;
-  TableMerger merger(mContext.get(), &finalTable, options);
+  options.auto_add_overlay = false;
+  TableMerger merger(context_.get(), &final_table, options);
 
-  ResourceFile fileDesc;
-  fileDesc.config = test::parseConfigOrDie("hdpi-v4");
-  fileDesc.name = test::parseNameOrDie("layout/main");
-  fileDesc.source = Source("res/layout-hdpi/main.xml");
-  test::TestFile testFile("path/to/res/layout-hdpi/main.xml.flat");
+  ResourceFile file_desc;
+  file_desc.config = test::ParseConfigOrDie("hdpi-v4");
+  file_desc.name = test::ParseNameOrDie("layout/main");
+  file_desc.source = Source("res/layout-hdpi/main.xml");
+  test::TestFile test_file("path/to/res/layout-hdpi/main.xml.flat");
 
-  ASSERT_TRUE(merger.mergeFile(fileDesc, &testFile));
+  ASSERT_TRUE(merger.MergeFile(file_desc, &test_file));
 
-  FileReference* file = test::getValueForConfig<FileReference>(
-      &finalTable, "com.app.a:layout/main", test::parseConfigOrDie("hdpi-v4"));
+  FileReference* file = test::GetValueForConfig<FileReference>(
+      &final_table, "com.app.a:layout/main", test::ParseConfigOrDie("hdpi-v4"));
   ASSERT_NE(nullptr, file);
   EXPECT_EQ(std::string("res/layout-hdpi-v4/main.xml"), *file->path);
 }
 
 TEST_F(TableMergerTest, MergeFileOverlay) {
-  ResourceTable finalTable;
-  TableMergerOptions tableMergerOptions;
-  tableMergerOptions.autoAddOverlay = false;
-  TableMerger merger(mContext.get(), &finalTable, tableMergerOptions);
+  ResourceTable final_table;
+  TableMergerOptions options;
+  options.auto_add_overlay = false;
+  TableMerger merger(context_.get(), &final_table, options);
 
-  ResourceFile fileDesc;
-  fileDesc.name = test::parseNameOrDie("xml/foo");
-  test::TestFile fileA("path/to/fileA.xml.flat");
-  test::TestFile fileB("path/to/fileB.xml.flat");
+  ResourceFile file_desc;
+  file_desc.name = test::ParseNameOrDie("xml/foo");
+  test::TestFile file_a("path/to/fileA.xml.flat");
+  test::TestFile file_b("path/to/fileB.xml.flat");
 
-  ASSERT_TRUE(merger.mergeFile(fileDesc, &fileA));
-  ASSERT_TRUE(merger.mergeFileOverlay(fileDesc, &fileB));
+  ASSERT_TRUE(merger.MergeFile(file_desc, &file_a));
+  ASSERT_TRUE(merger.MergeFileOverlay(file_desc, &file_b));
 }
 
 TEST_F(TableMergerTest, MergeFileReferences) {
-  std::unique_ptr<ResourceTable> tableA =
+  std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
-          .setPackageId("com.app.a", 0x7f)
-          .addFileReference("com.app.a:xml/file", "res/xml/file.xml")
-          .build();
-  std::unique_ptr<ResourceTable> tableB =
+          .SetPackageId("com.app.a", 0x7f)
+          .AddFileReference("com.app.a:xml/file", "res/xml/file.xml")
+          .Build();
+  std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
-          .setPackageId("com.app.b", 0x7f)
-          .addFileReference("com.app.b:xml/file", "res/xml/file.xml")
-          .build();
+          .SetPackageId("com.app.b", 0x7f)
+          .AddFileReference("com.app.b:xml/file", "res/xml/file.xml")
+          .Build();
 
-  ResourceTable finalTable;
-  TableMerger merger(mContext.get(), &finalTable, TableMergerOptions{});
+  ResourceTable final_table;
+  TableMerger merger(context_.get(), &final_table, TableMergerOptions{});
   io::FileCollection collection;
-  collection.insertFile("res/xml/file.xml");
+  collection.InsertFile("res/xml/file.xml");
 
-  ASSERT_TRUE(merger.merge({}, tableA.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get()));
   ASSERT_TRUE(
-      merger.mergeAndMangle({}, "com.app.b", tableB.get(), &collection));
+      merger.MergeAndMangle({}, "com.app.b", table_b.get(), &collection));
 
   FileReference* f =
-      test::getValue<FileReference>(&finalTable, "com.app.a:xml/file");
+      test::GetValue<FileReference>(&final_table, "com.app.a:xml/file");
   ASSERT_NE(f, nullptr);
   EXPECT_EQ(std::string("res/xml/file.xml"), *f->path);
 
-  f = test::getValue<FileReference>(&finalTable,
+  f = test::GetValue<FileReference>(&final_table,
                                     "com.app.a:xml/com.app.b$file");
   ASSERT_NE(f, nullptr);
   EXPECT_EQ(std::string("res/xml/com.app.b$file.xml"), *f->path);
@@ -156,25 +154,25 @@ TEST_F(TableMergerTest, MergeFileReferences) {
 TEST_F(TableMergerTest, OverrideResourceWithOverlay) {
   std::unique_ptr<ResourceTable> base =
       test::ResourceTableBuilder()
-          .setPackageId("", 0x00)
-          .addValue("bool/foo", ResourceUtils::tryParseBool("true"))
-          .build();
+          .SetPackageId("", 0x00)
+          .AddValue("bool/foo", ResourceUtils::TryParseBool("true"))
+          .Build();
   std::unique_ptr<ResourceTable> overlay =
       test::ResourceTableBuilder()
-          .setPackageId("", 0x00)
-          .addValue("bool/foo", ResourceUtils::tryParseBool("false"))
-          .build();
+          .SetPackageId("", 0x00)
+          .AddValue("bool/foo", ResourceUtils::TryParseBool("false"))
+          .Build();
 
-  ResourceTable finalTable;
-  TableMergerOptions tableMergerOptions;
-  tableMergerOptions.autoAddOverlay = false;
-  TableMerger merger(mContext.get(), &finalTable, tableMergerOptions);
+  ResourceTable final_table;
+  TableMergerOptions options;
+  options.auto_add_overlay = false;
+  TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.merge({}, base.get()));
-  ASSERT_TRUE(merger.mergeOverlay({}, overlay.get()));
+  ASSERT_TRUE(merger.Merge({}, base.get()));
+  ASSERT_TRUE(merger.MergeOverlay({}, overlay.get()));
 
   BinaryPrimitive* foo =
-      test::getValue<BinaryPrimitive>(&finalTable, "com.app.a:bool/foo");
+      test::GetValue<BinaryPrimitive>(&final_table, "com.app.a:bool/foo");
   ASSERT_NE(nullptr, foo);
   EXPECT_EQ(0x0u, foo->value.data);
 }
@@ -182,170 +180,168 @@ TEST_F(TableMergerTest, OverrideResourceWithOverlay) {
 TEST_F(TableMergerTest, OverrideSameResourceIdsWithOverlay) {
   std::unique_ptr<ResourceTable> base =
       test::ResourceTableBuilder()
-          .setPackageId("", 0x7f)
-          .setSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
+          .SetPackageId("", 0x7f)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
                           SymbolState::kPublic)
-          .build();
+          .Build();
   std::unique_ptr<ResourceTable> overlay =
       test::ResourceTableBuilder()
-          .setPackageId("", 0x7f)
-          .setSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
+          .SetPackageId("", 0x7f)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
                           SymbolState::kPublic)
-          .build();
+          .Build();
 
-  ResourceTable finalTable;
-  TableMergerOptions tableMergerOptions;
-  tableMergerOptions.autoAddOverlay = false;
-  TableMerger merger(mContext.get(), &finalTable, tableMergerOptions);
+  ResourceTable final_table;
+  TableMergerOptions options;
+  options.auto_add_overlay = false;
+  TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.merge({}, base.get()));
-  ASSERT_TRUE(merger.mergeOverlay({}, overlay.get()));
+  ASSERT_TRUE(merger.Merge({}, base.get()));
+  ASSERT_TRUE(merger.MergeOverlay({}, overlay.get()));
 }
 
 TEST_F(TableMergerTest, FailToOverrideConflictingTypeIdsWithOverlay) {
   std::unique_ptr<ResourceTable> base =
       test::ResourceTableBuilder()
-          .setPackageId("", 0x7f)
-          .setSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
+          .SetPackageId("", 0x7f)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
                           SymbolState::kPublic)
-          .build();
+          .Build();
   std::unique_ptr<ResourceTable> overlay =
       test::ResourceTableBuilder()
-          .setPackageId("", 0x7f)
-          .setSymbolState("bool/foo", ResourceId(0x7f, 0x02, 0x0001),
+          .SetPackageId("", 0x7f)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x02, 0x0001),
                           SymbolState::kPublic)
-          .build();
+          .Build();
 
-  ResourceTable finalTable;
-  TableMergerOptions tableMergerOptions;
-  tableMergerOptions.autoAddOverlay = false;
-  TableMerger merger(mContext.get(), &finalTable, tableMergerOptions);
+  ResourceTable final_table;
+  TableMergerOptions options;
+  options.auto_add_overlay = false;
+  TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.merge({}, base.get()));
-  ASSERT_FALSE(merger.mergeOverlay({}, overlay.get()));
+  ASSERT_TRUE(merger.Merge({}, base.get()));
+  ASSERT_FALSE(merger.MergeOverlay({}, overlay.get()));
 }
 
 TEST_F(TableMergerTest, FailToOverrideConflictingEntryIdsWithOverlay) {
   std::unique_ptr<ResourceTable> base =
       test::ResourceTableBuilder()
-          .setPackageId("", 0x7f)
-          .setSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
+          .SetPackageId("", 0x7f)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
                           SymbolState::kPublic)
-          .build();
+          .Build();
   std::unique_ptr<ResourceTable> overlay =
       test::ResourceTableBuilder()
-          .setPackageId("", 0x7f)
-          .setSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0002),
+          .SetPackageId("", 0x7f)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0002),
                           SymbolState::kPublic)
-          .build();
+          .Build();
 
-  ResourceTable finalTable;
-  TableMergerOptions tableMergerOptions;
-  tableMergerOptions.autoAddOverlay = false;
-  TableMerger merger(mContext.get(), &finalTable, tableMergerOptions);
+  ResourceTable final_table;
+  TableMergerOptions options;
+  options.auto_add_overlay = false;
+  TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.merge({}, base.get()));
-  ASSERT_FALSE(merger.mergeOverlay({}, overlay.get()));
+  ASSERT_TRUE(merger.Merge({}, base.get()));
+  ASSERT_FALSE(merger.MergeOverlay({}, overlay.get()));
 }
 
 TEST_F(TableMergerTest, MergeAddResourceFromOverlay) {
-  std::unique_ptr<ResourceTable> tableA =
+  std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
-          .setPackageId("", 0x7f)
-          .setSymbolState("bool/foo", {}, SymbolState::kUndefined)
-          .build();
-  std::unique_ptr<ResourceTable> tableB =
+          .SetPackageId("", 0x7f)
+          .SetSymbolState("bool/foo", {}, SymbolState::kUndefined)
+          .Build();
+  std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
-          .setPackageId("", 0x7f)
-          .addValue("bool/foo", ResourceUtils::tryParseBool("true"))
-          .build();
+          .SetPackageId("", 0x7f)
+          .AddValue("bool/foo", ResourceUtils::TryParseBool("true"))
+          .Build();
 
-  ResourceTable finalTable;
-  TableMerger merger(mContext.get(), &finalTable, TableMergerOptions{});
+  ResourceTable final_table;
+  TableMerger merger(context_.get(), &final_table, TableMergerOptions{});
 
-  ASSERT_TRUE(merger.merge({}, tableA.get()));
-  ASSERT_TRUE(merger.mergeOverlay({}, tableB.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get()));
+  ASSERT_TRUE(merger.MergeOverlay({}, table_b.get()));
 }
 
 TEST_F(TableMergerTest, MergeAddResourceFromOverlayWithAutoAddOverlay) {
-  std::unique_ptr<ResourceTable> tableA =
-      test::ResourceTableBuilder().setPackageId("", 0x7f).build();
-  std::unique_ptr<ResourceTable> tableB =
+  std::unique_ptr<ResourceTable> table_a =
+      test::ResourceTableBuilder().SetPackageId("", 0x7f).Build();
+  std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
-          .setPackageId("", 0x7f)
-          .addValue("bool/foo", ResourceUtils::tryParseBool("true"))
-          .build();
+          .SetPackageId("", 0x7f)
+          .AddValue("bool/foo", ResourceUtils::TryParseBool("true"))
+          .Build();
 
-  ResourceTable finalTable;
+  ResourceTable final_table;
   TableMergerOptions options;
-  options.autoAddOverlay = true;
-  TableMerger merger(mContext.get(), &finalTable, options);
+  options.auto_add_overlay = true;
+  TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.merge({}, tableA.get()));
-  ASSERT_TRUE(merger.mergeOverlay({}, tableB.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get()));
+  ASSERT_TRUE(merger.MergeOverlay({}, table_b.get()));
 }
 
 TEST_F(TableMergerTest, FailToMergeNewResourceWithoutAutoAddOverlay) {
-  std::unique_ptr<ResourceTable> tableA =
-      test::ResourceTableBuilder().setPackageId("", 0x7f).build();
-  std::unique_ptr<ResourceTable> tableB =
+  std::unique_ptr<ResourceTable> table_a =
+      test::ResourceTableBuilder().SetPackageId("", 0x7f).Build();
+  std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
-          .setPackageId("", 0x7f)
-          .addValue("bool/foo", ResourceUtils::tryParseBool("true"))
-          .build();
+          .SetPackageId("", 0x7f)
+          .AddValue("bool/foo", ResourceUtils::TryParseBool("true"))
+          .Build();
 
-  ResourceTable finalTable;
+  ResourceTable final_table;
   TableMergerOptions options;
-  options.autoAddOverlay = false;
-  TableMerger merger(mContext.get(), &finalTable, options);
+  options.auto_add_overlay = false;
+  TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.merge({}, tableA.get()));
-  ASSERT_FALSE(merger.mergeOverlay({}, tableB.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get()));
+  ASSERT_FALSE(merger.MergeOverlay({}, table_b.get()));
 }
 
 TEST_F(TableMergerTest, OverlaidStyleablesShouldBeMerged) {
-  std::unique_ptr<ResourceTable> tableA =
+  std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
-          .setPackageId("com.app.a", 0x7f)
-          .addValue("com.app.a:styleable/Foo",
+          .SetPackageId("com.app.a", 0x7f)
+          .AddValue("com.app.a:styleable/Foo",
                     test::StyleableBuilder()
-                        .addItem("com.app.a:attr/bar")
-                        .addItem("com.app.a:attr/foo", ResourceId(0x01010000))
-                        .build())
-          .build();
+                        .AddItem("com.app.a:attr/bar")
+                        .AddItem("com.app.a:attr/foo", ResourceId(0x01010000))
+                        .Build())
+          .Build();
 
-  std::unique_ptr<ResourceTable> tableB =
+  std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
-          .setPackageId("com.app.a", 0x7f)
-          .addValue("com.app.a:styleable/Foo",
+          .SetPackageId("com.app.a", 0x7f)
+          .AddValue("com.app.a:styleable/Foo",
                     test::StyleableBuilder()
-                        .addItem("com.app.a:attr/bat")
-                        .addItem("com.app.a:attr/foo")
-                        .build())
-          .build();
+                        .AddItem("com.app.a:attr/bat")
+                        .AddItem("com.app.a:attr/foo")
+                        .Build())
+          .Build();
 
-  ResourceTable finalTable;
+  ResourceTable final_table;
   TableMergerOptions options;
-  options.autoAddOverlay = true;
-  TableMerger merger(mContext.get(), &finalTable, options);
+  options.auto_add_overlay = true;
+  TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.merge({}, tableA.get()));
-  ASSERT_TRUE(merger.mergeOverlay({}, tableB.get()));
-
-  Debug::printTable(&finalTable, {});
+  ASSERT_TRUE(merger.Merge({}, table_a.get()));
+  ASSERT_TRUE(merger.MergeOverlay({}, table_b.get()));
 
   Styleable* styleable =
-      test::getValue<Styleable>(&finalTable, "com.app.a:styleable/Foo");
+      test::GetValue<Styleable>(&final_table, "com.app.a:styleable/Foo");
   ASSERT_NE(nullptr, styleable);
 
-  std::vector<Reference> expectedRefs = {
-      Reference(test::parseNameOrDie("com.app.a:attr/bar")),
-      Reference(test::parseNameOrDie("com.app.a:attr/bat")),
-      Reference(test::parseNameOrDie("com.app.a:attr/foo"),
+  std::vector<Reference> expected_refs = {
+      Reference(test::ParseNameOrDie("com.app.a:attr/bar")),
+      Reference(test::ParseNameOrDie("com.app.a:attr/bat")),
+      Reference(test::ParseNameOrDie("com.app.a:attr/foo"),
                 ResourceId(0x01010000)),
   };
 
-  EXPECT_EQ(expectedRefs, styleable->entries);
+  EXPECT_EQ(expected_refs, styleable->entries);
 }
 
 }  // namespace aapt

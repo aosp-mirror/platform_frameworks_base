@@ -17,6 +17,8 @@
 #ifndef AAPT_LINKER_REFERENCELINKER_H
 #define AAPT_LINKER_REFERENCELINKER_H
 
+#include "android-base/macros.h"
+
 #include "Resource.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
@@ -24,8 +26,6 @@
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
 #include "xml/XmlDom.h"
-
-#include <cassert>
 
 namespace aapt {
 
@@ -36,33 +36,33 @@ namespace aapt {
  * Once the ResourceTable is processed by this linker, it is ready to be
  * flattened.
  */
-struct ReferenceLinker : public IResourceTableConsumer {
+class ReferenceLinker : public IResourceTableConsumer {
+ public:
+  ReferenceLinker() = default;
+
   /**
    * Returns true if the symbol is visible by the reference and from the
    * callsite.
    */
-  static bool isSymbolVisible(const SymbolTable::Symbol& symbol,
-                              const Reference& ref, const CallSite& callSite);
+  static bool IsSymbolVisible(const SymbolTable::Symbol& symbol,
+                              const Reference& ref, const CallSite& callsite);
 
   /**
    * Performs name mangling and looks up the resource in the symbol table.
-   * Returns nullptr
-   * if the symbol was not found.
+   * Returns nullptr if the symbol was not found.
    */
-  static const SymbolTable::Symbol* resolveSymbol(const Reference& reference,
+  static const SymbolTable::Symbol* ResolveSymbol(const Reference& reference,
                                                   NameMangler* mangler,
                                                   SymbolTable* symbols);
 
   /**
    * Performs name mangling and looks up the resource in the symbol table. If
-   * the symbol is
-   * not visible by the reference at the callsite, nullptr is returned. outError
-   * holds
-   * the error message.
+   * the symbol is not visible by the reference at the callsite, nullptr is
+   * returned. out_error holds the error message.
    */
-  static const SymbolTable::Symbol* resolveSymbolCheckVisibility(
-      const Reference& reference, NameMangler* nameMangler,
-      SymbolTable* symbols, CallSite* callSite, std::string* outError);
+  static const SymbolTable::Symbol* ResolveSymbolCheckVisibility(
+      const Reference& reference, NameMangler* name_mangler,
+      SymbolTable* symbols, CallSite* callsite, std::string* out_error);
 
   /**
    * Same as resolveSymbolCheckVisibility(), but also makes sure the symbol is
@@ -70,25 +70,24 @@ struct ReferenceLinker : public IResourceTableConsumer {
    * That is, the return value will have a non-null value for
    * ISymbolTable::Symbol::attribute.
    */
-  static const SymbolTable::Symbol* resolveAttributeCheckVisibility(
-      const Reference& reference, NameMangler* nameMangler,
-      SymbolTable* symbols, CallSite* callSite, std::string* outError);
+  static const SymbolTable::Symbol* ResolveAttributeCheckVisibility(
+      const Reference& reference, NameMangler* name_mangler,
+      SymbolTable* symbols, CallSite* callsite, std::string* out_error);
 
   /**
    * Resolves the attribute reference and returns an xml::AaptAttribute if
    * successful.
    * If resolution fails, outError holds the error message.
    */
-  static Maybe<xml::AaptAttribute> compileXmlAttribute(
-      const Reference& reference, NameMangler* nameMangler,
-      SymbolTable* symbols, CallSite* callSite, std::string* outError);
+  static Maybe<xml::AaptAttribute> CompileXmlAttribute(
+      const Reference& reference, NameMangler* name_mangler,
+      SymbolTable* symbols, CallSite* callsite, std::string* out_error);
 
   /**
-   * Writes the resource name to the DiagMessage, using the "orig_name (aka
-   * <transformed_name>)"
-   * syntax.
+   * Writes the resource name to the DiagMessage, using the
+   * "orig_name (aka <transformed_name>)" syntax.
    */
-  static void writeResourceName(DiagMessage* outMsg, const Reference& orig,
+  static void WriteResourceName(DiagMessage* out_msg, const Reference& orig,
                                 const Reference& transformed);
 
   /**
@@ -100,14 +99,17 @@ struct ReferenceLinker : public IResourceTableConsumer {
    * Returns false on failure, and an error message is logged to the
    * IDiagnostics in the context.
    */
-  static bool linkReference(Reference* reference, IAaptContext* context,
+  static bool LinkReference(Reference* reference, IAaptContext* context,
                             SymbolTable* symbols, xml::IPackageDeclStack* decls,
-                            CallSite* callSite);
+                            CallSite* callsite);
 
   /**
    * Links all references in the ResourceTable.
    */
-  bool consume(IAaptContext* context, ResourceTable* table) override;
+  bool Consume(IAaptContext* context, ResourceTable* table) override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ReferenceLinker);
 };
 
 }  // namespace aapt

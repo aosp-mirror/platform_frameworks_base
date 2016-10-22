@@ -2,6 +2,7 @@
 
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
+#include <utils/ByteOrder.h>
 #include <utils/String8.h>
 
 #include <fcntl.h>

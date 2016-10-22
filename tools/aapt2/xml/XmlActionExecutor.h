@@ -17,14 +17,15 @@
 #ifndef AAPT_XML_XMLPATTERN_H
 #define AAPT_XML_XMLPATTERN_H
 
-#include "Diagnostics.h"
-#include "xml/XmlDom.h"
-
-#include <android-base/macros.h>
 #include <functional>
 #include <map>
 #include <string>
 #include <vector>
+
+#include "android-base/macros.h"
+
+#include "Diagnostics.h"
+#include "xml/XmlDom.h"
 
 namespace aapt {
 namespace xml {
@@ -34,14 +35,14 @@ enum class XmlActionExecutorPolicy {
    * Actions on run if elements are matched, errors occur only when actions
    * return false.
    */
-  None,
+  kNone,
 
   /**
    * The actions defined must match and run. If an element is found that does
    * not match
    * an action, an error occurs.
    */
-  Whitelist,
+  kWhitelist,
 };
 
 /**
@@ -60,22 +61,22 @@ class XmlNodeAction {
    * element
    * with the name `name`.
    */
-  XmlNodeAction& operator[](const std::string& name) { return mMap[name]; }
+  XmlNodeAction& operator[](const std::string& name) { return map_[name]; }
 
   /**
    * Add an action to be performed at this XmlNodeAction.
    */
-  void action(ActionFunc f);
-  void action(ActionFuncWithDiag);
+  void Action(ActionFunc f);
+  void Action(ActionFuncWithDiag);
 
  private:
   friend class XmlActionExecutor;
 
-  bool execute(XmlActionExecutorPolicy policy, SourcePathDiagnostics* diag,
+  bool Execute(XmlActionExecutorPolicy policy, SourcePathDiagnostics* diag,
                Element* el) const;
 
-  std::map<std::string, XmlNodeAction> mMap;
-  std::vector<ActionFuncWithDiag> mActions;
+  std::map<std::string, XmlNodeAction> map_;
+  std::vector<ActionFuncWithDiag> actions_;
 };
 
 /**
@@ -89,20 +90,19 @@ class XmlActionExecutor {
 
   /**
    * Find or create a root XmlNodeAction that will be performed for the root XML
-   * element
-   * with the name `name`.
+   * element with the name `name`.
    */
-  XmlNodeAction& operator[](const std::string& name) { return mMap[name]; }
+  XmlNodeAction& operator[](const std::string& name) { return map_[name]; }
 
   /**
    * Execute the defined actions for this XmlResource.
    * Returns true if all actions return true, otherwise returns false.
    */
-  bool execute(XmlActionExecutorPolicy policy, IDiagnostics* diag,
+  bool Execute(XmlActionExecutorPolicy policy, IDiagnostics* diag,
                XmlResource* doc) const;
 
  private:
-  std::map<std::string, XmlNodeAction> mMap;
+  std::map<std::string, XmlNodeAction> map_;
 
   DISALLOW_COPY_AND_ASSIGN(XmlActionExecutor);
 };

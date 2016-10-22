@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+#include <dirent.h>
+
+#include <fstream>
+#include <string>
+
 #include "ConfigDescription.h"
 #include "Diagnostics.h"
 #include "Flags.h"
@@ -33,14 +38,10 @@
 #include "xml/XmlDom.h"
 #include "xml/XmlPullParser.h"
 
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
-
-#include <android-base/errors.h>
-#include <android-base/file.h>
-#include <dirent.h>
-#include <fstream>
-#include <string>
+#include "android-base/errors.h"
+#include "android-base/file.h"
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/io/zero_copy_stream_impl_lite.h"
 
 using google::protobuf::io::CopyingOutputStreamAdaptor;
 using google::protobuf::io::ZeroCopyOutputStream;
@@ -49,7 +50,7 @@ namespace aapt {
 
 struct ResourcePathData {
   Source source;
-  std::string resourceDir;
+  std::string resource_dir;
   std::string name;
   std::string extension;
 
@@ -58,7 +59,7 @@ struct ResourcePathData {
   // version qualifiers. We want to preserve the original input so the output is
   // easily
   // computed before hand.
-  std::string configStr;
+  std::string config_str;
   ConfigDescription config;
 };
 
@@ -66,60 +67,60 @@ struct ResourcePathData {
  * Resource file paths are expected to look like:
  * [--/res/]type[-config]/name
  */
-static Maybe<ResourcePathData> extractResourcePathData(const std::string& path,
-                                                       std::string* outError) {
-  std::vector<std::string> parts = util::split(path, file::sDirSep);
+static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path,
+                                                       std::string* out_error) {
+  std::vector<std::string> parts = util::Split(path, file::sDirSep);
   if (parts.size() < 2) {
-    if (outError) *outError = "bad resource path";
+    if (out_error) *out_error = "bad resource path";
     return {};
   }
 
   std::string& dir = parts[parts.size() - 2];
-  StringPiece dirStr = dir;
+  StringPiece dir_str = dir;
 
-  StringPiece configStr;
+  StringPiece config_str;
   ConfigDescription config;
-  size_t dashPos = dir.find('-');
-  if (dashPos != std::string::npos) {
-    configStr = dirStr.substr(dashPos + 1, dir.size() - (dashPos + 1));
-    if (!ConfigDescription::parse(configStr, &config)) {
-      if (outError) {
-        std::stringstream errStr;
-        errStr << "invalid configuration '" << configStr << "'";
-        *outError = errStr.str();
+  size_t dash_pos = dir.find('-');
+  if (dash_pos != std::string::npos) {
+    config_str = dir_str.substr(dash_pos + 1, dir.size() - (dash_pos + 1));
+    if (!ConfigDescription::Parse(config_str, &config)) {
+      if (out_error) {
+        std::stringstream err_str;
+        err_str << "invalid configuration '" << config_str << "'";
+        *out_error = err_str.str();
       }
       return {};
     }
-    dirStr = dirStr.substr(0, dashPos);
+    dir_str = dir_str.substr(0, dash_pos);
   }
 
   std::string& filename = parts[parts.size() - 1];
   StringPiece name = filename;
   StringPiece extension;
-  size_t dotPos = filename.find('.');
-  if (dotPos != std::string::npos) {
-    extension = name.substr(dotPos + 1, filename.size() - (dotPos + 1));
-    name = name.substr(0, dotPos);
+  size_t dot_pos = filename.find('.');
+  if (dot_pos != std::string::npos) {
+    extension = name.substr(dot_pos + 1, filename.size() - (dot_pos + 1));
+    name = name.substr(0, dot_pos);
   }
 
-  return ResourcePathData{Source(path),         dirStr.toString(),
-                          name.toString(),      extension.toString(),
-                          configStr.toString(), config};
+  return ResourcePathData{Source(path),          dir_str.ToString(),
+                          name.ToString(),       extension.ToString(),
+                          config_str.ToString(), config};
 }
 
 struct CompileOptions {
-  std::string outputPath;
-  Maybe<std::string> resDir;
+  std::string output_path;
+  Maybe<std::string> res_dir;
   bool pseudolocalize = false;
-  bool legacyMode = false;
+  bool legacy_mode = false;
   bool verbose = false;
 };
 
-static std::string buildIntermediateFilename(const ResourcePathData& data) {
+static std::string BuildIntermediateFilename(const ResourcePathData& data) {
   std::stringstream name;
-  name << data.resourceDir;
-  if (!data.configStr.empty()) {
-    name << "-" << data.configStr;
+  name << data.resource_dir;
+  if (!data.config_str.empty()) {
+    name << "-" << data.config_str;
   }
   name << "_" << data.name;
   if (!data.extension.empty()) {
@@ -129,92 +130,93 @@ static std::string buildIntermediateFilename(const ResourcePathData& data) {
   return name.str();
 }
 
-static bool isHidden(const StringPiece& filename) {
-  return util::stringStartsWith(filename, ".");
+static bool IsHidden(const StringPiece& filename) {
+  return util::StartsWith(filename, ".");
 }
 
 /**
  * Walks the res directory structure, looking for resource files.
  */
-static bool loadInputFilesFromDir(IAaptContext* context,
-                                  const CompileOptions& options,
-                                  std::vector<ResourcePathData>* outPathData) {
-  const std::string& rootDir = options.resDir.value();
-  std::unique_ptr<DIR, decltype(closedir)*> d(opendir(rootDir.data()),
+static bool LoadInputFilesFromDir(
+    IAaptContext* context, const CompileOptions& options,
+    std::vector<ResourcePathData>* out_path_data) {
+  const std::string& root_dir = options.res_dir.value();
+  std::unique_ptr<DIR, decltype(closedir)*> d(opendir(root_dir.data()),
                                               closedir);
   if (!d) {
-    context->getDiagnostics()->error(DiagMessage() << strerror(errno));
+    context->GetDiagnostics()->Error(DiagMessage() << strerror(errno));
     return false;
   }
 
   while (struct dirent* entry = readdir(d.get())) {
-    if (isHidden(entry->d_name)) {
+    if (IsHidden(entry->d_name)) {
       continue;
     }
 
-    std::string prefixPath = rootDir;
-    file::appendPath(&prefixPath, entry->d_name);
+    std::string prefix_path = root_dir;
+    file::AppendPath(&prefix_path, entry->d_name);
 
-    if (file::getFileType(prefixPath) != file::FileType::kDirectory) {
+    if (file::GetFileType(prefix_path) != file::FileType::kDirectory) {
       continue;
     }
 
-    std::unique_ptr<DIR, decltype(closedir)*> subDir(opendir(prefixPath.data()),
-                                                     closedir);
-    if (!subDir) {
-      context->getDiagnostics()->error(DiagMessage() << strerror(errno));
+    std::unique_ptr<DIR, decltype(closedir)*> subdir(
+        opendir(prefix_path.data()), closedir);
+    if (!subdir) {
+      context->GetDiagnostics()->Error(DiagMessage() << strerror(errno));
       return false;
     }
 
-    while (struct dirent* leafEntry = readdir(subDir.get())) {
-      if (isHidden(leafEntry->d_name)) {
+    while (struct dirent* leaf_entry = readdir(subdir.get())) {
+      if (IsHidden(leaf_entry->d_name)) {
         continue;
       }
 
-      std::string fullPath = prefixPath;
-      file::appendPath(&fullPath, leafEntry->d_name);
+      std::string full_path = prefix_path;
+      file::AppendPath(&full_path, leaf_entry->d_name);
 
-      std::string errStr;
-      Maybe<ResourcePathData> pathData =
-          extractResourcePathData(fullPath, &errStr);
-      if (!pathData) {
-        context->getDiagnostics()->error(DiagMessage() << errStr);
+      std::string err_str;
+      Maybe<ResourcePathData> path_data =
+          ExtractResourcePathData(full_path, &err_str);
+      if (!path_data) {
+        context->GetDiagnostics()->Error(DiagMessage() << err_str);
         return false;
       }
 
-      outPathData->push_back(std::move(pathData.value()));
+      out_path_data->push_back(std::move(path_data.value()));
     }
   }
   return true;
 }
 
-static bool compileTable(IAaptContext* context, const CompileOptions& options,
-                         const ResourcePathData& pathData,
+static bool CompileTable(IAaptContext* context, const CompileOptions& options,
+                         const ResourcePathData& path_data,
                          IArchiveWriter* writer,
-                         const std::string& outputPath) {
+                         const std::string& output_path) {
   ResourceTable table;
   {
-    std::ifstream fin(pathData.source.path, std::ifstream::binary);
+    std::ifstream fin(path_data.source.path, std::ifstream::binary);
     if (!fin) {
-      context->getDiagnostics()->error(DiagMessage(pathData.source)
+      context->GetDiagnostics()->Error(DiagMessage(path_data.source)
                                        << strerror(errno));
       return false;
     }
 
     // Parse the values file from XML.
-    xml::XmlPullParser xmlParser(fin);
+    xml::XmlPullParser xml_parser(fin);
 
-    ResourceParserOptions parserOptions;
-    parserOptions.errorOnPositionalArguments = !options.legacyMode;
+    ResourceParserOptions parser_options;
+    parser_options.error_on_positional_arguments = !options.legacy_mode;
 
     // If the filename includes donottranslate, then the default translatable is
     // false.
-    parserOptions.translatable =
-        pathData.name.find("donottranslate") == std::string::npos;
+    parser_options.translatable =
+        path_data.name.find("donottranslate") == std::string::npos;
 
-    ResourceParser resParser(context->getDiagnostics(), &table, pathData.source,
-                             pathData.config, parserOptions);
-    if (!resParser.parse(&xmlParser)) {
+    ResourceParser res_parser(context->GetDiagnostics(), &table,
+                              path_data.source, path_data.config,
+                              parser_options);
+    if (!res_parser.Parse(&xml_parser)) {
       return false;
     }
 
@@ -226,242 +228,241 @@ static bool compileTable(IAaptContext* context, const CompileOptions& options,
     // These are created as weak symbols, and are only generated from default
     // configuration
     // strings and plurals.
-    PseudolocaleGenerator pseudolocaleGenerator;
-    if (!pseudolocaleGenerator.consume(context, &table)) {
+    PseudolocaleGenerator pseudolocale_generator;
+    if (!pseudolocale_generator.Consume(context, &table)) {
       return false;
     }
   }
 
   // Ensure we have the compilation package at least.
-  table.createPackage(context->getCompilationPackage());
+  table.CreatePackage(context->GetCompilationPackage());
 
   // Assign an ID to any package that has resources.
   for (auto& pkg : table.packages) {
     if (!pkg->id) {
       // If no package ID was set while parsing (public identifiers), auto
       // assign an ID.
-      pkg->id = context->getPackageId();
+      pkg->id = context->GetPackageId();
     }
   }
 
   // Create the file/zip entry.
-  if (!writer->startEntry(outputPath, 0)) {
-    context->getDiagnostics()->error(DiagMessage(outputPath)
+  if (!writer->StartEntry(output_path, 0)) {
+    context->GetDiagnostics()->Error(DiagMessage(output_path)
                                      << "failed to open");
     return false;
   }
 
   // Make sure CopyingOutputStreamAdaptor is deleted before we call
-  // writer->finishEntry().
+  // writer->FinishEntry().
   {
     // Wrap our IArchiveWriter with an adaptor that implements the
     // ZeroCopyOutputStream
     // interface.
-    CopyingOutputStreamAdaptor copyingAdaptor(writer);
+    CopyingOutputStreamAdaptor copying_adaptor(writer);
 
-    std::unique_ptr<pb::ResourceTable> pbTable = serializeTableToPb(&table);
-    if (!pbTable->SerializeToZeroCopyStream(&copyingAdaptor)) {
-      context->getDiagnostics()->error(DiagMessage(outputPath)
+    std::unique_ptr<pb::ResourceTable> pb_table = SerializeTableToPb(&table);
+    if (!pb_table->SerializeToZeroCopyStream(&copying_adaptor)) {
+      context->GetDiagnostics()->Error(DiagMessage(output_path)
                                        << "failed to write");
       return false;
     }
   }
 
-  if (!writer->finishEntry()) {
-    context->getDiagnostics()->error(DiagMessage(outputPath)
+  if (!writer->FinishEntry()) {
+    context->GetDiagnostics()->Error(DiagMessage(output_path)
                                      << "failed to finish entry");
     return false;
   }
   return true;
 }
 
-static bool writeHeaderAndBufferToWriter(const StringPiece& outputPath,
+static bool WriteHeaderAndBufferToWriter(const StringPiece& output_path,
                                          const ResourceFile& file,
                                          const BigBuffer& buffer,
                                          IArchiveWriter* writer,
                                          IDiagnostics* diag) {
   // Start the entry so we can write the header.
-  if (!writer->startEntry(outputPath, 0)) {
-    diag->error(DiagMessage(outputPath) << "failed to open file");
+  if (!writer->StartEntry(output_path, 0)) {
+    diag->Error(DiagMessage(output_path) << "failed to open file");
     return false;
   }
 
   // Make sure CopyingOutputStreamAdaptor is deleted before we call
-  // writer->finishEntry().
+  // writer->FinishEntry().
   {
     // Wrap our IArchiveWriter with an adaptor that implements the
     // ZeroCopyOutputStream
     // interface.
-    CopyingOutputStreamAdaptor copyingAdaptor(writer);
-    CompiledFileOutputStream outputStream(&copyingAdaptor);
+    CopyingOutputStreamAdaptor copying_adaptor(writer);
+    CompiledFileOutputStream output_stream(&copying_adaptor);
 
     // Number of CompiledFiles.
-    outputStream.WriteLittleEndian32(1);
+    output_stream.WriteLittleEndian32(1);
 
-    std::unique_ptr<pb::CompiledFile> compiledFile =
-        serializeCompiledFileToPb(file);
-    outputStream.WriteCompiledFile(compiledFile.get());
-    outputStream.WriteData(&buffer);
+    std::unique_ptr<pb::CompiledFile> compiled_file =
+        SerializeCompiledFileToPb(file);
+    output_stream.WriteCompiledFile(compiled_file.get());
+    output_stream.WriteData(&buffer);
 
-    if (outputStream.HadError()) {
-      diag->error(DiagMessage(outputPath) << "failed to write data");
+    if (output_stream.HadError()) {
+      diag->Error(DiagMessage(output_path) << "failed to write data");
       return false;
     }
   }
 
-  if (!writer->finishEntry()) {
-    diag->error(DiagMessage(outputPath) << "failed to finish writing data");
+  if (!writer->FinishEntry()) {
+    diag->Error(DiagMessage(output_path) << "failed to finish writing data");
     return false;
   }
   return true;
 }
 
-static bool writeHeaderAndMmapToWriter(const StringPiece& outputPath,
+static bool WriteHeaderAndMmapToWriter(const StringPiece& output_path,
                                        const ResourceFile& file,
                                        const android::FileMap& map,
                                        IArchiveWriter* writer,
                                        IDiagnostics* diag) {
   // Start the entry so we can write the header.
-  if (!writer->startEntry(outputPath, 0)) {
-    diag->error(DiagMessage(outputPath) << "failed to open file");
+  if (!writer->StartEntry(output_path, 0)) {
+    diag->Error(DiagMessage(output_path) << "failed to open file");
     return false;
   }
 
   // Make sure CopyingOutputStreamAdaptor is deleted before we call
-  // writer->finishEntry().
+  // writer->FinishEntry().
   {
     // Wrap our IArchiveWriter with an adaptor that implements the
-    // ZeroCopyOutputStream
-    // interface.
-    CopyingOutputStreamAdaptor copyingAdaptor(writer);
-    CompiledFileOutputStream outputStream(&copyingAdaptor);
+    // ZeroCopyOutputStream interface.
+    CopyingOutputStreamAdaptor copying_adaptor(writer);
+    CompiledFileOutputStream output_stream(&copying_adaptor);
 
     // Number of CompiledFiles.
-    outputStream.WriteLittleEndian32(1);
+    output_stream.WriteLittleEndian32(1);
 
-    std::unique_ptr<pb::CompiledFile> compiledFile =
-        serializeCompiledFileToPb(file);
-    outputStream.WriteCompiledFile(compiledFile.get());
-    outputStream.WriteData(map.getDataPtr(), map.getDataLength());
+    std::unique_ptr<pb::CompiledFile> compiled_file =
+        SerializeCompiledFileToPb(file);
+    output_stream.WriteCompiledFile(compiled_file.get());
+    output_stream.WriteData(map.getDataPtr(), map.getDataLength());
 
-    if (outputStream.HadError()) {
-      diag->error(DiagMessage(outputPath) << "failed to write data");
+    if (output_stream.HadError()) {
+      diag->Error(DiagMessage(output_path) << "failed to write data");
       return false;
     }
   }
 
-  if (!writer->finishEntry()) {
-    diag->error(DiagMessage(outputPath) << "failed to finish writing data");
+  if (!writer->FinishEntry()) {
+    diag->Error(DiagMessage(output_path) << "failed to finish writing data");
     return false;
   }
   return true;
 }
 
-static bool flattenXmlToOutStream(IAaptContext* context,
-                                  const StringPiece& outputPath,
-                                  xml::XmlResource* xmlRes,
+static bool FlattenXmlToOutStream(IAaptContext* context,
+                                  const StringPiece& output_path,
+                                  xml::XmlResource* xmlres,
                                   CompiledFileOutputStream* out) {
   BigBuffer buffer(1024);
-  XmlFlattenerOptions xmlFlattenerOptions;
-  xmlFlattenerOptions.keepRawValues = true;
-  XmlFlattener flattener(&buffer, xmlFlattenerOptions);
-  if (!flattener.consume(context, xmlRes)) {
+  XmlFlattenerOptions xml_flattener_options;
+  xml_flattener_options.keep_raw_values = true;
+  XmlFlattener flattener(&buffer, xml_flattener_options);
+  if (!flattener.Consume(context, xmlres)) {
     return false;
   }
 
-  std::unique_ptr<pb::CompiledFile> pbCompiledFile =
-      serializeCompiledFileToPb(xmlRes->file);
-  out->WriteCompiledFile(pbCompiledFile.get());
+  std::unique_ptr<pb::CompiledFile> pb_compiled_file =
+      SerializeCompiledFileToPb(xmlres->file);
+  out->WriteCompiledFile(pb_compiled_file.get());
   out->WriteData(&buffer);
 
   if (out->HadError()) {
-    context->getDiagnostics()->error(DiagMessage(outputPath)
+    context->GetDiagnostics()->Error(DiagMessage(output_path)
                                      << "failed to write data");
     return false;
   }
   return true;
 }
 
-static bool compileXml(IAaptContext* context, const CompileOptions& options,
-                       const ResourcePathData& pathData, IArchiveWriter* writer,
-                       const std::string& outputPath) {
-  if (context->verbose()) {
-    context->getDiagnostics()->note(DiagMessage(pathData.source)
+static bool CompileXml(IAaptContext* context, const CompileOptions& options,
+                       const ResourcePathData& path_data,
+                       IArchiveWriter* writer, const std::string& output_path) {
+  if (context->IsVerbose()) {
+    context->GetDiagnostics()->Note(DiagMessage(path_data.source)
                                     << "compiling XML");
   }
 
-  std::unique_ptr<xml::XmlResource> xmlRes;
+  std::unique_ptr<xml::XmlResource> xmlres;
   {
-    std::ifstream fin(pathData.source.path, std::ifstream::binary);
+    std::ifstream fin(path_data.source.path, std::ifstream::binary);
     if (!fin) {
-      context->getDiagnostics()->error(DiagMessage(pathData.source)
+      context->GetDiagnostics()->Error(DiagMessage(path_data.source)
                                        << strerror(errno));
       return false;
     }
 
-    xmlRes = xml::inflate(&fin, context->getDiagnostics(), pathData.source);
+    xmlres = xml::Inflate(&fin, context->GetDiagnostics(), path_data.source);
 
     fin.close();
   }
 
-  if (!xmlRes) {
+  if (!xmlres) {
     return false;
   }
 
-  xmlRes->file.name =
-      ResourceName({}, *parseResourceType(pathData.resourceDir), pathData.name);
-  xmlRes->file.config = pathData.config;
-  xmlRes->file.source = pathData.source;
+  xmlres->file.name = ResourceName(
+      {}, *ParseResourceType(path_data.resource_dir), path_data.name);
+  xmlres->file.config = path_data.config;
+  xmlres->file.source = path_data.source;
 
   // Collect IDs that are defined here.
   XmlIdCollector collector;
-  if (!collector.consume(context, xmlRes.get())) {
+  if (!collector.Consume(context, xmlres.get())) {
     return false;
   }
 
   // Look for and process any <aapt:attr> tags and create sub-documents.
-  InlineXmlFormatParser inlineXmlFormatParser;
-  if (!inlineXmlFormatParser.consume(context, xmlRes.get())) {
+  InlineXmlFormatParser inline_xml_format_parser;
+  if (!inline_xml_format_parser.Consume(context, xmlres.get())) {
     return false;
   }
 
   // Start the entry so we can write the header.
-  if (!writer->startEntry(outputPath, 0)) {
-    context->getDiagnostics()->error(DiagMessage(outputPath)
+  if (!writer->StartEntry(output_path, 0)) {
+    context->GetDiagnostics()->Error(DiagMessage(output_path)
                                      << "failed to open file");
     return false;
   }
 
   // Make sure CopyingOutputStreamAdaptor is deleted before we call
-  // writer->finishEntry().
+  // writer->FinishEntry().
   {
     // Wrap our IArchiveWriter with an adaptor that implements the
     // ZeroCopyOutputStream
     // interface.
-    CopyingOutputStreamAdaptor copyingAdaptor(writer);
-    CompiledFileOutputStream outputStream(&copyingAdaptor);
+    CopyingOutputStreamAdaptor copying_adaptor(writer);
+    CompiledFileOutputStream output_stream(&copying_adaptor);
 
-    std::vector<std::unique_ptr<xml::XmlResource>>& inlineDocuments =
-        inlineXmlFormatParser.getExtractedInlineXmlDocuments();
+    std::vector<std::unique_ptr<xml::XmlResource>>& inline_documents =
+        inline_xml_format_parser.GetExtractedInlineXmlDocuments();
 
     // Number of CompiledFiles.
-    outputStream.WriteLittleEndian32(1 + inlineDocuments.size());
+    output_stream.WriteLittleEndian32(1 + inline_documents.size());
 
-    if (!flattenXmlToOutStream(context, outputPath, xmlRes.get(),
-                               &outputStream)) {
+    if (!FlattenXmlToOutStream(context, output_path, xmlres.get(),
+                               &output_stream)) {
       return false;
     }
 
-    for (auto& inlineXmlDoc : inlineDocuments) {
-      if (!flattenXmlToOutStream(context, outputPath, inlineXmlDoc.get(),
-                                 &outputStream)) {
+    for (auto& inline_xml_doc : inline_documents) {
+      if (!FlattenXmlToOutStream(context, output_path, inline_xml_doc.get(),
+                                 &output_stream)) {
         return false;
       }
     }
   }
 
-  if (!writer->finishEntry()) {
-    context->getDiagnostics()->error(DiagMessage(outputPath)
+  if (!writer->FinishEntry()) {
+    context->GetDiagnostics()->Error(DiagMessage(output_path)
                                      << "failed to finish writing data");
     return false;
   }
@@ -470,69 +471,69 @@ static bool compileXml(IAaptContext* context, const CompileOptions& options,
 
 class BigBufferOutputStream : public io::OutputStream {
  public:
-  explicit BigBufferOutputStream(BigBuffer* buffer) : mBuffer(buffer) {}
+  explicit BigBufferOutputStream(BigBuffer* buffer) : buffer_(buffer) {}
 
   bool Next(void** data, int* len) override {
     size_t count;
-    *data = mBuffer->nextBlock(&count);
+    *data = buffer_->NextBlock(&count);
     *len = static_cast<int>(count);
     return true;
   }
 
-  void BackUp(int count) override { mBuffer->backUp(count); }
+  void BackUp(int count) override { buffer_->BackUp(count); }
 
-  int64_t ByteCount() const override { return mBuffer->size(); }
+  int64_t ByteCount() const override { return buffer_->size(); }
 
   bool HadError() const override { return false; }
 
  private:
-  BigBuffer* mBuffer;
+  BigBuffer* buffer_;
 
   DISALLOW_COPY_AND_ASSIGN(BigBufferOutputStream);
 };
 
-static bool compilePng(IAaptContext* context, const CompileOptions& options,
-                       const ResourcePathData& pathData, IArchiveWriter* writer,
-                       const std::string& outputPath) {
-  if (context->verbose()) {
-    context->getDiagnostics()->note(DiagMessage(pathData.source)
+static bool CompilePng(IAaptContext* context, const CompileOptions& options,
+                       const ResourcePathData& path_data,
+                       IArchiveWriter* writer, const std::string& output_path) {
+  if (context->IsVerbose()) {
+    context->GetDiagnostics()->Note(DiagMessage(path_data.source)
                                     << "compiling PNG");
   }
 
   BigBuffer buffer(4096);
-  ResourceFile resFile;
-  resFile.name =
-      ResourceName({}, *parseResourceType(pathData.resourceDir), pathData.name);
-  resFile.config = pathData.config;
-  resFile.source = pathData.source;
+  ResourceFile res_file;
+  res_file.name = ResourceName({}, *ParseResourceType(path_data.resource_dir),
+                               path_data.name);
+  res_file.config = path_data.config;
+  res_file.source = path_data.source;
 
   {
     std::string content;
-    if (!android::base::ReadFileToString(pathData.source.path, &content)) {
-      context->getDiagnostics()->error(
-          DiagMessage(pathData.source)
+    if (!android::base::ReadFileToString(path_data.source.path, &content)) {
+      context->GetDiagnostics()->Error(
+          DiagMessage(path_data.source)
           << android::base::SystemErrorCodeToString(errno));
       return false;
     }
 
-    BigBuffer crunchedPngBuffer(4096);
-    BigBufferOutputStream crunchedPngBufferOut(&crunchedPngBuffer);
+    BigBuffer crunched_png_buffer(4096);
+    BigBufferOutputStream crunched_png_buffer_out(&crunched_png_buffer);
 
     // Ensure that we only keep the chunks we care about if we end up
     // using the original PNG instead of the crunched one.
-    PngChunkFilter pngChunkFilter(content);
-    std::unique_ptr<Image> image = readPng(context, &pngChunkFilter);
+    PngChunkFilter png_chunk_filter(content);
+    std::unique_ptr<Image> image = ReadPng(context, &png_chunk_filter);
     if (!image) {
       return false;
     }
 
-    std::unique_ptr<NinePatch> ninePatch;
-    if (pathData.extension == "9.png") {
+    std::unique_ptr<NinePatch> nine_patch;
+    if (path_data.extension == "9.png") {
       std::string err;
-      ninePatch = NinePatch::create(image->rows.get(), image->width,
-                                    image->height, &err);
-      if (!ninePatch) {
-        context->getDiagnostics()->error(DiagMessage() << err);
+      nine_patch = NinePatch::Create(image->rows.get(), image->width,
+                                     image->height, &err);
+      if (!nine_patch) {
+        context->GetDiagnostics()->Error(DiagMessage() << err);
         return false;
       }
 
@@ -549,89 +550,91 @@ static bool compilePng(IAaptContext* context, const CompileOptions& options,
         memmove(image->rows[h], image->rows[h] + 4, image->width * 4);
       }
 
-      if (context->verbose()) {
-        context->getDiagnostics()->note(DiagMessage(pathData.source)
-                                        << "9-patch: " << *ninePatch);
+      if (context->IsVerbose()) {
+        context->GetDiagnostics()->Note(DiagMessage(path_data.source)
+                                        << "9-patch: " << *nine_patch);
       }
     }
 
     // Write the crunched PNG.
-    if (!writePng(context, image.get(), ninePatch.get(), &crunchedPngBufferOut,
-                  {})) {
+    if (!WritePng(context, image.get(), nine_patch.get(),
+                  &crunched_png_buffer_out, {})) {
       return false;
     }
 
-    if (ninePatch != nullptr ||
-        crunchedPngBufferOut.ByteCount() <= pngChunkFilter.ByteCount()) {
+    if (nine_patch != nullptr ||
+        crunched_png_buffer_out.ByteCount() <= png_chunk_filter.ByteCount()) {
       // No matter what, we must use the re-encoded PNG, even if it is larger.
       // 9-patch images must be re-encoded since their borders are stripped.
-      buffer.appendBuffer(std::move(crunchedPngBuffer));
+      buffer.AppendBuffer(std::move(crunched_png_buffer));
     } else {
       // The re-encoded PNG is larger than the original, and there is
       // no mandatory transformation. Use the original.
-      if (context->verbose()) {
-        context->getDiagnostics()->note(
-            DiagMessage(pathData.source)
+      if (context->IsVerbose()) {
+        context->GetDiagnostics()->Note(
+            DiagMessage(path_data.source)
             << "original PNG is smaller than crunched PNG"
             << ", using original");
       }
 
-      PngChunkFilter pngChunkFilterAgain(content);
-      BigBuffer filteredPngBuffer(4096);
-      BigBufferOutputStream filteredPngBufferOut(&filteredPngBuffer);
-      io::copy(&filteredPngBufferOut, &pngChunkFilterAgain);
-      buffer.appendBuffer(std::move(filteredPngBuffer));
+      PngChunkFilter png_chunk_filter_again(content);
+      BigBuffer filtered_png_buffer(4096);
+      BigBufferOutputStream filtered_png_buffer_out(&filtered_png_buffer);
+      io::Copy(&filtered_png_buffer_out, &png_chunk_filter_again);
+      buffer.AppendBuffer(std::move(filtered_png_buffer));
     }
 
-    if (context->verbose()) {
+    if (context->IsVerbose()) {
       // For debugging only, use the legacy PNG cruncher and compare the
       // resulting file sizes.
       // This will help catch exotic cases where the new code may generate
       // larger PNGs.
-      std::stringstream legacyStream(content);
-      BigBuffer legacyBuffer(4096);
-      Png png(context->getDiagnostics());
-      if (!png.process(pathData.source, &legacyStream, &legacyBuffer, {})) {
+      std::stringstream legacy_stream(content);
+      BigBuffer legacy_buffer(4096);
+      Png png(context->GetDiagnostics());
+      if (!png.process(path_data.source, &legacy_stream, &legacy_buffer, {})) {
         return false;
       }
 
-      context->getDiagnostics()->note(DiagMessage(pathData.source)
-                                      << "legacy=" << legacyBuffer.size()
+      context->GetDiagnostics()->Note(DiagMessage(path_data.source)
+                                      << "legacy=" << legacy_buffer.size()
                                       << " new=" << buffer.size());
     }
   }
 
-  if (!writeHeaderAndBufferToWriter(outputPath, resFile, buffer, writer,
-                                    context->getDiagnostics())) {
+  if (!WriteHeaderAndBufferToWriter(output_path, res_file, buffer, writer,
+                                    context->GetDiagnostics())) {
     return false;
   }
   return true;
 }
 
-static bool compileFile(IAaptContext* context, const CompileOptions& options,
-                        const ResourcePathData& pathData,
-                        IArchiveWriter* writer, const std::string& outputPath) {
-  if (context->verbose()) {
-    context->getDiagnostics()->note(DiagMessage(pathData.source)
+static bool CompileFile(IAaptContext* context, const CompileOptions& options,
+                        const ResourcePathData& path_data,
+                        IArchiveWriter* writer,
+                        const std::string& output_path) {
+  if (context->IsVerbose()) {
+    context->GetDiagnostics()->Note(DiagMessage(path_data.source)
                                     << "compiling file");
   }
 
   BigBuffer buffer(256);
-  ResourceFile resFile;
-  resFile.name =
-      ResourceName({}, *parseResourceType(pathData.resourceDir), pathData.name);
-  resFile.config = pathData.config;
-  resFile.source = pathData.source;
+  ResourceFile res_file;
+  res_file.name = ResourceName({}, *ParseResourceType(path_data.resource_dir),
+                               path_data.name);
+  res_file.config = path_data.config;
+  res_file.source = path_data.source;
 
-  std::string errorStr;
-  Maybe<android::FileMap> f = file::mmapPath(pathData.source.path, &errorStr);
+  std::string error_str;
+  Maybe<android::FileMap> f = file::MmapPath(path_data.source.path, &error_str);
   if (!f) {
-    context->getDiagnostics()->error(DiagMessage(pathData.source) << errorStr);
+    context->GetDiagnostics()->Error(DiagMessage(path_data.source)
+                                     << error_str);
     return false;
   }
 
-  if (!writeHeaderAndMmapToWriter(outputPath, resFile, f.value(), writer,
-                                  context->getDiagnostics())) {
+  if (!WriteHeaderAndMmapToWriter(output_path, res_file, f.value(), writer,
+                                  context->GetDiagnostics())) {
     return false;
   }
   return true;
@@ -639,155 +642,156 @@ static bool compileFile(IAaptContext* context, const CompileOptions& options,
 
 class CompileContext : public IAaptContext {
  public:
-  void setVerbose(bool val) { mVerbose = val; }
+  void SetVerbose(bool val) { verbose_ = val; }
 
-  bool verbose() override { return mVerbose; }
+  bool IsVerbose() override { return verbose_; }
 
-  IDiagnostics* getDiagnostics() override { return &mDiagnostics; }
+  IDiagnostics* GetDiagnostics() override { return &diagnostics_; }
 
-  NameMangler* getNameMangler() override {
+  NameMangler* GetNameMangler() override {
     abort();
     return nullptr;
   }
 
-  const std::string& getCompilationPackage() override {
+  const std::string& GetCompilationPackage() override {
     static std::string empty;
     return empty;
   }
 
-  uint8_t getPackageId() override { return 0x0; }
+  uint8_t GetPackageId() override { return 0x0; }
 
-  SymbolTable* getExternalSymbols() override {
+  SymbolTable* GetExternalSymbols() override {
     abort();
     return nullptr;
   }
 
-  int getMinSdkVersion() override { return 0; }
+  int GetMinSdkVersion() override { return 0; }
 
  private:
-  StdErrDiagnostics mDiagnostics;
-  bool mVerbose = false;
+  StdErrDiagnostics diagnostics_;
+  bool verbose_ = false;
 };
 
 /**
  * Entry point for compilation phase. Parses arguments and dispatches to the
  * correct steps.
  */
-int compile(const std::vector<StringPiece>& args) {
+int Compile(const std::vector<StringPiece>& args) {
   CompileContext context;
   CompileOptions options;
 
   bool verbose = false;
   Flags flags =
       Flags()
-          .requiredFlag("-o", "Output path", &options.outputPath)
-          .optionalFlag("--dir", "Directory to scan for resources",
-                        &options.resDir)
-          .optionalSwitch("--pseudo-localize",
+          .RequiredFlag("-o", "Output path", &options.output_path)
+          .OptionalFlag("--dir", "Directory to scan for resources",
+                        &options.res_dir)
+          .OptionalSwitch("--pseudo-localize",
                           "Generate resources for pseudo-locales "
                           "(en-XA and ar-XB)",
                           &options.pseudolocalize)
-          .optionalSwitch(
+          .OptionalSwitch(
               "--legacy",
               "Treat errors that used to be valid in AAPT as warnings",
-              &options.legacyMode)
-          .optionalSwitch("-v", "Enables verbose logging", &verbose);
-  if (!flags.parse("aapt2 compile", args, &std::cerr)) {
+              &options.legacy_mode)
+          .OptionalSwitch("-v", "Enables verbose logging", &verbose);
+  if (!flags.Parse("aapt2 compile", args, &std::cerr)) {
     return 1;
   }
 
-  context.setVerbose(verbose);
+  context.SetVerbose(verbose);
 
-  std::unique_ptr<IArchiveWriter> archiveWriter;
+  std::unique_ptr<IArchiveWriter> archive_writer;
 
-  std::vector<ResourcePathData> inputData;
-  if (options.resDir) {
-    if (!flags.getArgs().empty()) {
+  std::vector<ResourcePathData> input_data;
+  if (options.res_dir) {
+    if (!flags.GetArgs().empty()) {
       // Can't have both files and a resource directory.
-      context.getDiagnostics()->error(DiagMessage()
+      context.GetDiagnostics()->Error(DiagMessage()
                                       << "files given but --dir specified");
-      flags.usage("aapt2 compile", &std::cerr);
+      flags.Usage("aapt2 compile", &std::cerr);
       return 1;
     }
 
-    if (!loadInputFilesFromDir(&context, options, &inputData)) {
+    if (!LoadInputFilesFromDir(&context, options, &input_data)) {
       return 1;
     }
 
-    archiveWriter = createZipFileArchiveWriter(context.getDiagnostics(),
-                                               options.outputPath);
+    archive_writer = CreateZipFileArchiveWriter(context.GetDiagnostics(),
+                                                options.output_path);
 
   } else {
-    inputData.reserve(flags.getArgs().size());
+    input_data.reserve(flags.GetArgs().size());
 
     // Collect data from the path for each input file.
-    for (const std::string& arg : flags.getArgs()) {
-      std::string errorStr;
-      if (Maybe<ResourcePathData> pathData =
-              extractResourcePathData(arg, &errorStr)) {
-        inputData.push_back(std::move(pathData.value()));
+    for (const std::string& arg : flags.GetArgs()) {
+      std::string error_str;
+      if (Maybe<ResourcePathData> path_data =
+              ExtractResourcePathData(arg, &error_str)) {
+        input_data.push_back(std::move(path_data.value()));
       } else {
-        context.getDiagnostics()->error(DiagMessage() << errorStr << " (" << arg
-                                                      << ")");
+        context.GetDiagnostics()->Error(DiagMessage() << error_str << " ("
+                                                      << arg << ")");
         return 1;
       }
     }
 
-    archiveWriter = createDirectoryArchiveWriter(context.getDiagnostics(),
-                                                 options.outputPath);
+    archive_writer = CreateDirectoryArchiveWriter(context.GetDiagnostics(),
+                                                  options.output_path);
   }
 
-  if (!archiveWriter) {
+  if (!archive_writer) {
     return 1;
   }
 
   bool error = false;
-  for (ResourcePathData& pathData : inputData) {
+  for (ResourcePathData& path_data : input_data) {
     if (options.verbose) {
-      context.getDiagnostics()->note(DiagMessage(pathData.source)
+      context.GetDiagnostics()->Note(DiagMessage(path_data.source)
                                      << "processing");
     }
 
-    if (pathData.resourceDir == "values") {
+    if (path_data.resource_dir == "values") {
       // Overwrite the extension.
-      pathData.extension = "arsc";
+      path_data.extension = "arsc";
 
-      const std::string outputFilename = buildIntermediateFilename(pathData);
-      if (!compileTable(&context, options, pathData, archiveWriter.get(),
-                        outputFilename)) {
+      const std::string output_filename = BuildIntermediateFilename(path_data);
+      if (!CompileTable(&context, options, path_data, archive_writer.get(),
+                        output_filename)) {
         error = true;
       }
 
     } else {
-      const std::string outputFilename = buildIntermediateFilename(pathData);
-      if (const ResourceType* type = parseResourceType(pathData.resourceDir)) {
+      const std::string output_filename = BuildIntermediateFilename(path_data);
+      if (const ResourceType* type =
+              ParseResourceType(path_data.resource_dir)) {
         if (*type != ResourceType::kRaw) {
-          if (pathData.extension == "xml") {
-            if (!compileXml(&context, options, pathData, archiveWriter.get(),
-                            outputFilename)) {
+          if (path_data.extension == "xml") {
+            if (!CompileXml(&context, options, path_data, archive_writer.get(),
+                            output_filename)) {
               error = true;
             }
-          } else if (pathData.extension == "png" ||
-                     pathData.extension == "9.png") {
-            if (!compilePng(&context, options, pathData, archiveWriter.get(),
-                            outputFilename)) {
+          } else if (path_data.extension == "png" ||
+                     path_data.extension == "9.png") {
+            if (!CompilePng(&context, options, path_data, archive_writer.get(),
+                            output_filename)) {
               error = true;
             }
           } else {
-            if (!compileFile(&context, options, pathData, archiveWriter.get(),
-                             outputFilename)) {
+            if (!CompileFile(&context, options, path_data, archive_writer.get(),
+                             output_filename)) {
               error = true;
             }
           }
         } else {
-          if (!compileFile(&context, options, pathData, archiveWriter.get(),
-                           outputFilename)) {
+          if (!CompileFile(&context, options, path_data, archive_writer.get(),
+                           output_filename)) {
             error = true;
           }
         }
       } else {
-        context.getDiagnostics()->error(
-            DiagMessage() << "invalid file path '" << pathData.source << "'");
+        context.GetDiagnostics()->Error(
+            DiagMessage() << "invalid file path '" << path_data.source << "'");
         error = true;
       }
     }

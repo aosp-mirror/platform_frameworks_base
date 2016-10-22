@@ -26,10 +26,11 @@
 
 #include <utils/Compat.h>
 #include <utils/Errors.h>
-#include <utils/FileMap.h>
 #include <utils/String8.h>
 
 namespace android {
+
+class FileMap;
 
 /*
  * Instances of this class provide read-only operations on a byte stream.

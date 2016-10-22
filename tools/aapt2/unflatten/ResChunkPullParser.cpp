@@ -15,55 +15,60 @@
  */
 
 #include "unflatten/ResChunkPullParser.h"
-#include "util/Util.h"
 
-#include <androidfw/ResourceTypes.h>
 #include <cstddef>
+
+#include "android-base/logging.h"
+#include "androidfw/ResourceTypes.h"
+
+#include "util/Util.h"
 
 namespace aapt {
 
 using android::ResChunk_header;
 
-ResChunkPullParser::Event ResChunkPullParser::next() {
-    if (!isGoodEvent(mEvent)) {
-        return mEvent;
-    }
+ResChunkPullParser::Event ResChunkPullParser::Next() {
+  if (!IsGoodEvent(event_)) {
+    return event_;
+  }
 
-    if (mEvent == Event::StartDocument) {
-        mCurrentChunk = mData;
-    } else {
-        mCurrentChunk = (const ResChunk_header*)
-                (((const char*) mCurrentChunk) + util::deviceToHost32(mCurrentChunk->size));
-    }
+  if (event_ == Event::kStartDocument) {
+    current_chunk_ = data_;
+  } else {
+    current_chunk_ =
+        (const ResChunk_header*)(((const char*)current_chunk_) +
+                                 util::DeviceToHost32(current_chunk_->size));
+  }
 
-    const std::ptrdiff_t diff = (const char*) mCurrentChunk - (const char*) mData;
-    assert(diff >= 0 && "diff is negative");
-    const size_t offset = static_cast<const size_t>(diff);
+  const std::ptrdiff_t diff = (const char*)current_chunk_ - (const char*)data_;
+  CHECK(diff >= 0) << "diff is negative";
+  const size_t offset = static_cast<const size_t>(diff);
 
-    if (offset == mLen) {
-        mCurrentChunk = nullptr;
-        return (mEvent = Event::EndDocument);
-    } else if (offset + sizeof(ResChunk_header) > mLen) {
-        mLastError = "chunk is past the end of the document";
-        mCurrentChunk = nullptr;
-        return (mEvent = Event::BadDocument);
-    }
+  if (offset == len_) {
+    current_chunk_ = nullptr;
+    return (event_ = Event::kEndDocument);
+  } else if (offset + sizeof(ResChunk_header) > len_) {
+    error_ = "chunk is past the end of the document";
+    current_chunk_ = nullptr;
+    return (event_ = Event::kBadDocument);
+  }
 
-    if (util::deviceToHost16(mCurrentChunk->headerSize) < sizeof(ResChunk_header)) {
-        mLastError = "chunk has too small header";
-        mCurrentChunk = nullptr;
-        return (mEvent = Event::BadDocument);
-    } else if (util::deviceToHost32(mCurrentChunk->size) <
-            util::deviceToHost16(mCurrentChunk->headerSize)) {
-        mLastError = "chunk's total size is smaller than header";
-        mCurrentChunk = nullptr;
-        return (mEvent = Event::BadDocument);
-    } else if (offset + util::deviceToHost32(mCurrentChunk->size) > mLen) {
-        mLastError = "chunk's data extends past the end of the document";
-        mCurrentChunk = nullptr;
-        return (mEvent = Event::BadDocument);
-    }
-    return (mEvent = Event::Chunk);
+  if (util::DeviceToHost16(current_chunk_->headerSize) <
+      sizeof(ResChunk_header)) {
+    error_ = "chunk has too small header";
+    current_chunk_ = nullptr;
+    return (event_ = Event::kBadDocument);
+  } else if (util::DeviceToHost32(current_chunk_->size) <
+             util::DeviceToHost16(current_chunk_->headerSize)) {
+    error_ = "chunk's total size is smaller than header";
+    current_chunk_ = nullptr;
+    return (event_ = Event::kBadDocument);
+  } else if (offset + util::DeviceToHost32(current_chunk_->size) > len_) {
+    error_ = "chunk's data extends past the end of the document";
+    current_chunk_ = nullptr;
+    return (event_ = Event::kBadDocument);
+  }
+  return (event_ = Event::kChunk);
 }
 
-} // namespace aapt
+}  // namespace aapt

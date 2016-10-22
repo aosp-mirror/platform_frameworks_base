@@ -17,21 +17,24 @@
 #ifndef AAPT_FLATTEN_TABLEFLATTENER_H
 #define AAPT_FLATTEN_TABLEFLATTENER_H
 
+#include "android-base/macros.h"
+
+#include "ResourceTable.h"
 #include "process/IResourceTableConsumer.h"
+#include "util/BigBuffer.h"
 
 namespace aapt {
 
-class BigBuffer;
-class ResourceTable;
-
 class TableFlattener : public IResourceTableConsumer {
  public:
-  explicit TableFlattener(BigBuffer* buffer) : mBuffer(buffer) {}
+  explicit TableFlattener(BigBuffer* buffer) : buffer_(buffer) {}
 
-  bool consume(IAaptContext* context, ResourceTable* table) override;
+  bool Consume(IAaptContext* context, ResourceTable* table) override;
 
  private:
-  BigBuffer* mBuffer;
+  DISALLOW_COPY_AND_ASSIGN(TableFlattener);
+
+  BigBuffer* buffer_;
 };
 
 }  // namespace aapt

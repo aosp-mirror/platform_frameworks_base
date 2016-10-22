@@ -17,9 +17,9 @@
 #ifndef AAPT_SDK_CONSTANTS_H
 #define AAPT_SDK_CONSTANTS_H
 
-#include "Resource.h"
-
 #include <utility>
+
+#include "Resource.h"
 
 namespace aapt {
 
@@ -47,9 +47,9 @@ enum {
   SDK_MARSHMALLOW = 23,
 };
 
-size_t findAttributeSdkLevel(const ResourceId& id);
-size_t findAttributeSdkLevel(const ResourceName& name);
-std::pair<StringPiece, int> getDevelopmentSdkCodeNameAndVersion();
+size_t FindAttributeSdkLevel(const ResourceId& id);
+size_t FindAttributeSdkLevel(const ResourceName& name);
+std::pair<StringPiece, int> GetDevelopmentSdkCodeNameAndVersion();
 
 }  // namespace aapt
 

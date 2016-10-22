@@ -23,11 +23,11 @@
 
 namespace aapt {
 
-std::unique_ptr<StyledString> pseudolocalizeStyledString(
+std::unique_ptr<StyledString> PseudolocalizeStyledString(
     StyledString* string, Pseudolocalizer::Method method, StringPool* pool);
 
 struct PseudolocaleGenerator : public IResourceTableConsumer {
-  bool consume(IAaptContext* context, ResourceTable* table) override;
+  bool Consume(IAaptContext* context, ResourceTable* table) override;
 };
 
 }  // namespace aapt

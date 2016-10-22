@@ -15,61 +15,62 @@
  */
 
 #include "flatten/XmlFlattener.h"
+
+#include "androidfw/ResourceTypes.h"
+
 #include "link/Linkers.h"
 #include "test/Test.h"
 #include "util/BigBuffer.h"
 #include "util/Util.h"
-
-#include <androidfw/ResourceTypes.h>
 
 namespace aapt {
 
 class XmlFlattenerTest : public ::testing::Test {
  public:
   void SetUp() override {
-    mContext =
+    context_ =
         test::ContextBuilder()
-            .setCompilationPackage("com.app.test")
-            .setNameManglerPolicy(NameManglerPolicy{"com.app.test"})
-            .addSymbolSource(
+            .SetCompilationPackage("com.app.test")
+            .SetNameManglerPolicy(NameManglerPolicy{"com.app.test"})
+            .AddSymbolSource(
                 test::StaticSymbolSourceBuilder()
-                    .addSymbol("android:attr/id", ResourceId(0x010100d0),
-                               test::AttributeBuilder().build())
-                    .addSymbol("com.app.test:id/id", ResourceId(0x7f020000))
-                    .addSymbol("android:attr/paddingStart",
+                    .AddSymbol("android:attr/id", ResourceId(0x010100d0),
+                               test::AttributeBuilder().Build())
+                    .AddSymbol("com.app.test:id/id", ResourceId(0x7f020000))
+                    .AddSymbol("android:attr/paddingStart",
                                ResourceId(0x010103b3),
-                               test::AttributeBuilder().build())
-                    .addSymbol("android:attr/colorAccent",
+                               test::AttributeBuilder().Build())
+                    .AddSymbol("android:attr/colorAccent",
                                ResourceId(0x01010435),
-                               test::AttributeBuilder().build())
-                    .build())
-            .build();
+                               test::AttributeBuilder().Build())
+                    .Build())
+            .Build();
   }
 
-  ::testing::AssertionResult flatten(xml::XmlResource* doc,
-                                     android::ResXMLTree* outTree,
+  ::testing::AssertionResult Flatten(xml::XmlResource* doc,
+                                     android::ResXMLTree* out_tree,
                                      const XmlFlattenerOptions& options = {}) {
     using namespace android;  // For NO_ERROR on windows because it is a macro.
 
     BigBuffer buffer(1024);
     XmlFlattener flattener(&buffer, options);
-    if (!flattener.consume(mContext.get(), doc)) {
+    if (!flattener.Consume(context_.get(), doc)) {
       return ::testing::AssertionFailure() << "failed to flatten XML Tree";
     }
 
-    std::unique_ptr<uint8_t[]> data = util::copy(buffer);
-    if (outTree->setTo(data.get(), buffer.size(), true) != NO_ERROR) {
+    std::unique_ptr<uint8_t[]> data = util::Copy(buffer);
+    if (out_tree->setTo(data.get(), buffer.size(), true) != NO_ERROR) {
       return ::testing::AssertionFailure() << "flattened XML is corrupt";
     }
     return ::testing::AssertionSuccess();
   }
 
  protected:
-  std::unique_ptr<IAaptContext> mContext;
+  std::unique_ptr<IAaptContext> context_;
 };
 
 TEST_F(XmlFlattenerTest, FlattenXmlWithNoCompiledAttributes) {
-  std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom(R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"EOF(
             <View xmlns:test="http://com.test"
                   attr="hey">
               <Layout test:hello="hi" />
@@ -77,27 +78,27 @@ TEST_F(XmlFlattenerTest, FlattenXmlWithNoCompiledAttributes) {
             </View>)EOF");
 
   android::ResXMLTree tree;
-  ASSERT_TRUE(flatten(doc.get(), &tree));
+  ASSERT_TRUE(Flatten(doc.get(), &tree));
 
   ASSERT_EQ(tree.next(), android::ResXMLTree::START_NAMESPACE);
 
   size_t len;
-  const char16_t* namespacePrefix = tree.getNamespacePrefix(&len);
-  EXPECT_EQ(StringPiece16(namespacePrefix, len), u"test");
+  const char16_t* namespace_prefix = tree.getNamespacePrefix(&len);
+  EXPECT_EQ(StringPiece16(namespace_prefix, len), u"test");
 
-  const char16_t* namespaceUri = tree.getNamespaceUri(&len);
-  ASSERT_EQ(StringPiece16(namespaceUri, len), u"http://com.test");
+  const char16_t* namespace_uri = tree.getNamespaceUri(&len);
+  ASSERT_EQ(StringPiece16(namespace_uri, len), u"http://com.test");
 
   ASSERT_EQ(tree.next(), android::ResXMLTree::START_TAG);
 
   ASSERT_EQ(tree.getElementNamespace(&len), nullptr);
-  const char16_t* tagName = tree.getElementName(&len);
-  EXPECT_EQ(StringPiece16(tagName, len), u"View");
+  const char16_t* tag_name = tree.getElementName(&len);
+  EXPECT_EQ(StringPiece16(tag_name, len), u"View");
 
   ASSERT_EQ(1u, tree.getAttributeCount());
   ASSERT_EQ(tree.getAttributeNamespace(0, &len), nullptr);
-  const char16_t* attrName = tree.getAttributeName(0, &len);
-  EXPECT_EQ(StringPiece16(attrName, len), u"attr");
+  const char16_t* attr_name = tree.getAttributeName(0, &len);
+  EXPECT_EQ(StringPiece16(attr_name, len), u"attr");
 
   EXPECT_EQ(0, tree.indexOfAttribute(nullptr, 0, u"attr",
                                      StringPiece16(u"attr").size()));
@@ -105,22 +106,22 @@ TEST_F(XmlFlattenerTest, FlattenXmlWithNoCompiledAttributes) {
   ASSERT_EQ(tree.next(), android::ResXMLTree::START_TAG);
 
   ASSERT_EQ(tree.getElementNamespace(&len), nullptr);
-  tagName = tree.getElementName(&len);
-  EXPECT_EQ(StringPiece16(tagName, len), u"Layout");
+  tag_name = tree.getElementName(&len);
+  EXPECT_EQ(StringPiece16(tag_name, len), u"Layout");
 
   ASSERT_EQ(1u, tree.getAttributeCount());
-  const char16_t* attrNamespace = tree.getAttributeNamespace(0, &len);
-  EXPECT_EQ(StringPiece16(attrNamespace, len), u"http://com.test");
+  const char16_t* attr_namespace = tree.getAttributeNamespace(0, &len);
+  EXPECT_EQ(StringPiece16(attr_namespace, len), u"http://com.test");
 
-  attrName = tree.getAttributeName(0, &len);
-  EXPECT_EQ(StringPiece16(attrName, len), u"hello");
+  attr_name = tree.getAttributeName(0, &len);
+  EXPECT_EQ(StringPiece16(attr_name, len), u"hello");
 
   ASSERT_EQ(tree.next(), android::ResXMLTree::END_TAG);
   ASSERT_EQ(tree.next(), android::ResXMLTree::START_TAG);
 
   ASSERT_EQ(tree.getElementNamespace(&len), nullptr);
-  tagName = tree.getElementName(&len);
-  EXPECT_EQ(StringPiece16(tagName, len), u"Layout");
+  tag_name = tree.getElementName(&len);
+  EXPECT_EQ(StringPiece16(tag_name, len), u"Layout");
   ASSERT_EQ(0u, tree.getAttributeCount());
 
   ASSERT_EQ(tree.next(), android::ResXMLTree::TEXT);
@@ -129,39 +130,39 @@ TEST_F(XmlFlattenerTest, FlattenXmlWithNoCompiledAttributes) {
 
   ASSERT_EQ(tree.next(), android::ResXMLTree::END_TAG);
   ASSERT_EQ(tree.getElementNamespace(&len), nullptr);
-  tagName = tree.getElementName(&len);
-  EXPECT_EQ(StringPiece16(tagName, len), u"Layout");
+  tag_name = tree.getElementName(&len);
+  EXPECT_EQ(StringPiece16(tag_name, len), u"Layout");
 
   ASSERT_EQ(tree.next(), android::ResXMLTree::END_TAG);
   ASSERT_EQ(tree.getElementNamespace(&len), nullptr);
-  tagName = tree.getElementName(&len);
-  EXPECT_EQ(StringPiece16(tagName, len), u"View");
+  tag_name = tree.getElementName(&len);
+  EXPECT_EQ(StringPiece16(tag_name, len), u"View");
 
   ASSERT_EQ(tree.next(), android::ResXMLTree::END_NAMESPACE);
-  namespacePrefix = tree.getNamespacePrefix(&len);
-  EXPECT_EQ(StringPiece16(namespacePrefix, len), u"test");
+  namespace_prefix = tree.getNamespacePrefix(&len);
+  EXPECT_EQ(StringPiece16(namespace_prefix, len), u"test");
 
-  namespaceUri = tree.getNamespaceUri(&len);
-  ASSERT_EQ(StringPiece16(namespaceUri, len), u"http://com.test");
+  namespace_uri = tree.getNamespaceUri(&len);
+  ASSERT_EQ(StringPiece16(namespace_uri, len), u"http://com.test");
 
   ASSERT_EQ(tree.next(), android::ResXMLTree::END_DOCUMENT);
 }
 
 TEST_F(XmlFlattenerTest, FlattenCompiledXmlAndStripSdk21) {
-  std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom(R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"EOF(
             <View xmlns:android="http://schemas.android.com/apk/res/android"
                 android:paddingStart="1dp"
                 android:colorAccent="#ffffff"/>)EOF");
 
   XmlReferenceLinker linker;
-  ASSERT_TRUE(linker.consume(mContext.get(), doc.get()));
-  ASSERT_TRUE(linker.getSdkLevels().count(17) == 1);
-  ASSERT_TRUE(linker.getSdkLevels().count(21) == 1);
+  ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
+  ASSERT_TRUE(linker.sdk_levels().count(17) == 1);
+  ASSERT_TRUE(linker.sdk_levels().count(21) == 1);
 
   android::ResXMLTree tree;
   XmlFlattenerOptions options;
-  options.maxSdkLevel = 17;
-  ASSERT_TRUE(flatten(doc.get(), &tree, options));
+  options.max_sdk_level = 17;
+  ASSERT_TRUE(Flatten(doc.get(), &tree, options));
 
   while (tree.next() != android::ResXMLTree::START_TAG) {
     ASSERT_NE(tree.getEventType(), android::ResXMLTree::BAD_DOCUMENT);
@@ -173,23 +174,23 @@ TEST_F(XmlFlattenerTest, FlattenCompiledXmlAndStripSdk21) {
 }
 
 TEST_F(XmlFlattenerTest, FlattenCompiledXmlAndStripOnlyTools) {
-  std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom(R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"EOF(
             <View xmlns:tools="http://schemas.android.com/tools"
                 xmlns:foo="http://schemas.android.com/foo"
                 foo:bar="Foo"
                 tools:ignore="MissingTranslation"/>)EOF");
 
   android::ResXMLTree tree;
-  ASSERT_TRUE(flatten(doc.get(), &tree));
+  ASSERT_TRUE(Flatten(doc.get(), &tree));
 
   ASSERT_EQ(tree.next(), android::ResXMLTree::START_NAMESPACE);
 
   size_t len;
-  const char16_t* namespacePrefix = tree.getNamespacePrefix(&len);
-  EXPECT_EQ(StringPiece16(namespacePrefix, len), u"foo");
+  const char16_t* namespace_prefix = tree.getNamespacePrefix(&len);
+  EXPECT_EQ(StringPiece16(namespace_prefix, len), u"foo");
 
-  const char16_t* namespaceUri = tree.getNamespaceUri(&len);
-  ASSERT_EQ(StringPiece16(namespaceUri, len),
+  const char16_t* namespace_uri = tree.getNamespaceUri(&len);
+  ASSERT_EQ(StringPiece16(namespace_uri, len),
             u"http://schemas.android.com/foo");
 
   ASSERT_EQ(tree.next(), android::ResXMLTree::START_TAG);
@@ -200,14 +201,14 @@ TEST_F(XmlFlattenerTest, FlattenCompiledXmlAndStripOnlyTools) {
 }
 
 TEST_F(XmlFlattenerTest, AssignSpecialAttributeIndices) {
-  std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom(R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"EOF(
             <View xmlns:android="http://schemas.android.com/apk/res/android"
                   android:id="@id/id"
                   class="str"
                   style="@id/id"/>)EOF");
 
   android::ResXMLTree tree;
-  ASSERT_TRUE(flatten(doc.get(), &tree));
+  ASSERT_TRUE(Flatten(doc.get(), &tree));
 
   while (tree.next() != android::ResXMLTree::START_TAG) {
     ASSERT_NE(tree.getEventType(), android::ResXMLTree::BAD_DOCUMENT);
@@ -225,10 +226,10 @@ TEST_F(XmlFlattenerTest, AssignSpecialAttributeIndices) {
  */
 TEST_F(XmlFlattenerTest, NoNamespaceIsNotTheSameAsEmptyNamespace) {
   std::unique_ptr<xml::XmlResource> doc =
-      test::buildXmlDom("<View package=\"android\"/>");
+      test::BuildXmlDom("<View package=\"android\"/>");
 
   android::ResXMLTree tree;
-  ASSERT_TRUE(flatten(doc.get(), &tree));
+  ASSERT_TRUE(Flatten(doc.get(), &tree));
 
   while (tree.next() != android::ResXMLTree::START_TAG) {
     ASSERT_NE(tree.getEventType(), android::ResXMLTree::BAD_DOCUMENT);
@@ -242,10 +243,10 @@ TEST_F(XmlFlattenerTest, NoNamespaceIsNotTheSameAsEmptyNamespace) {
 
 TEST_F(XmlFlattenerTest, EmptyStringValueInAttributeIsNotNull) {
   std::unique_ptr<xml::XmlResource> doc =
-      test::buildXmlDom("<View package=\"\"/>");
+      test::BuildXmlDom("<View package=\"\"/>");
 
   android::ResXMLTree tree;
-  ASSERT_TRUE(flatten(doc.get(), &tree));
+  ASSERT_TRUE(Flatten(doc.get(), &tree));
 
   while (tree.next() != android::ResXMLTree::START_TAG) {
     ASSERT_NE(tree.getEventType(), android::ResXMLTree::BAD_DOCUMENT);

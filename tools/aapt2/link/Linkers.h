@@ -17,11 +17,14 @@
 #ifndef AAPT_LINKER_LINKERS_H
 #define AAPT_LINKER_LINKERS_H
 
+#include <set>
+#include <unordered_set>
+
+#include "android-base/macros.h"
+
 #include "Resource.h"
 #include "process/IResourceTableConsumer.h"
 #include "xml/XmlDom.h"
-
-#include <set>
 
 namespace aapt {
 
@@ -31,8 +34,7 @@ struct ConfigDescription;
 
 /**
  * Defines the location in which a value exists. This determines visibility of
- * other
- * package's private symbols.
+ * other package's private symbols.
  */
 struct CallSite {
   ResourceNameRef resource;
@@ -40,26 +42,30 @@ struct CallSite {
 
 /**
  * Determines whether a versioned resource should be created. If a versioned
- * resource already
- * exists, it takes precedence.
+ * resource already exists, it takes precedence.
  */
-bool shouldGenerateVersionedResource(const ResourceEntry* entry,
+bool ShouldGenerateVersionedResource(const ResourceEntry* entry,
                                      const ConfigDescription& config,
-                                     const int sdkVersionToGenerate);
+                                     const int sdk_version_to_generate);
 
 class AutoVersioner : public IResourceTableConsumer {
  public:
-  bool consume(IAaptContext* context, ResourceTable* table) override;
-};
+  AutoVersioner() = default;
 
-class XmlAutoVersioner : public IXmlResourceConsumer {
- public:
-  bool consume(IAaptContext* context, xml::XmlResource* resource) override;
+  bool Consume(IAaptContext* context, ResourceTable* table) override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(AutoVersioner);
 };
 
 class VersionCollapser : public IResourceTableConsumer {
  public:
-  bool consume(IAaptContext* context, ResourceTable* table) override;
+  VersionCollapser() = default;
+
+  bool Consume(IAaptContext* context, ResourceTable* table) override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(VersionCollapser);
 };
 
 /**
@@ -67,7 +73,12 @@ class VersionCollapser : public IResourceTableConsumer {
  */
 class ResourceDeduper : public IResourceTableConsumer {
  public:
-  bool consume(IAaptContext* context, ResourceTable* table) override;
+  ResourceDeduper() = default;
+
+  bool Consume(IAaptContext* context, ResourceTable* table) override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ResourceDeduper);
 };
 
 /**
@@ -103,8 +114,46 @@ class ResourceDeduper : public IResourceTableConsumer {
  * conflict will never
  * occur.
  */
-struct PrivateAttributeMover : public IResourceTableConsumer {
-  bool consume(IAaptContext* context, ResourceTable* table) override;
+class PrivateAttributeMover : public IResourceTableConsumer {
+ public:
+  PrivateAttributeMover() = default;
+
+  bool Consume(IAaptContext* context, ResourceTable* table) override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(PrivateAttributeMover);
+};
+
+class ResourceConfigValue;
+
+class ProductFilter : public IResourceTableConsumer {
+ public:
+  using ResourceConfigValueIter =
+      std::vector<std::unique_ptr<ResourceConfigValue>>::iterator;
+
+  explicit ProductFilter(std::unordered_set<std::string> products)
+      : products_(products) {}
+
+  ResourceConfigValueIter SelectProductToKeep(
+      const ResourceNameRef& name, const ResourceConfigValueIter begin,
+      const ResourceConfigValueIter end, IDiagnostics* diag);
+
+  bool Consume(IAaptContext* context, ResourceTable* table) override;
+
+ private:
+  std::unordered_set<std::string> products_;
+
+  DISALLOW_COPY_AND_ASSIGN(ProductFilter);
+};
+
+class XmlAutoVersioner : public IXmlResourceConsumer {
+ public:
+  XmlAutoVersioner() = default;
+
+  bool Consume(IAaptContext* context, xml::XmlResource* resource) override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(XmlAutoVersioner);
 };
 
 /**
@@ -116,13 +165,16 @@ struct PrivateAttributeMover : public IResourceTableConsumer {
  * XmlReferenceLinker.
  */
 class XmlNamespaceRemover : public IXmlResourceConsumer {
- private:
-  bool mKeepUris;
-
  public:
-  XmlNamespaceRemover(bool keepUris = false) : mKeepUris(keepUris){};
+  explicit XmlNamespaceRemover(bool keep_uris = false)
+      : keep_uris_(keep_uris){};
 
-  bool consume(IAaptContext* context, xml::XmlResource* resource) override;
+  bool Consume(IAaptContext* context, xml::XmlResource* resource) override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(XmlNamespaceRemover);
+
+  bool keep_uris_;
 };
 
 /**
@@ -131,18 +183,22 @@ class XmlNamespaceRemover : public IXmlResourceConsumer {
  * Once an XmlResource is processed by this linker, it is ready to be flattened.
  */
 class XmlReferenceLinker : public IXmlResourceConsumer {
- private:
-  std::set<int> mSdkLevelsFound;
-
  public:
-  bool consume(IAaptContext* context, xml::XmlResource* resource) override;
+  XmlReferenceLinker() = default;
+
+  bool Consume(IAaptContext* context, xml::XmlResource* resource) override;
 
   /**
    * Once the XmlResource has been consumed, this returns the various SDK levels
    * in which
    * framework attributes used within the XML document were defined.
    */
-  inline const std::set<int>& getSdkLevels() const { return mSdkLevelsFound; }
+  inline const std::set<int>& sdk_levels() const { return sdk_levels_found_; }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(XmlReferenceLinker);
+
+  std::set<int> sdk_levels_found_;
 };
 
 }  // namespace aapt

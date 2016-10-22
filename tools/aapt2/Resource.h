@@ -17,18 +17,18 @@
 #ifndef AAPT_RESOURCE_H
 #define AAPT_RESOURCE_H
 
-#include "ConfigDescription.h"
-#include "Source.h"
-#include "util/StringPiece.h"
-
-#include <utils/JenkinsHash.h>
-
 #include <iomanip>
 #include <limits>
 #include <sstream>
 #include <string>
 #include <tuple>
 #include <vector>
+
+#include "utils/JenkinsHash.h"
+
+#include "ConfigDescription.h"
+#include "Source.h"
+#include "util/StringPiece.h"
 
 namespace aapt {
 
@@ -62,13 +62,13 @@ enum class ResourceType {
   kXml,
 };
 
-StringPiece toString(ResourceType type);
+StringPiece ToString(ResourceType type);
 
 /**
  * Returns a pointer to a valid ResourceType, or nullptr if
  * the string was invalid.
  */
-const ResourceType* parseResourceType(const StringPiece& str);
+const ResourceType* ParseResourceType(const StringPiece& str);
 
 /**
  * A resource's name. This can uniquely identify
@@ -76,16 +76,16 @@ const ResourceType* parseResourceType(const StringPiece& str);
  */
 struct ResourceName {
   std::string package;
-  ResourceType type;
+  ResourceType type = ResourceType::kRaw;
   std::string entry;
 
-  ResourceName() : type(ResourceType::kRaw) {}
+  ResourceName() = default;
   ResourceName(const StringPiece& p, ResourceType t, const StringPiece& e);
 
   int compare(const ResourceName& other) const;
 
-  bool isValid() const;
-  std::string toString() const;
+  bool is_valid() const;
+  std::string ToString() const;
 };
 
 /**
@@ -96,7 +96,7 @@ struct ResourceName {
  */
 struct ResourceNameRef {
   StringPiece package;
-  ResourceType type;
+  ResourceType type = ResourceType::kRaw;
   StringPiece entry;
 
   ResourceNameRef() = default;
@@ -108,8 +108,8 @@ struct ResourceNameRef {
   ResourceNameRef& operator=(ResourceNameRef&& rhs) = default;
   ResourceNameRef& operator=(const ResourceName& rhs);
 
-  ResourceName toResourceName() const;
-  bool isValid() const;
+  ResourceName ToResourceName() const;
+  bool is_valid() const;
 };
 
 /**
@@ -128,13 +128,13 @@ struct ResourceId {
 
   ResourceId();
   ResourceId(const ResourceId& rhs);
-  ResourceId(uint32_t resId);  // NOLINT(implicit)
+  ResourceId(uint32_t res_id);  // NOLINT(implicit)
   ResourceId(uint8_t p, uint8_t t, uint16_t e);
 
-  bool isValid() const;
-  uint8_t packageId() const;
-  uint8_t typeId() const;
-  uint16_t entryId() const;
+  bool is_valid() const;
+  uint8_t package_id() const;
+  uint8_t type_id() const;
+  uint16_t entry_id() const;
 };
 
 struct SourcedResourceName {
@@ -153,7 +153,7 @@ struct ResourceFile {
   Source source;
 
   // Exported symbols
-  std::vector<SourcedResourceName> exportedSymbols;
+  std::vector<SourcedResourceName> exported_symbols;
 };
 
 /**
@@ -196,24 +196,24 @@ inline ResourceId::ResourceId() : id(0) {}
 
 inline ResourceId::ResourceId(const ResourceId& rhs) : id(rhs.id) {}
 
-inline ResourceId::ResourceId(uint32_t resId) : id(resId) {}
+inline ResourceId::ResourceId(uint32_t res_id) : id(res_id) {}
 
 inline ResourceId::ResourceId(uint8_t p, uint8_t t, uint16_t e)
     : id((p << 24) | (t << 16) | e) {}
 
-inline bool ResourceId::isValid() const {
+inline bool ResourceId::is_valid() const {
   return (id & 0xff000000u) != 0 && (id & 0x00ff0000u) != 0;
 }
 
-inline uint8_t ResourceId::packageId() const {
+inline uint8_t ResourceId::package_id() const {
   return static_cast<uint8_t>(id >> 24);
 }
 
-inline uint8_t ResourceId::typeId() const {
+inline uint8_t ResourceId::type_id() const {
   return static_cast<uint8_t>(id >> 16);
 }
 
-inline uint16_t ResourceId::entryId() const {
+inline uint16_t ResourceId::entry_id() const {
   return static_cast<uint16_t>(id);
 }
 
@@ -234,13 +234,13 @@ inline bool operator!=(const ResourceId& lhs, const ResourceId& rhs) {
 }
 
 inline ::std::ostream& operator<<(::std::ostream& out,
-                                  const ResourceId& resId) {
-  std::ios_base::fmtflags oldFlags = out.flags();
-  char oldFill = out.fill();
+                                  const ResourceId& res_id) {
+  std::ios_base::fmtflags old_flags = out.flags();
+  char old_fill = out.fill();
   out << "0x" << std::internal << std::setfill('0') << std::setw(8) << std::hex
-      << resId.id;
-  out.flags(oldFlags);
-  out.fill(oldFill);
+      << res_id.id;
+  out.flags(old_flags);
+  out.fill(old_fill);
   return out;
 }
 
@@ -250,7 +250,7 @@ inline ::std::ostream& operator<<(::std::ostream& out,
 
 inline ::std::ostream& operator<<(::std::ostream& out,
                                   const ResourceType& val) {
-  return out << toString(val);
+  return out << ToString(val);
 }
 
 //
@@ -259,7 +259,7 @@ inline ::std::ostream& operator<<(::std::ostream& out,
 
 inline ResourceName::ResourceName(const StringPiece& p, ResourceType t,
                                   const StringPiece& e)
-    : package(p.toString()), type(t), entry(e.toString()) {}
+    : package(p.ToString()), type(t), entry(e.ToString()) {}
 
 inline int ResourceName::compare(const ResourceName& other) const {
   int cmp = package.compare(other.package);
@@ -270,7 +270,7 @@ inline int ResourceName::compare(const ResourceName& other) const {
   return cmp;
 }
 
-inline bool ResourceName::isValid() const {
+inline bool ResourceName::is_valid() const {
   return !package.empty() && !entry.empty();
 }
 
@@ -297,7 +297,7 @@ inline ::std::ostream& operator<<(::std::ostream& out,
   return out << name.type << "/" << name.entry;
 }
 
-inline std::string ResourceName::toString() const {
+inline std::string ResourceName::ToString() const {
   std::stringstream stream;
   stream << *this;
   return stream.str();
@@ -321,11 +321,11 @@ inline ResourceNameRef& ResourceNameRef::operator=(const ResourceName& rhs) {
   return *this;
 }
 
-inline ResourceName ResourceNameRef::toResourceName() const {
+inline ResourceName ResourceNameRef::ToResourceName() const {
   return ResourceName(package, type, entry);
 }
 
-inline bool ResourceNameRef::isValid() const {
+inline bool ResourceNameRef::is_valid() const {
   return !package.empty() && !entry.empty();
 }
 

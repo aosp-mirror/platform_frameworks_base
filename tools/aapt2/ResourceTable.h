@@ -70,7 +70,7 @@ class ResourceConfigValue {
 
   ResourceConfigValue(const ConfigDescription& config,
                       const StringPiece& product)
-      : config(config), product(product.toString()) {}
+      : config(config), product(product.ToString()) {}
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceConfigValue);
@@ -98,23 +98,23 @@ class ResourceEntry {
    * Whether this resource is public (and must maintain the same entry ID across
    * builds).
    */
-  Symbol symbolStatus;
+  Symbol symbol_status;
 
   /**
    * The resource's values for each configuration.
    */
   std::vector<std::unique_ptr<ResourceConfigValue>> values;
 
-  explicit ResourceEntry(const StringPiece& name) : name(name.toString()) {}
+  explicit ResourceEntry(const StringPiece& name) : name(name.ToString()) {}
 
-  ResourceConfigValue* findValue(const ConfigDescription& config);
-  ResourceConfigValue* findValue(const ConfigDescription& config,
+  ResourceConfigValue* FindValue(const ConfigDescription& config);
+  ResourceConfigValue* FindValue(const ConfigDescription& config,
                                  const StringPiece& product);
-  ResourceConfigValue* findOrCreateValue(const ConfigDescription& config,
+  ResourceConfigValue* FindOrCreateValue(const ConfigDescription& config,
                                          const StringPiece& product);
   std::vector<ResourceConfigValue*> findAllValues(
       const ConfigDescription& config);
-  std::vector<ResourceConfigValue*> findValuesIf(
+  std::vector<ResourceConfigValue*> FindValuesIf(
       const std::function<bool(ResourceConfigValue*)>& f);
 
  private:
@@ -141,7 +141,7 @@ class ResourceTableType {
    * Whether this type is public (and must maintain the same
    * type ID across builds).
    */
-  Symbol symbolStatus;
+  Symbol symbol_status;
 
   /**
    * List of resources for this type.
@@ -150,8 +150,8 @@ class ResourceTableType {
 
   explicit ResourceTableType(const ResourceType type) : type(type) {}
 
-  ResourceEntry* findEntry(const StringPiece& name);
-  ResourceEntry* findOrCreateEntry(const StringPiece& name);
+  ResourceEntry* FindEntry(const StringPiece& name);
+  ResourceEntry* FindOrCreateEntry(const StringPiece& name);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceTableType);
@@ -168,8 +168,8 @@ class ResourceTablePackage {
   std::vector<std::unique_ptr<ResourceTableType>> types;
 
   ResourceTablePackage() = default;
-  ResourceTableType* findType(ResourceType type);
-  ResourceTableType* findOrCreateType(const ResourceType type);
+  ResourceTableType* FindType(ResourceType type);
+  ResourceTableType* FindOrCreateType(const ResourceType type);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceTablePackage);
@@ -191,53 +191,53 @@ class ResourceTable {
    * When a collision of resources occurs, this method decides which value to
    * keep.
    */
-  static CollisionResult resolveValueCollision(Value* existing,
+  static CollisionResult ResolveValueCollision(Value* existing,
                                                Value* incoming);
 
-  bool addResource(const ResourceNameRef& name, const ConfigDescription& config,
+  bool AddResource(const ResourceNameRef& name, const ConfigDescription& config,
                    const StringPiece& product, std::unique_ptr<Value> value,
                    IDiagnostics* diag);
 
-  bool addResource(const ResourceNameRef& name, const ResourceId& resId,
+  bool AddResource(const ResourceNameRef& name, const ResourceId& res_id,
                    const ConfigDescription& config, const StringPiece& product,
                    std::unique_ptr<Value> value, IDiagnostics* diag);
 
-  bool addFileReference(const ResourceNameRef& name,
+  bool AddFileReference(const ResourceNameRef& name,
                         const ConfigDescription& config, const Source& source,
                         const StringPiece& path, IDiagnostics* diag);
 
-  bool addFileReferenceAllowMangled(const ResourceNameRef& name,
+  bool AddFileReferenceAllowMangled(const ResourceNameRef& name,
                                     const ConfigDescription& config,
                                     const Source& source,
                                     const StringPiece& path, io::IFile* file,
                                     IDiagnostics* diag);
 
   /**
-   * Same as addResource, but doesn't verify the validity of the name. This is
+   * Same as AddResource, but doesn't verify the validity of the name. This is
    * used
    * when loading resources from an existing binary resource table that may have
    * mangled
    * names.
    */
-  bool addResourceAllowMangled(const ResourceNameRef& name,
+  bool AddResourceAllowMangled(const ResourceNameRef& name,
                                const ConfigDescription& config,
                                const StringPiece& product,
                                std::unique_ptr<Value> value,
                                IDiagnostics* diag);
 
-  bool addResourceAllowMangled(const ResourceNameRef& name,
+  bool AddResourceAllowMangled(const ResourceNameRef& name,
                                const ResourceId& id,
                                const ConfigDescription& config,
                                const StringPiece& product,
                                std::unique_ptr<Value> value,
                                IDiagnostics* diag);
 
-  bool setSymbolState(const ResourceNameRef& name, const ResourceId& resId,
+  bool SetSymbolState(const ResourceNameRef& name, const ResourceId& res_id,
                       const Symbol& symbol, IDiagnostics* diag);
 
-  bool setSymbolStateAllowMangled(const ResourceNameRef& name,
-                                  const ResourceId& resId, const Symbol& symbol,
-                                  IDiagnostics* diag);
+  bool SetSymbolStateAllowMangled(const ResourceNameRef& name,
+                                  const ResourceId& res_id,
+                                  const Symbol& symbol, IDiagnostics* diag);
 
   struct SearchResult {
     ResourceTablePackage* package;
@@ -245,21 +245,21 @@ class ResourceTable {
     ResourceEntry* entry;
   };
 
-  Maybe<SearchResult> findResource(const ResourceNameRef& name);
+  Maybe<SearchResult> FindResource(const ResourceNameRef& name);
 
   /**
    * The string pool used by this resource table. Values that reference strings
    * must use
    * this pool to create their strings.
    *
-   * NOTE: `stringPool` must come before `packages` so that it is destroyed
+   * NOTE: `string_pool` must come before `packages` so that it is destroyed
    * after.
-   * When `string pool` references are destroyed (as they will be when
+   * When `string_pool` references are destroyed (as they will be when
    * `packages`
    * is destroyed), they decrement a refCount, which would cause invalid
    * memory access if the pool was already destroyed.
    */
-  StringPool stringPool;
+  StringPool string_pool;
 
   /**
    * The list of packages in this table, sorted alphabetically by package name.
@@ -273,31 +273,31 @@ class ResourceTable {
    * represent the
    * 'current' package before it is known to the ResourceTable.
    */
-  ResourceTablePackage* findPackage(const StringPiece& name);
+  ResourceTablePackage* FindPackage(const StringPiece& name);
 
-  ResourceTablePackage* findPackageById(uint8_t id);
+  ResourceTablePackage* FindPackageById(uint8_t id);
 
-  ResourceTablePackage* createPackage(const StringPiece& name,
+  ResourceTablePackage* CreatePackage(const StringPiece& name,
                                       Maybe<uint8_t> id = {});
 
  private:
-  ResourceTablePackage* findOrCreatePackage(const StringPiece& name);
+  ResourceTablePackage* FindOrCreatePackage(const StringPiece& name);
 
-  bool addResourceImpl(const ResourceNameRef& name, const ResourceId& resId,
+  bool AddResourceImpl(const ResourceNameRef& name, const ResourceId& res_id,
                        const ConfigDescription& config,
                        const StringPiece& product, std::unique_ptr<Value> value,
-                       const char* validChars,
-                       const CollisionResolverFunc& conflictResolver,
+                       const char* valid_chars,
+                       const CollisionResolverFunc& conflict_resolver,
                        IDiagnostics* diag);
 
-  bool addFileReferenceImpl(const ResourceNameRef& name,
+  bool AddFileReferenceImpl(const ResourceNameRef& name,
                             const ConfigDescription& config,
                             const Source& source, const StringPiece& path,
-                            io::IFile* file, const char* validChars,
+                            io::IFile* file, const char* valid_chars,
                             IDiagnostics* diag);
 
-  bool setSymbolStateImpl(const ResourceNameRef& name, const ResourceId& resId,
-                          const Symbol& symbol, const char* validChars,
+  bool SetSymbolStateImpl(const ResourceNameRef& name, const ResourceId& res_id,
+                          const Symbol& symbol, const char* valid_chars,
                           IDiagnostics* diag);
 
   DISALLOW_COPY_AND_ASSIGN(ResourceTable);

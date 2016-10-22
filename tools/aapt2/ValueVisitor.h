@@ -24,32 +24,31 @@ namespace aapt {
 
 /**
  * Visits a value and invokes the appropriate method based on its type. Does not
- * traverse
- * into compound types. Use ValueVisitor for that.
+ * traverse into compound types. Use ValueVisitor for that.
  */
 struct RawValueVisitor {
   virtual ~RawValueVisitor() = default;
 
-  virtual void visitItem(Item* value) {}
-  virtual void visit(Reference* value) { visitItem(value); }
-  virtual void visit(RawString* value) { visitItem(value); }
-  virtual void visit(String* value) { visitItem(value); }
-  virtual void visit(StyledString* value) { visitItem(value); }
-  virtual void visit(FileReference* value) { visitItem(value); }
-  virtual void visit(Id* value) { visitItem(value); }
-  virtual void visit(BinaryPrimitive* value) { visitItem(value); }
+  virtual void VisitItem(Item* value) {}
+  virtual void Visit(Reference* value) { VisitItem(value); }
+  virtual void Visit(RawString* value) { VisitItem(value); }
+  virtual void Visit(String* value) { VisitItem(value); }
+  virtual void Visit(StyledString* value) { VisitItem(value); }
+  virtual void Visit(FileReference* value) { VisitItem(value); }
+  virtual void Visit(Id* value) { VisitItem(value); }
+  virtual void Visit(BinaryPrimitive* value) { VisitItem(value); }
 
-  virtual void visit(Attribute* value) {}
-  virtual void visit(Style* value) {}
-  virtual void visit(Array* value) {}
-  virtual void visit(Plural* value) {}
-  virtual void visit(Styleable* value) {}
+  virtual void Visit(Attribute* value) {}
+  virtual void Visit(Style* value) {}
+  virtual void Visit(Array* value) {}
+  virtual void Visit(Plural* value) {}
+  virtual void Visit(Styleable* value) {}
 };
 
 // NOLINT, do not add parentheses around T.
-#define DECL_VISIT_COMPOUND_VALUE(T)          \
-  virtual void visit(T* value) { /* NOLINT */ \
-    visitSubValues(value);                    \
+#define DECL_VISIT_COMPOUND_VALUE(T)                   \
+  virtual void Visit(T* value) override { /* NOLINT */ \
+    VisitSubValues(value);                             \
   }
 
 /**
@@ -59,44 +58,43 @@ struct RawValueVisitor {
 struct ValueVisitor : public RawValueVisitor {
   // The compiler will think we're hiding an overload, when we actually intend
   // to call into RawValueVisitor. This will expose the visit methods in the
-  // super
-  // class so the compiler knows we are trying to call them.
-  using RawValueVisitor::visit;
+  // super class so the compiler knows we are trying to call them.
+  using RawValueVisitor::Visit;
 
-  void visitSubValues(Attribute* attribute) {
+  void VisitSubValues(Attribute* attribute) {
     for (Attribute::Symbol& symbol : attribute->symbols) {
-      visit(&symbol.symbol);
+      Visit(&symbol.symbol);
     }
   }
 
-  void visitSubValues(Style* style) {
+  void VisitSubValues(Style* style) {
     if (style->parent) {
-      visit(&style->parent.value());
+      Visit(&style->parent.value());
     }
 
     for (Style::Entry& entry : style->entries) {
-      visit(&entry.key);
-      entry.value->accept(this);
+      Visit(&entry.key);
+      entry.value->Accept(this);
     }
   }
 
-  void visitSubValues(Array* array) {
+  void VisitSubValues(Array* array) {
     for (std::unique_ptr<Item>& item : array->items) {
-      item->accept(this);
+      item->Accept(this);
     }
   }
 
-  void visitSubValues(Plural* plural) {
+  void VisitSubValues(Plural* plural) {
     for (std::unique_ptr<Item>& item : plural->values) {
       if (item) {
-        item->accept(this);
+        item->Accept(this);
       }
     }
   }
 
-  void visitSubValues(Styleable* styleable) {
+  void VisitSubValues(Styleable* styleable) {
     for (Reference& reference : styleable->entries) {
-      visit(&reference);
+      Visit(&reference);
     }
   }
 
@@ -114,7 +112,7 @@ template <typename T>
 struct DynCastVisitor : public RawValueVisitor {
   T* value = nullptr;
 
-  void visit(T* v) override { value = v; }
+  void Visit(T* v) override { value = v; }
 };
 
 /**
@@ -124,12 +122,12 @@ template <>
 struct DynCastVisitor<Item> : public RawValueVisitor {
   Item* value = nullptr;
 
-  void visitItem(Item* item) override { value = item; }
+  void VisitItem(Item* item) override { value = item; }
 };
 
 template <typename T>
-const T* valueCast(const Value* value) {
-  return valueCast<T>(const_cast<Value*>(value));
+const T* ValueCast(const Value* value) {
+  return ValueCast<T>(const_cast<Value*>(value));
 }
 
 /**
@@ -137,30 +135,30 @@ const T* valueCast(const Value* value) {
  * Otherwise, returns nullptr.
  */
 template <typename T>
-T* valueCast(Value* value) {
+T* ValueCast(Value* value) {
   if (!value) {
     return nullptr;
   }
   DynCastVisitor<T> visitor;
-  value->accept(&visitor);
+  value->Accept(&visitor);
   return visitor.value;
 }
 
-inline void visitAllValuesInPackage(ResourceTablePackage* pkg,
+inline void VisitAllValuesInPackage(ResourceTablePackage* pkg,
                                     RawValueVisitor* visitor) {
   for (auto& type : pkg->types) {
     for (auto& entry : type->entries) {
-      for (auto& configValue : entry->values) {
-        configValue->value->accept(visitor);
+      for (auto& config_value : entry->values) {
+        config_value->value->Accept(visitor);
       }
     }
   }
 }
 
-inline void visitAllValuesInTable(ResourceTable* table,
+inline void VisitAllValuesInTable(ResourceTable* table,
                                   RawValueVisitor* visitor) {
   for (auto& pkg : table->packages) {
-    visitAllValuesInPackage(pkg.get(), visitor);
+    VisitAllValuesInPackage(pkg.get(), visitor);
   }
 }
 

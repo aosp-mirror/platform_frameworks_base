@@ -14,70 +14,74 @@
  * limitations under the License.
  */
 
-#include "ResourceTable.h"
 #include "link/Linkers.h"
+
+#include "ResourceTable.h"
 #include "test/Test.h"
 
 namespace aapt {
 
 TEST(ResourceDeduperTest, SameValuesAreDeduped) {
-  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
-  const ConfigDescription defaultConfig = {};
-  const ConfigDescription enConfig = test::parseConfigOrDie("en");
-  const ConfigDescription enV21Config = test::parseConfigOrDie("en-v21");
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  const ConfigDescription default_config = {};
+  const ConfigDescription en_config = test::ParseConfigOrDie("en");
+  const ConfigDescription en_v21_config = test::ParseConfigOrDie("en-v21");
   // Chosen because this configuration is compatible with en.
-  const ConfigDescription landConfig = test::parseConfigOrDie("land");
+  const ConfigDescription land_config = test::ParseConfigOrDie("land");
 
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .addString("android:string/dedupe", ResourceId{}, defaultConfig,
+          .AddString("android:string/dedupe", ResourceId{}, default_config,
                      "dedupe")
-          .addString("android:string/dedupe", ResourceId{}, enConfig, "dedupe")
-          .addString("android:string/dedupe", ResourceId{}, landConfig,
+          .AddString("android:string/dedupe", ResourceId{}, en_config, "dedupe")
+          .AddString("android:string/dedupe", ResourceId{}, land_config,
                      "dedupe")
-          .addString("android:string/dedupe2", ResourceId{}, defaultConfig,
+          .AddString("android:string/dedupe2", ResourceId{}, default_config,
                      "dedupe")
-          .addString("android:string/dedupe2", ResourceId{}, enConfig, "dedupe")
-          .addString("android:string/dedupe2", ResourceId{}, enV21Config,
+          .AddString("android:string/dedupe2", ResourceId{}, en_config,
+                     "dedupe")
+          .AddString("android:string/dedupe2", ResourceId{}, en_v21_config,
                      "keep")
-          .addString("android:string/dedupe2", ResourceId{}, landConfig,
+          .AddString("android:string/dedupe2", ResourceId{}, land_config,
                      "dedupe")
-          .build();
+          .Build();
 
-  ASSERT_TRUE(ResourceDeduper().consume(context.get(), table.get()));
-  EXPECT_EQ(nullptr, test::getValueForConfig<String>(
-                         table.get(), "android:string/dedupe", enConfig));
-  EXPECT_EQ(nullptr, test::getValueForConfig<String>(
-                         table.get(), "android:string/dedupe", landConfig));
-  EXPECT_EQ(nullptr, test::getValueForConfig<String>(
-                         table.get(), "android:string/dedupe2", enConfig));
-  EXPECT_NE(nullptr, test::getValueForConfig<String>(
-                         table.get(), "android:string/dedupe2", enV21Config));
+  ASSERT_TRUE(ResourceDeduper().Consume(context.get(), table.get()));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<String>(
+                         table.get(), "android:string/dedupe", en_config));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<String>(
+                         table.get(), "android:string/dedupe", land_config));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<String>(
+                         table.get(), "android:string/dedupe2", en_config));
+  EXPECT_NE(nullptr, test::GetValueForConfig<String>(
+                         table.get(), "android:string/dedupe2", en_v21_config));
 }
 
 TEST(ResourceDeduperTest, DifferentValuesAreKept) {
-  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
-  const ConfigDescription defaultConfig = {};
-  const ConfigDescription enConfig = test::parseConfigOrDie("en");
-  const ConfigDescription enV21Config = test::parseConfigOrDie("en-v21");
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  const ConfigDescription default_config = {};
+  const ConfigDescription en_config = test::ParseConfigOrDie("en");
+  const ConfigDescription en_v21_config = test::ParseConfigOrDie("en-v21");
   // Chosen because this configuration is compatible with en.
-  const ConfigDescription landConfig = test::parseConfigOrDie("land");
+  const ConfigDescription land_config = test::ParseConfigOrDie("land");
 
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .addString("android:string/keep", ResourceId{}, defaultConfig, "keep")
-          .addString("android:string/keep", ResourceId{}, enConfig, "keep")
-          .addString("android:string/keep", ResourceId{}, enV21Config, "keep2")
-          .addString("android:string/keep", ResourceId{}, landConfig, "keep2")
-          .build();
+          .AddString("android:string/keep", ResourceId{}, default_config,
+                     "keep")
+          .AddString("android:string/keep", ResourceId{}, en_config, "keep")
+          .AddString("android:string/keep", ResourceId{}, en_v21_config,
+                     "keep2")
+          .AddString("android:string/keep", ResourceId{}, land_config, "keep2")
+          .Build();
 
-  ASSERT_TRUE(ResourceDeduper().consume(context.get(), table.get()));
-  EXPECT_NE(nullptr, test::getValueForConfig<String>(
-                         table.get(), "android:string/keep", enConfig));
-  EXPECT_NE(nullptr, test::getValueForConfig<String>(
-                         table.get(), "android:string/keep", enV21Config));
-  EXPECT_NE(nullptr, test::getValueForConfig<String>(
-                         table.get(), "android:string/keep", landConfig));
+  ASSERT_TRUE(ResourceDeduper().Consume(context.get(), table.get()));
+  EXPECT_NE(nullptr, test::GetValueForConfig<String>(
+                         table.get(), "android:string/keep", en_config));
+  EXPECT_NE(nullptr, test::GetValueForConfig<String>(
+                         table.get(), "android:string/keep", en_v21_config));
+  EXPECT_NE(nullptr, test::GetValueForConfig<String>(
+                         table.get(), "android:string/keep", land_config));
 }
 
 }  // namespace aapt

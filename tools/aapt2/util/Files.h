@@ -17,17 +17,17 @@
 #ifndef AAPT_FILES_H
 #define AAPT_FILES_H
 
-#include "Diagnostics.h"
-#include "Maybe.h"
-#include "Source.h"
-
-#include "util/StringPiece.h"
-
-#include <utils/FileMap.h>
-#include <cassert>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "android-base/macros.h"
+#include "utils/FileMap.h"
+
+#include "Diagnostics.h"
+#include "Maybe.h"
+#include "Source.h"
+#include "util/StringPiece.h"
 
 namespace aapt {
 namespace file {
@@ -50,18 +50,12 @@ enum class FileType {
   kSocket,
 };
 
-FileType getFileType(const StringPiece& path);
-
-/*
- * Lists files under the directory `root`. Files are listed
- * with just their leaf (filename) names.
- */
-std::vector<std::string> listFiles(const StringPiece& root);
+FileType GetFileType(const StringPiece& path);
 
 /*
  * Appends a path to `base`, separated by the directory separator.
  */
-void appendPath(std::string* base, StringPiece part);
+void AppendPath(std::string* base, StringPiece part);
 
 /*
  * Makes all the directories in `path`. The last element in the path
@@ -72,46 +66,45 @@ bool mkdirs(const StringPiece& path);
 /**
  * Returns all but the last part of the path.
  */
-StringPiece getStem(const StringPiece& path);
+StringPiece GetStem(const StringPiece& path);
 
 /**
  * Returns the last part of the path with extension.
  */
-StringPiece getFilename(const StringPiece& path);
+StringPiece GetFilename(const StringPiece& path);
 
 /**
  * Returns the extension of the path. This is the entire string after
  * the first '.' of the last part of the path.
  */
-StringPiece getExtension(const StringPiece& path);
+StringPiece GetExtension(const StringPiece& path);
 
 /**
  * Converts a package name (com.android.app) to a path: com/android/app
  */
-std::string packageToPath(const StringPiece& package);
+std::string PackageToPath(const StringPiece& package);
 
 /**
  * Creates a FileMap for the file at path.
  */
-Maybe<android::FileMap> mmapPath(const StringPiece& path,
-                                 std::string* outError);
+Maybe<android::FileMap> MmapPath(const StringPiece& path,
+                                 std::string* out_error);
 
 /**
  * Reads the file at path and appends each line to the outArgList vector.
  */
-bool appendArgsFromFile(const StringPiece& path,
-                        std::vector<std::string>* outArgList,
-                        std::string* outError);
+bool AppendArgsFromFile(const StringPiece& path,
+                        std::vector<std::string>* out_arglist,
+                        std::string* out_error);
 
 /*
  * Filter that determines which resource files/directories are
  * processed by AAPT. Takes a pattern string supplied by the user.
- * Pattern format is specified in the
- * FileFilter::setPattern(const std::string&) method.
+ * Pattern format is specified in the FileFilter::SetPattern() method.
  */
 class FileFilter {
  public:
-  explicit FileFilter(IDiagnostics* diag) : mDiag(diag) {}
+  explicit FileFilter(IDiagnostics* diag) : diag_(diag) {}
 
   /*
    * Patterns syntax:
@@ -127,7 +120,7 @@ class FileFilter {
    * - Otherwise the full string is matched.
    * - match is not case-sensitive.
    */
-  bool setPattern(const StringPiece& pattern);
+  bool SetPattern(const StringPiece& pattern);
 
   /**
    * Applies the filter, returning true for pass, false for fail.
@@ -135,8 +128,10 @@ class FileFilter {
   bool operator()(const std::string& filename, FileType type) const;
 
  private:
-  IDiagnostics* mDiag;
-  std::vector<std::string> mPatternTokens;
+  DISALLOW_COPY_AND_ASSIGN(FileFilter);
+
+  IDiagnostics* diag_;
+  std::vector<std::string> pattern_tokens_;
 };
 
 }  // namespace file

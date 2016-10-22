@@ -17,14 +17,15 @@
 #ifndef AAPT_IO_FILE_H
 #define AAPT_IO_FILE_H
 
-#include "Source.h"
-#include "io/Data.h"
-#include "util/Util.h"
-
-#include <android-base/macros.h>
 #include <list>
 #include <memory>
 #include <vector>
+
+#include "android-base/macros.h"
+
+#include "Source.h"
+#include "io/Data.h"
+#include "util/Util.h"
 
 namespace aapt {
 namespace io {
@@ -49,7 +50,7 @@ class IFile {
    *
    * Returns nullptr on failure.
    */
-  virtual std::unique_ptr<IData> openAsData() = 0;
+  virtual std::unique_ptr<IData> OpenAsData() = 0;
 
   /**
    * Returns the source of this file. This is for presentation to the user and
@@ -58,9 +59,9 @@ class IFile {
    * the files within
    * a ZIP archive from the path to the containing ZIP archive.
    */
-  virtual const Source& getSource() const = 0;
+  virtual const Source& GetSource() const = 0;
 
-  IFile* createFileSegment(size_t offset, size_t len);
+  IFile* CreateFileSegment(size_t offset, size_t len);
 
  private:
   // Any segments created from this IFile need to be owned by this IFile, so
@@ -68,7 +69,7 @@ class IFile {
   // in a list. This will never be read, so we prefer better insertion
   // performance
   // than cache locality, hence the list.
-  std::list<std::unique_ptr<IFile>> mSegments;
+  std::list<std::unique_ptr<IFile>> segments_;
 };
 
 /**
@@ -78,26 +79,26 @@ class IFile {
 class FileSegment : public IFile {
  public:
   explicit FileSegment(IFile* file, size_t offset, size_t len)
-      : mFile(file), mOffset(offset), mLen(len) {}
+      : file_(file), offset_(offset), len_(len) {}
 
-  std::unique_ptr<IData> openAsData() override;
+  std::unique_ptr<IData> OpenAsData() override;
 
-  const Source& getSource() const override { return mFile->getSource(); }
+  const Source& GetSource() const override { return file_->GetSource(); }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(FileSegment);
 
-  IFile* mFile;
-  size_t mOffset;
-  size_t mLen;
+  IFile* file_;
+  size_t offset_;
+  size_t len_;
 };
 
 class IFileCollectionIterator {
  public:
   virtual ~IFileCollectionIterator() = default;
 
-  virtual bool hasNext() = 0;
-  virtual IFile* next() = 0;
+  virtual bool HasNext() = 0;
+  virtual IFile* Next() = 0;
 };
 
 /**
@@ -109,8 +110,8 @@ class IFileCollection {
  public:
   virtual ~IFileCollection() = default;
 
-  virtual IFile* findFile(const StringPiece& path) = 0;
-  virtual std::unique_ptr<IFileCollectionIterator> iterator() = 0;
+  virtual IFile* FindFile(const StringPiece& path) = 0;
+  virtual std::unique_ptr<IFileCollectionIterator> Iterator() = 0;
 };
 
 }  // namespace io

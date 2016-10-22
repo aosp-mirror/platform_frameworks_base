@@ -15,14 +15,13 @@
  */
 
 #include "Resource.h"
-#include "util/StringPiece.h"
 
 #include <map>
 #include <string>
 
 namespace aapt {
 
-StringPiece toString(ResourceType type) {
+StringPiece ToString(ResourceType type) {
   switch (type) {
     case ResourceType::kAnim:
       return "anim";
@@ -100,7 +99,7 @@ static const std::map<StringPiece, ResourceType> sResourceTypeMap{
     {"xml", ResourceType::kXml},
 };
 
-const ResourceType* parseResourceType(const StringPiece& str) {
+const ResourceType* ParseResourceType(const StringPiece& str) {
   auto iter = sResourceTypeMap.find(str);
   if (iter == std::end(sResourceTypeMap)) {
     return nullptr;

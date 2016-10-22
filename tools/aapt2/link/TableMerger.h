@@ -17,6 +17,11 @@
 #ifndef AAPT_TABLEMERGER_H
 #define AAPT_TABLEMERGER_H
 
+#include <functional>
+#include <map>
+
+#include "android-base/macros.h"
+
 #include "Resource.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
@@ -25,9 +30,6 @@
 #include "process/IResourceTableConsumer.h"
 #include "util/Util.h"
 
-#include <functional>
-#include <map>
-
 namespace aapt {
 
 struct TableMergerOptions {
@@ -35,7 +37,7 @@ struct TableMergerOptions {
    * If true, resources in overlays can be added without previously having
    * existed.
    */
-  bool autoAddOverlay = false;
+  bool auto_add_overlay = false;
 };
 
 /**
@@ -62,15 +64,14 @@ struct TableMergerOptions {
 class TableMerger {
  public:
   /**
-   * Note: The outTable ResourceTable must live longer than this TableMerger.
-   * References
-   * are made to this ResourceTable for efficiency reasons.
+   * Note: The out_table ResourceTable must live longer than this TableMerger.
+   * References are made to this ResourceTable for efficiency reasons.
    */
-  TableMerger(IAaptContext* context, ResourceTable* outTable,
+  TableMerger(IAaptContext* context, ResourceTable* out_table,
               const TableMergerOptions& options);
 
-  const std::set<std::string>& getMergedPackages() const {
-    return mMergedPackages;
+  const std::set<std::string>& merged_packages() const {
+    return merged_packages_;
   }
 
   /**
@@ -78,7 +79,7 @@ class TableMerger {
    * An io::IFileCollection is optional and used to find the referenced Files
    * and process them.
    */
-  bool merge(const Source& src, ResourceTable* table,
+  bool Merge(const Source& src, ResourceTable* table,
              io::IFileCollection* collection = nullptr);
 
   /**
@@ -86,7 +87,7 @@ class TableMerger {
    * An io::IFileCollection is optional and used to find the referenced Files
    * and process them.
    */
-  bool mergeOverlay(const Source& src, ResourceTable* table,
+  bool MergeOverlay(const Source& src, ResourceTable* table,
                     io::IFileCollection* collection = nullptr);
 
   /**
@@ -95,44 +96,45 @@ class TableMerger {
    * An io::IFileCollection is needed in order to find the referenced Files and
    * process them.
    */
-  bool mergeAndMangle(const Source& src, const StringPiece& package,
+  bool MergeAndMangle(const Source& src, const StringPiece& package,
                       ResourceTable* table, io::IFileCollection* collection);
 
   /**
    * Merges a compiled file that belongs to this same or empty package. This is
    * for local sources.
    */
-  bool mergeFile(const ResourceFile& fileDesc, io::IFile* file);
+  bool MergeFile(const ResourceFile& fileDesc, io::IFile* file);
 
   /**
    * Merges a compiled file from an overlay, overriding an existing definition.
    */
-  bool mergeFileOverlay(const ResourceFile& fileDesc, io::IFile* file);
+  bool MergeFileOverlay(const ResourceFile& fileDesc, io::IFile* file);
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(TableMerger);
+
   using FileMergeCallback = std::function<bool(const ResourceNameRef&,
                                                const ConfigDescription& config,
                                                FileReference*, FileReference*)>;
 
-  IAaptContext* mContext;
-  ResourceTable* mMasterTable;
-  TableMergerOptions mOptions;
-  ResourceTablePackage* mMasterPackage;
+  IAaptContext* context_;
+  ResourceTable* master_table_;
+  TableMergerOptions options_;
+  ResourceTablePackage* master_package_;
+  std::set<std::string> merged_packages_;
 
-  std::set<std::string> mMergedPackages;
-
-  bool mergeFileImpl(const ResourceFile& fileDesc, io::IFile* file,
+  bool MergeFileImpl(const ResourceFile& file_desc, io::IFile* file,
                      bool overlay);
 
-  bool mergeImpl(const Source& src, ResourceTable* srcTable,
-                 io::IFileCollection* collection, bool overlay, bool allowNew);
+  bool MergeImpl(const Source& src, ResourceTable* src_table,
+                 io::IFileCollection* collection, bool overlay, bool allow_new);
 
-  bool doMerge(const Source& src, ResourceTable* srcTable,
-               ResourceTablePackage* srcPackage, const bool manglePackage,
-               const bool overlay, const bool allowNewResources,
+  bool DoMerge(const Source& src, ResourceTable* src_table,
+               ResourceTablePackage* src_package, const bool mangle_package,
+               const bool overlay, const bool allow_new_resources,
                const FileMergeCallback& callback);
 
-  std::unique_ptr<FileReference> cloneAndMangleFile(const std::string& package,
+  std::unique_ptr<FileReference> CloneAndMangleFile(const std::string& package,
                                                     const FileReference& value);
 };
 

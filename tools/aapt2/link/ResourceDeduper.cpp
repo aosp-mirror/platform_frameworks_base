@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#include "DominatorTree.h"
-#include "ResourceTable.h"
 #include "link/Linkers.h"
 
 #include <algorithm>
+
+#include "DominatorTree.h"
+#include "ResourceTable.h"
 
 namespace aapt {
 
@@ -40,55 +41,57 @@ class DominatedKeyValueRemover : public DominatorTree::BottomUpVisitor {
   using Node = DominatorTree::Node;
 
   explicit DominatedKeyValueRemover(IAaptContext* context, ResourceEntry* entry)
-      : mContext(context), mEntry(entry) {}
+      : context_(context), entry_(entry) {}
 
-  void visitConfig(Node* node) {
+  void VisitConfig(Node* node) {
     Node* parent = node->parent();
     if (!parent) {
       return;
     }
-    ResourceConfigValue* nodeValue = node->value();
-    ResourceConfigValue* parentValue = parent->value();
-    if (!nodeValue || !parentValue) {
+    ResourceConfigValue* node_value = node->value();
+    ResourceConfigValue* parent_value = parent->value();
+    if (!node_value || !parent_value) {
       return;
     }
-    if (!nodeValue->value->equals(parentValue->value.get())) {
+    if (!node_value->value->Equals(parent_value->value.get())) {
       return;
     }
 
     // Compare compatible configs for this entry and ensure the values are
     // equivalent.
-    const ConfigDescription& nodeConfiguration = nodeValue->config;
-    for (const auto& sibling : mEntry->values) {
+    const ConfigDescription& node_configuration = node_value->config;
+    for (const auto& sibling : entry_->values) {
       if (!sibling->value) {
         // Sibling was already removed.
         continue;
       }
-      if (nodeConfiguration.isCompatibleWith(sibling->config) &&
-          !nodeValue->value->equals(sibling->value.get())) {
+      if (node_configuration.IsCompatibleWith(sibling->config) &&
+          !node_value->value->Equals(sibling->value.get())) {
         // The configurations are compatible, but the value is
         // different, so we can't remove this value.
         return;
       }
     }
-    if (mContext->verbose()) {
-      mContext->getDiagnostics()->note(
-          DiagMessage(nodeValue->value->getSource())
+    if (context_->IsVerbose()) {
+      context_->GetDiagnostics()->Note(
+          DiagMessage(node_value->value->GetSource())
           << "removing dominated duplicate resource with name \""
-          << mEntry->name << "\"");
+          << entry_->name << "\"");
     }
-    nodeValue->value = {};
+    node_value->value = {};
   }
 
  private:
-  IAaptContext* mContext;
-  ResourceEntry* mEntry;
+  DISALLOW_COPY_AND_ASSIGN(DominatedKeyValueRemover);
+
+  IAaptContext* context_;
+  ResourceEntry* entry_;
 };
 
-static void dedupeEntry(IAaptContext* context, ResourceEntry* entry) {
+static void DedupeEntry(IAaptContext* context, ResourceEntry* entry) {
   DominatorTree tree(entry->values);
   DominatedKeyValueRemover remover(context, entry);
-  tree.accept(&remover);
+  tree.Accept(&remover);
 
   // Erase the values that were removed.
   entry->values.erase(
@@ -102,15 +105,15 @@ static void dedupeEntry(IAaptContext* context, ResourceEntry* entry) {
 
 }  // namespace
 
-bool ResourceDeduper::consume(IAaptContext* context, ResourceTable* table) {
+bool ResourceDeduper::Consume(IAaptContext* context, ResourceTable* table) {
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
-        dedupeEntry(context, entry.get());
+        DedupeEntry(context, entry.get());
       }
     }
   }
   return true;
 }
 
-}  // aapt
+}  // namespace aapt

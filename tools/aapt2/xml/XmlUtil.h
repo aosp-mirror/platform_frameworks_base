@@ -17,10 +17,10 @@
 #ifndef AAPT_XML_XMLUTIL_H
 #define AAPT_XML_XMLUTIL_H
 
+#include <string>
+
 #include "ResourceValues.h"
 #include "util/Maybe.h"
-
-#include <string>
 
 namespace aapt {
 namespace xml {
@@ -51,7 +51,7 @@ struct ExtractedPackage {
    * private resources
    * are made visible.
    */
-  bool privateNamespace;
+  bool private_namespace;
 };
 
 /**
@@ -62,8 +62,8 @@ struct ExtractedPackage {
  * Special case: if namespaceUri is http://schemas.android.com/apk/res-auto,
  * returns an empty package name.
  */
-Maybe<ExtractedPackage> extractPackageFromNamespace(
-    const std::string& namespaceUri);
+Maybe<ExtractedPackage> ExtractPackageFromNamespace(
+    const std::string& namespace_uri);
 
 /**
  * Returns an XML Android namespace for the given package of the form:
@@ -74,8 +74,8 @@ Maybe<ExtractedPackage> extractPackageFromNamespace(
  *
  * http://schemas.android.com/apk/prv/res/<package>
  */
-std::string buildPackageNamespace(const StringPiece& package,
-                                  bool privateReference = false);
+std::string BuildPackageNamespace(const StringPiece& package,
+                                  bool private_reference = false);
 
 /**
  * Interface representing a stack of XML namespace declarations. When looking up
@@ -89,20 +89,19 @@ struct IPackageDeclStack {
    * Returns an ExtractedPackage struct if the alias given corresponds with a
    * package declaration.
    */
-  virtual Maybe<ExtractedPackage> transformPackageAlias(
-      const StringPiece& alias, const StringPiece& localPackage) const = 0;
+  virtual Maybe<ExtractedPackage> TransformPackageAlias(
+      const StringPiece& alias, const StringPiece& local_package) const = 0;
 };
 
 /**
  * Helper function for transforming the original Reference inRef to a fully
  * qualified reference
  * via the IPackageDeclStack. This will also mark the Reference as private if
- * the namespace of
- * the package declaration was private.
+ * the namespace of the package declaration was private.
  */
-void transformReferenceFromNamespace(IPackageDeclStack* declStack,
-                                     const StringPiece& localPackage,
-                                     Reference* inRef);
+void TransformReferenceFromNamespace(IPackageDeclStack* decl_stack,
+                                     const StringPiece& local_package,
+                                     Reference* in_ref);
 
 }  // namespace xml
 }  // namespace aapt

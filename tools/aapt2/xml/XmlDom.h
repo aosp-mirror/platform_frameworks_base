@@ -17,17 +17,17 @@
 #ifndef AAPT_XML_DOM_H
 #define AAPT_XML_DOM_H
 
+#include <istream>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "Diagnostics.h"
 #include "Resource.h"
 #include "ResourceValues.h"
 #include "util/StringPiece.h"
 #include "util/Util.h"
 #include "xml/XmlUtil.h"
-
-#include <istream>
-#include <memory>
-#include <string>
-#include <vector>
 
 namespace aapt {
 namespace xml {
@@ -40,16 +40,16 @@ class RawVisitor;
 class Node {
  public:
   Node* parent = nullptr;
-  size_t lineNumber = 0;
-  size_t columnNumber = 0;
+  size_t line_number = 0;
+  size_t column_number = 0;
   std::string comment;
   std::vector<std::unique_ptr<Node>> children;
 
   virtual ~Node() = default;
 
-  void addChild(std::unique_ptr<Node> child);
-  virtual void accept(RawVisitor* visitor) = 0;
-  virtual std::unique_ptr<Node> clone() = 0;
+  void AddChild(std::unique_ptr<Node> child);
+  virtual void Accept(RawVisitor* visitor) = 0;
+  virtual std::unique_ptr<Node> Clone() = 0;
 };
 
 /**
@@ -59,7 +59,7 @@ class Node {
 template <typename Derived>
 class BaseNode : public Node {
  public:
-  virtual void accept(RawVisitor* visitor) override;
+  virtual void Accept(RawVisitor* visitor) override;
 };
 
 /**
@@ -67,10 +67,10 @@ class BaseNode : public Node {
  */
 class Namespace : public BaseNode<Namespace> {
  public:
-  std::string namespacePrefix;
-  std::string namespaceUri;
+  std::string namespace_prefix;
+  std::string namespace_uri;
 
-  std::unique_ptr<Node> clone() override;
+  std::unique_ptr<Node> Clone() override;
 };
 
 struct AaptAttribute {
@@ -82,12 +82,12 @@ struct AaptAttribute {
  * An XML attribute.
  */
 struct Attribute {
-  std::string namespaceUri;
+  std::string namespace_uri;
   std::string name;
   std::string value;
 
-  Maybe<AaptAttribute> compiledAttribute;
-  std::unique_ptr<Item> compiledValue;
+  Maybe<AaptAttribute> compiled_attribute;
+  std::unique_ptr<Item> compiled_value;
 };
 
 /**
@@ -95,19 +95,19 @@ struct Attribute {
  */
 class Element : public BaseNode<Element> {
  public:
-  std::string namespaceUri;
+  std::string namespace_uri;
   std::string name;
   std::vector<Attribute> attributes;
 
-  Attribute* findAttribute(const StringPiece& ns, const StringPiece& name);
-  xml::Element* findChild(const StringPiece& ns, const StringPiece& name);
-  xml::Element* findChildWithAttribute(const StringPiece& ns,
+  Attribute* FindAttribute(const StringPiece& ns, const StringPiece& name);
+  xml::Element* FindChild(const StringPiece& ns, const StringPiece& name);
+  xml::Element* FindChildWithAttribute(const StringPiece& ns,
                                        const StringPiece& name,
-                                       const StringPiece& attrNs,
-                                       const StringPiece& attrName,
-                                       const StringPiece& attrValue);
-  std::vector<xml::Element*> getChildElements();
-  std::unique_ptr<Node> clone() override;
+                                       const StringPiece& attr_ns,
+                                       const StringPiece& attr_name,
+                                       const StringPiece& attr_value);
+  std::vector<xml::Element*> GetChildElements();
+  std::unique_ptr<Node> Clone() override;
 };
 
 /**
@@ -117,7 +117,7 @@ class Text : public BaseNode<Text> {
  public:
   std::string text;
 
-  std::unique_ptr<Node> clone() override;
+  std::unique_ptr<Node> Clone() override;
 };
 
 /**
@@ -133,18 +133,18 @@ class XmlResource {
  * Inflates an XML DOM from a text stream, logging errors to the logger.
  * Returns the root node on success, or nullptr on failure.
  */
-std::unique_ptr<XmlResource> inflate(std::istream* in, IDiagnostics* diag,
+std::unique_ptr<XmlResource> Inflate(std::istream* in, IDiagnostics* diag,
                                      const Source& source);
 
 /**
  * Inflates an XML DOM from a binary ResXMLTree, logging errors to the logger.
  * Returns the root node on success, or nullptr on failure.
  */
-std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen,
+std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len,
                                      IDiagnostics* diag, const Source& source);
 
-Element* findRootElement(XmlResource* doc);
-Element* findRootElement(Node* node);
+Element* FindRootElement(XmlResource* doc);
+Element* FindRootElement(Node* node);
 
 /**
  * A visitor interface for the different XML Node subtypes. This will not
@@ -155,9 +155,9 @@ class RawVisitor {
  public:
   virtual ~RawVisitor() = default;
 
-  virtual void visit(Namespace* node) {}
-  virtual void visit(Element* node) {}
-  virtual void visit(Text* text) {}
+  virtual void Visit(Namespace* node) {}
+  virtual void Visit(Element* node) {}
+  virtual void Visit(Text* text) {}
 };
 
 /**
@@ -165,17 +165,17 @@ class RawVisitor {
  */
 class Visitor : public RawVisitor {
  public:
-  using RawVisitor::visit;
+  using RawVisitor::Visit;
 
-  void visit(Namespace* node) override { visitChildren(node); }
+  void Visit(Namespace* node) override { VisitChildren(node); }
 
-  void visit(Element* node) override { visitChildren(node); }
+  void Visit(Element* node) override { VisitChildren(node); }
 
-  void visit(Text* text) override { visitChildren(text); }
+  void Visit(Text* text) override { VisitChildren(text); }
 
-  void visitChildren(Node* node) {
+  void VisitChildren(Node* node) {
     for (auto& child : node->children) {
-      child->accept(this);
+      child->Accept(this);
     }
   }
 };
@@ -185,11 +185,12 @@ class Visitor : public RawVisitor {
  */
 class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
  public:
-  using Visitor::visit;
+  using Visitor::Visit;
 
-  void visit(Namespace* ns) override;
-  Maybe<ExtractedPackage> transformPackageAlias(
-      const StringPiece& alias, const StringPiece& localPackage) const override;
+  void Visit(Namespace* ns) override;
+  Maybe<ExtractedPackage> TransformPackageAlias(
+      const StringPiece& alias,
+      const StringPiece& local_package) const override;
 
  private:
   struct PackageDecl {
@@ -197,30 +198,30 @@ class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
     ExtractedPackage package;
   };
 
-  std::vector<PackageDecl> mPackageDecls;
+  std::vector<PackageDecl> package_decls_;
 };
 
 // Implementations
 
 template <typename Derived>
-void BaseNode<Derived>::accept(RawVisitor* visitor) {
-  visitor->visit(static_cast<Derived*>(this));
+void BaseNode<Derived>::Accept(RawVisitor* visitor) {
+  visitor->Visit(static_cast<Derived*>(this));
 }
 
 template <typename T>
 class NodeCastImpl : public RawVisitor {
  public:
-  using RawVisitor::visit;
+  using RawVisitor::Visit;
 
   T* value = nullptr;
 
-  void visit(T* v) override { value = v; }
+  void Visit(T* v) override { value = v; }
 };
 
 template <typename T>
-T* nodeCast(Node* node) {
+T* NodeCast(Node* node) {
   NodeCastImpl<T> visitor;
-  node->accept(&visitor);
+  node->Accept(&visitor);
   return visitor.value;
 }
 

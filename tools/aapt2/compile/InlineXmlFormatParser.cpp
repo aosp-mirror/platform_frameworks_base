@@ -15,15 +15,17 @@
  */
 
 #include "compile/InlineXmlFormatParser.h"
+
+#include <sstream>
+#include <string>
+
+#include "android-base/macros.h"
+
 #include "Debug.h"
 #include "ResourceUtils.h"
 #include "util/Util.h"
 #include "xml/XmlDom.h"
 #include "xml/XmlUtil.h"
-
-#include <android-base/macros.h>
-#include <sstream>
-#include <string>
 
 namespace aapt {
 
@@ -34,38 +36,38 @@ namespace {
  */
 class Visitor : public xml::PackageAwareVisitor {
  public:
-  using xml::PackageAwareVisitor::visit;
+  using xml::PackageAwareVisitor::Visit;
 
   struct InlineDeclaration {
     xml::Element* el;
-    std::string attrNamespaceUri;
-    std::string attrName;
+    std::string attr_namespace_uri;
+    std::string attr_name;
   };
 
-  explicit Visitor(IAaptContext* context, xml::XmlResource* xmlResource)
-      : mContext(context), mXmlResource(xmlResource) {}
+  explicit Visitor(IAaptContext* context, xml::XmlResource* xml_resource)
+      : context_(context), xml_resource_(xml_resource) {}
 
-  void visit(xml::Element* el) override {
-    if (el->namespaceUri != xml::kSchemaAapt || el->name != "attr") {
-      xml::PackageAwareVisitor::visit(el);
+  void Visit(xml::Element* el) override {
+    if (el->namespace_uri != xml::kSchemaAapt || el->name != "attr") {
+      xml::PackageAwareVisitor::Visit(el);
       return;
     }
 
-    const Source& src = mXmlResource->file.source.withLine(el->lineNumber);
+    const Source& src = xml_resource_->file.source.WithLine(el->line_number);
 
-    xml::Attribute* attr = el->findAttribute({}, "name");
+    xml::Attribute* attr = el->FindAttribute({}, "name");
     if (!attr) {
-      mContext->getDiagnostics()->error(DiagMessage(src)
+      context_->GetDiagnostics()->Error(DiagMessage(src)
                                         << "missing 'name' attribute");
-      mError = true;
+      error_ = true;
       return;
     }
 
-    Maybe<Reference> ref = ResourceUtils::parseXmlAttributeName(attr->value);
+    Maybe<Reference> ref = ResourceUtils::ParseXmlAttributeName(attr->value);
     if (!ref) {
-      mContext->getDiagnostics()->error(
+      context_->GetDiagnostics()->Error(
           DiagMessage(src) << "invalid XML attribute '" << attr->value << "'");
-      mError = true;
+      error_ = true;
       return;
     }
 
@@ -76,63 +78,63 @@ class Visitor : public xml::PackageAwareVisitor {
     // the local package if the user specified name="style" or something. This
     // should just
     // be the default namespace.
-    Maybe<xml::ExtractedPackage> maybePkg =
-        transformPackageAlias(name.package, {});
-    if (!maybePkg) {
-      mContext->getDiagnostics()->error(DiagMessage(src)
+    Maybe<xml::ExtractedPackage> maybe_pkg =
+        TransformPackageAlias(name.package, {});
+    if (!maybe_pkg) {
+      context_->GetDiagnostics()->Error(DiagMessage(src)
                                         << "invalid namespace prefix '"
                                         << name.package << "'");
-      mError = true;
+      error_ = true;
       return;
     }
 
-    const xml::ExtractedPackage& pkg = maybePkg.value();
-    const bool privateNamespace =
-        pkg.privateNamespace || ref.value().privateReference;
+    const xml::ExtractedPackage& pkg = maybe_pkg.value();
+    const bool private_namespace =
+        pkg.private_namespace || ref.value().private_reference;
 
     InlineDeclaration decl;
     decl.el = el;
-    decl.attrName = name.entry;
+    decl.attr_name = name.entry;
     if (!pkg.package.empty()) {
-      decl.attrNamespaceUri =
-          xml::buildPackageNamespace(pkg.package, privateNamespace);
+      decl.attr_namespace_uri =
+          xml::BuildPackageNamespace(pkg.package, private_namespace);
     }
 
-    mInlineDeclarations.push_back(std::move(decl));
+    inline_declarations_.push_back(std::move(decl));
   }
 
-  const std::vector<InlineDeclaration>& getInlineDeclarations() const {
-    return mInlineDeclarations;
+  const std::vector<InlineDeclaration>& GetInlineDeclarations() const {
+    return inline_declarations_;
   }
 
-  bool hasError() const { return mError; }
+  bool HasError() const { return error_; }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Visitor);
 
-  IAaptContext* mContext;
-  xml::XmlResource* mXmlResource;
-  std::vector<InlineDeclaration> mInlineDeclarations;
-  bool mError = false;
+  IAaptContext* context_;
+  xml::XmlResource* xml_resource_;
+  std::vector<InlineDeclaration> inline_declarations_;
+  bool error_ = false;
 };
 
 }  // namespace
 
-bool InlineXmlFormatParser::consume(IAaptContext* context,
+bool InlineXmlFormatParser::Consume(IAaptContext* context,
                                     xml::XmlResource* doc) {
   Visitor visitor(context, doc);
-  doc->root->accept(&visitor);
-  if (visitor.hasError()) {
+  doc->root->Accept(&visitor);
+  if (visitor.HasError()) {
     return false;
   }
 
-  size_t nameSuffixCounter = 0;
+  size_t name_suffix_counter = 0;
   for (const Visitor::InlineDeclaration& decl :
-       visitor.getInlineDeclarations()) {
-    auto newDoc = util::make_unique<xml::XmlResource>();
-    newDoc->file.config = doc->file.config;
-    newDoc->file.source = doc->file.source.withLine(decl.el->lineNumber);
-    newDoc->file.name = doc->file.name;
+       visitor.GetInlineDeclarations()) {
+    auto new_doc = util::make_unique<xml::XmlResource>();
+    new_doc->file.config = doc->file.config;
+    new_doc->file.source = doc->file.source.WithLine(decl.el->line_number);
+    new_doc->file.name = doc->file.name;
 
     // Modify the new entry name. We need to suffix the entry with a number to
     // avoid
@@ -140,63 +142,64 @@ bool InlineXmlFormatParser::consume(IAaptContext* context,
     // won't show up
     // in R.java.
 
-    newDoc->file.name.entry = NameMangler::mangleEntry(
-        {}, newDoc->file.name.entry + "__" + std::to_string(nameSuffixCounter));
+    new_doc->file.name.entry =
+        NameMangler::MangleEntry({}, new_doc->file.name.entry + "__" +
+                                         std::to_string(name_suffix_counter));
 
     // Extracted elements must be the only child of <aapt:attr>.
     // Make sure there is one root node in the children (ignore empty text).
     for (auto& child : decl.el->children) {
-      const Source childSource = doc->file.source.withLine(child->lineNumber);
-      if (xml::Text* t = xml::nodeCast<xml::Text>(child.get())) {
-        if (!util::trimWhitespace(t->text).empty()) {
-          context->getDiagnostics()->error(
-              DiagMessage(childSource)
+      const Source child_source = doc->file.source.WithLine(child->line_number);
+      if (xml::Text* t = xml::NodeCast<xml::Text>(child.get())) {
+        if (!util::TrimWhitespace(t->text).empty()) {
+          context->GetDiagnostics()->Error(
+              DiagMessage(child_source)
               << "can't extract text into its own resource");
           return false;
         }
-      } else if (newDoc->root) {
-        context->getDiagnostics()->error(
-            DiagMessage(childSource)
+      } else if (new_doc->root) {
+        context->GetDiagnostics()->Error(
+            DiagMessage(child_source)
             << "inline XML resources must have a single root");
         return false;
       } else {
-        newDoc->root = std::move(child);
-        newDoc->root->parent = nullptr;
+        new_doc->root = std::move(child);
+        new_doc->root->parent = nullptr;
       }
     }
 
     // Walk up and find the parent element.
     xml::Node* node = decl.el;
-    xml::Element* parentEl = nullptr;
+    xml::Element* parent_el = nullptr;
     while (node->parent &&
-           (parentEl = xml::nodeCast<xml::Element>(node->parent)) == nullptr) {
+           (parent_el = xml::NodeCast<xml::Element>(node->parent)) == nullptr) {
       node = node->parent;
     }
 
-    if (!parentEl) {
-      context->getDiagnostics()->error(
-          DiagMessage(newDoc->file.source)
+    if (!parent_el) {
+      context->GetDiagnostics()->Error(
+          DiagMessage(new_doc->file.source)
           << "no suitable parent for inheriting attribute");
       return false;
     }
 
     // Add the inline attribute to the parent.
-    parentEl->attributes.push_back(
-        xml::Attribute{decl.attrNamespaceUri, decl.attrName,
-                       "@" + newDoc->file.name.toString()});
+    parent_el->attributes.push_back(
+        xml::Attribute{decl.attr_namespace_uri, decl.attr_name,
+                       "@" + new_doc->file.name.ToString()});
 
     // Delete the subtree.
-    for (auto iter = parentEl->children.begin();
-         iter != parentEl->children.end(); ++iter) {
+    for (auto iter = parent_el->children.begin();
+         iter != parent_el->children.end(); ++iter) {
       if (iter->get() == node) {
-        parentEl->children.erase(iter);
+        parent_el->children.erase(iter);
         break;
       }
     }
 
-    mQueue.push_back(std::move(newDoc));
+    queue_.push_back(std::move(new_doc));
 
-    nameSuffixCounter++;
+    name_suffix_counter++;
   }
   return true;
 }

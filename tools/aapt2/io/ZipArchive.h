@@ -17,11 +17,12 @@
 #ifndef AAPT_IO_ZIPARCHIVE_H
 #define AAPT_IO_ZIPARCHIVE_H
 
+#include "ziparchive/zip_archive.h"
+
+#include <map>
+
 #include "io/File.h"
 #include "util/StringPiece.h"
-
-#include <ziparchive/zip_archive.h>
-#include <map>
 
 namespace aapt {
 namespace io {
@@ -36,13 +37,13 @@ class ZipFile : public IFile {
  public:
   ZipFile(ZipArchiveHandle handle, const ZipEntry& entry, const Source& source);
 
-  std::unique_ptr<IData> openAsData() override;
-  const Source& getSource() const override;
+  std::unique_ptr<IData> OpenAsData() override;
+  const Source& GetSource() const override;
 
  private:
-  ZipArchiveHandle mZipHandle;
-  ZipEntry mZipEntry;
-  Source mSource;
+  ZipArchiveHandle zip_handle_;
+  ZipEntry zip_entry_;
+  Source source_;
 };
 
 class ZipFileCollection;
@@ -51,11 +52,11 @@ class ZipFileCollectionIterator : public IFileCollectionIterator {
  public:
   explicit ZipFileCollectionIterator(ZipFileCollection* collection);
 
-  bool hasNext() override;
-  io::IFile* next() override;
+  bool HasNext() override;
+  io::IFile* Next() override;
 
  private:
-  std::map<std::string, std::unique_ptr<IFile>>::const_iterator mCurrent, mEnd;
+  std::map<std::string, std::unique_ptr<IFile>>::const_iterator current_, end_;
 };
 
 /**
@@ -63,11 +64,11 @@ class ZipFileCollectionIterator : public IFileCollectionIterator {
  */
 class ZipFileCollection : public IFileCollection {
  public:
-  static std::unique_ptr<ZipFileCollection> create(const StringPiece& path,
+  static std::unique_ptr<ZipFileCollection> Create(const StringPiece& path,
                                                    std::string* outError);
 
-  io::IFile* findFile(const StringPiece& path) override;
-  std::unique_ptr<IFileCollectionIterator> iterator() override;
+  io::IFile* FindFile(const StringPiece& path) override;
+  std::unique_ptr<IFileCollectionIterator> Iterator() override;
 
   ~ZipFileCollection() override;
 
@@ -75,8 +76,8 @@ class ZipFileCollection : public IFileCollection {
   friend class ZipFileCollectionIterator;
   ZipFileCollection();
 
-  ZipArchiveHandle mHandle;
-  std::map<std::string, std::unique_ptr<IFile>> mFiles;
+  ZipArchiveHandle handle_;
+  std::map<std::string, std::unique_ptr<IFile>> files_;
 };
 
 }  // namespace io

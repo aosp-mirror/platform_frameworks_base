@@ -17,11 +17,12 @@
 #ifndef AAPT_MAYBE_H
 #define AAPT_MAYBE_H
 
-#include "util/TypeTraits.h"
-
-#include <cassert>
 #include <type_traits>
 #include <utility>
+
+#include "android-base/logging.h"
+
+#include "util/TypeTraits.h"
 
 namespace aapt {
 
@@ -88,7 +89,7 @@ class Maybe {
    */
   const T& value() const;
 
-  T valueOrDefault(const T& def) const;
+  T value_or_default(const T& def) const;
 
  private:
   template <typename U>
@@ -102,55 +103,55 @@ class Maybe {
 
   void destroy();
 
-  bool mNothing;
+  bool nothing_;
 
-  typename std::aligned_storage<sizeof(T), alignof(T)>::type mStorage;
+  typename std::aligned_storage<sizeof(T), alignof(T)>::type storage_;
 };
 
 template <typename T>
-Maybe<T>::Maybe() : mNothing(true) {}
+Maybe<T>::Maybe() : nothing_(true) {}
 
 template <typename T>
 Maybe<T>::~Maybe() {
-  if (!mNothing) {
+  if (!nothing_) {
     destroy();
   }
 }
 
 template <typename T>
-Maybe<T>::Maybe(const Maybe& rhs) : mNothing(rhs.mNothing) {
-  if (!rhs.mNothing) {
-    new (&mStorage) T(reinterpret_cast<const T&>(rhs.mStorage));
+Maybe<T>::Maybe(const Maybe& rhs) : nothing_(rhs.nothing_) {
+  if (!rhs.nothing_) {
+    new (&storage_) T(reinterpret_cast<const T&>(rhs.storage_));
   }
 }
 
 template <typename T>
 template <typename U>
-Maybe<T>::Maybe(const Maybe<U>& rhs) : mNothing(rhs.mNothing) {
-  if (!rhs.mNothing) {
-    new (&mStorage) T(reinterpret_cast<const U&>(rhs.mStorage));
+Maybe<T>::Maybe(const Maybe<U>& rhs) : nothing_(rhs.nothing_) {
+  if (!rhs.nothing_) {
+    new (&storage_) T(reinterpret_cast<const U&>(rhs.storage_));
   }
 }
 
 template <typename T>
-Maybe<T>::Maybe(Maybe&& rhs) : mNothing(rhs.mNothing) {
-  if (!rhs.mNothing) {
-    rhs.mNothing = true;
+Maybe<T>::Maybe(Maybe&& rhs) : nothing_(rhs.nothing_) {
+  if (!rhs.nothing_) {
+    rhs.nothing_ = true;
 
     // Move the value from rhs.
-    new (&mStorage) T(std::move(reinterpret_cast<T&>(rhs.mStorage)));
+    new (&storage_) T(std::move(reinterpret_cast<T&>(rhs.storage_)));
     rhs.destroy();
   }
 }
 
 template <typename T>
 template <typename U>
-Maybe<T>::Maybe(Maybe<U>&& rhs) : mNothing(rhs.mNothing) {
-  if (!rhs.mNothing) {
-    rhs.mNothing = true;
+Maybe<T>::Maybe(Maybe<U>&& rhs) : nothing_(rhs.nothing_) {
+  if (!rhs.nothing_) {
+    rhs.nothing_ = true;
 
     // Move the value from rhs.
-    new (&mStorage) T(std::move(reinterpret_cast<U&>(rhs.mStorage)));
+    new (&storage_) T(std::move(reinterpret_cast<U&>(rhs.storage_)));
     rhs.destroy();
   }
 }
@@ -170,21 +171,21 @@ inline Maybe<T>& Maybe<T>::operator=(const Maybe<U>& rhs) {
 template <typename T>
 template <typename U>
 Maybe<T>& Maybe<T>::copy(const Maybe<U>& rhs) {
-  if (mNothing && rhs.mNothing) {
+  if (nothing_ && rhs.nothing_) {
     // Both are nothing, nothing to do.
     return *this;
-  } else if (!mNothing && !rhs.mNothing) {
+  } else if (!nothing_ && !rhs.nothing_) {
     // We both are something, so assign rhs to us.
-    reinterpret_cast<T&>(mStorage) = reinterpret_cast<const U&>(rhs.mStorage);
-  } else if (mNothing) {
+    reinterpret_cast<T&>(storage_) = reinterpret_cast<const U&>(rhs.storage_);
+  } else if (nothing_) {
     // We are nothing but rhs is something.
-    mNothing = rhs.mNothing;
+    nothing_ = rhs.nothing_;
 
     // Copy the value from rhs.
-    new (&mStorage) T(reinterpret_cast<const U&>(rhs.mStorage));
+    new (&storage_) T(reinterpret_cast<const U&>(rhs.storage_));
   } else {
     // We are something but rhs is nothing, so destroy our value.
-    mNothing = rhs.mNothing;
+    nothing_ = rhs.nothing_;
     destroy();
   }
   return *this;
@@ -205,69 +206,69 @@ inline Maybe<T>& Maybe<T>::operator=(Maybe<U>&& rhs) {
 template <typename T>
 template <typename U>
 Maybe<T>& Maybe<T>::move(Maybe<U>&& rhs) {
-  if (mNothing && rhs.mNothing) {
+  if (nothing_ && rhs.nothing_) {
     // Both are nothing, nothing to do.
     return *this;
-  } else if (!mNothing && !rhs.mNothing) {
+  } else if (!nothing_ && !rhs.nothing_) {
     // We both are something, so move assign rhs to us.
-    rhs.mNothing = true;
-    reinterpret_cast<T&>(mStorage) =
-        std::move(reinterpret_cast<U&>(rhs.mStorage));
+    rhs.nothing_ = true;
+    reinterpret_cast<T&>(storage_) =
+        std::move(reinterpret_cast<U&>(rhs.storage_));
     rhs.destroy();
-  } else if (mNothing) {
+  } else if (nothing_) {
     // We are nothing but rhs is something.
-    mNothing = false;
-    rhs.mNothing = true;
+    nothing_ = false;
+    rhs.nothing_ = true;
 
     // Move the value from rhs.
-    new (&mStorage) T(std::move(reinterpret_cast<U&>(rhs.mStorage)));
+    new (&storage_) T(std::move(reinterpret_cast<U&>(rhs.storage_)));
     rhs.destroy();
   } else {
     // We are something but rhs is nothing, so destroy our value.
-    mNothing = true;
+    nothing_ = true;
     destroy();
   }
   return *this;
 }
 
 template <typename T>
-Maybe<T>::Maybe(const T& value) : mNothing(false) {
-  new (&mStorage) T(value);
+Maybe<T>::Maybe(const T& value) : nothing_(false) {
+  new (&storage_) T(value);
 }
 
 template <typename T>
-Maybe<T>::Maybe(T&& value) : mNothing(false) {
-  new (&mStorage) T(std::forward<T>(value));
+Maybe<T>::Maybe(T&& value) : nothing_(false) {
+  new (&storage_) T(std::forward<T>(value));
 }
 
 template <typename T>
 Maybe<T>::operator bool() const {
-  return !mNothing;
+  return !nothing_;
 }
 
 template <typename T>
 T& Maybe<T>::value() {
-  assert(!mNothing && "Maybe<T>::value() called on Nothing");
-  return reinterpret_cast<T&>(mStorage);
+  CHECK(!nothing_) << "Maybe<T>::value() called on Nothing";
+  return reinterpret_cast<T&>(storage_);
 }
 
 template <typename T>
 const T& Maybe<T>::value() const {
-  assert(!mNothing && "Maybe<T>::value() called on Nothing");
-  return reinterpret_cast<const T&>(mStorage);
+  CHECK(!nothing_) << "Maybe<T>::value() called on Nothing";
+  return reinterpret_cast<const T&>(storage_);
 }
 
 template <typename T>
-T Maybe<T>::valueOrDefault(const T& def) const {
-  if (mNothing) {
+T Maybe<T>::value_or_default(const T& def) const {
+  if (nothing_) {
     return def;
   }
-  return reinterpret_cast<const T&>(mStorage);
+  return reinterpret_cast<const T&>(storage_);
 }
 
 template <typename T>
 void Maybe<T>::destroy() {
-  reinterpret_cast<T&>(mStorage).~T();
+  reinterpret_cast<T&>(storage_).~T();
 }
 
 template <typename T>

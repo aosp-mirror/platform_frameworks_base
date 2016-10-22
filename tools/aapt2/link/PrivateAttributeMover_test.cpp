@@ -15,64 +15,65 @@
  */
 
 #include "link/Linkers.h"
+
 #include "test/Test.h"
 
 namespace aapt {
 
 TEST(PrivateAttributeMoverTest, MovePrivateAttributes) {
-  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
 
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .addSimple("android:attr/publicA")
-          .addSimple("android:attr/privateA")
-          .addSimple("android:attr/publicB")
-          .addSimple("android:attr/privateB")
-          .setSymbolState("android:attr/publicA", ResourceId(0x01010000),
+          .AddSimple("android:attr/publicA")
+          .AddSimple("android:attr/privateA")
+          .AddSimple("android:attr/publicB")
+          .AddSimple("android:attr/privateB")
+          .SetSymbolState("android:attr/publicA", ResourceId(0x01010000),
                           SymbolState::kPublic)
-          .setSymbolState("android:attr/publicB", ResourceId(0x01010000),
+          .SetSymbolState("android:attr/publicB", ResourceId(0x01010000),
                           SymbolState::kPublic)
-          .build();
+          .Build();
 
   PrivateAttributeMover mover;
-  ASSERT_TRUE(mover.consume(context.get(), table.get()));
+  ASSERT_TRUE(mover.Consume(context.get(), table.get()));
 
-  ResourceTablePackage* package = table->findPackage("android");
+  ResourceTablePackage* package = table->FindPackage("android");
   ASSERT_NE(package, nullptr);
 
-  ResourceTableType* type = package->findType(ResourceType::kAttr);
+  ResourceTableType* type = package->FindType(ResourceType::kAttr);
   ASSERT_NE(type, nullptr);
   ASSERT_EQ(type->entries.size(), 2u);
-  EXPECT_NE(type->findEntry("publicA"), nullptr);
-  EXPECT_NE(type->findEntry("publicB"), nullptr);
+  EXPECT_NE(type->FindEntry("publicA"), nullptr);
+  EXPECT_NE(type->FindEntry("publicB"), nullptr);
 
-  type = package->findType(ResourceType::kAttrPrivate);
+  type = package->FindType(ResourceType::kAttrPrivate);
   ASSERT_NE(type, nullptr);
   ASSERT_EQ(type->entries.size(), 2u);
-  EXPECT_NE(type->findEntry("privateA"), nullptr);
-  EXPECT_NE(type->findEntry("privateB"), nullptr);
+  EXPECT_NE(type->FindEntry("privateA"), nullptr);
+  EXPECT_NE(type->FindEntry("privateB"), nullptr);
 }
 
 TEST(PrivateAttributeMoverTest,
      LeavePrivateAttributesWhenNoPublicAttributesDefined) {
-  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
 
   std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-                                             .addSimple("android:attr/privateA")
-                                             .addSimple("android:attr/privateB")
-                                             .build();
+                                             .AddSimple("android:attr/privateA")
+                                             .AddSimple("android:attr/privateB")
+                                             .Build();
 
   PrivateAttributeMover mover;
-  ASSERT_TRUE(mover.consume(context.get(), table.get()));
+  ASSERT_TRUE(mover.Consume(context.get(), table.get()));
 
-  ResourceTablePackage* package = table->findPackage("android");
+  ResourceTablePackage* package = table->FindPackage("android");
   ASSERT_NE(package, nullptr);
 
-  ResourceTableType* type = package->findType(ResourceType::kAttr);
+  ResourceTableType* type = package->FindType(ResourceType::kAttr);
   ASSERT_NE(type, nullptr);
   ASSERT_EQ(type->entries.size(), 2u);
 
-  type = package->findType(ResourceType::kAttrPrivate);
+  type = package->FindType(ResourceType::kAttrPrivate);
   ASSERT_EQ(type, nullptr);
 }
 

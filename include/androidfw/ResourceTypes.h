@@ -22,7 +22,6 @@
 
 #include <androidfw/Asset.h>
 #include <androidfw/LocaleData.h>
-#include <utils/ByteOrder.h>
 #include <utils/Errors.h>
 #include <utils/String16.h>
 #include <utils/Vector.h>

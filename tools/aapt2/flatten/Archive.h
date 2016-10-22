@@ -17,16 +17,17 @@
 #ifndef AAPT_FLATTEN_ARCHIVE_H
 #define AAPT_FLATTEN_ARCHIVE_H
 
-#include "Diagnostics.h"
-#include "util/BigBuffer.h"
-#include "util/Files.h"
-#include "util/StringPiece.h"
-
-#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "google/protobuf/io/zero_copy_stream_impl_lite.h"
+
+#include "Diagnostics.h"
+#include "util/BigBuffer.h"
+#include "util/Files.h"
+#include "util/StringPiece.h"
 
 namespace aapt {
 
@@ -38,28 +39,28 @@ struct ArchiveEntry {
 
   std::string path;
   uint32_t flags;
-  size_t uncompressedSize;
+  size_t uncompressed_size;
 };
 
 class IArchiveWriter : public google::protobuf::io::CopyingOutputStream {
  public:
   virtual ~IArchiveWriter() = default;
 
-  virtual bool startEntry(const StringPiece& path, uint32_t flags) = 0;
-  virtual bool writeEntry(const BigBuffer& buffer) = 0;
-  virtual bool writeEntry(const void* data, size_t len) = 0;
-  virtual bool finishEntry() = 0;
+  virtual bool StartEntry(const StringPiece& path, uint32_t flags) = 0;
+  virtual bool WriteEntry(const BigBuffer& buffer) = 0;
+  virtual bool WriteEntry(const void* data, size_t len) = 0;
+  virtual bool FinishEntry() = 0;
 
   // CopyingOutputStream implementations.
   bool Write(const void* buffer, int size) override {
-    return writeEntry(buffer, size);
+    return WriteEntry(buffer, size);
   }
 };
 
-std::unique_ptr<IArchiveWriter> createDirectoryArchiveWriter(
+std::unique_ptr<IArchiveWriter> CreateDirectoryArchiveWriter(
     IDiagnostics* diag, const StringPiece& path);
 
-std::unique_ptr<IArchiveWriter> createZipFileArchiveWriter(
+std::unique_ptr<IArchiveWriter> CreateZipFileArchiveWriter(
     IDiagnostics* diag, const StringPiece& path);
 
 }  // namespace aapt

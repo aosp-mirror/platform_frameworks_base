@@ -17,14 +17,14 @@
 #ifndef AAPT_SPLIT_TABLESPLITTER_H
 #define AAPT_SPLIT_TABLESPLITTER_H
 
+#include <set>
+#include <vector>
+#include "android-base/macros.h"
+
 #include "ConfigDescription.h"
 #include "ResourceTable.h"
 #include "filter/ConfigFilter.h"
 #include "process/IResourceTableConsumer.h"
-
-#include <android-base/macros.h>
-#include <set>
-#include <vector>
 
 namespace aapt {
 
@@ -36,39 +36,36 @@ struct TableSplitterOptions {
   /**
    * The preferred density to keep in the table, stripping out all others.
    */
-  Maybe<uint16_t> preferredDensity;
+  Maybe<uint16_t> preferred_density;
 
   /**
    * Configuration filter that determines which resource configuration values
    * end up in
    * the final table.
    */
-  IConfigFilter* configFilter = nullptr;
+  IConfigFilter* config_filter = nullptr;
 };
 
 class TableSplitter {
  public:
   TableSplitter(const std::vector<SplitConstraints>& splits,
                 const TableSplitterOptions& options)
-      : mSplitConstraints(splits),
-        mPreferredDensity(options.preferredDensity),
-        mConfigFilter(options.configFilter) {
-    for (size_t i = 0; i < mSplitConstraints.size(); i++) {
-      mSplits.push_back(util::make_unique<ResourceTable>());
+      : split_constraints_(splits), options_(options) {
+    for (size_t i = 0; i < split_constraints_.size(); i++) {
+      splits_.push_back(util::make_unique<ResourceTable>());
     }
   }
 
-  bool verifySplitConstraints(IAaptContext* context);
+  bool VerifySplitConstraints(IAaptContext* context);
 
-  void splitTable(ResourceTable* originalTable);
+  void SplitTable(ResourceTable* original_table);
 
-  std::vector<std::unique_ptr<ResourceTable>>& getSplits() { return mSplits; }
+  std::vector<std::unique_ptr<ResourceTable>>& splits() { return splits_; }
 
  private:
-  std::vector<SplitConstraints> mSplitConstraints;
-  std::vector<std::unique_ptr<ResourceTable>> mSplits;
-  Maybe<uint16_t> mPreferredDensity;
-  IConfigFilter* mConfigFilter;
+  std::vector<SplitConstraints> split_constraints_;
+  std::vector<std::unique_ptr<ResourceTable>> splits_;
+  TableSplitterOptions options_;
 
   DISALLOW_COPY_AND_ASSIGN(TableSplitter);
 };

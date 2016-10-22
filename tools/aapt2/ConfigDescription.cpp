@@ -15,14 +15,16 @@
  */
 
 #include "ConfigDescription.h"
+
+#include <string>
+#include <vector>
+
+#include "androidfw/ResourceTypes.h"
+
 #include "Locale.h"
 #include "SdkConstants.h"
 #include "util/StringPiece.h"
 #include "util/Util.h"
-
-#include <androidfw/ResourceTypes.h>
-#include <string>
-#include <vector>
 
 namespace aapt {
 
@@ -30,7 +32,7 @@ using android::ResTable_config;
 
 static const char* kWildcardName = "any";
 
-const ConfigDescription& ConfigDescription::defaultConfig() {
+const ConfigDescription& ConfigDescription::DefaultConfig() {
   static ConfigDescription config = {};
   return config;
 }
@@ -589,169 +591,169 @@ static bool parseVersion(const char* name, ResTable_config* out) {
   return true;
 }
 
-bool ConfigDescription::parse(const StringPiece& str, ConfigDescription* out) {
-  std::vector<std::string> parts = util::splitAndLowercase(str, '-');
+bool ConfigDescription::Parse(const StringPiece& str, ConfigDescription* out) {
+  std::vector<std::string> parts = util::SplitAndLowercase(str, '-');
 
   ConfigDescription config;
-  ssize_t partsConsumed = 0;
+  ssize_t parts_consumed = 0;
   LocaleValue locale;
 
-  const auto partsEnd = parts.end();
-  auto partIter = parts.begin();
+  const auto parts_end = parts.end();
+  auto part_iter = parts.begin();
 
   if (str.size() == 0) {
     goto success;
   }
 
-  if (parseMcc(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseMcc(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseMnc(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseMnc(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
   // Locale spans a few '-' separators, so we let it
   // control the index.
-  partsConsumed = locale.initFromParts(partIter, partsEnd);
-  if (partsConsumed < 0) {
+  parts_consumed = locale.InitFromParts(part_iter, parts_end);
+  if (parts_consumed < 0) {
     return false;
   } else {
-    locale.writeTo(&config);
-    partIter += partsConsumed;
-    if (partIter == partsEnd) {
+    locale.WriteTo(&config);
+    part_iter += parts_consumed;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseLayoutDirection(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseLayoutDirection(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseSmallestScreenWidthDp(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseSmallestScreenWidthDp(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseScreenWidthDp(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseScreenWidthDp(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseScreenHeightDp(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseScreenHeightDp(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseScreenLayoutSize(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseScreenLayoutSize(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseScreenLayoutLong(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseScreenLayoutLong(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseScreenRound(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseScreenRound(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseOrientation(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseOrientation(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseUiModeType(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseUiModeType(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseUiModeNight(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseUiModeNight(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseDensity(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseDensity(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseTouchscreen(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseTouchscreen(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseKeysHidden(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseKeysHidden(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseKeyboard(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseKeyboard(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseNavHidden(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseNavHidden(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseNavigation(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseNavigation(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseScreenSize(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseScreenSize(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
 
-  if (parseVersion(partIter->c_str(), &config)) {
-    ++partIter;
-    if (partIter == partsEnd) {
+  if (parseVersion(part_iter->c_str(), &config)) {
+    ++part_iter;
+    if (part_iter == parts_end) {
       goto success;
     }
   }
@@ -761,57 +763,57 @@ bool ConfigDescription::parse(const StringPiece& str, ConfigDescription* out) {
 
 success:
   if (out != NULL) {
-    applyVersionForCompatibility(&config);
+    ApplyVersionForCompatibility(&config);
     *out = config;
   }
   return true;
 }
 
-void ConfigDescription::applyVersionForCompatibility(
+void ConfigDescription::ApplyVersionForCompatibility(
     ConfigDescription* config) {
-  uint16_t minSdk = 0;
+  uint16_t min_sdk = 0;
   if (config->screenLayout2 & ResTable_config::MASK_SCREENROUND) {
-    minSdk = SDK_MARSHMALLOW;
+    min_sdk = SDK_MARSHMALLOW;
   } else if (config->density == ResTable_config::DENSITY_ANY) {
-    minSdk = SDK_LOLLIPOP;
+    min_sdk = SDK_LOLLIPOP;
   } else if (config->smallestScreenWidthDp !=
                  ResTable_config::SCREENWIDTH_ANY ||
              config->screenWidthDp != ResTable_config::SCREENWIDTH_ANY ||
              config->screenHeightDp != ResTable_config::SCREENHEIGHT_ANY) {
-    minSdk = SDK_HONEYCOMB_MR2;
+    min_sdk = SDK_HONEYCOMB_MR2;
   } else if ((config->uiMode & ResTable_config::MASK_UI_MODE_TYPE) !=
                  ResTable_config::UI_MODE_TYPE_ANY ||
              (config->uiMode & ResTable_config::MASK_UI_MODE_NIGHT) !=
                  ResTable_config::UI_MODE_NIGHT_ANY) {
-    minSdk = SDK_FROYO;
+    min_sdk = SDK_FROYO;
   } else if ((config->screenLayout & ResTable_config::MASK_SCREENSIZE) !=
                  ResTable_config::SCREENSIZE_ANY ||
              (config->screenLayout & ResTable_config::MASK_SCREENLONG) !=
                  ResTable_config::SCREENLONG_ANY ||
              config->density != ResTable_config::DENSITY_DEFAULT) {
-    minSdk = SDK_DONUT;
+    min_sdk = SDK_DONUT;
   }
 
-  if (minSdk > config->sdkVersion) {
-    config->sdkVersion = minSdk;
+  if (min_sdk > config->sdkVersion) {
+    config->sdkVersion = min_sdk;
   }
 }
 
-ConfigDescription ConfigDescription::copyWithoutSdkVersion() const {
+ConfigDescription ConfigDescription::CopyWithoutSdkVersion() const {
   ConfigDescription copy = *this;
   copy.sdkVersion = 0;
   return copy;
 }
 
-bool ConfigDescription::dominates(const ConfigDescription& o) const {
-  if (*this == defaultConfig() || *this == o) {
+bool ConfigDescription::Dominates(const ConfigDescription& o) const {
+  if (*this == DefaultConfig() || *this == o) {
     return true;
   }
-  return matchWithDensity(o) && !o.matchWithDensity(*this) &&
-         !isMoreSpecificThan(o) && !o.hasHigherPrecedenceThan(*this);
+  return MatchWithDensity(o) && !o.MatchWithDensity(*this) &&
+         !isMoreSpecificThan(o) && !o.HasHigherPrecedenceThan(*this);
 }
 
-bool ConfigDescription::hasHigherPrecedenceThan(
+bool ConfigDescription::HasHigherPrecedenceThan(
     const ConfigDescription& o) const {
   // The order of the following tests defines the importance of one
   // configuration parameter over another. Those tests first are more
@@ -866,7 +868,7 @@ bool ConfigDescription::hasHigherPrecedenceThan(
   return *this != o;
 }
 
-bool ConfigDescription::conflictsWith(const ConfigDescription& o) const {
+bool ConfigDescription::ConflictsWith(const ConfigDescription& o) const {
   // This method should be updated as new configuration parameters are
   // introduced (e.g. screenConfig2).
   auto pred = [](const uint32_t a, const uint32_t b) -> bool {
@@ -892,8 +894,8 @@ bool ConfigDescription::conflictsWith(const ConfigDescription& o) const {
          !pred(keyboard, o.keyboard) || !pred(navigation, o.navigation);
 }
 
-bool ConfigDescription::isCompatibleWith(const ConfigDescription& o) const {
-  return !conflictsWith(o) && !dominates(o) && !o.dominates(*this);
+bool ConfigDescription::IsCompatibleWith(const ConfigDescription& o) const {
+  return !ConflictsWith(o) && !Dominates(o) && !o.Dominates(*this);
 }
 
 }  // namespace aapt

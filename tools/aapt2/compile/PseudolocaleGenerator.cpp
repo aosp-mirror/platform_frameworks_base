@@ -15,27 +15,29 @@
  */
 
 #include "compile/PseudolocaleGenerator.h"
+
+#include <algorithm>
+
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
 #include "compile/Pseudolocalizer.h"
 
-#include <algorithm>
-
 namespace aapt {
 
-std::unique_ptr<StyledString> pseudolocalizeStyledString(
+std::unique_ptr<StyledString> PseudolocalizeStyledString(
     StyledString* string, Pseudolocalizer::Method method, StringPool* pool) {
   Pseudolocalizer localizer(method);
 
-  const StringPiece originalText = *string->value->str;
+  const StringPiece original_text = *string->value->str;
 
   StyleString localized;
 
   // Copy the spans. We will update their offsets when we localize.
   localized.spans.reserve(string->value->spans.size());
   for (const StringPool::Span& span : string->value->spans) {
-    localized.spans.push_back(Span{*span.name, span.firstChar, span.lastChar});
+    localized.spans.push_back(
+        Span{*span.name, span.first_char, span.last_char});
   }
 
   // The ranges are all represented with a single value. This is the start of
@@ -49,8 +51,8 @@ std::unique_ptr<StyledString> pseudolocalizeStyledString(
     // Since this struct represents the start of one range and end of another,
     // we have
     // the two pointers respectively.
-    uint32_t* updateStart;
-    uint32_t* updateEnd;
+    uint32_t* update_start;
+    uint32_t* update_end;
   };
 
   auto cmp = [](const Range& r, size_t index) -> bool {
@@ -64,109 +66,113 @@ std::unique_ptr<StyledString> pseudolocalizeStyledString(
   //
   std::vector<Range> ranges;
   ranges.push_back(Range{0});
-  ranges.push_back(Range{originalText.size() - 1});
+  ranges.push_back(Range{original_text.size() - 1});
   for (size_t i = 0; i < string->value->spans.size(); i++) {
     const StringPool::Span& span = string->value->spans[i];
 
     // Insert or update the Range marker for the start of this span.
     auto iter =
-        std::lower_bound(ranges.begin(), ranges.end(), span.firstChar, cmp);
-    if (iter != ranges.end() && iter->start == span.firstChar) {
-      iter->updateStart = &localized.spans[i].firstChar;
+        std::lower_bound(ranges.begin(), ranges.end(), span.first_char, cmp);
+    if (iter != ranges.end() && iter->start == span.first_char) {
+      iter->update_start = &localized.spans[i].first_char;
     } else {
-      ranges.insert(
-          iter, Range{span.firstChar, &localized.spans[i].firstChar, nullptr});
+      ranges.insert(iter, Range{span.first_char, &localized.spans[i].first_char,
+                                nullptr});
     }
 
     // Insert or update the Range marker for the end of this span.
-    iter = std::lower_bound(ranges.begin(), ranges.end(), span.lastChar, cmp);
-    if (iter != ranges.end() && iter->start == span.lastChar) {
-      iter->updateEnd = &localized.spans[i].lastChar;
+    iter = std::lower_bound(ranges.begin(), ranges.end(), span.last_char, cmp);
+    if (iter != ranges.end() && iter->start == span.last_char) {
+      iter->update_end = &localized.spans[i].last_char;
     } else {
       ranges.insert(
-          iter, Range{span.lastChar, nullptr, &localized.spans[i].lastChar});
+          iter, Range{span.last_char, nullptr, &localized.spans[i].last_char});
     }
   }
 
-  localized.str += localizer.start();
+  localized.str += localizer.Start();
 
   // Iterate over the ranges and localize each section.
   for (size_t i = 0; i < ranges.size(); i++) {
     const size_t start = ranges[i].start;
-    size_t len = originalText.size() - start;
+    size_t len = original_text.size() - start;
     if (i + 1 < ranges.size()) {
       len = ranges[i + 1].start - start;
     }
 
-    if (ranges[i].updateStart) {
-      *ranges[i].updateStart = localized.str.size();
+    if (ranges[i].update_start) {
+      *ranges[i].update_start = localized.str.size();
     }
 
-    if (ranges[i].updateEnd) {
-      *ranges[i].updateEnd = localized.str.size();
+    if (ranges[i].update_end) {
+      *ranges[i].update_end = localized.str.size();
     }
 
-    localized.str += localizer.text(originalText.substr(start, len));
+    localized.str += localizer.Text(original_text.substr(start, len));
   }
 
-  localized.str += localizer.end();
+  localized.str += localizer.End();
 
-  std::unique_ptr<StyledString> localizedString =
-      util::make_unique<StyledString>(pool->makeRef(localized));
-  localizedString->setSource(string->getSource());
-  return localizedString;
+  std::unique_ptr<StyledString> localized_string =
+      util::make_unique<StyledString>(pool->MakeRef(localized));
+  localized_string->SetSource(string->GetSource());
+  return localized_string;
 }
 
 namespace {
 
-struct Visitor : public RawValueVisitor {
-  StringPool* mPool;
-  Pseudolocalizer::Method mMethod;
-  Pseudolocalizer mLocalizer;
-
+class Visitor : public RawValueVisitor {
+ public:
   // Either value or item will be populated upon visiting the value.
-  std::unique_ptr<Value> mValue;
-  std::unique_ptr<Item> mItem;
+  std::unique_ptr<Value> value;
+  std::unique_ptr<Item> item;
 
   Visitor(StringPool* pool, Pseudolocalizer::Method method)
-      : mPool(pool), mMethod(method), mLocalizer(method) {}
+      : pool_(pool), method_(method), localizer_(method) {}
 
-  void visit(Plural* plural) override {
+  void Visit(Plural* plural) override {
     std::unique_ptr<Plural> localized = util::make_unique<Plural>();
     for (size_t i = 0; i < plural->values.size(); i++) {
-      Visitor subVisitor(mPool, mMethod);
+      Visitor sub_visitor(pool_, method_);
       if (plural->values[i]) {
-        plural->values[i]->accept(&subVisitor);
-        if (subVisitor.mValue) {
-          localized->values[i] = std::move(subVisitor.mItem);
+        plural->values[i]->Accept(&sub_visitor);
+        if (sub_visitor.value) {
+          localized->values[i] = std::move(sub_visitor.item);
         } else {
           localized->values[i] =
-              std::unique_ptr<Item>(plural->values[i]->clone(mPool));
+              std::unique_ptr<Item>(plural->values[i]->Clone(pool_));
         }
       }
     }
-    localized->setSource(plural->getSource());
-    localized->setWeak(true);
-    mValue = std::move(localized);
+    localized->SetSource(plural->GetSource());
+    localized->SetWeak(true);
+    value = std::move(localized);
   }
 
-  void visit(String* string) override {
+  void Visit(String* string) override {
     std::string result =
-        mLocalizer.start() + mLocalizer.text(*string->value) + mLocalizer.end();
+        localizer_.Start() + localizer_.Text(*string->value) + localizer_.End();
     std::unique_ptr<String> localized =
-        util::make_unique<String>(mPool->makeRef(result));
-    localized->setSource(string->getSource());
-    localized->setWeak(true);
-    mItem = std::move(localized);
+        util::make_unique<String>(pool_->MakeRef(result));
+    localized->SetSource(string->GetSource());
+    localized->SetWeak(true);
+    item = std::move(localized);
   }
 
-  void visit(StyledString* string) override {
-    mItem = pseudolocalizeStyledString(string, mMethod, mPool);
-    mItem->setWeak(true);
+  void Visit(StyledString* string) override {
+    item = PseudolocalizeStyledString(string, method_, pool_);
+    item->SetWeak(true);
   }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Visitor);
+
+  StringPool* pool_;
+  Pseudolocalizer::Method method_;
+  Pseudolocalizer localizer_;
 };
 
-ConfigDescription modifyConfigForPseudoLocale(const ConfigDescription& base,
+ConfigDescription ModifyConfigForPseudoLocale(const ConfigDescription& base,
                                               Pseudolocalizer::Method m) {
   ConfigDescription modified = base;
   switch (m) {
@@ -189,31 +195,31 @@ ConfigDescription modifyConfigForPseudoLocale(const ConfigDescription& base,
   return modified;
 }
 
-void pseudolocalizeIfNeeded(const Pseudolocalizer::Method method,
-                            ResourceConfigValue* originalValue,
+void PseudolocalizeIfNeeded(const Pseudolocalizer::Method method,
+                            ResourceConfigValue* original_value,
                             StringPool* pool, ResourceEntry* entry) {
   Visitor visitor(pool, method);
-  originalValue->value->accept(&visitor);
+  original_value->value->Accept(&visitor);
 
-  std::unique_ptr<Value> localizedValue;
-  if (visitor.mValue) {
-    localizedValue = std::move(visitor.mValue);
-  } else if (visitor.mItem) {
-    localizedValue = std::move(visitor.mItem);
+  std::unique_ptr<Value> localized_value;
+  if (visitor.value) {
+    localized_value = std::move(visitor.value);
+  } else if (visitor.item) {
+    localized_value = std::move(visitor.item);
   }
 
-  if (!localizedValue) {
+  if (!localized_value) {
     return;
   }
 
-  ConfigDescription configWithAccent =
-      modifyConfigForPseudoLocale(originalValue->config, method);
+  ConfigDescription config_with_accent =
+      ModifyConfigForPseudoLocale(original_value->config, method);
 
-  ResourceConfigValue* newConfigValue =
-      entry->findOrCreateValue(configWithAccent, originalValue->product);
-  if (!newConfigValue->value) {
+  ResourceConfigValue* new_config_value =
+      entry->FindOrCreateValue(config_with_accent, original_value->product);
+  if (!new_config_value->value) {
     // Only use auto-generated pseudo-localization if none is defined.
-    newConfigValue->value = std::move(localizedValue);
+    new_config_value->value = std::move(localized_value);
   }
 }
 
@@ -222,29 +228,30 @@ void pseudolocalizeIfNeeded(const Pseudolocalizer::Method method,
  * default locale)
  * and is translateable.
  */
-static bool isPseudolocalizable(ResourceConfigValue* configValue) {
-  const int diff = configValue->config.diff(ConfigDescription::defaultConfig());
+static bool IsPseudolocalizable(ResourceConfigValue* config_value) {
+  const int diff =
+      config_value->config.diff(ConfigDescription::DefaultConfig());
   if (diff & ConfigDescription::CONFIG_LOCALE) {
     return false;
   }
-  return configValue->value->isTranslateable();
+  return config_value->value->IsTranslateable();
 }
 
 }  // namespace
 
-bool PseudolocaleGenerator::consume(IAaptContext* context,
+bool PseudolocaleGenerator::Consume(IAaptContext* context,
                                     ResourceTable* table) {
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
         std::vector<ResourceConfigValue*> values =
-            entry->findValuesIf(isPseudolocalizable);
+            entry->FindValuesIf(IsPseudolocalizable);
 
         for (ResourceConfigValue* value : values) {
-          pseudolocalizeIfNeeded(Pseudolocalizer::Method::kAccent, value,
-                                 &table->stringPool, entry.get());
-          pseudolocalizeIfNeeded(Pseudolocalizer::Method::kBidi, value,
-                                 &table->stringPool, entry.get());
+          PseudolocalizeIfNeeded(Pseudolocalizer::Method::kAccent, value,
+                                 &table->string_pool, entry.get());
+          PseudolocalizeIfNeeded(Pseudolocalizer::Method::kBidi, value,
+                                 &table->string_pool, entry.get());
         }
       }
     }

@@ -15,15 +15,19 @@
  */
 
 #include "XmlDom.h"
-#include "XmlPullParser.h"
-#include "util/Util.h"
+
+#include <expat.h>
 
 #include <cassert>
-#include <expat.h>
 #include <memory>
 #include <stack>
 #include <string>
 #include <tuple>
+
+#include "android-base/logging.h"
+
+#include "XmlPullParser.h"
+#include "util/Util.h"
 
 namespace aapt {
 namespace xml {
@@ -31,459 +35,476 @@ namespace xml {
 constexpr char kXmlNamespaceSep = 1;
 
 struct Stack {
-    std::unique_ptr<xml::Node> root;
-    std::stack<xml::Node*> nodeStack;
-    std::string pendingComment;
+  std::unique_ptr<xml::Node> root;
+  std::stack<xml::Node*> node_stack;
+  std::string pending_comment;
 };
 
 /**
  * Extracts the namespace and name of an expanded element or attribute name.
  */
-static void splitName(const char* name, std::string* outNs, std::string* outName) {
-    const char* p = name;
-    while (*p != 0 && *p != kXmlNamespaceSep) {
-        p++;
-    }
+static void SplitName(const char* name, std::string* out_ns,
+                      std::string* out_name) {
+  const char* p = name;
+  while (*p != 0 && *p != kXmlNamespaceSep) {
+    p++;
+  }
 
-    if (*p == 0) {
-        outNs->clear();
-        *outName = StringPiece(name).toString();
-    } else {
-        *outNs = StringPiece(name, (p - name)).toString();
-        *outName = StringPiece(p + 1).toString();
-    }
+  if (*p == 0) {
+    out_ns->clear();
+    *out_name = StringPiece(name).ToString();
+  } else {
+    *out_ns = StringPiece(name, (p - name)).ToString();
+    *out_name = StringPiece(p + 1).ToString();
+  }
 }
 
-static void addToStack(Stack* stack, XML_Parser parser, std::unique_ptr<Node> node) {
-    node->lineNumber = XML_GetCurrentLineNumber(parser);
-    node->columnNumber = XML_GetCurrentColumnNumber(parser);
+static void AddToStack(Stack* stack, XML_Parser parser,
+                       std::unique_ptr<Node> node) {
+  node->line_number = XML_GetCurrentLineNumber(parser);
+  node->column_number = XML_GetCurrentColumnNumber(parser);
 
-    Node* thisNode = node.get();
-    if (!stack->nodeStack.empty()) {
-        stack->nodeStack.top()->addChild(std::move(node));
-    } else {
-        stack->root = std::move(node);
-    }
+  Node* this_node = node.get();
+  if (!stack->node_stack.empty()) {
+    stack->node_stack.top()->AddChild(std::move(node));
+  } else {
+    stack->root = std::move(node);
+  }
 
-    if (!nodeCast<Text>(thisNode)) {
-        stack->nodeStack.push(thisNode);
-    }
+  if (!NodeCast<Text>(this_node)) {
+    stack->node_stack.push(this_node);
+  }
 }
 
-static void XMLCALL startNamespaceHandler(void* userData, const char* prefix, const char* uri) {
-    XML_Parser parser = reinterpret_cast<XML_Parser>(userData);
-    Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
+static void XMLCALL StartNamespaceHandler(void* user_data, const char* prefix,
+                                          const char* uri) {
+  XML_Parser parser = reinterpret_cast<XML_Parser>(user_data);
+  Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
 
-    std::unique_ptr<Namespace> ns = util::make_unique<Namespace>();
-    if (prefix) {
-        ns->namespacePrefix = StringPiece(prefix).toString();
-    }
+  std::unique_ptr<Namespace> ns = util::make_unique<Namespace>();
+  if (prefix) {
+    ns->namespace_prefix = StringPiece(prefix).ToString();
+  }
 
-    if (uri) {
-        ns->namespaceUri = StringPiece(uri).toString();
-    }
+  if (uri) {
+    ns->namespace_uri = StringPiece(uri).ToString();
+  }
 
-    addToStack(stack, parser, std::move(ns));
+  AddToStack(stack, parser, std::move(ns));
 }
 
-static void XMLCALL endNamespaceHandler(void* userData, const char* prefix) {
-    XML_Parser parser = reinterpret_cast<XML_Parser>(userData);
-    Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
+static void XMLCALL EndNamespaceHandler(void* user_data, const char* prefix) {
+  XML_Parser parser = reinterpret_cast<XML_Parser>(user_data);
+  Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
 
-    assert(!stack->nodeStack.empty());
-    stack->nodeStack.pop();
+  CHECK(!stack->node_stack.empty());
+  stack->node_stack.pop();
 }
 
-static bool lessAttribute(const Attribute& lhs, const Attribute& rhs) {
-    return std::tie(lhs.namespaceUri, lhs.name, lhs.value) <
-            std::tie(rhs.namespaceUri, rhs.name, rhs.value);
+static bool less_attribute(const Attribute& lhs, const Attribute& rhs) {
+  return std::tie(lhs.namespace_uri, lhs.name, lhs.value) <
+         std::tie(rhs.namespace_uri, rhs.name, rhs.value);
 }
 
-static void XMLCALL startElementHandler(void* userData, const char* name, const char** attrs) {
-    XML_Parser parser = reinterpret_cast<XML_Parser>(userData);
-    Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
+static void XMLCALL StartElementHandler(void* user_data, const char* name,
+                                        const char** attrs) {
+  XML_Parser parser = reinterpret_cast<XML_Parser>(user_data);
+  Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
 
-    std::unique_ptr<Element> el = util::make_unique<Element>();
-    splitName(name, &el->namespaceUri, &el->name);
+  std::unique_ptr<Element> el = util::make_unique<Element>();
+  SplitName(name, &el->namespace_uri, &el->name);
 
-    while (*attrs) {
-        Attribute attribute;
-        splitName(*attrs++, &attribute.namespaceUri, &attribute.name);
-        attribute.value = StringPiece(*attrs++).toString();
+  while (*attrs) {
+    Attribute attribute;
+    SplitName(*attrs++, &attribute.namespace_uri, &attribute.name);
+    attribute.value = StringPiece(*attrs++).ToString();
 
-        // Insert in sorted order.
-        auto iter = std::lower_bound(el->attributes.begin(), el->attributes.end(), attribute,
-                                     lessAttribute);
-        el->attributes.insert(iter, std::move(attribute));
-    }
+    // Insert in sorted order.
+    auto iter = std::lower_bound(el->attributes.begin(), el->attributes.end(),
+                                 attribute, less_attribute);
+    el->attributes.insert(iter, std::move(attribute));
+  }
 
-    el->comment = std::move(stack->pendingComment);
-    addToStack(stack, parser, std::move(el));
+  el->comment = std::move(stack->pending_comment);
+  AddToStack(stack, parser, std::move(el));
 }
 
-static void XMLCALL endElementHandler(void* userData, const char* name) {
-    XML_Parser parser = reinterpret_cast<XML_Parser>(userData);
-    Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
+static void XMLCALL EndElementHandler(void* user_data, const char* name) {
+  XML_Parser parser = reinterpret_cast<XML_Parser>(user_data);
+  Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
 
-    assert(!stack->nodeStack.empty());
-    //stack->nodeStack.top()->comment = std::move(stack->pendingComment);
-    stack->nodeStack.pop();
+  CHECK(!stack->node_stack.empty());
+  // stack->nodeStack.top()->comment = std::move(stack->pendingComment);
+  stack->node_stack.pop();
 }
 
-static void XMLCALL characterDataHandler(void* userData, const char* s, int len) {
-    XML_Parser parser = reinterpret_cast<XML_Parser>(userData);
-    Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
+static void XMLCALL CharacterDataHandler(void* user_data, const char* s,
+                                         int len) {
+  XML_Parser parser = reinterpret_cast<XML_Parser>(user_data);
+  Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
 
-    if (!s || len <= 0) {
+  if (!s || len <= 0) {
+    return;
+  }
+
+  // See if we can just append the text to a previous text node.
+  if (!stack->node_stack.empty()) {
+    Node* currentParent = stack->node_stack.top();
+    if (!currentParent->children.empty()) {
+      Node* last_child = currentParent->children.back().get();
+      if (Text* text = NodeCast<Text>(last_child)) {
+        text->text += StringPiece(s, len).ToString();
         return;
+      }
     }
+  }
 
-    // See if we can just append the text to a previous text node.
-    if (!stack->nodeStack.empty()) {
-        Node* currentParent = stack->nodeStack.top();
-        if (!currentParent->children.empty()) {
-            Node* lastChild = currentParent->children.back().get();
-            if (Text* text = nodeCast<Text>(lastChild)) {
-                text->text += StringPiece(s, len).toString();
-                return;
-            }
-        }
-    }
-
-    std::unique_ptr<Text> text = util::make_unique<Text>();
-    text->text = StringPiece(s, len).toString();
-    addToStack(stack, parser, std::move(text));
+  std::unique_ptr<Text> text = util::make_unique<Text>();
+  text->text = StringPiece(s, len).ToString();
+  AddToStack(stack, parser, std::move(text));
 }
 
-static void XMLCALL commentDataHandler(void* userData, const char* comment) {
-    XML_Parser parser = reinterpret_cast<XML_Parser>(userData);
-    Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
+static void XMLCALL CommentDataHandler(void* user_data, const char* comment) {
+  XML_Parser parser = reinterpret_cast<XML_Parser>(user_data);
+  Stack* stack = reinterpret_cast<Stack*>(XML_GetUserData(parser));
 
-    if (!stack->pendingComment.empty()) {
-        stack->pendingComment += '\n';
-    }
-    stack->pendingComment += comment;
+  if (!stack->pending_comment.empty()) {
+    stack->pending_comment += '\n';
+  }
+  stack->pending_comment += comment;
 }
 
-std::unique_ptr<XmlResource> inflate(std::istream* in, IDiagnostics* diag, const Source& source) {
-    Stack stack;
-
-    XML_Parser parser = XML_ParserCreateNS(nullptr, kXmlNamespaceSep);
-    XML_SetUserData(parser, &stack);
-    XML_UseParserAsHandlerArg(parser);
-    XML_SetElementHandler(parser, startElementHandler, endElementHandler);
-    XML_SetNamespaceDeclHandler(parser, startNamespaceHandler, endNamespaceHandler);
-    XML_SetCharacterDataHandler(parser, characterDataHandler);
-    XML_SetCommentHandler(parser, commentDataHandler);
-
-    char buffer[1024];
-    while (!in->eof()) {
-        in->read(buffer, sizeof(buffer) / sizeof(buffer[0]));
-        if (in->bad() && !in->eof()) {
-            stack.root = {};
-            diag->error(DiagMessage(source) << strerror(errno));
-            break;
-        }
-
-        if (XML_Parse(parser, buffer, in->gcount(), in->eof()) == XML_STATUS_ERROR) {
-            stack.root = {};
-            diag->error(DiagMessage(source.withLine(XML_GetCurrentLineNumber(parser)))
-                        << XML_ErrorString(XML_GetErrorCode(parser)));
-            break;
-        }
-    }
-
-    XML_ParserFree(parser);
-    if (stack.root) {
-        return util::make_unique<XmlResource>(ResourceFile{ {}, {}, source }, std::move(stack.root));
-    }
-    return {};
-}
-
-static void copyAttributes(Element* el, android::ResXMLParser* parser) {
-    const size_t attrCount = parser->getAttributeCount();
-    if (attrCount > 0) {
-        el->attributes.reserve(attrCount);
-        for (size_t i = 0; i < attrCount; i++) {
-            Attribute attr;
-            size_t len;
-            const char16_t* str16 = parser->getAttributeNamespace(i, &len);
-            if (str16) {
-                attr.namespaceUri = util::utf16ToUtf8(StringPiece16(str16, len));
-            }
-
-            str16 = parser->getAttributeName(i, &len);
-            if (str16) {
-                attr.name = util::utf16ToUtf8(StringPiece16(str16, len));
-            }
-
-            str16 = parser->getAttributeStringValue(i, &len);
-            if (str16) {
-                attr.value = util::utf16ToUtf8(StringPiece16(str16, len));
-            }
-            el->attributes.push_back(std::move(attr));
-        }
-    }
-}
-
-std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnostics* diag,
+std::unique_ptr<XmlResource> Inflate(std::istream* in, IDiagnostics* diag,
                                      const Source& source) {
-    // We import the android namespace because on Windows NO_ERROR is a macro, not an enum, which
-    // causes errors when qualifying it with android::
-    using namespace android;
+  Stack stack;
 
-    std::unique_ptr<Node> root;
-    std::stack<Node*> nodeStack;
+  XML_Parser parser = XML_ParserCreateNS(nullptr, kXmlNamespaceSep);
+  XML_SetUserData(parser, &stack);
+  XML_UseParserAsHandlerArg(parser);
+  XML_SetElementHandler(parser, StartElementHandler, EndElementHandler);
+  XML_SetNamespaceDeclHandler(parser, StartNamespaceHandler,
+                              EndNamespaceHandler);
+  XML_SetCharacterDataHandler(parser, CharacterDataHandler);
+  XML_SetCommentHandler(parser, CommentDataHandler);
 
-    ResXMLTree tree;
-    if (tree.setTo(data, dataLen) != NO_ERROR) {
-        return {};
+  char buffer[1024];
+  while (!in->eof()) {
+    in->read(buffer, sizeof(buffer) / sizeof(buffer[0]));
+    if (in->bad() && !in->eof()) {
+      stack.root = {};
+      diag->Error(DiagMessage(source) << strerror(errno));
+      break;
     }
 
-    ResXMLParser::event_code_t code;
-    while ((code = tree.next()) != ResXMLParser::BAD_DOCUMENT &&
-            code != ResXMLParser::END_DOCUMENT) {
-        std::unique_ptr<Node> newNode;
-        switch (code) {
-            case ResXMLParser::START_NAMESPACE: {
-                std::unique_ptr<Namespace> node = util::make_unique<Namespace>();
-                size_t len;
-                const char16_t* str16 = tree.getNamespacePrefix(&len);
-                if (str16) {
-                    node->namespacePrefix = util::utf16ToUtf8(StringPiece16(str16, len));
-                }
+    if (XML_Parse(parser, buffer, in->gcount(), in->eof()) ==
+        XML_STATUS_ERROR) {
+      stack.root = {};
+      diag->Error(DiagMessage(source.WithLine(XML_GetCurrentLineNumber(parser)))
+                  << XML_ErrorString(XML_GetErrorCode(parser)));
+      break;
+    }
+  }
 
-                str16 = tree.getNamespaceUri(&len);
-                if (str16) {
-                    node->namespaceUri = util::utf16ToUtf8(StringPiece16(str16, len));
-                }
-                newNode = std::move(node);
-                break;
-            }
+  XML_ParserFree(parser);
+  if (stack.root) {
+    return util::make_unique<XmlResource>(ResourceFile{{}, {}, source},
+                                          std::move(stack.root));
+  }
+  return {};
+}
 
-            case ResXMLParser::START_TAG: {
-                std::unique_ptr<Element> node = util::make_unique<Element>();
-                size_t len;
-                const char16_t* str16 = tree.getElementNamespace(&len);
-                if (str16) {
-                    node->namespaceUri = util::utf16ToUtf8(StringPiece16(str16, len));
-                }
+static void CopyAttributes(Element* el, android::ResXMLParser* parser) {
+  const size_t attr_count = parser->getAttributeCount();
+  if (attr_count > 0) {
+    el->attributes.reserve(attr_count);
+    for (size_t i = 0; i < attr_count; i++) {
+      Attribute attr;
+      size_t len;
+      const char16_t* str16 = parser->getAttributeNamespace(i, &len);
+      if (str16) {
+        attr.namespace_uri = util::Utf16ToUtf8(StringPiece16(str16, len));
+      }
 
-                str16 = tree.getElementName(&len);
-                if (str16) {
-                    node->name = util::utf16ToUtf8(StringPiece16(str16, len));
-                }
+      str16 = parser->getAttributeName(i, &len);
+      if (str16) {
+        attr.name = util::Utf16ToUtf8(StringPiece16(str16, len));
+      }
 
-                copyAttributes(node.get(), &tree);
+      str16 = parser->getAttributeStringValue(i, &len);
+      if (str16) {
+        attr.value = util::Utf16ToUtf8(StringPiece16(str16, len));
+      }
+      el->attributes.push_back(std::move(attr));
+    }
+  }
+}
 
-                newNode = std::move(node);
-                break;
-            }
+std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len,
+                                     IDiagnostics* diag, const Source& source) {
+  // We import the android namespace because on Windows NO_ERROR is a macro, not
+  // an enum, which
+  // causes errors when qualifying it with android::
+  using namespace android;
 
-            case ResXMLParser::TEXT: {
-                std::unique_ptr<Text> node = util::make_unique<Text>();
-                size_t len;
-                const char16_t* str16 = tree.getText(&len);
-                if (str16) {
-                    node->text = util::utf16ToUtf8(StringPiece16(str16, len));
-                }
-                newNode = std::move(node);
-                break;
-            }
+  std::unique_ptr<Node> root;
+  std::stack<Node*> node_stack;
 
-            case ResXMLParser::END_NAMESPACE:
-            case ResXMLParser::END_TAG:
-                assert(!nodeStack.empty());
-                nodeStack.pop();
-                break;
+  ResXMLTree tree;
+  if (tree.setTo(data, data_len) != NO_ERROR) {
+    return {};
+  }
 
-            default:
-                assert(false);
-                break;
+  ResXMLParser::event_code_t code;
+  while ((code = tree.next()) != ResXMLParser::BAD_DOCUMENT &&
+         code != ResXMLParser::END_DOCUMENT) {
+    std::unique_ptr<Node> new_node;
+    switch (code) {
+      case ResXMLParser::START_NAMESPACE: {
+        std::unique_ptr<Namespace> node = util::make_unique<Namespace>();
+        size_t len;
+        const char16_t* str16 = tree.getNamespacePrefix(&len);
+        if (str16) {
+          node->namespace_prefix = util::Utf16ToUtf8(StringPiece16(str16, len));
         }
 
-        if (newNode) {
-            newNode->lineNumber = tree.getLineNumber();
-
-            Node* thisNode = newNode.get();
-            if (!root) {
-                assert(nodeStack.empty());
-                root = std::move(newNode);
-            } else {
-                assert(!nodeStack.empty());
-                nodeStack.top()->addChild(std::move(newNode));
-            }
-
-            if (!nodeCast<Text>(thisNode)) {
-                nodeStack.push(thisNode);
-            }
+        str16 = tree.getNamespaceUri(&len);
+        if (str16) {
+          node->namespace_uri = util::Utf16ToUtf8(StringPiece16(str16, len));
         }
-    }
-    return util::make_unique<XmlResource>(ResourceFile{}, std::move(root));
-}
+        new_node = std::move(node);
+        break;
+      }
 
-std::unique_ptr<Node> Namespace::clone() {
-    auto ns = util::make_unique<Namespace>();
-    ns->comment = comment;
-    ns->lineNumber = lineNumber;
-    ns->columnNumber = columnNumber;
-    ns->namespacePrefix = namespacePrefix;
-    ns->namespaceUri = namespaceUri;
-
-    ns->children.reserve(children.size());
-    for (const std::unique_ptr<xml::Node>& child : children) {
-        ns->addChild(child->clone());
-    }
-    return std::move(ns);
-}
-
-Element* findRootElement(XmlResource* doc) {
-    return findRootElement(doc->root.get());
-}
-
-Element* findRootElement(Node* node) {
-    if (!node) {
-        return nullptr;
-    }
-
-    Element* el = nullptr;
-    while ((el = nodeCast<Element>(node)) == nullptr) {
-        if (node->children.empty()) {
-            return nullptr;
+      case ResXMLParser::START_TAG: {
+        std::unique_ptr<Element> node = util::make_unique<Element>();
+        size_t len;
+        const char16_t* str16 = tree.getElementNamespace(&len);
+        if (str16) {
+          node->namespace_uri = util::Utf16ToUtf8(StringPiece16(str16, len));
         }
-        // We are looking for the first element, and namespaces can only have one child.
-        node = node->children.front().get();
-    }
-    return el;
-}
 
-void Node::addChild(std::unique_ptr<Node> child) {
-    child->parent = this;
-    children.push_back(std::move(child));
-}
-
-Attribute* Element::findAttribute(const StringPiece& ns, const StringPiece& name) {
-    for (auto& attr : attributes) {
-        if (ns == attr.namespaceUri && name == attr.name) {
-            return &attr;
+        str16 = tree.getElementName(&len);
+        if (str16) {
+          node->name = util::Utf16ToUtf8(StringPiece16(str16, len));
         }
+
+        CopyAttributes(node.get(), &tree);
+
+        new_node = std::move(node);
+        break;
+      }
+
+      case ResXMLParser::TEXT: {
+        std::unique_ptr<Text> node = util::make_unique<Text>();
+        size_t len;
+        const char16_t* str16 = tree.getText(&len);
+        if (str16) {
+          node->text = util::Utf16ToUtf8(StringPiece16(str16, len));
+        }
+        new_node = std::move(node);
+        break;
+      }
+
+      case ResXMLParser::END_NAMESPACE:
+      case ResXMLParser::END_TAG:
+        CHECK(!node_stack.empty());
+        node_stack.pop();
+        break;
+
+      default:
+        LOG(FATAL) << "unhandled XML chunk type";
+        break;
     }
+
+    if (new_node) {
+      new_node->line_number = tree.getLineNumber();
+
+      Node* this_node = new_node.get();
+      if (!root) {
+        CHECK(node_stack.empty()) << "node stack should be empty";
+        root = std::move(new_node);
+      } else {
+        CHECK(!node_stack.empty()) << "node stack should not be empty";
+        node_stack.top()->AddChild(std::move(new_node));
+      }
+
+      if (!NodeCast<Text>(this_node)) {
+        node_stack.push(this_node);
+      }
+    }
+  }
+  return util::make_unique<XmlResource>(ResourceFile{}, std::move(root));
+}
+
+std::unique_ptr<Node> Namespace::Clone() {
+  auto ns = util::make_unique<Namespace>();
+  ns->comment = comment;
+  ns->line_number = line_number;
+  ns->column_number = column_number;
+  ns->namespace_prefix = namespace_prefix;
+  ns->namespace_uri = namespace_uri;
+
+  ns->children.reserve(children.size());
+  for (const std::unique_ptr<xml::Node>& child : children) {
+    ns->AddChild(child->Clone());
+  }
+  return std::move(ns);
+}
+
+Element* FindRootElement(XmlResource* doc) {
+  return FindRootElement(doc->root.get());
+}
+
+Element* FindRootElement(Node* node) {
+  if (!node) {
     return nullptr;
-}
+  }
 
-Element* Element::findChild(const StringPiece& ns, const StringPiece& name) {
-    return findChildWithAttribute(ns, name, {}, {}, {});
-}
-
-Element* Element::findChildWithAttribute(const StringPiece& ns, const StringPiece& name,
-                                         const StringPiece& attrNs, const StringPiece& attrName,
-                                         const StringPiece& attrValue) {
-    for (auto& childNode : children) {
-        Node* child = childNode.get();
-        while (nodeCast<Namespace>(child)) {
-            if (child->children.empty()) {
-                break;
-            }
-            child = child->children[0].get();
-        }
-
-        if (Element* el = nodeCast<Element>(child)) {
-            if (ns == el->namespaceUri && name == el->name) {
-                if (attrNs.empty() && attrName.empty()) {
-                    return el;
-                }
-
-                Attribute* attr = el->findAttribute(attrNs, attrName);
-                if (attr && attrValue == attr->value) {
-                    return el;
-                }
-            }
-        }
+  Element* el = nullptr;
+  while ((el = NodeCast<Element>(node)) == nullptr) {
+    if (node->children.empty()) {
+      return nullptr;
     }
-    return nullptr;
+    // We are looking for the first element, and namespaces can only have one
+    // child.
+    node = node->children.front().get();
+  }
+  return el;
 }
 
-std::vector<Element*> Element::getChildElements() {
-    std::vector<Element*> elements;
-    for (auto& childNode : children) {
-        Node* child = childNode.get();
-        while (nodeCast<Namespace>(child)) {
-            if (child->children.empty()) {
-                break;
-            }
-            child = child->children[0].get();
-        }
+void Node::AddChild(std::unique_ptr<Node> child) {
+  child->parent = this;
+  children.push_back(std::move(child));
+}
 
-        if (Element* el = nodeCast<Element>(child)) {
-            elements.push_back(el);
-        }
+Attribute* Element::FindAttribute(const StringPiece& ns,
+                                  const StringPiece& name) {
+  for (auto& attr : attributes) {
+    if (ns == attr.namespace_uri && name == attr.name) {
+      return &attr;
     }
-    return elements;
+  }
+  return nullptr;
 }
 
-std::unique_ptr<Node> Element::clone() {
-    auto el = util::make_unique<Element>();
-    el->comment = comment;
-    el->lineNumber = lineNumber;
-    el->columnNumber = columnNumber;
-    el->name = name;
-    el->namespaceUri = namespaceUri;
+Element* Element::FindChild(const StringPiece& ns, const StringPiece& name) {
+  return FindChildWithAttribute(ns, name, {}, {}, {});
+}
 
-    el->attributes.reserve(attributes.size());
-    for (xml::Attribute& attr : attributes) {
-        // Don't copy compiled values or attributes.
-        el->attributes.push_back(xml::Attribute{ attr.namespaceUri, attr.name, attr.value });
+Element* Element::FindChildWithAttribute(const StringPiece& ns,
+                                         const StringPiece& name,
+                                         const StringPiece& attr_ns,
+                                         const StringPiece& attr_name,
+                                         const StringPiece& attr_value) {
+  for (auto& child_node : children) {
+    Node* child = child_node.get();
+    while (NodeCast<Namespace>(child)) {
+      if (child->children.empty()) {
+        break;
+      }
+      child = child->children[0].get();
     }
 
-    el->children.reserve(children.size());
-    for (const std::unique_ptr<xml::Node>& child : children) {
-        el->addChild(child->clone());
+    if (Element* el = NodeCast<Element>(child)) {
+      if (ns == el->namespace_uri && name == el->name) {
+        if (attr_ns.empty() && attr_name.empty()) {
+          return el;
+        }
+
+        Attribute* attr = el->FindAttribute(attr_ns, attr_name);
+        if (attr && attr_value == attr->value) {
+          return el;
+        }
+      }
     }
-    return std::move(el);
+  }
+  return nullptr;
 }
 
-std::unique_ptr<Node> Text::clone() {
-    auto t = util::make_unique<Text>();
-    t->comment = comment;
-    t->lineNumber = lineNumber;
-    t->columnNumber = columnNumber;
-    t->text = text;
-    return std::move(t);
+std::vector<Element*> Element::GetChildElements() {
+  std::vector<Element*> elements;
+  for (auto& child_node : children) {
+    Node* child = child_node.get();
+    while (NodeCast<Namespace>(child)) {
+      if (child->children.empty()) {
+        break;
+      }
+      child = child->children[0].get();
+    }
+
+    if (Element* el = NodeCast<Element>(child)) {
+      elements.push_back(el);
+    }
+  }
+  return elements;
 }
 
-void PackageAwareVisitor::visit(Namespace* ns) {
-   bool added = false;
-   if (Maybe<ExtractedPackage> maybePackage = extractPackageFromNamespace(ns->namespaceUri)) {
-       ExtractedPackage& package = maybePackage.value();
-       mPackageDecls.push_back(PackageDecl{ ns->namespacePrefix, std::move(package) });
-       added = true;
-   }
+std::unique_ptr<Node> Element::Clone() {
+  auto el = util::make_unique<Element>();
+  el->comment = comment;
+  el->line_number = line_number;
+  el->column_number = column_number;
+  el->name = name;
+  el->namespace_uri = namespace_uri;
 
-   Visitor::visit(ns);
+  el->attributes.reserve(attributes.size());
+  for (xml::Attribute& attr : attributes) {
+    // Don't copy compiled values or attributes.
+    el->attributes.push_back(
+        xml::Attribute{attr.namespace_uri, attr.name, attr.value});
+  }
 
-   if (added) {
-       mPackageDecls.pop_back();
-   }
+  el->children.reserve(children.size());
+  for (const std::unique_ptr<xml::Node>& child : children) {
+    el->AddChild(child->Clone());
+  }
+  return std::move(el);
 }
 
-Maybe<ExtractedPackage> PackageAwareVisitor::transformPackageAlias(
-       const StringPiece& alias, const StringPiece& localPackage) const {
-   if (alias.empty()) {
-       return ExtractedPackage{ localPackage.toString(), false /* private */ };
-   }
-
-   const auto rend = mPackageDecls.rend();
-   for (auto iter = mPackageDecls.rbegin(); iter != rend; ++iter) {
-       if (alias == iter->prefix) {
-           if (iter->package.package.empty()) {
-               return ExtractedPackage{ localPackage.toString(),
-                                              iter->package.privateNamespace };
-           }
-           return iter->package;
-       }
-   }
-   return {};
+std::unique_ptr<Node> Text::Clone() {
+  auto t = util::make_unique<Text>();
+  t->comment = comment;
+  t->line_number = line_number;
+  t->column_number = column_number;
+  t->text = text;
+  return std::move(t);
 }
 
-} // namespace xml
-} // namespace aapt
+void PackageAwareVisitor::Visit(Namespace* ns) {
+  bool added = false;
+  if (Maybe<ExtractedPackage> maybe_package =
+          ExtractPackageFromNamespace(ns->namespace_uri)) {
+    ExtractedPackage& package = maybe_package.value();
+    package_decls_.push_back(
+        PackageDecl{ns->namespace_prefix, std::move(package)});
+    added = true;
+  }
+
+  Visitor::Visit(ns);
+
+  if (added) {
+    package_decls_.pop_back();
+  }
+}
+
+Maybe<ExtractedPackage> PackageAwareVisitor::TransformPackageAlias(
+    const StringPiece& alias, const StringPiece& local_package) const {
+  if (alias.empty()) {
+    return ExtractedPackage{local_package.ToString(), false /* private */};
+  }
+
+  const auto rend = package_decls_.rend();
+  for (auto iter = package_decls_.rbegin(); iter != rend; ++iter) {
+    if (alias == iter->prefix) {
+      if (iter->package.package.empty()) {
+        return ExtractedPackage{local_package.ToString(),
+                                iter->package.private_namespace};
+      }
+      return iter->package;
+    }
+  }
+  return {};
+}
+
+}  // namespace xml
+}  // namespace aapt

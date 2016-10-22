@@ -15,6 +15,7 @@
  */
 
 #include "compile/Png.h"
+
 #include "io/Io.h"
 #include "util/StringPiece.h"
 
@@ -39,7 +40,7 @@ enum PngChunkTypes {
   kPngChunksRGB = u32(115, 82, 71, 66),
 };
 
-static uint32_t peek32LE(const char* data) {
+static uint32_t Peek32LE(const char* data) {
   uint32_t word = ((uint32_t)data[0]) & 0x000000ff;
   word <<= 8;
   word |= ((uint32_t)data[1]) & 0x000000ff;
@@ -50,7 +51,7 @@ static uint32_t peek32LE(const char* data) {
   return word;
 }
 
-static bool isPngChunkWhitelisted(uint32_t type) {
+static bool IsPngChunkWhitelisted(uint32_t type) {
   switch (type) {
     case kPngChunkIHDR:
     case kPngChunkIDAT:
@@ -64,93 +65,93 @@ static bool isPngChunkWhitelisted(uint32_t type) {
   }
 }
 
-PngChunkFilter::PngChunkFilter(const StringPiece& data) : mData(data) {
-  if (util::stringStartsWith(mData, kPngSignature)) {
-    mWindowStart = 0;
-    mWindowEnd = strlen(kPngSignature);
+PngChunkFilter::PngChunkFilter(const StringPiece& data) : data_(data) {
+  if (util::StartsWith(data_, kPngSignature)) {
+    window_start_ = 0;
+    window_end_ = strlen(kPngSignature);
   } else {
-    mError = true;
+    error_ = true;
   }
 }
 
-bool PngChunkFilter::consumeWindow(const void** buffer, int* len) {
-  if (mWindowStart != mWindowEnd) {
+bool PngChunkFilter::ConsumeWindow(const void** buffer, int* len) {
+  if (window_start_ != window_end_) {
     // We have bytes to give from our window.
-    const int bytesRead = (int)(mWindowEnd - mWindowStart);
-    *buffer = mData.data() + mWindowStart;
-    *len = bytesRead;
-    mWindowStart = mWindowEnd;
+    const int bytes_read = (int)(window_end_ - window_start_);
+    *buffer = data_.data() + window_start_;
+    *len = bytes_read;
+    window_start_ = window_end_;
     return true;
   }
   return false;
 }
 
 bool PngChunkFilter::Next(const void** buffer, int* len) {
-  if (mError) {
+  if (error_) {
     return false;
   }
 
   // In case BackUp was called, we must consume the window.
-  if (consumeWindow(buffer, len)) {
+  if (ConsumeWindow(buffer, len)) {
     return true;
   }
 
   // Advance the window as far as possible (until we meet a chunk that
   // we want to strip).
-  while (mWindowEnd < mData.size()) {
+  while (window_end_ < data_.size()) {
     // Chunk length (4 bytes) + type (4 bytes) + crc32 (4 bytes) = 12 bytes.
     const size_t kMinChunkHeaderSize = 3 * sizeof(uint32_t);
 
     // Is there enough room for a chunk header?
-    if (mData.size() - mWindowStart < kMinChunkHeaderSize) {
-      mError = true;
+    if (data_.size() - window_start_ < kMinChunkHeaderSize) {
+      error_ = true;
       return false;
     }
 
     // Verify the chunk length.
-    const uint32_t chunkLen = peek32LE(mData.data() + mWindowEnd);
-    if (((uint64_t)chunkLen) + ((uint64_t)mWindowEnd) + sizeof(uint32_t) >
-        mData.size()) {
+    const uint32_t chunk_len = Peek32LE(data_.data() + window_end_);
+    if (((uint64_t)chunk_len) + ((uint64_t)window_end_) + sizeof(uint32_t) >
+        data_.size()) {
       // Overflow.
-      mError = true;
+      error_ = true;
       return false;
     }
 
     // Do we strip this chunk?
-    const uint32_t chunkType =
-        peek32LE(mData.data() + mWindowEnd + sizeof(uint32_t));
-    if (isPngChunkWhitelisted(chunkType)) {
+    const uint32_t chunk_type =
+        Peek32LE(data_.data() + window_end_ + sizeof(uint32_t));
+    if (IsPngChunkWhitelisted(chunk_type)) {
       // Advance the window to include this chunk.
-      mWindowEnd += kMinChunkHeaderSize + chunkLen;
+      window_end_ += kMinChunkHeaderSize + chunk_len;
     } else {
       // We want to strip this chunk. If we accumulated a window,
       // we must return the window now.
-      if (mWindowStart != mWindowEnd) {
+      if (window_start_ != window_end_) {
         break;
       }
 
       // The window is empty, so we can advance past this chunk
       // and keep looking for the next good chunk,
-      mWindowEnd += kMinChunkHeaderSize + chunkLen;
-      mWindowStart = mWindowEnd;
+      window_end_ += kMinChunkHeaderSize + chunk_len;
+      window_start_ = window_end_;
     }
   }
 
-  if (consumeWindow(buffer, len)) {
+  if (ConsumeWindow(buffer, len)) {
     return true;
   }
   return false;
 }
 
 void PngChunkFilter::BackUp(int count) {
-  if (mError) {
+  if (error_) {
     return;
   }
-  mWindowStart -= count;
+  window_start_ -= count;
 }
 
 bool PngChunkFilter::Skip(int count) {
-  if (mError) {
+  if (error_) {
     return false;
   }
 

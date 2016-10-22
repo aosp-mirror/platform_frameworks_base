@@ -17,26 +17,26 @@
 #ifndef AAPT_DEBUG_H
 #define AAPT_DEBUG_H
 
+// Include for printf-like debugging.
+#include <iostream>
+
 #include "Resource.h"
 #include "ResourceTable.h"
 #include "xml/XmlDom.h"
 
-// Include for printf-like debugging.
-#include <iostream>
-
 namespace aapt {
 
 struct DebugPrintTableOptions {
-  bool showSources = false;
+  bool show_sources = false;
 };
 
 struct Debug {
-  static void printTable(ResourceTable* table,
+  static void PrintTable(ResourceTable* table,
                          const DebugPrintTableOptions& options = {});
-  static void printStyleGraph(ResourceTable* table,
-                              const ResourceName& targetStyle);
-  static void dumpHex(const void* data, size_t len);
-  static void dumpXml(xml::XmlResource* doc);
+  static void PrintStyleGraph(ResourceTable* table,
+                              const ResourceName& target_style);
+  static void DumpHex(const void* data, size_t len);
+  static void DumpXml(xml::XmlResource* doc);
 };
 
 }  // namespace aapt

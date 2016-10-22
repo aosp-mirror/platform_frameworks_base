@@ -15,44 +15,45 @@
  */
 
 #include "filter/ConfigFilter.h"
-#include "ConfigDescription.h"
 
-#include <androidfw/ResourceTypes.h>
+#include "androidfw/ResourceTypes.h"
+
+#include "ConfigDescription.h"
 
 namespace aapt {
 
-void AxisConfigFilter::addConfig(ConfigDescription config) {
-  uint32_t diffMask = ConfigDescription::defaultConfig().diff(config);
+void AxisConfigFilter::AddConfig(ConfigDescription config) {
+  uint32_t diff_mask = ConfigDescription::DefaultConfig().diff(config);
 
   // Ignore the version
-  diffMask &= ~android::ResTable_config::CONFIG_VERSION;
+  diff_mask &= ~android::ResTable_config::CONFIG_VERSION;
 
   // Ignore any densities. Those are best handled in --preferred-density
-  if ((diffMask & android::ResTable_config::CONFIG_DENSITY) != 0) {
+  if ((diff_mask & android::ResTable_config::CONFIG_DENSITY) != 0) {
     config.density = 0;
-    diffMask &= ~android::ResTable_config::CONFIG_DENSITY;
+    diff_mask &= ~android::ResTable_config::CONFIG_DENSITY;
   }
 
-  mConfigs.insert(std::make_pair(config, diffMask));
-  mConfigMask |= diffMask;
+  configs_.insert(std::make_pair(config, diff_mask));
+  config_mask_ |= diff_mask;
 }
 
-bool AxisConfigFilter::match(const ConfigDescription& config) const {
-  const uint32_t mask = ConfigDescription::defaultConfig().diff(config);
-  if ((mConfigMask & mask) == 0) {
+bool AxisConfigFilter::Match(const ConfigDescription& config) const {
+  const uint32_t mask = ConfigDescription::DefaultConfig().diff(config);
+  if ((config_mask_ & mask) == 0) {
     // The two configurations don't have any common axis.
     return true;
   }
 
-  uint32_t matchedAxis = 0;
-  for (const auto& entry : mConfigs) {
+  uint32_t matched_axis = 0;
+  for (const auto& entry : configs_) {
     const ConfigDescription& target = entry.first;
-    const uint32_t diffMask = entry.second;
+    const uint32_t diff_mask = entry.second;
     uint32_t diff = target.diff(config);
-    if ((diff & diffMask) == 0) {
+    if ((diff & diff_mask) == 0) {
       // Mark the axis that was matched.
-      matchedAxis |= diffMask;
-    } else if ((diff & diffMask) == android::ResTable_config::CONFIG_LOCALE) {
+      matched_axis |= diff_mask;
+    } else if ((diff & diff_mask) == android::ResTable_config::CONFIG_LOCALE) {
       // If the locales differ, but the languages are the same and
       // the locale we are matching only has a language specified,
       // we match.
@@ -60,10 +61,10 @@ bool AxisConfigFilter::match(const ConfigDescription& config) const {
           memcmp(config.language, target.language, sizeof(config.language)) ==
               0) {
         if (config.country[0] == 0) {
-          matchedAxis |= android::ResTable_config::CONFIG_LOCALE;
+          matched_axis |= android::ResTable_config::CONFIG_LOCALE;
         }
       }
-    } else if ((diff & diffMask) ==
+    } else if ((diff & diff_mask) ==
                android::ResTable_config::CONFIG_SMALLEST_SCREEN_SIZE) {
       // Special case if the smallest screen width doesn't match. We check that
       // the
@@ -71,11 +72,11 @@ bool AxisConfigFilter::match(const ConfigDescription& config) const {
       // specified.
       if (config.smallestScreenWidthDp != 0 &&
           config.smallestScreenWidthDp < target.smallestScreenWidthDp) {
-        matchedAxis |= android::ResTable_config::CONFIG_SMALLEST_SCREEN_SIZE;
+        matched_axis |= android::ResTable_config::CONFIG_SMALLEST_SCREEN_SIZE;
       }
     }
   }
-  return matchedAxis == (mConfigMask & mask);
+  return matched_axis == (config_mask_ & mask);
 }
 
 }  // namespace aapt

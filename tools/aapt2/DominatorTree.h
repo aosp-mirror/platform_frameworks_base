@@ -17,12 +17,12 @@
 #ifndef AAPT_DOMINATOR_TREE_H
 #define AAPT_DOMINATOR_TREE_H
 
-#include "ResourceTable.h"
-
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "ResourceTable.h"
 
 namespace aapt {
 
@@ -53,67 +53,67 @@ class DominatorTree {
   class Node {
    public:
     explicit Node(ResourceConfigValue* value = nullptr, Node* parent = nullptr)
-        : mValue(value), mParent(parent) {}
+        : value_(value), parent_(parent) {}
 
-    inline ResourceConfigValue* value() const { return mValue; }
+    inline ResourceConfigValue* value() const { return value_; }
 
-    inline Node* parent() const { return mParent; }
+    inline Node* parent() const { return parent_; }
 
-    inline bool isRootNode() const { return !mValue; }
+    inline bool is_root_node() const { return !value_; }
 
     inline const std::vector<std::unique_ptr<Node>>& children() const {
-      return mChildren;
+      return children_;
     }
 
-    bool tryAddChild(std::unique_ptr<Node> newChild);
+    bool TryAddChild(std::unique_ptr<Node> new_child);
 
    private:
-    bool addChild(std::unique_ptr<Node> newChild);
-    bool dominates(const Node* other) const;
+    bool AddChild(std::unique_ptr<Node> new_child);
+    bool Dominates(const Node* other) const;
 
-    ResourceConfigValue* mValue;
-    Node* mParent;
-    std::vector<std::unique_ptr<Node>> mChildren;
+    ResourceConfigValue* value_;
+    Node* parent_;
+    std::vector<std::unique_ptr<Node>> children_;
 
     DISALLOW_COPY_AND_ASSIGN(Node);
   };
 
   struct Visitor {
     virtual ~Visitor() = default;
-    virtual void visitTree(const std::string& product, Node* root) = 0;
+    virtual void VisitTree(const std::string& product, Node* root) = 0;
   };
 
   class BottomUpVisitor : public Visitor {
    public:
     virtual ~BottomUpVisitor() = default;
 
-    void visitTree(const std::string& product, Node* root) override {
+    void VisitTree(const std::string& product, Node* root) override {
       for (auto& child : root->children()) {
-        visitNode(child.get());
+        VisitNode(child.get());
       }
     }
 
-    virtual void visitConfig(Node* node) = 0;
+    virtual void VisitConfig(Node* node) = 0;
 
    private:
-    void visitNode(Node* node) {
+    void VisitNode(Node* node) {
       for (auto& child : node->children()) {
-        visitNode(child.get());
+        VisitNode(child.get());
       }
-      visitConfig(node);
+      VisitConfig(node);
     }
   };
 
-  void accept(Visitor* visitor);
+  void Accept(Visitor* visitor);
 
-  inline const std::map<std::string, Node>& getProductRoots() const {
-    return mProductRoots;
+  inline const std::map<std::string, Node>& product_roots() const {
+    return product_roots_;
   }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(DominatorTree);
 
-  std::map<std::string, Node> mProductRoots;
+  std::map<std::string, Node> product_roots_;
 };
 
 }  // namespace aapt

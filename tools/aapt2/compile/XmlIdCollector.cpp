@@ -15,55 +15,59 @@
  */
 
 #include "compile/XmlIdCollector.h"
-#include "ResourceUtils.h"
-#include "ResourceValues.h"
-#include "xml/XmlDom.h"
 
 #include <algorithm>
 #include <vector>
+
+#include "ResourceUtils.h"
+#include "ResourceValues.h"
+#include "xml/XmlDom.h"
 
 namespace aapt {
 
 namespace {
 
-static bool cmpName(const SourcedResourceName& a, const ResourceNameRef& b) {
+static bool cmp_name(const SourcedResourceName& a, const ResourceNameRef& b) {
   return a.name < b;
 }
 
 struct IdCollector : public xml::Visitor {
-  using xml::Visitor::visit;
+ public:
+  using xml::Visitor::Visit;
 
-  std::vector<SourcedResourceName>* mOutSymbols;
+  explicit IdCollector(std::vector<SourcedResourceName>* out_symbols)
+      : out_symbols_(out_symbols) {}
 
-  explicit IdCollector(std::vector<SourcedResourceName>* outSymbols)
-      : mOutSymbols(outSymbols) {}
-
-  void visit(xml::Element* element) override {
+  void Visit(xml::Element* element) override {
     for (xml::Attribute& attr : element->attributes) {
       ResourceNameRef name;
       bool create = false;
-      if (ResourceUtils::parseReference(attr.value, &name, &create, nullptr)) {
+      if (ResourceUtils::ParseReference(attr.value, &name, &create, nullptr)) {
         if (create && name.type == ResourceType::kId) {
-          auto iter = std::lower_bound(mOutSymbols->begin(), mOutSymbols->end(),
-                                       name, cmpName);
-          if (iter == mOutSymbols->end() || iter->name != name) {
-            mOutSymbols->insert(iter, SourcedResourceName{name.toResourceName(),
-                                                          element->lineNumber});
+          auto iter = std::lower_bound(out_symbols_->begin(),
+                                       out_symbols_->end(), name, cmp_name);
+          if (iter == out_symbols_->end() || iter->name != name) {
+            out_symbols_->insert(iter,
+                                 SourcedResourceName{name.ToResourceName(),
+                                                     element->line_number});
           }
         }
       }
     }
 
-    xml::Visitor::visit(element);
+    xml::Visitor::Visit(element);
   }
+
+ private:
+  std::vector<SourcedResourceName>* out_symbols_;
 };
 
 }  // namespace
 
-bool XmlIdCollector::consume(IAaptContext* context, xml::XmlResource* xmlRes) {
-  xmlRes->file.exportedSymbols.clear();
-  IdCollector collector(&xmlRes->file.exportedSymbols);
-  xmlRes->root->accept(&collector);
+bool XmlIdCollector::Consume(IAaptContext* context, xml::XmlResource* xmlRes) {
+  xmlRes->file.exported_symbols.clear();
+  IdCollector collector(&xmlRes->file.exported_symbols);
+  xmlRes->root->Accept(&collector);
   return true;
 }
 
