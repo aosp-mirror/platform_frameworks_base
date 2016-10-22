@@ -659,11 +659,9 @@ public class SystemServicesProxy {
      * Sends a message to close other system windows.
      */
     public void sendCloseSystemWindows(String reason) {
-        if (ActivityManagerNative.isSystemReady()) {
-            try {
-                mIam.closeSystemDialogs(reason);
-            } catch (RemoteException e) {
-            }
+        try {
+            mIam.closeSystemDialogs(reason);
+        } catch (RemoteException e) {
         }
     }
 
@@ -1018,7 +1016,8 @@ public class SystemServicesProxy {
         if (mIam == null) return;
 
         try {
-            mIam.startInPlaceAnimationOnFrontMostApplication(opts);
+            mIam.startInPlaceAnimationOnFrontMostApplication(
+                    opts == null ? null : opts.toBundle());
         } catch (Exception e) {
             e.printStackTrace();
         }

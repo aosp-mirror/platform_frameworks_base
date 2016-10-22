@@ -17,8 +17,8 @@
 package com.android.uiautomator.core;
 
 import android.app.ActivityManagerNative;
+import android.app.ContentProviderHolder;
 import android.app.IActivityManager;
-import android.app.IActivityManager.ContentProviderHolder;
 import android.app.UiAutomation;
 import android.content.Context;
 import android.content.IContentProvider;

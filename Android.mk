@@ -68,6 +68,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IActivityContainer.aidl \
 	core/java/android/app/IActivityContainerCallback.aidl \
 	core/java/android/app/IActivityController.aidl \
+	core/java/android/app/IActivityManager.aidl \
 	core/java/android/app/IActivityPendingResult.aidl \
 	core/java/android/app/IAlarmCompleteListener.aidl \
 	core/java/android/app/IAlarmListener.aidl \
@@ -615,6 +616,7 @@ aidl_files := \
 	frameworks/base/core/java/android/os/DropBoxManager.aidl \
 	frameworks/base/core/java/android/os/Bundle.aidl \
 	frameworks/base/core/java/android/os/Debug.aidl \
+	frameworks/base/core/java/android/os/StrictMode.aidl \
 	frameworks/base/core/java/android/accessibilityservice/AccessibilityServiceInfo.aidl \
 	frameworks/base/core/java/android/net/Network.aidl \
 	frameworks/base/core/java/android/net/RouteInfo.aidl \
@@ -695,6 +697,7 @@ aidl_files := \
 	frameworks/base/core/java/android/content/pm/ApplicationInfo.aidl \
 	frameworks/base/core/java/android/content/pm/PermissionInfo.aidl \
 	frameworks/base/core/java/android/content/pm/ActivityInfo.aidl \
+	frameworks/base/core/java/android/content/pm/ConfigurationInfo.aidl \
 	frameworks/base/core/java/android/content/pm/PackageInfo.aidl \
 	frameworks/base/core/java/android/content/pm/ResolveInfo.aidl \
 	frameworks/base/core/java/android/content/pm/ProviderInfo.aidl \

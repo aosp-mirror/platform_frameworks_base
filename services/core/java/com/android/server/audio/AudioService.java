@@ -403,6 +403,7 @@ public class AudioService extends IAudioService.Stub {
 
     /** Interface for UserManagerService. */
     private final UserManagerInternal mUserManagerInternal;
+    private final ActivityManagerInternal mActivityManagerInternal;
 
     private final UserRestrictionsListener mUserRestrictionsListener =
             new AudioServiceUserRestrictionsListener();
@@ -612,6 +613,7 @@ public class AudioService extends IAudioService.Stub {
         mIsSingleVolume = AudioSystem.isSingleVolume(context);
 
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mAudioEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleAudioEvent");
@@ -3691,7 +3693,7 @@ public class AudioService extends IAudioService.Stub {
 
     private void broadcastVibrateSetting(int vibrateType) {
         // Send broadcast
-        if (ActivityManagerNative.isSystemReady()) {
+        if (mActivityManagerInternal.isSystemReady()) {
             Intent broadcast = new Intent(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
             broadcast.putExtra(AudioManager.EXTRA_VIBRATE_TYPE, vibrateType);
             broadcast.putExtra(AudioManager.EXTRA_VIBRATE_SETTING, getVibrateSetting(vibrateType));
@@ -5425,8 +5427,7 @@ public class AudioService extends IAudioService.Stub {
         // when the user switches back. For managed profiles, we should kill all recording apps
         ComponentName homeActivityName = null;
         if (!oldUser.isManagedProfile()) {
-            homeActivityName = LocalServices.getService(ActivityManagerInternal.class)
-                    .getHomeActivityForUser(oldUser.id);
+            homeActivityName = mActivityManagerInternal.getHomeActivityForUser(oldUser.id);
         }
         final String[] permissions = { Manifest.permission.RECORD_AUDIO };
         List<PackageInfo> packages;

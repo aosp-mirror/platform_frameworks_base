@@ -16,6 +16,7 @@
 package android.os;
 
 import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
@@ -1554,7 +1555,7 @@ public final class StrictMode {
                     // We restore the current policy below, in the finally block.
                     setThreadPolicyMask(0);
 
-                    ActivityManagerNative.getDefault().handleApplicationStrictModeViolation(
+                    ActivityManager.getService().handleApplicationStrictModeViolation(
                         RuntimeInit.getApplicationObject(),
                         violationMaskSubset,
                         info);
@@ -2373,7 +2374,7 @@ public final class StrictMode {
      *
      * @hide
      */
-    public static class ViolationInfo {
+    public static class ViolationInfo implements Parcelable {
         public String message;
 
         /**
@@ -2528,6 +2529,7 @@ public final class StrictMode {
         /**
          * Save a ViolationInfo instance to a parcel.
          */
+        @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(message);
             crashInfo.writeToParcel(dest, flags);
@@ -2584,6 +2586,23 @@ public final class StrictMode {
             }
         }
 
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Parcelable.Creator<ViolationInfo> CREATOR =
+                new Parcelable.Creator<ViolationInfo>() {
+                    @Override
+                    public ViolationInfo createFromParcel(Parcel in) {
+                        return new ViolationInfo(in);
+                    }
+
+                    @Override
+                    public ViolationInfo[] newArray(int size) {
+                        return new ViolationInfo[size];
+                    }
+                };
     }
 
     // Dummy throwable, for now, since we don't know when or where the

@@ -6047,8 +6047,8 @@ public class Activity extends ContextThemeWrapper
         boolean drawComplete;
         try {
             mTranslucentCallback = callback;
-            mChangeCanvasToTranslucent =
-                    ActivityManagerNative.getDefault().convertToTranslucent(mToken, options);
+            mChangeCanvasToTranslucent = ActivityManagerNative.getDefault().convertToTranslucent(
+                    mToken, options == null ? null : options.toBundle());
             WindowManagerGlobal.getInstance().changeCanvasOpacity(mToken, false);
             drawComplete = true;
         } catch (RemoteException e) {
@@ -6092,7 +6092,8 @@ public class Activity extends ContextThemeWrapper
      */
     ActivityOptions getActivityOptions() {
         try {
-            return ActivityManagerNative.getDefault().getActivityOptions(mToken);
+            return ActivityOptions.fromBundle(
+                    ActivityManagerNative.getDefault().getActivityOptions(mToken));
         } catch (RemoteException e) {
         }
         return null;
@@ -6988,7 +6989,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void startLockTask() {
         try {
-            ActivityManagerNative.getDefault().startLockTaskMode(mToken);
+            ActivityManagerNative.getDefault().startLockTaskModeByToken(mToken);
         } catch (RemoteException e) {
         }
     }

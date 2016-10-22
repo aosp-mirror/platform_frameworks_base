@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.app.ActivityManagerInternal;
 import android.database.ContentObserver;
 import android.os.BatteryStats;
 
@@ -148,6 +149,8 @@ public final class BatteryService extends SystemService {
 
     private boolean mSentLowBatteryBroadcast = false;
 
+    private ActivityManagerInternal mActivityManagerInternal;
+
     public BatteryService(Context context) {
         super(context);
 
@@ -155,6 +158,7 @@ public final class BatteryService extends SystemService {
         mHandler = new Handler(true /*async*/);
         mLed = new Led(context, getLocalService(LightsManager.class));
         mBatteryStats = BatteryStatsService.getService();
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         mCriticalBatteryLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
@@ -279,7 +283,7 @@ public final class BatteryService extends SystemService {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (ActivityManagerNative.isSystemReady()) {
+                    if (mActivityManagerInternal.isSystemReady()) {
                         Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
                         intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -298,7 +302,7 @@ public final class BatteryService extends SystemService {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (ActivityManagerNative.isSystemReady()) {
+                    if (mActivityManagerInternal.isSystemReady()) {
                         Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
                         intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

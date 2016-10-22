@@ -62,6 +62,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Singleton;
 import android.util.Size;
 
 import org.xmlpull.v1.XmlSerializer;
@@ -1687,7 +1688,7 @@ public class ActivityManager {
      */
     public List<ActivityManager.AppTask> getAppTasks() {
         ArrayList<AppTask> tasks = new ArrayList<AppTask>();
-        List<IAppTask> appTasks;
+        List<IBinder> appTasks;
         try {
             appTasks = ActivityManagerNative.getDefault().getAppTasks(mContext.getPackageName());
         } catch (RemoteException e) {
@@ -1695,7 +1696,7 @@ public class ActivityManager {
         }
         int numAppTasks = appTasks.size();
         for (int i = 0; i < numAppTasks; i++) {
-            tasks.add(new AppTask(appTasks.get(i)));
+            tasks.add(new AppTask(IAppTask.Stub.asInterface(appTasks.get(i))));
         }
         return tasks;
     }
@@ -3520,6 +3521,76 @@ public class ActivityManager {
         pw.flush();
     }
 
+    /**
+     * @hide
+     */
+    public static void broadcastStickyIntent(Intent intent, int userId) {
+        broadcastStickyIntent(intent, AppOpsManager.OP_NONE, userId);
+    }
+
+    /**
+     * Convenience for sending a sticky broadcast.  For internal use only.
+     *
+     * @hide
+     */
+    public static void broadcastStickyIntent(Intent intent, int appOp, int userId) {
+        try {
+            getService().broadcastIntent(
+                    null, intent, null, null, Activity.RESULT_OK, null, null,
+                    null /*permission*/, appOp, null, false, true, userId);
+        } catch (RemoteException ex) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static void noteWakeupAlarm(PendingIntent ps, int sourceUid, String sourcePkg,
+            String tag) {
+        try {
+            getService().noteWakeupAlarm((ps != null) ? ps.getTarget() : null,
+                    sourceUid, sourcePkg, tag);
+        } catch (RemoteException ex) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static void noteAlarmStart(PendingIntent ps, int sourceUid, String tag) {
+        try {
+            getService().noteAlarmStart((ps != null) ? ps.getTarget() : null, sourceUid, tag);
+        } catch (RemoteException ex) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static void noteAlarmFinish(PendingIntent ps, int sourceUid, String tag) {
+        try {
+            getService().noteAlarmFinish((ps != null) ? ps.getTarget() : null, sourceUid, tag);
+        } catch (RemoteException ex) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static IActivityManager getService() {
+        return IActivityManagerSingleton.get();
+    }
+
+    private static final Singleton<IActivityManager> IActivityManagerSingleton =
+            new Singleton<IActivityManager>() {
+                @Override
+                protected IActivityManager create() {
+                    final IBinder b = ServiceManager.getService(Context.ACTIVITY_SERVICE);
+                    final IActivityManager am = IActivityManager.Stub.asInterface(b);
+                    return am;
+                }
+            };
+
     private static void dumpService(PrintWriter pw, FileDescriptor fd, String name, String[] args) {
         pw.print("DUMP OF SERVICE "); pw.print(name); pw.println(":");
         IBinder service = ServiceManager.checkService(name);
@@ -3593,7 +3664,7 @@ public class ActivityManager {
      */
     public void startLockTaskMode(int taskId) {
         try {
-            ActivityManagerNative.getDefault().startLockTaskMode(taskId);
+            ActivityManagerNative.getDefault().startLockTaskModeById(taskId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
