@@ -250,7 +250,7 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Օրացույց"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"օգտագործել օրացույցը"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Կարճ հաղորդագրություն"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"ուղարկել և դիտել SMS հաղորդ․-ները"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"ուղարկել և դիտել SMS-ները"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Պահոց"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"օգտագործել լուսանկարները, մեդիա ֆայլերը և ձեր սարքում պահվող մյուս ֆայլերը"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Բարձրախոս"</string>
