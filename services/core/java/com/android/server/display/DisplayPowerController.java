@@ -153,6 +153,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // True if should use light sensor to automatically determine doze screen brightness.
     private final boolean mAllowAutoBrightnessWhileDozingConfig;
 
+    // True if using only new sensor samples to automatically determine doze screen brightness.
+    private boolean mUseNewSensorSamplesForDoze;
+
     // True if we should fade the screen while turning it off, false if we should play
     // a stylish color fade animation instead.
     private boolean mColorFadeFadesConfig;
@@ -345,10 +348,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     com.android.internal.R.array.config_dozeSensorLuxLevels);
             int[] dozeBrightnessBacklightValues = resources.getIntArray(
                     com.android.internal.R.array.config_dozeBrightnessBacklightValues);
-            boolean useNewSensorSamplesForDoze = resources.getBoolean(
+            mUseNewSensorSamplesForDoze = resources.getBoolean(
                     com.android.internal.R.bool.config_useNewSensorSamplesForDoze);
             LuxLevels luxLevels = new LuxLevels(brightHysteresisLevels, darkHysteresisLevels,
-                    luxHysteresisLevels, useNewSensorSamplesForDoze, dozeSensorLuxLevels,
+                    luxHysteresisLevels, mUseNewSensorSamplesForDoze, dozeSensorLuxLevels,
                     dozeBrightnessBacklightValues);
 
             Spline screenAutoBrightnessSpline = createAutoBrightnessSpline(lux, screenBrightness);
@@ -671,10 +674,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mAppliedAutoBrightness = false;
         }
 
-        // Use default brightness when dozing unless overridden.
-        if (brightness < 0 && (state == Display.STATE_DOZE
-                || state == Display.STATE_DOZE_SUSPEND)) {
-            brightness = mScreenBrightnessDozeConfig;
+        // Use default brightness when dozing unless overridden or if collecting sensor samples.
+        if (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND) {
+            if (brightness < 0) {
+                brightness = mScreenBrightnessDozeConfig;
+            } else if (mUseNewSensorSamplesForDoze) {
+                brightness = Math.min(brightness, mScreenBrightnessDozeConfig);
+            }
         }
 
         // Apply manual brightness.
