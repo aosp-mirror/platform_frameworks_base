@@ -121,6 +121,24 @@
 
     </PreferenceScreen>
 
+    <PreferenceScreen
+      android:key="picture_in_picture"
+      android:title="@string/picture_in_picture">
+
+        <com.android.systemui.tuner.TunerSwitch
+          android:key="pip_swipe_to_dismiss"
+          android:title="@string/pip_swipe_to_dismiss_title"
+          android:summary="@string/pip_swipe_to_dismiss_summary"
+          sysui:defValue="true" />
+
+        <com.android.systemui.tuner.TunerSwitch
+          android:key="pip_drag_to_dismiss"
+          android:title="@string/pip_drag_to_dismiss_title"
+          android:summary="@string/pip_drag_to_dismiss_summary"
+          sysui:defValue="true" />
+
+    </PreferenceScreen>
+
     <!--
     <Preference
         android:key="nav_bar"
