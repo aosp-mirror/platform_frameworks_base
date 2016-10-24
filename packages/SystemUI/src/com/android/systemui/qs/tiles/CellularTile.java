@@ -113,16 +113,6 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
-    protected void handleSecondaryClick() {
-        MetricsLogger.action(mContext, getMetricsCategory());
-        if (mDataController.isMobileDataSupported()) {
-            showDetail(true);
-        } else {
-            mHost.startActivityDismissingKeyguard(CELLULAR_SETTINGS);
-        }
-    }
-
-    @Override
     public CharSequence getTileLabel() {
         return mContext.getString(R.string.quick_settings_cellular_detail_title);
     }
