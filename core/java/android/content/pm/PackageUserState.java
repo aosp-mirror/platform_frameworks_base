@@ -44,7 +44,6 @@ public class PackageUserState {
     public boolean notLaunched;
     public boolean hidden; // Is the app restricted by owner / admin
     public boolean suspended;
-    public boolean blockUninstall;
     public boolean instantApp;
     public int enabled;
     public String lastDisableAppCaller;
@@ -75,7 +74,6 @@ public class PackageUserState {
         notLaunched = o.notLaunched;
         hidden = o.hidden;
         suspended = o.suspended;
-        blockUninstall = o.blockUninstall;
         instantApp = o.instantApp;
         enabled = o.enabled;
         lastDisableAppCaller = o.lastDisableAppCaller;
@@ -191,9 +189,6 @@ public class PackageUserState {
             return false;
         }
         if (suspended != oldState.suspended) {
-            return false;
-        }
-        if (blockUninstall != oldState.blockUninstall) {
             return false;
         }
         if (instantApp != oldState.instantApp) {
