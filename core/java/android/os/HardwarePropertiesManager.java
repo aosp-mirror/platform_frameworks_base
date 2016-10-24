@@ -18,6 +18,7 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.thermal.V1_0.Constants;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -56,18 +57,19 @@ public class HardwarePropertiesManager {
     /**
      * Device temperature types. These must match the values in
      * frameworks/native/include/hardwareproperties/HardwarePropertiesManager.h
+     * TODO(b/32022261) Remove this comment.
      */
     /** Temperature of CPUs in Celsius. */
-    public static final int DEVICE_TEMPERATURE_CPU = 0;
+    public static final int DEVICE_TEMPERATURE_CPU = Constants.TemperatureType.CPU;
 
     /** Temperature of GPUs in Celsius. */
-    public static final int DEVICE_TEMPERATURE_GPU = 1;
+    public static final int DEVICE_TEMPERATURE_GPU = Constants.TemperatureType.GPU;
 
     /** Temperature of battery in Celsius. */
-    public static final int DEVICE_TEMPERATURE_BATTERY = 2;
+    public static final int DEVICE_TEMPERATURE_BATTERY = Constants.TemperatureType.BATTERY;
 
     /** Temperature of device skin in Celsius. */
-    public static final int DEVICE_TEMPERATURE_SKIN = 3;
+    public static final int DEVICE_TEMPERATURE_SKIN = Constants.TemperatureType.SKIN;
 
     /** Get current temperature. */
     public static final int TEMPERATURE_CURRENT = 0;

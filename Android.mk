@@ -503,7 +503,10 @@ LOCAL_ADDITIONAL_DEPENDENCIES := $(framework_res_R_stamp)
 
 LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_JAVA_LIBRARIES := core-oj core-libart conscrypt okhttp core-junit bouncycastle ext
-LOCAL_STATIC_JAVA_LIBRARIES := framework-protos
+
+LOCAL_STATIC_JAVA_LIBRARIES :=                          \
+    framework-protos                                    \
+    android.hardware.thermal@1.0-java-constants         \
 
 LOCAL_MODULE := framework
 
