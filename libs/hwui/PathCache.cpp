@@ -138,11 +138,6 @@ static void computePathBounds(const SkPath* path, const SkPaint* paint, PathText
     height = uint32_t(pathHeight + texture->offset * 2.0 + 0.5);
 }
 
-static void initBitmap(SkBitmap& bitmap, uint32_t width, uint32_t height) {
-    bitmap.allocPixels(SkImageInfo::MakeA8(width, height));
-    bitmap.eraseColor(0);
-}
-
 static void initPaint(SkPaint& paint) {
     // Make sure the paint is opaque, color, alpha, filter, etc.
     // will be applied later when compositing the alpha8 texture
@@ -154,7 +149,7 @@ static void initPaint(SkPaint& paint) {
     paint.setBlendMode(SkBlendMode::kSrc);
 }
 
-static SkBitmap* drawPath(const SkPath* path, const SkPaint* paint, PathTexture* texture,
+static sk_sp<Bitmap> drawPath(const SkPath* path, const SkPaint* paint, PathTexture* texture,
         uint32_t maxTextureSize) {
     uint32_t width, height;
     computePathBounds(path, paint, texture, width, height);
@@ -164,13 +159,14 @@ static SkBitmap* drawPath(const SkPath* path, const SkPaint* paint, PathTexture*
         return nullptr;
     }
 
-    SkBitmap* bitmap = new SkBitmap();
-    initBitmap(*bitmap, width, height);
-
+    sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(SkImageInfo::MakeA8(width, height));
     SkPaint pathPaint(*paint);
     initPaint(pathPaint);
 
-    SkCanvas canvas(*bitmap);
+    SkBitmap skBitmap;
+    bitmap->getSkBitmap(&skBitmap);
+    skBitmap.eraseColor(0);
+    SkCanvas canvas(skBitmap);
     canvas.translate(-texture->left + texture->offset, -texture->top + texture->offset);
     canvas.drawPath(*path, pathPaint);
     return bitmap;
@@ -227,7 +223,7 @@ void PathCache::removeTexture(PathTexture* texture) {
 
         // If there is a pending task we must wait for it to return
         // before attempting our cleanup
-        const sp<Task<SkBitmap*> >& task = texture->task();
+        const sp<PathTask>& task = texture->task();
         if (task != nullptr) {
             task->getResult();
             texture->clearTask();
@@ -280,20 +276,20 @@ PathTexture* PathCache::addTexture(const PathDescription& entry, const SkPath *p
     ATRACE_NAME("Generate Path Texture");
 
     PathTexture* texture = new PathTexture(Caches::getInstance(), path->getGenerationID());
-    std::unique_ptr<SkBitmap> bitmap(drawPath(path, paint, texture, mMaxTextureSize));
-    if (!bitmap.get()) {
+    sk_sp<Bitmap> bitmap(drawPath(path, paint, texture, mMaxTextureSize));
+    if (!bitmap) {
         delete texture;
         return nullptr;
     }
 
     purgeCache(bitmap->width(), bitmap->height());
-    generateTexture(entry, bitmap.get(), texture);
+    generateTexture(entry, *bitmap, texture);
     return texture;
 }
 
-void PathCache::generateTexture(const PathDescription& entry, SkBitmap* bitmap,
+void PathCache::generateTexture(const PathDescription& entry, Bitmap& bitmap,
         PathTexture* texture, bool addToCache) {
-    generateTexture(*bitmap, texture);
+    generateTexture(bitmap, texture);
 
     // Note here that we upload to a texture even if it's bigger than mMaxSize.
     // Such an entry in mCache will only be temporary, since it will be evicted
@@ -314,7 +310,7 @@ void PathCache::clear() {
     mCache.clear();
 }
 
-void PathCache::generateTexture(SkBitmap& bitmap, Texture* texture) {
+void PathCache::generateTexture(Bitmap& bitmap, Texture* texture) {
     ATRACE_NAME("Upload Path Texture");
     texture->upload(bitmap);
     texture->setFilter(GL_LINEAR);
@@ -325,10 +321,10 @@ void PathCache::generateTexture(SkBitmap& bitmap, Texture* texture) {
 ///////////////////////////////////////////////////////////////////////////////
 
 PathCache::PathProcessor::PathProcessor(Caches& caches):
-        TaskProcessor<SkBitmap*>(&caches.tasks), mMaxTextureSize(caches.maxTextureSize) {
+        TaskProcessor<sk_sp<Bitmap> >(&caches.tasks), mMaxTextureSize(caches.maxTextureSize) {
 }
 
-void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
+void PathCache::PathProcessor::onProcess(const sp<Task<sk_sp<Bitmap> > >& task) {
     PathTask* t = static_cast<PathTask*>(task.get());
     ATRACE_NAME("pathPrecache");
 
@@ -377,13 +373,13 @@ PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
     } else {
         // A bitmap is attached to the texture, this means we need to
         // upload it as a GL texture
-        const sp<Task<SkBitmap*> >& task = texture->task();
+        const sp<PathTask>& task = texture->task();
         if (task != nullptr) {
             // But we must first wait for the worker thread to be done
             // producing the bitmap, so let's wait
-            SkBitmap* bitmap = task->getResult();
+            sk_sp<Bitmap> bitmap = task->getResult();
             if (bitmap) {
-                generateTexture(entry, bitmap, texture, false);
+                generateTexture(entry, *bitmap, texture, false);
                 texture->clearTask();
             } else {
                 texture->clearTask();

@@ -18,9 +18,9 @@
 #define ANDROID_HWUI_TEXTURE_H
 
 #include "GpuMemoryTracker.h"
+#include "hwui/Bitmap.h"
 
 #include <GLES2/gl2.h>
-#include <SkBitmap.h>
 
 namespace android {
 namespace uirenderer {
@@ -74,13 +74,13 @@ public:
     }
 
     /**
-     * Updates this Texture with the contents of the provided SkBitmap,
+     * Updates this Texture with the contents of the provided Bitmap,
      * also setting the appropriate width, height, and format. It is not necessary
      * to call resize() prior to this.
      *
-     * Note this does not set the generation from the SkBitmap.
+     * Note this does not set the generation from the Bitmap.
      */
-    void upload(const SkBitmap& source);
+    void upload(Bitmap& source);
 
     /**
      * Basically glTexImage2D/glTexSubImage2D.

@@ -666,7 +666,6 @@ void RecordingCanvas::refBitmapsInShader(const SkShader* shader) {
     SkBitmap bitmap;
     SkShader::TileMode xy[2];
     if (shader->isABitmap(&bitmap, nullptr, xy)) {
-        // TODO: create  hwui-owned BitmapShader.
         Bitmap* hwuiBitmap = static_cast<Bitmap*>(bitmap.pixelRef());
         refBitmap(*hwuiBitmap);
         return;

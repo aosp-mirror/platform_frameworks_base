@@ -171,12 +171,6 @@ static void uploadToTexture(bool resize, GLint internalFormat, GLenum format, GL
     }
 }
 
-static void uploadSkBitmapToTexture(const SkBitmap& bitmap,
-        bool resize, GLint internalFormat, GLenum format, GLenum type) {
-    uploadToTexture(resize, internalFormat, format, type, bitmap.rowBytesAsPixels(),
-            bitmap.bytesPerPixel(), bitmap.width(), bitmap.height(), bitmap.getPixels());
-}
-
 static void colorTypeToGlFormatAndType(const Caches& caches, SkColorType colorType,
         bool needSRGB, GLint* outInternalFormat, GLint* outFormat, GLint* outType) {
     switch (colorType) {
@@ -218,9 +212,7 @@ static void colorTypeToGlFormatAndType(const Caches& caches, SkColorType colorTy
     }
 }
 
-void Texture::upload(const SkBitmap& bitmap) {
-    SkAutoLockPixels alp(bitmap);
-
+void Texture::upload(Bitmap& bitmap) {
     if (!bitmap.readyToDraw()) {
         ALOGE("Cannot generate texture from bitmap");
         return;
@@ -244,7 +236,7 @@ void Texture::upload(const SkBitmap& bitmap) {
     }
 
     sk_sp<SkColorSpace> sRGB = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
-    bool needSRGB = bitmap.colorSpace() == sRGB.get();
+    bool needSRGB = bitmap.info().colorSpace() == sRGB.get();
 
     GLint internalFormat, format, type;
     colorTypeToGlFormatAndType(mCaches, bitmap.colorType(), needSRGB, &internalFormat, &format, &type);
@@ -264,15 +256,21 @@ void Texture::upload(const SkBitmap& bitmap) {
 
         SkBitmap rgbaBitmap;
         rgbaBitmap.allocPixels(SkImageInfo::MakeN32(
-                mWidth, mHeight, bitmap.alphaType(), hasSRGB ? sRGB : nullptr));
+                mWidth, mHeight, bitmap.info().alphaType(), hasSRGB ? sRGB : nullptr));
         rgbaBitmap.eraseColor(0);
 
         SkCanvas canvas(rgbaBitmap);
-        canvas.drawBitmap(bitmap, 0.0f, 0.0f, nullptr);
+        SkBitmap skBitmap;
+        bitmap.getSkBitmap(&skBitmap);
+        canvas.drawBitmap(skBitmap, 0.0f, 0.0f, nullptr);
 
-        uploadSkBitmapToTexture(rgbaBitmap, needsAlloc, internalFormat, format, type);
+        uploadToTexture(needsAlloc, internalFormat, format, type, rgbaBitmap.rowBytesAsPixels(),
+                rgbaBitmap.bytesPerPixel(), rgbaBitmap.width(),
+                rgbaBitmap.height(), rgbaBitmap.getPixels());
+
     } else {
-        uploadSkBitmapToTexture(bitmap, needsAlloc, internalFormat, format, type);
+        uploadToTexture(needsAlloc, internalFormat, format, type, bitmap.rowBytesAsPixels(),
+                bitmap.info().bytesPerPixel(), bitmap.width(), bitmap.height(), bitmap.pixels());
     }
 
     if (canMipMap) {
