@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi-yhteysvirhe"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Todennusvirhe"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ei kantoalueella"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Internetyhteyttä ei havaittu, yhteyttä ei muodosteta automaattisesti uudelleen."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Internetyhteyttä ei havaittu. Yhteyttä ei muodosteta automaattisesti uudelleen."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Ei internetyhteyttä"</string>
     <string name="saved_network" msgid="4352716707126620811">"Tallentaja: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Yhteys muodostettu Wi‑Fi-apurin kautta"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Yhdistetty seuraavan kautta: %1$s"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Näytä leikkeiden rajat, marginaalit jne."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Pakota RTL-ulkoasun suunta"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Pakota kaikkien kielten näytön ulkoasun suunnaksi RTL"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Näytä suorittimen käyttö"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Näytön peittokuva näyttää nykyisen suoritinkäytön"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Pakota GPU-hahmonnus"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Käytä GPU:ta 2d-piirtämiseen"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Pakota 4x MSAA"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Suurin"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Muokattu (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Ohje ja palaute"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Valikko"</string>
 </resources>

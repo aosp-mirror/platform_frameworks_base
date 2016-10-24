@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"การเชื่อมต่อ Wi-Fi ล้มเหลว"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ปัญหาในการตรวจสอบสิทธิ์"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"ไม่อยู่ในพื้นที่ให้บริการ"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"ไม่พบการเข้าถึงอินเทอร์เน็ต ระบบจะไม่เชื่อมต่อใหม่โดยอัตโนมัติ"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"ไม่พบการเข้าถึงอินเทอร์เน็ต ระบบจะไม่เชื่อมต่อใหม่โดยอัตโนมัติ"</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"ไม่สามารถเข้าถึงอินเทอร์เน็ต"</string>
     <string name="saved_network" msgid="4352716707126620811">"บันทึกโดย <xliff:g id="NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"เชื่อมต่อผ่านตัวช่วย Wi-Fi อยู่"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"เชื่อมต่อผ่าน %1$s แล้ว"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"แสดงหน้าปกคลิป ขอบ ฯลฯ"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"บังคับทิศทางการจัดวาง RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"บังคับทิศทางการจัดวางหน้าจอเป็น RTL สำหรับทุกภาษา"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"แสดงการใช้ CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"การวางซ้อนหน้าจอที่แสดงการใช้ CPU ในปัจจุบัน"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"เร่งการแสดงผลของ GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"ต้องใช้ GPU สำหรับการวาดภาพ 2 มิติ"</string>
     <string name="force_msaa" msgid="7920323238677284387">"บังคับใช้ 4x MSAA"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"ใหญ่ที่สุด"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"กำหนดเอง (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"ความช่วยเหลือและความคิดเห็น"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"เมนู"</string>
 </resources>

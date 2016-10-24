@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi ချိတ်ဆက်မှု မအောင်မြင်ပါ"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"စစ်မှန်ကြောင်းအတည်ပြုရန်၌ ပြသနာရှိခြင်း"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"စက်ကွင်းထဲတွင် မဟုတ်ပါ"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"မည်သည့် အင်တာနက်မျှမရှိပါ၊ အလိုအလျောက် ပြန်လည်မချိတ်ဆက်ပါ။"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"အင်တာနက်ချိတ်ဆက်မှု ရှာမတွေ့ပါ၊ အလိုအလျောက် ပြန်လည်ချိတ်ဆက်မည် မဟုတ်ပါ။"</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"အင်တာနက် ချိတ်ဆက်မှု မရှိပါ။"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> မှသိမ်းဆည်းခဲ့သည်"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"ကြိုးမဲ့ကူညီသူမှတဆင့် ချိတ်ဆက်၏"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"ဖြတ်ပိုင်းအနားသတ်များ၊ အနားများ စသဖြင့် ပြပါ။"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL ဖွဲ့စည်းပုံအညွှန်း မဖြစ်မနေလုပ်ပါ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"လိုကယ်လ်အားလုံးအတွက် မျက်နှာပြင် ဖွဲ့စည်းပုံအညွှန်း မဖြစ်မနေလုပ်ရန်"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPUအသုံးပြုမှုအား ပြသရန်"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"လက်ရှိCPUအသုံးပြုမှုအားလုံး မျက်နှာပြင်တွင်ပြသမှု"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPUအား အတင်းအကျပ်ဖြစ်စေမည်"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"GPUကို ၂ဖက်မြင်ပုံဆွဲခြင်းအတွက် မဖြစ်မနေအသုံးပြုစေရန်"</string>
     <string name="force_msaa" msgid="7920323238677284387">"တွန်းအား ၄× MSAA"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"အကြီးဆုံး"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"စိတ်ကြိုက် (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"အကူအညီနှင့် အကြံပြုချက်"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"မီနူး"</string>
 </resources>

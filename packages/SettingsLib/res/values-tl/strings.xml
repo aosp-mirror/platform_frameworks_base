@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Pagkabigo ng Koneksyon sa WiFi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problema sa pagpapatotoo"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Wala sa sakop"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Walang Natukoy na Access sa Internet, hindi awtomatikong muling kumonekta."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Walang Na-detect na Access sa Internet, hindi awtomatikong muling kokonekta."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Walang Access sa Internet."</string>
     <string name="saved_network" msgid="4352716707126620811">"Na-save ni <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Nakakonekta sa pamamagitan ng Wi‑Fi assistant"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Nakakonekta sa pamamagitan ng %1$s"</string>
@@ -146,7 +147,7 @@
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Hindi available ang mga setting ng VPN para sa user na ito"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Hindi available ang mga setting ng pagte-theter para sa user na ito"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Hindi available ang mga setting ng Access Point Name para sa user na ito"</string>
-    <string name="enable_adb" msgid="7982306934419797485">"Pagde-debug ng USB"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"Pag-debug ng USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Debug mode kapag nakakonekta ang USB"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Bawiin ang mga pahintulot sa pag-debug ng USB"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Shortcut ng ulat sa bug"</string>
@@ -186,8 +187,8 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"I-enable ang pagsisiyasat sa attribute na view"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Palaging panatilihing aktibo ang mobile data, kahit na aktibo ang Wi‑Fi (para sa mabilis na paglipat ng network)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Payagan ang pag-debug ng USB?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"Ang pag-debug ng USB ay nilalayon para sa mga layuning pagpapabuti lamang. Gamitin ito upang kumopya ng data sa pagitan ng iyong computer at iyong device, mag-install ng apps sa iyong device nang walang notification, at magbasa ng data ng log."</string>
-    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Bawiin ang access sa pagde-debug ng USB mula sa lahat ng computer na dati mong pinahintulutan?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"Ang pag-debug ng USB ay para lang sa mga layuning pag-develop. Gamitin ito upang kumopya ng data sa pagitan ng iyong computer at iyong device, mag-install ng mga app sa iyong device nang walang notification, at magbasa ng data ng log."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Bawiin ang access sa pag-debug ng USB mula sa lahat ng computer na dati mong pinahintulutan?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Payagan ang mga setting ng pag-develop?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Nilalayon ang mga setting na ito para sa paggamit sa pag-develop lamang. Maaaring magsanhi ang mga ito ng pagkasira o hindi paggana nang maayos ng iyong device at mga application na nandito."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"I-verify ang mga app sa USB"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Ipakita ang mga hangganan ng clip, margin, atbp."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Force RTL layout dir."</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Force screen layout dir. sa RTL sa lahat ng lokal"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Ipakita paggamit ng CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Ipinapakita ng screen overlay ang paggamit ng CPU ngayon"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Ipilit ang pag-render ng GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Sapilitang paggamit sa GPU para sa 2d na pagguhit"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Puwersahin ang 4x MSAA"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Pinakamalaki"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Custom (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Tulong at feedback"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Menu"</string>
 </resources>

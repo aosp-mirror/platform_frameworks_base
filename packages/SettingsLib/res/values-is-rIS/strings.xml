@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi-tengingarvilla"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Vandamál við auðkenningu"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ekkert samband"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Enginn netaðgangur fannst; endurtengist ekki sjálfkrafa."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Enginn netaðgangur fannst, endurtengist ekki sjálfkrafa."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Enginn netaðgangur."</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> vistaði"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Tengt í gegnum Wi-Fi aðstoð"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Tengt í gegnum %1$s"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Sýna skurðlínur, spássíur o.s.frv."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Þvinga umbrot frá hægri til vinstri"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Þvinga umbrot skjás frá hægri til vinstri fyrir alla tungumálskóða"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Sýna örgjörvanotkun"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Skjáyfirlögn sem sýnir núverandi örgjörvanotkun"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Þvinga skjákortsteiknun"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Þvinga notkun skjákorts fyrir tvívíða teikningu"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Þvinga 4x MSAA"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Stærst"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Sérsniðið (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Hjálp og ábendingar"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Valmynd"</string>
 </resources>

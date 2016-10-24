@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"‏أخفق اتصال WiFi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"حدثت مشكلة في المصادقة"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"ليست في النطاق"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"لم يتم اكتشاف اتصال بالإنترنت."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"لم يتم اكتشاف اتصال بالإنترنت، ولن تتم إعادة الاتصال تلقائيًا."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"لا يتوفر اتصال بالإنترنت."</string>
     <string name="saved_network" msgid="4352716707126620811">"تم الحفظ بواسطة <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"‏تم التوصيل عبر مساعد Wi-Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"‏تم الاتصال عبر %1$s"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"عرض حدود وهوامش المقطع وما إلى ذلك."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"فرض اتجاه التنسيق ليكون من اليمين إلى اليسار"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"فرض اتجاه تنسيق الشاشة ليكون من اليمين إلى اليسار لجميع اللغات"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"‏عرض استخدام CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"‏عرض تراكب الشاشة لاستخدام CPU الحالي"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"‏فرض عرض رسومات GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"فرض استخدام وحدة معالجة الرسومات للرسم ثنائي الأبعاد"</string>
     <string name="force_msaa" msgid="7920323238677284387">"‏فرض 4x MSAA"</string>
@@ -329,7 +328,7 @@
     <string name="home" msgid="3256884684164448244">"الشاشة الرئيسية للإعدادات"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"٠‏٪"</item>
-    <item msgid="8934126114226089439">"٪۵۰"</item>
+    <item msgid="8934126114226089439">"٥٠٪"</item>
     <item msgid="1286113608943010849">"٪۱۰۰"</item>
   </string-array>
     <string name="charge_length_format" msgid="8978516217024434156">"قبل <xliff:g id="ID_1">%1$s</xliff:g>"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"أكبر مستوى"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"مخصص (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"المساعدة والتعليقات"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"القائمة"</string>
 </resources>

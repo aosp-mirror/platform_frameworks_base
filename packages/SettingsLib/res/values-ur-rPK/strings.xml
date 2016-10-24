@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"‏WiFi کنکشن کی ناکامی"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"توثیق کا مسئلہ"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"رینج میں نہیں ہے"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"انٹرنیٹ تک کسی رسائی کا پتہ نہیں چلا، خود بخود دوبارہ منسلک نہیں ہوگا۔"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"انٹرنیٹ تک کسی رسائی کا پتہ نہیں چلا، خودکار طور پر دوبارہ منسلک نہیں ہوگا۔"</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"انٹرنیٹ تک کوئی رسائی نہیں۔"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> کی جانب سے محفوظ کردہ"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"‏Wi‑Fi اسسٹنٹ کے ذریعے منسلک ہے"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"‏منسلک بذریعہ ‎%1$s"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"کلپ باؤنڈز، حاشیے وغیرہ دکھائیں"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"‏RTL لے آؤٹ سمت زبردستی نافذ کریں"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"‏سبھی زبانوں کیلئے اسکرین لے آؤٹ کی سمت کو RTL پر مجبور کریں"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"‏CPU استعمال دکھائیں"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"‏موجودہ CPU استعمال دکھانے والا اسکرین اوورلے"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"‏GPU رینڈرنگ زبردستی نافذ کریں"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"‏2D ڈرائنگ کیلئے GPU کا استعمال زبردستی نافذ کریں"</string>
     <string name="force_msaa" msgid="7920323238677284387">"‏4x MSAA زبردستی نافذ کریں"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"سب سے بڑا"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"حسب ضرورت (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"مدد اور تاثرات"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"مینو"</string>
 </resources>

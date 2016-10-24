@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi कनेक्शन अयशस्वी"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"प्रमाणीकरण समस्या"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"परिक्षेत्रामध्ये नाही"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"कोणताही इंटरनेट प्रवेश आढळला नाही, स्वयंचलितपणे रीकनेक्ट करणार नाही."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"कोणताही इंटरनेट प्रवेश आढळला नाही, स्वयंचलितपणे पुन्हा कनेक्ट करणार नाही."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"इंटरनेट प्रवेश नाही."</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> द्वारे जतन केले"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi सहाय्यक द्वारे कनेक्ट केले"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s द्वारे कनेक्‍ट केले"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"क्लिप सीमा, समास इत्यादी दर्शवा."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL लेआउट दिशानिर्देशाची सक्ती करा"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"सर्व लोकॅलसाठी RTL स्क्रीन लेआउट दिशानिर्देशाची सक्ती करा"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU वापर दर्शवा"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"वर्तमान CPU वापर दर्शविणारे स्क्रीन आच्छादन"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU प्रस्तुतीस सक्ती करा"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d रेखांकनासाठी GPU च्या वापराची सक्ती करा"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA ची सक्ती करा"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"सर्वात मोठा"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"सानुकूल करा (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"मदत आणि अभिप्राय"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"मेनू"</string>
 </resources>

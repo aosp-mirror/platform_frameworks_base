@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Zlyhanie pripojenia Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problém s overením totožnosti"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Mimo dosah"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Nenašiel sa žiadny prístup k internetu, preto nedôjde k automatickému opätovnému pripojeniu"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Nenašiel sa žiadny prístup k internetu, preto nedôjde k automatickému opätovnému pripojeniu."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Žiadny prístup k internetu."</string>
     <string name="saved_network" msgid="4352716707126620811">"Uložil(a) <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Pripojené pomocou Asistenta Wi-Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Pripojené prostredníctvom %1$s"</string>
@@ -173,8 +174,8 @@
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Zvýšiť úroveň denníkov Wi-Fi, zobrazovať podľa SSID RSSI pri výbere siete Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Keď túto možnosť zapnete, Wi-Fi bude agresívnejšie odovzdávať dát. pripoj. na mob. sieť vtedy, keď bude slabý signál Wi-Fi"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Povoliť alebo zakázať funkciu Wifi Roam Scans na základe objemu prenosu údajov v rozhraní"</string>
-    <string name="select_logd_size_title" msgid="7433137108348553508">"Veľkosti vyrovnávacej pamäte denníka"</string>
-    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Veľkosť na vyrovnávaciu pamäť nástroja denníkov"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Vyrovnávacia pamäť nástroja denníkov"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Veľkosť vyrovnávacej pamäte nástroja denníkov"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Vymazať trvalé úložisko zapisovača do denníka?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Keď prestaneme monitorovať pomocou trvalého zapisovača do denníka, musíme vymazať jeho dáta, ktoré sa nachádzajú vo vašom zariadení."</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"Natrvalo ukladať dáta zapisovača do denníka na zariadení"</string>
@@ -186,8 +187,8 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"Kontrola atribútov zobrazenia"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Vždy ponechávať mobilné dáta aktívne, dokonca aj pri aktívnej sieti Wi‑Fi (na rýchle prepínanie sietí)"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Povoliť ladenie cez USB?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"Ladenie prostredníctvom USB je určené iba na účely vývoja. Použite ho na kopírovanie dát medzi počítačom a zariadením, inštaláciu aplikácií do zariadenia bez upozornenia a čítanie údajov denníka."</string>
-    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Chcete odvolať prístup k ladeniu cez USB zo všetkých počítačov, ktoré ste predtým autorizovali?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"Ladenie cez USB je určené iba na účely vývoja. Možno ho použiť na kopírovanie dát medzi počítačom a zariadením, inštaláciu aplikácií do zariadenia bez upozornenia a čítanie dát denníka."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Chcete všetkým v minulosti autorizovaným počítačom odvolať prístup k ladeniu cez USB?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Povoliť nastavenia pre vývojárov?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Tieto nastavenia sú určené len pre vývojárov. Môžu spôsobiť poruchu alebo nesprávne fungovanie zariadenia a nainštalovaných aplikácií."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Overovať aplikácie z USB"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Zobraziť vo výstrižku ohraničenie, okraje a pod."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Rozloženia sprava doľava"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Vynútiť pre všetky jazyky rozloženie obrazovky sprava doľava"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Zobraziť využitie CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Prekryvná vrstva s aktuálnym využitím procesora"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Vykresľovat pomocou GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Používať GPU na dvojrozmerné vykresľovanie"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Vynútiť 4x MSAA"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Najväčšie"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Vlastné (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Pomocník a spätná väzba"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Ponuka"</string>
 </resources>
