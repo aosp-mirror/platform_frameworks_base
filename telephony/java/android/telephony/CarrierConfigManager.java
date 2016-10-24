@@ -1072,6 +1072,18 @@ public class CarrierConfigManager {
     public static final String KEY_EDITABLE_WFC_ROAMING_MODE_BOOL =
             "editable_wfc_roaming_mode_bool";
 
+   /**
+     * Determine whether current lpp_mode used for E-911 needs to be kept persistently.
+     * {@code false} - not keeping the lpp_mode means using default configuration of gps.conf
+     *                 when sim is not presented.
+     * {@code true}  - current lpp_profile of carrier will be kepted persistently
+     *                 even after sim is removed.
+     *
+     * @hide
+     */
+    public static final String KEY_PERSIST_LPP_MODE_BOOL = "persist_lpp_mode_bool";
+
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1266,6 +1278,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(FILTERED_CNAP_NAMES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
+        sDefaults.putBoolean(KEY_PERSIST_LPP_MODE_BOOL, false);
     }
 
     /**
