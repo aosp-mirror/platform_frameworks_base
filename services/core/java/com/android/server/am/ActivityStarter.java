@@ -1614,9 +1614,9 @@ class ActivityStarter {
                 == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK)) {
             // The caller has requested to completely replace any existing task with its new
             // activity. Well that should not be too hard...
+            intentActivity.task.performClearTaskLocked();
+            intentActivity.task.setIntent(mStartActivity);
             mReuseTask = intentActivity.task;
-            mReuseTask.performClearTaskLocked();
-            mReuseTask.setIntent(mStartActivity);
             // When we clear the task - focus will be adjusted, which will bring another task
             // to top before we launch the activity we need. This will temporary swap their
             // mTaskToReturnTo values and we don't want to overwrite them accidentally.
