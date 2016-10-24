@@ -39,18 +39,20 @@
 #include <jni.h>
 #include <sys/stat.h>
 
+#include <memory>
+
 using namespace android;
 
 static jobject createBitmapRegionDecoder(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream) {
-    SkAutoTDelete<SkBitmapRegionDecoder> brd(
+  std::unique_ptr<SkBitmapRegionDecoder> brd(
             SkBitmapRegionDecoder::Create(stream.release(),
                                           SkBitmapRegionDecoder::kAndroidCodec_Strategy));
-    if (NULL == brd) {
+    if (!brd) {
         doThrowIOE(env, "Image format not supported");
         return nullObjectReturn("CreateBitmapRegionDecoder returned null");
     }
 
-    return GraphicsJNI::createBitmapRegionDecoder(env, brd.detach());
+    return GraphicsJNI::createBitmapRegionDecoder(env, brd.release());
 }
 
 static jobject nativeNewInstanceFromByteArray(JNIEnv* env, jobject, jbyteArray byteArray,

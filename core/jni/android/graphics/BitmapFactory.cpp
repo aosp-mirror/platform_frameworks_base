@@ -365,7 +365,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     SkColorType decodeColorType = codec->computeOutputColorType(prefColorType);
 
     // Construct a color table for the decode if necessary
-    SkAutoTUnref<SkColorTable> colorTable(nullptr);
+    sk_sp<SkColorTable> colorTable(nullptr);
     SkPMColor* colorPtr = nullptr;
     int* colorCount = nullptr;
     int maxColors = 256;
@@ -399,7 +399,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     }
     SkBitmap decodingBitmap;
     if (!decodingBitmap.setInfo(bitmapInfo) ||
-            !decodingBitmap.tryAllocPixels(decodeAllocator, colorTable)) {
+            !decodingBitmap.tryAllocPixels(decodeAllocator, colorTable.get())) {
         // SkAndroidCodec should recommend a valid SkImageInfo, so setInfo()
         // should only only fail if the calculated value for rowBytes is too
         // large.
