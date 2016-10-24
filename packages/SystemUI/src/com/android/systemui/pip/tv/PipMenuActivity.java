@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.tv.pip;
+package com.android.systemui.pip.tv;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.android.systemui.R;
-import com.android.systemui.Interpolators;
 
 /**
  * Activity to show the PIP menu to control PIP.

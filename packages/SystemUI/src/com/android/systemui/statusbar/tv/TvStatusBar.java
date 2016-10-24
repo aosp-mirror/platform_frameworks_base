@@ -27,7 +27,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.NotificationData;
-import com.android.systemui.tv.pip.PipManager;
+import com.android.systemui.pip.tv.PipManager;
 
 /**
  * Status bar implementation for "large screen" products that mostly present no on-screen nav

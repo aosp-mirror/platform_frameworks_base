@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.tv.pip;
+package com.android.systemui.pip.tv;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.View.OnFocusChangeListener;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;

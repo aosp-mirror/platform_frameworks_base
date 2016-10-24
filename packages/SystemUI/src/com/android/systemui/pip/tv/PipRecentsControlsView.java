@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.tv.pip;
+package com.android.systemui.pip.tv;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnFocusChangeListener;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
-
-import static com.android.systemui.tv.pip.PipManager.PLAYBACK_STATE_PLAYING;
-import static com.android.systemui.tv.pip.PipManager.PLAYBACK_STATE_PAUSED;
-import static com.android.systemui.tv.pip.PipManager.PLAYBACK_STATE_UNAVAILABLE;
 
 /**
  * An FrameLayout that contains {@link PipControlsView} with its scrim.
@@ -49,7 +43,6 @@ public class PipRecentsControlsView extends FrameLayout {
     }
 
     private final PipManager mPipManager = PipManager.getInstance();
-    private Listener mListener;
     private PipControlsView mPipControlsView;
     private View mScrim;
     private Animator mFocusGainAnimator;

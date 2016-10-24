@@ -42,7 +42,7 @@ import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.SystemBars;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.tv.pip.PipUI;
+import com.android.systemui.pip.PipUI;
 import com.android.systemui.usb.StorageNotification;
 import com.android.systemui.volume.VolumeUI;
 

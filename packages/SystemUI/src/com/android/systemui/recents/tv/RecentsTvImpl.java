@@ -25,7 +25,6 @@ import android.graphics.Rect;
 import android.os.SystemClock;
 import android.os.UserHandle;
 
-import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -37,8 +36,7 @@ import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.model.ThumbnailData;
 import com.android.systemui.recents.tv.views.TaskCardView;
-import com.android.systemui.statusbar.tv.TvStatusBar;
-import com.android.systemui.tv.pip.PipManager;
+import com.android.systemui.pip.tv.PipManager;
 
 public class RecentsTvImpl extends RecentsImpl{
     public final static String RECENTS_TV_ACTIVITY =

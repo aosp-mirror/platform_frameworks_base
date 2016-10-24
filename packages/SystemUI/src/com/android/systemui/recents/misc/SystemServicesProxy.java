@@ -79,6 +79,8 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.systemui.R;
+import com.android.systemui.pip.tv.PipMenuActivity;
+import com.android.systemui.pip.tv.PipOnboardingActivity;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.model.Task;
@@ -109,8 +111,8 @@ public class SystemServicesProxy {
     final static List<String> sRecentsBlacklist;
     static {
         sRecentsBlacklist = new ArrayList<>();
-        sRecentsBlacklist.add("com.android.systemui.tv.pip.PipOnboardingActivity");
-        sRecentsBlacklist.add("com.android.systemui.tv.pip.PipMenuActivity");
+        sRecentsBlacklist.add(PipOnboardingActivity.class.getName());
+        sRecentsBlacklist.add(PipMenuActivity.class.getName());
     }
 
     private static SystemServicesProxy sSystemServicesProxy;

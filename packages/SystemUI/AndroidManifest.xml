@@ -389,7 +389,7 @@
 
         <!-- started from PipUI -->
         <activity
-            android:name="com.android.systemui.tv.pip.PipMenuActivity"
+            android:name=".pip.tv.PipMenuActivity"
             android:exported="true"
             android:theme="@style/PipTheme"
             android:launchMode="singleTop"
@@ -400,7 +400,7 @@
             androidprv:alwaysFocusable="true"
             android:excludeFromRecents="true" />
         <activity
-            android:name="com.android.systemui.tv.pip.PipOverlayActivity"
+            android:name=".pip.tv.PipOverlayActivity"
             android:exported="true"
             android:theme="@style/PipTheme"
             android:taskAffinity=""
@@ -409,7 +409,7 @@
             android:supportsPictureInPicture="true"
             android:excludeFromRecents="true" />
         <activity
-            android:name="com.android.systemui.tv.pip.PipOnboardingActivity"
+            android:name=".pip.tv.PipOnboardingActivity"
             android:exported="true"
             android:theme="@style/PipTheme"
             android:launchMode="singleTop"
