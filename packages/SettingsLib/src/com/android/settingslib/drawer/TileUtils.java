@@ -123,9 +123,9 @@ public class TileUtils {
                 // Only add Settings for this user.
                 getTilesForAction(context, user, SETTINGS_ACTION, cache, null, tiles, true);
                 getTilesForAction(context, user, OPERATOR_SETTINGS, cache,
-                        OPERATOR_DEFAULT_CATEGORY, tiles, false);
+                        OPERATOR_DEFAULT_CATEGORY, tiles, false, true);
                 getTilesForAction(context, user, MANUFACTURER_SETTINGS, cache,
-                        MANUFACTURER_DEFAULT_CATEGORY, tiles, false);
+                        MANUFACTURER_DEFAULT_CATEGORY, tiles, false, true);
             }
             getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
         }
@@ -177,12 +177,20 @@ public class TileUtils {
     private static void getTilesForAction(Context context,
             UserHandle user, String action, Map<Pair<String, String>, Tile> addedCache,
             String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings) {
+        getTilesForAction(context, user, action, addedCache, defaultCategory, outTiles,
+                requireSettings, requireSettings);
+    }
+
+    private static void getTilesForAction(Context context,
+            UserHandle user, String action, Map<Pair<String, String>, Tile> addedCache,
+            String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings,
+            boolean usePriority) {
         Intent intent = new Intent(action);
         if (requireSettings) {
             intent.setPackage(SETTING_PKG);
         }
         getTilesForIntent(context, user, intent, addedCache, defaultCategory, outTiles,
-                requireSettings, true);
+                usePriority, true);
     }
 
     public static void getTilesForIntent(Context context, UserHandle user, Intent intent,
