@@ -26,6 +26,7 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
@@ -854,6 +855,25 @@ public class UserManagerService extends IUserManager.Stub {
                 info.flags ^= UserInfo.FLAG_DISABLED;
                 writeUserLP(getUserDataLU(info.id));
             }
+        }
+    }
+
+    /**
+     * Evicts a user's CE key by stopping and restarting the user.
+     *
+     * The key is evicted automatically by the user controller when the user has stopped.
+     */
+    @Override
+    public void evictCredentialEncryptionKey(@UserIdInt int userId) {
+        checkManageUsersPermission("evict CE key");
+        final IActivityManager am = ActivityManagerNative.getDefault();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            am.restartUserInBackground(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowAsRuntimeException();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 

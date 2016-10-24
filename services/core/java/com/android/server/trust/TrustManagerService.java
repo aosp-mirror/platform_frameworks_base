@@ -25,6 +25,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.Manifest;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustListener;
@@ -103,6 +104,7 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_SWITCH_USER = 9;
     private static final int MSG_FLUSH_TRUST_USUALLY_MANAGED = 10;
     private static final int MSG_UNLOCK_USER = 11;
+    private static final int MSG_STOP_USER = 12;
 
     private static final int TRUST_USUALLY_MANAGED_FLUSH_DELAY = 2 * 60 * 1000;
 
@@ -414,15 +416,18 @@ public class TrustManagerService extends SystemService {
                 }
             }
             boolean deviceLocked = secure && showingKeyguard && !trusted;
+            setDeviceLockedForUser(id, deviceLocked);
+        }
+    }
 
-            boolean changed;
-            synchronized (mDeviceLockedForUser) {
-                changed = isDeviceLockedInner(id) != deviceLocked;
-                mDeviceLockedForUser.put(id, deviceLocked);
-            }
-            if (changed) {
-                dispatchDeviceLocked(id, deviceLocked);
-            }
+    private void setDeviceLockedForUser(@UserIdInt int userId, boolean locked) {
+        final boolean changed;
+        synchronized (mDeviceLockedForUser) {
+            changed = isDeviceLockedInner(userId) != locked;
+            mDeviceLockedForUser.put(userId, locked);
+        }
+        if (changed) {
+            dispatchDeviceLocked(userId, locked);
         }
     }
 
@@ -724,6 +729,11 @@ public class TrustManagerService extends SystemService {
         mHandler.obtainMessage(MSG_UNLOCK_USER, userId, 0, null).sendToTarget();
     }
 
+    @Override
+    public void onStopUser(@UserIdInt int userId) {
+        mHandler.obtainMessage(MSG_STOP_USER, userId, 0, null).sendToTarget();
+    }
+
     // Plumbing
 
     private final IBinder mService = new ITrustManager.Stub() {
@@ -981,6 +991,9 @@ public class TrustManagerService extends SystemService {
                 case MSG_SWITCH_USER:
                     mCurrentUser = msg.arg1;
                     refreshDeviceLockedForUser(UserHandle.USER_ALL);
+                    break;
+                case MSG_STOP_USER:
+                    setDeviceLockedForUser(msg.arg1, true);
                     break;
                 case MSG_FLUSH_TRUST_USUALLY_MANAGED:
                     SparseBooleanArray usuallyManaged;

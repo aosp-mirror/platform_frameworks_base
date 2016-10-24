@@ -90,7 +90,7 @@ interface IDevicePolicyManager {
     void setRequiredStrongAuthTimeout(in ComponentName who, long timeMs, boolean parent);
     long getRequiredStrongAuthTimeout(in ComponentName who, int userId, boolean parent);
 
-    void lockNow(boolean parent);
+    void lockNow(int flags, boolean parent);
 
     void wipeData(int flags);
 

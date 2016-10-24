@@ -578,6 +578,7 @@ interface IActivityManager {
     boolean requestAutoFillData(in IResultReceiver receiver, in Bundle receiverExtras,
             in IBinder activityToken, int flags);
     void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback);
+    int restartUserInBackground(int userId);
 
     // WARNING: when these transactions are updated, check if they are any callers on the native
     // side. If so, make sure they are using the correct transaction ids and arguments.

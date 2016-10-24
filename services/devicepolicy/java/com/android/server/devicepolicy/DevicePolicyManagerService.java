@@ -75,6 +75,7 @@ import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
+import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1494,6 +1495,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         TelephonyManager getTelephonyManager() {
             return TelephonyManager.from(mContext);
+        }
+
+        TrustManager getTrustManager() {
+            return (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
         }
 
         IWindowManager getIWindowManager() {
@@ -4377,31 +4382,52 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void lockNow(boolean parent) {
+    public void lockNow(int flags, boolean parent) {
         if (!mHasFeature) {
             return;
         }
+
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
-            getActiveAdminForCallerLocked(
+            final ActiveAdmin admin = getActiveAdminForCallerLocked(
                     null, DeviceAdminInfo.USES_POLICY_FORCE_LOCK, parent);
 
-            int userToLock = mInjector.userHandleGetCallingUserId();
-
-            // Unless this is a managed profile with work challenge enabled, lock all users.
-            if (parent || !isSeparateProfileChallengeEnabled(userToLock)) {
-                userToLock = UserHandle.USER_ALL;
-            }
             final long ident = mInjector.binderClearCallingIdentity();
             try {
+                // Evict key
+                if ((flags & DevicePolicyManager.FLAG_EVICT_CE_KEY) != 0) {
+                    enforceManagedProfile(callingUserId, "set FLAG_EVICT_CE_KEY");
+                    if (!isProfileOwner(admin.info.getComponent(), callingUserId)) {
+                        throw new SecurityException(
+                               "Only profile owner admins can set FLAG_EVICT_CE_KEY");
+                    }
+                    if (parent) {
+                        throw new IllegalArgumentException(
+                                "Cannot set FLAG_EVICT_CE_KEY for the parent");
+                    }
+                    if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
+                        throw new UnsupportedOperationException(
+                                "FLAG_EVICT_CE_KEY only applies to FBE devices");
+                    }
+                    mUserManager.evictCredentialEncryptionKey(callingUserId);
+                }
+
+                // Lock all users unless this is a managed profile with a separate challenge
+                final int userToLock = (parent || !isSeparateProfileChallengeEnabled(callingUserId)
+                        ? UserHandle.USER_ALL : callingUserId);
                 mLockPatternUtils.requireStrongAuth(
                         STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW, userToLock);
+
+                // Require authentication for the device or profile
                 if (userToLock == UserHandle.USER_ALL) {
                     // Power off the display
                     mInjector.powerManagerGoToSleep(SystemClock.uptimeMillis(),
                             PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN, 0);
                     mInjector.getIWindowManager().lockNow(null);
+                } else {
+                    mInjector.getTrustManager().setDeviceLockedForUser(userToLock, true);
                 }
             } catch (RemoteException e) {
             } finally {

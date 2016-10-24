@@ -442,6 +442,19 @@ final class UserController {
         }
     }
 
+    int restartUser(final int userId, final boolean foreground) {
+        return stopUser(userId, /* force */ true, new IStopUserCallback.Stub() {
+            @Override
+            public void userStopped(final int userId) {
+                // Post to the same handler that this callback is called from to ensure the user
+                // cleanup is complete before restarting.
+                mHandler.post(() -> startUser(userId, foreground));
+            }
+            @Override
+            public void userStopAborted(final int userId) {}
+        });
+    }
+
     int stopUser(final int userId, final boolean force, final IStopUserCallback callback) {
         if (mInjector.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -634,6 +647,12 @@ final class UserController {
         }
 
         if (stopped) {
+            // Evict the user's credential encryption key
+            try {
+                getStorageManager().lockUserKey(userId);
+            } catch (RemoteException re) {
+                throw re.rethrowAsRuntimeException();
+            }
             mInjector.systemServiceManagerCleanupUser(userId);
             synchronized (mLock) {
                 mInjector.stackSupervisorRemoveUserLocked(userId);

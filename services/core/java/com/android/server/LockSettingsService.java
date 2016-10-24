@@ -176,12 +176,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         @Override
-        public void onBootPhase(int phase) {
-            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-                mLockSettingsService.maybeShowEncryptionNotifications();
-            } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
-                // TODO
-            }
+        public void onStartUser(int userHandle) {
+            mLockSettingsService.onStartUser(userHandle);
         }
 
         @Override
@@ -313,27 +309,25 @@ public class LockSettingsService extends ILockSettings.Stub {
      * If the account is credential-encrypted, show notification requesting the user to unlock
      * the device.
      */
-    private void maybeShowEncryptionNotifications() {
-        final List<UserInfo> users = mUserManager.getUsers();
-        for (int i = 0; i < users.size(); i++) {
-            UserInfo user = users.get(i);
-            UserHandle userHandle = user.getUserHandle();
-            final boolean isSecure = mStorage.hasPassword(user.id) || mStorage.hasPattern(user.id);
-            if (isSecure && !mUserManager.isUserUnlockingOrUnlocked(userHandle)) {
-                if (!user.isManagedProfile()) {
-                    // When the user is locked, we communicate it loud-and-clear
-                    // on the lockscreen; we only show a notification below for
-                    // locked managed profiles.
-                } else {
-                    UserInfo parent = mUserManager.getProfileParent(user.id);
-                    if (parent != null &&
-                            mUserManager.isUserUnlockingOrUnlocked(parent.getUserHandle()) &&
-                            !mUserManager.isQuietModeEnabled(userHandle)) {
-                        // Only show notifications for managed profiles once their parent
-                        // user is unlocked.
-                        showEncryptionNotificationForProfile(userHandle);
-                    }
-                }
+    private void maybeShowEncryptionNotificationForUser(@UserIdInt int userId) {
+        final UserInfo user = mUserManager.getUserInfo(userId);
+        if (!user.isManagedProfile()) {
+            // When the user is locked, we communicate it loud-and-clear
+            // on the lockscreen; we only show a notification below for
+            // locked managed profiles.
+            return;
+        }
+
+        final UserHandle userHandle = user.getUserHandle();
+        final boolean isSecure = mStorage.hasPassword(userId) || mStorage.hasPattern(userId);
+        if (isSecure && !mUserManager.isUserUnlockingOrUnlocked(userHandle)) {
+            UserInfo parent = mUserManager.getProfileParent(userId);
+            if (parent != null &&
+                    mUserManager.isUserUnlockingOrUnlocked(parent.getUserHandle()) &&
+                    !mUserManager.isQuietModeEnabled(userHandle)) {
+                // Only show notifications for managed profiles once their parent
+                // user is unlocked.
+                showEncryptionNotificationForProfile(userHandle);
             }
         }
     }
@@ -384,13 +378,17 @@ public class LockSettingsService extends ILockSettings.Stub {
         mNotificationManager.notifyAsUser(null, FBE_ENCRYPTED_NOTIFICATION, notification, user);
     }
 
-    public void hideEncryptionNotification(UserHandle userHandle) {
+    private void hideEncryptionNotification(UserHandle userHandle) {
         if (DEBUG) Slog.v(TAG, "hide encryption notification, user: "+ userHandle.getIdentifier());
         mNotificationManager.cancelAsUser(null, FBE_ENCRYPTED_NOTIFICATION, userHandle);
     }
 
     public void onCleanupUser(int userId) {
         hideEncryptionNotification(new UserHandle(userId));
+    }
+
+    public void onStartUser(final int userId) {
+        maybeShowEncryptionNotificationForUser(userId);
     }
 
     public void onUnlockUser(final int userId) {
