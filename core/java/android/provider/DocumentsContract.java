@@ -28,6 +28,7 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ResolveInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
@@ -422,6 +423,14 @@ public final class DocumentsContract {
         public static final int FLAG_SUPPORTS_SETTINGS = 1 << 11;
 
         /**
+         * Flag indicating that a Web link can be obtained for the document.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#createWebLinkIntent(PackageManager, Uri, Bundle)
+         */
+        public static final int FLAG_WEB_LINKABLE = 1 << 12;
+
+        /**
          * Flag indicating that a document is not complete, likely its
          * contents are being downloaded. Partial files cannot be opened,
          * copied, moved in the UI. But they can be deleted and retried
@@ -685,11 +694,19 @@ public final class DocumentsContract {
     public static final String METHOD_EJECT_ROOT = "android:ejectRoot";
     /** {@hide} */
     public static final String METHOD_FIND_DOCUMENT_PATH = "android:findDocumentPath";
+    /** {@hide} */
+    public static final String METHOD_CREATE_WEB_LINK_INTENT = "android:createWebLinkIntent";
 
     /** {@hide} */
     public static final String EXTRA_PARENT_URI = "parentUri";
     /** {@hide} */
     public static final String EXTRA_URI = "uri";
+
+    /**
+     * @see #createWebLinkIntent(ContentResolver, Uri, Bundle)
+     * {@hide}
+     */
+    public static final String EXTRA_OPTIONS = "options";
 
     private static final String PATH_ROOT = "root";
     private static final String PATH_RECENT = "recent";
@@ -1397,6 +1414,85 @@ public final class DocumentsContract {
 
         final Bundle out = client.call(METHOD_FIND_DOCUMENT_PATH, null, in);
 
+        return out.getParcelable(DocumentsContract.EXTRA_RESULT);
+    }
+
+    /**
+     * Creates an intent for obtaining a web link for the specified document.
+     *
+     * <p>Note, that due to internal limitations, if there is already a web link
+     * intent created for the specified document but with different options,
+     * then it may be overriden.
+     *
+     * <p>Providers are required to show confirmation UI for all new permissions granted
+     * for the linked document.
+     *
+     * <p>If list of recipients is known, then it should be passed in options as
+     * {@link Intent#EXTRA_EMAIL} as either a string or list of strings. Note, that
+     * this is just a hint for the provider, which can ignore the list. In either
+     * case the provider is required to show a UI for letting the user confirm
+     * any new permission grants.
+     *
+     * <p>Since this API may show a UI, it cannot be called from background.
+     *
+     * <p>In order to obtain the Web Link use code like this:
+     * <pre><code>
+     * void onSomethingHappened() {
+     *   IntentSender sender = DocumentsContract.createWebLinkIntent(<i>...</i>);
+     *   if (sender != null) {
+     *     startIntentSenderForResult(
+     *         DocumentsContract.createWebLinkIntent(<i>...</i>),
+     *         WEB_LINK_REQUEST_CODE,
+     *         null, 0, 0, 0, null);
+     *   }
+     * }
+     *
+     * <i>(...)</i>
+     *
+     * void onActivityResult(int requestCode, int resultCode, Intent data) {
+     *   if (requestCode == WEB_LINK_REQUEST_CODE && resultCode == RESULT_OK) {
+     *     Uri weblinkUri = data.getData();
+     *     <i>...</i>
+     *   }
+     * }
+     * </code></pre>
+     *
+     * @param uri uri for the document to create a link to.
+     * @param options Extra information for generating the link.
+     * @return an intent sender to obtain the web link, or null if the document
+     *      is not linkable, or creating the intent sender failed.
+     * @see DocumentsProvider#createWebLinkIntent(String, Bundle)
+     * @see Intent#EXTRA_EMAIL
+     */
+    public static IntentSender createWebLinkIntent(ContentResolver resolver, Uri uri,
+            Bundle options) {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                uri.getAuthority());
+        try {
+            return createWebLinkIntent(client, uri, options);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to create a web link intent", e);
+            return null;
+        } finally {
+            ContentProviderClient.releaseQuietly(client);
+        }
+    }
+
+    /**
+     * {@hide}
+     */
+    public static IntentSender createWebLinkIntent(ContentProviderClient client, Uri uri,
+            Bundle options) throws RemoteException {
+        final Bundle in = new Bundle();
+        in.putParcelable(DocumentsContract.EXTRA_URI, uri);
+
+        // Options may be provider specific, so put them in a separate bundle to
+        // avoid overriding the Uri.
+        if (options != null) {
+            in.putBundle(EXTRA_OPTIONS, options);
+        }
+
+        final Bundle out = client.call(METHOD_CREATE_WEB_LINK_INTENT, null, in);
         return out.getParcelable(DocumentsContract.EXTRA_RESULT);
     }
 
