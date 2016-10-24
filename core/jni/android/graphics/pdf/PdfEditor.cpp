@@ -13,6 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define LOG_TAG "PdfEditor"
+
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <vector>
+
+#include <android/log.h>
+#include <utils/Log.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -29,11 +38,6 @@
 #include "SkMatrix.h"
 
 #include <core_jni_helpers.h>
-#include <vector>
-#include <utils/Log.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 namespace android {
 
@@ -142,8 +146,7 @@ static bool writeAllBytes(const int fd, const void* buffer, const size_t byteCou
             if (errno == EINTR) {
                 continue;
             }
-            __android_log_print(ANDROID_LOG_ERROR, LOG_TAG,
-                    "Error writing to buffer: %d", errno);
+            ALOGE("Error writing to buffer: %d", errno);
             return false;
         }
         remainingBytes -= writtenByteCount;
