@@ -22,8 +22,7 @@
 #include "VectorDrawable.h"
 
 #include <SkCanvas.h>
-#include <SkClipStack.h>
-#include <SkTArray.h>
+#include <SkTLazy.h>
 
 namespace android {
 
@@ -39,10 +38,7 @@ public:
      *      not be NULL. This constructor will ref() the SkCanvas, and unref()
      *      it in its destructor.
      */
-    explicit SkiaCanvas(SkCanvas* canvas) : mCanvas(canvas) {
-        SkASSERT(canvas);
-        canvas->ref();
-    }
+    explicit SkiaCanvas(SkCanvas* canvas);
 
     virtual SkCanvas* asSkCanvas() override {
         return mCanvas.get();
@@ -152,7 +148,7 @@ public:
             uirenderer::GlFunctorLifecycleListener* listener) override;
 
 protected:
-    explicit SkiaCanvas() {}
+    SkiaCanvas();
     void reset(SkCanvas* skiaCanvas);
     void drawDrawable(SkDrawable* drawable) { mCanvas->drawDrawable(drawable); }
 
@@ -167,19 +163,26 @@ private:
     struct SaveRec {
         int              saveCount;
         SaveFlags::Flags saveFlags;
+        size_t           clipIndex;
     };
 
     bool mHighContrastText = false;
 
+    const SaveRec* currentSaveRec() const;
     void recordPartialSave(SaveFlags::Flags flags);
-    void saveClipsForFrame(SkTArray<SkClipStack::Element>& clips, int frameSaveCount);
-    void applyClips(const SkTArray<SkClipStack::Element>& clips);
+
+    template<typename T>
+    void recordClip(const T&, SkRegion::Op);
+    void applyPersistentClips(size_t clipStartIndex);
 
     void drawPoints(const float* points, int count, const SkPaint& paint,
             SkCanvas::PointMode mode);
 
-    sk_sp<SkCanvas> mCanvas;
+    class Clip;
+
+    sk_sp<SkCanvas>          mCanvas;
     std::unique_ptr<SkDeque> mSaveStack; // lazily allocated, tracks partial saves.
+    std::vector<Clip>        mClipStack; // tracks persistent clips.
 };
 
 } // namespace android
