@@ -484,7 +484,8 @@ public class WifiTracker {
         mMainHandler.scheduleAPCopyingAndCloseWriteLock();
     }
 
-    private AccessPoint getCachedOrCreate(ScanResult result, List<AccessPoint> cache) {
+    @VisibleForTesting
+    AccessPoint getCachedOrCreate(ScanResult result, List<AccessPoint> cache) {
         final int N = cache.size();
         for (int i = 0; i < N; i++) {
             if (cache.get(i).matches(result)) {
@@ -493,10 +494,13 @@ public class WifiTracker {
                 return ret;
             }
         }
-        return new AccessPoint(mContext, result);
+        final AccessPoint accessPoint = new AccessPoint(mContext, result);
+        accessPoint.setListener(mAccessPointListenerAdapter);
+        return accessPoint;
     }
 
-    private AccessPoint getCachedOrCreate(WifiConfiguration config, List<AccessPoint> cache) {
+    @VisibleForTesting
+    AccessPoint getCachedOrCreate(WifiConfiguration config, List<AccessPoint> cache) {
         final int N = cache.size();
         for (int i = 0; i < N; i++) {
             if (cache.get(i).matches(config)) {
@@ -505,7 +509,7 @@ public class WifiTracker {
                 return ret;
             }
         }
-        AccessPoint accessPoint = new AccessPoint(mContext, config);
+        final AccessPoint accessPoint = new AccessPoint(mContext, config);
         accessPoint.setListener(mAccessPointListenerAdapter);
         return accessPoint;
     }
