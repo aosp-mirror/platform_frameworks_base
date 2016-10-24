@@ -416,7 +416,8 @@ final class RemoteConnectionService {
                 request.getVideoState());
         try {
             if (mConnectionById.isEmpty()) {
-                mOutgoingConnectionServiceRpc.addConnectionServiceAdapter(mServant.getStub());
+                mOutgoingConnectionServiceRpc.addConnectionServiceAdapter(mServant.getStub(),
+                        null /*Session.Info*/);
             }
             RemoteConnection connection =
                     new RemoteConnection(id, mOutgoingConnectionServiceRpc, newRequest);
@@ -427,7 +428,8 @@ final class RemoteConnectionService {
                     id,
                     newRequest,
                     isIncoming,
-                    false /* isUnknownCall */);
+                    false /* isUnknownCall */,
+                    null /*Session.info*/);
             connection.registerCallback(new RemoteConnection.Callback() {
                 @Override
                 public void onDestroyed(RemoteConnection connection) {
@@ -467,7 +469,8 @@ final class RemoteConnectionService {
     private void maybeDisconnectAdapter() {
         if (mConnectionById.isEmpty() && mConferenceById.isEmpty()) {
             try {
-                mOutgoingConnectionServiceRpc.removeConnectionServiceAdapter(mServant.getStub());
+                mOutgoingConnectionServiceRpc.removeConnectionServiceAdapter(mServant.getStub(),
+                        null /*Session.info*/);
             } catch (RemoteException e) {
             }
         }

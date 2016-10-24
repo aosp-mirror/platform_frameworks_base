@@ -229,6 +229,23 @@ public class SessionManager {
     }
 
     /**
+     * Retrieve the information of the currently active Session. This information is parcelable and
+     * is used to create an external Session ({@link #startExternalSession(Session.Info, String)}).
+     * If there is no Session active, this method will return null.
+     */
+    public synchronized Session.Info getExternalSession() {
+        int threadId = getCallingThreadId();
+        Session threadSession = mSessionMapper.get(threadId);
+        if (threadSession == null) {
+            Log.d(LOGGING_TAG, "Log.getExternalSession was called with no session " +
+                    "active.");
+            return null;
+        }
+
+        return threadSession.getInfo();
+    }
+
+    /**
      * Cancels a subsession that had Log.createSubsession() called on it, but will never have
      * Log.continueSession(...) called on it due to an error. Allows the subsession to be cleaned
      * gracefully instead of being removed by the mSessionCleanupHandler forcefully later.

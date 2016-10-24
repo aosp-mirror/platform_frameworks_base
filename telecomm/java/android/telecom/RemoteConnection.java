@@ -847,7 +847,7 @@ public final class RemoteConnection {
     public void abort() {
         try {
             if (mConnected) {
-                mConnectionService.abort(mConnectionId);
+                mConnectionService.abort(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         }
@@ -859,7 +859,7 @@ public final class RemoteConnection {
     public void answer() {
         try {
             if (mConnected) {
-                mConnectionService.answer(mConnectionId);
+                mConnectionService.answer(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         }
@@ -873,7 +873,7 @@ public final class RemoteConnection {
     public void answer(int videoState) {
         try {
             if (mConnected) {
-                mConnectionService.answerVideo(mConnectionId, videoState);
+                mConnectionService.answerVideo(mConnectionId, videoState, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         }
@@ -885,7 +885,7 @@ public final class RemoteConnection {
     public void reject() {
         try {
             if (mConnected) {
-                mConnectionService.reject(mConnectionId);
+                mConnectionService.reject(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         }
@@ -897,7 +897,7 @@ public final class RemoteConnection {
     public void hold() {
         try {
             if (mConnected) {
-                mConnectionService.hold(mConnectionId);
+                mConnectionService.hold(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         }
@@ -909,7 +909,7 @@ public final class RemoteConnection {
     public void unhold() {
         try {
             if (mConnected) {
-                mConnectionService.unhold(mConnectionId);
+                mConnectionService.unhold(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         }
@@ -921,7 +921,7 @@ public final class RemoteConnection {
     public void disconnect() {
         try {
             if (mConnected) {
-                mConnectionService.disconnect(mConnectionId);
+                mConnectionService.disconnect(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         }
@@ -939,7 +939,7 @@ public final class RemoteConnection {
     public void playDtmfTone(char digit) {
         try {
             if (mConnected) {
-                mConnectionService.playDtmfTone(mConnectionId, digit);
+                mConnectionService.playDtmfTone(mConnectionId, digit, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         }
@@ -955,7 +955,7 @@ public final class RemoteConnection {
     public void stopDtmfTone() {
         try {
             if (mConnected) {
-                mConnectionService.stopDtmfTone(mConnectionId);
+                mConnectionService.stopDtmfTone(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         }
@@ -985,7 +985,8 @@ public final class RemoteConnection {
     public void postDialContinue(boolean proceed) {
         try {
             if (mConnected) {
-                mConnectionService.onPostDialContinue(mConnectionId, proceed);
+                mConnectionService.onPostDialContinue(mConnectionId, proceed,
+                        null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         }
@@ -999,7 +1000,7 @@ public final class RemoteConnection {
     public void pullExternalCall() {
         try {
             if (mConnected) {
-                mConnectionService.pullExternalCall(mConnectionId);
+                mConnectionService.pullExternalCall(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         }
@@ -1026,7 +1027,8 @@ public final class RemoteConnection {
     public void setCallAudioState(CallAudioState state) {
         try {
             if (mConnected) {
-                mConnectionService.onCallAudioStateChanged(mConnectionId, state);
+                mConnectionService.onCallAudioStateChanged(mConnectionId, state,
+                        null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         }
