@@ -101,7 +101,7 @@ public class PowerNotificationControlsFragment extends Fragment {
     }
 
     private boolean isEnabled() {
-        int setting = Settings.Secure.getInt(getContext().getContentResolver(), KEY_SHOW_PNC, 0);
+        int setting = Settings.Secure.getInt(getContext().getContentResolver(), KEY_SHOW_PNC, 1);
         return setting == 1;
     }
 
