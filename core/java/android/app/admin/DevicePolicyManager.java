@@ -1055,6 +1055,7 @@ public class DevicePolicyManager {
      *         otherwise
      */
     public boolean isAdminActive(@NonNull ComponentName admin) {
+        throwIfParentInstance("isAdminActive");
         return isAdminActiveAsUser(admin, myUserId());
     }
 
@@ -6140,6 +6141,7 @@ public class DevicePolicyManager {
      * <li>{@link #getPasswordExpirationTimeout}</li>
      * <li>{@link #setPasswordExpirationTimeout}</li>
      * <li>{@link #getPasswordExpiration}</li>
+     * <li>{@link #getPasswordMaximumLength}</li>
      * <li>{@link #isActivePasswordSufficient}</li>
      * <li>{@link #getCurrentFailedPasswordAttempts}</li>
      * <li>{@link #getMaximumFailedPasswordsForWipe}</li>
