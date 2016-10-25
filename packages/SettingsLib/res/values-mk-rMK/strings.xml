@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Поврзувањето преку Wi-Fi не успеа"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Проблем со автентикација"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Надвор од опсег"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Не е откриен пристап до интернет, нема автоматски повторно да се поврзете."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Не е откриен пристап до Интернет, нема автоматски повторно да се поврзете."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Нема пристап до Интернет."</string>
     <string name="saved_network" msgid="4352716707126620811">"Зачувано од <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Поврзано преку помошник за Wi-Fismile"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Поврзано преку %1$s"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Прикажи граници на клип, маргини, итн."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Сила на RTL за насока на слој"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Присилно постави насока на распоред на екран во РТЛ за сите локални стандарди"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Прикажи употреба на ЦПУ"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Прекривка на екран прикаж. употреба на тековен ЦПУ"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Присили рендерирање на GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Присилно користење на GPU за цртеж 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Сила 4x MSAA"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Најголем"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Приспособен (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Помош и повратни информации"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Мени"</string>
 </resources>

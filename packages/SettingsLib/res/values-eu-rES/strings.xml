@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Ezin izan da konektatu Wi-Fi sarera"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Autentifikazio-arazoa"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Urrunegi"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Ez da hauteman Interneterako sarbiderik. Ez da automatikoki berriro konektatuko."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Ez da hauteman Interneterako sarbiderik. Ez da automatikoki berriro konektatuko."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Ezin da konektatu Internetera."</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> aplikazioak gorde du"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi laguntzailearen bidez konektatuta"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s bidez konektatuta"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Erakutsi kliparen mugak, marjinak, etab."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Behartu eskuin-ezker norabidea."</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Behartu pantaila-diseinuaren norabidea eskuin-ezker izatera eskualdeko ezarpen guztiekin."</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Erakutsi PUZ erabilera"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"PUZ erabilera erakusten duen pantaila-gainjartzea"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Behartu GPU errendatzea"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Behartu GPUa erabiltzera 2 dimentsioko marrazkietan."</string>
     <string name="force_msaa" msgid="7920323238677284387">"Behartu 4x MSAA"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Handiena"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Pertsonalizatua (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Laguntza eta iritziak"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Menua"</string>
 </resources>

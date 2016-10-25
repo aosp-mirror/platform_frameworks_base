@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi കണക്ഷൻ പരാജയം"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ആധികാരികമാക്കുന്നതിലെ പ്രശ്‌നം"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"പരിധിയിലില്ല"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"ഇന്റർനെറ്റ് ആക്സസ്സൊന്നും കണ്ടെത്താത്തതിനാൽ സ്വയം വീണ്ടും കണക്‌റ്റുചെയ്യില്ല."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"ഇന്റർനെറ്റ് ആക്സസ്സൊന്നും കണ്ടെത്താത്തതിനാൽ സ്വയം വീണ്ടും കണക്‌റ്റുചെയ്യില്ല."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"ഇന്റർനെറ്റ് ആക്‌സസ്സ് ഇല്ല."</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> സംരക്ഷിച്ചത്"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"വൈഫൈ അസിസ്റ്റന്റ് മുഖേന കണക്‌റ്റുചെയ്തു"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s വഴി ബന്ധിപ്പിച്ചു"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"ക്ലിപ്പ് ബൗണ്ടുകൾ, മാർജിനുകൾ തുടങ്ങിയവ ദൃശ്യമാക്കുക"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL ലേഔട്ട് ഡയറക്ഷൻ നിർബന്ധമാക്കുക"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"എല്ലാ ഭാഷകൾക്കുമായി സ്‌ക്രീൻ ലേഔട്ട് ഡയറക്ഷൻ RTL-ലേക്ക് നിർബന്ധമാക്കുക"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU ഉപയോഗം ദൃശ്യമാക്കുക"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"സ്ക്രീൻ ഓവർലേ നിലവിലെ CPU ഉപയോഗം ദൃശ്യമാക്കുന്നു"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU റെൻഡറിംഗ് ഫോഴ്സ്ചെയ്യുക"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d ഡ്രോയിംഗിനായുള്ള നിരബന്ധിത GPU ഉപയോഗം"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA നിർബന്ധമാക്കുക"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"ഏറ്റവും വലുത്"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ഇഷ്ടാനുസൃതം ( <xliff:g id="DENSITYDPI">%d</xliff:g> )"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"സഹായവും പ്രതികരണവും"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"മെനു"</string>
 </resources>

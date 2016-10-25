@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Αποτυχία σύνδεσης Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Πρόβλημα ελέγχου ταυτότητας"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Εκτός εμβέλειας"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Δεν εντοπίστηκε καμία πρόσβαση στο διαδίκτυο, δεν θα γίνει αυτόματη επανασύνδεση."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Δεν εντοπίστηκε πρόσβαση στο διαδίκτυο. Δεν θα πραγματοποιηθεί αυτόματη επανασύνδεση."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Δεν υπάρχει πρόσβαση στο διαδίκτυο."</string>
     <string name="saved_network" msgid="4352716707126620811">"Αποθηκεύτηκε από <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Σύνδεση μέσω βοηθού Wi‑Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Συνδέθηκε μέσω %1$s"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Εμφάνιση ορίων κλιπ, περιθωρίων, κλπ."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Επιβολή κατ. διάταξης RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Επιβολή διάταξης οθόν. RTL για όλες τις τοπ. ρυθμ."</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Προβολή χρήσης CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Επικάλυψη οθόνης για προβολή τρέχουσας χρήσης CPU"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Αναγκαστική απόδοση GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Αναγκαστική χρήση του GPU για σχέδιο 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Αναγκαστικά 4x MSAA"</string>
@@ -287,8 +286,8 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Μετατροπή…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Με κρυπτογράφηση αρχείου"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Μετατροπή σε κρυπτογράφηση βάσει αρχείου…"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Μετατροπή τμήματος δεδομένων σε κρυπτογράφηση βάσει αρχείου.\n !!Προσοχή!! Με αυτήν την ενέργεια, θα διαγραφούν όλα τα δεδομένα σας.\n Αυτή η λειτουργία βρίσκεται σε δοκιμαστικό στάδιο alpha και ενδέχεται να μην λειτουργεί σωστά.\n Πατήστε \"Εκκαθάριση και μετατροπή…\" για να συνεχίσετε."</string>
-    <string name="button_convert_fbe" msgid="5152671181309826405">"Εκκαθάριση και μετατροπή…"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Μετατροπή τμήματος δεδομένων σε κρυπτογράφηση βάσει αρχείου.\n !!Προσοχή!! Με αυτήν την ενέργεια, θα διαγραφούν όλα τα δεδομένα σας.\n Αυτή η λειτουργία βρίσκεται σε δοκιμαστικό στάδιο alpha και ενδέχεται να μην λειτουργεί σωστά.\n Πατήστε \"Διαγραφή και μετατροπή…\" για να συνεχίσετε."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Διαγραφή και μετατροπή…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Λειτουργία χρώματος εικόνας"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Χρήση sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Απενεργοποιημένο"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Μεγαλύτερα"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Προσαρμοσμένη (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Βοήθεια και σχόλια"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Μενού"</string>
 </resources>

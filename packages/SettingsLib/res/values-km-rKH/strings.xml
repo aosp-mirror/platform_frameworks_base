@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"ការ​ភ្ជាប់​ WiFi បរាជ័យ"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"បញ្ហា​ក្នុង​ការ​ផ្ទៀងផ្ទាត់"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"នៅ​ក្រៅ​តំបន់"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"រក​មិន​ឃើញ​ការ​ចូល​ដំណើរការ​អ៊ីនធឺណិត, នឹង​មិន​ភ្ជាប់​ឡើង​វិញ​ដោយ​ស្វ័យ​ប្រវត្តិ​ទេ។"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"រកមិនឃើញការតភ្ជាប់អ៊ីនធឺណិតទេ វានឹងមិនភ្ជាប់ឡើងវិញដោយស្វ័យប្រវត្តិទេ។"</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"គ្មានការតភ្ជាប់អ៊ីនធឺណិតទេ"</string>
     <string name="saved_network" msgid="4352716707126620811">"បានរក្សាទុកដោយ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"បានភ្ជាប់តាមរយៈជំនួយការ Wi‑Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"បានភ្ជាប់តាមរយៈ %1$s"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"បង្ហាញ​ការ​ភ្ជាប់​អត្ថបទ​សម្រង់ រឹម ។ល។"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"បង្ខំ​ទិស​ប្លង់ RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"បង្ខំ​ទិស​ប្លង់​អេក្រង់​ទៅកាន់ RTL សម្រាប់​មូលដ្ឋាន​ទាំងអស់"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"បង្ហាញ​​ការ​ប្រើ CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"អេក្រង់​ត្រួត​គ្នា​បង្ហាញ​​ការ​ប្រើ CPU បច្ចុប្បន្ន"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"បង្ខំ​ឲ្យ​បង្ហាញ GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"បង្ខំ​ប្រើ GPU សម្រាប់​ការ​គូរ​លើក​ទី​ពីរ"</string>
     <string name="force_msaa" msgid="7920323238677284387">"បង្ខំ 4x MSAA"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"ធំបំផុត"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ផ្ទាល់ខ្លួន (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"ជំនួយ និងមតិស្ថាបនា"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"ម៉ឺនុយ"</string>
 </resources>

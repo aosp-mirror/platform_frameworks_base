@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Error de conexión Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Error de autenticación"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Fuera de rango"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"No se ha detectado acceso a Internet, no se volverá a conectar automáticamente."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"No se ha detectado acceso a Internet, por lo que no se volverá a conectar automáticamente."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"No se ha detectado acceso a Internet."</string>
     <string name="saved_network" msgid="4352716707126620811">"Guardadas por <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Conectado a través de asistente Wi‑Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Conectado a través de %1$s"</string>
@@ -173,7 +174,7 @@
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar el nivel de logging de Wi-Fi, mostrar por SSID RSSI en el selector Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Si está habilitada, la conexión Wi‑Fi será más agresiva al transferir la conexión de datos al móvil (si la señal Wi‑Fi no es estable)"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Permitir/No permitir búsquedas de Wi-Fi basadas en la cantidad de tráfico de datos presente en la interfaz"</string>
-    <string name="select_logd_size_title" msgid="7433137108348553508">"Tamaños del búfer de Logger"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Tamaños de búfer de registrador"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Elige el tamaño del Logger por búfer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"¿Borrar almacenamiento continuo del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Cuando ya no supervisamos la actividad con el registrador de forma continua, estamos obligados a borrar los datos del registrador almacenados en el dispositivo."</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Mostrar límites de vídeo, márgenes, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forzar dirección diseño RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forzar dirección (RTL) para todas configuraciones"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Mostrar uso de la CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Suporponer el uso de la CPU en la pantalla"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Forzar aceleración GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Forzar uso de GPU para dibujos en 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Forzar MSAA 4x"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Lo más grande posible"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Personalizado (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Ayuda y sugerencias"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Menú"</string>
 </resources>

@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi કનેક્શન નિષ્ફળ"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"પ્રમાણીકરણ સમસ્યા"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"રેન્જમાં નથી"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"કોઈ ઇન્ટરનેટ અ‍ૅક્સેસ શોધાયું નથી, આપમેળે ફરીથી કનેક્ટ કરશે નહીં."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"કોઈ ઇન્ટરનેટ અ‍ૅક્સેસ મળી નથી, આપમેળે ફરીથી કનેક્ટ કરશે નહીં."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"કોઈ ઇન્ટરનેટ ઍક્સેસ નથી."</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા સચવાયું"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Wi-Fi સહાયક દ્વારા કનેક્ટ થયું"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s દ્વારા કનેક્ટ થયેલ"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"ક્લિપ બાઉન્ડ્સ, હાંસિયાં વગેરે બતાવો."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL લેઆઉટ દિશા નિર્દેશની ફરજ પાડો"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"તમામ લૉકેલ્સ માટે સ્ક્રીન લેઆઉટ દિશા નિર્દેશને RTL ની ફરજ પાડો"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU સંગ્રહ બતાવો"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"વર્તમાન CPU વપરાશ દર્શાવતું સ્ક્રીન ઓવરલે"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU રેન્ડરિંગની ફરજ પાડો"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2જા રેખાંકન માટે GPU ના ઉપયોગની ફરજ પાડો"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA ને ફરજ પાડો"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"સૌથી મોટું"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"કસ્ટમ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"સહાય અને પ્રતિસાદ"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"મેનુ"</string>
 </resources>

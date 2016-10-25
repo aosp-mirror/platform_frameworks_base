@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WLAN-Verbindungsfehler"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Authentifizierungsproblem"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Nicht in Reichweite"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Keine Internetverbindung erkannt, es kann nicht automatisch eine Verbindung hergestellt werden."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Keine Internetverbindung erkannt. Es kann nicht automatisch eine Verbindung hergestellt werden."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Kein Internetzugriff."</string>
     <string name="saved_network" msgid="4352716707126620811">"Gespeichert von <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Über WLAN-Assistenten verbunden"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Über %1$s verbunden"</string>
@@ -38,7 +39,7 @@
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Verbindung wird getrennt..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Verbindung wird hergestellt..."</string>
     <string name="bluetooth_connected" msgid="6038755206916626419">"Verbunden"</string>
-    <string name="bluetooth_pairing" msgid="1426882272690346242">"Pairing läuft…"</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"Kopplung läuft…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Verbunden (kein Telefon)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Verbunden (außer Audiomedien)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Verbunden (ohne Nachrichtenzugriff)"</string>
@@ -69,12 +70,12 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Für Audiosystem des Telefons verwenden"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Für Dateiübertragung verwenden"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Für Eingabe verwenden"</string>
-    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Pairing durchführen"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"Pairing durchführen"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Koppeln"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"KOPPELN"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Abbrechen"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Über das Pairing kann auf deine Kontakte und auf deinen Anrufverlauf zugegriffen werden, wenn eine Verbindung besteht."</string>
-    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Pairing mit <xliff:g id="DEVICE_NAME">%1$s</xliff:g> war nicht möglich."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Pairing mit <xliff:g id="DEVICE_NAME">%1$s</xliff:g> war nicht möglich, weil die eingegebene PIN oder der Zugangscode falsch ist."</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Über die Kopplung kann auf deine Kontakte und auf deinen Anrufverlauf zugegriffen werden, wenn eine Verbindung besteht."</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Kopplung mit <xliff:g id="DEVICE_NAME">%1$s</xliff:g> war nicht möglich."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Kopplung mit <xliff:g id="DEVICE_NAME">%1$s</xliff:g> war nicht möglich, weil die eingegebene PIN oder der Zugangscode falsch ist."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Kommunikation mit <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ist nicht möglich."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Verbindung wurde von <xliff:g id="DEVICE_NAME">%1$s</xliff:g> abgelehnt."</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"WLAN: aus"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Clip-Begrenzungen, Ränder usw. anzeigen"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL-Layout erzwingen"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"RTL-Bildschirmlayout für alle Sprachen erzwingen"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU-Auslastung anzeigen"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Bildschirm-Overlay mit aktueller CPU-Auslastung"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU-Rendering erzwingen"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Einsatz von GPU für 2D-Zeichnung erzwingen"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA erzwingen"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Am größten"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Benutzerdefiniert (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Hilfe &amp; Feedback"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Menü"</string>
 </resources>

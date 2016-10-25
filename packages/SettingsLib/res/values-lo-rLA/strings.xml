@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"​ການ​ເຊື່ອມ​ຕໍ່ WiFi ລົ້ມ​ເຫຼວ"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ບັນຫາການພິສູດຢືນຢັນ"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"ບໍ່ຢູ່ໃນໄລຍະທີ່ເຊື່ອມຕໍ່ໄດ້"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"​ບໍ່​ພົບ​ການ​ເຊື່ອມ​ຕໍ່​ອິນ​ເຕີ​ເນັດ​, ຈະ​ບໍ່​ຖືກ​ເຊື່ອມ​ຕໍ່​ໃໝ່​ໂດຍ​ອັດ​ຕະ​ໂນ​ມັດ."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"ບໍ່ພົບການເຊື່ອມຕໍ່ອິນເຕີເນັດ, ຈະບໍ່ເຊື່ອມຕໍ່ໃໝ່ໂດຍອັດຕະໂນມັດ."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ."</string>
     <string name="saved_network" msgid="4352716707126620811">"ບັນທຶກ​​​ໂດຍ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"ເຊື່ອມ​ຕໍ່​ຜ່ານ Wi‑Fi ຕົວ​ຊ່ວຍ​ແລ້ວ"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"​ເຊື່ອມຕໍ່​ຜ່ານ %1$s ​ແລ້ວ"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"ສະແດງໜ້າປົກຄລິບ, ຂອບ ແລະອື່ນໆ."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"ບັງ​ຄັບ​ໃຫ້ຮູບຮ່າງຂຽນຈາກຂວາຫາຊ້າຍ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"ບັງຄັບໃຫ້ຮູບຮ່າງໜ້າຈໍ ຂຽນຈາກຂວາໄປຊ້າຍ ສຳລັບທຸກພາສາ"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"ສະແດງການນຳໃຊ້ CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"ການວາງຊ້ອນໜ້າຈໍທີ່ສະແດງການນຳໃຊ້ CPU ໃນປັດຈຸບັນ"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"ບັງຄັບໃຊ້ GPU ປະມວນພາບ"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"ບັງຄັບໃຊ້ GPU ເພື່ອການແຕ້ມພາບ 2 ມິຕິ"</string>
     <string name="force_msaa" msgid="7920323238677284387">"ບັງຄັບໃຊ້ 4x MSAA"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"ໃຫຍ່ທີ່ສຸດ"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ປັບແຕ່ງເອງ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"ຊ່ວຍເຫຼືອ &amp; ຄຳຕິຊົມ"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"ເມນູ"</string>
 </resources>

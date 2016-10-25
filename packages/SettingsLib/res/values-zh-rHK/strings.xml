@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi 連線失敗"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"驗證問題"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"超出可用範圍"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"未能偵測到互聯網連線，因此不會自動重新連線。"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"無法偵測互聯網連線，未能自動重新連線。"</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"無法偵測互聯網連線。"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> 的儲存"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"已透過 Wi-Fi 小幫手連線"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"已透過 %1$s 連線"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"顯示剪輯範圍、邊界等"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"強制使用從右至左的版面配置方向"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"強制將所有語言代碼的畫面配置方向改為從右至左"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"顯示 CPU 使用量"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"在螢幕上重疊顯示目前的 CPU 使用量"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"強制使用 GPU 轉譯"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"強制使用 GPU 進行 2D 繪圖"</string>
     <string name="force_msaa" msgid="7920323238677284387">"強制 4x MSAA"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"最大"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"自訂 (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"說明與意見反映"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"選單"</string>
 </resources>

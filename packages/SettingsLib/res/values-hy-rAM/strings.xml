@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi կապի ձախողում"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Նույնականացման խնդիր"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ընդգրկույթից դուրս է"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Ինտերնետի հասանելիություն չկա. ավտոմատ կերպով կրկին չի միանա:"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Ինտերնետ կապ չկա, ինչի պատճառով ավտոմատ վերամիացում չի կատարվի:"</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Ինտերնետ կապ չկա:"</string>
     <string name="saved_network" msgid="4352716707126620811">"Պահել է հետևյալ օգտվողը՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Կապակցված է Wi‑Fi Օգնականի միջոցով"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Կապակցված է %1$s-ի միջոցով"</string>
@@ -38,7 +39,7 @@
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Անջատվում է..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Միանում է..."</string>
     <string name="bluetooth_connected" msgid="6038755206916626419">"Միացված է"</string>
-    <string name="bluetooth_pairing" msgid="1426882272690346242">"Զուգավորում..."</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"Զուգակցում..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Միացված (առանց հեռախոսի)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Միացված է (առանց մեդիա)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Միացված է (հաղորդագրությանը մուտք չկա)"</string>
@@ -72,7 +73,7 @@
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Զուգավորել"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"Զուգավորել"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Չեղարկել"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Զուգավորում է մուտքի թույլտվությունը դեպի ձեր կոնտակտները և զանգերի պատմությունը, երբ միացված է:"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Զուգակցում է մուտքի թույլտվությունը դեպի ձեր կոնտակտները և զանգերի պատմությունը, երբ միացված է:"</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Չհաջողվեց զուգավորել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Հնարավոր չեղավ զուգավորվել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ սխալ PIN-ի կամ անցաբառի պատճառով:."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Հնարավոր չէ կապ հաստատել  <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Ցույց տալ կտրվածքի սահմանները, լուսանցքները և այլն"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Փոխել RTL-ի դասավորության ուղղությունը"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Դարձնել էկրանի դասավորության ուղղությունը դեպի RTL բոլոր լեզուների համար"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Ցույց տալ CPU-ի աշխատանքը"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Էկրանի վերադրումը ցույց է տալիս ընթացիկ CPU օգտագործումը"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Ստիպել GPU-ին մատուցել"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Ստիպողաբար GPU-ի օգտագործում 2-րդ պատկերի համար"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Ստիպել  4x MSAA"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Ամենամեծ"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Հատուկ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Օգնություն և հետադարձ կապ"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Ընտրացանկ"</string>
 </resources>
