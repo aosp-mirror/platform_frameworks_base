@@ -7,11 +7,11 @@ trainingnavtop=true
 
     <h2>This lesson teaches you how to</h2>
     <ol>
-      <li><a href="#connect">Get a Geographic Location</a></li>
-      <li><a href="#fetch-address">Define an Intent Service to Fetch the
-        Address</a></li>
-      <li><a href="#start-intent">Start the Intent Service</a></li>
-      <li><a href="#result-receiver">Receive the Geocoding Results</a></li>
+      <li><a href="#connect">Get a geographic location</a></li>
+      <li><a href="#fetch-address">Define an intent service to fetch the
+        address</a></li>
+      <li><a href="#start-intent">Start the intent service</a></li>
+      <li><a href="#result-receiver">Receive the geocoding results</a></li>
     </ol>
 
     <h2>You should also read</h2>
@@ -58,7 +58,7 @@ trainingnavtop=true
   convert a geographic location to an address. The method returns an estimated
   street address corresponding to a given latitude and longitude.</p>
 
-<h2 id="connect">Get a Geographic Location</h2>
+<h2 id="connect">Get a geographic location</h2>
 
 <p>The last known location of the device is a useful starting point for the
   address lookup feature. The lesson on
@@ -69,12 +69,12 @@ trainingnavtop=true
   <a href="{@docRoot}reference/com/google/android/gms/location/FusedLocationProviderApi.html">fused
   location provider</a> to find the latest location of the device.</p>
 
-<p>To access the fused location provider, you need to create an instance of the
+<p>To access the fused location provider, create an instance of the
   Google Play services API client. To learn how to connect your client, see
   <a href="{@docRoot}training/location/retrieve-current.html#play-services">Connect
   to Google Play Services</a>.</p>
 
-<p>In order for the fused location provider to retrieve a precise street
+<p>To enable the fused location provider to retrieve a precise street
   address, set the location permission in your app manifest to
   {@code ACCESS_FINE_LOCATION}, as shown in the following example:</p>
 
@@ -86,12 +86,12 @@ trainingnavtop=true
 &lt;/manifest&gt;
 </pre>
 
-<h2 id="fetch-address">Define an Intent Service to Fetch the Address</h2>
+<h2 id="fetch-address">Define an intent service to fetch the address</h2>
 
 <p>The {@link android.location.Geocoder#getFromLocation getFromLocation()}
   method provided by the {@link android.location.Geocoder} class accepts a
-  latitude and longitude, and returns a list of addresses. The method is
-  synchronous, and may take a long time to do its work, so you should not call
+  latitude and longitude and returns a list of addresses. The method is
+  synchronous and may take a long time to do its work, so you should not call
   it from the main, user interface (UI) thread of your app.</p>
 
 <p>The {@link android.app.IntentService IntentService} class provides a
@@ -100,23 +100,23 @@ trainingnavtop=true
   Note that the {@link android.os.AsyncTask AsyncTask} class also allows you to
   perform background operations, but it's designed for short operations. An
   {@link android.os.AsyncTask AsyncTask} shouldn't keep a reference to the UI if
-  the activity is recreated, for example when the device is rotated. In
+  the activity is re-created, such as when the device is rotated. In
   contrast, an {@link android.app.IntentService IntentService} doesn't need to
   be cancelled when the activity is rebuilt.</p>
 
 <p>Define a {@code FetchAddressIntentService} class that extends
   {@link android.app.IntentService}. This class is your address lookup service.
-  The intent service handles an intent asynchronously on a worker thread, and
+  The intent service handles an intent asynchronously on a worker thread and
   stops itself when it runs out of work. The intent extras provide the data
   needed by the service, including a {@link android.location.Location} object
-  for conversion to an address, and a {@link android.os.ResultReceiver} object
+  for conversion to an address and a {@link android.os.ResultReceiver} object
   to handle the results of the address lookup. The service uses a {@link
-  android.location.Geocoder} to fetch the address for the location, and sends
+  android.location.Geocoder} to fetch the address for the location and sends
   the results to the {@link android.os.ResultReceiver}.</p>
 
-<h3>Define the Intent Service in your App Manifest</h3>
+<h3>Define the intent service in your app manifest</h3>
 
-<p>Add an entry to your app manifest defining the intent service:</p>
+<p>Add an entry to your app manifest that defines the intent service, as shown here:</p>
 
 <pre>
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -131,26 +131,26 @@ trainingnavtop=true
 &lt;/manifest&gt;
 </pre>
 
-<p class="note"><strong>Note:</strong> The {@code <service>} element in
-  the manifest doesn't need to include an intent filter, because your main
+<p class="note"><strong>Note:</strong> The {@code &lt;service&gt;} element in
+  the manifest doesn't need to include an intent filter because your main
   activity creates an explicit intent by specifying the name of the class to use
   for the intent.</p>
 
-<h3>Create a Geocoder</h3>
+<h3>Create a geocoder</h3>
 
 <p>The process of converting a geographic location to an address is called
-  <em>reverse geocoding</em>. To perform the main work of the intent service,
-  that is, your reverse geocoding request, implement
+  <em>reverse geocoding</em>. To perform the main work of the intent service (your reverse
+  geocoding request), implement
   {@link android.app.IntentService#onHandleIntent onHandleIntent()} within the
   {@code FetchAddressIntentService} class. Create a
   {@link android.location.Geocoder} object to handle the reverse geocoding.</p>
 
 <p>A locale represents a specific geographical or linguistic region. Locale
-  objects are used to adjust the presentation of information, such as numbers or
-  dates, to suit the conventions in the region represented by the locale. Pass a
+  objects adjust the presentation of information, such as numbers or
+  dates, to suit the conventions in the region that is represented by the locale. Pass a
   <a href="{@docRoot}reference/java/util/Locale.html">{@code Locale}</a> object
-  to the {@link android.location.Geocoder} object, to ensure that the resulting
-  address is localized to the user's geographic region.</p>
+  to the {@link android.location.Geocoder} object to ensure that the resulting
+  address is localized to the user's geographic region. Here is an example:</p>
 
 <pre>
 &#64;Override
@@ -162,7 +162,7 @@ protected void onHandleIntent(Intent intent) {
 
 <h3 id="retrieve-street-address">Retrieve the street address data</h3>
 
-<p>The next step is to retrieve the street address from the geocoder, handle
+<p>You can now retrieve the street address from the geocoder, handle
   any errors that may occur, and send the results back to the activity that
   requested the address. To report the results of the geocoding
   process, you need two numeric constants that indicate success or failure.
@@ -185,32 +185,34 @@ public final class Constants {
 
 <p>To get a street address corresponding to a geographical location, call
   {@link android.location.Geocoder#getFromLocation getFromLocation()},
-  passing it the latitude and longitude from the location object, and the
-  maximum number of addresses you want returned. In this case, you want just one
-  address. The geocoder returns an array of addresses. If no addresses were
+  passing it the latitude and longitude from the location object and the
+  maximum number of addresses that you want returned. In this case, you want just one
+  address. The geocoder returns an array of addresses. If no addresses are
   found to match the given location, it returns an empty list. If there is no
   backend geocoding service available, the geocoder returns null.</p>
 
-<p>Check for the following errors as shown in the code sample below. If an error
-  occurs, place the corresponding error message in the {@code errorMessage}
-  variable, so you can send it back to the requesting activity:</p>
+<p>Check for the following errors, as shown in the code sample below:</p>
 
 <ul>
-  <li><strong>No location data provided</strong> - The intent extras do not
-    include the {@link android.location.Location} object required for reverse
+  <li><strong>No location data provided</strong> &ndash; The intent extras do not
+    include the {@link android.location.Location} object that is required for reverse
     geocoding.</li>
-  <li><strong>Invalid latitude or longitude used</strong> - The latitude
-    and/or longitude values provided in the {@link android.location.Location}
+  <li><strong>Invalid latitude or longitude used</strong> &ndash; The latitude
+    and/or longitude values that are provided in the {@link android.location.Location}
     object are invalid.</li>
-  <li><strong>No geocoder available</strong> - The background geocoding service
-    is not available, due to a network error or IO exception.</li>
-  <li><strong>Sorry, no address found</strong> - The geocoder could not find an
+  <li><strong>No geocoder available</strong> &ndash; The background geocoding service
+    is not available due to a network error or IO exception.</li>
+  <li><strong>Sorry, no address found</strong> &ndash; The geocoder can't find an
     address for the given latitude/longitude.</li>
 </ul>
 
+<p>If an error
+  occurs, place the corresponding error message in the {@code errorMessage}
+  variable so that you can send it back to the requesting activity.
+
 <p>To get the individual lines of an address object, use the
   {@link android.location.Address#getAddressLine getAddressLine()}
-  method provided by the {@link android.location.Address} class. Then join the
+  method that is provided by the {@link android.location.Address} class. Join the
   lines into a list of address fragments ready to return to the activity that
   requested the address.</p>
 
@@ -220,7 +222,7 @@ public final class Constants {
   results consist of the previously-mentioned numeric success/failure code and
   a string. In the case of a successful reverse geocoding, the string contains
   the address. In the case of a failure, the string contains the error message,
-  as shown in the code sample below:</p>
+  as shown in this code sample:</p>
 
 <pre>
 &#64;Override
@@ -280,18 +282,18 @@ protected void onHandleIntent(Intent intent) {
 
 <h3 id="return-address">Return the address to the requestor</h3>
 
-<p>The final thing the intent service must do is send the address back to a
+<p>The final action that the intent service must complete is sending the address back to a
   {@link android.os.ResultReceiver} in the activity that started the service.
   The {@link android.os.ResultReceiver} class allows you to send a
   numeric result code as well as a message containing the result data. The
   numeric code is useful for reporting the success or failure of the geocoding
   request. In the case of a successful reverse geocoding, the message contains
   the address. In the case of a failure, the message contains some text
-  describing the reason for failure.</p>
+  describing the reason for the failure.</p>
 
 <p>You have already retrieved the address from the geocoder, trapped any errors
-  that may occur, and called the {@code deliverResultToReceiver()} method. Now
-  you need to define the {@code deliverResultToReceiver()} method that sends
+  that may occur, and called the {@code deliverResultToReceiver()} method, so now
+  you must define the {@code deliverResultToReceiver()} method that sends
   a result code and message bundle to the result receiver.</p>
 
 <p>For the result code, use the value that you've passed to the
@@ -299,7 +301,7 @@ protected void onHandleIntent(Intent intent) {
   To construct the message bundle, concatenate the {@code RESULT_DATA_KEY}
   constant from your {@code Constants} class (defined in
   <a href="#retrieve-street-address">Retrieve the street address data</a>) and
-  the value in the {@code message} parameter passed to the
+  the value in the {@code message} parameter that is passed to the
   {@code deliverResultToReceiver()} method, as shown in the following sample:
 </p>
 
@@ -315,26 +317,26 @@ public class FetchAddressIntentService extends IntentService {
 }
 </pre>
 
-<h2 id="start-intent">Start the Intent Service</h2>
+<h2 id="start-intent">Start the intent service</h2>
 
 <p>The intent service, as defined in the previous section, runs in the
-  background and is responsible for fetching the address corresponding to a
+  background and fetches the address corresponding to a
   given geographic location. When you start the service, the Android framework
-  instantiates and starts the service if it isn't already running, and creates a
-  process if needed. If the service is already running then it remains running.
+  instantiates and starts the service if it isn't already running, and it creates a
+  process if needed. If the service is already running, it remains running.
   Because the service extends {@link android.app.IntentService IntentService},
-  it shuts down automatically when all intents have been processed.</p>
+  it shuts down automatically after all intents are processed.</p>
 
-<p>Start the service from your app's main activity,
+<p>Start the service from your app's main activity
   and create an {@link android.content.Intent} to pass data to the service. You
-  need an <em>explicit</em> intent, because you want only your service
+  need an <em>explicit</em> intent because you want only your service
   to respond to the intent. For more information, see
   <a href="{@docRoot}guide/components/intents-filters.html#Types">Intent
   Types</a>.</p>
 
 <p>To create an explicit intent, specify the name of the
   class to use for the service: {@code FetchAddressIntentService.class}.
-  Pass two pieces of information in the intent extras:</p>
+  Pass this information in the intent extras:</p>
 
 <ul>
   <li>A {@link android.os.ResultReceiver} to handle the results of the address
@@ -361,6 +363,12 @@ public class MainActivity extends ActionBarActivity implements
     }
 }
 </pre>
+
+<p class="caution"><strong>Caution</strong>: To ensure that your app is secure, always use an
+explicit intent when starting a {@link android.app.Service} and do not declare intent filters for
+your services. Using an implicit intent to start a service is a security hazard because you cannot
+be certain of the service that will respond to the intent, and the user cannot see which service
+starts.</p>
 
 <p>Call the above {@code startIntentService()} method when the
   user takes an action that requires a geocoding address lookup. For example,
@@ -391,7 +399,7 @@ public void fetchAddressButtonHandler(View view) {
   app's UI. The following code snippet shows the call to the
   {@code startIntentService()} method in the
   <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">{@code onConnected()}</a>
-  callback provided by the Google API Client:</p>
+  callback that is provided by the Google API Client:</p>
 
 <pre>
 public class MainActivity extends ActionBarActivity implements
@@ -420,9 +428,9 @@ public class MainActivity extends ActionBarActivity implements
 }
 </pre>
 
-<h2 id="result-receiver">Receive the Geocoding Results</h2>
+<h2 id="result-receiver">Receive the geocoding results</h2>
 
-<p>The intent service has handled the geocoding request, and uses a
+<p>After the intent service handles the geocoding request, it uses a
   {@link android.os.ResultReceiver} to return the results to the activity that
   made the request. In the activity that makes the request, define an
   {@code AddressResultReceiver} that extends {@link android.os.ResultReceiver}
@@ -430,14 +438,14 @@ public class MainActivity extends ActionBarActivity implements
 
 <p>The result includes a numeric result code (<code>resultCode</code>) as well
   as a message containing the result data (<code>resultData</code>). If the
-  reverse geocoding process was successful, the <code>resultData</code> contains
+  reverse geocoding process is successful, the <code>resultData</code> contains
   the address. In the case of a failure, the <code>resultData</code> contains
-  text describing the reason for failure. For details of the possible errors,
+  text describing the reason for the failure. For details of the possible errors,
   see <a href="#return-address">Return the address to the requestor</a>.</p>
 
 <p>Override the
   {@link android.os.ResultReceiver#onReceiveResult onReceiveResult()} method
-  to handle the results delivered to the result receiver, as shown in the
+  to handle the results that are delivered to the result receiver, as shown in the
   following code sample:</p>
 
 <pre>
