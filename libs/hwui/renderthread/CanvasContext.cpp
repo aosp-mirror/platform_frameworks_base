@@ -97,6 +97,31 @@ void CanvasContext::destroyLayer(RenderNode* node) {
     }
 }
 
+void CanvasContext::invokeFunctor(const RenderThread& thread, Functor* functor) {
+    ATRACE_CALL();
+    auto renderType = Properties::getRenderPipelineType();
+    switch (renderType) {
+        case RenderPipelineType::OpenGL:
+            OpenGLPipeline::invokeFunctor(thread, functor);
+            break;
+        default:
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            break;
+    }
+}
+
+void CanvasContext::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
+    auto renderType = Properties::getRenderPipelineType();
+    switch (renderType) {
+        case RenderPipelineType::OpenGL:
+            OpenGLPipeline::prepareToDraw(thread, bitmap);
+            break;
+        default:
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            break;
+    }
+}
+
 CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         RenderNode* rootRenderNode, IContextFactory* contextFactory,
         std::unique_ptr<IRenderPipeline> renderPipeline)
@@ -425,8 +450,11 @@ void CanvasContext::draw() {
 
     GpuMemoryTracker::onFrameCompleted();
 #ifdef BUGREPORT_FONT_CACHE_USAGE
-    Caches& caches = Caches::getInstance();
-    caches.fontRenderer.getFontRenderer().historyTracker().frameCompleted();
+    auto renderType = Properties::getRenderPipelineType();
+    if (RenderPipelineType::OpenGL == renderType) {
+        Caches& caches = Caches::getInstance();
+        caches.fontRenderer.getFontRenderer().historyTracker().frameCompleted();
+    }
 #endif
 
 }
@@ -454,16 +482,6 @@ void CanvasContext::prepareAndDraw(RenderNode* node) {
         // wait on fences so tasks don't overlap next frame
         waitOnFences();
     }
-}
-
-void CanvasContext::invokeFunctor(RenderThread& thread, Functor* functor) {
-    ATRACE_CALL();
-    DrawGlInfo::Mode mode = DrawGlInfo::kModeProcessNoContext;
-    if (thread.eglManager().hasEglContext()) {
-        mode = DrawGlInfo::kModeProcess;
-    }
-
-    thread.renderState().invokeFunctor(functor, mode, nullptr);
 }
 
 void CanvasContext::markLayerInUse(RenderNode* node) {
@@ -520,10 +538,6 @@ void CanvasContext::destroyHardwareResources(TreeObserver* observer) {
         for (const sp<RenderNode>& node : mRenderNodes) {
             node->destroyHardwareResources(observer);
         }
-        Caches& caches = Caches::getInstance();
-        // Make sure to release all the textures we were owning as there won't
-        // be another draw
-        caches.textureCache.resetMarkInUse(this);
         mRenderPipeline->onDestroyHardwareResources();
     }
 }

@@ -165,6 +165,10 @@ bool OpenGLPipeline::isContextReady() {
 }
 
 void OpenGLPipeline::onDestroyHardwareResources() {
+    Caches& caches = Caches::getInstance();
+    // Make sure to release all the textures we were owning as there won't
+    // be another draw
+    caches.textureCache.resetMarkInUse(this);
     mRenderThread.renderState().flush(Caches::FlushMode::Layers);
 }
 
@@ -223,6 +227,21 @@ void OpenGLPipeline::destroyLayer(RenderNode* node) {
         layer->renderState.layerPool().putOrDelete(layer);
         node->setLayer(nullptr);
     }
+}
+
+void OpenGLPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
+    if (Caches::hasInstance() && thread.eglManager().hasEglContext()) {
+        ATRACE_NAME("Bitmap#prepareToDraw task");
+        Caches::getInstance().textureCache.prefetch(bitmap);
+    }
+}
+
+void OpenGLPipeline::invokeFunctor(const RenderThread& thread, Functor* functor) {
+    DrawGlInfo::Mode mode = DrawGlInfo::kModeProcessNoContext;
+    if (thread.eglManager().hasEglContext()) {
+        mode = DrawGlInfo::kModeProcess;
+    }
+    thread.renderState().invokeFunctor(functor, mode, nullptr);
 }
 
 } /* namespace renderthread */

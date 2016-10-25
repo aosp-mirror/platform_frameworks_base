@@ -89,8 +89,8 @@ public:
     void pushBackFrameCallback(IFrameCallback* callback);
 
     TimeLord& timeLord() { return mTimeLord; }
-    RenderState& renderState() { return *mRenderState; }
-    EglManager& eglManager() { return *mEglManager; }
+    RenderState& renderState() const { return *mRenderState; }
+    EglManager& eglManager() const { return *mEglManager; }
     JankTracker& jankTracker() { return *mJankTracker; }
 
     const DisplayInfo& mainDisplayInfo() { return mDisplayInfo; }

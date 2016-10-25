@@ -266,6 +266,7 @@ LOCAL_SRC_FILES += \
     tests/unit/BakedOpDispatcherTests.cpp \
     tests/unit/BakedOpRendererTests.cpp \
     tests/unit/BakedOpStateTests.cpp \
+    tests/unit/CanvasContextTests.cpp \
     tests/unit/CanvasStateTests.cpp \
     tests/unit/ClipAreaTests.cpp \
     tests/unit/DamageAccumulatorTests.cpp \

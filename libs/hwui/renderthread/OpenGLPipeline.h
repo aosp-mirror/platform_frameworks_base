@@ -56,6 +56,8 @@ public:
     bool createOrUpdateLayer(RenderNode* node,
             const DamageAccumulator& damageAccumulator) override;
     static void destroyLayer(RenderNode* node);
+    static void prepareToDraw(const RenderThread& thread, Bitmap* bitmap);
+    static void invokeFunctor(const RenderThread& thread, Functor* functor);
 
 private:
     EglManager& mEglManager;

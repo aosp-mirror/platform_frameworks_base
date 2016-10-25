@@ -85,6 +85,10 @@ public:
      */
     static void destroyLayer(RenderNode* node);
 
+    static void invokeFunctor(const RenderThread& thread, Functor* functor);
+
+    static void prepareToDraw(const RenderThread& thread, Bitmap* bitmap);
+
     /*
      * If Properties::isSkiaEnabled() is true then this will return the Skia
      * grContext associated with the current RenderPipeline.
@@ -120,8 +124,6 @@ public:
 
     void destroyHardwareResources(TreeObserver* observer);
     static void trimMemory(RenderThread& thread, int level);
-
-    static void invokeFunctor(RenderThread& thread, Functor* functor);
 
     DeferredLayerUpdater* createTextureLayer();
 

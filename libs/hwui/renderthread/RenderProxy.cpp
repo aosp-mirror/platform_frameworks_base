@@ -618,10 +618,7 @@ int RenderProxy::copySurfaceInto(sp<Surface>& surface, int left, int top,
 }
 
 CREATE_BRIDGE2(prepareToDraw, RenderThread* thread, Bitmap* bitmap) {
-    if (Caches::hasInstance() && args->thread->eglManager().hasEglContext()) {
-        ATRACE_NAME("Bitmap#prepareToDraw task");
-        Caches::getInstance().textureCache.prefetch(args->bitmap);
-    }
+    CanvasContext::prepareToDraw(*args->thread, args->bitmap);
     args->bitmap->unref();
     args->bitmap = nullptr;
     return nullptr;
