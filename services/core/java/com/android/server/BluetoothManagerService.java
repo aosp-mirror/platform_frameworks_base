@@ -221,6 +221,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                                 mBluetoothLock.readLock().lock();
                                 if (mBluetooth != null) {
                                     mBluetooth.onBrEdrDown();
+                                    mEnable = false;
                                     mEnableExternal = false;
                                 }
                             } catch (RemoteException e) {
@@ -436,14 +437,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     class ClientDeathRecipient implements IBinder.DeathRecipient {
         public void binderDied() {
-            if (DBG) Slog.d(TAG, "Binder is dead -  unregister Ble App");
+            if (DBG) Slog.d(TAG, "Binder is dead - unregister Ble App");
             if (mBleAppCount > 0) --mBleAppCount;
 
             if (mBleAppCount == 0) {
                 if (DBG) Slog.d(TAG, "Disabling LE only mode after application crash");
                 try {
                     mBluetoothLock.readLock().lock();
-                    if (mBluetooth != null) {
+                    if (mBluetooth != null &&
+                        mBluetooth.getState() == BluetoothAdapter.STATE_BLE_ON) {
+                        mEnable = false;
                         mBluetooth.onBrEdrDown();
                     }
                 } catch (RemoteException e) {
@@ -460,6 +463,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     @Override
     public boolean isBleScanAlwaysAvailable() {
+        if (isAirplaneModeOn() && !mEnable) {
+            return false;
+        }
         try {
             return (Settings.Global.getInt(mContentResolver,
                     Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE)) != 0;
