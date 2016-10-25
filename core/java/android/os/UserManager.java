@@ -1187,12 +1187,33 @@ public class UserManager {
      * @return The source of user restriction. Any combination of {@link #RESTRICTION_NOT_SET},
      *         {@link #RESTRICTION_SOURCE_SYSTEM}, {@link #RESTRICTION_SOURCE_DEVICE_OWNER}
      *         and {@link #RESTRICTION_SOURCE_PROFILE_OWNER}
+     * @deprecated use {@link #getUserRestrictionSources(String, int)} instead.
      */
+    @Deprecated
     @SystemApi
     @UserRestrictionSource
     public int getUserRestrictionSource(String restrictionKey, UserHandle userHandle) {
         try {
             return mService.getUserRestrictionSource(restrictionKey, userHandle.getIdentifier());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     *
+     * Returns a list of users who set a user restriction on a given user.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * @param restrictionKey the string key representing the restriction
+     * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
+     * @return a list of user ids enforcing this restriction.
+     */
+    @SystemApi
+    public List<EnforcingUser> getUserRestrictionSources(
+            String restrictionKey, UserHandle userHandle) {
+        try {
+            return mService.getUserRestrictionSources(restrictionKey, userHandle.getIdentifier());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2310,8 +2331,8 @@ public class UserManager {
      * @hide
      * Checks if any uninitialized user has the specific seed account name and type.
      *
-     * @param mAccountName The account name to check for
-     * @param mAccountType The account type of the account to check for
+     * @param accountName The account name to check for
+     * @param accountType The account type of the account to check for
      * @return whether the seed account was found
      */
     public boolean someUserHasSeedAccount(String accountName, String accountType) {
@@ -2319,6 +2340,75 @@ public class UserManager {
             return mService.someUserHasSeedAccount(accountName, accountType);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * User that enforces a restriction.
+     *
+     * @see #getUserRestrictionSources(String, UserHandle)
+     */
+    @SystemApi
+    public static final class EnforcingUser implements Parcelable {
+        private final @UserIdInt int userId;
+        private final @UserRestrictionSource int userRestrictionSource;
+
+        /**
+         * @hide
+         */
+        public EnforcingUser(
+                @UserIdInt int userId, @UserRestrictionSource int userRestrictionSource) {
+            this.userId = userId;
+            this.userRestrictionSource = userRestrictionSource;
+        }
+
+        private EnforcingUser(Parcel in) {
+            userId = in.readInt();
+            userRestrictionSource = in.readInt();
+        }
+
+        public static final Creator<EnforcingUser> CREATOR = new Creator<EnforcingUser>() {
+            @Override
+            public EnforcingUser createFromParcel(Parcel in) {
+                return new EnforcingUser(in);
+            }
+
+            @Override
+            public EnforcingUser[] newArray(int size) {
+                return new EnforcingUser[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(userId);
+            dest.writeInt(userRestrictionSource);
+        }
+
+        /**
+         * Returns an id of the enforcing user.
+         *
+         * <p> Will be UserHandle.USER_NULL when restriction is set by the system.
+         */
+        public UserHandle getUserHandle() {
+            return UserHandle.of(userId);
+        }
+
+        /**
+         * Returns the status of the enforcing user.
+         *
+         * <p> One of {@link #RESTRICTION_SOURCE_SYSTEM},
+         * {@link #RESTRICTION_SOURCE_DEVICE_OWNER} and
+         * {@link #RESTRICTION_SOURCE_PROFILE_OWNER}
+         */
+        public @UserRestrictionSource int getUserRestrictionSource() {
+            return userRestrictionSource;
         }
     }
 }
