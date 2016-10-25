@@ -72,9 +72,8 @@ public:
     GlopBuilder& setFillLayer(Texture& texture, const SkColorFilter* colorFilter,
             float alpha, SkBlendMode mode, Blend::ModeOrderSwap modeUsage);
     GlopBuilder& setFillTextureLayer(Layer& layer, float alpha);
-    // TODO: Texture should probably know and own its target.
-    // setFillLayer() forces it to GL_TEXTURE which isn't always correct.
-    // Similarly setFillLayer normally forces its own wrap & filter mode
+    // TODO: setFillLayer normally forces its own wrap & filter mode,
+    // which isn't always correct.
     GlopBuilder& setFillExternalTexture(Texture& texture, Matrix4& textureTransform);
 
     GlopBuilder& setTransform(const Matrix4& canvas, const int transformFlags);

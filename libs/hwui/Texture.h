@@ -41,21 +41,19 @@ public:
 
     virtual ~Texture() { }
 
-    inline void setWrap(GLenum wrap, bool bindTexture = false, bool force = false,
-                GLenum renderTarget = GL_TEXTURE_2D) {
-        setWrapST(wrap, wrap, bindTexture, force, renderTarget);
+    inline void setWrap(GLenum wrap, bool bindTexture = false, bool force = false) {
+        setWrapST(wrap, wrap, bindTexture, force);
     }
 
     virtual void setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture = false,
-            bool force = false, GLenum renderTarget = GL_TEXTURE_2D);
+            bool force = false);
 
-    inline void setFilter(GLenum filter, bool bindTexture = false, bool force = false,
-                GLenum renderTarget = GL_TEXTURE_2D) {
-        setFilterMinMag(filter, filter, bindTexture, force, renderTarget);
+    inline void setFilter(GLenum filter, bool bindTexture = false, bool force = false) {
+        setFilterMinMag(filter, filter, bindTexture, force);
     }
 
     virtual void setFilterMinMag(GLenum min, GLenum mag, bool bindTexture = false,
-            bool force = false, GLenum renderTarget = GL_TEXTURE_2D);
+            bool force = false);
 
     /**
      * Convenience method to call glDeleteTextures() on this texture's id.
@@ -91,7 +89,8 @@ public:
     /**
      * Wraps an existing texture.
      */
-    void wrap(GLuint id, uint32_t width, uint32_t height, GLint internalFormat, GLint format);
+    void wrap(GLuint id, uint32_t width, uint32_t height, GLint internalFormat,
+            GLint format, GLenum target);
 
     GLuint id() const {
         return mId;
@@ -111,6 +110,10 @@ public:
 
     GLint internalFormat() const {
         return mInternalFormat;
+    }
+
+    GLenum target() const {
+        return mTarget;
     }
 
     /**
@@ -152,7 +155,8 @@ private:
     friend class Layer;
 
     // Returns true if the size changed, false if it was the same
-    bool updateSize(uint32_t width, uint32_t height, GLint internalFormat, GLint format);
+    bool updateSize(uint32_t width, uint32_t height, GLint internalFormat,
+            GLint format, GLenum target);
     void resetCachedParams();
 
     GLuint mId = 0;
@@ -160,6 +164,7 @@ private:
     uint32_t mHeight = 0;
     GLint mFormat = 0;
     GLint mInternalFormat = 0;
+    GLenum mTarget = GL_NONE;
 
     /* See GLES spec section 3.8.14
      * "In the initial state, the value assigned to TEXTURE_MIN_FILTER is

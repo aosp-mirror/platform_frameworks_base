@@ -278,12 +278,12 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
         // texture always takes slot 0, shader samplers increment from there
         mCaches->textureState().activateTexture(0);
 
-        mCaches->textureState().bindTexture(texture.target, texture.texture->id());
+        mCaches->textureState().bindTexture(texture.texture->target(), texture.texture->id());
         if (texture.clamp != GL_INVALID_ENUM) {
-            texture.texture->setWrap(texture.clamp, false, false, texture.target);
+            texture.texture->setWrap(texture.clamp, false, false);
         }
         if (texture.filter != GL_INVALID_ENUM) {
-            texture.texture->setFilter(texture.filter, false, false, texture.target);
+            texture.texture->setFilter(texture.filter, false, false);
         }
 
         if (texture.textureTransform) {

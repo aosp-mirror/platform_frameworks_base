@@ -308,8 +308,7 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture,
 
     GLenum filter = (textureFillFlags & TextureFillFlags::ForceFilter)
             ? GL_LINEAR : PaintUtils::getFilter(paint);
-    mOutGlop->fill.texture = { &texture,
-            GL_TEXTURE_2D, filter, GL_CLAMP_TO_EDGE, nullptr };
+    mOutGlop->fill.texture = { &texture, filter, GL_CLAMP_TO_EDGE, nullptr };
 
     if (paint) {
         int color = paint->getColor();
@@ -352,10 +351,10 @@ GlopBuilder& GlopBuilder::setFillPaint(const SkPaint& paint, float alphaScale, b
 
     if (CC_LIKELY(!shadowInterp)) {
         mOutGlop->fill.texture = {
-                nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+                nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
     } else {
         mOutGlop->fill.texture = {
-                mCaches.textureState().getShadowLutTexture(), GL_TEXTURE_2D,
+                mCaches.textureState().getShadowLutTexture(),
                 GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
     }
 
@@ -373,7 +372,7 @@ GlopBuilder& GlopBuilder::setFillPathTexturePaint(PathTexture& texture,
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     //specify invalid filter/clamp, since these are always static for PathTextures
-    mOutGlop->fill.texture = { &texture, GL_TEXTURE_2D, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    mOutGlop->fill.texture = { &texture, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
 
     setFill(paint.getColor(), alphaScale,
             paint.getBlendMode(), Blend::ModeOrderSwap::NoSwap,
@@ -390,7 +389,7 @@ GlopBuilder& GlopBuilder::setFillShadowTexturePaint(ShadowTexture& texture, int 
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     //specify invalid filter/clamp, since these are always static for ShadowTextures
-    mOutGlop->fill.texture = { &texture, GL_TEXTURE_2D, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    mOutGlop->fill.texture = { &texture, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
 
     const int ALPHA_BITMASK = SK_ColorBLACK;
     const int COLOR_BITMASK = ~ALPHA_BITMASK;
@@ -412,7 +411,7 @@ GlopBuilder& GlopBuilder::setFillBlack() {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
-    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
     setFill(SK_ColorBLACK, 1.0f, SkBlendMode::kSrcOver, Blend::ModeOrderSwap::NoSwap,
             nullptr, nullptr);
     return *this;
@@ -422,7 +421,7 @@ GlopBuilder& GlopBuilder::setFillClear() {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
-    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
     setFill(SK_ColorBLACK, 1.0f, SkBlendMode::kClear, Blend::ModeOrderSwap::NoSwap,
             nullptr, nullptr);
     return *this;
@@ -433,8 +432,7 @@ GlopBuilder& GlopBuilder::setFillLayer(Texture& texture, const SkColorFilter* co
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
-    mOutGlop->fill.texture = { &texture,
-            GL_TEXTURE_2D, GL_LINEAR, GL_CLAMP_TO_EDGE, nullptr };
+    mOutGlop->fill.texture = { &texture, GL_LINEAR, GL_CLAMP_TO_EDGE, nullptr };
 
     setFill(SK_ColorWHITE, alpha, mode, modeUsage, nullptr, colorFilter);
 
@@ -447,7 +445,7 @@ GlopBuilder& GlopBuilder::setFillTextureLayer(Layer& layer, float alpha) {
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     mOutGlop->fill.texture = { &(layer.getTexture()),
-            layer.getRenderTarget(), GL_LINEAR, GL_CLAMP_TO_EDGE, &layer.getTexTransform() };
+            GL_LINEAR, GL_CLAMP_TO_EDGE, &layer.getTexTransform() };
 
     setFill(SK_ColorWHITE, alpha, layer.getMode(), Blend::ModeOrderSwap::NoSwap,
             nullptr, layer.getColorFilter());
@@ -461,9 +459,7 @@ GlopBuilder& GlopBuilder::setFillExternalTexture(Texture& texture, Matrix4& text
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
-    mOutGlop->fill.texture = { &texture,
-            GL_TEXTURE_EXTERNAL_OES, GL_LINEAR, GL_CLAMP_TO_EDGE,
-            &textureTransform };
+    mOutGlop->fill.texture = { &texture, GL_LINEAR, GL_CLAMP_TO_EDGE, &textureTransform };
 
     setFill(SK_ColorWHITE, 1.0f, SkBlendMode::kSrc, Blend::ModeOrderSwap::NoSwap,
             nullptr, nullptr);
@@ -603,7 +599,7 @@ void verify(const ProgramDescription& description, const Glop& glop) {
 void GlopBuilder::build() {
     REQUIRE_STAGES(kAllStages);
     if (mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::TextureCoord) {
-        if (mOutGlop->fill.texture.target == GL_TEXTURE_2D) {
+        if (mOutGlop->fill.texture.texture->target() == GL_TEXTURE_2D) {
             mDescription.hasTexture = true;
         } else {
             mDescription.hasExternalTexture = true;
@@ -668,7 +664,8 @@ void GlopBuilder::dump(const Glop& glop) {
     ALOGD("    program %p", fill.program);
     if (fill.texture.texture) {
         ALOGD("    texture %p, target %d, filter %d, clamp %d",
-                fill.texture.texture, fill.texture.target, fill.texture.filter, fill.texture.clamp);
+                fill.texture.texture, fill.texture.texture->target(),
+                fill.texture.filter, fill.texture.clamp);
         if (fill.texture.textureTransform) {
             fill.texture.textureTransform->dump("texture transform");
         }

@@ -45,7 +45,11 @@ static void expectFillEq(Glop::Fill& expectedFill, Glop::Fill& builtFill) {
     EXPECT_EQ(expectedFill.skiaShaderData.skiaShaderType, builtFill.skiaShaderData.skiaShaderType);
     EXPECT_EQ(expectedFill.texture.clamp, builtFill.texture.clamp);
     EXPECT_EQ(expectedFill.texture.filter, builtFill.texture.filter);
-    EXPECT_EQ(expectedFill.texture.target, builtFill.texture.target);
+    EXPECT_TRUE((expectedFill.texture.texture && builtFill.texture.texture)
+            || (!expectedFill.texture.texture && !builtFill.texture.texture));
+    if (expectedFill.texture.texture) {
+        EXPECT_EQ(expectedFill.texture.texture->target(), builtFill.texture.texture->target());
+    }
     EXPECT_EQ(expectedFill.texture.textureTransform, builtFill.texture.textureTransform);
 }
 
@@ -108,7 +112,7 @@ static std::unique_ptr<Glop> blackUnitQuadGlop(RenderState& renderState) {
     glop->fill.color.set(Color::Black);
     glop->fill.skiaShaderData.skiaShaderType = kNone_SkiaShaderType;
     glop->fill.filterMode = ProgramDescription::ColorFilterMode::None;
-    glop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    glop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
     return glop;
 }
 

@@ -41,7 +41,6 @@ Layer::Layer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight
     // TODO: This is a violation of Android's typical ref counting, but it
     // preserves the old inc/dec ref locations. This should be changed...
     incStrong(nullptr);
-    renderTarget = GL_NONE;  // see DeferredLayerUpdater::updateLayer()
     texture.mWidth = layerWidth;
     texture.mHeight = layerHeight;
     renderState.registerLayer(this);
@@ -66,7 +65,7 @@ void Layer::setColorFilter(SkColorFilter* filter) {
 
 void Layer::bindTexture() const {
     if (texture.mId) {
-        caches.textureState().bindTexture(renderTarget, texture.mId);
+        caches.textureState().bindTexture(texture.target(), texture.mId);
     }
 }
 
