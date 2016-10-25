@@ -648,12 +648,11 @@ final class AccessibilityController {
             }
 
             private void populateWindowsOnScreenLocked(SparseArray<WindowState> outWindows) {
-                DisplayContent displayContent = mWindowManagerService
-                        .getDefaultDisplayContentLocked();
-                WindowList windowList = displayContent.getWindowList();
+                final DisplayContent dc = mWindowManagerService.getDefaultDisplayContentLocked();
+                final ReadOnlyWindowList windowList = dc.getReadOnlyWindowList();
                 final int windowCount = windowList.size();
                 for (int i = 0; i < windowCount; i++) {
-                    WindowState windowState = windowList.get(i);
+                    final WindowState windowState = windowList.get(i);
                     if (windowState.isOnScreen() && windowState.isVisibleLw() &&
                             !windowState.mWinAnimator.mEnterAnimationPending) {
                         outWindows.put(windowState.mLayer, windowState);
@@ -1027,9 +1026,8 @@ final class AccessibilityController {
                 Region unaccountedSpace = mTempRegion;
                 unaccountedSpace.set(0, 0, screenWidth, screenHeight);
 
-                SparseArray<WindowState> visibleWindows = mTempWindowStates;
+                final SparseArray<WindowState> visibleWindows = mTempWindowStates;
                 populateVisibleWindowsOnScreenLocked(visibleWindows);
-
                 Set<IBinder> addedWindows = mTempBinderSet;
                 addedWindows.clear();
 
@@ -1299,12 +1297,11 @@ final class AccessibilityController {
         }
 
         private void populateVisibleWindowsOnScreenLocked(SparseArray<WindowState> outWindows) {
-            DisplayContent displayContent = mWindowManagerService
-                    .getDefaultDisplayContentLocked();
-            WindowList windowList = displayContent.getWindowList();
+            final DisplayContent dc = mWindowManagerService.getDefaultDisplayContentLocked();
+            final ReadOnlyWindowList windowList = dc.getReadOnlyWindowList();
             final int windowCount = windowList.size();
             for (int i = 0; i < windowCount; i++) {
-                WindowState windowState = windowList.get(i);
+                final WindowState windowState = windowList.get(i);
                 if (windowState.isVisibleLw()) {
                     outWindows.put(windowState.mLayer, windowState);
                 }

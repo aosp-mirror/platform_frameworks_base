@@ -42,9 +42,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * Test class for {@link WindowContainer}.
  *
- * Build: mmma -j32 frameworks/base/services/tests/servicestests
- * Install: adb install -r out/target/product/$TARGET_PRODUCT/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
- * Run: adb shell am instrument -w -e class com.android.server.wm.WindowContainerTests com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+ * Build/Install/Run:
+ *  bit FrameworksServicesTests:com.android.server.wm.WindowContainerTests
  */
 @SmallTest
 @Presubmit

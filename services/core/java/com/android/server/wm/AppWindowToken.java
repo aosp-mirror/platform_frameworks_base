@@ -946,8 +946,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE || DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
                     "Removing starting window: " + tStartingWindow);
-            getDisplayContent().getWindowList().remove(tStartingWindow);
-            mService.mWindowsChanged = true;
+            getDisplayContent().removeFromWindowList(tStartingWindow);
             if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
                     "Removing starting " + tStartingWindow + " from " + fromToken);
             fromToken.removeChild(tStartingWindow);

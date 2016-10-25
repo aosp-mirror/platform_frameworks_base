@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
@@ -109,7 +110,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         mService = service;
     }
 
-    void addInputConsumer(String name, InputConsumerImpl consumer) {
+    private void addInputConsumer(String name, InputConsumerImpl consumer) {
         mInputConsumers.put(name, consumer);
         updateInputWindowsLw(true /* force */);
     }
@@ -130,8 +131,9 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         return false;
     }
 
-    InputConsumerImpl getInputConsumer(String name) {
-        return mInputConsumers.get(name);
+    InputConsumerImpl getInputConsumer(String name, int displayId) {
+        // TODO(multi-display): Allow input consumers on non-default displays?
+        return (displayId == DEFAULT_DISPLAY) ? mInputConsumers.get(name) : null;
     }
 
     void layoutInputConsumers(int dw, int dh) {
@@ -165,8 +167,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             case INPUT_CONSUMER_PIP:
                 // The touchable region of the Pip input window is cropped to the bounds of the
                 // stack, and we need FLAG_NOT_TOUCH_MODAL to ensure other events fall through
-                consumer.mWindowHandle.layoutParamsFlags |=
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+                consumer.mWindowHandle.layoutParamsFlags |= FLAG_NOT_TOUCH_MODAL;
                 break;
         }
         addInputConsumer(name, consumer);
