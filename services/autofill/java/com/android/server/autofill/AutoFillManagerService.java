@@ -218,20 +218,11 @@ public final class AutoFillManagerService extends SystemService {
     final class AutoFillManagerServiceStub extends IAutoFillManagerService.Stub {
 
         @Override
-        public String startSession(int userId, Bundle args, int flags, IBinder activityToken) {
+        public boolean requestAutoFill(int userId, IBinder activityToken) {
             mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
             synchronized (mLock) {
-                return getImplOrThrowLocked(userId).startSession(args, flags, activityToken);
-            }
-        }
-
-        @Override
-        public boolean finishSession(int userId, String token) {
-            mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
-
-            synchronized (mLock) {
-                return getImplOrThrowLocked(userId).finishSessionLocked(token);
+                return getImplOrThrowLocked(userId).requestAutoFill(activityToken);
             }
         }
 
@@ -243,12 +234,6 @@ public final class AutoFillManagerService extends SystemService {
                         + Binder.getCallingPid()
                         + ", uid=" + Binder.getCallingUid());
                 return;
-            }
-            if (args.length > 0) {
-                if ("--sessions".equals(args[0])) {
-                    dumpSessions(pw);
-                    return;
-                }
             }
             synchronized (mLock) {
                 pw.print("mEnableService: "); pw.println(mEnableService);
@@ -265,20 +250,6 @@ public final class AutoFillManagerService extends SystemService {
                         impl.dumpLocked("  ", pw);
                     }
                 }
-            }
-        }
-
-        private void dumpSessions(PrintWriter pw) {
-            boolean foundOne = false;
-            synchronized (mLock) {
-                final int size = mImplByUser.size();
-                for (int i = 0; i < size; i++) {
-                    final AutoFillManagerServiceImpl impl = mImplByUser.valueAt(i);
-                    foundOne |= impl.dumpSessionsLocked("", pw);
-                }
-            }
-            if (!foundOne) {
-                pw.println("No active sessions");
             }
         }
 

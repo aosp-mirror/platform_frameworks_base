@@ -12142,6 +12142,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 != null;
     }
 
+    @Override
+    public boolean requestAutoFillData(IResultReceiver receiver, Bundle receiverExtras,
+            IBinder activityToken) {
+        return enqueueAssistContext(ActivityManager.ASSIST_CONTEXT_AUTOFILL, null, null, receiver,
+                receiverExtras, activityToken, true, true,
+                UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_LONG_TIMEOUT)
+                != null;
+    }
+
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
             IResultReceiver receiver, Bundle receiverExtras, IBinder activityToken,
             boolean focused, boolean newSessionId, int userHandle, Bundle args, long timeout) {
@@ -12266,6 +12275,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 sendBundle.putParcelable(VoiceInteractionSession.KEY_CONTENT, pae.content);
                 sendBundle.putBundle(VoiceInteractionSession.KEY_RECEIVER_EXTRAS,
                         pae.receiverExtras);
+                IBinder autoFillCallback =
+                        extras.getBinder(VoiceInteractionSession.KEY_AUTO_FILL_CALLBACK);
+                if (autoFillCallback != null) {
+                    sendBundle.putBinder(VoiceInteractionSession.KEY_AUTO_FILL_CALLBACK,
+                            autoFillCallback);
+                }
             }
         }
         if (sendReceiver != null) {

@@ -88,6 +88,8 @@ import android.provider.Downloads;
 import android.provider.Settings;
 import android.security.NetworkSecurityPolicy;
 import android.security.net.config.NetworkSecurityConfigProvider;
+import android.service.autofill.IAutoFillCallback;
+import android.service.voice.VoiceInteractionSession;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -2881,16 +2883,24 @@ public final class ActivityThread {
                 mLastAssistStructures.remove(i);
             }
         }
+        // Filling for auto-fill has a few differences:
+        // - it does not need an AssistContent
+        // - it does not call onProvideAssistData()
+        // - it needs an IAutoFillCallback
+        boolean forAutofill = cmd.requestType == ActivityManager.ASSIST_CONTEXT_AUTOFILL;
+
         Bundle data = new Bundle();
         AssistStructure structure = null;
-        AssistContent content = new AssistContent();
+        AssistContent content = forAutofill ? null : new AssistContent();
         ActivityClientRecord r = mActivities.get(cmd.activityToken);
         Uri referrer = null;
         if (r != null) {
             r.activity.getApplication().dispatchOnProvideAssistData(r.activity, data);
-            r.activity.onProvideAssistData(data);
+            if (!forAutofill) {
+                r.activity.onProvideAssistData(data);
+            }
             referrer = r.activity.onProvideReferrer();
-            if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL) {
+            if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL || forAutofill) {
                 structure = new AssistStructure(r.activity);
                 Intent activityIntent = r.activity.getIntent();
                 if (activityIntent != null && (r.window == null ||
@@ -2900,11 +2910,21 @@ public final class ActivityThread {
                     intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                             | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION));
                     intent.removeUnsafeExtras();
-                    content.setDefaultIntent(intent);
+                    if (forAutofill) {
+                        IAutoFillCallback autoFillCallback = r.activity.getAutoFillCallback();
+                        data.putBinder(VoiceInteractionSession.KEY_AUTO_FILL_CALLBACK,
+                                autoFillCallback.asBinder());
+                    } else {
+                        content.setDefaultIntent(intent);
+                    }
                 } else {
-                    content.setDefaultIntent(new Intent());
+                    if (!forAutofill) {
+                        content.setDefaultIntent(new Intent());
+                    }
                 }
-                r.activity.onProvideAssistContent(content);
+                if (!forAutofill) {
+                    r.activity.onProvideAssistContent(content);
+                }
             }
         }
         if (structure == null) {

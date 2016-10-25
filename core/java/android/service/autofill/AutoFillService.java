@@ -15,27 +15,37 @@
  */
 package android.service.autofill;
 
+import android.annotation.IntDef;
 import android.annotation.SdkConstant;
+import android.app.Activity;
 import android.app.Service;
 import android.app.assist.AssistStructure;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
+import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
 
 import com.android.internal.os.HandlerCaller;
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Top-level service of the current auto-fill service for a given user.
+ *
+ * <p>Apps providing auto-fill capabilities must extend this service.
  */
-// TODO: expand documentation
 public abstract class AutoFillService extends Service {
 
-    private static final String TAG = "AutoFillService";
-    private static final boolean DEBUG = true; // TODO: set to false once stable
+    static final String TAG = "AutoFillService";
+    static final boolean DEBUG = true; // TODO: set to false once stable
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -47,11 +57,23 @@ public abstract class AutoFillService extends Service {
     public static final String SERVICE_INTERFACE = "android.service.autofill.AutoFillService";
 
     private static final int MSG_READY = 1;
-    private static final int MSG_NEW_SESSION = 2;
-    private static final int MSG_SESSION_FINISHED = 3;
-    private static final int MSG_SHUTDOWN = 4;
+    private static final int MSG_AUTO_FILL = 2;
+    private static final int MSG_SHUTDOWN = 3;
 
-    // TODO: add metadata?
+    private final IResultReceiver mAssistReceiver = new IResultReceiver.Stub() {
+        @Override
+        public void send(int resultCode, Bundle resultData) throws RemoteException {
+            final AssistStructure structure = resultData
+                    .getParcelable(VoiceInteractionSession.KEY_STRUCTURE);
+
+            final IBinder binder = resultData
+                    .getBinder(VoiceInteractionSession.KEY_AUTO_FILL_CALLBACK);
+
+            mHandlerCaller
+                .obtainMessageOO(MSG_AUTO_FILL, structure, binder).sendToTarget();
+        }
+
+    };
 
     private final IAutoFillService mInterface = new IAutoFillService.Stub() {
         @Override
@@ -60,15 +82,8 @@ public abstract class AutoFillService extends Service {
         }
 
         @Override
-        public void newSession(String token, Bundle data, int flags,
-                AssistStructure structure) {
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIOOO(MSG_NEW_SESSION,
-                    flags, token, data, structure));
-        }
-
-        @Override
-        public void finishSession(String token) {
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(MSG_SESSION_FINISHED, token));
+        public IResultReceiver getAssistReceiver() {
+            return mAssistReceiver;
         }
 
         @Override
@@ -85,17 +100,11 @@ public abstract class AutoFillService extends Service {
                 case MSG_READY: {
                     onReady();
                     break;
-                } case MSG_NEW_SESSION: {
+                } case MSG_AUTO_FILL: {
                     final SomeArgs args = (SomeArgs) msg.obj;
-                    final int flags = args.argi1;
-                    final String token = (String) args.arg1;
-                    final Bundle data = (Bundle) args.arg2;
-                    final AssistStructure assistStructure = (AssistStructure) args.arg3;
-                    onNewSession(token, data, flags, assistStructure);
-                    break;
-                } case MSG_SESSION_FINISHED: {
-                    final String token = (String) msg.obj;
-                    onSessionFinished(token);
+                    final AssistStructure structure = (AssistStructure) args.arg1;
+                    final IBinder binder = (IBinder) args.arg2;
+                    autoFillActivity(structure, binder);
                     break;
                 } case MSG_SHUTDOWN: {
                     onShutdown();
@@ -121,6 +130,7 @@ public abstract class AutoFillService extends Service {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return mInterface.asBinder();
         }
+        Log.w(TAG, "Tried to bind to wrong intent: " + intent);
         return null;
     }
 
@@ -129,41 +139,26 @@ public abstract class AutoFillService extends Service {
      * to receive interaction from it.
      *
      * <p>You should generally do initialization here rather than in {@link #onCreate}.
-     *
-     * <p>Sub-classes should call it first, since it sets the reference to the sytem-server service.
      */
-    // TODO: rename to onConnected() / add onDisconnected()?
+    // TODO: rename to onConnect() / update javadoc
     public void onReady() {
         if (DEBUG) Log.d(TAG, "onReady()");
     }
 
     /**
-     * Called to receive data from the application that the user was requested auto-fill for.
+     * Handles an auto-fill request.
      *
-     * @param token unique token identifying the auto-fill session, it should be used when providing
-     * the auto-filled fields.
-     * @param data Arbitrary data supplied by the app through
-     * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData}.
-     * May be {@code null} if data has been disabled by the user or device policy.
-     * @param startFlags currently always 0.
-     * @param structure If available, the structure definition of all windows currently
-     * displayed by the app.  May be {@code null} if auto-fill data has been disabled by the user
-     * or device policy; will be an empty stub if the application has disabled auto-fill
-     * by marking its window as secure.
+     * @param structure {@link Activity}'s view structure .
+     * @param cancellationSignal signal for observing cancel requests.
+     * @param callback object used to fulllfill the request.
      */
-    @SuppressWarnings("unused")
-    // TODO: take the factory approach where this method return a session, and move the callback
-    // methods (like autofill()) to the session.
-    public void onNewSession(String token, Bundle data, int startFlags, AssistStructure structure) {
-        if (DEBUG) Log.d(TAG, "onNewSession(): token=" + token);
-    }
+    public abstract void onFillRequest(AssistStructure structure,
+            CancellationSignal cancellationSignal, FillCallback callback);
 
-    /**
-     * Called when an auto-fill session is finished.
-     */
-    @SuppressWarnings("unused")
-    public void onSessionFinished(String token) {
-        if (DEBUG) Log.d(TAG, "onSessionFinished(): token=" + token);
+    private void autoFillActivity(AssistStructure structure, IBinder binder) {
+        final FillCallback callback = new FillCallback(binder);
+        // TODO: hook up the cancelationSignal
+        onFillRequest(structure, new CancellationSignal(), callback);
     }
 
     /**
@@ -172,7 +167,9 @@ public abstract class AutoFillService extends Service {
      *
      * <p> At this point this service may no longer be an active {@link AutoFillService}.
      */
+    // TODO: rename to onDisconnected() / update javadoc
     public void onShutdown() {
         if (DEBUG) Log.d(TAG, "onShutdown()");
     }
+
 }

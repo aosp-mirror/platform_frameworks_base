@@ -515,6 +515,7 @@ public class AssistStructure implements Parcelable {
         String mIdPackage;
         String mIdType;
         String mIdEntry;
+        int mAutoFillId = View.NO_ID;
         int mX;
         int mY;
         int mScrollX;
@@ -539,6 +540,7 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_ACTIVATED = 0x00002000;
         static final int FLAGS_CONTEXT_CLICKABLE = 0x00004000;
 
+        static final int FLAGS_HAS_AUTO_FILL_ID = 0x80000000;
         static final int FLAGS_HAS_MATRIX = 0x40000000;
         static final int FLAGS_HAS_ALPHA = 0x20000000;
         static final int FLAGS_HAS_ELEVATION = 0x10000000;
@@ -581,6 +583,9 @@ public class AssistStructure implements Parcelable {
                         mIdPackage = preader.readString();
                     }
                 }
+            }
+            if ((flags&FLAGS_HAS_AUTO_FILL_ID) != 0) {
+                mAutoFillId = in.readInt();
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 mX = in.readInt();
@@ -637,6 +642,9 @@ public class AssistStructure implements Parcelable {
             if (mId != View.NO_ID) {
                 flags |= FLAGS_HAS_ID;
             }
+            if (mAutoFillId != View.NO_ID) {
+                flags |= FLAGS_HAS_AUTO_FILL_ID;
+            }
             if ((mX&~0x7fff) != 0 || (mY&~0x7fff) != 0
                     || (mWidth&~0x7fff) != 0 | (mHeight&~0x7fff) != 0) {
                 flags |= FLAGS_HAS_LARGE_COORDS;
@@ -680,6 +688,9 @@ public class AssistStructure implements Parcelable {
                         pwriter.writeString(mIdPackage);
                     }
                 }
+            }
+            if ((flags&FLAGS_HAS_AUTO_FILL_ID) != 0) {
+                out.writeInt(mAutoFillId);
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 out.writeInt(mX);
@@ -748,6 +759,16 @@ public class AssistStructure implements Parcelable {
          */
         public String getIdEntry() {
             return mIdEntry;
+        }
+
+        /**
+         * Returns the id that can be used to auto-fill the view.
+         *
+         * <p>It's only set when the {@link AssistStructure} is used for auto-filling purposes, not
+         * for assist.
+         */
+        public int getAutoFillId() {
+            return mAutoFillId;
         }
 
         /**
@@ -1321,6 +1342,11 @@ public class AssistStructure implements Parcelable {
         @Override
         public Rect getTempRect() {
             return mAssist.mTmpRect;
+        }
+
+        @Override
+        public void setAutoFillId(int autoFillId) {
+            mNode.mAutoFillId = autoFillId;
         }
     }
 

@@ -40,10 +40,8 @@ public final class AutoFillManagerServiceShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         try {
             switch (cmd) {
-                case "start":
-                    return runStart(pw);
-                case "finish":
-                    return runFinish(pw);
+                case "request":
+                    return requestAutoFill();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -60,62 +58,16 @@ public final class AutoFillManagerServiceShellCommand extends ShellCommand {
             pw.println("  help");
             pw.println("    Prints this help text.");
             pw.println("");
-            pw.println("  start session [--user USER_ID]");
-            pw.println("    Starts an auto-fill session. "
-                    + "Prints 'token:SESSION_TOKEN if successful, or error message");
-            pw.println("");
-            pw.println("  finish session <TOKEN> [--user USER_ID]");
-            pw.println("    Finishes a session with the given TOKEN. "
-                    + "Prints empty string if successful, or error message.");
+            pw.println("  request [--user USER_ID]");
+            pw.println("    Request auto-fill on the top activity. ");
             pw.println("");
         }
     }
 
-    private int runStart(PrintWriter pw) throws RemoteException {
-        final String type = getNextArg();
-        if (type == null) {
-            pw.println("Error: didn't specify type of data to start");
-            return -1;
-        }
-        switch (type) {
-            case "session":
-                return startAutoFillSession(pw);
-        }
-        pw.println("Error: unknown start type '" + type + "'");
-        return -1;
-    }
-
-    private int runFinish(PrintWriter pw) throws RemoteException {
-        final String type = getNextArg();
-        if (type == null) {
-            pw.println("Error: didn't specify type of data to finish");
-            return -1;
-        }
-        switch (type) {
-            case "session":
-                return finishAutoFillSession(pw);
-        }
-        pw.println("Error: unknown finish type '" + type + "'");
-        return -1;
-    }
-
-    private int startAutoFillSession(PrintWriter pw) throws RemoteException {
+    private int requestAutoFill() throws RemoteException {
         final int userId = getUserIdFromArgs();
-        final String token = mService.startSession(userId, null, 0, null);
-        pw.print("token:"); pw.println(token);
-        return 0;
-    }
-
-    private int finishAutoFillSession(PrintWriter pw) throws RemoteException {
-        final String token = getNextArgRequired();
-        final int userId = getUserIdFromArgs();
-
-        boolean finished = mService.finishSession(userId, token);
-        if (!finished) {
-            pw.println("No such session");
-            return 1;
-        }
-        return 0;
+        final boolean ok = mService.requestAutoFill(userId, null);
+        return ok ? 0 : 1;
     }
 
     private int getUserIdFromArgs() {

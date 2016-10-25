@@ -6703,6 +6703,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             structure.setId(id, null, null, null);
         }
+
+        // The auto-fill id needs to be unique, but its value doesn't matter, so it's better to
+        // reuse the accessibility id to save space.
+        structure.setAutoFillId(getAccessibilityViewId());
+
         structure.setDimens(mLeft, mTop, mScrollX, mScrollY, mRight - mLeft, mBottom - mTop);
         if (!hasIdentityMatrix()) {
             structure.setTransformation(getMatrix());
