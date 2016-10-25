@@ -26,10 +26,10 @@
 #include <ResourceCache.h>
 
 #include "SkCanvas.h"
+#include "SkLatticeIter.h"
 #include "SkRegion.h"
 #include "GraphicsJNI.h"
-
-#include "utils/NinePatch.h"
+#include "NinePatchUtils.h"
 
 #include "JNIHelp.h"
 #include "core_jni_helpers.h"
@@ -88,18 +88,40 @@ public:
     }
 
     static jlong getTransparentRegion(JNIEnv* env, jobject, jobject jbitmap,
-            jlong chunkHandle, jobject boundsRect) {
+            jlong chunkHandle, jobject dstRect) {
         Res_png_9patch* chunk = reinterpret_cast<Res_png_9patch*>(chunkHandle);
         SkASSERT(chunk);
         SkASSERT(boundsRect);
 
         SkBitmap bitmap;
         GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
-        SkRect bounds;
-        GraphicsJNI::jrect_to_rect(env, boundsRect, &bounds);
+        SkRect dst;
+        GraphicsJNI::jrect_to_rect(env, dstRect, &dst);
 
-        SkRegion* region = NULL;
-        NinePatch::Draw(NULL, bounds, bitmap, *chunk, NULL, &region);
+        SkCanvas::Lattice lattice;
+        SkIRect src = SkIRect::MakeWH(bitmap.width(), bitmap.height());
+        lattice.fBounds = &src;
+        NinePatchUtils::SetLatticeDivs(&lattice, *chunk, bitmap.width(), bitmap.height());
+        lattice.fFlags = nullptr;
+
+        SkRegion* region = nullptr;
+        if (SkLatticeIter::Valid(bitmap.width(), bitmap.height(), lattice)) {
+            SkLatticeIter iter(lattice, dst);
+            if (iter.numRectsToDraw() == chunk->numColors) {
+                SkRect dummy;
+                SkRect iterDst;
+                int index = 0;
+                while (iter.next(&dummy, &iterDst)) {
+                    if (0 == chunk->getColors()[index++] && !iterDst.isEmpty()) {
+                        if (!region) {
+                            region = new SkRegion();
+                        }
+
+                        region->op(iterDst.round(), SkRegion::kUnion_Op);
+                    }
+                }
+            }
+        }
 
         return reinterpret_cast<jlong>(region);
     }

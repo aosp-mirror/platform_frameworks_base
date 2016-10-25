@@ -38,7 +38,6 @@ hwui_src_files := \
     utils/Blur.cpp \
     utils/GLUtils.cpp \
     utils/LinearAllocator.cpp \
-    utils/NinePatchImpl.cpp \
     utils/StringUtils.cpp \
     utils/TestWindowContext.cpp \
     utils/VectorDrawableUtils.cpp \

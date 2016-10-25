@@ -17,6 +17,7 @@
 #include "SkiaCanvas.h"
 
 #include "CanvasProperty.h"
+#include "NinePatchUtils.h"
 #include "VectorDrawable.h"
 #include "hwui/Bitmap.h"
 #include "hwui/MinikinUtils.h"
@@ -670,23 +671,6 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeigh
                          indexCount, tmpPaint);
 }
 
-static inline void set_lattice_divs(SkCanvas::Lattice* lattice, const Res_png_9patch& chunk,
-                                    int width, int height) {
-    lattice->fXCount = chunk.numXDivs;
-    lattice->fYCount = chunk.numYDivs;
-    lattice->fXDivs = chunk.getXDivs();
-    lattice->fYDivs = chunk.getYDivs();
-
-    // We'll often see ninepatches where the last div is equal to the width or height.
-    // This doesn't provide any additional information and is not supported by Skia.
-    if (lattice->fXCount > 0 && width == lattice->fXDivs[lattice->fXCount - 1]) {
-        lattice->fXCount--;
-    }
-    if (lattice->fYCount > 0 && height == lattice->fYDivs[lattice->fYCount - 1]) {
-        lattice->fYCount--;
-    }
-}
-
 static inline int num_distinct_rects(const SkCanvas::Lattice& lattice) {
     int xRects;
     if (lattice.fXCount > 0) {
@@ -750,7 +734,7 @@ void SkiaCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch& chunk,
     hwuiBitmap.getSkBitmap(&bitmap);
 
     SkCanvas::Lattice lattice;
-    set_lattice_divs(&lattice, chunk, bitmap.width(), bitmap.height());
+    NinePatchUtils::SetLatticeDivs(&lattice, chunk, bitmap.width(), bitmap.height());
 
     lattice.fFlags = nullptr;
     int numFlags = 0;
