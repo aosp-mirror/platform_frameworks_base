@@ -5477,10 +5477,12 @@ public class Editor {
                 // Expanding with start handle.
                 offset = getWordStart(offset);
                 startOffset = getWordEnd(mStartOffset);
+                if (startOffset == offset) {
+                    offset = getNextCursorOffset(offset, false);
+                }
             }
             mLineSelectionIsOn = currLine;
-            Selection.setSelection((Spannable) mTextView.getText(),
-                    startOffset, offset);
+            Selection.setSelection((Spannable) mTextView.getText(), startOffset, offset);
         }
 
         private void updateParagraphBasedSelection(MotionEvent event) {
