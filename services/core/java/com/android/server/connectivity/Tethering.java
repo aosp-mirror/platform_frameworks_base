@@ -52,7 +52,6 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
@@ -62,6 +61,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.IndentingPrintWriter;
@@ -69,7 +69,6 @@ import com.android.internal.util.MessageUtils;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
-import com.android.server.IoThread;
 import com.android.server.connectivity.tethering.IControlsTethering;
 import com.android.server.connectivity.tethering.TetherInterfaceStateMachine;
 import com.android.server.net.BaseNetworkObserver;
@@ -99,6 +98,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private final static boolean DBG = false;
     private final static boolean VDBG = false;
 
+    protected static final String DISABLE_PROVISIONING_SYSPROP_KEY = "net.tethering.noprovisioning";
+
     private static final Class[] messageClasses = {
             Tethering.class, TetherMasterSM.class, TetherInterfaceStateMachine.class
     };
@@ -126,6 +127,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private final INetworkStatsService mStatsService;
     private final INetworkPolicyManager mPolicyManager;
     private final Looper mLooper;
+    private final MockableSystemProperties mSystemProperties;
 
     private static class TetherState {
         public final TetherInterfaceStateMachine mStateMachine;
@@ -179,18 +181,19 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private boolean mWifiTetherRequested;
 
     public Tethering(Context context, INetworkManagementService nmService,
-            INetworkStatsService statsService, INetworkPolicyManager policyManager) {
+            INetworkStatsService statsService, INetworkPolicyManager policyManager,
+            Looper looper, MockableSystemProperties systemProperties) {
         mContext = context;
         mNMService = nmService;
         mStatsService = statsService;
         mPolicyManager = policyManager;
+        mLooper = looper;
+        mSystemProperties = systemProperties;
 
         mPublicSync = new Object();
 
         mTetherStates = new ArrayMap<>();
 
-        // make our own thread so we don't anr the system
-        mLooper = IoThread.get().getLooper();
         mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper);
         mTetherMasterSM.start();
 
@@ -393,10 +396,11 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
      *
      * @return a boolean - {@code true} indicating tether provisioning is required by the carrier.
      */
-    private boolean isTetherProvisioningRequired() {
+    @VisibleForTesting
+    protected boolean isTetherProvisioningRequired() {
         String[] provisionApp = mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_mobile_hotspot_provision_app);
-        if (SystemProperties.getBoolean("net.tethering.noprovisioning", false)
+        if (mSystemProperties.getBoolean(DISABLE_PROVISIONING_SYSPROP_KEY, false)
                 || provisionApp == null) {
             return false;
         }
