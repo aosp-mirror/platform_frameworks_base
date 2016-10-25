@@ -2256,6 +2256,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void updateWallpaperForAnimator(WindowAnimator animator) {
+        resetAnimationBackgroundAnimator();
+
         final WindowList windows = mWindows;
         WindowState detachedWallpaper = null;
 
