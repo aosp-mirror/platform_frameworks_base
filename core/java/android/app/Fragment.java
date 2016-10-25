@@ -481,6 +481,12 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     // If app has requested a specific animation, this is the one to use.
     int mNextAnim;
 
+    // If app has requested a specific transition, this is the one to use.
+    int mNextTransition;
+
+    // If app has requested a specific transition style, this is the one to use.
+    int mNextTransitionStyle;
+
     // The parent container of the fragment after dynamically added to UI.
     ViewGroup mContainer;
 
@@ -509,6 +515,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
     SharedElementCallback mEnterTransitionCallback = SharedElementCallback.NULL_CALLBACK;
     SharedElementCallback mExitTransitionCallback = SharedElementCallback.NULL_CALLBACK;
+
+    // True if mHidden has been changed and the animation should be scheduled.
+    boolean mHiddenChanged;
 
     /**
      * State information that has been retrieved from a fragment instance

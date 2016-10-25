@@ -260,6 +260,32 @@ public abstract class FragmentTransaction {
     public abstract FragmentTransaction setBreadCrumbShortTitle(CharSequence text);
 
     /**
+     * Sets whether or not to allow optimizing operations within and across
+     * transactions. Optimizing fragment transaction's operations can eliminate
+     * operations that cancel. For example, if two transactions are executed
+     * together, one that adds a fragment A and the next replaces it with fragment B,
+     * the operations will cancel and only fragment B will be added. That means that
+     * fragment A may not go through the creation/destruction lifecycle.
+     * <p>
+     * The side effect of optimization is that fragments may have state changes
+     * out of the expected order. For example, one transaction adds fragment A,
+     * a second adds fragment B, then a third removes fragment A. Without optimization,
+     * fragment B could expect that while it is being created, fragment A will also
+     * exist because fragment A will be removed after fragment B was added.
+     * With optimization, fragment B cannot expect fragment A to exist when
+     * it has been created because fragment A's add/remove will be optimized out.
+     * <p>
+     * The default is {@code false} for applications targeting version
+     * versions prior to O and {@code true} for applications targeting O and
+     * later.
+     *
+     * @param allowOptimization {@code true} to enable optimizing operations
+     *                          or {@code false} to disable optimizing
+     *                          operations on this transaction.
+     */
+    public abstract FragmentTransaction setAllowOptimization(boolean allowOptimization);
+
+    /**
      * Schedules a commit of this transaction.  The commit does
      * not happen immediately; it will be scheduled as work on the main thread
      * to be done the next time that thread is ready.

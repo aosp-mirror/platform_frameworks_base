@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Parcel;
@@ -52,6 +53,7 @@ final class BackStackState implements Parcelable {
     final CharSequence mBreadCrumbShortTitleText;
     final ArrayList<String> mSharedElementSourceNames;
     final ArrayList<String> mSharedElementTargetNames;
+    final boolean mAllowOptimization;
 
     public BackStackState(FragmentManagerImpl fm, BackStackRecord bse) {
         final int numOps = bse.mOps.size();
@@ -81,6 +83,7 @@ final class BackStackState implements Parcelable {
         mBreadCrumbShortTitleText = bse.mBreadCrumbShortTitleText;
         mSharedElementSourceNames = bse.mSharedElementSourceNames;
         mSharedElementTargetNames = bse.mSharedElementTargetNames;
+        mAllowOptimization = bse.mAllowOptimization;
     }
 
     public BackStackState(Parcel in) {
@@ -95,6 +98,7 @@ final class BackStackState implements Parcelable {
         mBreadCrumbShortTitleText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mSharedElementSourceNames = in.createStringArrayList();
         mSharedElementTargetNames = in.createStringArrayList();
+        mAllowOptimization = in.readInt() != 0;
     }
 
     public BackStackRecord instantiate(FragmentManagerImpl fm) {
@@ -137,6 +141,7 @@ final class BackStackState implements Parcelable {
         bse.mBreadCrumbShortTitleText = mBreadCrumbShortTitleText;
         bse.mSharedElementSourceNames = mSharedElementSourceNames;
         bse.mSharedElementTargetNames = mSharedElementTargetNames;
+        bse.mAllowOptimization = mAllowOptimization;
         bse.bumpBackStackNesting(1);
         return bse;
     }
@@ -157,6 +162,7 @@ final class BackStackState implements Parcelable {
         TextUtils.writeToParcel(mBreadCrumbShortTitleText, dest, 0);
         dest.writeStringList(mSharedElementSourceNames);
         dest.writeStringList(mSharedElementTargetNames);
+        dest.writeInt(mAllowOptimization ? 1 : 0);
     }
 
     public static final Parcelable.Creator<BackStackState> CREATOR
@@ -175,7 +181,7 @@ final class BackStackState implements Parcelable {
  * @hide Entry of an operation on the fragment back stack.
  */
 final class BackStackRecord extends FragmentTransaction implements
-        FragmentManager.BackStackEntry, Runnable {
+        FragmentManager.BackStackEntry, FragmentManagerImpl.OpGenerator {
     static final String TAG = FragmentManagerImpl.TAG;
 
     final FragmentManagerImpl mManager;
@@ -210,6 +216,7 @@ final class BackStackRecord extends FragmentTransaction implements
     String mName;
     boolean mCommitted;
     int mIndex = -1;
+    boolean mAllowOptimization;
 
     int mBreadCrumbTitleRes;
     CharSequence mBreadCrumbTitleText;
@@ -352,6 +359,7 @@ final class BackStackRecord extends FragmentTransaction implements
 
     public BackStackRecord(FragmentManagerImpl manager) {
         mManager = manager;
+        mAllowOptimization = Build.isAtLeastO();
     }
 
     public int getId() {
@@ -633,6 +641,12 @@ final class BackStackRecord extends FragmentTransaction implements
         mManager.execSingleAction(this, true);
     }
 
+    @Override
+    public FragmentTransaction setAllowOptimization(boolean allowOptimization) {
+        mAllowOptimization = allowOptimization;
+        return this;
+    }
+
     int commitInternal(boolean allowStateLoss) {
         if (mCommitted) {
             throw new IllegalStateException("commit already called");
@@ -654,30 +668,40 @@ final class BackStackRecord extends FragmentTransaction implements
         return mIndex;
     }
 
-    public void run() {
+    /**
+     * Implementation of {@link FragmentManagerImpl.android.app.FragmentManagerImpl.OpGenerator}.
+     * This operation is added to the list of pending actions during {@link #commit()}, and
+     * will be executed on the UI thread to run this FragmentTransaction.
+     *
+     * @param records Modified to add this BackStackRecord
+     * @param isRecordPop Modified to add a false (this isn't a pop)
+     * @return true always because the records and isRecordPop will always be changed
+     */
+    @Override
+    public boolean generateOps(ArrayList<BackStackRecord> records, ArrayList<Boolean> isRecordPop) {
         if (FragmentManagerImpl.DEBUG) {
             Log.v(TAG, "Run: " + this);
         }
 
+        records.add(this);
+        isRecordPop.add(false);
         if (mAddToBackStack) {
-            if (mIndex < 0) {
-                throw new IllegalStateException("addToBackStack() called after commit()");
-            }
+            mManager.addBackStackState(this);
         }
+        return true;
+    }
 
-        expandReplaceOps();
-        bumpBackStackNesting(1);
-
-        if (mManager.mCurState >= Fragment.CREATED) {
-            SparseArray<FragmentContainerTransition> transitioningFragments = new SparseArray<>();
-            calculateFragments(transitioningFragments);
-            beginTransition(transitioningFragments);
-        }
-
+    /**
+     * Executes the operations contained within this transaction. The Fragment states will only
+     * be modified if optimizations are not allowed.
+     */
+    void executeOps() {
         final int numOps = mOps.size();
         for (int opNum = 0; opNum < numOps; opNum++) {
             final Op op = mOps.get(opNum);
-            Fragment f = op.fragment;
+            final Fragment f = op.fragment;
+            f.mNextTransition = mTransition;
+            f.mNextTransitionStyle = mTransitionStyle;
             switch (op.cmd) {
                 case OP_ADD:
                     f.mNextAnim = op.enterAnim;
@@ -685,56 +709,94 @@ final class BackStackRecord extends FragmentTransaction implements
                     break;
                 case OP_REMOVE:
                     f.mNextAnim = op.exitAnim;
-                    mManager.removeFragment(f, mTransition, mTransitionStyle);
+                    mManager.removeFragment(f);
                     break;
                 case OP_HIDE:
                     f.mNextAnim = op.exitAnim;
-                    mManager.hideFragment(f, mTransition, mTransitionStyle);
+                    mManager.hideFragment(f);
                     break;
                 case OP_SHOW:
                     f.mNextAnim = op.enterAnim;
-                    mManager.showFragment(f, mTransition, mTransitionStyle);
+                    mManager.showFragment(f);
                     break;
                 case OP_DETACH:
                     f.mNextAnim = op.exitAnim;
-                    mManager.detachFragment(f, mTransition, mTransitionStyle);
+                    mManager.detachFragment(f);
                     break;
                 case OP_ATTACH:
                     f.mNextAnim = op.enterAnim;
-                    mManager.attachFragment(f, mTransition, mTransitionStyle);
+                    mManager.attachFragment(f);
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown cmd: " + op.cmd);
             }
+            if (!mAllowOptimization && op.cmd != OP_ADD) {
+                mManager.moveFragmentToExpectedState(f);
+            }
         }
-
-        mManager.moveToState(mManager.mCurState, mTransition,
-                mTransitionStyle, true);
-
-        if (mAddToBackStack) {
-            mManager.addBackStackState(this);
+        if (!mAllowOptimization) {
+            // Added fragments are added at the end to comply with prior behavior.
+            mManager.moveToState(mManager.mCurState);
         }
     }
 
-    private void expandReplaceOps() {
-        final int numOps = mOps.size();
-
-        boolean hasReplace = false;
-        // Before we do anything, check to see if any replace operations exist:
-        for (int opNum = 0; opNum < numOps; opNum++) {
+    /**
+     * Reverses the execution of the operations within this transaction. The Fragment states will
+     * only be modified if optimizations are not allowed.
+     */
+    void executePopOps() {
+        for (int opNum = mOps.size() - 1; opNum >= 0; opNum--) {
             final Op op = mOps.get(opNum);
-            if (op.cmd == OP_REPLACE) {
-                hasReplace = true;
-                break;
+            Fragment f = op.fragment;
+            f.mNextTransition = FragmentManagerImpl.reverseTransit(mTransition);
+            f.mNextTransitionStyle = mTransitionStyle;
+            switch (op.cmd) {
+                case OP_ADD:
+                    f.mNextAnim = op.popExitAnim;
+                    mManager.removeFragment(f);
+                    break;
+                case OP_REMOVE:
+                    f.mNextAnim = op.popEnterAnim;
+                    mManager.addFragment(f, false);
+                    break;
+                case OP_HIDE:
+                    f.mNextAnim = op.popEnterAnim;
+                    mManager.showFragment(f);
+                    break;
+                case OP_SHOW:
+                    f.mNextAnim = op.popExitAnim;
+                    mManager.hideFragment(f);
+                    break;
+                case OP_DETACH:
+                    f.mNextAnim = op.popEnterAnim;
+                    mManager.attachFragment(f);
+                    break;
+                case OP_ATTACH:
+                    f.mNextAnim = op.popExitAnim;
+                    mManager.detachFragment(f);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown cmd: " + op.cmd);
+            }
+            if (!mAllowOptimization && op.cmd != OP_ADD) {
+                mManager.moveFragmentToExpectedState(f);
             }
         }
-
-        if (!hasReplace) {
-            return; // nothing to expand
+        if (!mAllowOptimization) {
+            mManager.moveToState(mManager.mCurState);
         }
+    }
 
-        ArrayList<Fragment> added = (mManager.mAdded == null) ? new ArrayList<Fragment>() :
-                new ArrayList<>(mManager.mAdded);
+    /**
+     * Removes all OP_REPLACE ops and replaces them with the proper add and remove
+     * operations that are equivalent to the replace. This must be called prior to
+     * {@link #executeOps()} or any other call that operations on mOps.
+     *
+     * @param added Initialized to the fragments that are in the mManager.mAdded, this
+     *              will be modified to contain the fragments that will be in mAdded
+     *              after the execution ({@link #executeOps()}.
+     */
+    void expandReplaceOps(ArrayList<Fragment> added) {
         for (int opNum = 0; opNum < mOps.size(); opNum++) {
             final Op op = mOps.get(opNum);
             switch (op.cmd) {
@@ -822,13 +884,14 @@ final class BackStackRecord extends FragmentTransaction implements
                     fragments.firstOut = null;
                 }
             }
+
             /**
              * Ensure that fragments that are entering are at least at the CREATED state
              * so that they may load Transitions using TransitionInflater.
              */
             if (fragment.mState < Fragment.CREATED && mManager.mCurState >= Fragment.CREATED &&
                     mManager.mHost.getContext().getApplicationInfo().targetSdkVersion >=
-                    Build.VERSION_CODES.N) {
+                            Build.VERSION_CODES.N && !mAllowOptimization) {
                 mManager.makeActive(fragment);
                 mManager.moveToState(fragment, Fragment.CREATED, 0, 0, false);
             }
@@ -843,7 +906,7 @@ final class BackStackRecord extends FragmentTransaction implements
      *                               and last fragments to be added. This will be modified by
      *                               this method.
      */
-    private void calculateFragments(
+    public void calculateFragments(
             SparseArray<FragmentContainerTransition> transitioningFragments) {
         if (!mManager.mContainer.onHasView()) {
             return; // nothing to see, so no transitions
@@ -874,7 +937,7 @@ final class BackStackRecord extends FragmentTransaction implements
      *                               and last fragments to be added. This will be modified by
      *                               this method.
      */
-    public void calculateBackFragments(
+    public void calculatePopFragments(
             SparseArray<FragmentContainerTransition> transitioningFragments) {
         if (!mManager.mContainer.onHasView()) {
             return; // nothing to see, so no transitions
@@ -923,7 +986,7 @@ final class BackStackRecord extends FragmentTransaction implements
      * in {@link #setNameOverrides(android.app.BackStackRecord.TransitionState, java.util.ArrayList,
      * java.util.ArrayList)}.
      */
-    private TransitionState beginTransition(SparseArray<FragmentContainerTransition> containers) {
+    TransitionState beginTransition(SparseArray<FragmentContainerTransition> containers) {
         TransitionState state = new TransitionState();
 
         // Adding a non-existent target view makes sure that the transitions don't target
@@ -947,28 +1010,28 @@ final class BackStackRecord extends FragmentTransaction implements
         return transition;
     }
 
-    private static Transition getEnterTransition(Fragment inFragment, boolean isBack) {
+    private static Transition getEnterTransition(Fragment inFragment, boolean isPop) {
         if (inFragment == null) {
             return null;
         }
-        return cloneTransition(isBack ? inFragment.getReenterTransition() :
+        return cloneTransition(isPop ? inFragment.getReenterTransition() :
                 inFragment.getEnterTransition());
     }
 
-    private static Transition getExitTransition(Fragment outFragment, boolean isBack) {
+    private static Transition getExitTransition(Fragment outFragment, boolean isPop) {
         if (outFragment == null) {
             return null;
         }
-        return cloneTransition(isBack ? outFragment.getReturnTransition() :
+        return cloneTransition(isPop ? outFragment.getReturnTransition() :
                 outFragment.getExitTransition());
     }
 
     private static TransitionSet getSharedElementTransition(Fragment inFragment,
-            Fragment outFragment, boolean isBack) {
+            Fragment outFragment, boolean isPop) {
         if (inFragment == null || outFragment == null) {
             return null;
         }
-        Transition transition = cloneTransition(isBack
+        Transition transition = cloneTransition(isPop
                 ? outFragment.getSharedElementReturnTransition()
                 : inFragment.getSharedElementEnterTransition());
         if (transition == null) {
@@ -998,11 +1061,11 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     private ArrayMap<String, View> remapSharedElements(TransitionState state, Fragment outFragment,
-            boolean isBack) {
+            boolean isPop) {
         ArrayMap<String, View> namedViews = new ArrayMap<String, View>();
         if (mSharedElementSourceNames != null) {
             outFragment.getView().findNamedViews(namedViews);
-            if (isBack) {
+            if (isPop) {
                 namedViews.retainAll(mSharedElementTargetNames);
             } else {
                 namedViews = remapNames(mSharedElementSourceNames, mSharedElementTargetNames,
@@ -1010,7 +1073,7 @@ final class BackStackRecord extends FragmentTransaction implements
             }
         }
 
-        if (isBack) {
+        if (isPop) {
             outFragment.mEnterTransitionCallback.onMapSharedElements(
                     mSharedElementTargetNames, namedViews);
             setBackNameOverrides(state, namedViews, false);
@@ -1038,7 +1101,7 @@ final class BackStackRecord extends FragmentTransaction implements
             final Transition enterTransition, final TransitionSet sharedElementTransition,
             final Transition exitTransition, final Transition overallTransition,
             final View container, final Fragment inFragment, final Fragment outFragment,
-            final ArrayList<View> hiddenFragmentViews, final boolean isBack,
+            final ArrayList<View> hiddenFragmentViews, final boolean isPop,
             final ArrayList<View> sharedElementTargets) {
         if (enterTransition == null && sharedElementTransition == null &&
                 overallTransition == null) {
@@ -1059,7 +1122,7 @@ final class BackStackRecord extends FragmentTransaction implements
 
                         ArrayMap<String, View> namedViews = null;
                         if (sharedElementTransition != null) {
-                            namedViews = mapSharedElementsIn(state, isBack, inFragment);
+                            namedViews = mapSharedElementsIn(state, isPop, inFragment);
                             removeTargets(sharedElementTransition, sharedElementTargets);
                             // keep the nonExistentView as excluded so the list doesn't get emptied
                             sharedElementTargets.remove(state.nonExistentView);
@@ -1073,7 +1136,7 @@ final class BackStackRecord extends FragmentTransaction implements
 
                             setEpicenterIn(namedViews, state);
 
-                            callSharedElementEnd(state, inFragment, outFragment, isBack,
+                            callSharedElementEnd(state, inFragment, outFragment, isPop,
                                     namedViews);
                         }
 
@@ -1104,8 +1167,8 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     private void callSharedElementEnd(TransitionState state, Fragment inFragment,
-            Fragment outFragment, boolean isBack, ArrayMap<String, View> namedViews) {
-        SharedElementCallback sharedElementCallback = isBack ?
+            Fragment outFragment, boolean isPop, ArrayMap<String, View> namedViews) {
+        SharedElementCallback sharedElementCallback = isPop ?
                 outFragment.mEnterTransitionCallback :
                 inFragment.mEnterTransitionCallback;
         ArrayList<String> names = new ArrayList<String>(namedViews.keySet());
@@ -1125,13 +1188,13 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     private ArrayMap<String, View> mapSharedElementsIn(TransitionState state,
-            boolean isBack, Fragment inFragment) {
+            boolean isPop, Fragment inFragment) {
         // Now map the shared elements in the incoming fragment
-        ArrayMap<String, View> namedViews = mapEnteringSharedElements(state, inFragment, isBack);
+        ArrayMap<String, View> namedViews = mapEnteringSharedElements(state, inFragment, isPop);
 
         // remap shared elements and set the name mapping used
         // in the shared element transition.
-        if (isBack) {
+        if (isPop) {
             inFragment.mExitTransitionCallback.onMapSharedElements(
                     mSharedElementTargetNames, namedViews);
             setBackNameOverrides(state, namedViews, true);
@@ -1145,10 +1208,10 @@ final class BackStackRecord extends FragmentTransaction implements
 
     private static Transition mergeTransitions(Transition enterTransition,
             Transition exitTransition, Transition sharedElementTransition, Fragment inFragment,
-            boolean isBack) {
+            boolean isPop) {
         boolean overlap = true;
         if (enterTransition != null && exitTransition != null && inFragment != null) {
-            overlap = isBack ? inFragment.getAllowReturnTransitionOverlap() :
+            overlap = isPop ? inFragment.getAllowReturnTransitionOverlap() :
                     inFragment.getAllowEnterTransitionOverlap();
         }
 
@@ -1496,17 +1559,17 @@ final class BackStackRecord extends FragmentTransaction implements
      * @param state The transition State as returned from {@link #beginTransition(
      * android.util.SparseArray, android.util.SparseArray, boolean)}.
      * @param inFragment The last fragment to be added.
-     * @param isBack true if this is popping the back stack or false if this is a
+     * @param isPop true if this is popping the back stack or false if this is a
      *               forward operation.
      */
     private ArrayMap<String, View> mapEnteringSharedElements(TransitionState state,
-            Fragment inFragment, boolean isBack) {
+            Fragment inFragment, boolean isPop) {
         ArrayMap<String, View> namedViews = new ArrayMap<String, View>();
         View root = inFragment.getView();
         if (root != null) {
             if (mSharedElementSourceNames != null) {
                 root.findNamedViews(namedViews);
-                if (isBack) {
+                if (isPop) {
                     namedViews = remapNames(mSharedElementSourceNames,
                             mSharedElementTargetNames, namedViews);
                 } else {
@@ -1565,81 +1628,6 @@ final class BackStackRecord extends FragmentTransaction implements
         });
     }
 
-    public TransitionState popFromBackStack(boolean doStateMove, TransitionState state,
-            SparseArray<FragmentContainerTransition> transitioningFragments) {
-        if (FragmentManagerImpl.DEBUG) {
-            Log.v(TAG, "popFromBackStack: " + this);
-            LogWriter logw = new LogWriter(Log.VERBOSE, TAG);
-            PrintWriter pw = new FastPrintWriter(logw, false, 1024);
-            dump("  ", null, pw, null);
-            pw.flush();
-        }
-
-        if (mManager.mCurState >= Fragment.CREATED) {
-            if (state == null) {
-                if (transitioningFragments.size() != 0) {
-                    state = beginTransition(transitioningFragments);
-                }
-            } else if (!doStateMove) {
-                setNameOverrides(state, mSharedElementTargetNames, mSharedElementSourceNames);
-            }
-        }
-
-        bumpBackStackNesting(-1);
-
-        final int numOps = mOps.size();
-        for (int opNum = numOps - 1; opNum >= 0; opNum--) {
-            final Op op = mOps.get(opNum);
-            Fragment f = op.fragment;
-            switch (op.cmd) {
-                case OP_ADD:
-                    f.mNextAnim = op.popExitAnim;
-                    mManager.removeFragment(f,
-                            FragmentManagerImpl.reverseTransit(mTransition),
-                            mTransitionStyle);
-                    break;
-                case OP_REMOVE:
-                    f.mNextAnim = op.popEnterAnim;
-                    mManager.addFragment(f, false);
-                    break;
-                case OP_HIDE:
-                    f.mNextAnim = op.popEnterAnim;
-                    mManager.showFragment(f,
-                            FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
-                    break;
-                case OP_SHOW:
-                    f.mNextAnim = op.popExitAnim;
-                    mManager.hideFragment(f,
-                            FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
-                    break;
-                case OP_DETACH:
-                    f.mNextAnim = op.popEnterAnim;
-                    mManager.attachFragment(f,
-                            FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
-                    break;
-                case OP_ATTACH:
-                    f.mNextAnim = op.popExitAnim;
-                    mManager.detachFragment(f,
-                            FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown cmd: " + op.cmd);
-            }
-        }
-
-        if (doStateMove) {
-            mManager.moveToState(mManager.mCurState,
-                    FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle, true);
-            state = null;
-        }
-
-        if (mIndex >= 0) {
-            mManager.freeBackStackIndex(mIndex);
-            mIndex = -1;
-        }
-        return state;
-    }
-
     private static void setNameOverride(ArrayMap<String, String> overrides,
             String source, String target) {
         if (source != null && target != null && !source.equals(target)) {
@@ -1653,7 +1641,7 @@ final class BackStackRecord extends FragmentTransaction implements
         }
     }
 
-    private static void setNameOverrides(TransitionState state, ArrayList<String> sourceNames,
+    static void setNameOverrides(TransitionState state, ArrayList<String> sourceNames,
             ArrayList<String> targetNames) {
         if (sourceNames != null && targetNames != null) {
             for (int i = 0; i < sourceNames.size(); i++) {
