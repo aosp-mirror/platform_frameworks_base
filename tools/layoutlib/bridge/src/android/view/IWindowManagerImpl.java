@@ -605,7 +605,7 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void getStableInsets(Rect outInsets) throws RemoteException {
+    public void getStableInsets(int displayId, Rect outInsets) throws RemoteException {
     }
 
     @Override

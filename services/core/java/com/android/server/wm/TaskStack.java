@@ -24,6 +24,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
@@ -1010,7 +1011,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
 
         if (dockSide == DOCKED_TOP) {
-            mService.getStableInsetsLocked(mTmpRect);
+            mService.getStableInsetsLocked(DEFAULT_DISPLAY, mTmpRect);
             int topInset = mTmpRect.top;
             mTmpAdjustedBounds.set(mBounds);
             mTmpAdjustedBounds.bottom =
@@ -1041,7 +1042,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
 
         if (dockSide == DOCKED_TOP) {
-            mService.getStableInsetsLocked(mTmpRect);
+            mService.getStableInsetsLocked(DEFAULT_DISPLAY, mTmpRect);
             int topInset = mTmpRect.top;
             return mBounds.bottom - topInset;
         } else if (dockSide == DOCKED_LEFT || dockSide == DOCKED_RIGHT) {

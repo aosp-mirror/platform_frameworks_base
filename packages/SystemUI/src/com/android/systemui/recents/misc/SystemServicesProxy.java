@@ -1084,7 +1084,8 @@ public class SystemServicesProxy {
         if (mWm == null) return;
 
         try {
-            WindowManagerGlobal.getWindowManagerService().getStableInsets(outStableInsets);
+            WindowManagerGlobal.getWindowManagerService().getStableInsets(Display.DEFAULT_DISPLAY,
+                    outStableInsets);
         } catch (Exception e) {
             e.printStackTrace();
         }

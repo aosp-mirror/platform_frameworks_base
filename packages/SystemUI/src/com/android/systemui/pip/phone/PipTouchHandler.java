@@ -36,6 +36,7 @@ import android.graphics.Rect;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.Display;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputEvent;
@@ -125,6 +126,10 @@ public class PipTouchHandler {
         mScroller = new Scroller(context);
         mScroller.setFriction(mViewConfig.getScrollFriction() * SCROLL_FRICTION_MULTIPLIER);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 2f);
+    }
+
+    public void onConfigurationChanged() {
+        updateBoundedPinnedStackBounds();
     }
 
     private void handleTouchEvent(MotionEvent ev) {
@@ -326,8 +331,11 @@ public class PipTouchHandler {
     private void updateBoundedPinnedStackBounds() {
         try {
             StackInfo info = mActivityManager.getStackInfo(PINNED_STACK_ID);
-            mPinnedStackBounds.set(info.bounds);
-            mBoundedPinnedStackBounds.set(mActivityManager.getPictureInPictureMovementBounds());
+            if (info != null) {
+                mPinnedStackBounds.set(info.bounds);
+                mBoundedPinnedStackBounds.set(mActivityManager.getPictureInPictureMovementBounds(
+                        Display.DEFAULT_DISPLAY));
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Could not fetch PIP movement bounds.", e);
         }

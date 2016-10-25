@@ -37,6 +37,7 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Display;
 import android.view.IWindowManager;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -220,7 +221,8 @@ public class PipManager {
     private void loadConfigurationsAndApply() {
         Resources res = mContext.getResources();
         try {
-            mDefaultPipBounds = mActivityManager.getDefaultPictureInPictureBounds();
+            mDefaultPipBounds = mActivityManager.getDefaultPictureInPictureBounds(
+                    Display.DEFAULT_DISPLAY);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get default PIP bounds", e);
         }
