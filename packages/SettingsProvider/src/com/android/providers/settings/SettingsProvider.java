@@ -2137,7 +2137,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 133;
+            private static final int SETTINGS_VERSION = 134;
 
             private final int mUserId;
 
@@ -2452,6 +2452,21 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 130) {
+                    // Split Ambient settings
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    boolean dozeExplicitlyDisabled = "0".equals(secureSettings.
+                            getSettingLocked(Settings.Secure.DOZE_ENABLED).getValue());
+
+                    if (dozeExplicitlyDisabled) {
+                        secureSettings.insertSettingLocked(Settings.Secure.DOZE_PULSE_ON_PICK_UP,
+                                "0", SettingsState.SYSTEM_PACKAGE_NAME);
+                        secureSettings.insertSettingLocked(Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
+                                "0", SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 131;
+                }
+
+                if (currentVersion == 131) {
                     // Initialize new multi-press timeout to default value
                     final SettingsState systemSecureSettings = getSecureSettingsLocked(userId);
                     final String oldValue = systemSecureSettings.getSettingLocked(
@@ -2464,11 +2479,11 @@ public class SettingsProvider extends ContentProvider {
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
 
-                    currentVersion = 131;
+                    currentVersion = 132;
                 }
 
-                if (currentVersion == 131) {
-                    // Version 131: Allow managed profile to optionally use the parent's ringtones
+                if (currentVersion == 132) {
+                    // Version 132: Allow managed profile to optionally use the parent's ringtones
                     final SettingsState systemSecureSettings = getSecureSettingsLocked(userId);
                     String defaultSyncParentSounds = (getContext().getResources()
                             .getBoolean(R.bool.def_sync_parent_sounds) ? "1" : "0");
@@ -2476,11 +2491,11 @@ public class SettingsProvider extends ContentProvider {
                             Settings.Secure.SYNC_PARENT_SOUNDS,
                             defaultSyncParentSounds,
                             SettingsState.SYSTEM_PACKAGE_NAME);
-                    currentVersion = 132;
+                    currentVersion = 133;
                 }
 
-                if (currentVersion == 132) {
-                    // Version 132: Add default end button behavior
+                if (currentVersion == 133) {
+                    // Version 133: Add default end button behavior
                     final SettingsState systemSettings = getSystemSettingsLocked(userId);
                     if (systemSettings.getSettingLocked(Settings.System.END_BUTTON_BEHAVIOR) ==
                             null) {
@@ -2489,7 +2504,7 @@ public class SettingsProvider extends ContentProvider {
                         systemSettings.insertSettingLocked(Settings.System.END_BUTTON_BEHAVIOR,
                                 defaultEndButtonBehavior, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
-                    currentVersion = 133;
+                    currentVersion = 134;
                 }
 
                 if (currentVersion != newVersion) {
