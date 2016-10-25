@@ -3045,6 +3045,7 @@ public class ActivityManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     public int getPackageImportance(String packageName) {
         try {
             int procState = ActivityManagerNative.getDefault().getPackageProcessState(packageName,
