@@ -179,7 +179,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
-    private static final String LOG_TAG = "DevicePolicyManagerService";
+    private static final String LOG_TAG = "DevicePolicyManager";
 
     private static final boolean VERBOSE_LOG = false; // DO NOT SUBMIT WITH TRUE
 
