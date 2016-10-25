@@ -1736,6 +1736,7 @@
   <java-symbol type="integer" name="config_autoBrightnessAmbientLightHorizon"/>
   <java-symbol type="integer" name="config_autoBrightnessBrighteningLightDebounce"/>
   <java-symbol type="integer" name="config_autoBrightnessDarkeningLightDebounce"/>
+  <java-symbol type="integer" name="config_autoBrightnessInitialLightSensorRate"/>
   <java-symbol type="integer" name="config_autoBrightnessLightSensorRate"/>
   <java-symbol type="integer" name="config_carDockKeepsScreenOn" />
   <java-symbol type="integer" name="config_criticalBatteryWarningLevel" />
