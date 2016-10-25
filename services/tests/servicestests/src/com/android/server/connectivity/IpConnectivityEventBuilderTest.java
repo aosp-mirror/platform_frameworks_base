@@ -16,6 +16,17 @@
 
 package com.android.server.connectivity;
 
+import static com.android.server.connectivity.MetricsTestUtil.aBool;
+import static com.android.server.connectivity.MetricsTestUtil.aByteArray;
+import static com.android.server.connectivity.MetricsTestUtil.aLong;
+import static com.android.server.connectivity.MetricsTestUtil.aString;
+import static com.android.server.connectivity.MetricsTestUtil.aType;
+import static com.android.server.connectivity.MetricsTestUtil.anInt;
+import static com.android.server.connectivity.MetricsTestUtil.anIntArray;
+import static com.android.server.connectivity.MetricsTestUtil.b;
+import static com.android.server.connectivity.MetricsTestUtil.describeIpEvent;
+import static com.android.server.connectivity.metrics.IpConnectivityLogClass.IpConnectivityLog;
+
 import android.net.ConnectivityMetricsEvent;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.ApfStats;
@@ -28,21 +39,10 @@ import android.net.metrics.IpReachabilityEvent;
 import android.net.metrics.NetworkEvent;
 import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
-import com.google.protobuf.nano.MessageNano;
-import java.util.Arrays;
+
 import junit.framework.TestCase;
 
-import static com.android.server.connectivity.metrics.IpConnectivityLogClass.IpConnectivityLog;
-import static com.android.server.connectivity.MetricsTestUtil.aBool;
-import static com.android.server.connectivity.MetricsTestUtil.aByteArray;
-import static com.android.server.connectivity.MetricsTestUtil.aLong;
-import static com.android.server.connectivity.MetricsTestUtil.aString;
-import static com.android.server.connectivity.MetricsTestUtil.aType;
-import static com.android.server.connectivity.MetricsTestUtil.anInt;
-import static com.android.server.connectivity.MetricsTestUtil.anIntArray;
-import static com.android.server.connectivity.MetricsTestUtil.b;
-import static com.android.server.connectivity.MetricsTestUtil.describeIpEvent;
-import static com.android.server.connectivity.MetricsTestUtil.ipEv;
+import java.util.Arrays;
 
 public class IpConnectivityEventBuilderTest extends TestCase {
 
@@ -351,8 +351,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
     static void verifySerialization(String want, ConnectivityMetricsEvent... input) {
         try {
             byte[] got = IpConnectivityEventBuilder.serialize(0, Arrays.asList(input));
-            IpConnectivityLog log = new IpConnectivityLog();
-            MessageNano.mergeFrom(log, got);
+            IpConnectivityLog log = IpConnectivityLog.parseFrom(got);
             assertEquals(want, log.toString());
         } catch (Exception e) {
             fail(e.toString());
