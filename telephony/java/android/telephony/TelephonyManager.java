@@ -2952,7 +2952,10 @@ public class TelephonyManager {
      * methods may return true.
      *
      * <p>This method returns valid data for registered cells on devices with
-     * {@link android.content.pm.PackageManager#FEATURE_TELEPHONY}.
+     * {@link android.content.pm.PackageManager#FEATURE_TELEPHONY}. In cases where only
+     * partial information is available for a particular CellInfo entry, unavailable fields
+     * will be reported as Integer.MAX_VALUE. All reported cells will include at least a
+     * valid set of technology-specific identification info and a power level measurement.
      *
      *<p>
      * This method is preferred over using {@link
