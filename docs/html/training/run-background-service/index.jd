@@ -35,16 +35,22 @@ startpage=true
 <!-- ------------------------------------------------------------------------------------------- -->
 <p>
     Unless you specify otherwise, most of the operations you do in an app run in the foreground on
-    a special thread called the UI thread. This can cause problems, because long-running operations
-    will interfere with the responsiveness of your user interface. This annoys your users, and can
+    a special thread called the UI thread. Long-running foreground operations can cause problems
+    and interfere with the responsiveness of your user interface, which annoys your users and can
     even cause system errors. To avoid this, the Android framework offers several classes that
-    help you off-load operations onto a separate thread running in the background. The most useful
-    of these is {@link android.app.IntentService}.
+    help you off-load operations onto a separate thread that runs in the background. The most
+    useful of these is {@link android.app.IntentService}.
 </p>
 <p>
     This class describes how to implement an {@link android.app.IntentService}, send it work
     requests, and report its results to other components.
 </p>
+
+<p class="note"><strong>Note:</strong> If your app targets Android 5.0 (API level 21),
+    you should use {@link android.app.job.JobScheduler} to execute background
+    services. For more information about this class,
+    see the {@link android.app.job.JobScheduler} reference documentation.</p>
+
 <h2>Lessons</h2>
 <dl>
     <dt>
