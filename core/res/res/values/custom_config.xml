@@ -42,4 +42,8 @@
 
     <!-- Whether to use scaled brightness (set -1 to disable) -->
     <integer name="config_useScaleBrightness">-1</integer>
+
+    <!-- Whether notify fingerprint client of successful cancelled authentication -->
+    <bool name="config_notifyClientOnFingerprintCancelSuccess">false</bool>
+
 </resources>
