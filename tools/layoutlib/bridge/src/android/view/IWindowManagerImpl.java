@@ -413,7 +413,8 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public int[] setNewConfiguration(Configuration arg0) throws RemoteException {
+    public int[] setNewDisplayOverrideConfiguration(Configuration arg0, int displayId)
+            throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -487,7 +488,7 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public Configuration updateOrientationFromAppTokens(Configuration arg0, IBinder arg1)
+    public Configuration updateOrientationFromAppTokens(Configuration arg0, IBinder arg1, int arg2)
             throws RemoteException {
         // TODO Auto-generated method stub
         return null;

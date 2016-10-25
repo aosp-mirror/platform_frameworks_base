@@ -25,6 +25,7 @@ import android.view.IWindowManager;
 import junit.framework.TestCase;
 
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 /**
  * TODO: Remove this. This is only a placeholder, need to implement this.
@@ -113,7 +114,8 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.updateOrientationFromAppTokens(new Configuration(), null);
+            mWm.updateOrientationFromAppTokens(new Configuration(),
+                    null /* freezeThisOneIfNeeded */, DEFAULT_DISPLAY);
             fail("IWindowManager.updateOrientationFromAppTokens did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {

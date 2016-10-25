@@ -2285,13 +2285,14 @@ final class ActivityStack extends ConfigurationContainer {
             // the screen based on the new activity order.
             boolean notUpdated = true;
             if (mStackSupervisor.isFocusedStack(this)) {
-                Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                        mService.getGlobalConfiguration(),
-                        next.mayFreezeScreenLocked(next.app) ? next.appToken : null);
+                final Configuration config = mWindowManager.updateOrientationFromAppTokens(
+                        mStackSupervisor.getDisplayOverrideConfiguration(mDisplayId),
+                        next.mayFreezeScreenLocked(next.app) ? next.appToken : null, mDisplayId);
                 if (config != null) {
                     next.frozenBeforeDestroy = true;
                 }
-                notUpdated = !mService.updateConfigurationLocked(config, next, false);
+                notUpdated = !mService.updateDisplayOverrideConfigurationLocked(config, next,
+                        false /* deferResume */, mDisplayId);
             }
 
             if (notUpdated) {

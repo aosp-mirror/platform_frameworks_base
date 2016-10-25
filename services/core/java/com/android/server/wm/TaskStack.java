@@ -448,8 +448,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
         // Calculate the current position.
         final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-        final int dividerSize = mService.getDefaultDisplayContentLocked()
-                .getDockedDividerController().getContentWidth();
+        final int dividerSize = mDisplayContent.getDockedDividerController().getContentWidth();
         final int dockSide = getDockSide(outBounds);
         final int dividerPosition = DockedDividerUtils.calculatePositionForBounds(outBounds,
                 dockSide, dividerSize);
@@ -783,13 +782,14 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             mAnimationBackgroundSurface.destroySurface();
             mAnimationBackgroundSurface = null;
         }
+        final DockedStackDividerController dividerController =
+                mDisplayContent.mDividerControllerLocked;
         mDisplayContent = null;
 
         mService.mWindowPlacerLocked.requestTraversal();
 
         if (mStackId == DOCKED_STACK_ID) {
-            mService.getDefaultDisplayContentLocked().mDividerControllerLocked
-                    .notifyDockedStackExistsChanged(false);
+            dividerController.notifyDockedStackExistsChanged(false);
         }
     }
 

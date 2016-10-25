@@ -1235,6 +1235,16 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case UPDATE_DISPLAY_OVERRIDE_CONFIGURATION_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final Configuration config = Configuration.CREATOR.createFromParcel(data);
+            final int displayId = data.readInt();
+            final boolean updated = updateDisplayOverrideConfiguration(config, displayId);
+            reply.writeNoException();
+            reply.writeInt(updated ? 1 : 0);
+            return true;
+        }
+
         case SET_REQUESTED_ORIENTATION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -4608,13 +4618,26 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return res;
     }
-    public boolean updateConfiguration(Configuration values) throws RemoteException
-    {
+    public boolean updateConfiguration(Configuration values) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         values.writeToParcel(data, 0);
         mRemote.transact(UPDATE_CONFIGURATION_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean updated = reply.readInt() == 1;
+        data.recycle();
+        reply.recycle();
+        return updated;
+    }
+    public boolean updateDisplayOverrideConfiguration(Configuration values, int displayId)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        values.writeToParcel(data, 0);
+        data.writeInt(displayId);
+        mRemote.transact(UPDATE_DISPLAY_OVERRIDE_CONFIGURATION_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean updated = reply.readInt() == 1;
         data.recycle();

@@ -38,7 +38,6 @@ import android.os.WorkSource;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.TimeUtils;
-import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IApplicationToken;
@@ -1670,7 +1669,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         //TODO (multidisplay): Accessibility supported only for the default display.
         if (mService.mAccessibilityController != null
-                && getDisplayContent().getDisplayId() == Display.DEFAULT_DISPLAY) {
+                && getDisplayContent().getDisplayId() == DEFAULT_DISPLAY) {
             mService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
         }
 
@@ -1831,6 +1830,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Visibility of the removed window. Will be used later to update orientation later on.
         boolean wasVisible = false;
 
+        final int displayId = getDisplayId();
+
         // First, see if we need to run an animation. If we do, we have to hold off on removing the
         // window until the animation is done. If the display is frozen, just remove immediately,
         // since the animation wouldn't be seen.
@@ -1891,8 +1892,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     mAnimatingExit = true;
                 }
                 //TODO (multidisplay): Magnification is supported only for the default display.
-                if (mService.mAccessibilityController != null
-                        && getDisplayId() == Display.DEFAULT_DISPLAY) {
+                if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
                     mService.mAccessibilityController.onWindowTransitionLocked(this, transit);
                 }
             }
@@ -1922,8 +1922,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         removeImmediately();
         // Removing a visible window will effect the computed orientation
         // So just update orientation if needed.
-        if (wasVisible && mService.updateOrientationFromAppTokensLocked(false)) {
-            mService.mH.sendEmptyMessage(SEND_NEW_CONFIGURATION);
+        if (wasVisible && mService.updateOrientationFromAppTokensLocked(false, displayId)) {
+            mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
         }
         mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
         Binder.restoreCallingIdentity(origId);
@@ -3037,8 +3037,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
 
             //TODO (multidisplay): Accessibility supported only for the default display.
-            if (mService.mAccessibilityController != null
-                    && getDisplayId() == Display.DEFAULT_DISPLAY) {
+            if (mService.mAccessibilityController != null && getDisplayId() == DEFAULT_DISPLAY) {
                 mService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
             }
 
