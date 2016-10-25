@@ -1237,7 +1237,7 @@ redirects:
 - from: /r/studio-ui/run-with-work-profile.html
   to: /studio/run/index.html?utm_source=android-studio#ir-work-profile
 - from: /r/studio-ui/am-gpu-debugger.html
-  to: /studio/profile/am-gpu.html?utm_source=android-studio
+  to: /studio/debug/am-gpu-debugger.html?utm_source=android-studio
 - from: /r/studio-ui/theme-editor.html
   to: /studio/write/theme-editor.html?utm_source=android-studio
 - from: /r/studio-ui/translations-editor.html
