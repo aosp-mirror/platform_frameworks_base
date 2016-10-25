@@ -6,34 +6,32 @@ page.article=true
 <div id="tb">
 <h2>In this document</h2>
 <ol class="nolist">
-  <li><a href="#StoringData">Storing Data</a></li>
-  <li><a href="#Permissions">Using Permissions</a></li>
-  <li><a href="#Networking">Using Networking</a></li>
-  <li><a href="#InputValidation">Performing Input Validation</a></li>
-  <li><a href="#UserData">Handling User Data</a></li>
+  <li><a href="#StoringData">Storing data</a></li>
+  <li><a href="#Permissions">Using permissions</a></li>
+  <li><a href="#Networking">Using networking</a></li>
+  <li><a href="#InputValidation">Performing input validation</a></li>
+  <li><a href="#UserData">Handling user data</a></li>
   <li><a href="#WebView">Using WebView</a></li>
-  <li><a href="#Crypto">Using Cryptography</a></li>
-  <li><a href="#IPC">Using Interprocess Communication</a></li>
-  <li><a href="#DynamicCode">Dynamically Loading Code</a></li>
-  <li><a href="#Dalvik">Security in a Virtual Machine</a></li>
-  <li><a href="#Native">Security in Native Code</a></li>
+  <li><a href="#Crypto">Using cryptography</a></li>
+  <li><a href="#IPC">Using interprocess communication</a></li>
+  <li><a href="#DynamicCode">Dynamically loading code</a></li>
+  <li><a href="#Dalvik">Security in a virtual machine</a></li>
+  <li><a href="#Native">Security in native code</a></li>
 </ol>
 <h2>See also</h2>
 <ul>
 <li><a href="http://source.android.com/tech/security/index.html">Android
-Security Overview</a></li>
+  Security Overview</a></li>
 <li><a href="{@docRoot}guide/topics/security/permissions.html">Permissions</a></li>
 </ul>
 </div></div>
 
 
-<p>Android has security features built
-into the operating system that significantly reduce the frequency and impact of
-application security issues. The system is designed so you can typically build your apps with
-default system and file permissions and avoid difficult decisions about security.</p>
+<p>Android has built-in security features that significantly reduce the frequency and impact of
+application security issues. The system is designed so that you can typically build your apps with
+the default system and file permissions and avoid difficult decisions about security.</p>
 
-<p>Some of the core security features that help you build secure apps
-include:
+<p>The following core security features help you build secure apps:
 <ul>
 <li>The Android Application Sandbox, which isolates your app data and code execution
 from other apps.</li>
@@ -43,47 +41,54 @@ security functionality such as cryptography, permissions, and secure
 <li>Technologies like ASLR, NX, ProPolice, safe_iop, OpenBSD dlmalloc, OpenBSD
 calloc, and Linux mmap_min_addr to mitigate risks associated with common memory
 management errors.</li>
-<li>An encrypted filesystem that can be enabled to protect data on lost or
+<li>An encrypted file system that can be enabled to protect data on lost or
 stolen devices.</li>
 <li>User-granted permissions to restrict access to system features and user data.</li>
 <li>Application-defined permissions to control application data on a per-app basis.</li>
 </ul>
 
-<p>Nevertheless, it is important that you be familiar with the Android
+<p>It is important that you be familiar with the Android
 security best practices in this document. Following these practices as general coding habits
-will reduce the likelihood of inadvertently introducing security issues that
+ reduces the likelihood of inadvertently introducing security issues that
 adversely affect your users.</p>
 
 
 
-<h2 id="StoringData">Storing Data</h2>
+<h2 id="StoringData">Storing data</h2>
 
 <p>The most common security concern for an application on Android is whether the data
 that you save on the device is accessible to other apps. There are three fundamental
 ways to save data on the device:</p>
 
+<ul>
+<li>Internal storage.</li>
+<li>External storage.</li>
+<li>Content providers.</li>
+</ul>
+
+The following paragraphs describe the security issues associated with each approach.
+
 <h3 id="InternalStorage">Using internal storage</h3>
 
 <p>By default, files that you create on <a
 href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">internal
-storage</a> are accessible only to your app. This
-protection is implemented by Android and is sufficient for most
-applications.</p>
+storage</a> are accessible only to your app.
+ Android implements this protection, and it's sufficient for most applications.</p>
 
-<p>You should generally avoid using the {@link android.content.Context#MODE_WORLD_WRITEABLE} or
+<p>Generally, avoid the {@link android.content.Context#MODE_WORLD_WRITEABLE} or
 {@link android.content.Context#MODE_WORLD_READABLE} modes for
 <acronym title="Interprocess Communication">IPC</acronym> files because they do not provide
 the ability to limit data access to particular applications, nor do they
-provide any control on data format. If you want to share your data with other
-app processes, you might instead consider using a
+provide any control of data format. If you want to share your data with other
+app processes, instead consider using a
 <a href="{@docRoot}guide/topics/providers/content-providers.html">content provider</a>, which
 offers read and write permissions to other apps and can make
 dynamic permission grants on a case-by-case basis.</p>
 
-<p>To provide additional protection for sensitive data, you might
-choose to encrypt local files using a key that is not directly accessible to the
-application. For example, a key can be placed in a {@link java.security.KeyStore}
-and protected with a user password that is not stored on the device.  While this
+<p>To provide additional protection for sensitive data, you can
+ encrypt local files using a key that is not directly accessible to the
+application. For example, you can place a key in a {@link java.security.KeyStore}
+and protect it with a user password that is not stored on the device.  While this
 does not protect data from a root compromise that can monitor the user
 inputting the password,  it can provide protection for a lost device without <a
 href="http://source.android.com/tech/encryption/index.html">file system
@@ -94,14 +99,14 @@ encryption</a>.</p>
 
 <p>Files created on <a
 href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">external
-storage</a>, such as SD Cards, are globally readable and writable.  Because
+storage</a>, such as SD cards, are globally readable and writable. Because
 external storage can be removed by the user and also modified by any
-application,  you should not store sensitive information using
+application, don't store sensitive information using
 external storage.</p>
 
-<p>As with data from any untrusted source, you should <a href="#InputValidation">perform input
-validation</a> when handling data from external storage.
-We strongly recommend that you not store executables or
+<p>You should <a href="#InputValidation">Perform input validation</a> when handling
+data from external storage as you would with data from any untrusted source.
+You should not store executables or
 class files on external storage prior to dynamic loading.  If your app
 does retrieve executable files from external storage, the files should be signed and
 cryptographically verified prior to dynamic loading.</p>
@@ -117,22 +122,22 @@ applications with access to your {@link android.content.ContentProvider}, mark t
 href="{@docRoot}guide/topics/manifest/provider-element.html#exported">
 android:exported=false</a></code> in the application manifest. Otherwise, set the <code><a
 href="{@docRoot}guide/topics/manifest/provider-element.html#exported">android:exported</a></code>
-attribute {@code "true"} to allow other apps to access the stored data.
+attribute to {@code true} to allow other apps to access the stored data.
 </p>
 
 <p>When creating a {@link android.content.ContentProvider}
-that will be exported for use by other applications, you can specify a single
+that is exported for use by other applications, you can specify a single
 <a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">permission
-</a> for reading and writing, or distinct permissions for reading and writing
-within the manifest. We recommend that you limit your permissions to those
+</a> for reading and writing, or you can specify distinct permissions for reading and writing.
+You should limit your permissions to those
 required to accomplish the task at hand. Keep in mind that it’s usually
 easier to add permissions later to expose new functionality than it is to take
-them away and break existing users.</p>
+them away and impact existing users.</p>
 
 <p>If you are using a content provider
 for sharing data between only your own apps, it is preferable to use the
 <a href="{@docRoot}guide/topics/manifest/permission-element.html#plevel">{@code
-android:protectionLevel}</a> attribute set to {@code "signature"} protection.
+android:protectionLevel}</a> attribute set to {@code signature} protection.
 Signature permissions do not require user confirmation,
 so they provide a better user experience and more controlled access to the
 content provider data when the apps accessing the data are
@@ -148,7 +153,7 @@ android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION} flags in the
 that activates the component.  The scope of these permissions can be further
 limited by the <code><a
 href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
-&lt;grant-uri-permission element&gt;</a></code>.</p>
+&lt;grant-uri-permission&gt;</a></code> element.</p>
 
 <p>When accessing a content provider, use parameterized query methods such as
 {@link android.content.ContentProvider#query(Uri,String[],String,String[],String) query()},
@@ -158,11 +163,11 @@ potential SQL injection from untrusted sources. Note that using parameterized me
 sufficient if the <code>selection</code> argument is built by concatenating user data
 prior to submitting it to the method.</p>
 
-<p>Do not have a false sense of security about the write permission.  Consider
-that the write permission allows SQL statements which make it possible for some
+<p>Don't have a false sense of security about the write permission.
+ The write permission allows SQL statements that make it possible for some
 data to be confirmed using creative <code>WHERE</code> clauses and parsing the
-results. For example, an attacker might probe for presence of a specific phone
-number in a call-log by modifying a row only if that phone number already
+results. For example, an attacker might probe for the presence of a specific phone
+number in a call log by modifying a row only if that phone number already
 exists. If the content provider data has predictable structure, the write
 permission may be equivalent to providing both reading and writing.</p>
 
@@ -172,7 +177,7 @@ permission may be equivalent to providing both reading and writing.</p>
 
 
 
-<h2 id="Permissions">Using Permissions</h2>
+<h2 id="Permissions">Using permissions</h2>
 
 <p>Because Android sandboxes applications from each other, applications must explicitly
 share resources and data. They do this by declaring the permissions they need for additional
@@ -180,25 +185,25 @@ capabilities not provided by the basic sandbox, including access to device featu
 the camera.</p>
 
 
-<h3 id="RequestingPermissions">Requesting Permissions</h3>
+<h3 id="RequestingPermissions">Requesting permissions</h3>
 
-<p>We recommend minimizing the number of permissions that your app requests.
-Not having access to sensitive permissions reduces the risk of
-inadvertently misusing those permissions, can improve user adoption, and makes
+<p>You should minimize the number of permissions that your app requests.
+Restricting access to sensitive permissions reduces the risk of
+inadvertently misusing those permissions, improves user adoption, and makes
 your app less vulnerable for attackers. Generally,
-if a permission is not required for your app to function, do not request it.</p>
+if a permission is not required for your app to function, don't request it.</p>
 
 <p>If it's possible to design your application in a way that does not require
 any permissions, that is preferable.  For example, rather than requesting access
 to device information to create a unique identifier, create a <a
 href="{@docRoot}reference/java/util/UUID.html">GUID</a> for your application
-(see the section about <a href="#UserData">Handling User Data</a>). Or, rather than
+(see the section about <a href="#UserData">Handling user data</a>). Or, rather than
 using external storage (which requires permission), store data
 on the internal storage.</p>
 
 <p>In addition to requesting permissions, your application can use the <a
-href="{@docRoot}guide/topics/manifest/permission-element.html">{@code <permissions>}</a>
-to protect IPC that is security sensitive and will be exposed to other
+href="{@docRoot}guide/topics/manifest/permission-element.html">{@code &lt;permission&gt;}</a>
+ element to protect IPC that is security sensitive and is exposed to other
 applications, such as a {@link android.content.ContentProvider}.
 In general, we recommend using access controls
 other than user confirmed permissions where possible because permissions can
@@ -211,13 +216,14 @@ provided by a single developer.</p>
 data over IPC that is available only because your app has permission to access
 that data. The clients of your app's IPC interface may not have that same
 data-access permission. More details on the frequency and potential effects
-of this issue appear in <a class="external-link"
-href="https://www.usenix.org/legacy/event/sec11/tech/full_papers/Felt.pdf"> this
-research paper</a>, published at USENIX.
+of this issue appear in the research paper <a
+href="https://www.usenix.org/legacy/event/sec11/tech/full_papers/Felt.pdf" class="external-link">
+Permission Re-Delegation: Attacks and Defenses
+</a>, published at USENIX.
 
 
 
-<h3 id="CreatingPermissions">Creating Permissions</h3>
+<h3 id="CreatingPermissions">Creating permissions</h3>
 
 <p>Generally, you should strive to define as few permissions as possible while
 satisfying your security requirements.  Creating a new permission is relatively
@@ -228,18 +234,18 @@ perform access checks using existing permissions.</p>
 
 <p>If you must create a new permission, consider whether you can accomplish
 your task with a <a
-href="{@docRoot}guide/topics/manifest/permission-element.html#plevel">"signature"
+href="{@docRoot}guide/topics/manifest/permission-element.html#plevel">signature
 protection level</a>.  Signature permissions are transparent
-to the user and only allow access by applications signed by the same developer
-as application performing the permission check.</p>
+to the user and allow access only by applications signed by the same developer
+as the application performing the permission check.</p>
 
 <p>If you create a permission with the <a
-href="{@docRoot}guide/topics/manifest/permission-element.html#plevel">"dangerous"
+href="{@docRoot}guide/topics/manifest/permission-element.html#plevel">dangerous
 protection level</a>, there are a number of complexities
 that you need to consider:
 <ul>
 <li>The permission must have a string that concisely expresses to a user the
-security decision they will be required to make.</li>
+security decision they are required to make.</li>
 <li>The permission string must be localized to many different languages.</li>
 <li>Users may choose not to install an application because a permission is
 confusing or perceived as risky.</li>
@@ -247,28 +253,28 @@ confusing or perceived as risky.</li>
 has not been installed.</li>
 </ul>
 
-<p>Each of these poses a significant non-technical challenge for you as the developer
+<p>Each of these poses a significant nontechnical challenge for you as the developer
 while also confusing your users,
-which is why we discourage the use of the "dangerous" permission level.</p>
+which is why we discourages the use of the <em>dangerous</em> permission level.</p>
 
 
 
 
 
-<h2 id="Networking">Using Networking</h2>
+<h2 id="Networking">Using networking</h2>
 
-<p>Network transactions are inherently risky for security, because it involves transmitting
+<p>Network transactions are inherently risky for security, because they involve transmitting
 data that is potentially private to the user. People are increasingly aware of the privacy
 concerns of a mobile device, especially when the device performs network transactions,
 so it's very important that your app implement all best practices toward keeping the user's
 data secure at all times.</p>
 
-<h3 id="IPNetworking">Using IP Networking</h3>
+<h3 id="IPNetworking">Using IP networking</h3>
 
 <p>Networking on Android is not significantly different from other Linux
 environments.  The key consideration is making sure that appropriate protocols
 are used for sensitive data, such as {@link javax.net.ssl.HttpsURLConnection} for
-secure web traffic.   We prefer use of HTTPS over HTTP anywhere that HTTPS is
+secure web traffic. You should use HTTPS over HTTP anywhere that HTTPS is
 supported on the server, because mobile devices frequently connect on networks
 that are not secured, such as public Wi-Fi hotspots.</p>
 
@@ -278,32 +284,32 @@ class.  Given the frequency with which Android devices connect to unsecured
 wireless networks using Wi-Fi, the use of secure networking is strongly
 encouraged for all applications that communicate over the network.</p>
 
-<p>We have seen some applications use <a
-href="http://en.wikipedia.org/wiki/Localhost">localhost</a> network ports for
-handling sensitive IPC.  We discourage this approach since these interfaces are
-accessible by other applications on the device.  Instead, you should use an Android IPC
-mechanism where authentication is possible such as with a {@link android.app.Service}.  (Even
-worse than using loopback is to bind to INADDR_ANY since then your application
-may receive requests from anywhere.)</p>
+<p>Some applications use <a
+href="http://en.wikipedia.org/wiki/Localhost" class="external-link">localhost</a> network ports for
+handling sensitive IPC.  You should not use this approach because these interfaces are
+accessible by other applications on the device. Instead, use an Android IPC
+mechanism where authentication is possible, such as with a {@link android.app.Service}.
+Binding to INADDR_ANY is worse than using loopback because then your application
+may receive requests from anywhere.</p>
 
-<p>Also, one common issue that warrants repeating is to make sure that you do
-not trust data downloaded from HTTP or other insecure protocols.  This includes
+<p>Make sure that you don't
+ trust data downloaded from HTTP or other insecure protocols.  This includes
 validation of input in {@link android.webkit.WebView} and
 any responses to intents issued against HTTP.</p>
 
 
-<h3>Using Telephony Networking</h3>
+<h3>Using telephony networking</h3>
 
 <p>The <acronym title="Short Message Service">SMS</acronym> protocol was primarily designed for
 user-to-user communication and is not well-suited for apps that want to transfer data.
-Due to the limitations of SMS, we strongly recommend the use of <a
+Due to the limitations of SMS, you should use <a
 href="{@docRoot}google/gcm/index.html">Google Cloud Messaging</a> (GCM)
 and IP networking for sending data messages from a web server to your app on a user device.</p>
 
 <p>Beware that SMS is neither encrypted nor strongly
-authenticated on either the network or the device.  In particular, any SMS receiver
-should expect that a malicious user may have sent the SMS to your application&mdash;Do
-not rely on unauthenticated SMS data to perform sensitive commands.
+authenticated on either the network or the device. In particular, any SMS receiver
+should expect that a malicious user may have sent the SMS to your application. Don't
+ rely on unauthenticated SMS data to perform sensitive commands.
 Also, you should be aware that SMS may be subject to spoofing and/or
 interception on the network.  On the Android-powered device itself, SMS
 messages are transmitted as broadcast intents, so they may be read or captured
@@ -314,32 +320,32 @@ permission.</p>
 
 
 
-<h2 id="InputValidation">Performing Input Validation</h2>
+<h2 id="InputValidation">Performing input validation</h2>
 
 <p>Insufficient input validation is one of the most common security problems
-affecting applications, regardless of what platform they run on. Android does
-have platform-level countermeasures that reduce the exposure of applications to
-input validation issues and you should use those features where possible. Also
-note that selection of type-safe languages tends to reduce the likelihood of
+affecting applications, regardless of what platform they run on. Android
+has platform-level countermeasures that reduce the exposure of applications to
+input validation issues, and you should use those features where possible. Also
+note that the selection of type-safe languages tends to reduce the likelihood of
 input validation issues.</p>
 
-<p>If you are using native code, then any data read from files, received over
+<p>If you are using native code, any data read from files, received over
 the network, or received from an IPC has the potential to introduce a security
 issue.  The most common problems are <a
-href="http://en.wikipedia.org/wiki/Buffer_overflow">buffer overflows</a>, <a
-href="http://en.wikipedia.org/wiki/Double_free#Use_after_free">use after
+href="http://en.wikipedia.org/wiki/Buffer_overflow" class="external-link">buffer overflows</a>, <a
+href="http://en.wikipedia.org/wiki/Double_free#Use_after_free" class="external-link">use after
 free</a>, and <a
-href="http://en.wikipedia.org/wiki/Off-by-one_error">off-by-one errors</a>.
+href="http://en.wikipedia.org/wiki/Off-by-one_error" class="external-link">off-by-one errors</a>.
 Android provides a number of technologies like <acronym
 title="Address Space Layout Randomization">ASLR</acronym> and <acronym
 title="Data Execution Prevention">DEP</acronym> that reduce the
-exploitability of these errors, but they do not solve the underlying problem.
-You can prevent these vulneratbilities by careful handling pointers and managing
+exploitability of these errors, but they don't solve the underlying problem.
+You can prevent these vulnerabilities by carefully handling pointers and managing
 buffers.</p>
 
-<p>Dynamic, string based languages such as JavaScript and SQL are also subject
+<p>Dynamic, string-based languages such as JavaScript and SQL are also subject
 to input validation problems due to escape characters and <a
-href="http://en.wikipedia.org/wiki/Code_injection">script injection</a>.</p>
+href="http://en.wikipedia.org/wiki/Code_injection" class="external-link">script injection</a>.</p>
 
 <p>If you are using data within queries that are submitted to an SQL database or a
 content provider, SQL injection may be an issue.  The best defense is to use
@@ -348,60 +354,59 @@ href="#ContentProviders">content providers</a>.
 Limiting permissions to read-only or write-only can also reduce the potential
 for harm related to SQL injection.</p>
 
-<p>If you cannot use the security features above, we strongly recommend the use
-of well-structured data formats and verifying that the data conforms to the
+<p>If you can't use the security features above, you should make sure to use
+well-structured data formats and verify that the data conforms to the
 expected format. While blacklisting of characters or character-replacement can
-be an effective strategy, these techniques are error-prone in practice and
+be an effective strategy, these techniques are error prone in practice and
 should be avoided when possible.</p>
 
 
 
 
 
-<h2 id="UserData">Handling User Data</h2>
+<h2 id="UserData">Handling user data</h2>
 
 <p>In general, the best approach for user data security is to minimize the use of APIs that access
 sensitive or personal user data. If you have access to user data and can avoid
-storing or transmitting the information, do not store or transmit the data.
-Finally, consider if there is a way that your application logic can be
+storing or transmitting it, don't store or transmit the data.
+Consider if there is a way that your application logic can be
 implemented using a hash or non-reversible form of the data.  For example, your
-application might use the hash of an an email address as a primary key, to
+application might use the hash of an email address as a primary key to
 avoid transmitting or storing the email address.  This reduces the chances of
 inadvertently exposing data, and it also reduces the chance of attackers
 attempting to exploit your application.</p>
 
 <p>If your application accesses personal information such as passwords or
-usernames, keep in mind that some jurisdictions may require you to provide a
-privacy policy explaining your use and storage of that data.  So following the
+user names, keep in mind that some jurisdictions may require you to provide a
+privacy policy explaining your use and storage of that data. Following the
 security best practice of minimizing access to user data may also simplify
 compliance.</p>
 
 <p>You should also consider whether your application might be inadvertently
 exposing personal information to other parties such as third-party components
 for advertising or third-party services used by your application. If you don't
-know why a component or service requires a personal information, don’t
+know why a component or service requires personal information, don’t
 provide it.  In general, reducing the access to personal information by your
-application will reduce the potential for problems in this area.</p>
+application reduces the potential for problems in this area.</p>
 
-<p>If access to sensitive data is required, evaluate whether that information
-must be transmitted to a server, or whether the operation can be performed on
-the client.  Consider running any code using sensitive data on the client to
-avoid transmitting user data.</p>
-
-<p>Also, make sure that you do not inadvertently expose user data to other
-application on the device through overly permissive IPC, world writable files,
-or network sockets. This is a special case of leaking permission-protected data,
+<p>If your app requires access to sensitive data, evaluate whether you need to
+ transmit it to a server or you can run the operation on
+the client. Consider running any code using sensitive data on the client to
+avoid transmitting user data. Also, make sure that you do not inadvertently expose user
+ data to other
+applications on the device through overly permissive IPC, world-writable files,
+or network sockets. Overly permissive IPC is a special case of leaking permission-protected data,
 discussed in the <a href="#RequestingPermissions">Requesting Permissions</a> section.</p>
 
 <p>If a <acronym title="Globally Unique Identifier">GUID</acronym>
-is required, create a large, unique number and store it.  Do not
-use phone identifiers such as the phone number or IMEI which may be associated
+is required, create a large, unique number and store it.  Don't
+use phone identifiers such as the phone number or IMEI, which may be associated
 with personal information.  This topic is discussed in more detail in the <a
-href="http://android-developers.blogspot.com/2011/03/identifying-app-installations.html">Android
-Developer Blog</a>.</p>
+href="http://android-developers.blogspot.com/2011/03/identifying-app-installations.html"
+>Android Developer Blog</a>.</p>
 
 <p>Be careful when writing to on-device logs.
-In Android, logs are a shared resource, and are available
+In Android, logs are a shared resource and are available
 to an application with the {@link android.Manifest.permission#READ_LOGS} permission.
 Even though the phone log data
 is temporary and erased on reboot, inappropriate logging of user information
@@ -414,19 +419,23 @@ could inadvertently leak user data to other applications.</p>
 
 <h2 id="WebView">Using WebView</h2>
 
-<p>Because {@link android.webkit.WebView} consumes web content that can include HTML and JavaScript,
+<p>Because {@link android.webkit.WebView} consumes web content that can include HTML
+ and JavaScript,
 improper use can introduce common web security issues such as <a
-href="http://en.wikipedia.org/wiki/Cross_site_scripting">cross-site-scripting</a>
+href="http://en.wikipedia.org/wiki/Cross_site_scripting" class="external-link">
+cross-site-scripting</a>
 (JavaScript injection).  Android includes a number of mechanisms to reduce
-the scope of these potential issues by limiting the capability of {@link android.webkit.WebView} to
+the scope of these potential issues by limiting the capability of
+ {@link android.webkit.WebView} to
 the minimum functionality required by your application.</p>
 
-<p>If your application does not directly use JavaScript within a {@link android.webkit.WebView}, do
-<em>not</em> call {@link android.webkit.WebSettings#setJavaScriptEnabled setJavaScriptEnabled()}.
+<p>If your application doesn't directly use JavaScript within a {@link android.webkit.WebView},
+ <em>do not</em> call
+ {@link android.webkit.WebSettings#setJavaScriptEnabled setJavaScriptEnabled()}.
 Some sample code uses this method, which you might repurpose in production
 application, so remove that method call if it's not required. By default,
 {@link android.webkit.WebView} does
-not execute JavaScript so cross-site-scripting is not possible.</p>
+not execute JavaScript, so cross-site-scripting is not possible.</p>
 
 <p>Use {@link android.webkit.WebView#addJavascriptInterface
 addJavaScriptInterface()} with
@@ -441,55 +450,55 @@ addJavaScriptInterface()} only to JavaScript that is contained within your appli
 <p>If your application accesses sensitive data with a
 {@link android.webkit.WebView}, you may want to use the
 {@link android.webkit.WebView#clearCache clearCache()} method to delete any files stored
-locally. Server-side
-headers like <code>no-cache</code> can also be used to indicate that an application should
+locally. You can also use server-side
+headers such as <code>no-cache</code> to indicate that an application should
 not cache particular content.</p>
 
 <p>Devices running platforms older than Android 4.4 (API level 19)
 use a version of {@link android.webkit webkit} that has a number of security issues.
 As a workaround, if your app is running on these devices, it
-should confirm that {@link android.webkit.WebView} objects display only trusted
-content. You should also use the updatable security {@link
-java.security.Provider Provider} object to make sure your app isn’t exposed to
-potential vulnerabilities in SSL, as described in <a
+must confirm that {@link android.webkit.WebView} objects display only trusted
+content. To make sure your app isn’t exposed to
+potential vulnerabilities in SSL, use the updatable security {@link
+java.security.Provider Provider} object as described in <a
 href="{@docRoot}training/articles/security-gms-provider.html">Updating Your
 Security Provider to Protect Against SSL Exploits</a>. If your application must
 render content from the open web, consider providing your own renderer so
 you can keep it up to date with the latest security patches.</p>
 
 
-<h3 id="Credentials">Handling Credentials</h3>
+<h3 id="Credentials">Handling credentials</h3>
 
-<p>In general, we recommend minimizing the frequency of asking for user
-credentials&mdash;to make phishing attacks more conspicuous, and less likely to be
-successful.  Instead use an authorization token and refresh it.</p>
+<p>To make phishing attacks more conspicuous and less likely to be
+successful, minimize the frequency of asking for user
+credentials. Instead use an authorization token and refresh it.</p>
 
-<p>Where possible, username and password should not be stored on the device.
-Instead, perform initial authentication using the username and password
-supplied by the user, and then use a short-lived, service-specific
+<p>Where possible, don't store user names and passwords on the device.
+Instead, perform initial authentication using the user name and password
+ supplied by the user, and then use a short-lived, service-specific
 authorization token.</p>
 
-<p>Services that will be accessible to multiple applications should be accessed
+<p>Services that are accessible to multiple applications should be accessed
 using {@link android.accounts.AccountManager}. If possible, use the
-{@link android.accounts.AccountManager} class to invoke a cloud-based service and do not store
+{@link android.accounts.AccountManager} class to invoke a cloud-based service and don't store
 passwords on the device.</p>
 
 <p>After using {@link android.accounts.AccountManager} to retrieve an
-{@link android.accounts.Account}, {@link android.accounts.Account#CREATOR}
-before passing in any credentials, so that you do not inadvertently pass
+{@link android.accounts.Account}, use {@link android.accounts.Account#CREATOR}
+before passing in any credentials so that you do not inadvertently pass
 credentials to the wrong application.</p>
 
-<p>If credentials are to be used only by applications that you create, then you
-can verify the application which accesses the {@link android.accounts.AccountManager} using
+<p>If credentials are used only by applications that you create, you
+can verify the application that accesses the {@link android.accounts.AccountManager} using
 {@link android.content.pm.PackageManager#checkSignatures checkSignature()}.
-Alternatively, if only one application will use the credential, you might use a
+Alternatively, if only one application uses the credential, you might use a
 {@link java.security.KeyStore} for storage.</p>
 
 
 
 
 
-<h2 id="Crypto">Using Cryptography</h2>
+<h2 id="Crypto">Using cryptography</h2>
 
 <p>In addition to providing data isolation, supporting full-filesystem
 encryption, and providing secure communications channels, Android provides a
@@ -500,21 +509,21 @@ implementation that can  support your use case.  If you need to securely
 retrieve a file from a known location, a simple HTTPS URI may be adequate and
 requires no knowledge of cryptography.  If you need a secure
 tunnel, consider using {@link javax.net.ssl.HttpsURLConnection} or
-{@link javax.net.ssl.SSLSocket}, rather than writing your own protocol.</p>
+{@link javax.net.ssl.SSLSocket} rather than writing your own protocol.</p>
 
-<p>If you do find yourself needing to implement your own protocol, we strongly
-recommend that you <em>not</em> implement your own cryptographic algorithms. Use
+<p>If you do need to implement your own protocol, you should <em>not</em>
+implement your own cryptographic algorithms. Use
 existing cryptographic algorithms such as those in the implementation of AES or
 RSA provided in the {@link javax.crypto.Cipher} class.</p>
 
 <p>Use a secure random number generator, {@link java.security.SecureRandom},
-to initialize any cryptographic keys, {@link javax.crypto.KeyGenerator}.
+to initialize any cryptographic keys generated by {@link javax.crypto.KeyGenerator}.
 Use of a key that is not generated with a secure random
-number generator significantly weakens the strength of the algorithm, and may
+number generator significantly weakens the strength of the algorithm and may
 allow offline attacks.</p>
 
-<p>If you need to store a key for repeated use, use a mechanism like
-  {@link java.security.KeyStore} that
+<p>If you need to store a key for repeated use, use a mechanism, such as
+  {@link java.security.KeyStore}, that
 provides a mechanism for long term storage and retrieval of cryptographic
 keys.</p>
 
@@ -522,10 +531,10 @@ keys.</p>
 
 
 
-<h2 id="IPC">Using Interprocess Communication</h2>
+<h2 id="IPC">Using interprocess communication</h2>
 
 <p>Some apps attempt to implement IPC using traditional Linux
-techniques such as network sockets and shared files.  We strongly encourage you to instead
+techniques such as network sockets and shared files. However, you should instead
 use Android system functionality for IPC such as {@link android.content.Intent},
 {@link android.os.Binder} or {@link android.os.Messenger} with a {@link
 android.app.Service}, and {@link android.content.BroadcastReceiver}.
@@ -535,19 +544,19 @@ mechanism.</p>
 
 <p>Many of the security elements are shared across IPC mechanisms.
 If your IPC mechanism is not intended for use by other applications, set the
-{@code android:exported} attribute to {@code "false"} in the component's manifest element,
+{@code android:exported} attribute to {@code false} in the component's manifest element,
 such as for the <a
-href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code <service>}</a>
+href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code &lt;service&gt;}</a>
 element.  This is useful for applications that consist of multiple processes
-within the same UID, or if you decide late in development that you do not
-actually want to expose functionality as IPC but you don’t want to rewrite
+within the same UID or if you decide late in development that you don't
+actually want to expose functionality as IPC, but you don’t want to rewrite
 the code.</p>
 
-<p>If your IPC is intended to be accessible to other applications, you can
+<p>If your IPC is accessible to other applications, you can
 apply a security policy by using the <a
-href="{@docRoot}guide/topics/manifest/permission-element.html">{@code <permission>}</a>
+href="{@docRoot}guide/topics/manifest/permission-element.html">{@code &lt;permission>}</a>
 element. If IPC is between your own separate apps that are signed with the same key,
-it is preferable to use {@code "signature"} level permission in the <a
+it is preferable to use {@code signature} level permission in the <a
 href="{@docRoot}guide/topics/manifest/permission-element.html#plevel">{@code
 android:protectionLevel}</a>.</p>
 
@@ -556,31 +565,42 @@ android:protectionLevel}</a>.</p>
 
 <h3>Using intents</h3>
 
-<p>Intents are the preferred mechanism for asynchronous IPC in Android.
+<p>For activities and broadcast receivers, intents are the preferred mechanism for
+ asynchronous IPC in Android.
 Depending on your application requirements, you might use {@link
 android.content.Context#sendBroadcast sendBroadcast()}, {@link
 android.content.Context#sendOrderedBroadcast sendOrderedBroadcast()},
 or an explicit intent to a specific application component.</p>
 
-<p>Note that ordered broadcasts can be “consumed” by a recipient, so they
-may not be delivered to all applications.  If you are sending an intent that must be delivered
-to a specific receiver, then you must use an explicit intent that declares the receiver
-by nameintent.</p>
+<p class="caution"><strong>Caution:</strong> If you use an intent to bind to a
+ {@link android.app.Service}, ensure that your app is secure by using an
+ <a href="{@docRoot}guide/components/intents-filters.html#Types">explicit</a>
+intent. Using an implicit intent to start a service is a
+security hazard because you can't be certain what service will respond to the intent,
+and the user can't see which service starts. Beginning with Android 5.0 (API level 21),
+ the system
+throws an exception if you call {@link android.content.Context#bindService bindService()}
+with an implicit intent.</p>
 
-<p>Senders of an intent can verify that the recipient has a permission
-specifying a non-Null permission with the method call.  Only applications with that
-permission will receive the intent.  If data within a broadcast intent may be
+<p>Note that ordered broadcasts can be <em>consumed</em> by a recipient, so they
+may not be delivered to all applications.  If you are sending an intent that must be delivered
+to a specific receiver, you must use an explicit intent that declares the receiver
+by name.</p>
+
+<p>Senders of an intent can verify that the recipient has permission
+ by specifying a non-null permission with the method call.  Only applications with that
+permission receive the intent. If data within a broadcast intent may be
 sensitive, you should consider applying a permission to make sure that
-malicious applications cannot register to receive those messages without
-appropriate permissions.  In those circumstances, you may also consider
+malicious applications can't register to receive those messages without
+appropriate permissions. In those circumstances, you may also consider
 invoking the receiver directly, rather than raising a broadcast.</p>
 
 <p class="note"><strong>Note:</strong> Intent filters should not be considered
-a security feature&mdash;components
+a security feature. Components
 can be invoked with explicit intents and may not have data that would conform to the intent
-filter. You should perform input validation within your intent receiver to
+filter. To
 confirm that it is properly formatted for the invoked receiver, service, or
-activity.</p>
+activity, perform input validation within your intent receiver.</p>
 
 
 
@@ -589,26 +609,32 @@ activity.</p>
 
 <p>A {@link android.app.Service} is often used to supply functionality for other applications to
 use. Each service class must have a corresponding <a
-href="{@docRoot}guide/topics/manifest/service-element.html">{@code <service>}</a> declaration in its
+href="{@docRoot}guide/topics/manifest/service-element.html">{@code <service>}</a>
+ declaration in its
 manifest file.</p>
 
 <p>By default, services are not exported and cannot be invoked by any other
-application. However, if you add any intent filters to the service declaration, then it is exported
+application. However, if you add any intent filters to the service declaration, it is exported
 by default. It's best if you explicitly declare the <a
 href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code
 android:exported}</a> attribute to be sure it behaves as you'd like.
 Services can also be protected using the <a
 href="{@docRoot}guide/topics/manifest/service-element.html#prmsn">{@code android:permission}</a>
-attribute. By doing so, other applications will need to declare
+attribute. By doing so, other applications need to declare
 a corresponding <code><a
 href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a>
 </code> element in their own manifest to be
 able to start, stop, or bind to the service.</p>
 
+<p class="note"><strong>Note:</strong> If your app targets Android 5.0 (API level 21) or later,
+ you should use the {@link android.app.job.JobScheduler} to execute background
+ services. For more information about {@link android.app.job.JobScheduler}, see its
+ {@link android.app.job.JobScheduler API-reference documentation}.</p>
+
 <p>A service can protect individual IPC calls into it with permissions, by
 calling {@link android.content.Context#checkCallingPermission
 checkCallingPermission()} before executing
-the implementation of that call.  We generally recommend using the
+the implementation of that call. You should use the
 declarative permissions in the manifest, since those are less prone to
 oversight.</p>
 
@@ -620,24 +646,24 @@ oversight.</p>
 preferred mechanism for RPC-style IPC in Android. They provide a well-defined
 interface that enables mutual authentication of the endpoints, if required.</p>
 
-<p>We strongly encourage designing interfaces in a manner that does not require
-interface specific permission checks. {@link android.os.Binder} and
+<p>You should design your app interfaces in a manner that does not require
+interface-specific permission checks. {@link android.os.Binder} and
 {@link android.os.Messenger} objects are not declared within the
 application manifest, and therefore you cannot apply declarative permissions
 directly to them.  They generally inherit permissions declared in the
 application manifest for the {@link android.app.Service} or {@link
 android.app.Activity} within which they are
 implemented.  If you are creating an interface that requires authentication
-and/or access controls, those controls must be
-explicitly added as code in the {@link android.os.Binder} or {@link android.os.Messenger}
+and/or access controls, you must explicitly add those controls
+ as code in the {@link android.os.Binder} or {@link android.os.Messenger}
 interface.</p>
 
-<p>If providing an interface that does require access controls, use {@link
+<p>If you are providing an interface that does require access controls, use {@link
 android.content.Context#checkCallingPermission checkCallingPermission()}
 to verify whether the
 caller has a required permission. This is especially important
 before accessing a service on behalf of the caller, as the identify of your
-application is passed to other interfaces.  If invoking an interface provided
+application is passed to other interfaces.  If you are invoking an interface provided
 by a {@link android.app.Service}, the {@link
 android.content.Context#bindService bindService()}
  invocation may fail if you do not have permission to access the given service.
@@ -660,8 +686,8 @@ application. If your {@link android.content.BroadcastReceiver}
 is intended for use by other applications, you
 may want to apply security permissions to receivers using the <code><a
 href="{@docRoot}guide/topics/manifest/receiver-element.html">
-&lt;receiver&gt;</a></code> element within the application manifest.  This will
-prevent applications without appropriate permissions from sending an intent to
+&lt;receiver&gt;</a></code> element within the application manifest.  This
+prevents applications without appropriate permissions from sending an intent to
 the {@link android.content.BroadcastReceiver}.</p>
 
 
@@ -671,57 +697,58 @@ the {@link android.content.BroadcastReceiver}.</p>
 
 
 
-<h2 id="DynamicCode">Dynamically Loading Code</h2>
+<h2 id="DynamicCode">Dynamically loading code</h2>
 
 <p>We strongly discourage loading code from outside of your application APK.
 Doing so significantly increases the likelihood of application compromise due
-to code injection or code tampering.  It also adds complexity around version
-management and application testing.  Finally, it can make it impossible to
+to code injection or code tampering. It also adds complexity around version
+management and application testing. It can also make it impossible to
 verify the behavior of an application, so it may be prohibited in some
 environments.</p>
 
 <p>If your application does dynamically load code, the most important thing to
-keep in mind about dynamically loaded code is that it runs with the same
-security permissions as the application APK.  The user made a decision to
-install your application based on your identity, and they are expecting that
+keep in mind about dynamically-loaded code is that it runs with the same
+security permissions as the application APK.  The user makes a decision to
+install your application based on your identity, and the user expects that
 you provide any code run within the application, including code that is
 dynamically loaded.</p>
 
 <p>The major security risk associated with dynamically loading code is that the
 code needs to come from a verifiable source. If the modules are included
-directly within your APK, then they cannot be modified by other applications.
+directly within your APK, they cannot be modified by other applications.
 This is true whether the code is a native library or a class being loaded using
-{@link dalvik.system.DexClassLoader}.  We have seen many instances of applications
-attempting to load code from insecure locations, such as downloaded from the
-network over unencrypted protocols or from world writable locations such as
+{@link dalvik.system.DexClassLoader}.  Many applications
+attempt to load code from insecure locations, such as downloaded from the
+network over unencrypted protocols or from world-writable locations such as
 external storage. These locations could allow someone on the network to modify
-the content in transit, or another application on a users device to modify the
-content on the device, respectively.</p>
+the content in transit or another application on a user's device to modify the
+content on the device.</p>
 
 
 
 
 
-<h2 id="Dalvik">Security in a Virtual Machine</h2>
+<h2 id="Dalvik">Security in a virtual machine</h2>
 
 <p>Dalvik is Android's runtime virtual machine (VM). Dalvik was built specifically for Android,
 but many of the concerns regarding secure code in other virtual machines also apply to Android.
 In general, you shouldn't concern yourself with security issues relating to the virtual machine.
-Your application runs in a secure sandbox environment, so other processes on the system cannnot
+Your application runs in a secure sandbox environment, so other processes on the system can't
 access your code or private data.</p>
 
-<p>If you're interested in diving deeper on the subject of virtual machine security,
-we recommend that you familiarize yourself with some
+<p>If you're interested in learning more about virtual machine security,
+ familiarize yourself with some
 existing literature on the subject. Two of the more popular resources are:
 <ul>
-<li><a href="http://www.securingjava.com/toc.html">
-http://www.securingjava.com/toc.html</a></li>
+<li><a href="http://www.securingjava.com/toc.html" class="external-link">
+Securing Java</a></li>
 <li><a
-href="https://www.owasp.org/index.php/Java_Security_Resources">
-https://www.owasp.org/index.php/Java_Security_Resources</a></li>
+href="https://www.owasp.org/index.php/Category:Java#tab=Related_3rd_Party_Projects"
+ class="external-link">
+Related 3rd party Projects</a></li>
 </ul></p>
 
-<p>This document is focused on the areas which are Android specific or
+<p>This document focuses on areas that are Android specific or
 different from other VM environments.  For developers experienced with VM
 programming in other environments, there are two broad issues that may be
 different about writing apps for Android:
@@ -742,21 +769,19 @@ because that code might be modified to include malicious behavior.</li>
 
 
 
-<h2 id="Native">Security in Native Code</h2>
+<h2 id="Native">Security in native code</h2>
 
-<p>In general, we encourage developers to use the Android SDK for
+<p>In general, you should use the Android SDK for
 application development, rather than using native code with the
 <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK</a>.  Applications built
 with native code are more complex, less portable, and more like to include
-common memory corruption errors such as buffer overflows.</p>
+common memory-corruption errors such as buffer overflows.</p>
 
-<p>Android is built using the Linux kernel and being familiar with Linux
-development security best practices is especially useful if you are going to
-use native code. Linux security practices are beyond the scope of this document,
-but one of the most popular resources is “Secure Programming for
-Linux and Unix HOWTO”, available at <a
-href="http://www.dwheeler.com/secure-programs">
-http://www.dwheeler.com/secure-programs</a>.</p>
+<p>Android is built using the Linux kernel, and being familiar with Linux
+development security best practices is especially useful if you are
+using native code. Linux security practices are beyond the scope of this document,
+but one of the most popular resources is <a href="http://www.dwheeler.com/secure-programs"
+ class="external-link">Secure Programming HOWTO - Creating Secure Software</a>.</p>
 
 <p>An important difference between Android and most Linux environments is the
 Application Sandbox.  On Android, all applications run in the Application
@@ -765,6 +790,5 @@ good way to think about it for developers familiar with Linux is to know that
 every application is given a unique <acronym title="User Identifier">UID</acronym>
 with very limited permissions. This is discussed in more detail in the <a
 href="http://source.android.com/tech/security/index.html">Android Security
-Overview</a> and you should be familiar with application permissions even if
+Overview</a>, and you should be familiar with application permissions even if
 you are using native code.</p>
-
