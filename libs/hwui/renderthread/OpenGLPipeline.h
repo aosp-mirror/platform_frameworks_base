@@ -56,7 +56,6 @@ public:
     bool createOrUpdateLayer(RenderNode* node,
             const DamageAccumulator& damageAccumulator) override;
     static void destroyLayer(RenderNode* node);
-    GrContext* getGrContext() override { return nullptr; }
 
 private:
     EglManager& mEglManager;

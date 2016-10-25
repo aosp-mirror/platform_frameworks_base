@@ -89,7 +89,7 @@ public:
      * If Properties::isSkiaEnabled() is true then this will return the Skia
      * grContext associated with the current RenderPipeline.
      */
-    GrContext* getGrContext() const { return mRenderPipeline->getGrContext(); }
+    GrContext* getGrContext() const { return mRenderThread.getGrContext(); }
 
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
