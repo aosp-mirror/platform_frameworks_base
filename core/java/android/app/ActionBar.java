@@ -1494,22 +1494,22 @@ public abstract class ActionBar {
         public void onFocusChange(View v, boolean hasFocus) {
             if (!hasFocus) {
                 v.setOnFocusChangeListener(null);
-                final View focused = mFocusRoot.findFocus();
-                if (focused != null) {
-                    focused.setOnFocusChangeListener(this);
-                } else {
-                    mFocusRoot.post(this);
-                }
+                mFocusRoot.post(this);
             }
         }
 
         @Override
         public void run() {
-            if (mContainer != null) {
-                mContainer.setTouchscreenBlocksFocus(true);
-            }
-            if (mToolbar != null) {
-                mToolbar.setTouchscreenBlocksFocus(true);
+            final View focused = mFocusRoot.findFocus();
+            if (focused != null) {
+                focused.setOnFocusChangeListener(this);
+            } else {
+                if (mContainer != null) {
+                    mContainer.setTouchscreenBlocksFocus(true);
+                }
+                if (mToolbar != null) {
+                    mToolbar.setTouchscreenBlocksFocus(true);
+                }
             }
         }
     }
