@@ -4072,7 +4072,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public int getPackageProcessState(String packageName, String callingPackage) {
         if (!hasUsageStatsPermission(callingPackage)) {
-            enforceCallingPermission(android.Manifest.permission.GET_PACKAGE_IMPORTANCE,
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
                     "getPackageProcessState");
         }
 
@@ -4082,20 +4082,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final ProcessRecord proc = mLruProcesses.get(i);
                 if (procState == ActivityManager.PROCESS_STATE_NONEXISTENT
                         || procState > proc.setProcState) {
-                    boolean found = false;
-                    for (int j=proc.pkgList.size()-1; j>=0 && !found; j--) {
-                        if (proc.pkgList.keyAt(j).equals(packageName)) {
-                            procState = proc.setProcState;
-                            found = true;
-                        }
+                    if (proc.pkgList.containsKey(packageName)) {
+                        procState = proc.setProcState;
+                        break;
                     }
-                    if (proc.pkgDeps != null && !found) {
-                        for (int j=proc.pkgDeps.size()-1; j>=0; j--) {
-                            if (proc.pkgDeps.valueAt(j).equals(packageName)) {
-                                procState = proc.setProcState;
-                                break;
-                            }
-                        }
+                    if (proc.pkgDeps != null && proc.pkgDeps.contains(packageName)) {
+                        procState = proc.setProcState;
                     }
                 }
             }
