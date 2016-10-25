@@ -275,6 +275,48 @@ public final class BluetoothUuid {
     }
 
     /**
+     * Parse UUID to bytes. The returned value is shortest representation, a 16-bit, 32-bit or 128-bit UUID,
+     * Note returned value is little endian (Bluetooth).
+     *
+     * @param uuid uuid to parse.
+     * @return shortest representation of {@code uuid} as bytes.
+     * @throws IllegalArgumentException If the {@code uuid} is null.
+     */
+    public static byte[] uuidToBytes(ParcelUuid uuid) {
+        if (uuid == null) {
+            throw new IllegalArgumentException("uuid cannot be null");
+        }
+
+        if (is16BitUuid(uuid)) {
+            byte[] uuidBytes = new byte[UUID_BYTES_16_BIT];
+            int uuidVal = getServiceIdentifierFromParcelUuid(uuid);
+            uuidBytes[0] = (byte)(uuidVal & 0xFF);
+            uuidBytes[1] = (byte)((uuidVal & 0xFF00) >> 8);
+            return uuidBytes;
+        }
+
+        if (is32BitUuid(uuid)) {
+            byte[] uuidBytes = new byte[UUID_BYTES_32_BIT];
+            int uuidVal = getServiceIdentifierFromParcelUuid(uuid);
+            uuidBytes[0] = (byte)(uuidVal & 0xFF);
+            uuidBytes[1] = (byte)((uuidVal & 0xFF00) >> 8);
+            uuidBytes[2] = (byte)((uuidVal & 0xFF0000) >> 16);
+            uuidBytes[3] = (byte)((uuidVal & 0xFF000000) >> 24);
+            return uuidBytes;
+        }
+
+        // Construct a 128 bit UUID.
+        long msb = uuid.getUuid().getMostSignificantBits();
+        long lsb = uuid.getUuid().getLeastSignificantBits();
+
+        byte[] uuidBytes = new byte[UUID_BYTES_128_BIT];
+        ByteBuffer buf = ByteBuffer.wrap(uuidBytes).order(ByteOrder.LITTLE_ENDIAN);
+        buf.putLong(8, msb);
+        buf.putLong(0, lsb);
+        return uuidBytes;
+    }
+
+    /**
      * Check whether the given parcelUuid can be converted to 16 bit bluetooth uuid.
      *
      * @param parcelUuid
