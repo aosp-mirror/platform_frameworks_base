@@ -7340,15 +7340,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean removeUser(ComponentName who, UserHandle userHandle) {
         Preconditions.checkNotNull(who, "ComponentName is null");
+        UserHandle callingUserHandle = mInjector.binderGetCallingUserHandle();
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-
-            long id = mInjector.binderClearCallingIdentity();
-            try {
-                return mUserManager.removeUser(userHandle.getIdentifier());
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
+        }
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            int restrictionSource = mUserManager.getUserRestrictionSource(
+                    UserManager.DISALLOW_REMOVE_USER, callingUserHandle);
+            if (restrictionSource != UserManager.RESTRICTION_NOT_SET
+                    && restrictionSource != UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) {
+                Log.w(LOG_TAG, "The device owner cannot remove a user because "
+                        + "DISALLOW_REMOVE_USER is enabled, and was not set by the device "
+                        + "owner");
+                return false;
             }
+            return mUserManagerInternal.removeUserEvenWhenDisallowed(
+                    userHandle.getIdentifier());
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
         }
     }
 
