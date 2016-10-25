@@ -17,3 +17,4 @@
 package android.app;
 
 parcelable ActivityManager.RecentTaskInfo;
+parcelable ActivityManager.TaskDescription;

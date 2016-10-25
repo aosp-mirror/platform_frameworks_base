@@ -160,7 +160,7 @@ public class SystemServicesProxy {
      * ActivityManagerNative.
      * This simply passes callbacks to listeners through {@link H}.
      * */
-    private ITaskStackListener.Stub mTaskStackListener = new ITaskStackListener.Stub() {
+    private android.app.TaskStackListener mTaskStackListener = new android.app.TaskStackListener() {
         @Override
         public void onTaskStackChanged() throws RemoteException {
             mHandler.removeMessages(H.ON_TASK_STACK_CHANGED);

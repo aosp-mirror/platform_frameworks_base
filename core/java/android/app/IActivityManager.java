@@ -214,6 +214,7 @@ public interface IActivityManager extends IInterface {
     public int getFocusedStackId() throws RemoteException;
     public void setFocusedTask(int taskId) throws RemoteException;
     public void registerTaskStackListener(ITaskStackListener listener) throws RemoteException;
+    public void unregisterTaskStackListener(ITaskStackListener listener) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
     public ContentProviderHolder getContentProvider(IApplicationThread caller,
             String name, int userId, boolean stable) throws RemoteException;
@@ -1114,4 +1115,5 @@ public interface IActivityManager extends IInterface {
     int GET_DEFAULT_PICTURE_IN_PICTURE_BOUNDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 401;
     int GET_PICTURE_IN_PICTURE_MOVEMENT_BOUNDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 402;
     int UPDATE_DISPLAY_OVERRIDE_CONFIGURATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 403;
+    int UNREGISTER_TASK_STACK_LISTENER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+404;
 }

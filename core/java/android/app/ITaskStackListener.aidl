@@ -16,6 +16,9 @@
 
 package android.app;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
+
 /** @hide */
 oneway interface ITaskStackListener {
     /** Called whenever there are changes to the state of tasks in a stack. */
@@ -45,4 +48,51 @@ oneway interface ITaskStackListener {
      * Callen when we launched an activity that is dismissed the docked stack.
      */
     void onActivityDismissingDockedStack();
+
+    /**
+     * Called when a task is added.
+     *
+     * @param taskId id of the task.
+     * @param componentName of the activity that the task is being started with.
+    */
+    void onTaskCreated(int taskId, in ComponentName componentName);
+
+    /**
+     * Called when a task is removed.
+     *
+     * @param taskId id of the task.
+    */
+    void onTaskRemoved(int taskId);
+
+    /**
+     * Called when a task is moved to the front of its stack.
+     *
+     * @param taskId id of the task.
+    */
+    void onTaskMovedToFront(int taskId);
+
+    /**
+     * Called when a task’s description is changed due to an activity calling
+     * ActivityManagerService.setTaskDescription
+     *
+     * @param taskId id of the task.
+     * @param td the new TaskDescription.
+    */
+    void onTaskDescriptionChanged(int taskId, in ActivityManager.TaskDescription td);
+
+    /**
+     * Called when a activity’s orientation is changed due to it calling
+     * ActivityManagerService.setRequestedOrientation
+     *
+     * @param taskId id of the task that the activity is in.
+     * @param requestedOrientation the new requested orientation.
+    */
+    void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation);
+
+    /**
+     * Called when the task is about to be finished but before its surfaces are
+     * removed from the window manager. This allows interested parties to
+     * perform relevant animations before the window disappears.
+     */
+    void onTaskRemovalStarted(int taskId);
 }

@@ -932,6 +932,10 @@ final class ActivityRecord {
             if (stopped) {
                 clearOptionsLocked();
             }
+
+            if (service != null) {
+                service.mTaskChangeNotificationController.notifyTaskStackChanged();
+            }
         }
     }
 
@@ -1733,6 +1737,8 @@ final class ActivityRecord {
                 mStackSupervisor.resumeFocusedStackTopActivityLocked();
             }
         }
+        service.mTaskChangeNotificationController.notifyActivityRequestedOrientationChanged(
+                task.taskId, requestedOrientation);
     }
 
     // TODO: now used only in one place to address race-condition. Remove when that will be fixed.
