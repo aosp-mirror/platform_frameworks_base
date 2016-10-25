@@ -26,6 +26,7 @@ import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
+import android.app.admin.PasswordMetrics;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -3523,12 +3524,10 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    public void setActivePasswordState(int quality, int length, int letters, int uppercase,
-            int lowercase, int numbers, int symbols, int nonletter, int userHandle) {
+    public void setActivePasswordState(PasswordMetrics metrics, int userHandle) {
         if (mService != null) {
             try {
-                mService.setActivePasswordState(quality, length, letters, uppercase, lowercase,
-                        numbers, symbols, nonletter, userHandle);
+                mService.setActivePasswordState(metrics, userHandle);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
