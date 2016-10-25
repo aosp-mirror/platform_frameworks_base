@@ -119,8 +119,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
-
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
         ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment,
@@ -2578,7 +2576,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
 
-        if (mNotificationData.getImportance(sbn.getKey()) < IMPORTANCE_HIGH) {
+        if (mNotificationData.getImportance(sbn.getKey()) < NotificationManager.IMPORTANCE_HIGH) {
             if (DEBUG) Log.d(TAG, "No peeking: unimportant notification: " + sbn.getKey());
             return false;
         }

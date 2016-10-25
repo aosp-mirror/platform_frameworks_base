@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.INotificationManager;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -30,7 +31,6 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.notification.NotificationListenerService;
-import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.view.View;
@@ -178,7 +178,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
             final Set<String> nonBlockablePkgs, final int importance) {
         mINotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-        mStartingUserImportance = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
+        mStartingUserImportance = NotificationManager.IMPORTANCE_UNSPECIFIED;
         try {
             mStartingUserImportance =
                     mINotificationManager.getImportance(sbn.getPackageName(), sbn.getUid());
@@ -229,15 +229,15 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
             if (mSeekBar.isEnabled()) {
                 return mSeekBar.getProgress();
             } else {
-                return Ranking.IMPORTANCE_UNSPECIFIED;
+                return NotificationManager.IMPORTANCE_UNSPECIFIED;
             }
         } else {
             if (mBlock.isChecked()) {
-                return Ranking.IMPORTANCE_NONE;
+                return NotificationManager.IMPORTANCE_NONE;
             } else if (mSilent.isChecked()) {
-                return Ranking.IMPORTANCE_LOW;
+                return NotificationManager.IMPORTANCE_LOW;
             } else {
-                return Ranking.IMPORTANCE_UNSPECIFIED;
+                return NotificationManager.IMPORTANCE_UNSPECIFIED;
             }
         }
     }
@@ -262,7 +262,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         }
         mBlock.setText(mContext.getString(R.string.block));
         mSilent.setText(mContext.getString(R.string.show_silently));
-        if (importance == NotificationListenerService.Ranking.IMPORTANCE_LOW) {
+        if (importance == NotificationManager.IMPORTANCE_LOW) {
             mSilent.setChecked(true);
         } else {
             mReset.setChecked(true);
@@ -278,9 +278,9 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         mSeekBar = (SeekBar) importanceSlider.findViewById(R.id.seekbar);
 
         final int minProgress = nonBlockable ?
-                NotificationListenerService.Ranking.IMPORTANCE_MIN
-                : NotificationListenerService.Ranking.IMPORTANCE_NONE;
-        mSeekBar.setMax(NotificationListenerService.Ranking.IMPORTANCE_MAX);
+                NotificationManager.IMPORTANCE_MIN
+                : NotificationManager.IMPORTANCE_NONE;
+        mSeekBar.setMax(NotificationManager.IMPORTANCE_HIGH);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -317,7 +317,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
                 applyAuto();
             }
         });
-        mAuto = mStartingUserImportance == Ranking.IMPORTANCE_UNSPECIFIED;
+        mAuto = mStartingUserImportance == NotificationManager.IMPORTANCE_UNSPECIFIED;
         applyAuto();
     }
 
@@ -344,35 +344,31 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
 
     private void updateTitleAndSummary(int progress) {
         switch (progress) {
-            case Ranking.IMPORTANCE_NONE:
+            case NotificationManager.IMPORTANCE_NONE:
                 mImportanceSummary.setText(mContext.getString(
                         R.string.notification_importance_blocked));
                 mImportanceTitle.setText(mContext.getString(R.string.blocked_importance));
                 break;
-            case Ranking.IMPORTANCE_MIN:
+            case NotificationManager.IMPORTANCE_MIN:
                 mImportanceSummary.setText(mContext.getString(
                         R.string.notification_importance_min));
                 mImportanceTitle.setText(mContext.getString(R.string.min_importance));
                 break;
-            case Ranking.IMPORTANCE_LOW:
+            case NotificationManager.IMPORTANCE_LOW:
                 mImportanceSummary.setText(mContext.getString(
                         R.string.notification_importance_low));
                 mImportanceTitle.setText(mContext.getString(R.string.low_importance));
                 break;
-            case Ranking.IMPORTANCE_DEFAULT:
+            case NotificationManager.IMPORTANCE_DEFAULT:
                 mImportanceSummary.setText(mContext.getString(
                         R.string.notification_importance_default));
                 mImportanceTitle.setText(mContext.getString(R.string.default_importance));
                 break;
-            case Ranking.IMPORTANCE_HIGH:
+            case NotificationManager.IMPORTANCE_HIGH:
+            case NotificationManager.IMPORTANCE_MAX:
                 mImportanceSummary.setText(mContext.getString(
                         R.string.notification_importance_high));
                 mImportanceTitle.setText(mContext.getString(R.string.high_importance));
-                break;
-            case Ranking.IMPORTANCE_MAX:
-                mImportanceSummary.setText(mContext.getString(
-                        R.string.notification_importance_max));
-                mImportanceTitle.setText(mContext.getString(R.string.max_importance));
                 break;
         }
     }

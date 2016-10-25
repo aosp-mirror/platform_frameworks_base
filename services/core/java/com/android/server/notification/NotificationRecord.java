@@ -15,12 +15,11 @@
  */
 package com.android.server.notification;
 
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MIN;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_DEFAULT;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_LOW;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MAX;
+import static android.app.NotificationManager.IMPORTANCE_MIN;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
+import static android.app.NotificationManager.IMPORTANCE_LOW;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -30,7 +29,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
-import android.net.Uri;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -140,10 +138,8 @@ public final class NotificationRecord {
                 importance = IMPORTANCE_DEFAULT;
                 break;
             case Notification.PRIORITY_HIGH:
-                importance = IMPORTANCE_HIGH;
-                break;
             case Notification.PRIORITY_MAX:
-                importance = IMPORTANCE_MAX;
+                importance = IMPORTANCE_HIGH;
                 break;
         }
         stats.requestedImportance = importance;
@@ -153,7 +149,7 @@ public final class NotificationRecord {
                 || n.sound != null
                 || n.vibrate != null
                 || mNotificationChannel.shouldVibrate()
-                || mNotificationChannel.getDefaultRingtone() != null;
+                || mNotificationChannel.getRingtone() != null;
         stats.isNoisy = isNoisy;
 
         if (!isNoisy && importance > IMPORTANCE_LOW) {
@@ -167,7 +163,7 @@ public final class NotificationRecord {
         }
 
         if (n.fullScreenIntent != null) {
-            importance = IMPORTANCE_MAX;
+            importance = IMPORTANCE_HIGH;
         }
 
         stats.naturalImportance = importance;
@@ -319,10 +315,11 @@ public final class NotificationRecord {
     @Override
     public final String toString() {
         return String.format(
-                "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s importance=%d key=%s: %s)",
+                "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s importance=%d key=%s" +
+                        " channel=%s: %s)",
                 System.identityHashCode(this),
                 this.sbn.getPackageName(), this.sbn.getUser(), this.sbn.getId(),
-                this.sbn.getTag(), this.mImportance, this.sbn.getKey(),
+                this.sbn.getTag(), this.mImportance, this.sbn.getKey(), this.getChannel().getId(),
                 this.sbn.getNotification());
     }
 
@@ -384,7 +381,7 @@ public final class NotificationRecord {
     }
 
     private void applyUserImportance() {
-        if (mUserImportance != NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED) {
+        if (mUserImportance != IMPORTANCE_UNSPECIFIED) {
             mImportance = mUserImportance;
             mImportanceExplanation = getUserExplanation();
         }
@@ -395,7 +392,7 @@ public final class NotificationRecord {
     }
 
     public void setImportance(int importance, CharSequence explanation) {
-        if (importance != NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED) {
+        if (importance != IMPORTANCE_UNSPECIFIED) {
             mImportance = importance;
             mImportanceExplanation = explanation;
         }

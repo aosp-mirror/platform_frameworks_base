@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.service.notification.NotificationRankerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationRankerService.REASON_APP_CANCEL_ALL;
 import static android.service.notification.NotificationRankerService.REASON_CHANNEL_BANNED;
@@ -40,8 +42,6 @@ import static android.service.notification.NotificationListenerService.SUPPRESSE
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_DEFAULT;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_NONE;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 
@@ -975,6 +975,7 @@ public class NotificationManagerService extends SystemService {
         mUsageStats = new NotificationUsageStats(getContext());
         mRankingHandler = new RankingHandlerWorker(mRankingThread.getLooper());
         mRankingHelper = new RankingHelper(getContext(),
+                getContext().getPackageManager(),
                 mRankingHandler,
                 mUsageStats,
                 extractorNames);
@@ -1538,8 +1539,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setImportance(String pkg, int uid, int importance) {
             enforceSystemOrSystemUI("Caller not system or systemui");
-            setNotificationsEnabledForPackageImpl(pkg, uid,
-                    importance != NotificationListenerService.Ranking.IMPORTANCE_NONE);
+            setNotificationsEnabledForPackageImpl(pkg, uid, importance != IMPORTANCE_NONE);
             mRankingHelper.setImportance(pkg, uid, importance);
             savePolicyFile();
         }
@@ -1563,21 +1563,6 @@ public class NotificationManagerService extends SystemService {
             Preconditions.checkNotNull(channel.getName());
             checkCallerIsSystemOrSameApp(pkg);
             mRankingHelper.createNotificationChannel(pkg, Binder.getCallingUid(), channel);
-            savePolicyFile();
-        }
-
-        @Override
-        public void updateNotificationChannel(String pkg, NotificationChannel channel) {
-            Preconditions.checkNotNull(channel);
-            Preconditions.checkNotNull(channel.getId());
-            checkCallerIsSystemOrSameApp(pkg);
-            if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
-                // cancel
-                cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
-                        UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED, null);
-            }
-            mRankingHelper.updateNotificationChannel(Binder.getCallingUid(), pkg,
-                    Binder.getCallingUid(), channel);
             savePolicyFile();
         }
 
@@ -1620,7 +1605,7 @@ public class NotificationManagerService extends SystemService {
                 cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
                         UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED, null);
             }
-            mRankingHelper.updateNotificationChannel(Binder.getCallingUid(), pkg, uid, channel);
+            mRankingHelper.updateNotificationChannel(pkg, uid, channel);
             savePolicyFile();
         }
 
@@ -2814,7 +2799,7 @@ public class NotificationManagerService extends SystemService {
 
         // setup local book-keeping
         final NotificationRecord r = new NotificationRecord(getContext(), n,
-                mRankingHelper.getNotificationChannel(pkg, callingUid,
+                mRankingHelper.getNotificationChannelWithFallback(pkg, callingUid,
                         n.getNotification().getNotificationChannel()));
         mHandler.post(new EnqueueNotificationRunnable(userId, r));
 
@@ -3022,7 +3007,8 @@ public class NotificationManagerService extends SystemService {
         final String key = record.getKey();
 
         // Should this notification make noise, vibe, or use the LED?
-        final boolean aboveThreshold = record.getImportance() >= IMPORTANCE_DEFAULT;
+        final boolean aboveThreshold =
+                record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT;
         final boolean canInterrupt = aboveThreshold && !record.isIntercepted();
         if (DBG || record.isIntercepted())
             Slog.v(TAG,
@@ -3076,8 +3062,8 @@ public class NotificationManagerService extends SystemService {
             } else if (notification.sound != null) {
                 soundUri = notification.sound;
                 hasValidSound = (soundUri != null);
-            } else if (record.getChannel().getDefaultRingtone() != null) {
-                soundUri = record.getChannel().getDefaultRingtone();
+            } else if (record.getChannel().getRingtone() != null) {
+                soundUri = record.getChannel().getRingtone();
                 hasValidSound = (soundUri != null);
             }
 
@@ -3094,9 +3080,7 @@ public class NotificationManagerService extends SystemService {
             // The DEFAULT_VIBRATE flag trumps any custom vibration AND the fallback.
             final boolean useDefaultVibrate =
                     (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
-
             final boolean hasChannelVibration = record.getChannel().shouldVibrate();
-
             hasValidVibrate = useDefaultVibrate || convertSoundToVibration ||
                     hasCustomVibrate || hasChannelVibration;
 

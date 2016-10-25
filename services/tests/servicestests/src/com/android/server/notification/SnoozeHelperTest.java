@@ -24,6 +24,7 @@ import org.mockito.MockitoAnnotations;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.os.UserHandle;
@@ -178,7 +179,8 @@ public class SnoozeHelperTest {
                 .build();
         return new NotificationRecord(getContext(), new StatusBarNotification(
                 pkg, pkg, id, tag, 0, 0, 0, n, user),
-                new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID, "name"));
+                new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID, "name",
+                        NotificationManager.IMPORTANCE_HIGH));
     }
 
 }

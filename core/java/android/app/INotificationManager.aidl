@@ -59,7 +59,6 @@ interface INotificationManager
     int getPackageImportance(String pkg);
 
     void createNotificationChannel(String pkg, in NotificationChannel channel);
-    void updateNotificationChannel(String pkg, in NotificationChannel channel);
     void updateNotificationChannelForPackage(String pkg, int uid, in NotificationChannel channel);
     NotificationChannel getNotificationChannel(String pkg, String channelId);
     NotificationChannel getNotificationChannelForPackage(String pkg, int uid, String channelId);

@@ -181,15 +181,15 @@ public class NotificationManager
     public static final int INTERRUPTION_FILTER_UNKNOWN = 0;
 
     /** @hide */
-    @IntDef({VISIBILITY_NO_OVERRIDE, IMPORTANCE_UNSPECIFIED, IMPORTANCE_NONE,
-            IMPORTANCE_MIN, IMPORTANCE_LOW, IMPORTANCE_DEFAULT, IMPORTANCE_HIGH,
-            IMPORTANCE_MAX})
+    @IntDef({IMPORTANCE_UNSPECIFIED, IMPORTANCE_NONE,
+            IMPORTANCE_MIN, IMPORTANCE_LOW, IMPORTANCE_DEFAULT, IMPORTANCE_HIGH})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Importance {}
 
     /** Value signifying that the user has not expressed a per-app visibility override value.
      * @hide */
     public static final int VISIBILITY_NO_OVERRIDE = -1000;
+
     /**
      * Value signifying that the user has not expressed an importance.
      *
@@ -214,19 +214,19 @@ public class NotificationManager
     public static final int IMPORTANCE_LOW = 2;
 
     /**
-     * Default notification importance: shows everywhere, allowed to makes noise,
-     * but does not visually intrude.
+     * Default notification importance: shows everywhere, makes noise, but does not visually
+     * intrude.
      */
     public static final int IMPORTANCE_DEFAULT = 3;
 
     /**
-     * Higher notification importance: shows everywhere, allowed to makes noise and peek.
+     * Higher notification importance: shows everywhere, makes noise and peeks. May use full screen
+     * intents.
      */
     public static final int IMPORTANCE_HIGH = 4;
 
     /**
-     * Highest notification importance: shows everywhere, allowed to makes noise, peek, and
-     * use full screen intents.
+     * Unused.
      */
     public static final int IMPORTANCE_MAX = 5;
 
@@ -402,24 +402,12 @@ public class NotificationManager
     }
 
     /**
-     * Returns all notification channels created by the calling app.
+     * Returns all notification channels belonging to the calling app.
      */
     public List<NotificationChannel> getNotificationChannels() {
         INotificationManager service = getService();
         try {
             return service.getNotificationChannels(mContext.getPackageName()).getList();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Updates settings for a given channel.
-     */
-    public void updateNotificationChannel(NotificationChannel channel) {
-        INotificationManager service = getService();
-        try {
-            service.updateNotificationChannel(mContext.getPackageName(), channel);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -1037,60 +1037,6 @@ public abstract class NotificationListenerService extends Service {
          * @hide */
         public static final int VISIBILITY_NO_OVERRIDE = NotificationManager.VISIBILITY_NO_OVERRIDE;
 
-        /**
-         * Value signifying that the user has not expressed an importance.
-         *
-         * This value is for persisting preferences, and should never be associated with
-         * an actual notification.
-         *
-         * @hide
-         */
-        public static final int IMPORTANCE_UNSPECIFIED = NotificationManager.IMPORTANCE_UNSPECIFIED;
-
-        /**
-         * A notification with no importance: shows nowhere, is blocked.
-         *
-         * @hide
-         */
-        public static final int IMPORTANCE_NONE = NotificationManager.IMPORTANCE_NONE;
-
-        /**
-         * Min notification importance: only shows in the shade, below the fold.
-         *
-         * @hide
-         */
-        public static final int IMPORTANCE_MIN = NotificationManager.IMPORTANCE_MIN;
-
-        /**
-         * Low notification importance: shows everywhere, but is not intrusive.
-         *
-         * @hide
-         */
-        public static final int IMPORTANCE_LOW = NotificationManager.IMPORTANCE_LOW;
-
-        /**
-         * Default notification importance: shows everywhere, allowed to makes noise,
-         * but does not visually intrude.
-         *
-         * @hide
-         */
-        public static final int IMPORTANCE_DEFAULT = NotificationManager.IMPORTANCE_DEFAULT;
-
-        /**
-         * Higher notification importance: shows everywhere, allowed to makes noise and peek.
-         *
-         * @hide
-         */
-        public static final int IMPORTANCE_HIGH = NotificationManager.IMPORTANCE_HIGH;
-
-        /**
-         * Highest notification importance: shows everywhere, allowed to makes noise, peek, and
-         * use full screen intents.
-         *
-         * @hide
-         */
-        public static final int IMPORTANCE_MAX = NotificationManager.IMPORTANCE_MAX;
-
         private String mKey;
         private int mRank = -1;
         private boolean mIsAmbient;
@@ -1192,7 +1138,7 @@ public abstract class NotificationListenerService extends Service {
                 CharSequence explanation, String overrideGroupKey) {
             mKey = key;
             mRank = rank;
-            mIsAmbient = importance < IMPORTANCE_LOW;
+            mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
             mMatchesInterruptionFilter = matchesInterruptionFilter;
             mVisibilityOverride = visibilityOverride;
             mSuppressedVisualEffects = suppressedVisualEffects;
@@ -1206,20 +1152,19 @@ public abstract class NotificationListenerService extends Service {
          */
         public static String importanceToString(int importance) {
             switch (importance) {
-                case IMPORTANCE_UNSPECIFIED:
+                case NotificationManager.IMPORTANCE_UNSPECIFIED:
                     return "UNSPECIFIED";
-                case IMPORTANCE_NONE:
+                case NotificationManager.IMPORTANCE_NONE:
                     return "NONE";
-                case IMPORTANCE_MIN:
+                case NotificationManager.IMPORTANCE_MIN:
                     return "MIN";
-                case IMPORTANCE_LOW:
+                case NotificationManager.IMPORTANCE_LOW:
                     return "LOW";
-                case IMPORTANCE_DEFAULT:
+                case NotificationManager.IMPORTANCE_DEFAULT:
                     return "DEFAULT";
-                case IMPORTANCE_HIGH:
+                case NotificationManager.IMPORTANCE_HIGH:
+                case NotificationManager.IMPORTANCE_MAX:
                     return "HIGH";
-                case IMPORTANCE_MAX:
-                    return "MAX";
                 default:
                     return "UNKNOWN(" + String.valueOf(importance) + ")";
             }
@@ -1326,7 +1271,7 @@ public abstract class NotificationListenerService extends Service {
             }
             Integer importance = mImportance.get(key);
             if (importance == null) {
-                return Ranking.IMPORTANCE_DEFAULT;
+                return NotificationManager.IMPORTANCE_DEFAULT;
             }
             return importance.intValue();
         }

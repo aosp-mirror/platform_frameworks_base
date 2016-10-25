@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.service.notification.NotificationListenerService;
 import android.util.Log;
@@ -44,7 +45,7 @@ public class NotificationIntrusivenessExtractor implements NotificationSignalExt
             return null;
         }
 
-        if (record.getImportance() >= NotificationListenerService.Ranking.IMPORTANCE_DEFAULT) {
+        if (record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT) {
             final Notification notification = record.getNotification();
             if ((notification.defaults & Notification.DEFAULT_VIBRATE) != 0 ||
                     notification.vibrate != null ||
