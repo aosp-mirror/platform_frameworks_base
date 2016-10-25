@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.DataSetObserver;
 import android.net.Uri;
@@ -95,20 +96,39 @@ public class AddPrinterActivity extends ListActivity implements AdapterView.OnIt
      */
     private RecommendedServicesAdapter mRecommendedServicesAdapter;
 
+    private static final String PKG_NAME_VENDING = "com.android.vending";
+    private boolean mHasVending;
+    private NoPrintServiceMessageAdapter mNoPrintServiceMessageAdapter;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.add_printer_activity);
 
+        try {
+            getPackageManager().getPackageInfo(PKG_NAME_VENDING, 0);
+            mHasVending = true;
+        } catch (PackageManager.NameNotFoundException e) {
+            mHasVending = false;
+        }
         mEnabledServicesAdapter = new EnabledServicesAdapter();
         mDisabledServicesAdapter = new DisabledServicesAdapter();
-        mRecommendedServicesAdapter = new RecommendedServicesAdapter();
+        if (mHasVending) {
+            mRecommendedServicesAdapter = new RecommendedServicesAdapter();
+        } else {
+            mNoPrintServiceMessageAdapter = new NoPrintServiceMessageAdapter();
+        }
 
         ArrayList<ActionAdapter> adapterList = new ArrayList<>(3);
         adapterList.add(mEnabledServicesAdapter);
-        adapterList.add(mRecommendedServicesAdapter);
+        if (mHasVending) {
+            adapterList.add(mRecommendedServicesAdapter);
+        }
         adapterList.add(mDisabledServicesAdapter);
+        if (!mHasVending) {
+            adapterList.add(mNoPrintServiceMessageAdapter);
+        }
 
         setListAdapter(new CombinedAdapter(adapterList));
 
@@ -119,8 +139,10 @@ public class AddPrinterActivity extends ListActivity implements AdapterView.OnIt
 
         getLoaderManager().initLoader(LOADER_ID_ENABLED_SERVICES, null, printServiceLoaderCallbacks);
         getLoaderManager().initLoader(LOADER_ID_DISABLED_SERVICES, null, printServiceLoaderCallbacks);
-        getLoaderManager().initLoader(LOADER_ID_RECOMMENDED_SERVICES, null,
-                new PrintServicePrintServiceRecommendationLoaderCallbacks());
+        if (mHasVending) {
+            getLoaderManager().initLoader(LOADER_ID_RECOMMENDED_SERVICES, null,
+                    new PrintServicePrintServiceRecommendationLoaderCallbacks());
+        }
         getLoaderManager().initLoader(LOADER_ID_ALL_SERVICES, null, printServiceLoaderCallbacks);
     }
 
@@ -162,7 +184,11 @@ public class AddPrinterActivity extends ListActivity implements AdapterView.OnIt
                     mDisabledServicesAdapter.updateData(data);
                     break;
                 case LOADER_ID_ALL_SERVICES:
-                    mRecommendedServicesAdapter.updateInstalledServices(data);
+                    if (mHasVending) {
+                        mRecommendedServicesAdapter.updateInstalledServices(data);
+                    } else {
+                        mNoPrintServiceMessageAdapter.updateInstalledServices(data);
+                    }
                 default:
                     // not reached
             }
@@ -179,7 +205,11 @@ public class AddPrinterActivity extends ListActivity implements AdapterView.OnIt
                         mDisabledServicesAdapter.updateData(null);
                         break;
                     case LOADER_ID_ALL_SERVICES:
-                        mRecommendedServicesAdapter.updateInstalledServices(null);
+                        if (mHasVending) {
+                            mRecommendedServicesAdapter.updateInstalledServices(null);
+                        } else {
+                            mNoPrintServiceMessageAdapter.updateInstalledServices(null);
+                        }
                         break;
                     default:
                         // not reached
@@ -786,6 +816,63 @@ public class AddPrinterActivity extends ListActivity implements AdapterView.OnIt
             mRecommendations = recommendations;
 
             filterRecommendations();
+        }
+    }
+
+    private class NoPrintServiceMessageAdapter extends ActionAdapter {
+        private boolean mHasPrintService;
+
+        void updateInstalledServices(@Nullable List<PrintServiceInfo> services) {
+            if (services == null || services.isEmpty()) {
+                mHasPrintService = false;
+            } else {
+                mHasPrintService = true;
+            }
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public int getCount() {
+            return mHasPrintService ? 0 : 1;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return 1;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return 0;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = getLayoutInflater().inflate(R.layout.no_print_services_message,
+                    parent, false);
+            }
+            return convertView;
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            return position != 0;
+        }
+
+        @Override
+        public void performAction(@IntRange(from = 0) int position) {
+            return;
         }
     }
 }
