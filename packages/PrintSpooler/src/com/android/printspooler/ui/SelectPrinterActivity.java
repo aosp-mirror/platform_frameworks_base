@@ -126,6 +126,8 @@ public final class SelectPrinterActivity extends Activity implements
 
         setContentView(R.layout.select_printer_activity);
 
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+
         mEnabledPrintServices = new ArrayMap<>();
 
         mPrinterRegistry = new PrinterRegistry(this, null, LOADER_ID_PRINT_REGISTRY,
@@ -265,6 +267,16 @@ public final class SelectPrinterActivity extends Activity implements
         });
 
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
