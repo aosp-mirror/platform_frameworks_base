@@ -662,12 +662,12 @@ public interface IActivityManager extends IInterface {
     /**
      * @return the default bounds of the PIP on the default display.
      */
-    public Rect getDefaultPictureInPictureBounds() throws RemoteException;
+    public Rect getDefaultPictureInPictureBounds(int displayId) throws RemoteException;
 
     /**
      * @return the movement bounds of the PIP on the default display.
      */
-    public Rect getPictureInPictureMovementBounds() throws RemoteException;
+    public Rect getPictureInPictureMovementBounds(int displayId) throws RemoteException;
 
     public int setVrMode(IBinder token, boolean enabled, ComponentName packageName)
             throws RemoteException;

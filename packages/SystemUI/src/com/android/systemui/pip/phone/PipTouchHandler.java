@@ -29,8 +29,6 @@ import android.animation.ValueAnimator;
 import android.app.ActivityManager.StackInfo;
 import android.app.IActivityManager;
 import android.content.Context;
-import android.content.res.Configuration;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Looper;
@@ -44,9 +42,9 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 import android.view.animation.Interpolator;
-import android.widget.Scroller;
 
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
 /**
@@ -61,8 +59,6 @@ public class PipTouchHandler {
     private static final int DISMISS_STACK_DURATION = 375;
     private static final int EXPAND_STACK_DURATION = 225;
 
-    private static final float SCROLL_FRICTION_MULTIPLIER = 8f;
-
     private final Context mContext;
     private final IActivityManager mActivityManager;
     private final ViewConfiguration mViewConfig;
@@ -70,6 +66,7 @@ public class PipTouchHandler {
 
     private final PipInputEventReceiver mInputEventReceiver;
     private final PipDismissViewController mDismissViewController;
+    private PipSnapAlgorithm mSnapAlgorithm;
 
     private final Rect mPinnedStackBounds = new Rect();
     private final Rect mBoundedPinnedStackBounds = new Rect();
@@ -81,7 +78,6 @@ public class PipTouchHandler {
     private int mActivePointerId;
 
     private final FlingAnimationUtils mFlingAnimationUtils;
-    private final Scroller mScroller;
     private VelocityTracker mVelocityTracker;
 
     /**
@@ -122,9 +118,11 @@ public class PipTouchHandler {
         mViewConfig = ViewConfiguration.get(context);
         mInputEventReceiver = new PipInputEventReceiver(mInputChannel, Looper.myLooper());
         mDismissViewController = new PipDismissViewController(context);
-        mScroller = new Scroller(context);
-        mScroller.setFriction(mViewConfig.getScrollFriction() * SCROLL_FRICTION_MULTIPLIER);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 2f);
+    }
+
+    public void onConfigurationChanged() {
+        updateBoundedPinnedStackBounds();
     }
 
     private void handleTouchEvent(MotionEvent ev) {
@@ -213,7 +211,7 @@ public class PipTouchHandler {
                         if (dismissBounds.contains(x, y)) {
                             animateDismissPinnedStack(dismissBounds);
                         } else {
-                            animateToSnapTarget();
+                            animateToClosestSnapTarget();
                         }
                     }
                 } else {
@@ -250,13 +248,8 @@ public class PipTouchHandler {
      * Creates an animation that continues the fling to a snap target.
      */
     private void flingToSnapTarget(float velocity, float velocityX, float velocityY) {
-        mScroller.fling(mPinnedStackBounds.left, mPinnedStackBounds.top,
-            (int) velocityX, (int) velocityY,
-            mBoundedPinnedStackBounds.left, mBoundedPinnedStackBounds.right,
-            mBoundedPinnedStackBounds.top, mBoundedPinnedStackBounds.bottom);
-        Rect toBounds = findClosestBoundedPinnedStackSnapTarget(
-            mScroller.getFinalX(), mScroller.getFinalY());
-        mScroller.abortAnimation();
+        Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mBoundedPinnedStackBounds,
+                mPinnedStackBounds, velocityX, velocityY);
         if (!mPinnedStackBounds.equals(toBounds)) {
             mPinnedStackBoundsAnimator = createResizePinnedStackAnimation(
                 toBounds, 0, FAST_OUT_SLOW_IN);
@@ -270,9 +263,9 @@ public class PipTouchHandler {
     /**
      * Animates the pinned stack to the closest snap target.
      */
-    private void animateToSnapTarget() {
-        Rect toBounds = findClosestBoundedPinnedStackSnapTarget(
-            mPinnedStackBounds.left, mPinnedStackBounds.top);
+    private void animateToClosestSnapTarget() {
+        Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mBoundedPinnedStackBounds,
+                mPinnedStackBounds);
         if (!mPinnedStackBounds.equals(toBounds)) {
             mPinnedStackBoundsAnimator = createResizePinnedStackAnimation(
                 toBounds, SNAP_STACK_DURATION, FAST_OUT_SLOW_IN);
@@ -326,8 +319,12 @@ public class PipTouchHandler {
     private void updateBoundedPinnedStackBounds() {
         try {
             StackInfo info = mActivityManager.getStackInfo(PINNED_STACK_ID);
-            mPinnedStackBounds.set(info.bounds);
-            mBoundedPinnedStackBounds.set(mActivityManager.getPictureInPictureMovementBounds());
+            if (info != null) {
+                mPinnedStackBounds.set(info.bounds);
+                mBoundedPinnedStackBounds.set(mActivityManager.getPictureInPictureMovementBounds(
+                        info.displayId));
+                mSnapAlgorithm = new PipSnapAlgorithm(mContext, info.displayId);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Could not fetch PIP movement bounds.", e);
         }
@@ -385,51 +382,6 @@ public class PipTouchHandler {
                 });
         return anim;
     }
-
-    /**
-     * @return the closest absolute bounded stack left/top to the given {@param x} and {@param y}.
-     */
-    private Rect findClosestBoundedPinnedStackSnapTarget(int x, int y) {
-        Point[] snapTargets;
-        int orientation = mContext.getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            snapTargets = new Point[] {
-                new Point(mBoundedPinnedStackBounds.left, mBoundedPinnedStackBounds.top),
-                new Point(mBoundedPinnedStackBounds.right, mBoundedPinnedStackBounds.top),
-                new Point(mBoundedPinnedStackBounds.left, mBoundedPinnedStackBounds.bottom),
-                new Point(mBoundedPinnedStackBounds.right, mBoundedPinnedStackBounds.bottom)
-            };
-        } else {
-            snapTargets = new Point[] {
-                new Point(mBoundedPinnedStackBounds.left, mBoundedPinnedStackBounds.top),
-                new Point(mBoundedPinnedStackBounds.right, mBoundedPinnedStackBounds.top),
-                new Point(mBoundedPinnedStackBounds.left, mBoundedPinnedStackBounds.bottom),
-                new Point(mBoundedPinnedStackBounds.right, mBoundedPinnedStackBounds.bottom)
-            };
-        }
-
-        Point closestSnapTarget = null;
-        float minDistance = Float.MAX_VALUE;
-        for (Point p : snapTargets) {
-            float distance = distanceToPoint(p, x, y);
-            if (distance < minDistance) {
-                closestSnapTarget = p;
-                minDistance = distance;
-            }
-        }
-
-        Rect toBounds = new Rect(mPinnedStackBounds);
-        toBounds.offsetTo(closestSnapTarget.x, closestSnapTarget.y);
-        return toBounds;
-    }
-
-    /**
-     * @return the distance between point {@param p} and the given {@param x} and {@param y}.
-     */
-    private float distanceToPoint(Point p, int x, int y) {
-        return PointF.length(p.x - x, p.y - y);
-    }
-
 
     /**
      * @return the distance between points {@param p1} and {@param p2}.

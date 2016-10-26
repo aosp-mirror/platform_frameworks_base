@@ -444,7 +444,7 @@ interface IWindowManager
     /**
      * Retrieves the current stable insets from the primary display.
      */
-    void getStableInsets(out Rect outInsets);
+    void getStableInsets(int displayId, out Rect outInsets);
 
     /**
      * Register shortcut key. Shortcut code is packed as:

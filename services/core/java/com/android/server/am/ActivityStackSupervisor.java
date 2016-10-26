@@ -45,6 +45,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
@@ -76,6 +77,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -3425,8 +3427,16 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
         mHandler.sendMessage(mHandler.obtainMessage(HANDLE_DISPLAY_CHANGED, displayId, 0));
     }
 
-    DisplayInfo getDisplayInfo(int displayId) {
-        return mActivityDisplays.get(displayId).mDisplayInfo;
+    DisplayMetrics getDisplayRealMetrics(int displayId) {
+        final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+        activityDisplay.mDisplay.getRealMetrics(activityDisplay.mRealMetrics);
+        return activityDisplay.mRealMetrics;
+    }
+
+    Point getDisplayRealSize(int displayId) {
+        final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+        activityDisplay.mDisplay.getRealSize(activityDisplay.mRealSize);
+        return activityDisplay.mRealSize;
     }
 
     private void handleDisplayAdded(int displayId) {
@@ -4289,7 +4299,8 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
         /** Actual Display this object tracks. */
         int mDisplayId;
         Display mDisplay;
-        DisplayInfo mDisplayInfo = new DisplayInfo();
+        private final DisplayMetrics mRealMetrics = new DisplayMetrics();
+        private final Point mRealSize = new Point();
 
         /** All of the stacks on this display. Order matters, topmost stack is in front of all other
          * stacks, bottommost behind. Accessed directly by ActivityManager package classes */
@@ -4313,7 +4324,6 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
         void init(Display display) {
             mDisplay = display;
             mDisplayId = display.getDisplayId();
-            mDisplay.getDisplayInfo(mDisplayInfo);
         }
 
         void attachActivities(ActivityStack stack, boolean onTop) {

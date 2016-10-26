@@ -2943,14 +2943,16 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         }
         case GET_DEFAULT_PICTURE_IN_PICTURE_BOUNDS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            Rect r = getDefaultPictureInPictureBounds();
+            final int displayId = data.readInt();
+            Rect r = getDefaultPictureInPictureBounds(displayId);
             reply.writeNoException();
             r.writeToParcel(reply, 0);
             return true;
         }
         case GET_PICTURE_IN_PICTURE_MOVEMENT_BOUNDS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            Rect r = getPictureInPictureMovementBounds();
+            final int displayId = data.readInt();
+            Rect r = getPictureInPictureMovementBounds(displayId);
             reply.writeNoException();
             r.writeToParcel(reply, 0);
             return true;
@@ -7026,11 +7028,12 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public Rect getDefaultPictureInPictureBounds() throws RemoteException
+    public Rect getDefaultPictureInPictureBounds(int displayId) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(displayId);
         mRemote.transact(GET_DEFAULT_PICTURE_IN_PICTURE_BOUNDS_TRANSACTION, data, reply, 0);
         reply.readException();
         Rect rect = Rect.CREATOR.createFromParcel(reply);
@@ -7040,11 +7043,12 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public Rect getPictureInPictureMovementBounds() throws RemoteException
+    public Rect getPictureInPictureMovementBounds(int displayId) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(displayId);
         mRemote.transact(GET_PICTURE_IN_PICTURE_MOVEMENT_BOUNDS_TRANSACTION, data, reply, 0);
         reply.readException();
         Rect rect = Rect.CREATOR.createFromParcel(reply);

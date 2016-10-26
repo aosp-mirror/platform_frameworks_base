@@ -8709,15 +8709,19 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void getStableInsets(Rect outInsets) throws RemoteException {
+    public void getStableInsets(int displayId, Rect outInsets) throws RemoteException {
         synchronized (mWindowMap) {
-            getStableInsetsLocked(outInsets);
+            getStableInsetsLocked(displayId, outInsets);
         }
     }
 
-    void getStableInsetsLocked(Rect outInsets) {
-        final DisplayInfo di = getDefaultDisplayInfoLocked();
-        mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight, outInsets);
+    void getStableInsetsLocked(int displayId, Rect outInsets) {
+        outInsets.setEmpty();
+        final DisplayContent dc = mRoot.getDisplayContent(displayId);
+        if (dc != null) {
+            final DisplayInfo di = dc.getDisplayInfo();
+            mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight, outInsets);
+        }
     }
 
     private void getNonDecorInsetsLocked(Rect outInsets) {
@@ -8733,7 +8737,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     public void subtractStableInsets(Rect inOutBounds) {
         synchronized (mWindowMap) {
-            getStableInsetsLocked(mTmpRect2);
+            getStableInsetsLocked(DEFAULT_DISPLAY, mTmpRect2);
             final DisplayInfo di = getDefaultDisplayInfoLocked();
             mTmpRect.set(0, 0, di.logicalWidth, di.logicalHeight);
             subtractInsets(mTmpRect, mTmpRect2, inOutBounds);

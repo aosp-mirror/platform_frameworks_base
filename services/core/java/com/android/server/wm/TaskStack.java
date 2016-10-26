@@ -24,6 +24,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
@@ -38,7 +39,10 @@ import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
 import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
 
 import android.app.ActivityManager.StackId;
+import android.app.IActivityManager;
 import android.content.res.Configuration;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Debug;
@@ -53,6 +57,7 @@ import android.view.WindowManagerPolicy;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
+import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -380,19 +385,41 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
         mTmpRect2.set(mBounds);
         mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
-        if (mStackId == DOCKED_STACK_ID) {
-            repositionDockedStackAfterRotation(mTmpRect2);
-            snapDockedStackAfterRotation(mTmpRect2);
-            final int newDockSide = getDockSide(mTmpRect2);
+        switch (mStackId) {
+            case PINNED_STACK_ID:
+                // Keep the pinned stack in the same aspect ratio as in the old orientation, but
+                // move it into the position in the rotated space, and snap to the closest space
+                // in the new orientation.
 
-            // Update the dock create mode and clear the dock create bounds, these
-            // might change after a rotation and the original values will be invalid.
-            mService.setDockedStackCreateStateLocked(
-                    (newDockSide == DOCKED_LEFT || newDockSide == DOCKED_TOP)
-                    ? DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
-                    : DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT,
-                    null);
-            mDisplayContent.getDockedDividerController().notifyDockSideChanged(newDockSide);
+                try {
+                    final IActivityManager am = mService.mActivityManager;
+                    final Rect movementBounds = am.getPictureInPictureMovementBounds(
+                            mDisplayContent.getDisplayId());
+                    final int width = mBounds.width();
+                    final int height = mBounds.height();
+                    final int left = mTmpRect2.centerX() - (width / 2);
+                    final int top = mTmpRect2.centerY() - (height / 2);
+                    mTmpRect2.set(left, top, left + width, top + height);
+
+                    final PipSnapAlgorithm snapAlgorithm = new PipSnapAlgorithm(mService.mContext,
+                            mDisplayContent.getDisplayId());
+                    mTmpRect2.set(snapAlgorithm.findClosestSnapBounds(movementBounds, mTmpRect2));
+                } catch (RemoteException e) {}
+                break;
+            case DOCKED_STACK_ID:
+                repositionDockedStackAfterRotation(mTmpRect2);
+                snapDockedStackAfterRotation(mTmpRect2);
+                final int newDockSide = getDockSide(mTmpRect2);
+
+                // Update the dock create mode and clear the dock create bounds, these
+                // might change after a rotation and the original values will be invalid.
+                mService.setDockedStackCreateStateLocked(
+                        (newDockSide == DOCKED_LEFT || newDockSide == DOCKED_TOP)
+                                ? DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
+                                : DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT,
+                        null);
+                mDisplayContent.getDockedDividerController().notifyDockSideChanged(newDockSide);
+                break;
         }
 
         mBoundsAfterRotation.set(mTmpRect2);
@@ -1010,7 +1037,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
 
         if (dockSide == DOCKED_TOP) {
-            mService.getStableInsetsLocked(mTmpRect);
+            mService.getStableInsetsLocked(DEFAULT_DISPLAY, mTmpRect);
             int topInset = mTmpRect.top;
             mTmpAdjustedBounds.set(mBounds);
             mTmpAdjustedBounds.bottom =
@@ -1041,7 +1068,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
 
         if (dockSide == DOCKED_TOP) {
-            mService.getStableInsetsLocked(mTmpRect);
+            mService.getStableInsetsLocked(DEFAULT_DISPLAY, mTmpRect);
             int topInset = mTmpRect.top;
             return mBounds.bottom - topInset;
         } else if (dockSide == DOCKED_LEFT || dockSide == DOCKED_RIGHT) {

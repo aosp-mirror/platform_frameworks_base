@@ -52,7 +52,9 @@ public class PipManager {
     /**
      * Updates the PIP per configuration changed.
      */
-    public void onConfigurationChanged() {}
+    public void onConfigurationChanged() {
+        mTouchHandler.onConfigurationChanged();
+    }
 
     /**
      * Gets an instance of {@link PipManager}.
