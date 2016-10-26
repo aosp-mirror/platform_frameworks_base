@@ -5408,18 +5408,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else if (mDismissKeyguard != DISMISS_KEYGUARD_NONE) {
                 mKeyguardHidden = false;
-                boolean willDismiss = false;
+                boolean dismissKeyguard = false;
+                final boolean trusted = mKeyguardDelegate.isTrusted();
                 if (mDismissKeyguard == DISMISS_KEYGUARD_START) {
-                    final boolean trusted = mKeyguardDelegate.isTrusted();
-                    willDismiss = trusted && mKeyguardOccluded && mKeyguardDelegate != null
-                            && mKeyguardDelegate.isShowing();
+                    final boolean willDismiss = trusted && mKeyguardOccluded
+                            && mKeyguardDelegate != null && mKeyguardDelegate.isShowing();
                     if (willDismiss) {
                         mCurrentlyDismissingKeyguard = true;
                     }
-
-                    // Only launch the next keyguard unlock window once per window.
-                    mHandler.post(() -> mKeyguardDelegate.dismiss(
-                            trusted /* allowWhileOccluded */));
+                    dismissKeyguard = true;
                 }
 
                 // If we are currently dismissing Keyguard, there is no need to unocclude it.
@@ -5429,6 +5426,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 | FINISH_LAYOUT_REDO_CONFIG
                                 | FINISH_LAYOUT_REDO_WALLPAPER;
                     }
+                }
+
+                if (dismissKeyguard) {
+                    // Only launch the next keyguard unlock window once per window.
+                    mHandler.post(() -> mKeyguardDelegate.dismiss(
+                            trusted /* allowWhileOccluded */));
                 }
             } else {
                 mWinDismissingKeyguard = null;
