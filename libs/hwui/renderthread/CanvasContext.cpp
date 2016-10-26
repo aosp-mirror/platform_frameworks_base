@@ -28,6 +28,9 @@
 #include "renderstate/Stencil.h"
 #include "protos/hwui.pb.h"
 #include "OpenGLPipeline.h"
+#include "pipeline/skia/SkiaOpenGLPipeline.h"
+#include "pipeline/skia/SkiaPipeline.h"
+#include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
 
@@ -69,13 +72,11 @@ CanvasContext* CanvasContext::create(RenderThread& thread,
             return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
                     std::make_unique<OpenGLPipeline>(thread));
         case RenderPipelineType::SkiaGL:
-            //TODO: implement SKIA GL
-            LOG_ALWAYS_FATAL("skiaGL canvas type not implemented.");
-            break;
+            return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
+                    std::make_unique<skiapipeline::SkiaOpenGLPipeline>(thread));
         case RenderPipelineType::SkiaVulkan:
-            //TODO: implement Vulkan
-            LOG_ALWAYS_FATAL("Vulkan canvas type not implemented.");
-            break;
+            return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
+                                std::make_unique<skiapipeline::SkiaVulkanPipeline>(thread));
         default:
             LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
             break;
@@ -88,6 +89,10 @@ void CanvasContext::destroyLayer(RenderNode* node) {
     switch (renderType) {
         case RenderPipelineType::OpenGL:
             OpenGLPipeline::destroyLayer(node);
+            break;
+        case RenderPipelineType::SkiaGL:
+        case RenderPipelineType::SkiaVulkan:
+            skiapipeline::SkiaPipeline::destroyLayer(node);
             break;
         default:
             LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
@@ -102,6 +107,12 @@ void CanvasContext::invokeFunctor(const RenderThread& thread, Functor* functor) 
         case RenderPipelineType::OpenGL:
             OpenGLPipeline::invokeFunctor(thread, functor);
             break;
+        case RenderPipelineType::SkiaGL:
+            skiapipeline::SkiaOpenGLPipeline::invokeFunctor(thread, functor);
+            break;
+        case RenderPipelineType::SkiaVulkan:
+            skiapipeline::SkiaVulkanPipeline::invokeFunctor(thread, functor);
+            break;
         default:
             LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
             break;
@@ -113,6 +124,10 @@ void CanvasContext::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
     switch (renderType) {
         case RenderPipelineType::OpenGL:
             OpenGLPipeline::prepareToDraw(thread, bitmap);
+            break;
+        case RenderPipelineType::SkiaGL:
+        case RenderPipelineType::SkiaVulkan:
+            skiapipeline::SkiaPipeline::prepareToDraw(thread, bitmap);
             break;
         default:
             LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);

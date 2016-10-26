@@ -16,39 +16,23 @@
 
 #pragma once
 
+#include <SkSurface.h>
+#include "Matrix.h"
+
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
 /**
- * TODO: this is a stub that will be added in a subsquent CL
+ * An offscreen rendering target used to contain the contents a RenderNode.
  */
-class SkiaFrameRenderer {
-public:
-
-    static bool skpCaptureEnabled() { return false; }
-
-    // TODO avoids unused compile error but we need to pass this to the reorder drawables!
-    static float getLightRadius() {
-        return 1.0f;
-    }
-
-    static uint8_t getAmbientShadowAlpha() {
-        return 1;
-    }
-
-    static uint8_t getSpotShadowAlpha() {
-        return 1;
-    }
-
-    static Vector3 getLightCenter() {
-        Vector3 result;
-        result.x = result.y = result.z = 1.0f;
-        return result;
-    }
-
+struct SkiaLayer
+{
+    sk_sp<SkSurface> layerSurface;
+    Matrix4 inverseTransformInWindow;
 };
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+
+} /* namespace skiapipeline */
+} /* namespace uirenderer */
+} /* namespace android */

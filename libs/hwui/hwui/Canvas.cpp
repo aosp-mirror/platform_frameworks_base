@@ -20,6 +20,8 @@
 #include "RenderNode.h"
 #include "MinikinUtils.h"
 #include "Paint.h"
+#include "Properties.h"
+#include "pipeline/skia/SkiaRecordingCanvas.h"
 #include "Typeface.h"
 
 #include <SkDrawFilter.h>
@@ -27,6 +29,9 @@
 namespace android {
 
 Canvas* Canvas::create_recording_canvas(int width, int height, uirenderer::RenderNode* renderNode) {
+    if (uirenderer::Properties::isSkiaEnabled()) {
+        return new uirenderer::skiapipeline::SkiaRecordingCanvas(renderNode, width, height);
+    }
     return new uirenderer::RecordingCanvas(width, height);
 }
 

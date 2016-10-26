@@ -17,7 +17,7 @@
 #include "ReorderBarrierDrawables.h"
 #include "RenderNode.h"
 #include "SkiaDisplayList.h"
-#include "SkiaFrameRenderer.h"
+#include "SkiaPipeline.h"
 
 #include <SkBlurMask.h>
 #include <SkBlurMaskFilter.h>
@@ -161,7 +161,7 @@ static void DrawSpotShadowGeneral(SkCanvas* canvas, const Shape& shape, float ca
         return;
     }
 
-    const Vector3 lightPos = SkiaFrameRenderer::getLightCenter();
+    const Vector3 lightPos = SkiaPipeline::getLightCenter();
     float zRatio = casterZValue / (lightPos.z - casterZValue);
     // clamp
     if (zRatio < 0.0f) {
@@ -170,7 +170,7 @@ static void DrawSpotShadowGeneral(SkCanvas* canvas, const Shape& shape, float ca
         zRatio = 0.95f;
     }
 
-    float blurRadius = SkiaFrameRenderer::getLightRadius()*zRatio;
+    float blurRadius = SkiaPipeline::getLightRadius()*zRatio;
 
     SkAutoCanvasRestore acr(canvas, true);
 
@@ -276,7 +276,7 @@ static void DrawRRectShadows(const SkRect& casterRect, SkScalar casterCornerRadi
     }
 
     if (spotAlpha > 0.0f) {
-        const Vector3 lightPos = SkiaFrameRenderer::getLightCenter();
+        const Vector3 lightPos = SkiaPipeline::getLightCenter();
         float zRatio = casterZValue / (lightPos.z - casterZValue);
         // clamp
         if (zRatio < 0.0f) {
@@ -285,7 +285,7 @@ static void DrawRRectShadows(const SkRect& casterRect, SkScalar casterCornerRadi
             zRatio = 0.95f;
         }
 
-        const SkScalar lightWidth = SkiaFrameRenderer::getLightRadius();
+        const SkScalar lightWidth = SkiaPipeline::getLightRadius();
         SkScalar srcSpaceSpotRadius = 2.0f * lightWidth * zRatio;
         // the device-space radius sent to the blur shader must fit in 14.2 fixed point
         if (srcSpaceSpotRadius*scaleFactor > MAX_BLUR_RADIUS) {
@@ -439,7 +439,7 @@ static void DrawRRectShadowsWithClip(const SkRect& casterRect, SkScalar casterCo
     }
 
     if (spotAlpha > 0.0f) {
-        const Vector3 lightPos = SkiaFrameRenderer::getLightCenter();
+        const Vector3 lightPos = SkiaPipeline::getLightCenter();
         float zRatio = casterZValue / (lightPos.z - casterZValue);
         // clamp
         if (zRatio < 0.0f) {
@@ -448,7 +448,7 @@ static void DrawRRectShadowsWithClip(const SkRect& casterRect, SkScalar casterCo
             zRatio = 0.95f;
         }
 
-        const SkScalar lightWidth = SkiaFrameRenderer::getLightRadius();
+        const SkScalar lightWidth = SkiaPipeline::getLightRadius();
         const SkScalar srcSpaceSpotRadius = 2.0f * lightWidth * zRatio;
         const SkScalar devSpaceSpotRadius = srcSpaceSpotRadius * scaleFactor;
 
@@ -626,8 +626,8 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
         return;
     }
 
-    float ambientAlpha = SkiaFrameRenderer::getAmbientShadowAlpha()*casterAlpha;
-    float spotAlpha = SkiaFrameRenderer::getSpotShadowAlpha()*casterAlpha;
+    float ambientAlpha = SkiaPipeline::getAmbientShadowAlpha()*casterAlpha;
+    float spotAlpha = SkiaPipeline::getSpotShadowAlpha()*casterAlpha;
     const float casterZValue = casterProperties.getZ();
 
     const RevealClip& revealClip = casterProperties.getRevealClip();

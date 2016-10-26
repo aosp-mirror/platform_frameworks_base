@@ -17,7 +17,7 @@
 #include "RenderNodeDrawable.h"
 #include "RenderNode.h"
 #include "SkiaDisplayList.h"
-#include "SkiaFrameRenderer.h"
+#include "SkiaPipeline.h"
 #include "utils/TraceUtils.h"
 
 namespace android {
@@ -57,7 +57,7 @@ void RenderNodeDrawable::onDraw(SkCanvas* canvas) {
 
 void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
     RenderNode* renderNode = mRenderNode.get();
-    if (SkiaFrameRenderer::skpCaptureEnabled()) {
+    if (SkiaPipeline::skpCaptureEnabled()) {
         SkRect dimensions = SkRect::MakeWH(renderNode->getWidth(), renderNode->getHeight());
         canvas->drawAnnotation(dimensions, renderNode->getName(), nullptr);
     }

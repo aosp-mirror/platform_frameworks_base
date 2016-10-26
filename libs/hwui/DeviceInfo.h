@@ -32,6 +32,7 @@ public:
     // only call this after GL has been initialized, or at any point if compiled
     // with HWUI_NULL_GPU
     static void initialize();
+    static void initialize(int maxTextureSize);
 
     int maxTextureSize() const { return mMaxTextureSize; }
 
