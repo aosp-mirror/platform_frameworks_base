@@ -31,7 +31,6 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libbinder \
     libmedia \
-    libmediadrm \
     libskia \
     libui \
     liblog \
@@ -41,7 +40,6 @@ LOCAL_SHARED_LIBRARIES := \
     libstagefright_foundation \
     libcamera_client \
     libmtp \
-    libusbhost \
     libexif \
     libpiex
 
