@@ -28,7 +28,8 @@
     -->
     <LinearLayout
         android:layout_height="match_parent"
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/car_navigation_bar_width"
+        android:layout_gravity="center"
         android:orientation="horizontal"
         android:clipChildren="false"
         android:clipToPadding="false"
