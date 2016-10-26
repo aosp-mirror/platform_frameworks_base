@@ -23,7 +23,9 @@ import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Interpolator;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -57,6 +59,7 @@ public class NotificationShelf extends ActivatableNotificationView {
     private int mStatusBarPaddingStart;
     private AmbientState mAmbientState;
     private NotificationStackScrollLayout mHostLayout;
+    private int mMaxLayoutHeight;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -192,8 +195,18 @@ public class NotificationShelf extends ActivatableNotificationView {
         float viewEnd = viewStart + row.getIntrinsicHeight();
         if (viewEnd > maxShelfStart) {
             if (viewStart < maxShelfStart) {
-                iconState.iconAppearAmount = 1.0f - ((maxShelfStart - viewStart) /
-                        row.getIntrinsicHeight());
+                float linearAmount = (maxShelfStart - viewStart) / row.getIntrinsicHeight();
+                float interpolatedAmount =  Interpolators.ACCELERATE_DECELERATE.getInterpolation(
+                        linearAmount);
+                float interpolationStart = mMaxLayoutHeight - getIntrinsicHeight() * 2;
+                float expandAmount = 0.0f;
+                if (getTranslationY() >= interpolationStart) {
+                    expandAmount = (getTranslationY() - interpolationStart) / getIntrinsicHeight();
+                    expandAmount = Math.min(1.0f, expandAmount);
+                }
+                interpolatedAmount = NotificationUtils.interpolate(
+                        interpolatedAmount, linearAmount, expandAmount);
+                iconState.iconAppearAmount = 1.0f - interpolatedAmount;
             } else {
                 iconState.iconAppearAmount = 1.0f;
             }
@@ -290,6 +303,10 @@ public class NotificationShelf extends ActivatableNotificationView {
 
     private void setIconContainerTranslation(float iconContainerTranslation) {
         mNotificationIconContainer.setTranslationX(iconContainerTranslation);
+    }
+
+    public void setMaxLayoutHeight(int maxLayoutHeight) {
+        mMaxLayoutHeight = maxLayoutHeight;
     }
 
     private class ShelfState extends ExpandableViewState {

@@ -563,6 +563,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void setMaxLayoutHeight(int maxLayoutHeight) {
         mMaxLayoutHeight = maxLayoutHeight;
+        mShelf.setMaxLayoutHeight(maxLayoutHeight);
         updateAlgorithmHeightAndPadding();
     }
 
