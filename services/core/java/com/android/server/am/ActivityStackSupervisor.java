@@ -2007,15 +2007,10 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
         }
     }
 
-    void deleteActivityContainer(IActivityContainer container) {
-        ActivityContainer activityContainer = (ActivityContainer)container;
-        if (activityContainer != null) {
-            if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS,
-                    "deleteActivityContainer: callers=" + Debug.getCallers(4));
-            final int stackId = activityContainer.mStackId;
-            mActivityContainers.remove(stackId);
-            mWindowManager.removeStack(stackId);
-        }
+    void deleteActivityContainerRecord(int stackId) {
+        if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS,
+                "deleteActivityContainerRecord: callers=" + Debug.getCallers(4));
+        mActivityContainers.remove(stackId);
     }
 
     void resizeStackLocked(int stackId, Rect bounds, Rect tempTaskBounds, Rect tempTaskInsetBounds,
@@ -3460,7 +3455,7 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
             if (activityDisplay != null) {
                 ArrayList<ActivityStack> stacks = activityDisplay.mStacks;
                 for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                    stacks.get(stackNdx).mActivityContainer.detachLocked();
+                    stacks.get(stackNdx).mActivityContainer.removeLocked();
                 }
                 mActivityDisplays.remove(displayId);
             }
@@ -4100,14 +4095,14 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
             }
         }
 
-        protected void detachLocked() {
-            if (DEBUG_STACK) Slog.d(TAG_STACK, "detachLocked: " + this + " from display="
+        void removeLocked() {
+            if (DEBUG_STACK) Slog.d(TAG_STACK, "removeLocked: " + this + " from display="
                     + mActivityDisplay + " Callers=" + Debug.getCallers(2));
             if (mActivityDisplay != null) {
                 mActivityDisplay.detachActivitiesLocked(mStack);
                 mActivityDisplay = null;
-                mStack.detachDisplay();
             }
+            mStack.remove();
         }
 
         @Override
@@ -4182,8 +4177,7 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
         }
 
         void onTaskListEmptyLocked() {
-            detachLocked();
-            deleteActivityContainer(this);
+            removeLocked();
             mHandler.obtainMessage(CONTAINER_CALLBACK_TASK_LIST_EMPTY, this).sendToTarget();
         }
 

@@ -2557,15 +2557,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case DELETE_ACTIVITY_CONTAINER_TRANSACTION:  {
-            data.enforceInterface(IActivityManager.descriptor);
-            IActivityContainer activityContainer =
-                    IActivityContainer.Stub.asInterface(data.readStrongBinder());
-            deleteActivityContainer(activityContainer);
-            reply.writeNoException();
-            return true;
-        }
-
         case CREATE_STACK_ON_DISPLAY: {
             data.enforceInterface(IActivityManager.descriptor);
             int displayId = data.readInt();
@@ -6394,18 +6385,6 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return res;
-    }
-
-    public void deleteActivityContainer(IActivityContainer activityContainer)
-            throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(activityContainer.asBinder());
-        mRemote.transact(DELETE_ACTIVITY_CONTAINER_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
     }
 
     public boolean startBinderTracking() throws RemoteException {

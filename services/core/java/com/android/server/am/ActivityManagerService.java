@@ -9856,14 +9856,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void deleteActivityContainer(IActivityContainer container) throws RemoteException {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "deleteActivityContainer()");
-        synchronized (this) {
-            mStackSupervisor.deleteActivityContainer(container);
-        }
-    }
-
-    @Override
     public IActivityContainer createStackOnDisplay(int displayId) throws RemoteException {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "createStackOnDisplay()");
         synchronized (this) {

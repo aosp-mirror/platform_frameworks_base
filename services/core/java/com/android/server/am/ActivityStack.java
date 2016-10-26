@@ -467,20 +467,21 @@ final class ActivityStack extends ConfigurationContainer {
         }
     }
 
-    void detachDisplay() {
+    void remove() {
         mDisplayId = Display.INVALID_DISPLAY;
         mStacks = null;
         if (mTaskPositioner != null) {
             mTaskPositioner.reset();
         }
-        mWindowManager.detachStack(mStackId);
-        onParentChanged();
         if (mStackId == DOCKED_STACK_ID) {
             // If we removed a docked stack we want to resize it so it resizes all other stacks
             // in the system to fullscreen.
             mStackSupervisor.resizeDockedStackLocked(
                     null, null, null, null, null, PRESERVE_WINDOWS);
         }
+        mStackSupervisor.deleteActivityContainerRecord(mStackId);
+        mWindowManager.removeStack(mStackId);
+        onParentChanged();
     }
 
     void getDisplaySize(Point out) {
