@@ -20,6 +20,8 @@
 #include "renderthread/EglManager.h"
 #include "renderstate/RenderState.h"
 #include "Readback.h"
+#include "SkiaPipeline.h"
+#include "SkiaProfileRenderer.h"
 #include "utils/TraceUtils.h"
 
 #include <android/native_window.h>
@@ -83,6 +85,16 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty,
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
     layerUpdateQueue->clear();
+
+    // Draw visual debugging features
+    if (CC_UNLIKELY(Properties::showDirtyRegions
+            || ProfileType::None == Properties::getProfileType())) {
+        SkCanvas* profileCanvas = surface->getCanvas();
+        SkiaProfileRenderer profileRenderer(profileCanvas);
+        profiler->draw(profileRenderer);
+        profileCanvas->flush();
+    }
+
     return true;
 }
 

@@ -25,6 +25,7 @@ hwui_src_files := \
     pipeline/skia/SkiaDisplayList.cpp \
     pipeline/skia/SkiaOpenGLPipeline.cpp \
     pipeline/skia/SkiaPipeline.cpp \
+    pipeline/skia/SkiaProfileRenderer.cpp \
     pipeline/skia/SkiaRecordingCanvas.cpp \
     pipeline/skia/SkiaVulkanPipeline.cpp \
     renderstate/Blend.cpp \
