@@ -2167,6 +2167,18 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             mFirstBoot = !mSettings.readLPw(sUserManager.getUsers(false));
 
+            // Clean up orphaned packages for which the code path doesn't exist
+            // and they are an update to a system app - caused by bug/32321269
+            final int packageSettingCount = mSettings.mPackages.size();
+            for (int i = packageSettingCount - 1; i >= 0; i--) {
+                PackageSetting ps = mSettings.mPackages.valueAt(i);
+                if (!isExternal(ps) && (ps.codePath == null || !ps.codePath.exists())
+                        && mSettings.getDisabledSystemPkgLPr(ps.name) != null) {
+                    mSettings.mPackages.removeAt(i);
+                    mSettings.enableSystemPackageLPw(ps.name);
+                }
+            }
+
             if (mFirstBoot) {
                 requestCopyPreoptedFiles();
             }
@@ -3126,8 +3138,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         flags = updateFlagsForPackage(flags, userId, packageName);
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 false /* requireFullPermission */, false /* checkShell */, "get package info");
+
         // reader
         synchronized (mPackages) {
+            // Normalize package name to hanlde renamed packages
+            packageName = normalizePackageNameLPr(packageName);
+
             final boolean matchFactoryOnly = (flags & MATCH_FACTORY_ONLY) != 0;
             PackageParser.Package p = null;
             if (matchFactoryOnly) {
@@ -3328,8 +3344,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         flags = updateFlagsForApplication(flags, userId, packageName);
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 false /* requireFullPermission */, false /* checkShell */, "get application info");
+
         // writer
         synchronized (mPackages) {
+            // Normalize package name to hanlde renamed packages
+            packageName = normalizePackageNameLPr(packageName);
+
             PackageParser.Package p = mPackages.get(packageName);
             if (DEBUG_PACKAGE_INFO) Log.v(
                     TAG, "getApplicationInfo " + packageName
@@ -3349,6 +3369,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         return null;
+    }
+
+    private String normalizePackageNameLPr(String packageName) {
+        String normalizedPackageName = mSettings.mRenamedPackages.get(packageName);
+        return normalizedPackageName != null ? normalizedPackageName : packageName;
     }
 
     @Override
@@ -19723,6 +19748,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     private void assertPackageKnown(String volumeUuid, String packageName)
             throws PackageManagerException {
         synchronized (mPackages) {
+            // Normalize package name to handle renamed packages
+            packageName = normalizePackageNameLPr(packageName);
+
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (ps == null) {
                 throw new PackageManagerException("Package " + packageName + " is unknown");
@@ -19737,6 +19765,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     private void assertPackageKnownAndInstalled(String volumeUuid, String packageName, int userId)
             throws PackageManagerException {
         synchronized (mPackages) {
+            // Normalize package name to handle renamed packages
+            packageName = normalizePackageNameLPr(packageName);
+
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (ps == null) {
                 throw new PackageManagerException("Package " + packageName + " is unknown");
