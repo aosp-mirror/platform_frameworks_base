@@ -59,7 +59,7 @@ import android.service.vr.IVrStateCallbacks;
 import android.util.EventLog;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
-import android.util.SparseIntArray;
+import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.view.Display;
 import android.view.WindowManagerPolicy;
@@ -483,7 +483,13 @@ public final class PowerManagerService extends SystemService
     // Set of app ids that are temporarily allowed to acquire wakelocks due to high-pri message
     int[] mDeviceIdleTempWhitelist = new int[0];
 
-    private final SparseIntArray mUidState = new SparseIntArray();
+    private final SparseArray<UidState> mUidState = new SparseArray<>();
+
+    // We are currently in the middle of a batch change of uids.
+    private boolean mUidsChanging;
+
+    // Some uids have actually changed while mUidsChanging was true.
+    private boolean mUidsChanged;
 
     // True if theater mode is enabled
     private boolean mTheaterModeEnabled;
@@ -878,7 +884,15 @@ public final class PowerManagerService extends SystemService
                 }
                 notifyAcquire = false;
             } else {
-                wakeLock = new WakeLock(lock, flags, tag, packageName, ws, historyTag, uid, pid);
+                UidState state = mUidState.get(uid);
+                if (state == null) {
+                    state = new UidState(uid);
+                    state.mProcState = ActivityManager.PROCESS_STATE_NONEXISTENT;
+                    mUidState.put(uid, state);
+                }
+                state.mNumWakeLocks++;
+                wakeLock = new WakeLock(lock, flags, tag, packageName, ws, historyTag, uid, pid,
+                        state);
                 try {
                     lock.linkToDeath(wakeLock, 0);
                 } catch (RemoteException ex) {
@@ -976,6 +990,12 @@ public final class PowerManagerService extends SystemService
 
     private void removeWakeLockLocked(WakeLock wakeLock, int index) {
         mWakeLocks.remove(index);
+        UidState state = wakeLock.mUidState;
+        state.mNumWakeLocks--;
+        if (state.mNumWakeLocks <= 0 &&
+                state.mProcState == ActivityManager.PROCESS_STATE_NONEXISTENT) {
+            mUidState.remove(state.mUid);
+        }
         notifyWakeLockReleasedLocked(wakeLock);
 
         applyWakeLockFlagsOnReleaseLocked(wakeLock);
@@ -2580,20 +2600,82 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    void startUidChangesInternal() {
+        synchronized (mLock) {
+            mUidsChanging = true;
+        }
+    }
+
+    void finishUidChangesInternal() {
+        synchronized (mLock) {
+            mUidsChanging = false;
+            if (mUidsChanged) {
+                updateWakeLockDisabledStatesLocked();
+                mUidsChanged = false;
+            }
+        }
+    }
+
+    private void handleUidStateChangeLocked() {
+        if (mUidsChanging) {
+            mUidsChanged = true;
+        } else {
+            updateWakeLockDisabledStatesLocked();
+        }
+    }
+
     void updateUidProcStateInternal(int uid, int procState) {
         synchronized (mLock) {
-            mUidState.put(uid, procState);
-            if (mDeviceIdleMode) {
-                updateWakeLockDisabledStatesLocked();
+            UidState state = mUidState.get(uid);
+            if (state == null) {
+                state = new UidState(uid);
+                mUidState.put(uid, state);
+            }
+            state.mProcState = procState;
+            if (mDeviceIdleMode && state.mNumWakeLocks > 0) {
+                handleUidStateChangeLocked();
             }
         }
     }
 
     void uidGoneInternal(int uid) {
         synchronized (mLock) {
-            mUidState.delete(uid);
-            if (mDeviceIdleMode) {
-                updateWakeLockDisabledStatesLocked();
+            final int index = mUidState.indexOfKey(uid);
+            if (index >= 0) {
+                UidState state = mUidState.valueAt(index);
+                state.mProcState = ActivityManager.PROCESS_STATE_NONEXISTENT;
+                state.mActive = false;
+                mUidState.removeAt(index);
+                if (mDeviceIdleMode && state.mNumWakeLocks > 0) {
+                    handleUidStateChangeLocked();
+                }
+            }
+        }
+    }
+
+    void uidActiveInternal(int uid) {
+        synchronized (mLock) {
+            UidState state = mUidState.get(uid);
+            if (state == null) {
+                state = new UidState(uid);
+                state.mProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
+                mUidState.put(uid, state);
+            }
+            state.mActive = true;
+            if (state.mNumWakeLocks > 0) {
+                handleUidStateChangeLocked();
+            }
+        }
+    }
+
+    void uidIdleInternal(int uid) {
+        synchronized (mLock) {
+            UidState state = mUidState.get(uid);
+            if (state != null) {
+                state.mActive = false;
+                if (state.mNumWakeLocks > 0) {
+                    handleUidStateChangeLocked();
+                }
             }
         }
     }
@@ -2626,17 +2708,20 @@ public final class PowerManagerService extends SystemService
         if ((wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK)
                 == PowerManager.PARTIAL_WAKE_LOCK) {
             boolean disabled = false;
-            if (mDeviceIdleMode) {
-                final int appid = UserHandle.getAppId(wakeLock.mOwnerUid);
-                // If we are in idle mode, we will ignore all partial wake locks that are
-                // for application uids that are not whitelisted.
-                if (appid >= Process.FIRST_APPLICATION_UID &&
-                        Arrays.binarySearch(mDeviceIdleWhitelist, appid) < 0 &&
-                        Arrays.binarySearch(mDeviceIdleTempWhitelist, appid) < 0 &&
-                        mUidState.get(wakeLock.mOwnerUid,
-                                ActivityManager.PROCESS_STATE_CACHED_EMPTY)
-                                > ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
-                    disabled = true;
+            final int appid = UserHandle.getAppId(wakeLock.mOwnerUid);
+            if (appid >= Process.FIRST_APPLICATION_UID) {
+                if (mDeviceIdleMode) {
+                    // If we are in idle mode, we will ignore all partial wake locks that are
+                    // for application uids that are not whitelisted.
+                    final UidState state = wakeLock.mUidState;
+                    if (Arrays.binarySearch(mDeviceIdleWhitelist, appid) < 0 &&
+                            Arrays.binarySearch(mDeviceIdleTempWhitelist, appid) < 0 &&
+                            state.mProcState != ActivityManager.PROCESS_STATE_NONEXISTENT &&
+                            state.mProcState > ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+                        disabled = true;
+                    }
+                } else {
+                    disabled = !wakeLock.mUidState.mActive;
                 }
             }
             if (wakeLock.mDisabled != disabled) {
@@ -2964,10 +3049,21 @@ public final class PowerManagerService extends SystemService
             pw.println("Screen dim duration: " + screenDimDuration + " ms");
 
             pw.println();
-            pw.println("UID states:");
+            pw.print("UID states (changing=");
+            pw.print(mUidsChanging);
+            pw.print(" changed=");
+            pw.print(mUidsChanged);
+            pw.println("):");
             for (int i=0; i<mUidState.size(); i++) {
+                final UidState state = mUidState.valueAt(i);
                 pw.print("  UID "); UserHandle.formatUid(pw, mUidState.keyAt(i));
-                pw.print(": "); pw.println(mUidState.valueAt(i));
+                pw.print(": ");
+                if (state.mActive) pw.print("  ACTIVE ");
+                else pw.print("INACTIVE ");
+                pw.print(" count=");
+                pw.print(state.mNumWakeLocks);
+                pw.print(" state=");
+                pw.println(state.mProcState);
             }
 
             pw.println();
@@ -3122,13 +3218,15 @@ public final class PowerManagerService extends SystemService
         public String mHistoryTag;
         public final int mOwnerUid;
         public final int mOwnerPid;
+        public final UidState mUidState;
         public long mAcquireTime;
         public boolean mNotifiedAcquired;
         public boolean mNotifiedLong;
         public boolean mDisabled;
 
         public WakeLock(IBinder lock, int flags, String tag, String packageName,
-                WorkSource workSource, String historyTag, int ownerUid, int ownerPid) {
+                WorkSource workSource, String historyTag, int ownerUid, int ownerPid,
+                UidState uidState) {
             mLock = lock;
             mFlags = flags;
             mTag = tag;
@@ -3137,6 +3235,7 @@ public final class PowerManagerService extends SystemService
             mHistoryTag = historyTag;
             mOwnerUid = ownerUid;
             mOwnerPid = ownerPid;
+            mUidState = uidState;
         }
 
         @Override
@@ -3309,6 +3408,17 @@ public final class PowerManagerService extends SystemService
             synchronized (this) {
                 return mName + ": ref count=" + mReferenceCount;
             }
+        }
+    }
+
+    static final class UidState {
+        final int mUid;
+        int mNumWakeLocks;
+        int mProcState;
+        boolean mActive;
+
+        UidState(int uid) {
+            mUid = uid;
         }
     }
 
@@ -3880,6 +3990,16 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override
+        public void startUidChanges() {
+            startUidChangesInternal();
+        }
+
+        @Override
+        public void finishUidChanges() {
+            finishUidChangesInternal();
+        }
+
+        @Override
         public void updateUidProcState(int uid, int procState) {
             updateUidProcStateInternal(uid, procState);
         }
@@ -3887,6 +4007,16 @@ public final class PowerManagerService extends SystemService
         @Override
         public void uidGone(int uid) {
             uidGoneInternal(uid);
+        }
+
+        @Override
+        public void uidActive(int uid) {
+            uidActiveInternal(uid);
+        }
+
+        @Override
+        public void uidIdle(int uid) {
+            uidIdleInternal(uid);
         }
 
         @Override

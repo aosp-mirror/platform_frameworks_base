@@ -4209,18 +4209,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     "*** Delivering " + N + " uid changes");
         }
 
-        if (mLocalPowerManager != null) {
-            for (int j=0; j<N; j++) {
-                UidRecord.ChangeItem item = mActiveUidChanges[j];
-                if (item.change == UidRecord.CHANGE_GONE
-                        || item.change == UidRecord.CHANGE_GONE_IDLE) {
-                    mLocalPowerManager.uidGone(item.uid);
-                } else {
-                    mLocalPowerManager.updateUidProcState(item.uid, item.processState);
-                }
-            }
-        }
-
         int i = mUidObservers.beginBroadcast();
         while (i > 0) {
             i--;
@@ -20819,6 +20807,27 @@ public final class ActivityManagerService extends ActivityManagerNative
         pendingChange.change = change;
         pendingChange.processState = uidRec != null
                 ? uidRec.setProcState : ActivityManager.PROCESS_STATE_NONEXISTENT;
+
+        // Directly update the power manager, since we sit on top of it and it is critical
+        // it be kept in sync (so wake locks will be held as soon as appropriate).
+        if (mLocalPowerManager != null) {
+            switch (change) {
+                case UidRecord.CHANGE_GONE:
+                case UidRecord.CHANGE_GONE_IDLE:
+                    mLocalPowerManager.uidGone(pendingChange.uid);
+                    break;
+                case UidRecord.CHANGE_IDLE:
+                    mLocalPowerManager.uidIdle(pendingChange.uid);
+                    break;
+                case UidRecord.CHANGE_ACTIVE:
+                    mLocalPowerManager.uidActive(pendingChange.uid);
+                    break;
+                default:
+                    mLocalPowerManager.updateUidProcState(pendingChange.uid,
+                            pendingChange.processState);
+                    break;
+            }
+        }
     }
 
     private void maybeUpdateProviderUsageStatsLocked(ProcessRecord app, String providerPkgName,
@@ -21367,6 +21376,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // Update from any uid changes.
+        if (mLocalPowerManager != null) {
+            mLocalPowerManager.startUidChanges();
+        }
         for (int i=mActiveUids.size()-1; i>=0; i--) {
             final UidRecord uidRec = mActiveUids.valueAt(i);
             int uidChange = UidRecord.CHANGE_PROCSTATE;
@@ -21397,6 +21409,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 noteUidProcessState(uidRec.uid, uidRec.curProcState);
             }
         }
+        if (mLocalPowerManager != null) {
+            mLocalPowerManager.finishUidChanges();
+        }
 
         if (mProcessStats.shouldWriteNowLocked(now)) {
             mHandler.post(new Runnable() {
@@ -21421,10 +21436,17 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final void idleUids() {
         synchronized (this) {
+            final int N = mActiveUids.size();
+            if (N <= 0) {
+                return;
+            }
             final long nowElapsed = SystemClock.elapsedRealtime();
             final long maxBgTime = nowElapsed - BACKGROUND_SETTLE_TIME;
             long nextTime = 0;
-            for (int i=mActiveUids.size()-1; i>=0; i--) {
+            if (mLocalPowerManager != null) {
+                mLocalPowerManager.startUidChanges();
+            }
+            for (int i=N-1; i>=0; i--) {
                 final UidRecord uidRec = mActiveUids.valueAt(i);
                 final long bgTime = uidRec.lastBackgroundTime;
                 if (bgTime > 0 && !uidRec.idle) {
@@ -21437,6 +21459,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                 }
+            }
+            if (mLocalPowerManager != null) {
+                mLocalPowerManager.finishUidChanges();
             }
             if (nextTime > 0) {
                 mHandler.removeMessages(IDLE_UIDS_MSG);
