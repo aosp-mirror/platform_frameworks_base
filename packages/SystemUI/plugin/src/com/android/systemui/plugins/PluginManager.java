@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -208,6 +209,10 @@ public class PluginManager extends BroadcastReceiver {
 
         @Override
         public void uncaughtException(Thread thread, Throwable throwable) {
+            if (SystemProperties.getBoolean("plugin.debugging", false)) {
+                mHandler.uncaughtException(thread, throwable);
+                return;
+            }
             // Search for and disable plugins that may have been involved in this crash.
             boolean disabledAny = checkStack(throwable);
             if (!disabledAny) {
