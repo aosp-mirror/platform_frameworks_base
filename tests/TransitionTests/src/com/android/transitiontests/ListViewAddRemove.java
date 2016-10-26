@@ -30,8 +30,9 @@ import android.widget.TextView;
 import android.transition.AutoTransition;
 import android.transition.ChangeBounds;
 import android.transition.Transition;
-import android.transition.TransitionSet;
+import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionManager;
+import android.transition.TransitionSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,7 +85,7 @@ public class ListViewAddRemove extends Activity {
         fadeIn.setDuration(50);
         noFadeIn.addTransition(new Fade(Fade.OUT)).addTransition(new ChangeBounds()).addTransition(fadeIn);
 
-        myTransition.addListener(new Transition.TransitionListenerAdapter() {
+        myTransition.addListener(new TransitionListenerAdapter() {
             @Override
             public void onTransitionStart(Transition transition) {
                 System.out.println("---------ListView Tops: Before--------");

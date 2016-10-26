@@ -33,6 +33,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.transition.Transition;
+import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionManager;
 import android.util.Pair;
 import android.util.Slog;
@@ -1324,7 +1325,7 @@ public class ActivityOptions {
                 + mStartY + ", mWidth=" + mWidth + ", mHeight=" + mHeight;
     }
 
-    private static class HideWindowListener extends Transition.TransitionListenerAdapter
+    private static class HideWindowListener extends TransitionListenerAdapter
         implements ExitTransitionCoordinator.HideSharedElementsCallback {
         private final Window mWindow;
         private final ExitTransitionCoordinator mExit;
