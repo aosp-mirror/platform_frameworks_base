@@ -156,8 +156,8 @@ public final class SystemServer {
             "com.android.server.midi.MidiService$Lifecycle";
     private static final String WIFI_SERVICE_CLASS =
             "com.android.server.wifi.WifiService";
-    private static final String WIFI_NAN_SERVICE_CLASS =
-            "com.android.server.wifi.nan.WifiNanService";
+    private static final String WIFI_AWARE_SERVICE_CLASS =
+            "com.android.server.wifi.aware.WifiAwareService";
     private static final String WIFI_P2P_SERVICE_CLASS =
             "com.android.server.wifi.p2p.WifiP2pService";
     private static final String ETHERNET_SERVICE_CLASS =
@@ -910,12 +910,13 @@ public final class SystemServer {
                 }
                 traceEnd();
 
-                if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_NAN)) {
-                    traceBeginAndSlog("StartWifiNan");
-                    mSystemServiceManager.startService(WIFI_NAN_SERVICE_CLASS);
+                if (context.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_WIFI_AWARE)) {
+                    traceBeginAndSlog("StartWifiAware");
+                    mSystemServiceManager.startService(WIFI_AWARE_SERVICE_CLASS);
                     traceEnd();
                 } else {
-                    Slog.i(TAG, "No Wi-Fi NAN Service (NAN support Not Present)");
+                    Slog.i(TAG, "No Wi-Fi Aware Service (Aware support Not Present)");
                 }
 
                 if (context.getPackageManager().hasSystemFeature(

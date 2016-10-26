@@ -14,41 +14,43 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 import android.annotation.NonNull;
 import android.util.Log;
 
 /**
- * A class representing a NAN subscribe session. Created when
- * {@link WifiNanSession#subscribe(android.os.Handler, SubscribeConfig, WifiNanDiscoverySessionCallback)}
+ * A class representing a Aware subscribe session. Created when
+ * {@link WifiAwareSession#subscribe(android.os.Handler, SubscribeConfig,
+ * WifiAwareDiscoverySessionCallback)}
  * is called and a discovery session is created and returned in
- * {@link WifiNanDiscoverySessionCallback#onSubscribeStarted(WifiNanSubscribeDiscoverySession)}.
- * See baseline functionality of all discovery sessions in {@link WifiNanDiscoveryBaseSession}.
+ * {@link WifiAwareDiscoverySessionCallback#onSubscribeStarted(WifiAwareSubscribeDiscoverySession)}.
+ * See baseline functionality of all discovery sessions in {@link WifiAwareDiscoveryBaseSession}.
  * This object allows updating an existing/running subscribe discovery session using
  * {@link #updateSubscribe(SubscribeConfig)}.
  *
- * @hide PROPOSED_NAN_API
+ * @hide PROPOSED_AWARE_API
  */
-public class WifiNanSubscribeDiscoverySession extends WifiNanDiscoveryBaseSession {
-    private static final String TAG = "WifiNanSubscribeDiscSsn";
+public class WifiAwareSubscribeDiscoverySession extends WifiAwareDiscoveryBaseSession {
+    private static final String TAG = "WifiAwareSubsDiscSsn";
 
     /**
      * {@hide}
      */
-    public WifiNanSubscribeDiscoverySession(WifiNanManager manager, int clientId, int sessionId) {
+    public WifiAwareSubscribeDiscoverySession(WifiAwareManager manager, int clientId,
+            int sessionId) {
         super(manager, clientId, sessionId);
     }
 
     /**
      * Re-configure the currently active subscribe session. The
-     * {@link WifiNanDiscoverySessionCallback} is not replaced - the same listener used
+     * {@link WifiAwareDiscoverySessionCallback} is not replaced - the same listener used
      * at creation is still used. The results of the configuration are returned using
-     * {@link WifiNanDiscoverySessionCallback}:
+     * {@link WifiAwareDiscoverySessionCallback}:
      * <ul>
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigUpdated()}: configuration
+     *     <li>{@link WifiAwareDiscoverySessionCallback#onSessionConfigUpdated()}: configuration
      *     update succeeded.
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFailed()}: configuration
+     *     <li>{@link WifiAwareDiscoverySessionCallback#onSessionConfigFailed()}: configuration
      *     update failed. The subscribe discovery session is still running using its previous
      *     configuration (i.e. update failure does not terminate the session).
      * </ul>
@@ -61,9 +63,9 @@ public class WifiNanSubscribeDiscoverySession extends WifiNanDiscoveryBaseSessio
             Log.w(TAG, "updateSubscribe: called on terminated session");
             return;
         } else {
-            WifiNanManager mgr = mMgr.get();
+            WifiAwareManager mgr = mMgr.get();
             if (mgr == null) {
-                Log.w(TAG, "updateSubscribe: called post GC on WifiNanManager");
+                Log.w(TAG, "updateSubscribe: called post GC on WifiAwareManager");
                 return;
             }
 
