@@ -957,7 +957,7 @@ public class SurfaceView extends View {
          */
         @Override
         public Canvas lockCanvas() {
-            return internalLockCanvas(null);
+            return internalLockCanvas(null, false);
         }
 
         /**
@@ -977,10 +977,15 @@ public class SurfaceView extends View {
          */
         @Override
         public Canvas lockCanvas(Rect inOutDirty) {
-            return internalLockCanvas(inOutDirty);
+            return internalLockCanvas(inOutDirty, false);
         }
 
-        private final Canvas internalLockCanvas(Rect dirty) {
+        @Override
+        public Canvas lockHardwareCanvas() {
+            return internalLockCanvas(null, true);
+        }
+
+        private Canvas internalLockCanvas(Rect dirty, boolean hardware) {
             mSurfaceLock.lock();
 
             if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " " + "Locking canvas... stopped="
@@ -989,7 +994,11 @@ public class SurfaceView extends View {
             Canvas c = null;
             if (!mDrawingStopped && mWindow != null) {
                 try {
-                    c = mSurface.lockCanvas(dirty);
+                    if (hardware) {
+                        c = mSurface.lockHardwareCanvas();
+                    } else {
+                        c = mSurface.lockCanvas(dirty);
+                    }
                 } catch (Exception e) {
                     Log.e(LOG_TAG, "Exception locking surface", e);
                 }
