@@ -25,6 +25,8 @@
 #include <cutils/log.h>
 #include <cutils/properties.h>
 #include <EGL/eglext.h>
+#include <GrContextOptions.h>
+#include <gl/GrGLInterface.h>
 #include <string>
 
 #define GLES_VERSION 2
@@ -126,6 +128,17 @@ void EglManager::initialize() {
     makeCurrent(mPBufferSurface);
     DeviceInfo::initialize();
     mRenderThread.renderState().onGLContextCreated();
+
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+        sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
+        LOG_ALWAYS_FATAL_IF(!glInterface.get());
+
+        GrContextOptions options;
+        options.fDisableDistanceFieldPaths = true;
+        options.fAllowPathMaskCaching = true;
+        mRenderThread.setGrContext(GrContext::Create(GrBackend::kOpenGL_GrBackend,
+                (GrBackendContext)glInterface.get(), options));
+    }
 }
 
 void EglManager::initExtensions() {
@@ -235,6 +248,7 @@ void EglManager::destroySurface(EGLSurface surface) {
 void EglManager::destroy() {
     if (mEglDisplay == EGL_NO_DISPLAY) return;
 
+    mRenderThread.setGrContext(nullptr);
     mRenderThread.renderState().onGLContextDestroyed();
     eglDestroyContext(mEglDisplay, mEglContext);
     eglDestroySurface(mEglDisplay, mPBufferSurface);

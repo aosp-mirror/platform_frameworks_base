@@ -22,6 +22,7 @@
 #include "../JankTracker.h"
 #include "TimeLord.h"
 
+#include <GrContext.h>
 #include <cutils/compiler.h>
 #include <ui/DisplayInfo.h>
 #include <utils/Looper.h>
@@ -94,6 +95,9 @@ public:
 
     const DisplayInfo& mainDisplayInfo() { return mDisplayInfo; }
 
+    GrContext* getGrContext() const { return mGrContext.get(); }
+    void setGrContext(GrContext* cxt) { mGrContext.reset(cxt); }
+
 protected:
     virtual bool threadLoop() override;
 
@@ -144,6 +148,8 @@ private:
     EglManager* mEglManager;
 
     JankTracker* mJankTracker = nullptr;
+
+    sk_sp<GrContext> mGrContext;
 };
 
 } /* namespace renderthread */
