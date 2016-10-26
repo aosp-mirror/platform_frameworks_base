@@ -17,20 +17,17 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.MathUtils;
 import android.util.SparseBooleanArray;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.R;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DozeParameters {
     private static final int MAX_DURATION = 60 * 1000;
@@ -113,6 +110,12 @@ public class DozeParameters {
 
     public int getPickupVibrationThreshold() {
         return getInt("doze.pickup.vibration.threshold", R.integer.doze_pickup_vibration_threshold);
+    }
+
+    public boolean getAlwaysOn() {
+        return Build.IS_DEBUGGABLE
+                && Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.DOZE_ALWAYS_ON, 0, UserHandle.USER_CURRENT) != 0;
     }
 
     private boolean getBoolean(String propName, int resId) {

@@ -1667,6 +1667,14 @@
          not appear on production builds ever. -->
     <string name="plugins" translatable="false">Plugins</string>
 
+    <!-- Ambient display section of the tuner. Non-translatable since it should
+        not appear on production builds ever. -->
+    <string name="tuner_doze" translatable="false">Ambient Display</string>
+
+    <!-- Ambient display always-on of the tuner. Non-translatable since it should
+        not appear on production builds ever. -->
+    <string name="tuner_doze_always_on" translatable="false">Always on</string>
+
     <!-- PIP section of the tuner. Non-translatable since it should
         not appear on production builds ever. -->
     <string name="picture_in_picture" translatable="false">Picture-in-Picture</string>

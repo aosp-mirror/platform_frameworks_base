@@ -27,6 +27,7 @@ public interface DozeHost {
     void startDozing(@NonNull Runnable ready);
     void pulseWhileDozing(@NonNull PulseCallback callback, int reason);
     void stopDozing();
+    void dozeTimeTick();
     boolean isPowerSaveActive();
     boolean isNotificationLightOn();
     boolean isPulsingBlocked();
