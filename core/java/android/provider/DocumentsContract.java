@@ -1412,7 +1412,7 @@ public final class DocumentsContract {
          * @param path the list of document ids from the parent document at
          *          position 0 to the child document.
          */
-        public Path(String rootId, List<String> path) {
+        public Path(@Nullable String rootId, List<String> path) {
             checkCollectionNotEmpty(path, "path");
             checkCollectionElementsNotNull(path, "path");
 
