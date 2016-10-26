@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -30,13 +30,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
- * Defines the configuration of a NAN publish session. Built using
+ * Defines the configuration of a Aware publish session. Built using
  * {@link PublishConfig.Builder}. A publish session is created using
- * {@link WifiNanSession#publish(android.os.Handler, PublishConfig, WifiNanDiscoverySessionCallback)}
+ * {@link WifiAwareSession#publish(android.os.Handler, PublishConfig,
+ * WifiAwareDiscoverySessionCallback)}
  * or updated using
- * {@link WifiNanPublishDiscoverySession#updatePublish(PublishConfig)}.
+ * {@link WifiAwarePublishDiscoverySession#updatePublish(PublishConfig)}.
  *
- * @hide PROPOSED_NAN_API
+ * @hide PROPOSED_AWARE_API
  */
 public final class PublishConfig implements Parcelable {
     /** @hide */
@@ -182,8 +183,9 @@ public final class PublishConfig implements Parcelable {
      *
      * @hide
      */
-    public void assertValid(WifiNanCharacteristics characteristics) throws IllegalArgumentException {
-        WifiNanUtils.validateServiceName(mServiceName);
+    public void assertValid(WifiAwareCharacteristics characteristics)
+            throws IllegalArgumentException {
+        WifiAwareUtils.validateServiceName(mServiceName);
 
         if (!LvBufferUtils.isValid(mMatchFilter, 1)) {
             throw new IllegalArgumentException(
@@ -320,12 +322,12 @@ public final class PublishConfig implements Parcelable {
          * Sets the number of times an unsolicited (configured using
          * {@link PublishConfig.Builder#setPublishType(int)}) publish session
          * will be broadcast. When the count is reached an event will be
-         * generated for {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)}
-         * with {@link WifiNanDiscoverySessionCallback#TERMINATE_REASON_DONE} [unless
+         * generated for {@link WifiAwareDiscoverySessionCallback#onSessionTerminated(int)}
+         * with {@link WifiAwareDiscoverySessionCallback#TERMINATE_REASON_DONE} [unless
          * {@link #setTerminateNotificationEnabled(boolean)} disables the callback].
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#destroy()} is
+         *     Session will be terminated when {@link WifiAwareDiscoveryBaseSession#destroy()} is
          *     called.
          *
          * @param publishCount Number of publish packets to broadcast.
@@ -346,12 +348,12 @@ public final class PublishConfig implements Parcelable {
          * {@link PublishConfig.Builder#setPublishType(int)}) publish session
          * will be alive - broadcasting a packet. When the TTL is reached
          * an event will be generated for
-         * {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)} with
-         * {@link WifiNanDiscoverySessionCallback#TERMINATE_REASON_DONE}  [unless
+         * {@link WifiAwareDiscoverySessionCallback#onSessionTerminated(int)} with
+         * {@link WifiAwareDiscoverySessionCallback#TERMINATE_REASON_DONE}  [unless
          * {@link #setTerminateNotificationEnabled(boolean)} disables the callback].
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#destroy()} is
+         *     Session will be terminated when {@link WifiAwareDiscoveryBaseSession#destroy()} is
          *     called.
          *
          * @param ttlSec Lifetime of a publish session in seconds.
@@ -369,7 +371,7 @@ public final class PublishConfig implements Parcelable {
 
         /**
          * Configure whether a publish terminate notification
-         * {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)} is reported
+         * {@link WifiAwareDiscoverySessionCallback#onSessionTerminated(int)} is reported
          * back to the callback.
          *
          * @param enable If true the terminate callback will be called when the

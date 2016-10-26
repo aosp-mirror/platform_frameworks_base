@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 /**
- * Base class for NAN attach callbacks. Should be extended by applications and set when calling
- * {@link WifiNanManager#attach(android.os.Handler, WifiNanAttachCallback)}. These are callbacks
- * applying to the NAN connection as a whole - not to specific publish or subscribe sessions -
- * for that see {@link WifiNanDiscoverySessionCallback}.
+ * Base class for Aware attach callbacks. Should be extended by applications and set when calling
+ * {@link WifiAwareManager#attach(android.os.Handler, WifiAwareAttachCallback)}. These are callbacks
+ * applying to the Aware connection as a whole - not to specific publish or subscribe sessions -
+ * for that see {@link WifiAwareDiscoverySessionCallback}.
  *
- * @hide PROPOSED_NAN_API
+ * @hide PROPOSED_AWARE_API
  */
-public class WifiNanAttachCallback {
+public class WifiAwareAttachCallback {
     /**
-     * Called when NAN attach operation
-     * {@link WifiNanManager#attach(android.os.Handler, WifiNanAttachCallback)}
+     * Called when Aware attach operation
+     * {@link WifiAwareManager#attach(android.os.Handler, WifiAwareAttachCallback)}
      * is completed and that we can now start discovery sessions or connections.
      *
-     * @param session The NAN object on which we can execute further NAN operations - e.g.
+     * @param session The Aware object on which we can execute further Aware operations - e.g.
      *                discovery, connections.
      */
-    public void onAttached(WifiNanSession session) {
+    public void onAttached(WifiAwareSession session) {
         /* empty */
     }
 
     /**
-     * Called when NAN attach operation
-     * {@link WifiNanManager#attach(android.os.Handler, WifiNanAttachCallback)} failed.
+     * Called when Aware attach operation
+     * {@link WifiAwareManager#attach(android.os.Handler, WifiAwareAttachCallback)} failed.
      */
     public void onAttachFailed() {
         /* empty */
