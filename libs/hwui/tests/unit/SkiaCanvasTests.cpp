@@ -45,7 +45,7 @@ TEST(SkiaCanvasProxy, drawGlyphsViaPicture) {
         SkCanvas* skCanvas = recorder.beginRecording(200, 200, NULL, 0);
         std::unique_ptr<Canvas> pictCanvas(Canvas::create_canvas(skCanvas));
         TestUtils::drawUtf8ToCanvas(pictCanvas.get(), text, paint, 25, 25);
-        sk_sp<SkPicture> picture(recorder.finishRecordingAsPicture());
+        sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
 
         canvas.asSkCanvas()->drawPicture(picture);
     });

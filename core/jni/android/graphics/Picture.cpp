@@ -43,7 +43,7 @@ Canvas* Picture::beginRecording(int width, int height) {
     mRecorder.reset(new SkPictureRecorder);
     mWidth = width;
     mHeight = height;
-    SkCanvas* canvas = mRecorder->beginRecording(width, height, NULL, 0);
+    SkCanvas* canvas = mRecorder->beginRecording(SkIntToScalar(width), SkIntToScalar(height));
     return Canvas::create_canvas(canvas);
 }
 

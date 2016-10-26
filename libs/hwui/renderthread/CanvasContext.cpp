@@ -19,11 +19,9 @@
 
 #include "AnimationContext.h"
 #include "Caches.h"
-#include "DeferredLayerUpdater.h"
 #include "EglManager.h"
 #include "LayerUpdateQueue.h"
 #include "Properties.h"
-#include "Readback.h"
 #include "RenderThread.h"
 #include "hwui/Canvas.h"
 #include "renderstate/RenderState.h"
