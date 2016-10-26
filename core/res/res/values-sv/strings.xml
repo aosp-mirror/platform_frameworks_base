@@ -667,7 +667,7 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Ange lösenord för att låsa upp"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Ange PIN-kod för att låsa upp"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Fel PIN-kod."</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"Tryck på Menu och sedan på 0 om du vill låsa upp."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Tryck på Menu och sedan på 0 för att låsa upp."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nödsamtalsnummer"</string>
     <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Ingen tjänst"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Skärmen har låsts."</string>
