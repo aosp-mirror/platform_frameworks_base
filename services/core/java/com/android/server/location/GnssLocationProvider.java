@@ -58,6 +58,7 @@ import android.os.AsyncTask;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -75,6 +76,7 @@ import android.telephony.SmsMessage;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
+import android.telephony.CarrierConfigManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 import android.util.Log;
@@ -396,10 +398,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // Persist property for LPP_PROFILE
     private final static String LPP_PROFILE = "persist.sys.gps.lpp";
 
-    // VZW PLMN info
-    private static final String[] VzwMccMncList = {"311480", "310004", "20404"};
-    // corresponding GID1 value, empty string means ignore gid1 match.
-    private static final String[] VzwGid1List = {"", "", "BAE0000000000000"};
 
 
     private final PowerManager mPowerManager;
@@ -520,42 +518,30 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
     };
 
-    private final boolean isVerizon(String mccMnc, String imsi, String groupId) {
-        if (DEBUG) Log.d(TAG, "simOperator: " + mccMnc);
-        if (!TextUtils.isEmpty(mccMnc) || !TextUtils.isEmpty(imsi)) {
-            for (int i = 0; i < VzwMccMncList.length; i++) {
-                if ((!TextUtils.isEmpty(mccMnc) && mccMnc.equals(VzwMccMncList[i])) ||
-                        (!TextUtils.isEmpty(imsi) && imsi.startsWith(VzwMccMncList[i]))) {
-                    // check gid too if needed
-                    if (TextUtils.isEmpty(VzwGid1List[i]) || VzwGid1List[i].equals(groupId)) {
-                        if (DEBUG) Log.d(TAG, "Verizon UICC");
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     private void subscriptionOrSimChanged(Context context) {
         if (DEBUG) Log.d(TAG, "received SIM related action: ");
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        CarrierConfigManager configManager = (CarrierConfigManager)
+                mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
         String mccMnc = phone.getSimOperator();
-        String imsi = phone.getSubscriberId();
-        String groupId = phone.getGroupIdLevel1();
+        boolean isKeepLppProfile = false;
         if (!TextUtils.isEmpty(mccMnc)) {
             if (DEBUG) Log.d(TAG, "SIM MCC/MNC is available: " + mccMnc);
             synchronized (mLock) {
-                if (isVerizon(mccMnc, imsi, groupId)) {
-                        // load current properties for carrier VZW
-                        loadPropertiesFromResource(context, mProperties);
-                        String lpp_profile = mProperties.getProperty("LPP_PROFILE");
-                        // set the persist property LPP_PROFILE for VZW
-                        SystemProperties.set(LPP_PROFILE, lpp_profile);
+                if (configManager != null) {
+                    PersistableBundle b = configManager.getConfig();
+                    isKeepLppProfile = b.getBoolean(CarrierConfigManager.KEY_PERSIST_LPP_MODE_BOOL);
+                }
+                if (isKeepLppProfile) {
+                    // load current properties for the carrier
+                    loadPropertiesFromResource(context, mProperties);
+                    String lpp_profile = mProperties.getProperty("LPP_PROFILE");
+                    // set the persist property LPP_PROFILE for the value
+                    SystemProperties.set(LPP_PROFILE, lpp_profile);
                 } else {
-                        // reset the persist property for Non VZW
-                        SystemProperties.set(LPP_PROFILE, "");
+                    // reset the persist property
+                    SystemProperties.set(LPP_PROFILE, "");
                 }
                 reloadGpsProperties(context, mProperties);
                 mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
