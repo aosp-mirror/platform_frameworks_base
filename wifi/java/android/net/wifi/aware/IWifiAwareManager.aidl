@@ -14,40 +14,40 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 import android.app.PendingIntent;
 
-import android.net.wifi.nan.ConfigRequest;
-import android.net.wifi.nan.IWifiNanDiscoverySessionCallback;
-import android.net.wifi.nan.IWifiNanEventCallback;
-import android.net.wifi.nan.PublishConfig;
-import android.net.wifi.nan.SubscribeConfig;
-import android.net.wifi.nan.WifiNanCharacteristics;
+import android.net.wifi.aware.ConfigRequest;
+import android.net.wifi.aware.IWifiAwareDiscoverySessionCallback;
+import android.net.wifi.aware.IWifiAwareEventCallback;
+import android.net.wifi.aware.PublishConfig;
+import android.net.wifi.aware.SubscribeConfig;
+import android.net.wifi.aware.WifiAwareCharacteristics;
 import android.net.wifi.RttManager;
 
 /**
- * Interface that WifiNanService implements
+ * Interface that WifiAwareService implements
  *
  * {@hide}
  */
-interface IWifiNanManager
+interface IWifiAwareManager
 {
-    // NAN API
+    // Aware API
     void enableUsage();
     void disableUsage();
     boolean isUsageEnabled();
-    WifiNanCharacteristics getCharacteristics();
+    WifiAwareCharacteristics getCharacteristics();
 
     // client API
-    void connect(in IBinder binder, in String callingPackage, in IWifiNanEventCallback callback,
+    void connect(in IBinder binder, in String callingPackage, in IWifiAwareEventCallback callback,
             in ConfigRequest configRequest, boolean notifyOnIdentityChanged);
     void disconnect(int clientId, in IBinder binder);
 
     void publish(int clientId, in PublishConfig publishConfig,
-            in IWifiNanDiscoverySessionCallback callback);
+            in IWifiAwareDiscoverySessionCallback callback);
     void subscribe(int clientId, in SubscribeConfig subscribeConfig,
-            in IWifiNanDiscoverySessionCallback callback);
+            in IWifiAwareDiscoverySessionCallback callback);
 
     // session API
     void updatePublish(int clientId, int discoverySessionId, in PublishConfig publishConfig);

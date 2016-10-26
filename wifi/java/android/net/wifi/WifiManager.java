@@ -1041,7 +1041,7 @@ public class WifiManager {
     /** @hide */
     public static final int WIFI_FEATURE_SCANNER          = 0x0020;  // WifiScanner APIs
     /** @hide */
-    public static final int WIFI_FEATURE_NAN              = 0x0040;  // Neighbor Awareness Networking
+    public static final int WIFI_FEATURE_AWARE              = 0x0040;  // Wi-Fi AWare networking
     /** @hide */
     public static final int WIFI_FEATURE_D2D_RTT          = 0x0080;  // Device-to-device RTT
     /** @hide */
@@ -1122,8 +1122,8 @@ public class WifiManager {
      * @return true if this adapter supports Neighbour Awareness Network APIs
      * @hide
      */
-    public boolean isNanSupported() {
-        return isFeatureSupported(WIFI_FEATURE_NAN);
+    public boolean isWifiAwareSupported() {
+        return isFeatureSupported(WIFI_FEATURE_AWARE);
     }
 
     /**
