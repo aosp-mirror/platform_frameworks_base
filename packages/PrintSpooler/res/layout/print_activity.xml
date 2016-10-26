@@ -49,8 +49,10 @@
         android:id="@+id/summary_content"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="2dip"
         android:paddingStart="16dip"
         android:paddingEnd="16dip"
+        android:paddingBottom="8dip"
         android:orientation="horizontal"
         android:elevation="@dimen/preview_controls_elevation"
         android:background="?android:attr/colorPrimary">
