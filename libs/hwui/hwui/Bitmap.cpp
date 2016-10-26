@@ -227,7 +227,7 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThr
     PixelFormat pixelFormat = internalFormatToPixelFormat(internalFormat);
     status_t error;
     sp<GraphicBuffer> buffer = alloc->createGraphicBuffer(info.width(), info.height(), pixelFormat,
-            GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER
+            1, GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER
             | GraphicBuffer::USAGE_SW_READ_NEVER , &error);
 
     if (!buffer.get()) {
