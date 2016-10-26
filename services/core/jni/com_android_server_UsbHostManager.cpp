@@ -34,6 +34,8 @@
 namespace android
 {
 
+static const int USB_CONTROL_TRANSFER_TIMEOUT_MS = 200;
+
 static struct parcel_file_descriptor_offsets_t
 {
     jclass mClass;
@@ -69,10 +71,13 @@ static int usb_device_added(const char *devname, void* client_data) {
     jobject thiz = (jobject)client_data;
     const usb_device_descriptor* deviceDesc = usb_device_get_device_descriptor(device);
 
-    char *manufacturer = usb_device_get_manufacturer_name(device);
-    char *product = usb_device_get_product_name(device);
+    char *manufacturer = usb_device_get_manufacturer_name(device,
+            USB_CONTROL_TRANSFER_TIMEOUT_MS);
+    char *product = usb_device_get_product_name(device,
+            USB_CONTROL_TRANSFER_TIMEOUT_MS);
     int version = usb_device_get_version(device);
-    char *serial = usb_device_get_serial(device);
+    char *serial = usb_device_get_serial(device,
+            USB_CONTROL_TRANSFER_TIMEOUT_MS);
 
     jstring deviceName = env->NewStringUTF(devname);
     jstring manufacturerName = AndroidRuntime::NewStringLatin1(env, manufacturer);
@@ -99,7 +104,8 @@ static int usb_device_added(const char *devname, void* client_data) {
     while ((desc = usb_descriptor_iter_next(&iter)) != NULL) {
         if (desc->bDescriptorType == USB_DT_CONFIG) {
             struct usb_config_descriptor *config = (struct usb_config_descriptor *)desc;
-            char *name = usb_device_get_string(device, config->iConfiguration);
+            char *name = usb_device_get_string(device, config->iConfiguration,
+                    USB_CONTROL_TRANSFER_TIMEOUT_MS);
             jstring configName = AndroidRuntime::NewStringLatin1(env, name);
 
             env->CallVoidMethod(thiz, method_addUsbConfiguration,
@@ -110,7 +116,8 @@ static int usb_device_added(const char *devname, void* client_data) {
             free(name);
         } else if (desc->bDescriptorType == USB_DT_INTERFACE) {
             struct usb_interface_descriptor *interface = (struct usb_interface_descriptor *)desc;
-            char *name = usb_device_get_string(device, interface->iInterface);
+            char *name = usb_device_get_string(device, interface->iInterface,
+                    USB_CONTROL_TRANSFER_TIMEOUT_MS);
             jstring interfaceName = AndroidRuntime::NewStringLatin1(env, name);
 
             env->CallVoidMethod(thiz, method_addUsbInterface,
