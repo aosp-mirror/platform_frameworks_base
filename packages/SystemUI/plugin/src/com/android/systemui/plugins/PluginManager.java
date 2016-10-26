@@ -36,6 +36,8 @@ import java.util.Map;
  */
 public class PluginManager extends BroadcastReceiver {
 
+    public static final String PLUGIN_CHANGED = "com.android.systemui.action.PLUGIN_CHANGED";
+
     private static PluginManager sInstance;
 
     private final HandlerThread mBackgroundThread;
@@ -105,6 +107,7 @@ public class PluginManager extends BroadcastReceiver {
         IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(PLUGIN_CHANGED);
         filter.addDataScheme("package");
         mContext.registerReceiver(this, filter);
         filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);

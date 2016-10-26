@@ -14,11 +14,14 @@
 
 package com.android.systemui.tuner;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v14.preference.PreferenceFragment;
 import android.support.v14.preference.SwitchPreference;
@@ -27,6 +30,7 @@ import android.support.v7.preference.PreferenceScreen;
 import android.support.v7.preference.PreferenceViewHolder;
 import android.view.View;
 
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.PluginPrefs;
 import com.android.systemui.R;
 
@@ -41,7 +45,30 @@ public class PluginFragment extends PreferenceFragment {
     private PluginPrefs mPluginPrefs;
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(PluginManager.PLUGIN_CHANGED);
+        filter.addDataScheme("package");
+        getContext().registerReceiver(mReceiver, filter);
+        filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
+        getContext().registerReceiver(mReceiver, filter);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getContext().unregisterReceiver(mReceiver);
+    }
+
+    @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        loadPrefs();
+    }
+
+    private void loadPrefs() {
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(getContext());
         screen.setOrderingAsAdded(false);
         Context prefContext = getPreferenceManager().getContext();
@@ -64,6 +91,13 @@ public class PluginFragment extends PreferenceFragment {
         setPreferenceScreen(screen);
     }
 
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            loadPrefs();
+        }
+    };
+
     private static class PluginPreference extends SwitchPreference {
         private final ComponentName mComponent;
         private final boolean mHasSettings;
@@ -82,10 +116,17 @@ public class PluginFragment extends PreferenceFragment {
 
         @Override
         protected boolean persistBoolean(boolean value) {
-            getContext().getPackageManager().setComponentEnabledSetting(mComponent,
-                    value ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                            : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            PackageManager pm = getContext().getPackageManager();
+            final int desiredState = value ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                    : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+            if (pm.getComponentEnabledSetting(mComponent) == desiredState) return true;
+            pm.setComponentEnabledSetting(mComponent,
+                    desiredState,
                     PackageManager.DONT_KILL_APP);
+            final String pkg = mComponent.getPackageName();
+            final Intent intent = new Intent(PluginManager.PLUGIN_CHANGED,
+                    pkg != null ? Uri.fromParts("package", pkg, null) : null);
+            getContext().sendBroadcast(intent);
             return true;
         }
 

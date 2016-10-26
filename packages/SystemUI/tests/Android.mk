@@ -87,7 +87,9 @@ LOCAL_JACK_COVERAGE_EXCLUDE_FILTER := com.android.systemui.tests.*,$(jacoco_excl
 
 include frameworks/base/packages/SettingsLib/common.mk
 
-include $(BUILD_PACKAGE)
+ifeq ($(EXCLUDE_SYSTEMUI_TESTS),)
+    include $(BUILD_PACKAGE)
+endif
 
 # Reset variables
 local_java_files :=
