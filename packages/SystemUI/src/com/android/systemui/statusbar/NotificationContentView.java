@@ -123,6 +123,7 @@ public class NotificationContentView extends FrameLayout {
     private boolean mFocusOnVisibilityChange;
     private boolean mHeadsupDisappearRunning;
     private boolean mIconsVisible;
+    private int mClipBottomAmount;
 
 
     public NotificationContentView(Context context, AttributeSet attrs) {
@@ -588,9 +589,18 @@ public class NotificationContentView extends FrameLayout {
         updateClipping();
     }
 
+
+    public void setClipBottomAmount(int clipBottomAmount) {
+        mClipBottomAmount = clipBottomAmount;
+        updateClipping();
+    }
+
     private void updateClipping() {
         if (mClipToActualHeight) {
-            mClipBounds.set(0, mClipTopAmount, getWidth(), mContentHeight);
+            int top = mClipTopAmount;
+            int bottom = mContentHeight - mClipBottomAmount;
+            bottom = Math.max(top, bottom);
+            mClipBounds.set(0, top, getWidth(), bottom);
             setClipBounds(mClipBounds);
         } else {
             setClipBounds(null);

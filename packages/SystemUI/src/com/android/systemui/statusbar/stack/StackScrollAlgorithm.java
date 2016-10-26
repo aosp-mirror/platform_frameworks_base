@@ -375,7 +375,7 @@ public class StackScrollAlgorithm {
                 clampPositionToBottomStackStart(childViewState, childViewState.height, childHeight,
                         ambientState);
             } else {
-                clampPositionToShelf(i, childViewState, ambientState);
+                clampPositionToShelf(childViewState, ambientState);
             }
         }
 
@@ -485,27 +485,14 @@ public class StackScrollAlgorithm {
      * Clamp the height of the child down such that its end is at most on the beginning of
      * the shelf.
      *
-     * @param index the index of the view
      * @param childViewState the view state of the child
      * @param ambientState the ambient state
      */
-    private void clampPositionToShelf(int index, ExpandableViewState childViewState,
+    private void clampPositionToShelf(ExpandableViewState childViewState,
             AmbientState ambientState) {
-        int minHeight = ambientState.getShelf().getNotificationMergeSize();
-        int shelfEnd = ambientState.getInnerHeight();
-        int shelfStart = shelfEnd - ambientState.getShelf().getIntrinsicHeight();
-        int maxChildEnd = shelfEnd;
-        if (index != ambientState.getShelfIndex() - 1) {
-            maxChildEnd = shelfStart - mPaddingBetweenElements;
-        }
+        int shelfStart = ambientState.getInnerHeight()
+                - ambientState.getShelf().getIntrinsicHeight();
         childViewState.yTranslation = Math.min(childViewState.yTranslation, shelfStart);
-        if (childViewState.yTranslation + childViewState.height > maxChildEnd) {
-            float newHeight = maxChildEnd - childViewState.yTranslation;
-            if (newHeight < minHeight) {
-                newHeight = Math.min(minHeight, shelfEnd - childViewState.yTranslation);
-            }
-            childViewState.height = (int) newHeight;
-        }
         if (childViewState.yTranslation >= shelfStart) {
             childViewState.hidden = true;
         }

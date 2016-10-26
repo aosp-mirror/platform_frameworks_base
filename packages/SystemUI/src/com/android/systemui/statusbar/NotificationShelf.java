@@ -23,7 +23,6 @@ import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Interpolator;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -60,6 +59,7 @@ public class NotificationShelf extends ActivatableNotificationView {
     private AmbientState mAmbientState;
     private NotificationStackScrollLayout mHostLayout;
     private int mMaxLayoutHeight;
+    private int mPaddingBetweenElements;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -92,6 +92,8 @@ public class NotificationShelf extends ActivatableNotificationView {
         mStatusBarHeight = getResources().getDimensionPixelOffset(R.dimen.status_bar_height);
         mStatusBarPaddingStart = getResources().getDimensionPixelOffset(
                 R.dimen.status_bar_padding_start);
+        mPaddingBetweenElements = getResources().getDimensionPixelSize(
+                R.dimen.notification_divider_height);
     }
 
     @Override
@@ -166,10 +168,9 @@ public class NotificationShelf extends ActivatableNotificationView {
         WeakHashMap<View, IconState> iconStates =
                 mNotificationIconContainer.resetViewStates();
         float numIconsInShelf = 0.0f;
-        float maxShelfStart = getTranslationY();
-        int shelfIndex = mAmbientState.getShelfIndex() - 1;
+        int shelfIndex = mAmbientState.getShelfIndex();
         //  find the first view that doesn't overlap with the shelf
-        for (int i = shelfIndex; i >= 0; i--) {
+        for (int i = shelfIndex - 1; i >= 0; i--) {
             ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
             if (!(child instanceof ExpandableNotificationRow)
                     || child.getVisibility() == GONE) {
@@ -178,8 +179,33 @@ public class NotificationShelf extends ActivatableNotificationView {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             StatusBarIconView icon = row.getEntry().expandedIcon;
             IconState iconState = iconStates.get(icon);
-            updateIconAppearance(maxShelfStart, row, iconState, icon);
+            float notificationClipEnd;
+            float shelfStart;
+            if (i == shelfIndex - 1) {
+                shelfStart = getTranslationY();
+                notificationClipEnd = shelfStart + getIntrinsicHeight();
+            } else {
+                shelfStart = getTranslationY();
+                notificationClipEnd = shelfStart - mPaddingBetweenElements;
+                float height = notificationClipEnd - row.getTranslationY();
+                if (height <= getNotificationMergeSize()) {
+                    // We want the gap to close when we reached the minimum size and only shrink
+                    // before
+                    notificationClipEnd = Math.min(shelfStart,
+                            row.getTranslationY() + getNotificationMergeSize());
+                }
+            }
+            updateNotificationClipHeight(row, notificationClipEnd);
+            updateIconAppearance(shelfStart, row, iconState, icon);
             numIconsInShelf += iconState.iconAppearAmount;
+        }
+        for (int i = mHostLayout.getChildCount() - 1; i >= shelfIndex; i--) {
+            // We need to reset the clipping in case a notification switches from high to low
+            // priority.
+            ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
+            if (child.getClipBottomAmount() != 0) {
+                child.setClipBottomAmount(0);
+            }
         }
         mNotificationIconContainer.calculateIconTranslations();
         mNotificationIconContainer.applyIconStates();
@@ -187,15 +213,25 @@ public class NotificationShelf extends ActivatableNotificationView {
         setHideBackground(numIconsInShelf < 1.0f);
     }
 
-    private void updateIconAppearance(float maxShelfStart, ExpandableNotificationRow row,
-            IconState iconState, StatusBarIconView icon) {
+    private void updateNotificationClipHeight(ExpandableNotificationRow row,
+            float notificationClipEnd) {
+        float viewEnd = row.getTranslationY() + row.getActualHeight();
+        if (viewEnd > notificationClipEnd) {
+            row.setClipBottomAmount((int) (viewEnd - notificationClipEnd));
+        } else {
+            row.setClipBottomAmount(0);
+        }
+    }
 
+    private void updateIconAppearance(float shelfTransformationStart, ExpandableNotificationRow row,
+            IconState iconState, StatusBarIconView icon) {
         // Let calculate how much the view is in the shelf
         float viewStart = row.getTranslationY();
-        float viewEnd = viewStart + row.getIntrinsicHeight();
-        if (viewEnd > maxShelfStart) {
-            if (viewStart < maxShelfStart) {
-                float linearAmount = (maxShelfStart - viewStart) / row.getIntrinsicHeight();
+        int transformHeight = row.getActualHeight() + mPaddingBetweenElements;
+        float viewEnd = viewStart + transformHeight;
+        if (viewEnd >= shelfTransformationStart) {
+            if (viewStart < shelfTransformationStart) {
+                float linearAmount = (shelfTransformationStart - viewStart) / transformHeight;
                 float interpolatedAmount =  Interpolators.ACCELERATE_DECELERATE.getInterpolation(
                         linearAmount);
                 float interpolationStart = mMaxLayoutHeight - getIntrinsicHeight() * 2;
@@ -284,7 +320,7 @@ public class NotificationShelf extends ActivatableNotificationView {
     public boolean hasNoContentHeight() {
         return true;
     }
-    
+
     private void setHideBackground(boolean hideBackground) {
         mHideBackground = hideBackground;
         updateBackground();

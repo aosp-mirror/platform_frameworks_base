@@ -593,10 +593,10 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void onPreDrawDuringAnimation() {
+        mShelf.updateAppearance();
         if (!mNeedsAnimation && !mChildrenUpdateRequested) {
             updateBackground();
         }
-        mShelf.updateAppearance();
     }
 
     private void updateScrollStateForAddedChildren() {
@@ -985,7 +985,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             float childTop = slidingChild.getTranslationY();
             float top = childTop + slidingChild.getClipTopAmount();
-            float bottom = childTop + slidingChild.getActualHeight();
+            float bottom = childTop + slidingChild.getActualHeight()
+                    - slidingChild.getClipBottomAmount();
 
             float dist = Math.min(Math.abs(top - localTouchY), Math.abs(bottom - localTouchY));
             if (dist < minDist) {
@@ -1014,7 +1015,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             float childTop = slidingChild.getTranslationY();
             float top = childTop + slidingChild.getClipTopAmount();
-            float bottom = childTop + slidingChild.getActualHeight();
+            float bottom = childTop + slidingChild.getActualHeight()
+                    - slidingChild.getClipBottomAmount();
 
             // Allow the full width of this view to prevent gesture conflict on Keyguard (phone and
             // camera affordance).
@@ -2122,6 +2124,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight());
                 bottom = Math.min(bottom, getHeight());
             }
+            bottom -= lastView.getClipBottomAmount();
         } else {
             top = mTopPadding;
             bottom = top;
@@ -3656,7 +3659,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (child.getVisibility() == GONE) {
                 continue;
             }
-            float bottom = child.getTranslationY() + child.getActualHeight();
+            float bottom = child.getTranslationY() + child.getActualHeight()
+                    - child.getClipBottomAmount();
             if (bottom > max) {
                 max = bottom;
             }
@@ -3694,7 +3698,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                     // we are above a notification entirely let's abort
                     return false;
                 }
-                boolean belowChild = touchY > childTop + child.getActualHeight();
+                boolean belowChild = touchY > childTop + child.getActualHeight()
+                        - child.getClipBottomAmount();
                 if (child == mDismissView) {
                     if(!belowChild && !mDismissView.isOnEmptySpace(touchX - mDismissView.getX(),
                                     touchY - childTop)) {

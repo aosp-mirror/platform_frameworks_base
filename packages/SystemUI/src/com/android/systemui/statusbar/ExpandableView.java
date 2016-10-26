@@ -38,6 +38,7 @@ public abstract class ExpandableView extends FrameLayout {
     protected OnHeightChangedListener mOnHeightChangedListener;
     private int mActualHeight;
     protected int mClipTopAmount;
+    private float mClipBottomAmount;
     private boolean mDark;
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
     private static Rect mClipRect = new Rect();
@@ -222,8 +223,24 @@ public abstract class ExpandableView extends FrameLayout {
         updateClipping();
     }
 
+    /**
+     * Set the amount the the notification is clipped on the bottom in addition to the regular
+     * clipping. This is mainly used to clip something in a non-animated way without changing the
+     * actual height of the notification and is purely visual.
+     *
+     * @param clipBottomAmount the amount to clip.
+     */
+    public void setClipBottomAmount(int clipBottomAmount) {
+        mClipBottomAmount = clipBottomAmount;
+        updateClipping();
+    }
+
     public int getClipTopAmount() {
         return mClipTopAmount;
+    }
+
+    public float getClipBottomAmount() {
+        return mClipBottomAmount;
     }
 
     public void setOnHeightChangedListener(OnHeightChangedListener listener) {
@@ -333,7 +350,8 @@ public abstract class ExpandableView extends FrameLayout {
             if (top >= getActualHeight()) {
                 top = getActualHeight() - 1;
             }
-            mClipRect.set(0, top, getWidth(), getActualHeight() + getExtraBottomPadding());
+            mClipRect.set(0, top, getWidth(), (int) (getActualHeight() + getExtraBottomPadding()
+                                - mClipBottomAmount));
             setClipBounds(mClipRect);
         } else {
             setClipBounds(null);

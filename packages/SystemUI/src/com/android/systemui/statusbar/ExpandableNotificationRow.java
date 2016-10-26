@@ -1607,6 +1607,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
+    @Override
+    public void setClipBottomAmount(int clipBottomAmount) {
+        super.setClipBottomAmount(clipBottomAmount);
+        mPrivateLayout.setClipBottomAmount(clipBottomAmount);
+        mPublicLayout.setClipBottomAmount(clipBottomAmount);
+        if (mGuts != null) {
+            mGuts.setClipBottomAmount(clipBottomAmount);
+        }
+    }
+
     public boolean isMaxExpandHeightInitialized() {
         return mMaxExpandHeight != 0;
     }

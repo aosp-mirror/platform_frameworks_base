@@ -674,6 +674,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     @Override
+    public void setClipBottomAmount(int clipBottomAmount) {
+        super.setClipBottomAmount(clipBottomAmount);
+        mBackgroundNormal.setClipBottomAmount(clipBottomAmount);
+        mBackgroundDimmed.setClipBottomAmount(clipBottomAmount);
+    }
+
+    @Override
     public void performRemoveAnimation(long duration, float translationDirection,
             Runnable onFinishedRunnable) {
         enableAppearDrawing(true);
