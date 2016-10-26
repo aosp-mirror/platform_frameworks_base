@@ -38,8 +38,11 @@ public abstract class HwBinder implements IHwBinder {
     public abstract void onTransact(
             int code, HwParcel request, HwParcel reply, int flags);
 
-    public native final void registerService(String serviceName);
-    public static native final IHwBinder getService(String serviceName);
+    public native final void registerService(
+            String serviceName, int versionMajor, int versionMinor);
+
+    public static native final IHwBinder getService(
+            String serviceName, int versionMajor, int versionMinor);
 
     // Returns address of the "freeFunction".
     private static native final long native_init();

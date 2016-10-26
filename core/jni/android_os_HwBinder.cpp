@@ -196,9 +196,21 @@ static void JHwBinder_native_transact(
 }
 
 static void JHwBinder_native_registerService(
-        JNIEnv *env, jobject thiz, jstring serviceNameObj) {
+        JNIEnv *env,
+        jobject thiz,
+        jstring serviceNameObj,
+        jint versionMajor,
+        jint versionMinor) {
     if (serviceNameObj == NULL) {
         jniThrowException(env, "java/lang/NullPointerException", NULL);
+        return;
+    }
+
+    if (versionMajor < 0
+            || versionMajor > 65535
+            || versionMinor < 0
+            || versionMinor > 65535) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
 
@@ -208,7 +220,8 @@ static void JHwBinder_native_registerService(
         return;  // XXX exception already pending?
     }
 
-    const hardware::hidl_version kVersion = hardware::make_hidl_version(1, 0);
+    const hardware::hidl_version kVersion =
+        hardware::make_hidl_version(versionMajor, versionMinor);
 
     sp<hardware::IBinder> binder = JHwBinder::GetNativeContext(env, thiz);
 
@@ -231,9 +244,21 @@ static void JHwBinder_native_registerService(
 }
 
 static jobject JHwBinder_native_getService(
-        JNIEnv *env, jclass /* clazzObj */, jstring serviceNameObj) {
+        JNIEnv *env,
+        jclass /* clazzObj */,
+        jstring serviceNameObj,
+        jint versionMajor,
+        jint versionMinor) {
     if (serviceNameObj == NULL) {
         jniThrowException(env, "java/lang/NullPointerException", NULL);
+        return NULL;
+    }
+
+    if (versionMajor < 0
+            || versionMajor > 65535
+            || versionMinor < 0
+            || versionMinor > 65535) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return NULL;
     }
 
@@ -243,7 +268,8 @@ static jobject JHwBinder_native_getService(
         return NULL;  // XXX exception already pending?
     }
 
-    const hardware::hidl_version kVersion = hardware::make_hidl_version(1, 0);
+    const hardware::hidl_version kVersion =
+        hardware::make_hidl_version(versionMajor, versionMinor);
 
     LOG(INFO) << "looking for service '"
               << String8(String16(
@@ -280,10 +306,10 @@ static JNINativeMethod gMethods[] = {
         "(IL" PACKAGE_PATH "/HwParcel;L" PACKAGE_PATH "/HwParcel;I)V",
         (void *)JHwBinder_native_transact },
 
-    { "registerService", "(Ljava/lang/String;)V",
+    { "registerService", "(Ljava/lang/String;II)V",
         (void *)JHwBinder_native_registerService },
 
-    { "getService", "(Ljava/lang/String;)L" PACKAGE_PATH "/IHwBinder;",
+    { "getService", "(Ljava/lang/String;II)L" PACKAGE_PATH "/IHwBinder;",
         (void *)JHwBinder_native_getService },
 };
 
