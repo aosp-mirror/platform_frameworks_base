@@ -2593,6 +2593,38 @@ message MetricsEvent {
     // ACTION: Logs provisioning started by trusted source.
     PROVISIONING_ENTRY_POINT_TRUSTED_SOURCE = 618;
 
+    // ACTION: Logged when copy account task finishes.
+    // TIME: Indicates time taken by copy account task to finish in MS.
+    PROVISIONING_COPY_ACCOUNT_TASK_MS = 619;
+
+    // ACTION: Logged when create profile task finishes.
+    // TIME: Indicates time taken by create profile task to finish in MS.
+    PROVISIONING_CREATE_PROFILE_TASK_MS = 620;
+
+    // ACTION: Logged when start profile task finishes.
+    // TIME: Indicates time taken by start profile task to finish in MS.
+    PROVISIONING_START_PROFILE_TASK_MS = 621;
+
+    // ACTION: Logged when download package task finishes.
+    // TIME: Indicates time taken by download package task to finish in MS.
+    PROVISIONING_DOWNLOAD_PACKAGE_TASK_MS = 622;
+
+    // ACTION: Logged when install package task finishes.
+    // TIME: Indicates time taken by install package task to finish in MS.
+    PROVISIONING_INSTALL_PACKAGE_TASK_MS = 623;
+
+    // ACTION: User cancelled provisioning.
+    PROVISIONING_CANCELLED = 624;
+
+    // ACTION: Logged when provisioning throws an error.
+    PROVISIONING_ERROR = 625;
+
+    // ACTION: Logs the status of copying user account during provisioning.
+    PROVISIONING_COPY_ACCOUNT_STATUS = 626;
+
+    // ACTION: Logs the end to end time taken by all provisioning tasks.
+    PROVISIONING_TOTAL_TASK_TIME_MS = 627;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
