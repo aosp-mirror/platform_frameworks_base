@@ -71,3 +71,5 @@ LOCAL_SHARED_LIBRARIES += \
     android.hardware.vibrator@1.0 \
     android.hardware.light@2.0 \
     android.hardware.vr@1.0 \
+    android.hardware.audio.common@2.0 \
+    android.hardware.tv.input@1.0 \
