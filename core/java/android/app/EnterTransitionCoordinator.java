@@ -123,6 +123,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         mIsReadyForTransition = true;
         hideViews(mSharedElements);
         if (getViewsTransition() != null && mTransitioningViews != null) {
+            stripOffscreenViews();
             hideViews(mTransitioningViews);
         }
         if (mIsReturning) {
@@ -518,9 +519,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             mIsViewsTransitionStarted = true;
             if (mTransitioningViews != null && !mTransitioningViews.isEmpty()) {
                 viewsTransition = configureTransition(getViewsTransition(), true);
-                if (viewsTransition != null && !mIsReturning) {
-                    stripOffscreenViews();
-                }
             }
             if (viewsTransition == null) {
                 viewsTransitionComplete();
