@@ -208,14 +208,15 @@ public class DozeSensors {
         @Override
         @AnyThread
         public void onTrigger(TriggerEvent event) {
-            mWakeLock.acquire();
-            try {
-                if (DEBUG) Log.d(TAG, "onTrigger: " + triggerEventToString(event));
+            mHandler.post(mWakeLock.wrap(() -> {
+                if (DEBUG)
+                    Log.d(TAG, "onTrigger: " + triggerEventToString(event));
                 boolean sensorPerformsProxCheck = false;
                 if (mSensor.getType() == Sensor.TYPE_PICK_UP_GESTURE) {
                     int subType = (int) event.values[0];
                     MetricsLogger.action(
-                            mContext, MetricsProto.MetricsEvent.ACTION_AMBIENT_GESTURE, subType);
+                            mContext, MetricsProto.MetricsEvent.ACTION_AMBIENT_GESTURE,
+                            subType);
                     sensorPerformsProxCheck =
                             mDozeParameters.getPickupSubtypePerformsProxCheck(subType);
                 }
@@ -223,9 +224,7 @@ public class DozeSensors {
                 mRegistered = false;
                 mCallback.onSensorPulse(mPulseReason, sensorPerformsProxCheck);
                 updateListener();  // reregister, this sensor only fires once
-            } finally {
-                mWakeLock.release();
-            }
+            }));
         }
 
         public void registerSettingsObserver(ContentObserver settingsObserver) {

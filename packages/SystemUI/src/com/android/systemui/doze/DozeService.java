@@ -35,8 +35,11 @@ import android.util.Log;
 import android.view.Display;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
+import com.android.internal.util.Preconditions;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.util.Assert;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -188,6 +191,7 @@ public class DozeService extends DreamService implements DozeSensors.Callback {
     }
 
     private void requestPulse(final int reason, boolean performedProxCheck) {
+        Assert.isMainThread();
         if (mHost != null && mDreaming && !mPulsing) {
             // Let the host know we want to pulse.  Wait for it to be ready, then
             // turn the screen on.  When finished, turn the screen off again.
