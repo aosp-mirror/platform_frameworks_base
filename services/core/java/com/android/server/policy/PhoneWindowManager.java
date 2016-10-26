@@ -7919,6 +7919,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (oldRotation == mUpsideDownRotation || newRotation == mUpsideDownRotation) {
             return false;
         }
+        // If the navigation bar can't change sides, then it will
+        // jump when we change orientations and we don't rotate
+        // seamlessly.
+        if (!mNavigationBarCanMove) {
+            return false;
+        }
         int delta = newRotation - oldRotation;
         if (delta < 0) delta += 4;
         // Likewise we don't rotate seamlessly for 180 degree rotations
