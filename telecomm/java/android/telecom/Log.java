@@ -188,6 +188,15 @@ public class Log {
         getSessionManager().startSession(shortMethodName, callerIdentification);
     }
 
+    public static void startSession(Session.Info info, String shortMethodName,
+            String callerIdentification) {
+        getSessionManager().startSession(info, shortMethodName, callerIdentification);
+    }
+
+    public static void startExternalSession(Session.Info sessionInfo, String shortMethodName) {
+        getSessionManager().startExternalSession(sessionInfo, shortMethodName);
+    }
+
     public static Session createSubsession() {
         return getSessionManager().createSubsession();
     }
