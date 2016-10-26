@@ -18,6 +18,7 @@
 
 #include "DeferredLayerUpdater.h"
 #include "EglManager.h"
+#include "ProfileRenderer.h"
 #include "renderstate/RenderState.h"
 #include "Readback.h"
 
@@ -76,7 +77,8 @@ bool OpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, const S
     BakedOpRenderer renderer(caches, mRenderThread.renderState(),
             opaque, lightInfo);
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
-    profiler->draw(&renderer);
+    ProfileRenderer profileRenderer(renderer);
+    profiler->draw(profileRenderer);
     drew = renderer.didDraw();
 
     // post frame cleanup

@@ -80,6 +80,7 @@ hwui_src_files := \
     PathParser.cpp \
     PathTessellator.cpp \
     PixelBuffer.cpp \
+    ProfileRenderer.cpp \
     Program.cpp \
     ProgramCache.cpp \
     Properties.cpp \
