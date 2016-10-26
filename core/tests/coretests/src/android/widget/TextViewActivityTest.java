@@ -17,7 +17,6 @@
 package android.widget;
 
 import static android.widget.espresso.CustomViewActions.longPressAtRelativeCoordinates;
-import static android.support.test.espresso.action.ViewActions.longClick;
 import static android.widget.espresso.DragHandleUtils.assertNoSelectionHandles;
 import static android.widget.espresso.DragHandleUtils.onHandleView;
 import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
@@ -37,6 +36,7 @@ import static android.widget.espresso.FloatingToolbarEspressoUtils.clickFloating
 import static android.widget.espresso.FloatingToolbarEspressoUtils.sleepForFloatingToolbarPopup;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.longClick;
 import static android.support.test.espresso.action.ViewActions.pressKey;
 import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.action.ViewActions.typeTextIntoFocusedView;
@@ -44,24 +44,25 @@ import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.is;
 
 import android.widget.espresso.CustomViewActions.RelativeCoordinatesProvider;
-import com.android.frameworks.coretests.R;
 
 import android.support.test.espresso.action.EspressoKey;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.InputType;
 import android.view.KeyEvent;
 
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.is;
+import com.android.frameworks.coretests.R;
 
 /**
  * Tests the TextView widget from an Activity
  */
+@MediumTest
 public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextViewActivity>{
 
     public TextViewActivityTest() {
@@ -74,7 +75,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         getActivity();
     }
 
-    @SmallTest
     public void testTypedTextIsOnScreen() throws Exception {
         final String helloWorld = "Hello world!";
         onView(withId(R.id.textview)).perform(click());
@@ -83,7 +83,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(matches(withText(helloWorld)));
     }
 
-    @SmallTest
     public void testPositionCursorAtTextAtIndex() throws Exception {
         final String helloWorld = "Hello world!";
         onView(withId(R.id.textview)).perform(click());
@@ -95,7 +94,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(matches(withText("Hello orld!")));
     }
 
-    @SmallTest
     public void testPositionCursorAtTextAtIndex_arabic() throws Exception {
         // Arabic text. The expected cursorable boundary is
         // | \u0623 \u064F | \u067A | \u0633 \u0652 |
@@ -117,7 +115,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(5));
     }
 
-    @SmallTest
     public void testPositionCursorAtTextAtIndex_devanagari() throws Exception {
         // Devanagari text. The expected cursorable boundary is | \u0915 \u093E |
         final String text = "\u0915\u093E";
@@ -132,7 +129,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(2));
     }
 
-    @SmallTest
     public void testLongPressToSelect() throws Exception {
         final String helloWorld = "Hello Kirk!";
         onView(withId(R.id.textview)).perform(click());
@@ -143,7 +139,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("Kirk"));
     }
 
-    @SmallTest
     public void testLongPressEmptySpace() throws Exception {
         final String helloWorld = "Hello big round sun!";
         onView(withId(R.id.textview)).perform(click());
@@ -158,7 +153,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(helloWorld.length()));
     }
 
-    @SmallTest
     public void testLongPressAndDragToSelect() throws Exception {
         final String helloWorld = "Hello little handsome boy!";
         onView(withId(R.id.textview)).perform(click());
@@ -169,7 +163,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("little handsome"));
     }
 
-    @SmallTest
     public void testLongPressAndDragToSelect_emoji() throws Exception {
         final String text = "\uD83D\uDE00\uD83D\uDE01\uD83D\uDE02\uD83D\uDE03";
         onView(withId(R.id.textview)).perform(click());
@@ -184,7 +177,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("\uD83D\uDE01"));
     }
 
-    @SmallTest
     public void testDragAndDrop() throws Exception {
         final String text = "abc def ghi.";
         onView(withId(R.id.textview)).perform(click());
@@ -206,7 +198,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(matches(withText(text)));
     }
 
-    @SmallTest
     public void testDoubleTapToSelect() throws Exception {
         final String helloWorld = "Hello SuetYi!";
         onView(withId(R.id.textview)).perform(click());
@@ -217,7 +208,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("SuetYi"));
     }
 
-    @SmallTest
     public void testDoubleTapAndDragToSelect() throws Exception {
         final String helloWorld = "Hello young beautiful girl!";
         onView(withId(R.id.textview)).perform(click());
@@ -228,7 +218,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("young beautiful"));
     }
 
-    @SmallTest
     public void testDoubleTapAndDragToSelect_multiLine() throws Exception {
         final String helloWorld = "abcd\n" + "efg\n" + "hijklm\n" + "nop";
         onView(withId(R.id.textview)).perform(click());
@@ -238,7 +227,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("abcd\nefg\nhijklm"));
     }
 
-    @SmallTest
     public void testSelectBackwordsByTouch() throws Exception {
         final String helloWorld = "Hello king of the Jungle!";
         onView(withId(R.id.textview)).perform(click());
@@ -249,7 +237,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("king of the"));
     }
 
-    @SmallTest
     public void testToolbarAppearsAfterSelection() throws Exception {
         final String text = "Toolbar appears after selection.";
         onView(withId(R.id.textview)).perform(click());
@@ -266,7 +253,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         assertFloatingToolbarIsNotDisplayed();
     }
 
-    @SmallTest
     public void testToolbarAppearsAfterSelection_withFirstStringLtrAlgorithmAndRtlHint()
             throws Exception {
         // after the hint layout change, the floating toolbar was not visible in the case below
@@ -294,7 +280,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         assertFloatingToolbarIsDisplayed();
     }
 
-    @SmallTest
     public void testToolbarAndInsertionHandle() throws Exception {
         final String text = "text";
         onView(withId(R.id.textview)).perform(click());
@@ -314,7 +299,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
                 getActivity().getString(com.android.internal.R.string.cut));
     }
 
-    @SmallTest
     public void testToolbarAndSelectionHandle() throws Exception {
         final String text = "abcd efg hijk";
         onView(withId(R.id.textview)).perform(click());
@@ -350,7 +334,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
                 getActivity().getString(com.android.internal.R.string.cut));
     }
 
-    @SmallTest
     public void testInsertionHandle() throws Exception {
         final String text = "abcd efg hijk ";
         onView(withId(R.id.textview)).perform(click());
@@ -370,7 +353,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("f")));
     }
 
-    @SmallTest
     public void testInsertionHandle_multiLine() throws Exception {
         final String text = "abcd\n" + "efg\n" + "hijk\n";
         onView(withId(R.id.textview)).perform(click());
@@ -390,7 +372,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("f")));
     }
 
-    @SmallTest
     public void testSelectionHandles() throws Exception {
         final String text = "abcd efg hijk lmn";
         onView(withId(R.id.textview)).perform(click());
@@ -415,7 +396,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("abcd efg hijk"));
     }
 
-    @SmallTest
     public void testSelectionHandles_bidi() throws Exception {
         final String text = "abc \u0621\u0622\u0623 def";
         onView(withId(R.id.textview)).perform(click());
@@ -460,7 +440,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("abc \u0621\u0622\u0623 def"));
     }
 
-    @SmallTest
     public void testSelectionHandles_multiLine() throws Exception {
         final String text = "abcd\n" + "efg\n" + "hijk\n" + "lmn\n" + "opqr";
         onView(withId(R.id.textview)).perform(click());
@@ -485,7 +464,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("abcd\nefg\nhijk\nlmn\nopqr"));
     }
 
-    @SmallTest
     public void testSelectionHandles_multiLine_rtl() throws Exception {
         // Arabic text.
         final String text = "\u062A\u062B\u062C\n" + "\u062D\u062E\u062F\n"
@@ -518,7 +496,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
     }
 
 
-    @SmallTest
     public void testSelectionHandles_doesNotPassAnotherHandle() throws Exception {
         final String text = "abcd efg hijk lmn";
         onView(withId(R.id.textview)).perform(click());
@@ -536,7 +513,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("e"));
     }
 
-    @SmallTest
     public void testSelectionHandles_doesNotPassAnotherHandle_multiLine() throws Exception {
         final String text = "abcd\n" + "efg\n" + "hijk\n" + "lmn\n" + "opqr";
         onView(withId(R.id.textview)).perform(click());
@@ -554,7 +530,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("h"));
     }
 
-    @SmallTest
     public void testSelectionHandles_snapToWordBoundary() throws Exception {
         final String text = "abcd efg hijk lmn opqr";
         onView(withId(R.id.textview)).perform(click());
@@ -607,7 +582,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("hijk lmn opq"));
     }
 
-    @SmallTest
     public void testSelectionHandles_snapToWordBoundary_multiLine() throws Exception {
         final String text = "abcd efg\n" + "hijk lmn\n" + "opqr stu";
         onView(withId(R.id.textview)).perform(click());
@@ -643,7 +617,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("hijk"));
     }
 
-    @SmallTest
     public void testSetSelectionAndActionMode() throws Exception {
         final String text = "abc def";
         onView(withId(R.id.textview)).perform(click());
@@ -707,7 +680,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
                 getActivity().getString(com.android.internal.R.string.copy));
     }
 
-    @SmallTest
     public void testTransientState() throws Exception {
         final String text = "abc def";
         onView(withId(R.id.textview)).perform(click());
