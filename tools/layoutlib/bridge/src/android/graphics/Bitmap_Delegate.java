@@ -92,8 +92,7 @@ public final class Bitmap_Delegate {
 
     @Nullable
     public static Bitmap_Delegate getDelegate(@Nullable Bitmap bitmap) {
-        // refSkPixelRef is a hack to get the native pointer: see #nativeRefPixelRef()
-        return bitmap == null ? null : getDelegate(bitmap.refSkPixelRef());
+        return bitmap == null ? null : getDelegate(bitmap.getNativeInstance());
     }
 
     /**
@@ -604,8 +603,6 @@ public final class Bitmap_Delegate {
     // Only used by AssetAtlasService, which we don't care about.
     @LayoutlibDelegate
     /*package*/ static long nativeRefPixelRef(long nativeBitmap) {
-        // Hack: This is called by Bitmap.refSkPixelRef() and LayoutLib uses that method to get
-        // the native pointer from a Bitmap. So, we return nativeBitmap here.
         return nativeBitmap;
     }
 
