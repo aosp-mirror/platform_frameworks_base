@@ -2502,4 +2502,11 @@
         <item>405</item>
     </integer-array>
 
+    <!-- Specifies whether the permissions needed by a legacy app should be
+         reviewed before any of its components can run. A legacy app is one
+         with targetSdkVersion < 23, i.e apps using the old permission model.
+         If review is not required, permissions are reviewed before the app
+         is installed. -->
+    <bool name="config_permissionReviewRequired">false</bool>
+
 </resources>

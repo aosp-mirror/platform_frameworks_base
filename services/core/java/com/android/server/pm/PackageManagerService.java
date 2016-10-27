@@ -1119,6 +1119,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
+    final boolean mPermissionReviewRequired;
+
     private final PackageUsage mPackageUsage = new PackageUsage();
     private final CompilerStats mCompilerStats = new CompilerStats();
 
@@ -2053,6 +2055,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         mContext = context;
+
+        mPermissionReviewRequired = context.getResources().getBoolean(
+                R.bool.config_permissionReviewRequired);
+
         mFactoryTest = factoryTest;
         mOnlyCore = onlyCore;
         mMetrics = new DisplayMetrics();
@@ -3965,7 +3971,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // their permissions as always granted runtime ones since we need
             // to keep the review required permission flag per user while an
             // install permission's state is shared across all users.
-            if (Build.PERMISSIONS_REVIEW_REQUIRED
+            if ((mPermissionReviewRequired || Build.PERMISSIONS_REVIEW_REQUIRED)
                     && pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M
                     && bp.isRuntime()) {
                 return;
@@ -4076,7 +4082,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // their permissions as always granted runtime ones since we need
             // to keep the review required permission flag per user while an
             // install permission's state is shared across all users.
-            if (Build.PERMISSIONS_REVIEW_REQUIRED
+            if ((mPermissionReviewRequired || Build.PERMISSIONS_REVIEW_REQUIRED)
                     && pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M
                     && bp.isRuntime()) {
                 return;
@@ -9866,7 +9872,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // their permissions as always granted runtime ones since we need
                     // to keep the review required permission flag per user while an
                     // install permission's state is shared across all users.
-                    if (!appSupportsRuntimePermissions && !Build.PERMISSIONS_REVIEW_REQUIRED) {
+                    if (!appSupportsRuntimePermissions && !mPermissionReviewRequired
+                            && !Build.PERMISSIONS_REVIEW_REQUIRED) {
                         // For legacy apps dangerous permissions are install time ones.
                         grant = GRANT_INSTALL;
                     } else if (origPermissions.hasInstallPermission(bp.name)) {
@@ -9952,7 +9959,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                             changedRuntimePermissionUserIds, userId);
                                 }
                                 // If the app supports runtime permissions no need for a review.
-                                if (Build.PERMISSIONS_REVIEW_REQUIRED
+                                if ((mPermissionReviewRequired || Build.PERMISSIONS_REVIEW_REQUIRED)
                                         && appSupportsRuntimePermissions
                                         && (flags & PackageManager
                                                 .FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
@@ -9961,7 +9968,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     changedRuntimePermissionUserIds = ArrayUtils.appendInt(
                                             changedRuntimePermissionUserIds, userId);
                                 }
-                            } else if (Build.PERMISSIONS_REVIEW_REQUIRED
+                            } else if ((mPermissionReviewRequired
+                                        || Build.PERMISSIONS_REVIEW_REQUIRED)
                                     && !appSupportsRuntimePermissions) {
                                 // For legacy apps that need a permission review, every new
                                 // runtime permission is granted but it is pending a review.
@@ -16423,7 +16431,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // If permission review is enabled and this is a legacy app, mark the
             // permission as requiring a review as this is the initial state.
             int flags = 0;
-            if (Build.PERMISSIONS_REVIEW_REQUIRED
+            if ((mPermissionReviewRequired || Build.PERMISSIONS_REVIEW_REQUIRED)
                     && ps.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
                 flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
             }
@@ -20272,7 +20280,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         // permissions to keep per user flag state whether review is needed.
         // Hence, if a new user is added we have to propagate dangerous
         // permission grants for these legacy apps.
-        if (Build.PERMISSIONS_REVIEW_REQUIRED) {
+        if (mPermissionReviewRequired || Build.PERMISSIONS_REVIEW_REQUIRED) {
             updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL
                     | UPDATE_PERMISSIONS_REPLACE_ALL);
         }
@@ -20726,7 +20734,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public boolean isPermissionsReviewRequired(String packageName, int userId) {
             synchronized (mPackages) {
                 // If we do not support permission review, done.
-                if (!Build.PERMISSIONS_REVIEW_REQUIRED) {
+                if (!mPermissionReviewRequired && !Build.PERMISSIONS_REVIEW_REQUIRED) {
                     return false;
                 }
 
