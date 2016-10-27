@@ -92,8 +92,7 @@ public final class Bitmap_Delegate {
 
     @Nullable
     public static Bitmap_Delegate getDelegate(@Nullable Bitmap bitmap) {
-        // refSkPixelRef is a hack to get the native pointer: see #nativeRefPixelRef()
-        return bitmap == null ? null : getDelegate(bitmap.refSkPixelRef());
+        return bitmap == null ? null : getDelegate(bitmap.getNativeInstance());
     }
 
     /**
