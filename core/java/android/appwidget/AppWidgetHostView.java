@@ -377,13 +377,13 @@ public class AppWidgetHostView extends FrameLayout {
      * AppWidget provider. Will animate into these new views as needed
      */
     public void updateAppWidget(RemoteViews remoteViews) {
-        applyRemoteViews(remoteViews);
+        applyRemoteViews(remoteViews, true);
     }
 
     /**
      * @hide
      */
-    protected void applyRemoteViews(RemoteViews remoteViews) {
+    protected void applyRemoteViews(RemoteViews remoteViews, boolean useAsyncIfPossible) {
         if (LOGD) Log.d(TAG, "updateAppWidget called mOld=" + mOld);
 
         boolean recycled = false;
@@ -423,7 +423,7 @@ public class AppWidgetHostView extends FrameLayout {
             mLayoutId = -1;
             mViewMode = VIEW_MODE_DEFAULT;
         } else {
-            if (mAsyncExecutor != null) {
+            if (mAsyncExecutor != null && useAsyncIfPossible) {
                 inflateAsync(remoteViews);
                 return;
             }

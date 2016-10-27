@@ -6284,6 +6284,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @param intent the intent used to identify the RemoteViewsService for the adapter to connect to.
      */
     public void setRemoteViewsAdapter(Intent intent) {
+        setRemoteViewsAdapter(intent, false);
+    }
+
+    /** @hide **/
+    public Runnable setRemoteViewsAdapterAsync(final Intent intent) {
+        return new RemoteViewsAdapter.AsyncRemoteAdapterAction(this, intent);
+    }
+
+    /** @hide **/
+    @Override
+    public void setRemoteViewsAdapter(Intent intent, boolean isAsync) {
         // Ensure that we don't already have a RemoteViewsAdapter that is bound to an existing
         // service handling the specified intent.
         if (mRemoteAdapter != null) {
@@ -6296,7 +6307,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         mDeferNotifyDataSetChanged = false;
         // Otherwise, create a new RemoteViewsAdapter for binding
-        mRemoteAdapter = new RemoteViewsAdapter(getContext(), intent, this);
+        mRemoteAdapter = new RemoteViewsAdapter(getContext(), intent, this, isAsync);
         if (mRemoteAdapter.isDataReady()) {
             setAdapter(mRemoteAdapter);
         }

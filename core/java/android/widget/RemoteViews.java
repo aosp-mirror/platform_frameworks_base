@@ -320,6 +320,10 @@ public class RemoteViews implements Parcelable, Filter {
             return this;
         }
 
+        public boolean prefersAsyncApply() {
+            return false;
+        }
+
         int viewId;
     }
 
@@ -715,13 +719,21 @@ public class RemoteViews implements Parcelable, Filter {
             intent.putExtra(EXTRA_REMOTEADAPTER_APPWIDGET_ID, host.getAppWidgetId());
             if (target instanceof AbsListView) {
                 AbsListView v = (AbsListView) target;
-                v.setRemoteViewsAdapter(intent);
+                v.setRemoteViewsAdapter(intent, isAsync);
                 v.setRemoteViewsOnClickHandler(handler);
             } else if (target instanceof AdapterViewAnimator) {
                 AdapterViewAnimator v = (AdapterViewAnimator) target;
-                v.setRemoteViewsAdapter(intent);
+                v.setRemoteViewsAdapter(intent, isAsync);
                 v.setRemoteViewsOnClickHandler(handler);
             }
+        }
+
+        @Override
+        public Action initActionAsync(ViewTree root, ViewGroup rootParent,
+                OnClickHandler handler) {
+            SetRemoteViewsAdapterIntent copy = new SetRemoteViewsAdapterIntent(viewId, intent);
+            copy.isAsync = true;
+            return copy;
         }
 
         public String getActionName() {
@@ -729,6 +741,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         Intent intent;
+        boolean isAsync = false;
 
         public final static int TAG = 10;
     }
@@ -1461,6 +1474,11 @@ public class RemoteViews implements Parcelable, Filter {
             // unique from the standpoint of merging.
             return "ReflectionAction" + this.methodName + this.type;
         }
+
+        @Override
+        public boolean prefersAsyncApply() {
+            return this.type == URI || this.type == ICON;
+        }
     }
 
     /**
@@ -1596,6 +1614,11 @@ public class RemoteViews implements Parcelable, Filter {
 
         public int mergeBehavior() {
             return MERGE_APPEND;
+        }
+
+        @Override
+        public boolean prefersAsyncApply() {
+            return nestedViews != null && nestedViews.prefersAsyncApply();
         }
 
         RemoteViews nestedViews;
@@ -1747,6 +1770,11 @@ public class RemoteViews implements Parcelable, Filter {
                 copy.id4 = d4 == 0 ? null : ctx.getDrawable(d4);
             }
             return copy;
+        }
+
+        @Override
+        public boolean prefersAsyncApply() {
+            return useIcons;
         }
 
         public String getActionName() {
@@ -3441,6 +3469,24 @@ public class RemoteViews implements Parcelable, Filter {
                 a.apply(v, parent, handler);
             }
         }
+    }
+
+    /**
+     * Returns true if the RemoteViews contains potentially costly operations and should be
+     * applied asynchronously.
+     *
+     * @hide
+     */
+    public boolean prefersAsyncApply() {
+        if (mActions != null) {
+            final int count = mActions.size();
+            for (int i = 0; i < count; i++) {
+                if (mActions.get(i).prefersAsyncApply()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private Context getContextForResources(Context context) {
