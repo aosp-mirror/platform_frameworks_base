@@ -324,6 +324,14 @@ public class RemoteViews implements Parcelable, Filter {
             return false;
         }
 
+        /**
+         * Overridden by subclasses which have (or inherit) an ApplicationInfo instance
+         * as member variable
+         */
+        public boolean hasSameAppInfo(ApplicationInfo parentInfo) {
+            return true;
+        }
+
         int viewId;
     }
 
@@ -1521,11 +1529,11 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        public ViewGroupAction(Parcel parcel, BitmapCache bitmapCache) {
+        ViewGroupAction(Parcel parcel, BitmapCache bitmapCache, ApplicationInfo info) {
             viewId = parcel.readInt();
             boolean nestedViewsNull = parcel.readInt() == 0;
             if (!nestedViewsNull) {
-                nestedViews = new RemoteViews(parcel, bitmapCache);
+                nestedViews = new RemoteViews(parcel, bitmapCache, info);
             } else {
                 nestedViews = null;
             }
@@ -1541,6 +1549,13 @@ public class RemoteViews implements Parcelable, Filter {
                 // signifies null
                 dest.writeInt(0);
             }
+        }
+
+        @Override
+        public boolean hasSameAppInfo(ApplicationInfo parentInfo) {
+            return nestedViews != null
+                    && nestedViews.mApplication.packageName.equals(parentInfo.packageName)
+                    && nestedViews.mApplication.uid == parentInfo.uid;
         }
 
         @Override
@@ -2195,10 +2210,10 @@ public class RemoteViews implements Parcelable, Filter {
      * @param parcel
      */
     public RemoteViews(Parcel parcel) {
-        this(parcel, null);
+        this(parcel, null, null);
     }
 
-    private RemoteViews(Parcel parcel, BitmapCache bitmapCache) {
+    private RemoteViews(Parcel parcel, BitmapCache bitmapCache, ApplicationInfo info) {
         int mode = parcel.readInt();
 
         // We only store a bitmap cache in the root of the RemoteViews.
@@ -2210,7 +2225,8 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         if (mode == MODE_NORMAL) {
-            mApplication = parcel.readParcelable(null);
+            mApplication = parcel.readInt() == 0 ? info :
+                    ApplicationInfo.CREATOR.createFromParcel(parcel);
             mLayoutId = parcel.readInt();
             mIsWidgetCollectionChild = parcel.readInt() == 1;
 
@@ -2230,7 +2246,7 @@ public class RemoteViews implements Parcelable, Filter {
                             mActions.add(new ReflectionAction(parcel));
                             break;
                         case ViewGroupAction.TAG:
-                            mActions.add(new ViewGroupAction(parcel, mBitmapCache));
+                            mActions.add(new ViewGroupAction(parcel, mBitmapCache, mApplication));
                             break;
                         case ReflectionActionWithoutParams.TAG:
                             mActions.add(new ReflectionActionWithoutParams(parcel));
@@ -2278,8 +2294,8 @@ public class RemoteViews implements Parcelable, Filter {
             }
         } else {
             // MODE_HAS_LANDSCAPE_AND_PORTRAIT
-            mLandscape = new RemoteViews(parcel, mBitmapCache);
-            mPortrait = new RemoteViews(parcel, mBitmapCache);
+            mLandscape = new RemoteViews(parcel, mBitmapCache, info);
+            mPortrait = new RemoteViews(parcel, mBitmapCache, mLandscape.mApplication);
             mApplication = mPortrait.mApplication;
             mLayoutId = mPortrait.getLayoutId();
         }
@@ -2299,11 +2315,11 @@ public class RemoteViews implements Parcelable, Filter {
         // Do not parcel the Bitmap cache - doing so creates an expensive copy of all bitmaps.
         // Instead pretend we're not owning the cache while parceling.
         mIsRoot = false;
-        writeToParcel(p, 0);
+        writeToParcel(p, PARCELABLE_ELIDE_DUPLICATES);
         p.setDataPosition(0);
         mIsRoot = true;
 
-        RemoteViews rv = new RemoteViews(p, mBitmapCache.clone());
+        RemoteViews rv = new RemoteViews(p, mBitmapCache.clone(), mApplication);
         rv.mIsRoot = true;
 
         p.recycle();
@@ -3536,7 +3552,12 @@ public class RemoteViews implements Parcelable, Filter {
             if (mIsRoot) {
                 mBitmapCache.writeBitmapsToParcel(dest, flags);
             }
-            dest.writeParcelable(mApplication, flags);
+            if (!mIsRoot && (flags & PARCELABLE_ELIDE_DUPLICATES) != 0) {
+                dest.writeInt(0);
+            } else {
+                dest.writeInt(1);
+                mApplication.writeToParcel(dest, flags);
+            }
             dest.writeInt(mLayoutId);
             dest.writeInt(mIsWidgetCollectionChild ? 1 : 0);
             int count;
@@ -3548,7 +3569,8 @@ public class RemoteViews implements Parcelable, Filter {
             dest.writeInt(count);
             for (int i=0; i<count; i++) {
                 Action a = mActions.get(i);
-                a.writeToParcel(dest, 0);
+                a.writeToParcel(dest, a.hasSameAppInfo(mApplication)
+                        ? PARCELABLE_ELIDE_DUPLICATES : 0);
             }
         } else {
             dest.writeInt(MODE_HAS_LANDSCAPE_AND_PORTRAIT);
@@ -3558,7 +3580,8 @@ public class RemoteViews implements Parcelable, Filter {
                 mBitmapCache.writeBitmapsToParcel(dest, flags);
             }
             mLandscape.writeToParcel(dest, flags);
-            mPortrait.writeToParcel(dest, flags);
+            // Both RemoteViews already share the same package and user
+            mPortrait.writeToParcel(dest, flags | PARCELABLE_ELIDE_DUPLICATES);
         }
     }
 
