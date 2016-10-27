@@ -1034,7 +1034,6 @@ final class AccessibilityController {
                 boolean focusedWindowAdded = false;
 
                 final int visibleWindowCount = visibleWindows.size();
-                int skipRemainingWindowsForTaskId = -1;
                 HashSet<Integer> skipRemainingWindowsForTasks = new HashSet<>();
                 for (int i = visibleWindowCount - 1; i >= 0; i--) {
                     final WindowState windowState = visibleWindows.valueAt(i);
