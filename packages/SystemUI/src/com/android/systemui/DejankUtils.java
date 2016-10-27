@@ -16,8 +16,9 @@
 
 package com.android.systemui;
 
+import com.android.systemui.util.Assert;
+
 import android.os.Handler;
-import android.os.Looper;
 import android.view.Choreographer;
 
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class DejankUtils {
      * <p>Needs to be called from the main thread.
      */
     public static void postAfterTraversal(Runnable r) {
-        throwIfNotCalledOnMainThread();
+        Assert.isMainThread();
         sPendingRunnables.add(r);
         postAnimationCallback();
     }
@@ -61,7 +62,7 @@ public class DejankUtils {
      * <p>Needs to be called from the main thread.
      */
     public static void removeCallbacks(Runnable r) {
-        throwIfNotCalledOnMainThread();
+        Assert.isMainThread();
         sPendingRunnables.remove(r);
         sHandler.removeCallbacks(r);
     }
@@ -69,11 +70,5 @@ public class DejankUtils {
     private static void postAnimationCallback() {
         sChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, sAnimationCallbackRunnable,
                 null);
-    }
-
-    private static void throwIfNotCalledOnMainThread() {
-        if (!Looper.getMainLooper().isCurrentThread()) {
-            throw new IllegalStateException("should be called from the main thread.");
-        }
     }
 }
