@@ -130,6 +130,7 @@ public:
             int left, int top, int right, int bottom, SkBitmap* bitmap);
     ANDROID_API static void prepareToDraw(Bitmap& bitmap);
 
+    static sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& bitmap);
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;

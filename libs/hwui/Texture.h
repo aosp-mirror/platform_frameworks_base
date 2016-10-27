@@ -21,8 +21,14 @@
 #include "hwui/Bitmap.h"
 
 #include <GLES2/gl2.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <SkBitmap.h>
 
 namespace android {
+
+class GraphicBuffer;
+
 namespace uirenderer {
 
 class Caches;
@@ -34,6 +40,11 @@ class Layer;
  */
 class Texture : public GpuMemoryTracker {
 public:
+    static SkBitmap uploadToN32(const SkBitmap& bitmap, bool hasSRGB, sk_sp<SkColorSpace> sRGB);
+    static bool hasUnsupportedColorType(const SkImageInfo& info, bool hasSRGB, SkColorSpace* sRGB);
+    static void colorTypeToGlFormatAndType(const Caches& caches, SkColorType colorType,
+            bool needSRGB, GLint* outInternalFormat, GLint* outFormat, GLint* outType);
+
     explicit Texture(Caches& caches)
         : GpuMemoryTracker(GpuObjectType::Texture)
         , mCaches(caches)
@@ -147,7 +158,6 @@ public:
      * the current frame. This is reset at the start of a new frame.
      */
     void* isInUse = nullptr;
-
 private:
     // TODO: Temporarily grant private access to Layer, remove once
     // Layer can be de-tangled from being a dual-purpose render target
@@ -157,6 +167,7 @@ private:
     // Returns true if the size changed, false if it was the same
     bool updateSize(uint32_t width, uint32_t height, GLint internalFormat,
             GLint format, GLenum target);
+    void uploadHardwareBitmapToTexture(GraphicBuffer* buffer);
     void resetCachedParams();
 
     GLuint mId = 0;
@@ -165,6 +176,7 @@ private:
     GLint mFormat = 0;
     GLint mInternalFormat = 0;
     GLenum mTarget = GL_NONE;
+    EGLImageKHR mEglImageHandle = EGL_NO_IMAGE_KHR;
 
     /* See GLES spec section 3.8.14
      * "In the initial state, the value assigned to TEXTURE_MIN_FILTER is

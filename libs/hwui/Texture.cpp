@@ -82,6 +82,12 @@ void Texture::setFilterMinMag(GLenum min, GLenum mag, bool bindTexture, bool for
 void Texture::deleteTexture() {
     mCaches.textureState().deleteTexture(mId);
     mId = 0;
+    mTarget = GL_NONE;
+    if (mEglImageHandle != EGL_NO_IMAGE_KHR) {
+        EGLDisplay eglDisplayHandle = eglGetCurrentDisplay();
+        eglDestroyImageKHR(eglDisplayHandle, mEglImageHandle);
+        mEglImageHandle = EGL_NO_IMAGE_KHR;
+    }
 }
 
 bool Texture::updateSize(uint32_t width, uint32_t height, GLint internalFormat,
@@ -129,6 +135,17 @@ void Texture::upload(GLint internalFormat, uint32_t width, uint32_t height,
     GL_CHECKPOINT(MODERATE);
 }
 
+void Texture::uploadHardwareBitmapToTexture(GraphicBuffer* buffer) {
+    EGLDisplay eglDisplayHandle = eglGetCurrentDisplay();
+    if (mEglImageHandle != EGL_NO_IMAGE_KHR) {
+        eglDestroyImageKHR(eglDisplayHandle, mEglImageHandle);
+        mEglImageHandle = EGL_NO_IMAGE_KHR;
+    }
+    mEglImageHandle = eglCreateImageKHR(eglDisplayHandle, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
+            buffer->getNativeBuffer(), 0);
+    glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, mEglImageHandle);
+}
+
 static void uploadToTexture(bool resize, GLint internalFormat, GLenum format, GLenum type,
         GLsizei stride, GLsizei bpp, GLsizei width, GLsizei height, const GLvoid * data) {
 
@@ -173,7 +190,7 @@ static void uploadToTexture(bool resize, GLint internalFormat, GLenum format, GL
     }
 }
 
-static void colorTypeToGlFormatAndType(const Caches& caches, SkColorType colorType,
+void Texture::colorTypeToGlFormatAndType(const Caches& caches, SkColorType colorType,
         bool needSRGB, GLint* outInternalFormat, GLint* outFormat, GLint* outType) {
     switch (colorType) {
     case kAlpha_8_SkColorType:
@@ -214,6 +231,24 @@ static void colorTypeToGlFormatAndType(const Caches& caches, SkColorType colorTy
     }
 }
 
+SkBitmap Texture::uploadToN32(const SkBitmap& bitmap, bool hasSRGB, sk_sp<SkColorSpace> sRGB) {
+    SkBitmap rgbaBitmap;
+    rgbaBitmap.allocPixels(SkImageInfo::MakeN32(bitmap.width(), bitmap.height(),
+            bitmap.info().alphaType(), hasSRGB ? sRGB : nullptr));
+    rgbaBitmap.eraseColor(0);
+    SkCanvas canvas(rgbaBitmap);
+    canvas.drawBitmap(bitmap, 0.0f, 0.0f, nullptr);
+    return rgbaBitmap;
+}
+
+bool Texture::hasUnsupportedColorType(const SkImageInfo& info, bool hasSRGB, SkColorSpace* sRGB) {
+    bool needSRGB = info.colorSpace() == sRGB;
+    return info.colorType() == kARGB_4444_SkColorType
+        || info.colorType() == kIndex_8_SkColorType
+        || (info.colorType() == kRGB_565_SkColorType && hasSRGB && needSRGB);
+}
+
+
 void Texture::upload(Bitmap& bitmap) {
     if (!bitmap.readyToDraw()) {
         ALOGE("Cannot generate texture from bitmap");
@@ -243,33 +278,23 @@ void Texture::upload(Bitmap& bitmap) {
     GLint internalFormat, format, type;
     colorTypeToGlFormatAndType(mCaches, bitmap.colorType(), needSRGB, &internalFormat, &format, &type);
 
-    if (updateSize(bitmap.width(), bitmap.height(), internalFormat, format, GL_TEXTURE_2D)) {
-        needsAlloc = true;
-    }
+    GLenum target = bitmap.isHardware() ? GL_TEXTURE_EXTERNAL_OES : GL_TEXTURE_2D;
+    needsAlloc |= updateSize(bitmap.width(), bitmap.height(), internalFormat, format, target);
 
     blend = !bitmap.isOpaque();
-    mCaches.textureState().bindTexture(mId);
+    mCaches.textureState().bindTexture(mTarget, mId);
 
     // TODO: Handle sRGB gray bitmaps
     bool hasSRGB = mCaches.extensions().hasSRGB();
-    if (CC_UNLIKELY(bitmap.colorType() == kARGB_4444_SkColorType
-            || bitmap.colorType() == kIndex_8_SkColorType
-            || (bitmap.colorType() == kRGB_565_SkColorType && hasSRGB && needSRGB))) {
-
-        SkBitmap rgbaBitmap;
-        rgbaBitmap.allocPixels(SkImageInfo::MakeN32(
-                mWidth, mHeight, bitmap.info().alphaType(), hasSRGB ? sRGB : nullptr));
-        rgbaBitmap.eraseColor(0);
-
-        SkCanvas canvas(rgbaBitmap);
+    if (CC_UNLIKELY(hasUnsupportedColorType(bitmap.info(), hasSRGB, sRGB.get()))) {
         SkBitmap skBitmap;
         bitmap.getSkBitmap(&skBitmap);
-        canvas.drawBitmap(skBitmap, 0.0f, 0.0f, nullptr);
-
+        SkBitmap rgbaBitmap = uploadToN32(skBitmap, hasSRGB, std::move(sRGB));
         uploadToTexture(needsAlloc, internalFormat, format, type, rgbaBitmap.rowBytesAsPixels(),
                 rgbaBitmap.bytesPerPixel(), rgbaBitmap.width(),
                 rgbaBitmap.height(), rgbaBitmap.getPixels());
-
+    } else if (bitmap.isHardware()) {
+        uploadHardwareBitmapToTexture(bitmap.graphicBuffer());
     } else {
         uploadToTexture(needsAlloc, internalFormat, format, type, bitmap.rowBytesAsPixels(),
                 bitmap.info().bytesPerPixel(), bitmap.width(), bitmap.height(), bitmap.pixels());
