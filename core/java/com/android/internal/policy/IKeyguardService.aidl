@@ -34,7 +34,6 @@ oneway interface IKeyguardService {
 
     void addStateMonitorCallback(IKeyguardStateCallback callback);
     void verifyUnlock(IKeyguardExitCallback callback);
-    void keyguardDone(boolean authenticated, boolean wakeup);
     void dismiss(boolean allowWhileOccluded);
     void onDreamingStarted();
     void onDreamingStopped();
@@ -93,10 +92,4 @@ oneway interface IKeyguardService {
      * @param fadeoutDuration the duration of the exit animation, in milliseconds
      */
     void startKeyguardExitAnimation(long startTime, long fadeoutDuration);
-
-    /**
-     * Notifies the Keyguard that the activity that was starting has now been drawn and it's safe
-     * to start the keyguard dismiss sequence.
-     */
-    void onActivityDrawn();
 }

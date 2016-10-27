@@ -524,10 +524,6 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void setKeyguardAnimatingIn(boolean animating) throws RemoteException {
-    }
-
-    @Override
     public void setSwitchingUser(boolean switching) throws RemoteException {
     }
 

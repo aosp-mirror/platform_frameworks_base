@@ -3168,15 +3168,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer
         pw.print(prefix); pw.println("mUserStackInFront=" + mUserStackInFront);
         pw.print(prefix); pw.println("mActivityContainers=" + mActivityContainers);
         pw.print(prefix); pw.print("mLockTaskModeState=" + lockTaskModeToString());
-                final SparseArray<String[]> packages = mService.mLockTaskPackages;
-                if (packages.size() > 0) {
-                    pw.println(" mLockTaskPackages (userId:packages)=");
-                    for (int i = 0; i < packages.size(); ++i) {
-                        pw.print(prefix); pw.print(prefix); pw.print(packages.keyAt(i));
-                        pw.print(":"); pw.println(Arrays.toString(packages.valueAt(i)));
-                    }
-                }
-                pw.println(" mLockTaskModeTasks" + mLockTaskModeTasks);
+        final SparseArray<String[]> packages = mService.mLockTaskPackages;
+        if (packages.size() > 0) {
+            pw.print(prefix); pw.println("mLockTaskPackages (userId:packages)=");
+            for (int i = 0; i < packages.size(); ++i) {
+                pw.print(prefix); pw.print(prefix); pw.print(packages.keyAt(i));
+                pw.print(":"); pw.println(Arrays.toString(packages.valueAt(i)));
+            }
+        }
+        pw.println(" mLockTaskModeTasks" + mLockTaskModeTasks);
+        mKeyguardController.dump(pw, prefix);
     }
 
     /**

@@ -559,19 +559,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         return mBouncer.interceptMediaKey(event);
     }
 
-    public void onActivityDrawn() {
-        if (mPhoneStatusBar.isCollapsing()) {
-            mPhoneStatusBar.addPostCollapseAction(new Runnable() {
-                @Override
-                public void run() {
-                    mViewMediatorCallback.readyForKeyguardDone();
-                }
-            });
-        } else {
-            mViewMediatorCallback.readyForKeyguardDone();
-        }
-    }
-
     public void readyForKeyguardDone() {
         mViewMediatorCallback.readyForKeyguardDone();
     }
@@ -586,10 +573,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public boolean isSecure(int userId) {
         return mBouncer.isSecure() || mLockPatternUtils.isSecure(userId);
-    }
-
-    public boolean isInputRestricted() {
-        return mViewMediatorCallback.isInputRestricted();
     }
 
     public void keyguardGoingAway() {

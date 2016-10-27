@@ -127,7 +127,10 @@ class UnknownAppVisibilityController {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "Unknown visibilities");
+        if (mUnknownApps.isEmpty()) {
+            return;
+        }
+        pw.println(prefix + "Unknown visibilities:");
         for (int i = mUnknownApps.size() - 1; i >= 0; i--) {
             pw.println(prefix + "  app=" + mUnknownApps.keyAt(i)
                     + " state=" + mUnknownApps.valueAt(i));

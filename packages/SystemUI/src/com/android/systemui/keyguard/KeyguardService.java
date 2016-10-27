@@ -81,15 +81,6 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void keyguardDone(boolean authenticated, boolean wakeup) {
-            Trace.beginSection("KeyguardService.mBinder#keyguardDone");
-            checkPermission();
-            // TODO: Remove wakeup
-            mKeyguardViewMediator.keyguardDone(authenticated);
-            Trace.endSection();
-        }
-
-        @Override // Binder interface
         public void setOccluded(boolean isOccluded, boolean animate) {
             Trace.beginSection("KeyguardService.mBinder#setOccluded");
             checkPermission();
@@ -201,12 +192,6 @@ public class KeyguardService extends Service {
             checkPermission();
             mKeyguardViewMediator.startKeyguardExitAnimation(startTime, fadeoutDuration);
             Trace.endSection();
-        }
-
-        @Override
-        public void onActivityDrawn() {
-            checkPermission();
-            mKeyguardViewMediator.onActivityDrawn();
         }
     };
 }

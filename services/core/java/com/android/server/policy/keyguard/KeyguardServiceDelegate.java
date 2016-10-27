@@ -237,12 +237,6 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    public void keyguardDone(boolean authenticated, boolean wakeup) {
-        if (mKeyguardService != null) {
-            mKeyguardService.keyguardDone(authenticated, wakeup);
-        }
-    }
-
     public void setOccluded(boolean isOccluded, boolean animate) {
         if (mKeyguardService != null) {
             if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ") animate=" + animate);

@@ -54,15 +54,6 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     }
 
     @Override // Binder interface
-    public void keyguardDone(boolean authenticated, boolean wakeup) {
-        try {
-            mService.keyguardDone(authenticated, wakeup);
-        } catch (RemoteException e) {
-            Slog.w(TAG , "Remote Exception", e);
-        }
-    }
-
-    @Override // Binder interface
     public void setOccluded(boolean isOccluded, boolean animate) {
         try {
             mService.setOccluded(isOccluded, animate);
@@ -220,15 +211,6 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
         try {
             mService.startKeyguardExitAnimation(startTime, fadeoutDuration);
-        } catch (RemoteException e) {
-            Slog.w(TAG , "Remote Exception", e);
-        }
-    }
-
-    @Override // Binder interface
-    public void onActivityDrawn() {
-        try {
-            mService.onActivityDrawn();
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }

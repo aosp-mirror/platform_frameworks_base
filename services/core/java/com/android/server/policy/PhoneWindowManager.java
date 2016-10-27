@@ -663,15 +663,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mPendingKeyguardOccluded;
     private boolean mKeyguardOccludedChanged;
 
-    boolean mShowingLockscreen;
     boolean mShowingDream;
     private boolean mLastShowingDream;
     boolean mDreamingLockscreen;
     boolean mDreamingSleepTokenNeeded;
     SleepToken mDreamingSleepToken;
     SleepToken mScreenOffSleepToken;
-    boolean mKeyguardSecure;
-    boolean mKeyguardSecureIncludingHidden;
     volatile boolean mKeyguardOccluded;
     boolean mHomePressed;
     boolean mHomeConsumed;
@@ -3778,6 +3775,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         if (AppTransition.isKeyguardGoingAwayTransit(transit)) {
+            if (DEBUG_KEYGUARD) Slog.d(TAG, "Starting keyguard exit animation");
             final long startTime = anim != null
                     ? SystemClock.uptimeMillis() + anim.getStartOffset()
                     : SystemClock.uptimeMillis();
@@ -5158,11 +5156,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mForcingShowNavBarLayer = -1;
 
         mAllowLockscreenWhenOn = false;
-        mShowingLockscreen = false;
         mShowingDream = false;
-        mKeyguardSecure = isKeyguardSecure(mCurrentUserId);
-        mKeyguardSecureIncludingHidden = mKeyguardSecure
-                && (mKeyguardDelegate != null && mKeyguardDelegate.isShowing());
     }
 
     /** {@inheritDoc} */
@@ -5181,7 +5175,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (attrs.type == TYPE_STATUS_BAR) {
             if ((attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                 mForceStatusBarFromKeyguard = true;
-                mShowingLockscreen = true;
             }
             if ((attrs.privateFlags & PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT) != 0) {
                 mForceStatusBarTransparent = true;
@@ -5205,8 +5198,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     appWindow = true;
                 }
             }
-
-            final IApplicationToken appToken = win.getAppToken();
 
             // For app windows that are not attached, we decide if all windows in the app they
             // represent should be hidden or if we should hide the lockscreen. For attached app
@@ -5299,7 +5290,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // started while the lockscreen was showing and remember this state
         // while the dream is showing.
         if (!mShowingDream) {
-            mDreamingLockscreen = mShowingLockscreen;
+            mDreamingLockscreen = isKeyguardShowingAndNotOccluded();
             if (mDreamingSleepTokenNeeded) {
                 mDreamingSleepTokenNeeded = false;
                 mHandler.obtainMessage(MSG_UPDATE_DREAMING_SLEEP_TOKEN, 0, 1).sendToTarget();
@@ -6634,13 +6625,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void dismissKeyguardLw() {
         if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "PWM.dismissKeyguardLw");
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    // ask the keyguard to prompt the user to authenticate if necessary
-                    mKeyguardDelegate.dismiss(true /* allowWhileOccluded */);
-                }
-            });
+
+            // ask the keyguard to prompt the user to authenticate if necessary
+            mKeyguardDelegate.dismiss(true /* allowWhileOccluded */);
         }
     }
 
@@ -8008,8 +7995,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(","); pw.print(mDockBottom); pw.println(")");
         pw.print(prefix); pw.print("mDockLayer="); pw.print(mDockLayer);
                 pw.print(" mStatusBarLayer="); pw.println(mStatusBarLayer);
-        pw.print(prefix); pw.print("mShowingLockscreen="); pw.print(mShowingLockscreen);
-                pw.print(" mShowingDream="); pw.print(mShowingDream);
+        pw.print(prefix); pw.print("mShowingDream="); pw.print(mShowingDream);
                 pw.print(" mDreamingLockscreen="); pw.print(mDreamingLockscreen);
                 pw.print(" mDreamingSleepToken="); pw.println(mDreamingSleepToken);
         if (mLastInputMethodWindow != null) {
@@ -8052,6 +8038,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         pw.print(prefix); pw.print("mTopIsFullscreen="); pw.print(mTopIsFullscreen);
                 pw.print(" mKeyguardOccluded="); pw.println(mKeyguardOccluded);
+                pw.print(" mKeyguardOccludedChanged="); pw.println(mKeyguardOccludedChanged);
+                pw.print(" mPendingKeyguardOccluded="); pw.println(mPendingKeyguardOccluded);
         pw.print(prefix); pw.print("mForceStatusBar="); pw.print(mForceStatusBar);
                 pw.print(" mForceStatusBarFromKeyguard=");
                 pw.println(mForceStatusBarFromKeyguard);

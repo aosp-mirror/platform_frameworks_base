@@ -31,6 +31,7 @@ import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 
 import com.android.server.wm.WindowManagerService;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -44,8 +45,8 @@ class KeyguardController {
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
     private WindowManagerService mWindowManager;
-    private boolean mKeyguardGoingAway;
     private boolean mKeyguardShowing;
+    private boolean mKeyguardGoingAway;
     private boolean mOccluded;
     private ActivityRecord mDismissingKeyguardActivity;
     private int mBeforeUnoccludeTransit;
@@ -255,5 +256,14 @@ class KeyguardController {
             mStackSupervisor.moveTasksToFullscreenStackLocked(DOCKED_STACK_ID,
                     mStackSupervisor.mFocusedStack.getStackId() == DOCKED_STACK_ID);
         }
+    }
+
+    void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "KeyguardController:");
+        pw.println(prefix + "  mKeyguardShowing=" + mKeyguardShowing);
+        pw.println(prefix + "  mKeyguardGoingAway=" + mKeyguardGoingAway);
+        pw.println(prefix + "  mOccluded=" + mOccluded);
+        pw.println(prefix + "  mDismissingKeyguardActivity=" + mDismissingKeyguardActivity);
+        pw.println(prefix + "  mVisibilityTransactionDepth=" + mVisibilityTransactionDepth);
     }
 }
