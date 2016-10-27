@@ -5319,6 +5319,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // notify only this one new request of the current state
     protected void notifyNetworkCallback(NetworkAgentInfo nai, NetworkRequestInfo nri) {
         int notifyType = ConnectivityManager.CALLBACK_AVAILABLE;
+        mHandler.removeMessages(EVENT_TIMEOUT_NETWORK_REQUEST, nri);
         if (nri.mPendingIntent == null) {
             callCallbackForRequest(nri, nai, notifyType, 0);
         } else {
