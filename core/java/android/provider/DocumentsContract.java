@@ -377,19 +377,6 @@ public final class DocumentsContract {
         public static final int FLAG_SUPPORTS_REMOVE = 1 << 10;
 
         /**
-         * Flag indicating that a document is an archive, and it's contents can be
-         * obtained via {@link DocumentsProvider#queryChildDocuments}.
-         * <p>
-         * The <em>provider</em> support library offers utility classes to add common
-         * archive support.
-         *
-         * @see #COLUMN_FLAGS
-         * @see DocumentsProvider#queryChildDocuments(String, String[], String)
-         * @hide
-         */
-        public static final int FLAG_ARCHIVE = 1 << 15;
-
-        /**
          * Flag indicating that a document is not complete, likely its
          * contents are being downloaded. Partial files cannot be opened,
          * copied, moved in the UI. But they can be deleted and retried
