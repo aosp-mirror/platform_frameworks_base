@@ -222,6 +222,7 @@ class FragmentTransition {
                 sharedElementTransition, inFragment, inIsPop);
 
         if (transition != null) {
+            replaceHide(exitTransition, outFragment, exitingViews);
             transition.setNameOverrides(nameOverrides);
             scheduleRemoveTargets(transition,
                     enterTransition, enteringViews, exitTransition, exitingViews,
@@ -305,6 +306,38 @@ class FragmentTransition {
                     enterTransition, enteringViews, exitTransition, exitingViews);
 
             TransitionManager.beginDelayedTransition(sceneRoot, transition);
+        }
+    }
+
+    /**
+     * Replace hide operations with visibility changes on the exiting views. Instead of making
+     * the entire fragment's view GONE, make each exiting view INVISIBLE. At the end of the
+     * transition, make the fragment's view GONE.
+     */
+    private static void replaceHide(Transition exitTransition, Fragment exitingFragment,
+            final ArrayList<View> exitingViews) {
+        if (exitingFragment != null && exitTransition != null && exitingFragment.mAdded
+                && exitingFragment.mHidden && exitingFragment.mHiddenChanged) {
+            exitingFragment.setHideReplaced(true);
+            final View fragmentView = exitingFragment.getView();
+            final ViewGroup container = exitingFragment.mContainer;
+            container.getViewTreeObserver().addOnPreDrawListener(
+                    new ViewTreeObserver.OnPreDrawListener() {
+                        @Override
+                        public boolean onPreDraw() {
+                            container.getViewTreeObserver().removeOnPreDrawListener(this);
+                            setViewVisibility(exitingViews, View.INVISIBLE);
+                            return true;
+                        }
+                    });
+            exitTransition.addListener(new Transition.TransitionListenerAdapter() {
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    transition.removeListener(this);
+                    fragmentView.setVisibility(View.GONE);
+                    setViewVisibility(exitingViews, View.VISIBLE);
+                }
+            });
         }
     }
 

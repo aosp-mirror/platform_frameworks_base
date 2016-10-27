@@ -1185,23 +1185,32 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             if (anim != null) {
                 anim.setTarget(fragment.mView);
                 if (fragment.mHidden) {
-                    // Delay the actual hide operation until the animation finishes, otherwise
-                    // the fragment will just immediately disappear
-                    anim.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            animation.removeListener(this);
-                            if (fragment.mView != null) {
-                                fragment.mView.setVisibility(View.GONE);
+                    if (fragment.isHideReplaced()) {
+                        fragment.setHideReplaced(false);
+                    } else {
+                        // Delay the actual hide operation until the animation finishes, otherwise
+                        // the fragment will just immediately disappear
+                        anim.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                animation.removeListener(this);
+                                if (fragment.mView != null) {
+                                    fragment.mView.setVisibility(View.GONE);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
                 setHWLayerAnimListenerIfAlpha(fragment.mView, anim);
                 anim.start();
             } else {
-                final int visibility = fragment.mHidden ? View.GONE : View.VISIBLE;
+                final int visibility = fragment.mHidden && !fragment.isHideReplaced()
+                        ? View.GONE
+                        : View.VISIBLE;
                 fragment.mView.setVisibility(visibility);
+                if (fragment.isHideReplaced()) {
+                    fragment.setHideReplaced(false);
+                }
             }
         }
         if (fragment.mAdded && fragment.mHasMenu && fragment.mMenuVisible) {
