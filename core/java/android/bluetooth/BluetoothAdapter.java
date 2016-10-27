@@ -789,19 +789,13 @@ public final class BluetoothAdapter {
     public boolean enableBLE() {
         if (!isBleScanAlwaysAvailable()) return false;
 
-        if (isLeEnabled() == true) {
-            if (DBG) Log.d(TAG, "enableBLE(): BT is already enabled..!");
-            try {
-                mManagerService.updateBleAppCount(mToken, true);
-            } catch (RemoteException e) {
-                Log.e(TAG, "", e);
-            }
-            return true;
-        }
-
         try {
-            if (DBG) Log.d(TAG, "Calling enableBLE");
             mManagerService.updateBleAppCount(mToken, true);
+            if (isLeEnabled()) {
+                if (DBG) Log.d(TAG, "enableBLE(): Bluetooth already enabled");
+                return true;
+            }
+            if (DBG) Log.d(TAG, "enableBLE(): Calling enable");
             return mManagerService.enable(ActivityThread.currentPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
