@@ -727,10 +727,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     static private void waitFor(Criteria criteria) {
         int delays = 0;
         while (!criteria.get()) {
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-            }
+            sleepFor(50);
             if (++delays == 10) fail();
         }
     }
@@ -2327,10 +2324,30 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         networkCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
 
         // pass timeout and validate that UNAVAILABLE is not called
-        try {
-            Thread.sleep(15);
-        } catch (InterruptedException e) {
-        }
+        sleepFor(15);
+        networkCallback.assertNoCallback();
+    }
+
+    /**
+     * Validate that a satisfied network request followed by a disconnected (lost) network does
+     * not trigger onUnavailable() once the time-out period expires.
+     */
+    @SmallTest
+    public void testSatisfiedThenLostNetworkRequestDoesNotTriggerOnUnavailable() {
+        NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
+                NetworkCapabilities.TRANSPORT_WIFI).build();
+        final TestNetworkCallback networkCallback = new TestNetworkCallback();
+        mCm.requestNetwork(nr, networkCallback, 500);
+
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+        networkCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        sleepFor(20);
+        mWiFiNetworkAgent.disconnect();
+        networkCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+
+        // pass timeout and validate that UNAVAILABLE is not called
+        sleepFor(600);
         networkCallback.assertNoCallback();
     }
 
@@ -2372,10 +2389,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // pass timeout and validate that no callbacks
         // Note: doesn't validate that nothing called from CS since even if called the CM already
         // unregisters the callback and won't pass it through!
-        try {
-            Thread.sleep(15);
-        } catch (InterruptedException e) {
-        }
+        sleepFor(15);
         networkCallback.assertNoCallback();
 
         // create a network satisfying request - validate that request not triggered
@@ -2787,5 +2801,14 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             mCm.registerNetworkCallback(networkRequest, pendingIntent);
             mCm.unregisterNetworkCallback(pendingIntent);
         }
+    }
+
+    /* test utilities */
+    static private void sleepFor(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+        }
+
     }
 }
