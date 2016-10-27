@@ -134,6 +134,24 @@ public class StorageManager {
     /** {@hide} */
     public static final int FLAG_INCLUDE_INVISIBLE = 1 << 10;
 
+    /** @hide The volume is not encrypted. */
+    public static final int ENCRYPTION_STATE_NONE = 1;
+
+    /** @hide The volume has been encrypted succesfully. */
+    public static final int ENCRYPTION_STATE_OK = 0;
+
+    /** @hide The volume is in a bad state.*/
+    public static final int ENCRYPTION_STATE_ERROR_UNKNOWN = -1;
+
+    /** @hide Encryption is incomplete */
+    public static final int ENCRYPTION_STATE_ERROR_INCOMPLETE = -2;
+
+    /** @hide Encryption is incomplete and irrecoverable */
+    public static final int ENCRYPTION_STATE_ERROR_INCONSISTENT = -3;
+
+    /** @hide Underlying data is corrupt */
+    public static final int ENCRYPTION_STATE_ERROR_CORRUPT = -4;
+
     private static volatile IMountService sMountService = null;
 
     // TODO: the location of the primary storage block varies from device to device, so we need to
