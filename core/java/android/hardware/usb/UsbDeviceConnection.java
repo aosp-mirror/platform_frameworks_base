@@ -21,6 +21,9 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
+
+import com.android.internal.util.Preconditions;
+
 import dalvik.system.CloseGuard;
 
 import java.io.FileDescriptor;
@@ -273,7 +276,40 @@ public class UsbDeviceConnection {
      *                                  {@link UsbRequest#queue(ByteBuffer, int)}
      */
     public UsbRequest requestWait() {
-        UsbRequest request = native_request_wait();
+        // -1 is special value indicating infinite wait
+        UsbRequest request = native_request_wait(-1);
+        if (request != null) {
+            request.dequeue();
+        }
+        return request;
+    }
+
+    /**
+     * Waits for the result of a {@link android.hardware.usb.UsbRequest#queue} operation
+     * <p>Note that this may return requests queued on multiple
+     * {@link android.hardware.usb.UsbEndpoint}s. When multiple endpoints are in use,
+     * {@link android.hardware.usb.UsbRequest#getEndpoint} and {@link
+     * android.hardware.usb.UsbRequest#getClientData} can be useful in determining how to process
+     * the result of this function.</p>
+     * <p>Position and array offset of the request's buffer are ignored and assumed to be 0. The
+     * position will be set to the number of bytes read/written.</p>
+     * <p>Android processes {@link UsbRequest UsbRequests} asynchronously. Hence it is not
+     * guaranteed that {@link #requestWait(int) requestWait(0)} returns a request that has been
+     * queued right before even if the request could have been processed immediately.</p>
+     *
+     * @param timeout timeout in milliseconds. If 0 this method does not wait.
+     *
+     * @return a completed USB request, or {@code null} if an error or time out occurred
+     *
+     * @throws IllegalArgumentException if the number of bytes read or written is more than the
+     *                                  limit of the request's buffer. The number of bytes is
+     *                                  determined by the {@code length} parameter of
+     *                                  {@link UsbRequest#queue(ByteBuffer, int)}
+     */
+    public UsbRequest requestWait(int timeout) {
+        timeout = Preconditions.checkArgumentNonnegative(timeout);
+
+        UsbRequest request = native_request_wait(timeout);
         if (request != null) {
             request.dequeue();
         }
@@ -318,7 +354,7 @@ public class UsbDeviceConnection {
             int index, byte[] buffer, int offset, int length, int timeout);
     private native int native_bulk_request(int endpoint, byte[] buffer,
             int offset, int length, int timeout);
-    private native UsbRequest native_request_wait();
+    private native UsbRequest native_request_wait(int timeout);
     private native String native_get_serial();
     private native boolean native_reset_device();
 }

@@ -24,12 +24,15 @@
 
 #include <usbhost/usbhost.h>
 
+#include <chrono>
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
 using namespace android;
+using namespace std::chrono;
 
 static const int USB_CONTROL_READ_TIMEOUT_MS = 200;
 
@@ -217,7 +220,7 @@ android_hardware_UsbDeviceConnection_bulk_request(JNIEnv *env, jobject thiz,
 }
 
 static jobject
-android_hardware_UsbDeviceConnection_request_wait(JNIEnv *env, jobject thiz)
+android_hardware_UsbDeviceConnection_request_wait(JNIEnv *env, jobject thiz, jint timeoutMillis)
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
@@ -225,11 +228,33 @@ android_hardware_UsbDeviceConnection_request_wait(JNIEnv *env, jobject thiz)
         return NULL;
     }
 
-    struct usb_request* request = usb_request_wait(device);
-    if (request)
+    struct usb_request* request;
+    if (timeoutMillis == -1) {
+        request = usb_request_wait(device, -1);
+    } else {
+        steady_clock::time_point currentTime = steady_clock::now();
+        steady_clock::time_point endTime = currentTime + std::chrono::milliseconds(timeoutMillis);
+
+        // Poll the existence of a request via usb_request_wait until we get a result, an unexpected
+        // error or time out. As several threads can listen on the same fd, we might get wakeups
+        // without data.
+        while (1) {
+            request = usb_request_wait(device, duration_cast<std::chrono::milliseconds>(endTime
+                               - currentTime).count());
+
+            int error = errno;
+            currentTime = steady_clock::now();
+            if (request != NULL || error != EAGAIN || currentTime >= endTime) {
+                break;
+            }
+        };
+    }
+
+    if (request) {
         return (jobject)request->client_data;
-    else
+    } else {
         return NULL;
+    }
 }
 
 static jstring
@@ -275,7 +300,7 @@ static const JNINativeMethod method_table[] = {
                                         (void *)android_hardware_UsbDeviceConnection_control_request},
     {"native_bulk_request",     "(I[BIII)I",
                                         (void *)android_hardware_UsbDeviceConnection_bulk_request},
-    {"native_request_wait",             "()Landroid/hardware/usb/UsbRequest;",
+    {"native_request_wait",             "(I)Landroid/hardware/usb/UsbRequest;",
                                         (void *)android_hardware_UsbDeviceConnection_request_wait},
     { "native_get_serial",      "()Ljava/lang/String;",
                                         (void*)android_hardware_UsbDeviceConnection_get_serial },
