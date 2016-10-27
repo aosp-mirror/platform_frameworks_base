@@ -265,8 +265,6 @@ public class UsbDeviceConnection {
      * {@link android.hardware.usb.UsbRequest#getEndpoint} and {@link
      * android.hardware.usb.UsbRequest#getClientData} can be useful in determining how to process
      * the result of this function.</p>
-     * <p>Position and array offset of the request's buffer are ignored and assumed to be 0. The
-     * position will be set to the number of bytes read/written.</p>
      *
      * @return a completed USB request, or null if an error occurred
      *
@@ -291,8 +289,6 @@ public class UsbDeviceConnection {
      * {@link android.hardware.usb.UsbRequest#getEndpoint} and {@link
      * android.hardware.usb.UsbRequest#getClientData} can be useful in determining how to process
      * the result of this function.</p>
-     * <p>Position and array offset of the request's buffer are ignored and assumed to be 0. The
-     * position will be set to the number of bytes read/written.</p>
      * <p>Android processes {@link UsbRequest UsbRequests} asynchronously. Hence it is not
      * guaranteed that {@link #requestWait(int) requestWait(0)} returns a request that has been
      * queued right before even if the request could have been processed immediately.</p>
@@ -307,7 +303,7 @@ public class UsbDeviceConnection {
      *                                  {@link UsbRequest#queue(ByteBuffer, int)}
      */
     public UsbRequest requestWait(int timeout) {
-        timeout = Preconditions.checkArgumentNonnegative(timeout);
+        timeout = Preconditions.checkArgumentNonnegative(timeout, "timeout");
 
         UsbRequest request = native_request_wait(timeout);
         if (request != null) {

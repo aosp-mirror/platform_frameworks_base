@@ -16,8 +16,10 @@
 
 package android.hardware.usb;
 
-import android.util.Log;
+import android.annotation.Nullable;
+
 import com.android.internal.util.Preconditions;
+
 import dalvik.system.CloseGuard;
 
 import java.nio.ByteBuffer;
@@ -38,13 +40,18 @@ public class UsbRequest {
 
     private static final String TAG = "UsbRequest";
 
+    // From drivers/usb/core/devio.c
+    private static final int MAX_USBFS_BUFFER_SIZE = 16384;
+
     // used by the JNI code
     private long mNativeContext;
 
     private UsbEndpoint mEndpoint;
 
-    // for temporarily saving current buffer across queue and dequeue
+    /** The buffer that is currently being read / written */
     private ByteBuffer mBuffer;
+
+    /** The amount of data to read / write when using {@link #queue} */
     private int mLength;
 
     // for client use
@@ -53,7 +60,20 @@ public class UsbRequest {
     // Prevent the connection from being finalized
     private UsbDeviceConnection mConnection;
 
+    /** Whether this buffer was {@link #enqueue enqueued (new behavior)} or {@link #queue queued
+     * (deprecared behavior)}. */
+    private boolean mIsUsingEnqueue;
+
+    /** Temporary buffer than might be used while buffer is enqueued */
+    private ByteBuffer mTempBuffer;
+
     private final CloseGuard mCloseGuard = CloseGuard.get();
+
+    /**
+     * Lock for queue, enqueue and dequeue, so a queue operation can be finished by a dequeue
+     * operation on a different thread.
+     */
+    private final Object mLock = new Object();
 
     public UsbRequest() {
     }
@@ -67,7 +87,7 @@ public class UsbRequest {
      */
     public boolean initialize(UsbDeviceConnection connection, UsbEndpoint endpoint) {
         mEndpoint = endpoint;
-        mConnection = Preconditions.checkNotNull(connection);
+        mConnection = Preconditions.checkNotNull(connection, "connection");
 
         boolean wasInitialized = native_init(connection, endpoint.getAddress(),
                 endpoint.getAttributes(), endpoint.getMaxPacketSize(), endpoint.getInterval());
@@ -140,54 +160,164 @@ public class UsbRequest {
      * Queues the request to send or receive data on its endpoint.
      * <p>For OUT endpoints, the given buffer data will be sent on the endpoint. For IN endpoints,
      * the endpoint will attempt to read the given number of bytes into the specified buffer. If the
-     * queueing operation is successful, we return true and the result will be returned via {@link
-     * android.hardware.usb.UsbDeviceConnection#requestWait}</p>
+     * queueing operation is successful, return true. The result will be returned via
+     * {@link UsbDeviceConnection#requestWait}</p>
      *
      * @param buffer the buffer containing the bytes to write, or location to store the results of a
      *               read. Position and array offset will be ignored and assumed to be 0. Limit and
-     *               capacity will be ignored.
+     *               capacity will be ignored. Once the request
+     *               {@link UsbDeviceConnection#requestWait() is processed} the position will be set
+     *               to the number of bytes read/written.
      * @param length number of bytes to read or write.
      *
      * @return true if the queueing operation succeeded
+     *
+     * @deprecated Use {@link #enqueue(ByteBuffer)} instead.
      */
+    @Deprecated
     public boolean queue(ByteBuffer buffer, int length) {
         boolean out = (mEndpoint.getDirection() == UsbConstants.USB_DIR_OUT);
-
-        // save our buffer for when the request has completed
-        mBuffer = buffer;
-        mLength = length;
-
-        // Note: On a buffer slice we lost the capacity information about the underlying buffer,
-        // hence we cannot check if the access would be a data leak/memory corruption.
-
         boolean result;
-        if (buffer.isDirect()) {
-            result = native_queue_direct(buffer, length, out);
-        } else if (buffer.hasArray()) {
-            result = native_queue_array(buffer.array(), length, out);
-        } else {
-            throw new IllegalArgumentException("buffer is not direct and has no array");
+
+        synchronized (mLock) {
+            // save our buffer for when the request has completed
+            mBuffer = buffer;
+            mLength = length;
+
+            // Note: On a buffer slice we lost the capacity information about the underlying buffer,
+            // hence we cannot check if the access would be a data leak/memory corruption.
+
+            if (buffer.isDirect()) {
+                result = native_queue_direct(buffer, length, out);
+            } else if (buffer.hasArray()) {
+                result = native_queue_array(buffer.array(), length, out);
+            } else {
+                throw new IllegalArgumentException("buffer is not direct and has no array");
+            }
+            if (!result) {
+                mBuffer = null;
+                mLength = 0;
+            }
         }
-        if (!result) {
-            mBuffer = null;
-            mLength = 0;
-        }
+
         return result;
     }
 
+    /**
+     * Queues the request to send or receive data on its endpoint.
+     *
+     * <p>For OUT endpoints, the remaining bytes of the buffer will be sent on the endpoint. For IN
+     * endpoints, the endpoint will attempt to fill the remaining bytes of the buffer. If the
+     * queueing operation is successful, return true. The result will be returned via
+     * {@link UsbDeviceConnection#requestWait}</p>
+     *
+     * @param buffer the buffer containing the bytes to send, or the buffer to fill. The state
+     *               of the buffer is undefined until the request is returned by
+     *               {@link UsbDeviceConnection#requestWait}. If the request failed the buffer
+     *               will be unchanged; if the request succeeded the position of the buffer is
+     *               incremented by the number of bytes sent/received.
+     *
+     * @return true if the queueing operation succeeded
+     */
+    public boolean enqueue(@Nullable ByteBuffer buffer) {
+        // Request need to be initialized
+        Preconditions.checkState(mNativeContext != 0, "request is not initialized");
+
+        // Request can not be currently enqueued
+        Preconditions.checkState(!mIsUsingEnqueue, "request is currently enqueued");
+
+        boolean isSend = (mEndpoint.getDirection() == UsbConstants.USB_DIR_OUT);
+        boolean wasEnqueued;
+
+        synchronized (mLock) {
+            mBuffer = buffer;
+
+            if (buffer == null) {
+                // Null buffers enqueue empty USB requests which is supported
+                mIsUsingEnqueue = true;
+                wasEnqueued = native_enqueue(null, 0, 0);
+            } else {
+                // Can only send/receive MAX_USBFS_BUFFER_SIZE bytes at once
+                Preconditions.checkArgumentInRange(buffer.remaining(), 0, MAX_USBFS_BUFFER_SIZE,
+                        "number of remaining bytes");
+
+                // Can not receive into read-only buffers.
+                Preconditions.checkArgument(!(buffer.isReadOnly() && !isSend), "buffer can not be "
+                        + "read-only when receiving data");
+
+                if (!buffer.isDirect()) {
+                    mTempBuffer = ByteBuffer.allocateDirect(mBuffer.remaining());
+
+                    if (isSend) {
+                        // Copy buffer into temporary buffer
+                        mBuffer.mark();
+                        mTempBuffer.put(mBuffer);
+                        mTempBuffer.flip();
+                        mBuffer.reset();
+                    }
+
+                    // Send/Receive into the temp buffer instead
+                    buffer = mTempBuffer;
+                }
+
+                mIsUsingEnqueue = true;
+                wasEnqueued = native_enqueue(buffer, buffer.position(), buffer.remaining());
+            }
+        }
+
+        if (!wasEnqueued) {
+            mIsUsingEnqueue = false;
+            mTempBuffer = null;
+            mBuffer = null;
+        }
+
+        return wasEnqueued;
+    }
+
     /* package */ void dequeue() {
-        boolean out = (mEndpoint.getDirection() == UsbConstants.USB_DIR_OUT);
-        int bytesRead;
-        if (mBuffer.isDirect()) {
-            bytesRead = native_dequeue_direct();
-        } else {
-            bytesRead = native_dequeue_array(mBuffer.array(), mLength, out);
+        boolean isSend = (mEndpoint.getDirection() == UsbConstants.USB_DIR_OUT);
+        int bytesTransferred;
+
+        synchronized (mLock) {
+            if (mIsUsingEnqueue) {
+                bytesTransferred = native_dequeue_direct();
+                mIsUsingEnqueue = false;
+
+                if (mBuffer == null) {
+                    // Nothing to do
+                } else if (mTempBuffer == null) {
+                    mBuffer.position(mBuffer.position() + bytesTransferred);
+                } else {
+                    mTempBuffer.limit(bytesTransferred);
+
+                    // The user might have modified mBuffer which might make put/position fail.
+                    // Changing the buffer while a request is in flight is not supported. Still,
+                    // make sure to free mTempBuffer correctly.
+                    try {
+                        if (isSend) {
+                            mBuffer.position(mBuffer.position() + bytesTransferred);
+                        } else {
+                            // Copy temp buffer back into original buffer
+                            mBuffer.put(mTempBuffer);
+                        }
+                    } finally {
+                        mTempBuffer = null;
+                    }
+                }
+            } else {
+                if (mBuffer.isDirect()) {
+                    bytesTransferred = native_dequeue_direct();
+                } else {
+                    bytesTransferred = native_dequeue_array(mBuffer.array(), mLength, isSend);
+                }
+                if (bytesTransferred >= 0) {
+                    mBuffer.position(Math.min(bytesTransferred, mLength));
+                }
+            }
+
+            mBuffer = null;
+            mLength = 0;
         }
-        if (bytesRead >= 0) {
-            mBuffer.position(Math.min(bytesRead, mLength));
-        }
-        mBuffer = null;
-        mLength = 0;
     }
 
     /**
@@ -202,6 +332,7 @@ public class UsbRequest {
     private native boolean native_init(UsbDeviceConnection connection, int ep_address,
             int ep_attributes, int ep_max_packet_size, int ep_interval);
     private native void native_close();
+    private native boolean native_enqueue(ByteBuffer buffer, int offset, int length);
     private native boolean native_queue_array(byte[] buffer, int length, boolean out);
     private native int native_dequeue_array(byte[] buffer, int length, boolean out);
     private native boolean native_queue_direct(ByteBuffer buffer, int length, boolean out);
