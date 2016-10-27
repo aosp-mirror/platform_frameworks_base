@@ -35,8 +35,6 @@ import android.util.Log;
 import android.view.Display;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
-import com.android.internal.util.Preconditions;
-import com.android.systemui.DejankUtils;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
@@ -284,7 +282,7 @@ public class DozeService extends DreamService implements DozeSensors.Callback {
 
     private void listenForPulseSignals(boolean listen) {
         if (DEBUG) Log.d(mTag, "listenForPulseSignals: " + listen);
-        mDozeSensors.setListen(listen);
+        mDozeSensors.setListening(listen);
         listenForBroadcasts(listen);
         listenForNotifications(listen);
     }
