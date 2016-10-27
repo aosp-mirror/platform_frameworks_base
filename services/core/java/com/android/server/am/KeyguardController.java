@@ -101,18 +101,23 @@ class KeyguardController {
      */
     void keyguardGoingAway(int flags) {
         if (mKeyguardShowing) {
-            mKeyguardGoingAway = true;
-            mWindowManager.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
-                    false /* alwaysKeepCurrent */, convertTransitFlags(flags),
-                    false /* forceOverride */);
-            mWindowManager.keyguardGoingAway(flags);
-            mService.updateSleepIfNeededLocked();
+            mWindowManager.deferSurfaceLayout();
+            try {
+                mKeyguardGoingAway = true;
+                mWindowManager.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
+                        false /* alwaysKeepCurrent */, convertTransitFlags(flags),
+                        false /* forceOverride */);
+                mWindowManager.keyguardGoingAway(flags);
+                mService.updateSleepIfNeededLocked();
 
-            // Some stack visibility might change (e.g. docked stack)
-            mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-            mWindowManager.executeAppTransition();
-            mService.applyVrModeIfNeededLocked(mStackSupervisor.getResumedActivityLocked(),
-                    true /* enable */);
+                // Some stack visibility might change (e.g. docked stack)
+                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                mWindowManager.executeAppTransition();
+                mService.applyVrModeIfNeededLocked(mStackSupervisor.getResumedActivityLocked(),
+                        true /* enable */);
+            } finally {
+                mWindowManager.continueSurfaceLayout();
+            }
         }
     }
 

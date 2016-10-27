@@ -2713,13 +2713,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        Task task = getTask();
-        if (task == null || task.inHomeStack()) {
-            // Don't save surfaces for home stack apps. These usually resume and draw
-            // first frame very fast. Saving surfaces are mostly a waste of memory.
-            return false;
-        }
-
+        final Task task = getTask();
         final AppWindowToken taskTop = task.getTopVisibleAppToken();
         if (taskTop != null && taskTop != mAppToken) {
             // Don't save if the window is not the topmost window.
