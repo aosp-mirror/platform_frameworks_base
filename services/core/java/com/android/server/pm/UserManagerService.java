@@ -2483,6 +2483,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     @Override
     public boolean removeUser(int userHandle) {
+        Slog.i(LOG_TAG, "removeUser u" + userHandle);
         checkManageOrCreateUsersPermission("Only the system can remove users");
         if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(
                 UserManager.DISALLOW_REMOVE_USER, false)) {
