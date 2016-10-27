@@ -771,9 +771,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mChildrenContainer;
     }
 
-    public void setHeadsupDisappearRunning(boolean running) {
-        mHeadsupDisappearRunning = running;
-        mPrivateLayout.setHeadsupDisappearRunning(running);
+    public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
+        mHeadsupDisappearRunning = headsUpAnimatingAway;
+        mPrivateLayout.setHeadsUpAnimatingAway(headsUpAnimatingAway);
+    }
+
+    /**
+     * @return if the view was just heads upped and is now animating away. During such a time the
+     * layout needs to be kept consistent
+     */
+    public boolean isHeadsUpAnimatingAway() {
+        return mHeadsupDisappearRunning;
     }
 
     public View getChildAfterViewWhenDismissed() {
@@ -1795,7 +1803,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         protected void onYTranslationAnimationFinished() {
             super.onYTranslationAnimationFinished();
             if (mHeadsupDisappearRunning) {
-                setHeadsupDisappearRunning(false);
+                setHeadsUpAnimatingAway(false);
             }
         }
 

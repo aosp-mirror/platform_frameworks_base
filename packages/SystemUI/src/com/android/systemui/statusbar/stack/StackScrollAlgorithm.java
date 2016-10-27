@@ -53,6 +53,7 @@ public class StackScrollAlgorithm {
     private StackScrollAlgorithmState mTempAlgorithmState = new StackScrollAlgorithmState();
     private boolean mIsExpanded;
     private int mBottomStackSlowDownLength;
+    private int mStatusBarHeight;
 
     public StackScrollAlgorithm(Context context) {
         initView(context);
@@ -82,6 +83,7 @@ public class StackScrollAlgorithm {
                 mBottomStackPeekSize,
                 getBottomStackSlowDownLength(),
                 0.5f);
+        mStatusBarHeight = context.getResources().getDimensionPixelSize(R.dimen.status_bar_height);
     }
 
     public void getStackScrollState(AmbientState ambientState, StackScrollState resultState) {
@@ -425,6 +427,7 @@ public class StackScrollAlgorithm {
             if (row.isPinned()) {
                 childState.yTranslation = Math.max(childState.yTranslation, 0);
                 childState.height = Math.max(row.getIntrinsicHeight(), childState.height);
+                childState.hidden = false;
                 ExpandableViewState topState = resultState.getViewStateForView(topHeadsUpEntry);
                 if (!isTopEntry && (!mIsExpanded
                         || unmodifiedEndLocation < topState.yTranslation + topState.height)) {
@@ -434,6 +437,9 @@ public class StackScrollAlgorithm {
                     childState.yTranslation = topState.yTranslation + topState.height
                             - childState.height;
                 }
+            }
+            if (row.isHeadsUpAnimatingAway()) {
+                childState.hidden = false;
             }
         }
     }
@@ -495,6 +501,9 @@ public class StackScrollAlgorithm {
         childViewState.yTranslation = Math.min(childViewState.yTranslation, shelfStart);
         if (childViewState.yTranslation >= shelfStart) {
             childViewState.hidden = true;
+        }
+        if (!ambientState.isShadeExpanded()) {
+            childViewState.height = (int) (mStatusBarHeight - childViewState.yTranslation);
         }
     }
 

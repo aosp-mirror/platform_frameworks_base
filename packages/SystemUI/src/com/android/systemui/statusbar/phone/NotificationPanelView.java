@@ -202,7 +202,7 @@ public class NotificationPanelView extends PanelView implements
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
         public void run() {
-            mHeadsUpAnimatingAway = false;
+            setHeadsUpAnimatingAway(false);
             notifyBarPanelExpansionChanged();
         }
     };
@@ -2195,14 +2195,20 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onHeadsUpPinnedModeChanged(final boolean inPinnedMode) {
+        mNotificationStackScroller.setInHeadsUpPinnedMode(inPinnedMode);
         if (inPinnedMode) {
             mHeadsUpExistenceChangedRunnable.run();
             updateNotificationTranslucency();
         } else {
-            mHeadsUpAnimatingAway = true;
+            setHeadsUpAnimatingAway(true);
             mNotificationStackScroller.runAfterAnimationFinished(
                     mHeadsUpExistenceChangedRunnable);
         }
+    }
+
+    public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
+        mHeadsUpAnimatingAway = headsUpAnimatingAway;
+        mNotificationStackScroller.setHeadsUpAnimatingAway(headsUpAnimatingAway);
     }
 
     @Override

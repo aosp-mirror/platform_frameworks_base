@@ -356,6 +356,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mNoAmbient;
     private final Rect mClipRect = new Rect();
     private boolean mIsClipped;
+    private Rect mRequestedClipBounds;
+    private boolean mInHeadsUpPinnedMode;
+    private boolean mHeadsUpAnimatingAway;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -679,16 +682,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    @Override
-    public void setClipBounds(Rect clipBounds) {
-        super.setClipBounds(clipBounds);
-        boolean clipped = clipBounds != null;
-        if (clipped != mIsClipped) {
-            mIsClipped = clipped;
-            updateFadingState();
-        }
-    }
-
     /**
      * Update the height of the panel.
      *
@@ -696,6 +689,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public void setExpandedHeight(float height) {
         mExpandedHeight = height;
+        setIsExpanded(height > 0);
         int minExpansionHeight = getMinExpansionHeight();
         if (height < minExpansionHeight) {
             mClipRect.left = 0;
@@ -703,11 +697,10 @@ public class NotificationStackScrollLayout extends ViewGroup
             mClipRect.top = 0;
             mClipRect.bottom = (int) height;
             height = minExpansionHeight;
-            setClipBounds(mClipRect);
+            setRequestedClipBounds(mClipRect);
         } else {
-            setClipBounds(null);
+            setRequestedClipBounds(null);
         }
-        setIsExpanded(height > getMinExpansionHeight());
         int stackHeight;
         float translationY;
         float appearEndPosition = getAppearEndPosition();
@@ -733,6 +726,26 @@ public class NotificationStackScrollLayout extends ViewGroup
             requestChildrenUpdate();
         }
         setStackTranslation(translationY);
+        requestChildrenUpdate();
+    }
+
+    private void setRequestedClipBounds(Rect clipRect) {
+        mRequestedClipBounds = clipRect;
+        updateClipping();
+    }
+
+    public void updateClipping() {
+        boolean clipped = mRequestedClipBounds != null && !mInHeadsUpPinnedMode
+                && !mHeadsUpAnimatingAway;
+        if (mIsClipped != clipped) {
+            mIsClipped = clipped;
+            updateFadingState();
+        }
+        if (clipped) {
+            setClipBounds(mRequestedClipBounds);
+        } else {
+            setClipBounds(null);
+        }
     }
 
     /**
@@ -2508,7 +2521,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (hasAddEvent) {
             // This child was just added lets remove all events.
             mHeadsUpChangeAnimations.removeAll(mTmpList);
-            ((ExpandableNotificationRow ) child).setHeadsupDisappearRunning(false);
+            ((ExpandableNotificationRow ) child).setHeadsUpAnimatingAway(false);
         }
         mTmpList.clear();
         return hasAddEvent;
@@ -2768,7 +2781,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                         : AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
                 if (row.isChildInGroup()) {
                     // We can otherwise get stuck in there if it was just isolated
-                    row.setHeadsupDisappearRunning(false);
+                    row.setHeadsUpAnimatingAway(false);
                 }
             } else {
                 ExpandableViewState viewState = mCurrentStackScrollState.getViewStateForView(row);
@@ -3271,10 +3284,10 @@ public class NotificationStackScrollLayout extends ViewGroup
             View view = getChildAt(i);
             if (view instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-                row.setHeadsupDisappearRunning(false);
+                row.setHeadsUpAnimatingAway(false);
                 if (row.isSummaryWithChildren()) {
                     for (ExpandableNotificationRow child : row.getNotificationChildren()) {
-                        child.setHeadsupDisappearRunning(false);
+                        child.setHeadsUpAnimatingAway(false);
                     }
                 }
             }
@@ -3833,7 +3846,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mHeadsUpChangeAnimations.add(new Pair<>(row, isHeadsUp));
             mNeedsAnimation = true;
             if (!mIsExpanded && !isHeadsUp) {
-                row.setHeadsupDisappearRunning(true);
+                row.setHeadsUpAnimatingAway(true);
             }
             requestChildrenUpdate();
         }
@@ -3980,6 +3993,16 @@ public class NotificationStackScrollLayout extends ViewGroup
                 ? mHeadsUpManager.getTopHeadsUpPinnedHeight()
                 : mShelf.getIntrinsicHeight()
                         - (mShelf.getIntrinsicHeight() - mStatusBarHeight) / 2;
+    }
+
+    public void setInHeadsUpPinnedMode(boolean inHeadsUpPinnedMode) {
+        mInHeadsUpPinnedMode = inHeadsUpPinnedMode;
+        updateClipping();
+    }
+
+    public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
+        mHeadsUpAnimatingAway = headsUpAnimatingAway;
+        updateClipping();
     }
 
     /**

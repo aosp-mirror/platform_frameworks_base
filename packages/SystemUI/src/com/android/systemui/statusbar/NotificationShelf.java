@@ -206,6 +206,11 @@ public class NotificationShelf extends ActivatableNotificationView {
             if (child.getClipBottomAmount() != 0) {
                 child.setClipBottomAmount(0);
             }
+            if (child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                row.setIconTransformationAmount(0);
+            }
+
         }
         mNotificationIconContainer.calculateIconTranslations();
         mNotificationIconContainer.applyIconStates();
@@ -216,7 +221,8 @@ public class NotificationShelf extends ActivatableNotificationView {
     private void updateNotificationClipHeight(ExpandableNotificationRow row,
             float notificationClipEnd) {
         float viewEnd = row.getTranslationY() + row.getActualHeight();
-        if (viewEnd > notificationClipEnd) {
+        if (viewEnd > notificationClipEnd && !row.isPinned() && !row.isHeadsUpAnimatingAway()) {
+            // TODO: handle heads up clipping correctly when closing.
             row.setClipBottomAmount((int) (viewEnd - notificationClipEnd));
         } else {
             row.setClipBottomAmount(0);
@@ -229,7 +235,8 @@ public class NotificationShelf extends ActivatableNotificationView {
         float viewStart = row.getTranslationY();
         int transformHeight = row.getActualHeight() + mPaddingBetweenElements;
         float viewEnd = viewStart + transformHeight;
-        if (viewEnd >= shelfTransformationStart) {
+        if (viewEnd >= shelfTransformationStart && !row.isPinned()
+                && !row.isHeadsUpAnimatingAway()) {
             if (viewStart < shelfTransformationStart) {
                 float linearAmount = (shelfTransformationStart - viewStart) / transformHeight;
                 float interpolatedAmount =  Interpolators.ACCELERATE_DECELERATE.getInterpolation(
@@ -269,7 +276,8 @@ public class NotificationShelf extends ActivatableNotificationView {
         float transitionDistance = getIntrinsicHeight() * 1.5f;
         float transformationStartPosition = getTranslationY() - transitionDistance;
         float transitionAmount = 0.0f;
-        if (viewStart < transformationStartPosition) {
+        if (viewStart < transformationStartPosition || row.isPinned()
+                || row.isHeadsUpAnimatingAway()) {
             // We simply place it on the icon of the notification
             iconState.yTranslation = notificationIconPosition - shelfIconPosition;
         } else {
