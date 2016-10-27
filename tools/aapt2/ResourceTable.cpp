@@ -21,6 +21,7 @@
 #include "ValueVisitor.h"
 #include "util/Util.h"
 
+#include <android-base/logging.h>
 #include <androidfw/ResourceTypes.h>
 #include <algorithm>
 #include <memory>
@@ -29,28 +30,29 @@
 
 namespace aapt {
 
-static bool lessThanType(const std::unique_ptr<ResourceTableType>& lhs,
-                         ResourceType rhs) {
+static bool less_than_type(const std::unique_ptr<ResourceTableType>& lhs,
+                           ResourceType rhs) {
   return lhs->type < rhs;
 }
 
 template <typename T>
-static bool lessThanStructWithName(const std::unique_ptr<T>& lhs,
-                                   const StringPiece& rhs) {
+static bool less_than_struct_with_name(const std::unique_ptr<T>& lhs,
+                                       const StringPiece& rhs) {
   return lhs->name.compare(0, lhs->name.size(), rhs.data(), rhs.size()) < 0;
 }
 
-ResourceTablePackage* ResourceTable::findPackage(const StringPiece& name) {
+ResourceTablePackage* ResourceTable::FindPackage(const StringPiece& name) {
   const auto last = packages.end();
-  auto iter = std::lower_bound(packages.begin(), last, name,
-                               lessThanStructWithName<ResourceTablePackage>);
+  auto iter =
+      std::lower_bound(packages.begin(), last, name,
+                       less_than_struct_with_name<ResourceTablePackage>);
   if (iter != last && name == (*iter)->name) {
     return iter->get();
   }
   return nullptr;
 }
 
-ResourceTablePackage* ResourceTable::findPackageById(uint8_t id) {
+ResourceTablePackage* ResourceTable::FindPackageById(uint8_t id) {
   for (auto& package : packages) {
     if (package->id && package->id.value() == id) {
       return package.get();
@@ -59,9 +61,9 @@ ResourceTablePackage* ResourceTable::findPackageById(uint8_t id) {
   return nullptr;
 }
 
-ResourceTablePackage* ResourceTable::createPackage(const StringPiece& name,
+ResourceTablePackage* ResourceTable::CreatePackage(const StringPiece& name,
                                                    Maybe<uint8_t> id) {
-  ResourceTablePackage* package = findOrCreatePackage(name);
+  ResourceTablePackage* package = FindOrCreatePackage(name);
   if (id && !package->id) {
     package->id = id;
     return package;
@@ -73,61 +75,62 @@ ResourceTablePackage* ResourceTable::createPackage(const StringPiece& name,
   return package;
 }
 
-ResourceTablePackage* ResourceTable::findOrCreatePackage(
+ResourceTablePackage* ResourceTable::FindOrCreatePackage(
     const StringPiece& name) {
   const auto last = packages.end();
-  auto iter = std::lower_bound(packages.begin(), last, name,
-                               lessThanStructWithName<ResourceTablePackage>);
+  auto iter =
+      std::lower_bound(packages.begin(), last, name,
+                       less_than_struct_with_name<ResourceTablePackage>);
   if (iter != last && name == (*iter)->name) {
     return iter->get();
   }
 
-  std::unique_ptr<ResourceTablePackage> newPackage =
+  std::unique_ptr<ResourceTablePackage> new_package =
       util::make_unique<ResourceTablePackage>();
-  newPackage->name = name.toString();
-  return packages.emplace(iter, std::move(newPackage))->get();
+  new_package->name = name.ToString();
+  return packages.emplace(iter, std::move(new_package))->get();
 }
 
-ResourceTableType* ResourceTablePackage::findType(ResourceType type) {
+ResourceTableType* ResourceTablePackage::FindType(ResourceType type) {
   const auto last = types.end();
-  auto iter = std::lower_bound(types.begin(), last, type, lessThanType);
+  auto iter = std::lower_bound(types.begin(), last, type, less_than_type);
   if (iter != last && (*iter)->type == type) {
     return iter->get();
   }
   return nullptr;
 }
 
-ResourceTableType* ResourceTablePackage::findOrCreateType(ResourceType type) {
+ResourceTableType* ResourceTablePackage::FindOrCreateType(ResourceType type) {
   const auto last = types.end();
-  auto iter = std::lower_bound(types.begin(), last, type, lessThanType);
+  auto iter = std::lower_bound(types.begin(), last, type, less_than_type);
   if (iter != last && (*iter)->type == type) {
     return iter->get();
   }
   return types.emplace(iter, new ResourceTableType(type))->get();
 }
 
-ResourceEntry* ResourceTableType::findEntry(const StringPiece& name) {
+ResourceEntry* ResourceTableType::FindEntry(const StringPiece& name) {
   const auto last = entries.end();
   auto iter = std::lower_bound(entries.begin(), last, name,
-                               lessThanStructWithName<ResourceEntry>);
+                               less_than_struct_with_name<ResourceEntry>);
   if (iter != last && name == (*iter)->name) {
     return iter->get();
   }
   return nullptr;
 }
 
-ResourceEntry* ResourceTableType::findOrCreateEntry(const StringPiece& name) {
+ResourceEntry* ResourceTableType::FindOrCreateEntry(const StringPiece& name) {
   auto last = entries.end();
   auto iter = std::lower_bound(entries.begin(), last, name,
-                               lessThanStructWithName<ResourceEntry>);
+                               less_than_struct_with_name<ResourceEntry>);
   if (iter != last && name == (*iter)->name) {
     return iter->get();
   }
   return entries.emplace(iter, new ResourceEntry(name))->get();
 }
 
-ResourceConfigValue* ResourceEntry::findValue(const ConfigDescription& config) {
-  return findValue(config, StringPiece());
+ResourceConfigValue* ResourceEntry::FindValue(const ConfigDescription& config) {
+  return FindValue(config, StringPiece());
 }
 
 struct ConfigKey {
@@ -144,7 +147,7 @@ bool ltConfigKeyRef(const std::unique_ptr<ResourceConfigValue>& lhs,
   return cmp < 0;
 }
 
-ResourceConfigValue* ResourceEntry::findValue(const ConfigDescription& config,
+ResourceConfigValue* ResourceEntry::FindValue(const ConfigDescription& config,
                                               const StringPiece& product) {
   auto iter = std::lower_bound(values.begin(), values.end(),
                                ConfigKey{&config, product}, ltConfigKeyRef);
@@ -157,7 +160,7 @@ ResourceConfigValue* ResourceEntry::findValue(const ConfigDescription& config,
   return nullptr;
 }
 
-ResourceConfigValue* ResourceEntry::findOrCreateValue(
+ResourceConfigValue* ResourceEntry::FindOrCreateValue(
     const ConfigDescription& config, const StringPiece& product) {
   auto iter = std::lower_bound(values.begin(), values.end(),
                                ConfigKey{&config, product}, ltConfigKeyRef);
@@ -197,7 +200,7 @@ std::vector<ResourceConfigValue*> ResourceEntry::findAllValues(
   return results;
 }
 
-std::vector<ResourceConfigValue*> ResourceEntry::findValuesIf(
+std::vector<ResourceConfigValue*> ResourceEntry::FindValuesIf(
     const std::function<bool(ResourceConfigValue*)>& f) {
   std::vector<ResourceConfigValue*> results;
   for (auto& configValue : values) {
@@ -232,16 +235,16 @@ std::vector<ResourceConfigValue*> ResourceEntry::findValuesIf(
  * format for there to be
  * no error.
  */
-ResourceTable::CollisionResult ResourceTable::resolveValueCollision(
+ResourceTable::CollisionResult ResourceTable::ResolveValueCollision(
     Value* existing, Value* incoming) {
-  Attribute* existingAttr = valueCast<Attribute>(existing);
-  Attribute* incomingAttr = valueCast<Attribute>(incoming);
-  if (!incomingAttr) {
-    if (incoming->isWeak()) {
+  Attribute* existing_attr = ValueCast<Attribute>(existing);
+  Attribute* incoming_attr = ValueCast<Attribute>(incoming);
+  if (!incoming_attr) {
+    if (incoming->IsWeak()) {
       // We're trying to add a weak resource but a resource
       // already exists. Keep the existing.
       return CollisionResult::kKeepOriginal;
-    } else if (existing->isWeak()) {
+    } else if (existing->IsWeak()) {
       // Override the weak resource with the new strong resource.
       return CollisionResult::kTakeNew;
     }
@@ -250,8 +253,8 @@ ResourceTable::CollisionResult ResourceTable::resolveValueCollision(
     return CollisionResult::kConflict;
   }
 
-  if (!existingAttr) {
-    if (existing->isWeak()) {
+  if (!existing_attr) {
+    if (existing->IsWeak()) {
       // The existing value is not an attribute and it is weak,
       // so take the incoming attribute value.
       return CollisionResult::kTakeNew;
@@ -261,7 +264,7 @@ ResourceTable::CollisionResult ResourceTable::resolveValueCollision(
     return CollisionResult::kConflict;
   }
 
-  assert(incomingAttr && existingAttr);
+  CHECK(incoming_attr != nullptr && existing_attr != nullptr);
 
   //
   // Attribute specific handling. At this point we know both
@@ -269,22 +272,22 @@ ResourceTable::CollisionResult ResourceTable::resolveValueCollision(
   // attributes all-over, we do special handling to see
   // which definition sticks.
   //
-  if (existingAttr->typeMask == incomingAttr->typeMask) {
+  if (existing_attr->type_mask == incoming_attr->type_mask) {
     // The two attributes are both DECLs, but they are plain attributes
     // with the same formats.
     // Keep the strongest one.
-    return existingAttr->isWeak() ? CollisionResult::kTakeNew
-                                  : CollisionResult::kKeepOriginal;
+    return existing_attr->IsWeak() ? CollisionResult::kTakeNew
+                                   : CollisionResult::kKeepOriginal;
   }
 
-  if (existingAttr->isWeak() &&
-      existingAttr->typeMask == android::ResTable_map::TYPE_ANY) {
+  if (existing_attr->IsWeak() &&
+      existing_attr->type_mask == android::ResTable_map::TYPE_ANY) {
     // Any incoming attribute is better than this.
     return CollisionResult::kTakeNew;
   }
 
-  if (incomingAttr->isWeak() &&
-      incomingAttr->typeMask == android::ResTable_map::TYPE_ANY) {
+  if (incoming_attr->IsWeak() &&
+      incoming_attr->type_mask == android::ResTable_map::TYPE_ANY) {
     // The incoming attribute may be a USE instead of a DECL.
     // Keep the existing attribute.
     return CollisionResult::kKeepOriginal;
@@ -295,138 +298,139 @@ ResourceTable::CollisionResult ResourceTable::resolveValueCollision(
 static constexpr const char* kValidNameChars = "._-";
 static constexpr const char* kValidNameMangledChars = "._-$";
 
-bool ResourceTable::addResource(const ResourceNameRef& name,
+bool ResourceTable::AddResource(const ResourceNameRef& name,
                                 const ConfigDescription& config,
                                 const StringPiece& product,
                                 std::unique_ptr<Value> value,
                                 IDiagnostics* diag) {
-  return addResourceImpl(name, {}, config, product, std::move(value),
-                         kValidNameChars, resolveValueCollision, diag);
+  return AddResourceImpl(name, {}, config, product, std::move(value),
+                         kValidNameChars, ResolveValueCollision, diag);
 }
 
-bool ResourceTable::addResource(const ResourceNameRef& name,
-                                const ResourceId& resId,
+bool ResourceTable::AddResource(const ResourceNameRef& name,
+                                const ResourceId& res_id,
                                 const ConfigDescription& config,
                                 const StringPiece& product,
                                 std::unique_ptr<Value> value,
                                 IDiagnostics* diag) {
-  return addResourceImpl(name, resId, config, product, std::move(value),
-                         kValidNameChars, resolveValueCollision, diag);
+  return AddResourceImpl(name, res_id, config, product, std::move(value),
+                         kValidNameChars, ResolveValueCollision, diag);
 }
 
-bool ResourceTable::addFileReference(const ResourceNameRef& name,
+bool ResourceTable::AddFileReference(const ResourceNameRef& name,
                                      const ConfigDescription& config,
                                      const Source& source,
                                      const StringPiece& path,
                                      IDiagnostics* diag) {
-  return addFileReferenceImpl(name, config, source, path, nullptr,
+  return AddFileReferenceImpl(name, config, source, path, nullptr,
                               kValidNameChars, diag);
 }
 
-bool ResourceTable::addFileReferenceAllowMangled(
+bool ResourceTable::AddFileReferenceAllowMangled(
     const ResourceNameRef& name, const ConfigDescription& config,
     const Source& source, const StringPiece& path, io::IFile* file,
     IDiagnostics* diag) {
-  return addFileReferenceImpl(name, config, source, path, file,
+  return AddFileReferenceImpl(name, config, source, path, file,
                               kValidNameMangledChars, diag);
 }
 
-bool ResourceTable::addFileReferenceImpl(
+bool ResourceTable::AddFileReferenceImpl(
     const ResourceNameRef& name, const ConfigDescription& config,
     const Source& source, const StringPiece& path, io::IFile* file,
-    const char* validChars, IDiagnostics* diag) {
+    const char* valid_chars, IDiagnostics* diag) {
   std::unique_ptr<FileReference> fileRef =
-      util::make_unique<FileReference>(stringPool.makeRef(path));
-  fileRef->setSource(source);
+      util::make_unique<FileReference>(string_pool.MakeRef(path));
+  fileRef->SetSource(source);
   fileRef->file = file;
-  return addResourceImpl(name, ResourceId{}, config, StringPiece{},
-                         std::move(fileRef), validChars, resolveValueCollision,
+  return AddResourceImpl(name, ResourceId{}, config, StringPiece{},
+                         std::move(fileRef), valid_chars, ResolveValueCollision,
                          diag);
 }
 
-bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
+bool ResourceTable::AddResourceAllowMangled(const ResourceNameRef& name,
                                             const ConfigDescription& config,
                                             const StringPiece& product,
                                             std::unique_ptr<Value> value,
                                             IDiagnostics* diag) {
-  return addResourceImpl(name, ResourceId{}, config, product, std::move(value),
-                         kValidNameMangledChars, resolveValueCollision, diag);
+  return AddResourceImpl(name, ResourceId{}, config, product, std::move(value),
+                         kValidNameMangledChars, ResolveValueCollision, diag);
 }
 
-bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
+bool ResourceTable::AddResourceAllowMangled(const ResourceNameRef& name,
                                             const ResourceId& id,
                                             const ConfigDescription& config,
                                             const StringPiece& product,
                                             std::unique_ptr<Value> value,
                                             IDiagnostics* diag) {
-  return addResourceImpl(name, id, config, product, std::move(value),
-                         kValidNameMangledChars, resolveValueCollision, diag);
+  return AddResourceImpl(name, id, config, product, std::move(value),
+                         kValidNameMangledChars, ResolveValueCollision, diag);
 }
 
-bool ResourceTable::addResourceImpl(
-    const ResourceNameRef& name, const ResourceId& resId,
+bool ResourceTable::AddResourceImpl(
+    const ResourceNameRef& name, const ResourceId& res_id,
     const ConfigDescription& config, const StringPiece& product,
-    std::unique_ptr<Value> value, const char* validChars,
+    std::unique_ptr<Value> value, const char* valid_chars,
     const CollisionResolverFunc& conflictResolver, IDiagnostics* diag) {
-  assert(value && "value can't be nullptr");
-  assert(diag && "diagnostics can't be nullptr");
+  CHECK(value != nullptr);
+  CHECK(diag != nullptr);
 
-  auto badCharIter =
-      util::findNonAlphaNumericAndNotInSet(name.entry, validChars);
-  if (badCharIter != name.entry.end()) {
-    diag->error(DiagMessage(value->getSource())
+  auto bad_char_iter =
+      util::FindNonAlphaNumericAndNotInSet(name.entry, valid_chars);
+  if (bad_char_iter != name.entry.end()) {
+    diag->Error(DiagMessage(value->GetSource())
                 << "resource '" << name << "' has invalid entry name '"
                 << name.entry << "'. Invalid character '"
-                << StringPiece(badCharIter, 1) << "'");
+                << StringPiece(bad_char_iter, 1) << "'");
     return false;
   }
 
-  ResourceTablePackage* package = findOrCreatePackage(name.package);
-  if (resId.isValid() && package->id &&
-      package->id.value() != resId.packageId()) {
-    diag->error(DiagMessage(value->getSource())
-                << "trying to add resource '" << name << "' with ID " << resId
+  ResourceTablePackage* package = FindOrCreatePackage(name.package);
+  if (res_id.is_valid() && package->id &&
+      package->id.value() != res_id.package_id()) {
+    diag->Error(DiagMessage(value->GetSource())
+                << "trying to add resource '" << name << "' with ID " << res_id
                 << " but package '" << package->name << "' already has ID "
                 << std::hex << (int)package->id.value() << std::dec);
     return false;
   }
 
-  ResourceTableType* type = package->findOrCreateType(name.type);
-  if (resId.isValid() && type->id && type->id.value() != resId.typeId()) {
-    diag->error(DiagMessage(value->getSource())
-                << "trying to add resource '" << name << "' with ID " << resId
+  ResourceTableType* type = package->FindOrCreateType(name.type);
+  if (res_id.is_valid() && type->id && type->id.value() != res_id.type_id()) {
+    diag->Error(DiagMessage(value->GetSource())
+                << "trying to add resource '" << name << "' with ID " << res_id
                 << " but type '" << type->type << "' already has ID "
                 << std::hex << (int)type->id.value() << std::dec);
     return false;
   }
 
-  ResourceEntry* entry = type->findOrCreateEntry(name.entry);
-  if (resId.isValid() && entry->id && entry->id.value() != resId.entryId()) {
-    diag->error(DiagMessage(value->getSource())
-                << "trying to add resource '" << name << "' with ID " << resId
+  ResourceEntry* entry = type->FindOrCreateEntry(name.entry);
+  if (res_id.is_valid() && entry->id &&
+      entry->id.value() != res_id.entry_id()) {
+    diag->Error(DiagMessage(value->GetSource())
+                << "trying to add resource '" << name << "' with ID " << res_id
                 << " but resource already has ID "
                 << ResourceId(package->id.value(), type->id.value(),
                               entry->id.value()));
     return false;
   }
 
-  ResourceConfigValue* configValue = entry->findOrCreateValue(config, product);
-  if (!configValue->value) {
+  ResourceConfigValue* config_value = entry->FindOrCreateValue(config, product);
+  if (!config_value->value) {
     // Resource does not exist, add it now.
-    configValue->value = std::move(value);
+    config_value->value = std::move(value);
 
   } else {
-    switch (conflictResolver(configValue->value.get(), value.get())) {
+    switch (conflictResolver(config_value->value.get(), value.get())) {
       case CollisionResult::kTakeNew:
         // Take the incoming value.
-        configValue->value = std::move(value);
+        config_value->value = std::move(value);
         break;
 
       case CollisionResult::kConflict:
-        diag->error(DiagMessage(value->getSource())
+        diag->Error(DiagMessage(value->GetSource())
                     << "duplicate value for resource '" << name << "' "
                     << "with config '" << config << "'");
-        diag->error(DiagMessage(configValue->value->getSource())
+        diag->Error(DiagMessage(config_value->value->GetSource())
                     << "resource previously defined here");
         return false;
 
@@ -435,113 +439,114 @@ bool ResourceTable::addResourceImpl(
     }
   }
 
-  if (resId.isValid()) {
-    package->id = resId.packageId();
-    type->id = resId.typeId();
-    entry->id = resId.entryId();
+  if (res_id.is_valid()) {
+    package->id = res_id.package_id();
+    type->id = res_id.type_id();
+    entry->id = res_id.entry_id();
   }
   return true;
 }
 
-bool ResourceTable::setSymbolState(const ResourceNameRef& name,
-                                   const ResourceId& resId,
+bool ResourceTable::SetSymbolState(const ResourceNameRef& name,
+                                   const ResourceId& res_id,
                                    const Symbol& symbol, IDiagnostics* diag) {
-  return setSymbolStateImpl(name, resId, symbol, kValidNameChars, diag);
+  return SetSymbolStateImpl(name, res_id, symbol, kValidNameChars, diag);
 }
 
-bool ResourceTable::setSymbolStateAllowMangled(const ResourceNameRef& name,
-                                               const ResourceId& resId,
+bool ResourceTable::SetSymbolStateAllowMangled(const ResourceNameRef& name,
+                                               const ResourceId& res_id,
                                                const Symbol& symbol,
                                                IDiagnostics* diag) {
-  return setSymbolStateImpl(name, resId, symbol, kValidNameMangledChars, diag);
+  return SetSymbolStateImpl(name, res_id, symbol, kValidNameMangledChars, diag);
 }
 
-bool ResourceTable::setSymbolStateImpl(const ResourceNameRef& name,
-                                       const ResourceId& resId,
+bool ResourceTable::SetSymbolStateImpl(const ResourceNameRef& name,
+                                       const ResourceId& res_id,
                                        const Symbol& symbol,
-                                       const char* validChars,
+                                       const char* valid_chars,
                                        IDiagnostics* diag) {
-  assert(diag && "diagnostics can't be nullptr");
+  CHECK(diag != nullptr);
 
-  auto badCharIter =
-      util::findNonAlphaNumericAndNotInSet(name.entry, validChars);
-  if (badCharIter != name.entry.end()) {
-    diag->error(DiagMessage(symbol.source)
+  auto bad_char_iter =
+      util::FindNonAlphaNumericAndNotInSet(name.entry, valid_chars);
+  if (bad_char_iter != name.entry.end()) {
+    diag->Error(DiagMessage(symbol.source)
                 << "resource '" << name << "' has invalid entry name '"
                 << name.entry << "'. Invalid character '"
-                << StringPiece(badCharIter, 1) << "'");
+                << StringPiece(bad_char_iter, 1) << "'");
     return false;
   }
 
-  ResourceTablePackage* package = findOrCreatePackage(name.package);
-  if (resId.isValid() && package->id &&
-      package->id.value() != resId.packageId()) {
-    diag->error(DiagMessage(symbol.source)
-                << "trying to add resource '" << name << "' with ID " << resId
+  ResourceTablePackage* package = FindOrCreatePackage(name.package);
+  if (res_id.is_valid() && package->id &&
+      package->id.value() != res_id.package_id()) {
+    diag->Error(DiagMessage(symbol.source)
+                << "trying to add resource '" << name << "' with ID " << res_id
                 << " but package '" << package->name << "' already has ID "
                 << std::hex << (int)package->id.value() << std::dec);
     return false;
   }
 
-  ResourceTableType* type = package->findOrCreateType(name.type);
-  if (resId.isValid() && type->id && type->id.value() != resId.typeId()) {
-    diag->error(DiagMessage(symbol.source)
-                << "trying to add resource '" << name << "' with ID " << resId
+  ResourceTableType* type = package->FindOrCreateType(name.type);
+  if (res_id.is_valid() && type->id && type->id.value() != res_id.type_id()) {
+    diag->Error(DiagMessage(symbol.source)
+                << "trying to add resource '" << name << "' with ID " << res_id
                 << " but type '" << type->type << "' already has ID "
                 << std::hex << (int)type->id.value() << std::dec);
     return false;
   }
 
-  ResourceEntry* entry = type->findOrCreateEntry(name.entry);
-  if (resId.isValid() && entry->id && entry->id.value() != resId.entryId()) {
-    diag->error(DiagMessage(symbol.source)
-                << "trying to add resource '" << name << "' with ID " << resId
+  ResourceEntry* entry = type->FindOrCreateEntry(name.entry);
+  if (res_id.is_valid() && entry->id &&
+      entry->id.value() != res_id.entry_id()) {
+    diag->Error(DiagMessage(symbol.source)
+                << "trying to add resource '" << name << "' with ID " << res_id
                 << " but resource already has ID "
                 << ResourceId(package->id.value(), type->id.value(),
                               entry->id.value()));
     return false;
   }
 
-  if (resId.isValid()) {
-    package->id = resId.packageId();
-    type->id = resId.typeId();
-    entry->id = resId.entryId();
+  if (res_id.is_valid()) {
+    package->id = res_id.package_id();
+    type->id = res_id.type_id();
+    entry->id = res_id.entry_id();
   }
 
   // Only mark the type state as public, it doesn't care about being private.
   if (symbol.state == SymbolState::kPublic) {
-    type->symbolStatus.state = SymbolState::kPublic;
+    type->symbol_status.state = SymbolState::kPublic;
   }
 
   if (symbol.state == SymbolState::kUndefined &&
-      entry->symbolStatus.state != SymbolState::kUndefined) {
+      entry->symbol_status.state != SymbolState::kUndefined) {
     // We can't undefine a symbol (remove its visibility). Ignore.
     return true;
   }
 
   if (symbol.state == SymbolState::kPrivate &&
-      entry->symbolStatus.state == SymbolState::kPublic) {
+      entry->symbol_status.state == SymbolState::kPublic) {
     // We can't downgrade public to private. Ignore.
     return true;
   }
 
-  entry->symbolStatus = std::move(symbol);
+  entry->symbol_status = std::move(symbol);
   return true;
 }
 
-Maybe<ResourceTable::SearchResult> ResourceTable::findResource(
+Maybe<ResourceTable::SearchResult> ResourceTable::FindResource(
     const ResourceNameRef& name) {
-  ResourceTablePackage* package = findPackage(name.package);
+  ResourceTablePackage* package = FindPackage(name.package);
   if (!package) {
     return {};
   }
 
-  ResourceTableType* type = package->findType(name.type);
+  ResourceTableType* type = package->FindType(name.type);
   if (!type) {
     return {};
   }
 
-  ResourceEntry* entry = type->findEntry(name.entry);
+  ResourceEntry* entry = type->FindEntry(name.entry);
   if (!entry) {
     return {};
   }

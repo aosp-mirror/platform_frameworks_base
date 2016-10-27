@@ -15,16 +15,20 @@
  */
 
 #include "flatten/XmlFlattener.h"
+
+#include <algorithm>
+#include <map>
+#include <vector>
+
+#include "android-base/logging.h"
+#include "android-base/macros.h"
+#include "androidfw/ResourceTypes.h"
+#include "utils/misc.h"
+
 #include "SdkConstants.h"
 #include "flatten/ChunkWriter.h"
 #include "flatten/ResourceTypeExtensions.h"
 #include "xml/XmlDom.h"
-
-#include <androidfw/ResourceTypes.h>
-#include <utils/misc.h>
-#include <algorithm>
-#include <map>
-#include <vector>
 
 using namespace android;
 
@@ -34,216 +38,215 @@ namespace {
 
 constexpr uint32_t kLowPriority = 0xffffffffu;
 
-struct XmlFlattenerVisitor : public xml::Visitor {
-  using xml::Visitor::visit;
+static bool cmp_xml_attribute_by_id(const xml::Attribute* a,
+                                    const xml::Attribute* b) {
+  if (a->compiled_attribute && a->compiled_attribute.value().id) {
+    if (b->compiled_attribute && b->compiled_attribute.value().id) {
+      return a->compiled_attribute.value().id.value() <
+             b->compiled_attribute.value().id.value();
+    }
+    return true;
+  } else if (!b->compiled_attribute) {
+    int diff = a->namespace_uri.compare(b->namespace_uri);
+    if (diff < 0) {
+      return true;
+    } else if (diff > 0) {
+      return false;
+    }
+    return a->name < b->name;
+  }
+  return false;
+}
 
-  BigBuffer* mBuffer;
-  XmlFlattenerOptions mOptions;
-  StringPool mPool;
-  std::map<uint8_t, StringPool> mPackagePools;
+class XmlFlattenerVisitor : public xml::Visitor {
+ public:
+  using xml::Visitor::Visit;
+
+  StringPool pool;
+  std::map<uint8_t, StringPool> package_pools;
 
   struct StringFlattenDest {
     StringPool::Ref ref;
     ResStringPool_ref* dest;
   };
-  std::vector<StringFlattenDest> mStringRefs;
 
-  // Scratch vector to filter attributes. We avoid allocations
-  // making this a member.
-  std::vector<xml::Attribute*> mFilteredAttrs;
+  std::vector<StringFlattenDest> string_refs;
 
   XmlFlattenerVisitor(BigBuffer* buffer, XmlFlattenerOptions options)
-      : mBuffer(buffer), mOptions(options) {}
+      : buffer_(buffer), options_(options) {}
 
-  void addString(const StringPiece& str, uint32_t priority,
-                 android::ResStringPool_ref* dest,
-                 bool treatEmptyStringAsNull = false) {
-    if (str.empty() && treatEmptyStringAsNull) {
-      // Some parts of the runtime treat null differently than empty string.
-      dest->index = util::deviceToHost32(-1);
-    } else {
-      mStringRefs.push_back(StringFlattenDest{
-          mPool.makeRef(str, StringPool::Context(priority)), dest});
-    }
-  }
-
-  void addString(const StringPool::Ref& ref, android::ResStringPool_ref* dest) {
-    mStringRefs.push_back(StringFlattenDest{ref, dest});
-  }
-
-  void writeNamespace(xml::Namespace* node, uint16_t type) {
-    ChunkWriter writer(mBuffer);
-
-    ResXMLTree_node* flatNode = writer.startChunk<ResXMLTree_node>(type);
-    flatNode->lineNumber = util::hostToDevice32(node->lineNumber);
-    flatNode->comment.index = util::hostToDevice32(-1);
-
-    ResXMLTree_namespaceExt* flatNs =
-        writer.nextBlock<ResXMLTree_namespaceExt>();
-    addString(node->namespacePrefix, kLowPriority, &flatNs->prefix);
-    addString(node->namespaceUri, kLowPriority, &flatNs->uri);
-
-    writer.finish();
-  }
-
-  void visit(xml::Namespace* node) override {
-    if (node->namespaceUri == xml::kSchemaTools) {
+  void Visit(xml::Namespace* node) override {
+    if (node->namespace_uri == xml::kSchemaTools) {
       // Skip dedicated tools namespace.
-      xml::Visitor::visit(node);
+      xml::Visitor::Visit(node);
     } else {
-      writeNamespace(node, android::RES_XML_START_NAMESPACE_TYPE);
-      xml::Visitor::visit(node);
-      writeNamespace(node, android::RES_XML_END_NAMESPACE_TYPE);
+      WriteNamespace(node, android::RES_XML_START_NAMESPACE_TYPE);
+      xml::Visitor::Visit(node);
+      WriteNamespace(node, android::RES_XML_END_NAMESPACE_TYPE);
     }
   }
 
-  void visit(xml::Text* node) override {
-    if (util::trimWhitespace(node->text).empty()) {
+  void Visit(xml::Text* node) override {
+    if (util::TrimWhitespace(node->text).empty()) {
       // Skip whitespace only text nodes.
       return;
     }
 
-    ChunkWriter writer(mBuffer);
-    ResXMLTree_node* flatNode =
-        writer.startChunk<ResXMLTree_node>(RES_XML_CDATA_TYPE);
-    flatNode->lineNumber = util::hostToDevice32(node->lineNumber);
-    flatNode->comment.index = util::hostToDevice32(-1);
+    ChunkWriter writer(buffer_);
+    ResXMLTree_node* flat_node =
+        writer.StartChunk<ResXMLTree_node>(RES_XML_CDATA_TYPE);
+    flat_node->lineNumber = util::HostToDevice32(node->line_number);
+    flat_node->comment.index = util::HostToDevice32(-1);
 
-    ResXMLTree_cdataExt* flatText = writer.nextBlock<ResXMLTree_cdataExt>();
-    addString(node->text, kLowPriority, &flatText->data);
+    ResXMLTree_cdataExt* flat_text = writer.NextBlock<ResXMLTree_cdataExt>();
+    AddString(node->text, kLowPriority, &flat_text->data);
 
-    writer.finish();
+    writer.Finish();
   }
 
-  void visit(xml::Element* node) override {
+  void Visit(xml::Element* node) override {
     {
-      ChunkWriter startWriter(mBuffer);
-      ResXMLTree_node* flatNode =
-          startWriter.startChunk<ResXMLTree_node>(RES_XML_START_ELEMENT_TYPE);
-      flatNode->lineNumber = util::hostToDevice32(node->lineNumber);
-      flatNode->comment.index = util::hostToDevice32(-1);
+      ChunkWriter start_writer(buffer_);
+      ResXMLTree_node* flat_node =
+          start_writer.StartChunk<ResXMLTree_node>(RES_XML_START_ELEMENT_TYPE);
+      flat_node->lineNumber = util::HostToDevice32(node->line_number);
+      flat_node->comment.index = util::HostToDevice32(-1);
 
-      ResXMLTree_attrExt* flatElem =
-          startWriter.nextBlock<ResXMLTree_attrExt>();
+      ResXMLTree_attrExt* flat_elem =
+          start_writer.NextBlock<ResXMLTree_attrExt>();
 
       // A missing namespace must be null, not an empty string. Otherwise the
-      // runtime
-      // complains.
-      addString(node->namespaceUri, kLowPriority, &flatElem->ns,
-                true /* treatEmptyStringAsNull */);
-      addString(node->name, kLowPriority, &flatElem->name,
-                true /* treatEmptyStringAsNull */);
+      // runtime complains.
+      AddString(node->namespace_uri, kLowPriority, &flat_elem->ns,
+                true /* treat_empty_string_as_null */);
+      AddString(node->name, kLowPriority, &flat_elem->name,
+                true /* treat_empty_string_as_null */);
 
-      flatElem->attributeStart = util::hostToDevice16(sizeof(*flatElem));
-      flatElem->attributeSize =
-          util::hostToDevice16(sizeof(ResXMLTree_attribute));
+      flat_elem->attributeStart = util::HostToDevice16(sizeof(*flat_elem));
+      flat_elem->attributeSize =
+          util::HostToDevice16(sizeof(ResXMLTree_attribute));
 
-      writeAttributes(node, flatElem, &startWriter);
+      WriteAttributes(node, flat_elem, &start_writer);
 
-      startWriter.finish();
+      start_writer.Finish();
     }
 
-    xml::Visitor::visit(node);
+    xml::Visitor::Visit(node);
 
     {
-      ChunkWriter endWriter(mBuffer);
-      ResXMLTree_node* flatEndNode =
-          endWriter.startChunk<ResXMLTree_node>(RES_XML_END_ELEMENT_TYPE);
-      flatEndNode->lineNumber = util::hostToDevice32(node->lineNumber);
-      flatEndNode->comment.index = util::hostToDevice32(-1);
+      ChunkWriter end_writer(buffer_);
+      ResXMLTree_node* flat_end_node =
+          end_writer.StartChunk<ResXMLTree_node>(RES_XML_END_ELEMENT_TYPE);
+      flat_end_node->lineNumber = util::HostToDevice32(node->line_number);
+      flat_end_node->comment.index = util::HostToDevice32(-1);
 
-      ResXMLTree_endElementExt* flatEndElem =
-          endWriter.nextBlock<ResXMLTree_endElementExt>();
-      addString(node->namespaceUri, kLowPriority, &flatEndElem->ns,
-                true /* treatEmptyStringAsNull */);
-      addString(node->name, kLowPriority, &flatEndElem->name);
+      ResXMLTree_endElementExt* flat_end_elem =
+          end_writer.NextBlock<ResXMLTree_endElementExt>();
+      AddString(node->namespace_uri, kLowPriority, &flat_end_elem->ns,
+                true /* treat_empty_string_as_null */);
+      AddString(node->name, kLowPriority, &flat_end_elem->name);
 
-      endWriter.finish();
+      end_writer.Finish();
     }
   }
 
-  static bool cmpXmlAttributeById(const xml::Attribute* a,
-                                  const xml::Attribute* b) {
-    if (a->compiledAttribute && a->compiledAttribute.value().id) {
-      if (b->compiledAttribute && b->compiledAttribute.value().id) {
-        return a->compiledAttribute.value().id.value() <
-               b->compiledAttribute.value().id.value();
-      }
-      return true;
-    } else if (!b->compiledAttribute) {
-      int diff = a->namespaceUri.compare(b->namespaceUri);
-      if (diff < 0) {
-        return true;
-      } else if (diff > 0) {
-        return false;
-      }
-      return a->name < b->name;
+ private:
+  DISALLOW_COPY_AND_ASSIGN(XmlFlattenerVisitor);
+
+  void AddString(const StringPiece& str, uint32_t priority,
+                 android::ResStringPool_ref* dest,
+                 bool treat_empty_string_as_null = false) {
+    if (str.empty() && treat_empty_string_as_null) {
+      // Some parts of the runtime treat null differently than empty string.
+      dest->index = util::DeviceToHost32(-1);
+    } else {
+      string_refs.push_back(StringFlattenDest{
+          pool.MakeRef(str, StringPool::Context(priority)), dest});
     }
-    return false;
   }
 
-  void writeAttributes(xml::Element* node, ResXMLTree_attrExt* flatElem,
+  void AddString(const StringPool::Ref& ref, android::ResStringPool_ref* dest) {
+    string_refs.push_back(StringFlattenDest{ref, dest});
+  }
+
+  void WriteNamespace(xml::Namespace* node, uint16_t type) {
+    ChunkWriter writer(buffer_);
+
+    ResXMLTree_node* flatNode = writer.StartChunk<ResXMLTree_node>(type);
+    flatNode->lineNumber = util::HostToDevice32(node->line_number);
+    flatNode->comment.index = util::HostToDevice32(-1);
+
+    ResXMLTree_namespaceExt* flat_ns =
+        writer.NextBlock<ResXMLTree_namespaceExt>();
+    AddString(node->namespace_prefix, kLowPriority, &flat_ns->prefix);
+    AddString(node->namespace_uri, kLowPriority, &flat_ns->uri);
+
+    writer.Finish();
+  }
+
+  void WriteAttributes(xml::Element* node, ResXMLTree_attrExt* flat_elem,
                        ChunkWriter* writer) {
-    mFilteredAttrs.clear();
-    mFilteredAttrs.reserve(node->attributes.size());
+    filtered_attrs_.clear();
+    filtered_attrs_.reserve(node->attributes.size());
 
     // Filter the attributes.
     for (xml::Attribute& attr : node->attributes) {
-      if (mOptions.maxSdkLevel && attr.compiledAttribute &&
-          attr.compiledAttribute.value().id) {
-        size_t sdkLevel =
-            findAttributeSdkLevel(attr.compiledAttribute.value().id.value());
-        if (sdkLevel > mOptions.maxSdkLevel.value()) {
+      if (options_.max_sdk_level && attr.compiled_attribute &&
+          attr.compiled_attribute.value().id) {
+        size_t sdk_level =
+            FindAttributeSdkLevel(attr.compiled_attribute.value().id.value());
+        if (sdk_level > options_.max_sdk_level.value()) {
           continue;
         }
       }
-      if (attr.namespaceUri == xml::kSchemaTools) {
+      if (attr.namespace_uri == xml::kSchemaTools) {
         continue;
       }
-      mFilteredAttrs.push_back(&attr);
+      filtered_attrs_.push_back(&attr);
     }
 
-    if (mFilteredAttrs.empty()) {
+    if (filtered_attrs_.empty()) {
       return;
     }
 
     const ResourceId kIdAttr(0x010100d0);
 
-    std::sort(mFilteredAttrs.begin(), mFilteredAttrs.end(),
-              cmpXmlAttributeById);
+    std::sort(filtered_attrs_.begin(), filtered_attrs_.end(),
+              cmp_xml_attribute_by_id);
 
-    flatElem->attributeCount = util::hostToDevice16(mFilteredAttrs.size());
+    flat_elem->attributeCount = util::HostToDevice16(filtered_attrs_.size());
 
-    ResXMLTree_attribute* flatAttr =
-        writer->nextBlock<ResXMLTree_attribute>(mFilteredAttrs.size());
-    uint16_t attributeIndex = 1;
-    for (const xml::Attribute* xmlAttr : mFilteredAttrs) {
+    ResXMLTree_attribute* flat_attr =
+        writer->NextBlock<ResXMLTree_attribute>(filtered_attrs_.size());
+    uint16_t attribute_index = 1;
+    for (const xml::Attribute* xml_attr : filtered_attrs_) {
       // Assign the indices for specific attributes.
-      if (xmlAttr->compiledAttribute && xmlAttr->compiledAttribute.value().id &&
-          xmlAttr->compiledAttribute.value().id.value() == kIdAttr) {
-        flatElem->idIndex = util::hostToDevice16(attributeIndex);
-      } else if (xmlAttr->namespaceUri.empty()) {
-        if (xmlAttr->name == "class") {
-          flatElem->classIndex = util::hostToDevice16(attributeIndex);
-        } else if (xmlAttr->name == "style") {
-          flatElem->styleIndex = util::hostToDevice16(attributeIndex);
+      if (xml_attr->compiled_attribute &&
+          xml_attr->compiled_attribute.value().id &&
+          xml_attr->compiled_attribute.value().id.value() == kIdAttr) {
+        flat_elem->idIndex = util::HostToDevice16(attribute_index);
+      } else if (xml_attr->namespace_uri.empty()) {
+        if (xml_attr->name == "class") {
+          flat_elem->classIndex = util::HostToDevice16(attribute_index);
+        } else if (xml_attr->name == "style") {
+          flat_elem->styleIndex = util::HostToDevice16(attribute_index);
         }
       }
-      attributeIndex++;
+      attribute_index++;
 
       // Add the namespaceUri to the list of StringRefs to encode. Use null if
       // the namespace
       // is empty (doesn't exist).
-      addString(xmlAttr->namespaceUri, kLowPriority, &flatAttr->ns,
-                true /* treatEmptyStringAsNull */);
+      AddString(xml_attr->namespace_uri, kLowPriority, &flat_attr->ns,
+                true /* treat_empty_string_as_null */);
 
-      flatAttr->rawValue.index = util::hostToDevice32(-1);
+      flat_attr->rawValue.index = util::HostToDevice32(-1);
 
-      if (!xmlAttr->compiledAttribute ||
-          !xmlAttr->compiledAttribute.value().id) {
+      if (!xml_attr->compiled_attribute ||
+          !xml_attr->compiled_attribute.value().id) {
         // The attribute has no associated ResourceID, so the string order
         // doesn't matter.
-        addString(xmlAttr->name, kLowPriority, &flatAttr->name);
+        AddString(xml_attr->name, kLowPriority, &flat_attr->name);
       } else {
         // Attribute names are stored without packages, but we use
         // their StringPool index to lookup their resource IDs.
@@ -252,99 +255,106 @@ struct XmlFlattenerVisitor : public xml::Visitor {
         // pools that we later combine.
         //
         // Lookup the StringPool for this package and make the reference there.
-        const xml::AaptAttribute& aaptAttr = xmlAttr->compiledAttribute.value();
+        const xml::AaptAttribute& aapt_attr =
+            xml_attr->compiled_attribute.value();
 
-        StringPool::Ref nameRef =
-            mPackagePools[aaptAttr.id.value().packageId()].makeRef(
-                xmlAttr->name, StringPool::Context(aaptAttr.id.value().id));
+        StringPool::Ref name_ref =
+            package_pools[aapt_attr.id.value().package_id()].MakeRef(
+                xml_attr->name, StringPool::Context(aapt_attr.id.value().id));
 
         // Add it to the list of strings to flatten.
-        addString(nameRef, &flatAttr->name);
+        AddString(name_ref, &flat_attr->name);
       }
 
-      if (mOptions.keepRawValues || !xmlAttr->compiledValue) {
+      if (options_.keep_raw_values || !xml_attr->compiled_value) {
         // Keep raw values if the value is not compiled or
         // if we're building a static library (need symbols).
-        addString(xmlAttr->value, kLowPriority, &flatAttr->rawValue);
+        AddString(xml_attr->value, kLowPriority, &flat_attr->rawValue);
       }
 
-      if (xmlAttr->compiledValue) {
-        bool result = xmlAttr->compiledValue->flatten(&flatAttr->typedValue);
-        assert(result);
+      if (xml_attr->compiled_value) {
+        CHECK(xml_attr->compiled_value->Flatten(&flat_attr->typedValue));
       } else {
         // Flatten as a regular string type.
-        flatAttr->typedValue.dataType = android::Res_value::TYPE_STRING;
-        addString(xmlAttr->value, kLowPriority,
-                  (ResStringPool_ref*)&flatAttr->typedValue.data);
+        flat_attr->typedValue.dataType = android::Res_value::TYPE_STRING;
+        AddString(xml_attr->value, kLowPriority,
+                  (ResStringPool_ref*)&flat_attr->typedValue.data);
       }
 
-      flatAttr->typedValue.size =
-          util::hostToDevice16(sizeof(flatAttr->typedValue));
-      flatAttr++;
+      flat_attr->typedValue.size =
+          util::HostToDevice16(sizeof(flat_attr->typedValue));
+      flat_attr++;
     }
   }
+
+  BigBuffer* buffer_;
+  XmlFlattenerOptions options_;
+
+  // Scratch vector to filter attributes. We avoid allocations
+  // making this a member.
+  std::vector<xml::Attribute*> filtered_attrs_;
 };
 
 }  // namespace
 
-bool XmlFlattener::flatten(IAaptContext* context, xml::Node* node) {
-  BigBuffer nodeBuffer(1024);
-  XmlFlattenerVisitor visitor(&nodeBuffer, mOptions);
-  node->accept(&visitor);
+bool XmlFlattener::Flatten(IAaptContext* context, xml::Node* node) {
+  BigBuffer node_buffer(1024);
+  XmlFlattenerVisitor visitor(&node_buffer, options_);
+  node->Accept(&visitor);
 
   // Merge the package pools into the main pool.
-  for (auto& packagePoolEntry : visitor.mPackagePools) {
-    visitor.mPool.merge(std::move(packagePoolEntry.second));
+  for (auto& package_pool_entry : visitor.package_pools) {
+    visitor.pool.Merge(std::move(package_pool_entry.second));
   }
 
   // Sort the string pool so that attribute resource IDs show up first.
-  visitor.mPool.sort(
+  visitor.pool.Sort(
       [](const StringPool::Entry& a, const StringPool::Entry& b) -> bool {
         return a.context.priority < b.context.priority;
       });
 
   // Now we flatten the string pool references into the correct places.
-  for (const auto& refEntry : visitor.mStringRefs) {
-    refEntry.dest->index = util::hostToDevice32(refEntry.ref.getIndex());
+  for (const auto& ref_entry : visitor.string_refs) {
+    ref_entry.dest->index = util::HostToDevice32(ref_entry.ref.index());
   }
 
   // Write the XML header.
-  ChunkWriter xmlHeaderWriter(mBuffer);
-  xmlHeaderWriter.startChunk<ResXMLTree_header>(RES_XML_TYPE);
+  ChunkWriter xml_header_writer(buffer_);
+  xml_header_writer.StartChunk<ResXMLTree_header>(RES_XML_TYPE);
 
   // Flatten the StringPool.
-  StringPool::flattenUtf8(mBuffer, visitor.mPool);
+  StringPool::FlattenUtf8(buffer_, visitor.pool);
 
   {
     // Write the array of resource IDs, indexed by StringPool order.
-    ChunkWriter resIdMapWriter(mBuffer);
-    resIdMapWriter.startChunk<ResChunk_header>(RES_XML_RESOURCE_MAP_TYPE);
-    for (const auto& str : visitor.mPool) {
+    ChunkWriter res_id_map_writer(buffer_);
+    res_id_map_writer.StartChunk<ResChunk_header>(RES_XML_RESOURCE_MAP_TYPE);
+    for (const auto& str : visitor.pool) {
       ResourceId id = {str->context.priority};
-      if (id.id == kLowPriority || !id.isValid()) {
+      if (id.id == kLowPriority || !id.is_valid()) {
         // When we see the first non-resource ID,
         // we're done.
         break;
       }
 
-      *resIdMapWriter.nextBlock<uint32_t>() = id.id;
+      *res_id_map_writer.NextBlock<uint32_t>() = id.id;
     }
-    resIdMapWriter.finish();
+    res_id_map_writer.Finish();
   }
 
   // Move the nodeBuffer and append it to the out buffer.
-  mBuffer->appendBuffer(std::move(nodeBuffer));
+  buffer_->AppendBuffer(std::move(node_buffer));
 
   // Finish the xml header.
-  xmlHeaderWriter.finish();
+  xml_header_writer.Finish();
   return true;
 }
 
-bool XmlFlattener::consume(IAaptContext* context, xml::XmlResource* resource) {
+bool XmlFlattener::Consume(IAaptContext* context, xml::XmlResource* resource) {
   if (!resource->root) {
     return false;
   }
-  return flatten(context, resource->root.get());
+  return Flatten(context, resource->root.get());
 }
 
 }  // namespace aapt

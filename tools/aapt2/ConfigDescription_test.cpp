@@ -15,17 +15,18 @@
  */
 
 #include "ConfigDescription.h"
+
+#include <string>
+
 #include "SdkConstants.h"
 #include "test/Test.h"
 #include "util/StringPiece.h"
-
-#include <string>
 
 namespace aapt {
 
 static ::testing::AssertionResult TestParse(
     const StringPiece& input, ConfigDescription* config = nullptr) {
-  if (ConfigDescription::parse(input, config)) {
+  if (ConfigDescription::Parse(input, config)) {
     return ::testing::AssertionSuccess() << input << " was successfully parsed";
   }
   return ::testing::AssertionFailure() << input << " could not be parsed";

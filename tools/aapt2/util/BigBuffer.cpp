@@ -20,58 +20,60 @@
 #include <memory>
 #include <vector>
 
+#include "android-base/logging.h"
+
 namespace aapt {
 
-void* BigBuffer::nextBlockImpl(size_t size) {
-    if (!mBlocks.empty()) {
-        Block& block = mBlocks.back();
-        if (block.mBlockSize - block.size >= size) {
-            void* outBuffer = block.buffer.get() + block.size;
-            block.size += size;
-            mSize += size;
-            return outBuffer;
-        }
+void* BigBuffer::NextBlockImpl(size_t size) {
+  if (!blocks_.empty()) {
+    Block& block = blocks_.back();
+    if (block.block_size_ - block.size >= size) {
+      void* out_buffer = block.buffer.get() + block.size;
+      block.size += size;
+      size_ += size;
+      return out_buffer;
     }
+  }
 
-    const size_t actualSize = std::max(mBlockSize, size);
+  const size_t actual_size = std::max(block_size_, size);
 
-    Block block = {};
+  Block block = {};
 
-    // Zero-allocate the block's buffer.
-    block.buffer = std::unique_ptr<uint8_t[]>(new uint8_t[actualSize]());
-    assert(block.buffer);
+  // Zero-allocate the block's buffer.
+  block.buffer = std::unique_ptr<uint8_t[]>(new uint8_t[actual_size]());
+  CHECK(block.buffer);
 
-    block.size = size;
-    block.mBlockSize = actualSize;
+  block.size = size;
+  block.block_size_ = actual_size;
 
-    mBlocks.push_back(std::move(block));
-    mSize += size;
-    return mBlocks.back().buffer.get();
+  blocks_.push_back(std::move(block));
+  size_ += size;
+  return blocks_.back().buffer.get();
 }
 
-void* BigBuffer::nextBlock(size_t* outSize) {
-    if (!mBlocks.empty()) {
-        Block& block = mBlocks.back();
-        if (block.size != block.mBlockSize) {
-            void* outBuffer = block.buffer.get() + block.size;
-            size_t size = block.mBlockSize - block.size;
-            block.size = block.mBlockSize;
-            mSize += size;
-            *outSize = size;
-            return outBuffer;
-        }
+void* BigBuffer::NextBlock(size_t* out_size) {
+  if (!blocks_.empty()) {
+    Block& block = blocks_.back();
+    if (block.size != block.block_size_) {
+      void* out_buffer = block.buffer.get() + block.size;
+      size_t size = block.block_size_ - block.size;
+      block.size = block.block_size_;
+      size_ += size;
+      *out_size = size;
+      return out_buffer;
     }
+  }
 
-    // Zero-allocate the block's buffer.
-    Block block = {};
-    block.buffer = std::unique_ptr<uint8_t[]>(new uint8_t[mBlockSize]());
-    assert(block.buffer);
-    block.size = mBlockSize;
-    block.mBlockSize = mBlockSize;
-    mBlocks.push_back(std::move(block));
-    mSize += mBlockSize;
-    *outSize = mBlockSize;
-    return mBlocks.back().buffer.get();
+  // Zero-allocate the block's buffer.
+  Block block = {};
+  block.buffer = std::unique_ptr<uint8_t[]>(new uint8_t[block_size_]());
+  CHECK(block.buffer);
+  block.size = block_size_;
+  block.block_size_ = block_size_;
+  blocks_.push_back(std::move(block));
+  size_ += block_size_;
+  *out_size = block_size_;
+  return blocks_.back().buffer.get();
 }
 
-} // namespace aapt
+}  // namespace aapt

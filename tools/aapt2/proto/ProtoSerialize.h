@@ -17,14 +17,14 @@
 #ifndef AAPT_FLATTEN_TABLEPROTOSERIALIZER_H
 #define AAPT_FLATTEN_TABLEPROTOSERIALIZER_H
 
+#include "android-base/macros.h"
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/io/zero_copy_stream_impl_lite.h"
+
 #include "Diagnostics.h"
 #include "ResourceTable.h"
 #include "Source.h"
 #include "proto/ProtoHelpers.h"
-
-#include <android-base/macros.h>
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 
 namespace aapt {
 
@@ -42,9 +42,9 @@ class CompiledFileOutputStream {
  private:
   DISALLOW_COPY_AND_ASSIGN(CompiledFileOutputStream);
 
-  void ensureAlignedWrite();
+  void EnsureAlignedWrite();
 
-  google::protobuf::io::CodedOutputStream mOut;
+  google::protobuf::io::CodedOutputStream out_;
 };
 
 class CompiledFileInputStream {
@@ -58,18 +58,18 @@ class CompiledFileInputStream {
  private:
   DISALLOW_COPY_AND_ASSIGN(CompiledFileInputStream);
 
-  void ensureAlignedRead();
+  void EnsureAlignedRead();
 
-  google::protobuf::io::CodedInputStream mIn;
+  google::protobuf::io::CodedInputStream in_;
 };
 
-std::unique_ptr<pb::ResourceTable> serializeTableToPb(ResourceTable* table);
-std::unique_ptr<ResourceTable> deserializeTableFromPb(
+std::unique_ptr<pb::ResourceTable> SerializeTableToPb(ResourceTable* table);
+std::unique_ptr<ResourceTable> DeserializeTableFromPb(
     const pb::ResourceTable& pbTable, const Source& source, IDiagnostics* diag);
 
-std::unique_ptr<pb::CompiledFile> serializeCompiledFileToPb(
+std::unique_ptr<pb::CompiledFile> SerializeCompiledFileToPb(
     const ResourceFile& file);
-std::unique_ptr<ResourceFile> deserializeCompiledFileFromPb(
+std::unique_ptr<ResourceFile> DeserializeCompiledFileFromPb(
     const pb::CompiledFile& pbFile, const Source& source, IDiagnostics* diag);
 
 }  // namespace aapt

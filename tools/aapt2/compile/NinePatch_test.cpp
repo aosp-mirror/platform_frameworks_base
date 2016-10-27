@@ -15,6 +15,7 @@
  */
 
 #include "compile/Image.h"
+
 #include "test/Test.h"
 
 namespace aapt {
@@ -182,169 +183,168 @@ static uint8_t* kStretchAndPadding5x5[] = {
 
 TEST(NinePatchTest, Minimum3x3) {
   std::string err;
-  EXPECT_EQ(nullptr, NinePatch::create(k2x2, 2, 2, &err));
+  EXPECT_EQ(nullptr, NinePatch::Create(k2x2, 2, 2, &err));
   EXPECT_FALSE(err.empty());
 }
 
 TEST(NinePatchTest, MixedNeutralColors) {
   std::string err;
-  EXPECT_EQ(nullptr, NinePatch::create(kMixedNeutralColor3x3, 3, 3, &err));
+  EXPECT_EQ(nullptr, NinePatch::Create(kMixedNeutralColor3x3, 3, 3, &err));
   EXPECT_FALSE(err.empty());
 }
 
 TEST(NinePatchTest, TransparentNeutralColor) {
   std::string err;
   EXPECT_NE(nullptr,
-            NinePatch::create(kTransparentNeutralColor3x3, 3, 3, &err));
+            NinePatch::Create(kTransparentNeutralColor3x3, 3, 3, &err));
 }
 
 TEST(NinePatchTest, SingleStretchRegion) {
   std::string err;
-  std::unique_ptr<NinePatch> ninePatch =
-      NinePatch::create(kSingleStretch7x6, 7, 6, &err);
-  ASSERT_NE(nullptr, ninePatch);
+  std::unique_ptr<NinePatch> nine_patch =
+      NinePatch::Create(kSingleStretch7x6, 7, 6, &err);
+  ASSERT_NE(nullptr, nine_patch);
 
-  ASSERT_EQ(1u, ninePatch->horizontalStretchRegions.size());
-  ASSERT_EQ(1u, ninePatch->verticalStretchRegions.size());
+  ASSERT_EQ(1u, nine_patch->horizontal_stretch_regions.size());
+  ASSERT_EQ(1u, nine_patch->vertical_stretch_regions.size());
 
-  EXPECT_EQ(Range(1, 4), ninePatch->horizontalStretchRegions.front());
-  EXPECT_EQ(Range(1, 3), ninePatch->verticalStretchRegions.front());
+  EXPECT_EQ(Range(1, 4), nine_patch->horizontal_stretch_regions.front());
+  EXPECT_EQ(Range(1, 3), nine_patch->vertical_stretch_regions.front());
 }
 
 TEST(NinePatchTest, MultipleStretchRegions) {
   std::string err;
-  std::unique_ptr<NinePatch> ninePatch =
-      NinePatch::create(kMultipleStretch10x7, 10, 7, &err);
-  ASSERT_NE(nullptr, ninePatch);
+  std::unique_ptr<NinePatch> nine_patch =
+      NinePatch::Create(kMultipleStretch10x7, 10, 7, &err);
+  ASSERT_NE(nullptr, nine_patch);
 
-  ASSERT_EQ(3u, ninePatch->horizontalStretchRegions.size());
-  ASSERT_EQ(2u, ninePatch->verticalStretchRegions.size());
+  ASSERT_EQ(3u, nine_patch->horizontal_stretch_regions.size());
+  ASSERT_EQ(2u, nine_patch->vertical_stretch_regions.size());
 
-  EXPECT_EQ(Range(1, 2), ninePatch->horizontalStretchRegions[0]);
-  EXPECT_EQ(Range(3, 5), ninePatch->horizontalStretchRegions[1]);
-  EXPECT_EQ(Range(6, 7), ninePatch->horizontalStretchRegions[2]);
+  EXPECT_EQ(Range(1, 2), nine_patch->horizontal_stretch_regions[0]);
+  EXPECT_EQ(Range(3, 5), nine_patch->horizontal_stretch_regions[1]);
+  EXPECT_EQ(Range(6, 7), nine_patch->horizontal_stretch_regions[2]);
 
-  EXPECT_EQ(Range(0, 2), ninePatch->verticalStretchRegions[0]);
-  EXPECT_EQ(Range(3, 5), ninePatch->verticalStretchRegions[1]);
+  EXPECT_EQ(Range(0, 2), nine_patch->vertical_stretch_regions[0]);
+  EXPECT_EQ(Range(3, 5), nine_patch->vertical_stretch_regions[1]);
 }
 
 TEST(NinePatchTest, InferPaddingFromStretchRegions) {
   std::string err;
-  std::unique_ptr<NinePatch> ninePatch =
-      NinePatch::create(kMultipleStretch10x7, 10, 7, &err);
-  ASSERT_NE(nullptr, ninePatch);
-  EXPECT_EQ(Bounds(1, 0, 1, 0), ninePatch->padding);
+  std::unique_ptr<NinePatch> nine_patch =
+      NinePatch::Create(kMultipleStretch10x7, 10, 7, &err);
+  ASSERT_NE(nullptr, nine_patch);
+  EXPECT_EQ(Bounds(1, 0, 1, 0), nine_patch->padding);
 }
 
 TEST(NinePatchTest, Padding) {
   std::string err;
-  std::unique_ptr<NinePatch> ninePatch =
-      NinePatch::create(kPadding6x5, 6, 5, &err);
-  ASSERT_NE(nullptr, ninePatch);
-  EXPECT_EQ(Bounds(1, 1, 1, 1), ninePatch->padding);
+  std::unique_ptr<NinePatch> nine_patch =
+      NinePatch::Create(kPadding6x5, 6, 5, &err);
+  ASSERT_NE(nullptr, nine_patch);
+  EXPECT_EQ(Bounds(1, 1, 1, 1), nine_patch->padding);
 }
 
 TEST(NinePatchTest, LayoutBoundsAreOnWrongEdge) {
   std::string err;
-  EXPECT_EQ(nullptr, NinePatch::create(kLayoutBoundsWrongEdge3x3, 3, 3, &err));
+  EXPECT_EQ(nullptr, NinePatch::Create(kLayoutBoundsWrongEdge3x3, 3, 3, &err));
   EXPECT_FALSE(err.empty());
 }
 
 TEST(NinePatchTest, LayoutBoundsMustTouchEdges) {
   std::string err;
   EXPECT_EQ(nullptr,
-            NinePatch::create(kLayoutBoundsNotEdgeAligned5x5, 5, 5, &err));
+            NinePatch::Create(kLayoutBoundsNotEdgeAligned5x5, 5, 5, &err));
   EXPECT_FALSE(err.empty());
 }
 
 TEST(NinePatchTest, LayoutBounds) {
   std::string err;
-  std::unique_ptr<NinePatch> ninePatch =
-      NinePatch::create(kLayoutBounds5x5, 5, 5, &err);
-  ASSERT_NE(nullptr, ninePatch);
-  EXPECT_EQ(Bounds(1, 1, 1, 1), ninePatch->layoutBounds);
+  std::unique_ptr<NinePatch> nine_patch =
+      NinePatch::Create(kLayoutBounds5x5, 5, 5, &err);
+  ASSERT_NE(nullptr, nine_patch);
+  EXPECT_EQ(Bounds(1, 1, 1, 1), nine_patch->layout_bounds);
 
-  ninePatch = NinePatch::create(kAsymmetricLayoutBounds5x5, 5, 5, &err);
-  ASSERT_NE(nullptr, ninePatch);
-  EXPECT_EQ(Bounds(1, 1, 0, 0), ninePatch->layoutBounds);
+  nine_patch = NinePatch::Create(kAsymmetricLayoutBounds5x5, 5, 5, &err);
+  ASSERT_NE(nullptr, nine_patch);
+  EXPECT_EQ(Bounds(1, 1, 0, 0), nine_patch->layout_bounds);
 }
 
 TEST(NinePatchTest, PaddingAndLayoutBounds) {
   std::string err;
-  std::unique_ptr<NinePatch> ninePatch =
-      NinePatch::create(kPaddingAndLayoutBounds5x5, 5, 5, &err);
-  ASSERT_NE(nullptr, ninePatch);
-  EXPECT_EQ(Bounds(1, 1, 1, 1), ninePatch->padding);
-  EXPECT_EQ(Bounds(1, 1, 1, 1), ninePatch->layoutBounds);
+  std::unique_ptr<NinePatch> nine_patch =
+      NinePatch::Create(kPaddingAndLayoutBounds5x5, 5, 5, &err);
+  ASSERT_NE(nullptr, nine_patch);
+  EXPECT_EQ(Bounds(1, 1, 1, 1), nine_patch->padding);
+  EXPECT_EQ(Bounds(1, 1, 1, 1), nine_patch->layout_bounds);
 }
 
 TEST(NinePatchTest, RegionColorsAreCorrect) {
   std::string err;
-  std::unique_ptr<NinePatch> ninePatch =
-      NinePatch::create(kColorfulImage5x5, 5, 5, &err);
-  ASSERT_NE(nullptr, ninePatch);
+  std::unique_ptr<NinePatch> nine_patch =
+      NinePatch::Create(kColorfulImage5x5, 5, 5, &err);
+  ASSERT_NE(nullptr, nine_patch);
 
-  std::vector<uint32_t> expectedColors = {
-      NinePatch::packRGBA((uint8_t*)RED),
+  std::vector<uint32_t> expected_colors = {
+      NinePatch::PackRGBA((uint8_t*)RED),
       (uint32_t)android::Res_png_9patch::NO_COLOR,
-      NinePatch::packRGBA((uint8_t*)GREEN),
+      NinePatch::PackRGBA((uint8_t*)GREEN),
       (uint32_t)android::Res_png_9patch::TRANSPARENT_COLOR,
-      NinePatch::packRGBA((uint8_t*)BLUE),
-      NinePatch::packRGBA((uint8_t*)GREEN),
+      NinePatch::PackRGBA((uint8_t*)BLUE),
+      NinePatch::PackRGBA((uint8_t*)GREEN),
   };
-  EXPECT_EQ(expectedColors, ninePatch->regionColors);
+  EXPECT_EQ(expected_colors, nine_patch->region_colors);
 }
 
 TEST(NinePatchTest, OutlineFromOpaqueImage) {
   std::string err;
-  std::unique_ptr<NinePatch> ninePatch =
-      NinePatch::create(kOutlineOpaque10x10, 10, 10, &err);
-  ASSERT_NE(nullptr, ninePatch);
-  EXPECT_EQ(Bounds(2, 2, 2, 2), ninePatch->outline);
-  EXPECT_EQ(0x000000ffu, ninePatch->outlineAlpha);
-  EXPECT_EQ(0.0f, ninePatch->outlineRadius);
+  std::unique_ptr<NinePatch> nine_patch =
+      NinePatch::Create(kOutlineOpaque10x10, 10, 10, &err);
+  ASSERT_NE(nullptr, nine_patch);
+  EXPECT_EQ(Bounds(2, 2, 2, 2), nine_patch->outline);
+  EXPECT_EQ(0x000000ffu, nine_patch->outline_alpha);
+  EXPECT_EQ(0.0f, nine_patch->outline_radius);
 }
 
 TEST(NinePatchTest, OutlineFromTranslucentImage) {
   std::string err;
-  std::unique_ptr<NinePatch> ninePatch =
-      NinePatch::create(kOutlineTranslucent10x10, 10, 10, &err);
-  ASSERT_NE(nullptr, ninePatch);
-  EXPECT_EQ(Bounds(3, 3, 3, 3), ninePatch->outline);
-  EXPECT_EQ(0x000000b3u, ninePatch->outlineAlpha);
-  EXPECT_EQ(0.0f, ninePatch->outlineRadius);
+  std::unique_ptr<NinePatch> nine_patch =
+      NinePatch::Create(kOutlineTranslucent10x10, 10, 10, &err);
+  ASSERT_NE(nullptr, nine_patch);
+  EXPECT_EQ(Bounds(3, 3, 3, 3), nine_patch->outline);
+  EXPECT_EQ(0x000000b3u, nine_patch->outline_alpha);
+  EXPECT_EQ(0.0f, nine_patch->outline_radius);
 }
 
 TEST(NinePatchTest, OutlineFromOffCenterImage) {
   std::string err;
-  std::unique_ptr<NinePatch> ninePatch =
-      NinePatch::create(kOutlineOffsetTranslucent12x10, 12, 10, &err);
-  ASSERT_NE(nullptr, ninePatch);
+  std::unique_ptr<NinePatch> nine_patch =
+      NinePatch::Create(kOutlineOffsetTranslucent12x10, 12, 10, &err);
+  ASSERT_NE(nullptr, nine_patch);
 
   // TODO(adamlesinski): The old AAPT algorithm searches from the outside to the
-  // middle
-  // for each inset. If the outline is shifted, the search may not find a closer
-  // bounds.
+  // middle for each inset. If the outline is shifted, the search may not find a
+  // closer bounds.
   // This check should be:
   //   EXPECT_EQ(Bounds(5, 3, 3, 3), ninePatch->outline);
-  // but until I know what behaviour I'm breaking, I will leave it at the
+  // but until I know what behavior I'm breaking, I will leave it at the
   // incorrect:
-  EXPECT_EQ(Bounds(4, 3, 3, 3), ninePatch->outline);
+  EXPECT_EQ(Bounds(4, 3, 3, 3), nine_patch->outline);
 
-  EXPECT_EQ(0x000000b3u, ninePatch->outlineAlpha);
-  EXPECT_EQ(0.0f, ninePatch->outlineRadius);
+  EXPECT_EQ(0x000000b3u, nine_patch->outline_alpha);
+  EXPECT_EQ(0.0f, nine_patch->outline_radius);
 }
 
 TEST(NinePatchTest, OutlineRadius) {
   std::string err;
-  std::unique_ptr<NinePatch> ninePatch =
-      NinePatch::create(kOutlineRadius5x5, 5, 5, &err);
-  ASSERT_NE(nullptr, ninePatch);
-  EXPECT_EQ(Bounds(0, 0, 0, 0), ninePatch->outline);
-  EXPECT_EQ(3.4142f, ninePatch->outlineRadius);
+  std::unique_ptr<NinePatch> nine_patch =
+      NinePatch::Create(kOutlineRadius5x5, 5, 5, &err);
+  ASSERT_NE(nullptr, nine_patch);
+  EXPECT_EQ(Bounds(0, 0, 0, 0), nine_patch->outline);
+  EXPECT_EQ(3.4142f, nine_patch->outline_radius);
 }
 
-::testing::AssertionResult bigEndianOne(uint8_t* cursor) {
+::testing::AssertionResult BigEndianOne(uint8_t* cursor) {
   if (cursor[0] == 0 && cursor[1] == 0 && cursor[2] == 0 && cursor[3] == 1) {
     return ::testing::AssertionSuccess();
   }
@@ -353,12 +353,12 @@ TEST(NinePatchTest, OutlineRadius) {
 
 TEST(NinePatchTest, SerializePngEndianness) {
   std::string err;
-  std::unique_ptr<NinePatch> ninePatch =
-      NinePatch::create(kStretchAndPadding5x5, 5, 5, &err);
-  ASSERT_NE(nullptr, ninePatch);
+  std::unique_ptr<NinePatch> nine_patch =
+      NinePatch::Create(kStretchAndPadding5x5, 5, 5, &err);
+  ASSERT_NE(nullptr, nine_patch);
 
   size_t len;
-  std::unique_ptr<uint8_t[]> data = ninePatch->serializeBase(&len);
+  std::unique_ptr<uint8_t[]> data = nine_patch->SerializeBase(&len);
   ASSERT_NE(nullptr, data);
   ASSERT_NE(0u, len);
 
@@ -368,10 +368,10 @@ TEST(NinePatchTest, SerializePngEndianness) {
   uint8_t* cursor = data.get() + 12;
 
   // Check that padding is big-endian. Expecting value 1.
-  EXPECT_TRUE(bigEndianOne(cursor));
-  EXPECT_TRUE(bigEndianOne(cursor + 4));
-  EXPECT_TRUE(bigEndianOne(cursor + 8));
-  EXPECT_TRUE(bigEndianOne(cursor + 12));
+  EXPECT_TRUE(BigEndianOne(cursor));
+  EXPECT_TRUE(BigEndianOne(cursor + 4));
+  EXPECT_TRUE(BigEndianOne(cursor + 8));
+  EXPECT_TRUE(BigEndianOne(cursor + 12));
 }
 
 }  // namespace aapt

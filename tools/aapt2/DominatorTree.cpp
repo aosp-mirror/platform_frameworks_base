@@ -15,77 +15,80 @@
  */
 
 #include "DominatorTree.h"
-#include "ConfigDescription.h"
 
 #include <algorithm>
+
+#include "android-base/logging.h"
+
+#include "ConfigDescription.h"
 
 namespace aapt {
 
 DominatorTree::DominatorTree(
     const std::vector<std::unique_ptr<ResourceConfigValue>>& configs) {
   for (const auto& config : configs) {
-    mProductRoots[config->product].tryAddChild(
+    product_roots_[config->product].TryAddChild(
         util::make_unique<Node>(config.get(), nullptr));
   }
 }
 
-void DominatorTree::accept(Visitor* visitor) {
-  for (auto& entry : mProductRoots) {
-    visitor->visitTree(entry.first, &entry.second);
+void DominatorTree::Accept(Visitor* visitor) {
+  for (auto& entry : product_roots_) {
+    visitor->VisitTree(entry.first, &entry.second);
   }
 }
 
-bool DominatorTree::Node::tryAddChild(std::unique_ptr<Node> newChild) {
-  assert(newChild->mValue && "cannot add a root or empty node as a child");
-  if (mValue && !dominates(newChild.get())) {
+bool DominatorTree::Node::TryAddChild(std::unique_ptr<Node> new_child) {
+  CHECK(new_child->value_) << "cannot add a root or empty node as a child";
+  if (value_ && !Dominates(new_child.get())) {
     // This is not the root and the child dominates us.
     return false;
   }
-  return addChild(std::move(newChild));
+  return AddChild(std::move(new_child));
 }
 
-bool DominatorTree::Node::addChild(std::unique_ptr<Node> newChild) {
-  bool hasDominatedChildren = false;
+bool DominatorTree::Node::AddChild(std::unique_ptr<Node> new_child) {
+  bool has_dominated_children = false;
   // Demote children dominated by the new config.
-  for (auto& child : mChildren) {
-    if (newChild->dominates(child.get())) {
-      child->mParent = newChild.get();
-      newChild->mChildren.push_back(std::move(child));
+  for (auto& child : children_) {
+    if (new_child->Dominates(child.get())) {
+      child->parent_ = new_child.get();
+      new_child->children_.push_back(std::move(child));
       child = {};
-      hasDominatedChildren = true;
+      has_dominated_children = true;
     }
   }
   // Remove dominated children.
-  if (hasDominatedChildren) {
-    mChildren.erase(
-        std::remove_if(mChildren.begin(), mChildren.end(),
+  if (has_dominated_children) {
+    children_.erase(
+        std::remove_if(children_.begin(), children_.end(),
                        [](const std::unique_ptr<Node>& child) -> bool {
                          return child == nullptr;
                        }),
-        mChildren.end());
+        children_.end());
   }
   // Add the new config to a child if a child dominates the new config.
-  for (auto& child : mChildren) {
-    if (child->dominates(newChild.get())) {
-      child->addChild(std::move(newChild));
+  for (auto& child : children_) {
+    if (child->Dominates(new_child.get())) {
+      child->AddChild(std::move(new_child));
       return true;
     }
   }
   // The new config is not dominated by a child, so add it here.
-  newChild->mParent = this;
-  mChildren.push_back(std::move(newChild));
+  new_child->parent_ = this;
+  children_.push_back(std::move(new_child));
   return true;
 }
 
-bool DominatorTree::Node::dominates(const Node* other) const {
+bool DominatorTree::Node::Dominates(const Node* other) const {
   // Check root node dominations.
-  if (other->isRootNode()) {
-    return isRootNode();
-  } else if (isRootNode()) {
+  if (other->is_root_node()) {
+    return is_root_node();
+  } else if (is_root_node()) {
     return true;
   }
   // Neither node is a root node; compare the configurations.
-  return mValue->config.dominates(other->mValue->config);
+  return value_->config.Dominates(other->value_->config);
 }
 
 }  // namespace aapt

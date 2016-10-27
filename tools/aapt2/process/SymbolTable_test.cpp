@@ -15,6 +15,7 @@
  */
 
 #include "process/SymbolTable.h"
+
 #include "test/Test.h"
 
 namespace aapt {
@@ -22,20 +23,20 @@ namespace aapt {
 TEST(ResourceTableSymbolSourceTest, FindSymbols) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .addSimple("android:id/foo", ResourceId(0x01020000))
-          .addSimple("android:id/bar")
-          .addValue("android:attr/foo", ResourceId(0x01010000),
-                    test::AttributeBuilder().build())
-          .build();
+          .AddSimple("android:id/foo", ResourceId(0x01020000))
+          .AddSimple("android:id/bar")
+          .AddValue("android:attr/foo", ResourceId(0x01010000),
+                    test::AttributeBuilder().Build())
+          .Build();
 
-  ResourceTableSymbolSource symbolSource(table.get());
+  ResourceTableSymbolSource symbol_source(table.get());
   EXPECT_NE(nullptr,
-            symbolSource.findByName(test::parseNameOrDie("android:id/foo")));
+            symbol_source.FindByName(test::ParseNameOrDie("android:id/foo")));
   EXPECT_NE(nullptr,
-            symbolSource.findByName(test::parseNameOrDie("android:id/bar")));
+            symbol_source.FindByName(test::ParseNameOrDie("android:id/bar")));
 
   std::unique_ptr<SymbolTable::Symbol> s =
-      symbolSource.findByName(test::parseNameOrDie("android:attr/foo"));
+      symbol_source.FindByName(test::ParseNameOrDie("android:attr/foo"));
   ASSERT_NE(nullptr, s);
   EXPECT_NE(nullptr, s->attribute);
 }
@@ -43,13 +44,13 @@ TEST(ResourceTableSymbolSourceTest, FindSymbols) {
 TEST(ResourceTableSymbolSourceTest, FindPrivateAttrSymbol) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .addValue("android:^attr-private/foo", ResourceId(0x01010000),
-                    test::AttributeBuilder().build())
-          .build();
+          .AddValue("android:^attr-private/foo", ResourceId(0x01010000),
+                    test::AttributeBuilder().Build())
+          .Build();
 
-  ResourceTableSymbolSource symbolSource(table.get());
+  ResourceTableSymbolSource symbol_source(table.get());
   std::unique_ptr<SymbolTable::Symbol> s =
-      symbolSource.findByName(test::parseNameOrDie("android:attr/foo"));
+      symbol_source.FindByName(test::ParseNameOrDie("android:attr/foo"));
   ASSERT_NE(nullptr, s);
   EXPECT_NE(nullptr, s->attribute);
 }

@@ -22,23 +22,23 @@
 namespace aapt {
 namespace io {
 
-bool copy(OutputStream* out, InputStream* in) {
-    const void* inBuffer;
-    int inLen;
-    while (in->Next(&inBuffer, &inLen)) {
-        void* outBuffer;
-        int outLen;
-        if (!out->Next(&outBuffer, &outLen)) {
-            return !out->HadError();
-        }
-
-        const int bytesToCopy = std::min(inLen, outLen);
-        memcpy(outBuffer, inBuffer, bytesToCopy);
-        out->BackUp(outLen - bytesToCopy);
-        in->BackUp(inLen - bytesToCopy);
+bool Copy(OutputStream* out, InputStream* in) {
+  const void* in_buffer;
+  int in_len;
+  while (in->Next(&in_buffer, &in_len)) {
+    void* out_buffer;
+    int out_len;
+    if (!out->Next(&out_buffer, &out_len)) {
+      return !out->HadError();
     }
-    return !in->HadError();
+
+    const int bytes_to_copy = std::min(in_len, out_len);
+    memcpy(out_buffer, in_buffer, bytes_to_copy);
+    out->BackUp(out_len - bytes_to_copy);
+    in->BackUp(in_len - bytes_to_copy);
+  }
+  return !in->HadError();
 }
 
-} // namespace io
-} // namespace aapt
+}  // namespace io
+}  // namespace aapt

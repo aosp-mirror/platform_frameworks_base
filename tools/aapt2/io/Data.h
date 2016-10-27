@@ -17,9 +17,10 @@
 #ifndef AAPT_IO_DATA_H
 #define AAPT_IO_DATA_H
 
-#include <android-base/macros.h>
-#include <utils/FileMap.h>
 #include <memory>
+
+#include "android-base/macros.h"
+#include "utils/FileMap.h"
 
 namespace aapt {
 namespace io {
@@ -39,20 +40,20 @@ class IData {
 class DataSegment : public IData {
  public:
   explicit DataSegment(std::unique_ptr<IData> data, size_t offset, size_t len)
-      : mData(std::move(data)), mOffset(offset), mLen(len) {}
+      : data_(std::move(data)), offset_(offset), len_(len) {}
 
   const void* data() const override {
-    return static_cast<const uint8_t*>(mData->data()) + mOffset;
+    return static_cast<const uint8_t*>(data_->data()) + offset_;
   }
 
-  size_t size() const override { return mLen; }
+  size_t size() const override { return len_; }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(DataSegment);
 
-  std::unique_ptr<IData> mData;
-  size_t mOffset;
-  size_t mLen;
+  std::unique_ptr<IData> data_;
+  size_t offset_;
+  size_t len_;
 };
 
 /**
@@ -63,14 +64,14 @@ class DataSegment : public IData {
 class MmappedData : public IData {
  public:
   explicit MmappedData(android::FileMap&& map)
-      : mMap(std::forward<android::FileMap>(map)) {}
+      : map_(std::forward<android::FileMap>(map)) {}
 
-  const void* data() const override { return mMap.getDataPtr(); }
+  const void* data() const override { return map_.getDataPtr(); }
 
-  size_t size() const override { return mMap.getDataLength(); }
+  size_t size() const override { return map_.getDataLength(); }
 
  private:
-  android::FileMap mMap;
+  android::FileMap map_;
 };
 
 /**
@@ -81,15 +82,15 @@ class MmappedData : public IData {
 class MallocData : public IData {
  public:
   MallocData(std::unique_ptr<const uint8_t[]> data, size_t size)
-      : mData(std::move(data)), mSize(size) {}
+      : data_(std::move(data)), size_(size) {}
 
-  const void* data() const override { return mData.get(); }
+  const void* data() const override { return data_.get(); }
 
-  size_t size() const override { return mSize; }
+  size_t size() const override { return size_; }
 
  private:
-  std::unique_ptr<const uint8_t[]> mData;
-  size_t mSize;
+  std::unique_ptr<const uint8_t[]> data_;
+  size_t size_;
 };
 
 /**

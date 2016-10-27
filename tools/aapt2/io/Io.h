@@ -17,8 +17,9 @@
 #ifndef AAPT_IO_IO_H
 #define AAPT_IO_IO_H
 
-#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <string>
+
+#include "google/protobuf/io/zero_copy_stream_impl_lite.h"
 
 namespace aapt {
 namespace io {
@@ -29,7 +30,7 @@ namespace io {
  *
  * The code style here matches the protobuf style.
  */
-class InputStream : public google::protobuf::io::ZeroCopyInputStream {
+class InputStream : public ::google::protobuf::io::ZeroCopyInputStream {
  public:
   virtual std::string GetError() const { return {}; }
 
@@ -42,7 +43,7 @@ class InputStream : public google::protobuf::io::ZeroCopyInputStream {
  *
  * The code style here matches the protobuf style.
  */
-class OutputStream : public google::protobuf::io::ZeroCopyOutputStream {
+class OutputStream : public ::google::protobuf::io::ZeroCopyOutputStream {
  public:
   virtual std::string GetError() const { return {}; }
 
@@ -54,7 +55,7 @@ class OutputStream : public google::protobuf::io::ZeroCopyOutputStream {
  * If there was an error, check the individual streams' HadError/GetError
  * methods.
  */
-bool copy(OutputStream* out, InputStream* in);
+bool Copy(OutputStream* out, InputStream* in);
 
 }  // namespace io
 }  // namespace aapt

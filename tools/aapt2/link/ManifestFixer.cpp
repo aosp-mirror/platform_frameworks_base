@@ -15,12 +15,15 @@
  */
 
 #include "link/ManifestFixer.h"
+
+#include <unordered_set>
+
+#include "android-base/logging.h"
+
 #include "ResourceUtils.h"
 #include "util/Util.h"
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
-
-#include <unordered_set>
 
 namespace aapt {
 
@@ -28,19 +31,20 @@ namespace aapt {
  * This is how PackageManager builds class names from AndroidManifest.xml
  * entries.
  */
-static bool nameIsJavaClassName(xml::Element* el, xml::Attribute* attr,
+static bool NameIsJavaClassName(xml::Element* el, xml::Attribute* attr,
                                 SourcePathDiagnostics* diag) {
   // We allow unqualified class names (ie: .HelloActivity)
   // Since we don't know the package name, we can just make a fake one here and
   // the test will be identical as long as the real package name is valid too.
-  Maybe<std::string> fullyQualifiedClassName =
-      util::getFullyQualifiedClassName("a", attr->value);
+  Maybe<std::string> fully_qualified_class_name =
+      util::GetFullyQualifiedClassName("a", attr->value);
 
-  StringPiece qualifiedClassName =
-      fullyQualifiedClassName ? fullyQualifiedClassName.value() : attr->value;
+  StringPiece qualified_class_name = fully_qualified_class_name
+                                         ? fully_qualified_class_name.value()
+                                         : attr->value;
 
-  if (!util::isJavaClassName(qualifiedClassName)) {
-    diag->error(DiagMessage(el->lineNumber)
+  if (!util::IsJavaClassName(qualified_class_name)) {
+    diag->Error(DiagMessage(el->line_number)
                 << "attribute 'android:name' in <" << el->name
                 << "> tag must be a valid Java class name");
     return false;
@@ -48,37 +52,37 @@ static bool nameIsJavaClassName(xml::Element* el, xml::Attribute* attr,
   return true;
 }
 
-static bool optionalNameIsJavaClassName(xml::Element* el,
+static bool OptionalNameIsJavaClassName(xml::Element* el,
                                         SourcePathDiagnostics* diag) {
-  if (xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, "name")) {
-    return nameIsJavaClassName(el, attr, diag);
+  if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name")) {
+    return NameIsJavaClassName(el, attr, diag);
   }
   return true;
 }
 
-static bool requiredNameIsJavaClassName(xml::Element* el,
+static bool RequiredNameIsJavaClassName(xml::Element* el,
                                         SourcePathDiagnostics* diag) {
-  if (xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, "name")) {
-    return nameIsJavaClassName(el, attr, diag);
+  if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name")) {
+    return NameIsJavaClassName(el, attr, diag);
   }
-  diag->error(DiagMessage(el->lineNumber)
+  diag->Error(DiagMessage(el->line_number)
               << "<" << el->name << "> is missing attribute 'android:name'");
   return false;
 }
 
-static bool verifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
-  xml::Attribute* attr = el->findAttribute({}, "package");
+static bool VerifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
+  xml::Attribute* attr = el->FindAttribute({}, "package");
   if (!attr) {
-    diag->error(DiagMessage(el->lineNumber)
+    diag->Error(DiagMessage(el->line_number)
                 << "<manifest> tag is missing 'package' attribute");
     return false;
-  } else if (ResourceUtils::isReference(attr->value)) {
-    diag->error(
-        DiagMessage(el->lineNumber)
+  } else if (ResourceUtils::IsReference(attr->value)) {
+    diag->Error(
+        DiagMessage(el->line_number)
         << "attribute 'package' in <manifest> tag must not be a reference");
     return false;
-  } else if (!util::isJavaPackageName(attr->value)) {
-    diag->error(DiagMessage(el->lineNumber)
+  } else if (!util::IsJavaPackageName(attr->value)) {
+    diag->Error(DiagMessage(el->line_number)
                 << "attribute 'package' in <manifest> tag is not a valid Java "
                    "package name: '"
                 << attr->value << "'");
@@ -89,242 +93,243 @@ static bool verifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
 
 /**
  * The coreApp attribute in <manifest> is not a regular AAPT attribute, so type
- * checking on it
- * is manual.
+ * checking on it is manual.
  */
-static bool fixCoreAppAttribute(xml::Element* el, SourcePathDiagnostics* diag) {
-  if (xml::Attribute* attr = el->findAttribute("", "coreApp")) {
+static bool FixCoreAppAttribute(xml::Element* el, SourcePathDiagnostics* diag) {
+  if (xml::Attribute* attr = el->FindAttribute("", "coreApp")) {
     std::unique_ptr<BinaryPrimitive> result =
-        ResourceUtils::tryParseBool(attr->value);
+        ResourceUtils::TryParseBool(attr->value);
     if (!result) {
-      diag->error(DiagMessage(el->lineNumber)
+      diag->Error(DiagMessage(el->line_number)
                   << "attribute coreApp must be a boolean");
       return false;
     }
-    attr->compiledValue = std::move(result);
+    attr->compiled_value = std::move(result);
   }
   return true;
 }
 
-bool ManifestFixer::buildRules(xml::XmlActionExecutor* executor,
+bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
                                IDiagnostics* diag) {
   // First verify some options.
-  if (mOptions.renameManifestPackage) {
-    if (!util::isJavaPackageName(mOptions.renameManifestPackage.value())) {
-      diag->error(DiagMessage() << "invalid manifest package override '"
-                                << mOptions.renameManifestPackage.value()
+  if (options_.rename_manifest_package) {
+    if (!util::IsJavaPackageName(options_.rename_manifest_package.value())) {
+      diag->Error(DiagMessage() << "invalid manifest package override '"
+                                << options_.rename_manifest_package.value()
                                 << "'");
       return false;
     }
   }
 
-  if (mOptions.renameInstrumentationTargetPackage) {
-    if (!util::isJavaPackageName(
-            mOptions.renameInstrumentationTargetPackage.value())) {
-      diag->error(DiagMessage()
+  if (options_.rename_instrumentation_target_package) {
+    if (!util::IsJavaPackageName(
+            options_.rename_instrumentation_target_package.value())) {
+      diag->Error(DiagMessage()
                   << "invalid instrumentation target package override '"
-                  << mOptions.renameInstrumentationTargetPackage.value()
+                  << options_.rename_instrumentation_target_package.value()
                   << "'");
       return false;
     }
   }
 
   // Common intent-filter actions.
-  xml::XmlNodeAction intentFilterAction;
-  intentFilterAction["action"];
-  intentFilterAction["category"];
-  intentFilterAction["data"];
+  xml::XmlNodeAction intent_filter_action;
+  intent_filter_action["action"];
+  intent_filter_action["category"];
+  intent_filter_action["data"];
 
   // Common meta-data actions.
-  xml::XmlNodeAction metaDataAction;
+  xml::XmlNodeAction meta_data_action;
 
   // Manifest actions.
-  xml::XmlNodeAction& manifestAction = (*executor)["manifest"];
-  manifestAction.action(verifyManifest);
-  manifestAction.action(fixCoreAppAttribute);
-  manifestAction.action([&](xml::Element* el) -> bool {
-    if (mOptions.versionNameDefault) {
-      if (el->findAttribute(xml::kSchemaAndroid, "versionName") == nullptr) {
+  xml::XmlNodeAction& manifest_action = (*executor)["manifest"];
+  manifest_action.Action(VerifyManifest);
+  manifest_action.Action(FixCoreAppAttribute);
+  manifest_action.Action([&](xml::Element* el) -> bool {
+    if (options_.version_name_default) {
+      if (el->FindAttribute(xml::kSchemaAndroid, "versionName") == nullptr) {
         el->attributes.push_back(
             xml::Attribute{xml::kSchemaAndroid, "versionName",
-                           mOptions.versionNameDefault.value()});
+                           options_.version_name_default.value()});
       }
     }
 
-    if (mOptions.versionCodeDefault) {
-      if (el->findAttribute(xml::kSchemaAndroid, "versionCode") == nullptr) {
+    if (options_.version_code_default) {
+      if (el->FindAttribute(xml::kSchemaAndroid, "versionCode") == nullptr) {
         el->attributes.push_back(
             xml::Attribute{xml::kSchemaAndroid, "versionCode",
-                           mOptions.versionCodeDefault.value()});
+                           options_.version_code_default.value()});
       }
     }
     return true;
   });
 
   // Meta tags.
-  manifestAction["eat-comment"];
+  manifest_action["eat-comment"];
 
   // Uses-sdk actions.
-  manifestAction["uses-sdk"].action([&](xml::Element* el) -> bool {
-    if (mOptions.minSdkVersionDefault &&
-        el->findAttribute(xml::kSchemaAndroid, "minSdkVersion") == nullptr) {
+  manifest_action["uses-sdk"].Action([&](xml::Element* el) -> bool {
+    if (options_.min_sdk_version_default &&
+        el->FindAttribute(xml::kSchemaAndroid, "minSdkVersion") == nullptr) {
       // There was no minSdkVersion defined and we have a default to assign.
       el->attributes.push_back(
           xml::Attribute{xml::kSchemaAndroid, "minSdkVersion",
-                         mOptions.minSdkVersionDefault.value()});
+                         options_.min_sdk_version_default.value()});
     }
 
-    if (mOptions.targetSdkVersionDefault &&
-        el->findAttribute(xml::kSchemaAndroid, "targetSdkVersion") == nullptr) {
+    if (options_.target_sdk_version_default &&
+        el->FindAttribute(xml::kSchemaAndroid, "targetSdkVersion") == nullptr) {
       // There was no targetSdkVersion defined and we have a default to assign.
       el->attributes.push_back(
           xml::Attribute{xml::kSchemaAndroid, "targetSdkVersion",
-                         mOptions.targetSdkVersionDefault.value()});
+                         options_.target_sdk_version_default.value()});
     }
     return true;
   });
 
   // Instrumentation actions.
-  manifestAction["instrumentation"].action([&](xml::Element* el) -> bool {
-    if (!mOptions.renameInstrumentationTargetPackage) {
+  manifest_action["instrumentation"].Action([&](xml::Element* el) -> bool {
+    if (!options_.rename_instrumentation_target_package) {
       return true;
     }
 
     if (xml::Attribute* attr =
-            el->findAttribute(xml::kSchemaAndroid, "targetPackage")) {
-      attr->value = mOptions.renameInstrumentationTargetPackage.value();
+            el->FindAttribute(xml::kSchemaAndroid, "targetPackage")) {
+      attr->value = options_.rename_instrumentation_target_package.value();
     }
     return true;
   });
 
-  manifestAction["original-package"];
-  manifestAction["protected-broadcast"];
-  manifestAction["uses-permission"];
-  manifestAction["permission"];
-  manifestAction["permission-tree"];
-  manifestAction["permission-group"];
+  manifest_action["original-package"];
+  manifest_action["protected-broadcast"];
+  manifest_action["uses-permission"];
+  manifest_action["permission"];
+  manifest_action["permission-tree"];
+  manifest_action["permission-group"];
 
-  manifestAction["uses-configuration"];
-  manifestAction["uses-feature"];
-  manifestAction["supports-screens"];
+  manifest_action["uses-configuration"];
+  manifest_action["uses-feature"];
+  manifest_action["supports-screens"];
 
-  manifestAction["compatible-screens"];
-  manifestAction["compatible-screens"]["screen"];
+  manifest_action["compatible-screens"];
+  manifest_action["compatible-screens"]["screen"];
 
-  manifestAction["supports-gl-texture"];
+  manifest_action["supports-gl-texture"];
 
   // Application actions.
-  xml::XmlNodeAction& applicationAction = manifestAction["application"];
-  applicationAction.action(optionalNameIsJavaClassName);
+  xml::XmlNodeAction& application_action = manifest_action["application"];
+  application_action.Action(OptionalNameIsJavaClassName);
 
   // Uses library actions.
-  applicationAction["uses-library"];
+  application_action["uses-library"];
 
   // Meta-data.
-  applicationAction["meta-data"] = metaDataAction;
+  application_action["meta-data"] = meta_data_action;
 
   // Activity actions.
-  applicationAction["activity"].action(requiredNameIsJavaClassName);
-  applicationAction["activity"]["intent-filter"] = intentFilterAction;
-  applicationAction["activity"]["meta-data"] = metaDataAction;
+  application_action["activity"].Action(RequiredNameIsJavaClassName);
+  application_action["activity"]["intent-filter"] = intent_filter_action;
+  application_action["activity"]["meta-data"] = meta_data_action;
 
   // Activity alias actions.
-  applicationAction["activity-alias"]["intent-filter"] = intentFilterAction;
-  applicationAction["activity-alias"]["meta-data"] = metaDataAction;
+  application_action["activity-alias"]["intent-filter"] = intent_filter_action;
+  application_action["activity-alias"]["meta-data"] = meta_data_action;
 
   // Service actions.
-  applicationAction["service"].action(requiredNameIsJavaClassName);
-  applicationAction["service"]["intent-filter"] = intentFilterAction;
-  applicationAction["service"]["meta-data"] = metaDataAction;
+  application_action["service"].Action(RequiredNameIsJavaClassName);
+  application_action["service"]["intent-filter"] = intent_filter_action;
+  application_action["service"]["meta-data"] = meta_data_action;
 
   // Receiver actions.
-  applicationAction["receiver"].action(requiredNameIsJavaClassName);
-  applicationAction["receiver"]["intent-filter"] = intentFilterAction;
-  applicationAction["receiver"]["meta-data"] = metaDataAction;
+  application_action["receiver"].Action(RequiredNameIsJavaClassName);
+  application_action["receiver"]["intent-filter"] = intent_filter_action;
+  application_action["receiver"]["meta-data"] = meta_data_action;
 
   // Provider actions.
-  applicationAction["provider"].action(requiredNameIsJavaClassName);
-  applicationAction["provider"]["intent-filter"] = intentFilterAction;
-  applicationAction["provider"]["meta-data"] = metaDataAction;
-  applicationAction["provider"]["grant-uri-permissions"];
-  applicationAction["provider"]["path-permissions"];
+  application_action["provider"].Action(RequiredNameIsJavaClassName);
+  application_action["provider"]["intent-filter"] = intent_filter_action;
+  application_action["provider"]["meta-data"] = meta_data_action;
+  application_action["provider"]["grant-uri-permissions"];
+  application_action["provider"]["path-permissions"];
 
   return true;
 }
 
 class FullyQualifiedClassNameVisitor : public xml::Visitor {
  public:
-  using xml::Visitor::visit;
+  using xml::Visitor::Visit;
 
   explicit FullyQualifiedClassNameVisitor(const StringPiece& package)
-      : mPackage(package) {}
+      : package_(package) {}
 
-  void visit(xml::Element* el) override {
+  void Visit(xml::Element* el) override {
     for (xml::Attribute& attr : el->attributes) {
-      if (attr.namespaceUri == xml::kSchemaAndroid &&
-          mClassAttributes.find(attr.name) != mClassAttributes.end()) {
-        if (Maybe<std::string> newValue =
-                util::getFullyQualifiedClassName(mPackage, attr.value)) {
-          attr.value = std::move(newValue.value());
+      if (attr.namespace_uri == xml::kSchemaAndroid &&
+          class_attributes_.find(attr.name) != class_attributes_.end()) {
+        if (Maybe<std::string> new_value =
+                util::GetFullyQualifiedClassName(package_, attr.value)) {
+          attr.value = std::move(new_value.value());
         }
       }
     }
 
     // Super implementation to iterate over the children.
-    xml::Visitor::visit(el);
+    xml::Visitor::Visit(el);
   }
 
  private:
-  StringPiece mPackage;
-  std::unordered_set<StringPiece> mClassAttributes = {"name"};
+  StringPiece package_;
+  std::unordered_set<StringPiece> class_attributes_ = {"name"};
 };
 
-static bool renameManifestPackage(const StringPiece& packageOverride,
-                                  xml::Element* manifestEl) {
-  xml::Attribute* attr = manifestEl->findAttribute({}, "package");
+static bool RenameManifestPackage(const StringPiece& package_override,
+                                  xml::Element* manifest_el) {
+  xml::Attribute* attr = manifest_el->FindAttribute({}, "package");
 
   // We've already verified that the manifest element is present, with a package
   // name specified.
-  assert(attr);
+  CHECK(attr != nullptr);
 
-  std::string originalPackage = std::move(attr->value);
-  attr->value = packageOverride.toString();
+  std::string original_package = std::move(attr->value);
+  attr->value = package_override.ToString();
 
-  FullyQualifiedClassNameVisitor visitor(originalPackage);
-  manifestEl->accept(&visitor);
+  FullyQualifiedClassNameVisitor visitor(original_package);
+  manifest_el->Accept(&visitor);
   return true;
 }
 
-bool ManifestFixer::consume(IAaptContext* context, xml::XmlResource* doc) {
-  xml::Element* root = xml::findRootElement(doc->root.get());
-  if (!root || !root->namespaceUri.empty() || root->name != "manifest") {
-    context->getDiagnostics()->error(DiagMessage(doc->file.source)
+bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
+  xml::Element* root = xml::FindRootElement(doc->root.get());
+  if (!root || !root->namespace_uri.empty() || root->name != "manifest") {
+    context->GetDiagnostics()->Error(DiagMessage(doc->file.source)
                                      << "root tag must be <manifest>");
     return false;
   }
 
-  if ((mOptions.minSdkVersionDefault || mOptions.targetSdkVersionDefault) &&
-      root->findChild({}, "uses-sdk") == nullptr) {
+  if ((options_.min_sdk_version_default ||
+       options_.target_sdk_version_default) &&
+      root->FindChild({}, "uses-sdk") == nullptr) {
     // Auto insert a <uses-sdk> element.
-    std::unique_ptr<xml::Element> usesSdk = util::make_unique<xml::Element>();
-    usesSdk->name = "uses-sdk";
-    root->addChild(std::move(usesSdk));
+    std::unique_ptr<xml::Element> uses_sdk = util::make_unique<xml::Element>();
+    uses_sdk->name = "uses-sdk";
+    root->AddChild(std::move(uses_sdk));
   }
 
   xml::XmlActionExecutor executor;
-  if (!buildRules(&executor, context->getDiagnostics())) {
+  if (!BuildRules(&executor, context->GetDiagnostics())) {
     return false;
   }
 
-  if (!executor.execute(xml::XmlActionExecutorPolicy::Whitelist,
-                        context->getDiagnostics(), doc)) {
+  if (!executor.Execute(xml::XmlActionExecutorPolicy::kWhitelist,
+                        context->GetDiagnostics(), doc)) {
     return false;
   }
 
-  if (mOptions.renameManifestPackage) {
+  if (options_.rename_manifest_package) {
     // Rename manifest package outside of the XmlActionExecutor.
     // We need to extract the old package name and FullyQualify all class names.
-    if (!renameManifestPackage(mOptions.renameManifestPackage.value(), root)) {
+    if (!RenameManifestPackage(options_.rename_manifest_package.value(),
+                               root)) {
       return false;
     }
   }

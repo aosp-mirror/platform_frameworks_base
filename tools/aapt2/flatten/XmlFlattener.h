@@ -17,6 +17,8 @@
 #ifndef AAPT_FLATTEN_XMLFLATTENER_H
 #define AAPT_FLATTEN_XMLFLATTENER_H
 
+#include "android-base/macros.h"
+
 #include "process/IResourceTableConsumer.h"
 #include "util/BigBuffer.h"
 #include "xml/XmlDom.h"
@@ -27,26 +29,28 @@ struct XmlFlattenerOptions {
   /**
    * Keep attribute raw string values along with typed values.
    */
-  bool keepRawValues = false;
+  bool keep_raw_values = false;
 
   /**
    * If set, the max SDK level of attribute to flatten. All others are ignored.
    */
-  Maybe<size_t> maxSdkLevel;
+  Maybe<size_t> max_sdk_level;
 };
 
 class XmlFlattener : public IXmlResourceConsumer {
  public:
   XmlFlattener(BigBuffer* buffer, XmlFlattenerOptions options)
-      : mBuffer(buffer), mOptions(options) {}
+      : buffer_(buffer), options_(options) {}
 
-  bool consume(IAaptContext* context, xml::XmlResource* resource) override;
+  bool Consume(IAaptContext* context, xml::XmlResource* resource) override;
 
  private:
-  BigBuffer* mBuffer;
-  XmlFlattenerOptions mOptions;
+  DISALLOW_COPY_AND_ASSIGN(XmlFlattener);
 
-  bool flatten(IAaptContext* context, xml::Node* node);
+  bool Flatten(IAaptContext* context, xml::Node* node);
+
+  BigBuffer* buffer_;
+  XmlFlattenerOptions options_;
 };
 
 }  // namespace aapt

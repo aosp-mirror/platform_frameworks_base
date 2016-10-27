@@ -21,23 +21,23 @@
 namespace aapt {
 namespace io {
 
-IFile* IFile::createFileSegment(size_t offset, size_t len) {
-   FileSegment* fileSegment = new FileSegment(this, offset, len);
-   mSegments.push_back(std::unique_ptr<IFile>(fileSegment));
-   return fileSegment;
+IFile* IFile::CreateFileSegment(size_t offset, size_t len) {
+  FileSegment* file_segment = new FileSegment(this, offset, len);
+  segments_.push_back(std::unique_ptr<IFile>(file_segment));
+  return file_segment;
 }
 
-std::unique_ptr<IData> FileSegment::openAsData() {
-    std::unique_ptr<IData> data = mFile->openAsData();
-    if (!data) {
-        return {};
-    }
-
-    if (mOffset <= data->size() - mLen) {
-        return util::make_unique<DataSegment>(std::move(data), mOffset, mLen);
-    }
+std::unique_ptr<IData> FileSegment::OpenAsData() {
+  std::unique_ptr<IData> data = file_->OpenAsData();
+  if (!data) {
     return {};
+  }
+
+  if (offset_ <= data->size() - len_) {
+    return util::make_unique<DataSegment>(std::move(data), offset_, len_);
+  }
+  return {};
 }
 
-} // namespace io
-} // namespace aapt
+}  // namespace io
+}  // namespace aapt

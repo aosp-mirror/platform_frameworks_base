@@ -14,81 +14,82 @@
  * limitations under the License.
  */
 
+#include "util/StringPiece.h"
+
 #include <algorithm>
-#include <gtest/gtest.h>
 #include <string>
 #include <vector>
 
-#include "util/StringPiece.h"
+#include "test/Test.h"
 
 namespace aapt {
 
 TEST(StringPieceTest, CompareNonNullTerminatedPiece) {
-    StringPiece a("hello world", 5);
-    StringPiece b("hello moon", 5);
-    EXPECT_EQ(a, b);
+  StringPiece a("hello world", 5);
+  StringPiece b("hello moon", 5);
+  EXPECT_EQ(a, b);
 
-    StringPiece16 a16(u"hello world", 5);
-    StringPiece16 b16(u"hello moon", 5);
-    EXPECT_EQ(a16, b16);
+  StringPiece16 a16(u"hello world", 5);
+  StringPiece16 b16(u"hello moon", 5);
+  EXPECT_EQ(a16, b16);
 }
 
 TEST(StringPieceTest, PiecesHaveCorrectSortOrder) {
-    std::string testing("testing");
-    std::string banana("banana");
-    std::string car("car");
+  std::string testing("testing");
+  std::string banana("banana");
+  std::string car("car");
 
-    EXPECT_TRUE(StringPiece(testing) > banana);
-    EXPECT_TRUE(StringPiece(testing) > car);
-    EXPECT_TRUE(StringPiece(banana) < testing);
-    EXPECT_TRUE(StringPiece(banana) < car);
-    EXPECT_TRUE(StringPiece(car) < testing);
-    EXPECT_TRUE(StringPiece(car) > banana);
+  EXPECT_TRUE(StringPiece(testing) > banana);
+  EXPECT_TRUE(StringPiece(testing) > car);
+  EXPECT_TRUE(StringPiece(banana) < testing);
+  EXPECT_TRUE(StringPiece(banana) < car);
+  EXPECT_TRUE(StringPiece(car) < testing);
+  EXPECT_TRUE(StringPiece(car) > banana);
 }
 
 TEST(StringPieceTest, PiecesHaveCorrectSortOrderUtf8) {
-    std::string testing("testing");
-    std::string banana("banana");
-    std::string car("car");
+  std::string testing("testing");
+  std::string banana("banana");
+  std::string car("car");
 
-    EXPECT_TRUE(StringPiece(testing) > banana);
-    EXPECT_TRUE(StringPiece(testing) > car);
-    EXPECT_TRUE(StringPiece(banana) < testing);
-    EXPECT_TRUE(StringPiece(banana) < car);
-    EXPECT_TRUE(StringPiece(car) < testing);
-    EXPECT_TRUE(StringPiece(car) > banana);
+  EXPECT_TRUE(StringPiece(testing) > banana);
+  EXPECT_TRUE(StringPiece(testing) > car);
+  EXPECT_TRUE(StringPiece(banana) < testing);
+  EXPECT_TRUE(StringPiece(banana) < car);
+  EXPECT_TRUE(StringPiece(car) < testing);
+  EXPECT_TRUE(StringPiece(car) > banana);
 }
 
 TEST(StringPieceTest, ContainsOtherStringPiece) {
-    StringPiece text("I am a leaf on the wind.");
-    StringPiece startNeedle("I am");
-    StringPiece endNeedle("wind.");
-    StringPiece middleNeedle("leaf");
-    StringPiece emptyNeedle("");
-    StringPiece missingNeedle("soar");
-    StringPiece longNeedle("This string is longer than the text.");
+  StringPiece text("I am a leaf on the wind.");
+  StringPiece start_needle("I am");
+  StringPiece end_needle("wind.");
+  StringPiece middle_needle("leaf");
+  StringPiece empty_needle("");
+  StringPiece missing_needle("soar");
+  StringPiece long_needle("This string is longer than the text.");
 
-    EXPECT_TRUE(text.contains(startNeedle));
-    EXPECT_TRUE(text.contains(endNeedle));
-    EXPECT_TRUE(text.contains(middleNeedle));
-    EXPECT_TRUE(text.contains(emptyNeedle));
-    EXPECT_FALSE(text.contains(missingNeedle));
-    EXPECT_FALSE(text.contains(longNeedle));
+  EXPECT_TRUE(text.contains(start_needle));
+  EXPECT_TRUE(text.contains(end_needle));
+  EXPECT_TRUE(text.contains(middle_needle));
+  EXPECT_TRUE(text.contains(empty_needle));
+  EXPECT_FALSE(text.contains(missing_needle));
+  EXPECT_FALSE(text.contains(long_needle));
 
-    StringPiece16 text16(u"I am a leaf on the wind.");
-    StringPiece16 startNeedle16(u"I am");
-    StringPiece16 endNeedle16(u"wind.");
-    StringPiece16 middleNeedle16(u"leaf");
-    StringPiece16 emptyNeedle16(u"");
-    StringPiece16 missingNeedle16(u"soar");
-    StringPiece16 longNeedle16(u"This string is longer than the text.");
+  StringPiece16 text16(u"I am a leaf on the wind.");
+  StringPiece16 start_needle16(u"I am");
+  StringPiece16 end_needle16(u"wind.");
+  StringPiece16 middle_needle16(u"leaf");
+  StringPiece16 empty_needle16(u"");
+  StringPiece16 missing_needle16(u"soar");
+  StringPiece16 long_needle16(u"This string is longer than the text.");
 
-    EXPECT_TRUE(text16.contains(startNeedle16));
-    EXPECT_TRUE(text16.contains(endNeedle16));
-    EXPECT_TRUE(text16.contains(middleNeedle16));
-    EXPECT_TRUE(text16.contains(emptyNeedle16));
-    EXPECT_FALSE(text16.contains(missingNeedle16));
-    EXPECT_FALSE(text16.contains(longNeedle16));
+  EXPECT_TRUE(text16.contains(start_needle16));
+  EXPECT_TRUE(text16.contains(end_needle16));
+  EXPECT_TRUE(text16.contains(middle_needle16));
+  EXPECT_TRUE(text16.contains(empty_needle16));
+  EXPECT_FALSE(text16.contains(missing_needle16));
+  EXPECT_FALSE(text16.contains(long_needle16));
 }
 
-} // namespace aapt
+}  // namespace aapt

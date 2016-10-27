@@ -17,13 +17,13 @@
 #ifndef AAPT_JAVA_CLASS_GENERATOR_H
 #define AAPT_JAVA_CLASS_GENERATOR_H
 
+#include <ostream>
+#include <string>
+
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "process/IResourceTableConsumer.h"
 #include "util/StringPiece.h"
-
-#include <ostream>
-#include <string>
 
 namespace aapt {
 
@@ -35,7 +35,7 @@ struct JavaClassGeneratorOptions {
    * Specifies whether to use the 'final' modifier
    * on resource entries. Default is true.
    */
-  bool useFinal = true;
+  bool use_final = true;
 
   enum class SymbolTypes {
     kAll,
@@ -49,7 +49,7 @@ struct JavaClassGeneratorOptions {
    * A list of JavaDoc annotations to add to the comments of all generated
    * classes.
    */
-  std::vector<std::string> javadocAnnotations;
+  std::vector<std::string> javadoc_annotations;
 };
 
 /*
@@ -69,34 +69,34 @@ class JavaClassGenerator {
    * We need to generate these symbols in a separate file.
    * Returns true on success.
    */
-  bool generate(const StringPiece& packageNameToGenerate, std::ostream* out);
+  bool Generate(const StringPiece& packageNameToGenerate, std::ostream* out);
 
-  bool generate(const StringPiece& packageNameToGenerate,
+  bool Generate(const StringPiece& packageNameToGenerate,
                 const StringPiece& outputPackageName, std::ostream* out);
 
   const std::string& getError() const;
 
  private:
-  bool addMembersToTypeClass(const StringPiece& packageNameToGenerate,
+  bool AddMembersToTypeClass(const StringPiece& packageNameToGenerate,
                              const ResourceTablePackage* package,
                              const ResourceTableType* type,
                              ClassDefinition* outTypeClassDef);
 
-  void addMembersToStyleableClass(const StringPiece& packageNameToGenerate,
+  void AddMembersToStyleableClass(const StringPiece& packageNameToGenerate,
                                   const std::string& entryName,
                                   const Styleable* styleable,
                                   ClassDefinition* outStyleableClassDef);
 
-  bool skipSymbol(SymbolState state);
+  bool SkipSymbol(SymbolState state);
 
-  IAaptContext* mContext;
-  ResourceTable* mTable;
-  JavaClassGeneratorOptions mOptions;
-  std::string mError;
+  IAaptContext* context_;
+  ResourceTable* table_;
+  JavaClassGeneratorOptions options_;
+  std::string error_;
 };
 
 inline const std::string& JavaClassGenerator::getError() const {
-  return mError;
+  return error_;
 }
 
 }  // namespace aapt

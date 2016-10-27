@@ -17,22 +17,23 @@
 #ifndef AAPT_COMPILE_PSEUDOLOCALIZE_H
 #define AAPT_COMPILE_PSEUDOLOCALIZE_H
 
+#include <memory>
+
+#include "android-base/macros.h"
+
 #include "ResourceValues.h"
 #include "StringPool.h"
 #include "util/StringPiece.h"
-
-#include <android-base/macros.h>
-#include <memory>
 
 namespace aapt {
 
 class PseudoMethodImpl {
  public:
   virtual ~PseudoMethodImpl() {}
-  virtual std::string start() { return {}; }
-  virtual std::string end() { return {}; }
-  virtual std::string text(const StringPiece& text) = 0;
-  virtual std::string placeholder(const StringPiece& text) = 0;
+  virtual std::string Start() { return {}; }
+  virtual std::string End() { return {}; }
+  virtual std::string Text(const StringPiece& text) = 0;
+  virtual std::string Placeholder(const StringPiece& text) = 0;
 };
 
 class Pseudolocalizer {
@@ -44,14 +45,14 @@ class Pseudolocalizer {
   };
 
   explicit Pseudolocalizer(Method method);
-  void setMethod(Method method);
-  std::string start() { return mImpl->start(); }
-  std::string end() { return mImpl->end(); }
-  std::string text(const StringPiece& text);
+  void SetMethod(Method method);
+  std::string Start() { return impl_->Start(); }
+  std::string End() { return impl_->End(); }
+  std::string Text(const StringPiece& text);
 
  private:
-  std::unique_ptr<PseudoMethodImpl> mImpl;
-  size_t mLastDepth;
+  std::unique_ptr<PseudoMethodImpl> impl_;
+  size_t last_depth_;
 };
 
 }  // namespace aapt

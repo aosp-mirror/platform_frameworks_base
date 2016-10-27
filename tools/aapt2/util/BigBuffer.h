@@ -17,11 +17,13 @@
 #ifndef AAPT_BIG_BUFFER_H
 #define AAPT_BIG_BUFFER_H
 
-#include <cassert>
 #include <cstring>
 #include <memory>
 #include <type_traits>
 #include <vector>
+
+#include "android-base/logging.h"
+#include "android-base/macros.h"
 
 namespace aapt {
 
@@ -54,18 +56,16 @@ class BigBuffer {
     /**
      * The size of the memory block allocation.
      */
-    size_t mBlockSize;
+    size_t block_size_;
   };
 
   typedef std::vector<Block>::const_iterator const_iterator;
 
   /**
    * Create a BigBuffer with block allocation sizes
-   * of blockSize.
+   * of block_size.
    */
-  explicit BigBuffer(size_t blockSize);
-
-  BigBuffer(const BigBuffer&) = delete;  // No copying.
+  explicit BigBuffer(size_t block_size);
 
   BigBuffer(BigBuffer&& rhs);
 
@@ -79,104 +79,106 @@ class BigBuffer {
    * a POD type. The elements are zero-initialized.
    */
   template <typename T>
-  T* nextBlock(size_t count = 1);
+  T* NextBlock(size_t count = 1);
 
   /**
-   * Returns the next block available and puts the size in outCount.
+   * Returns the next block available and puts the size in out_count.
    * This is useful for grabbing blocks where the size doesn't matter.
-   * Use backUp() to give back any bytes that were not used.
+   * Use BackUp() to give back any bytes that were not used.
    */
-  void* nextBlock(size_t* outCount);
+  void* NextBlock(size_t* out_count);
 
   /**
-   * Backs up count bytes. This must only be called after nextBlock()
-   * and can not be larger than sizeof(T) * count of the last nextBlock()
+   * Backs up count bytes. This must only be called after NextBlock()
+   * and can not be larger than sizeof(T) * count of the last NextBlock()
    * call.
    */
-  void backUp(size_t count);
+  void BackUp(size_t count);
 
   /**
    * Moves the specified BigBuffer into this one. When this method
    * returns, buffer is empty.
    */
-  void appendBuffer(BigBuffer&& buffer);
+  void AppendBuffer(BigBuffer&& buffer);
 
   /**
    * Pads the block with 'bytes' bytes of zero values.
    */
-  void pad(size_t bytes);
+  void Pad(size_t bytes);
 
   /**
    * Pads the block so that it aligns on a 4 byte boundary.
    */
-  void align4();
+  void Align4();
 
-  size_t getBlockSize() const;
+  size_t block_size() const;
 
   const_iterator begin() const;
   const_iterator end() const;
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(BigBuffer);
+
   /**
    * Returns a pointer to a buffer of the requested size.
    * The buffer is zero-initialized.
    */
-  void* nextBlockImpl(size_t size);
+  void* NextBlockImpl(size_t size);
 
-  size_t mBlockSize;
-  size_t mSize;
-  std::vector<Block> mBlocks;
+  size_t block_size_;
+  size_t size_;
+  std::vector<Block> blocks_;
 };
 
-inline BigBuffer::BigBuffer(size_t blockSize)
-    : mBlockSize(blockSize), mSize(0) {}
+inline BigBuffer::BigBuffer(size_t block_size)
+    : block_size_(block_size), size_(0) {}
 
 inline BigBuffer::BigBuffer(BigBuffer&& rhs)
-    : mBlockSize(rhs.mBlockSize),
-      mSize(rhs.mSize),
-      mBlocks(std::move(rhs.mBlocks)) {}
+    : block_size_(rhs.block_size_),
+      size_(rhs.size_),
+      blocks_(std::move(rhs.blocks_)) {}
 
-inline size_t BigBuffer::size() const { return mSize; }
+inline size_t BigBuffer::size() const { return size_; }
 
-inline size_t BigBuffer::getBlockSize() const { return mBlockSize; }
+inline size_t BigBuffer::block_size() const { return block_size_; }
 
 template <typename T>
-inline T* BigBuffer::nextBlock(size_t count) {
+inline T* BigBuffer::NextBlock(size_t count) {
   static_assert(std::is_standard_layout<T>::value,
                 "T must be standard_layout type");
-  assert(count != 0);
-  return reinterpret_cast<T*>(nextBlockImpl(sizeof(T) * count));
+  CHECK(count != 0);
+  return reinterpret_cast<T*>(NextBlockImpl(sizeof(T) * count));
 }
 
-inline void BigBuffer::backUp(size_t count) {
-  Block& block = mBlocks.back();
+inline void BigBuffer::BackUp(size_t count) {
+  Block& block = blocks_.back();
   block.size -= count;
-  mSize -= count;
+  size_ -= count;
 }
 
-inline void BigBuffer::appendBuffer(BigBuffer&& buffer) {
-  std::move(buffer.mBlocks.begin(), buffer.mBlocks.end(),
-            std::back_inserter(mBlocks));
-  mSize += buffer.mSize;
-  buffer.mBlocks.clear();
-  buffer.mSize = 0;
+inline void BigBuffer::AppendBuffer(BigBuffer&& buffer) {
+  std::move(buffer.blocks_.begin(), buffer.blocks_.end(),
+            std::back_inserter(blocks_));
+  size_ += buffer.size_;
+  buffer.blocks_.clear();
+  buffer.size_ = 0;
 }
 
-inline void BigBuffer::pad(size_t bytes) { nextBlock<char>(bytes); }
+inline void BigBuffer::Pad(size_t bytes) { NextBlock<char>(bytes); }
 
-inline void BigBuffer::align4() {
-  const size_t unaligned = mSize % 4;
+inline void BigBuffer::Align4() {
+  const size_t unaligned = size_ % 4;
   if (unaligned != 0) {
-    pad(4 - unaligned);
+    Pad(4 - unaligned);
   }
 }
 
 inline BigBuffer::const_iterator BigBuffer::begin() const {
-  return mBlocks.begin();
+  return blocks_.begin();
 }
 
 inline BigBuffer::const_iterator BigBuffer::end() const {
-  return mBlocks.end();
+  return blocks_.end();
 }
 
 }  // namespace aapt

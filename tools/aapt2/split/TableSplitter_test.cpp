@@ -15,155 +15,192 @@
  */
 
 #include "split/TableSplitter.h"
+
 #include "test/Test.h"
 
 namespace aapt {
 
 TEST(TableSplitterTest, NoSplitPreferredDensity) {
-    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .addFileReference("android:drawable/icon", "res/drawable-mdpi/icon.png",
-                              test::parseConfigOrDie("mdpi"))
-            .addFileReference("android:drawable/icon", "res/drawable-hdpi/icon.png",
-                              test::parseConfigOrDie("hdpi"))
-            .addFileReference("android:drawable/icon", "res/drawable-xhdpi/icon.png",
-                              test::parseConfigOrDie("xhdpi"))
-            .addFileReference("android:drawable/icon", "res/drawable-xxhdpi/icon.png",
-                              test::parseConfigOrDie("xxhdpi"))
-            .addSimple("android:string/one")
-            .build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddFileReference("android:drawable/icon",
+                            "res/drawable-mdpi/icon.png",
+                            test::ParseConfigOrDie("mdpi"))
+          .AddFileReference("android:drawable/icon",
+                            "res/drawable-hdpi/icon.png",
+                            test::ParseConfigOrDie("hdpi"))
+          .AddFileReference("android:drawable/icon",
+                            "res/drawable-xhdpi/icon.png",
+                            test::ParseConfigOrDie("xhdpi"))
+          .AddFileReference("android:drawable/icon",
+                            "res/drawable-xxhdpi/icon.png",
+                            test::ParseConfigOrDie("xxhdpi"))
+          .AddSimple("android:string/one")
+          .Build();
 
-    TableSplitterOptions options;
-    options.preferredDensity = ConfigDescription::DENSITY_XHIGH;
-    TableSplitter splitter({}, options);
-    splitter.splitTable(table.get());
+  TableSplitterOptions options;
+  options.preferred_density = ConfigDescription::DENSITY_XHIGH;
+  TableSplitter splitter({}, options);
+  splitter.SplitTable(table.get());
 
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(table.get(),
-                                                              "android:drawable/icon",
-                                                              test::parseConfigOrDie("mdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(table.get(),
-                                                              "android:drawable/icon",
-                                                              test::parseConfigOrDie("hdpi")));
-    EXPECT_NE(nullptr, test::getValueForConfig<FileReference>(table.get(),
-                                                              "android:drawable/icon",
-                                                              test::parseConfigOrDie("xhdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(table.get(),
-                                                              "android:drawable/icon",
-                                                              test::parseConfigOrDie("xxhdpi")));
-    EXPECT_NE(nullptr, test::getValue<Id>(table.get(), "android:string/one"));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         table.get(), "android:drawable/icon",
+                         test::ParseConfigOrDie("mdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         table.get(), "android:drawable/icon",
+                         test::ParseConfigOrDie("hdpi")));
+  EXPECT_NE(nullptr, test::GetValueForConfig<FileReference>(
+                         table.get(), "android:drawable/icon",
+                         test::ParseConfigOrDie("xhdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         table.get(), "android:drawable/icon",
+                         test::ParseConfigOrDie("xxhdpi")));
+  EXPECT_NE(nullptr, test::GetValue<Id>(table.get(), "android:string/one"));
 }
 
 TEST(TableSplitterTest, SplitTableByDensity) {
-    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .addFileReference("android:drawable/foo", "res/drawable-mdpi/foo.png",
-                              test::parseConfigOrDie("mdpi"))
-            .addFileReference("android:drawable/foo", "res/drawable-hdpi/foo.png",
-                              test::parseConfigOrDie("hdpi"))
-            .addFileReference("android:drawable/foo", "res/drawable-xhdpi/foo.png",
-                              test::parseConfigOrDie("xhdpi"))
-            .addFileReference("android:drawable/foo", "res/drawable-xxhdpi/foo.png",
-                              test::parseConfigOrDie("xxhdpi"))
-            .build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddFileReference("android:drawable/foo", "res/drawable-mdpi/foo.png",
+                            test::ParseConfigOrDie("mdpi"))
+          .AddFileReference("android:drawable/foo", "res/drawable-hdpi/foo.png",
+                            test::ParseConfigOrDie("hdpi"))
+          .AddFileReference("android:drawable/foo",
+                            "res/drawable-xhdpi/foo.png",
+                            test::ParseConfigOrDie("xhdpi"))
+          .AddFileReference("android:drawable/foo",
+                            "res/drawable-xxhdpi/foo.png",
+                            test::ParseConfigOrDie("xxhdpi"))
+          .Build();
 
-    std::vector<SplitConstraints> constraints;
-    constraints.push_back(SplitConstraints{ { test::parseConfigOrDie("mdpi") } });
-    constraints.push_back(SplitConstraints{ { test::parseConfigOrDie("hdpi") } });
-    constraints.push_back(SplitConstraints{ { test::parseConfigOrDie("xhdpi") } });
+  std::vector<SplitConstraints> constraints;
+  constraints.push_back(SplitConstraints{{test::ParseConfigOrDie("mdpi")}});
+  constraints.push_back(SplitConstraints{{test::ParseConfigOrDie("hdpi")}});
+  constraints.push_back(SplitConstraints{{test::ParseConfigOrDie("xhdpi")}});
 
-    TableSplitter splitter(constraints, TableSplitterOptions{});
-    splitter.splitTable(table.get());
+  TableSplitter splitter(constraints, TableSplitterOptions{});
+  splitter.SplitTable(table.get());
 
-    ASSERT_EQ(3u, splitter.getSplits().size());
+  ASSERT_EQ(3u, splitter.splits().size());
 
-    ResourceTable* splitOne = splitter.getSplits()[0].get();
-    ResourceTable* splitTwo = splitter.getSplits()[1].get();
-    ResourceTable* splitThree = splitter.getSplits()[2].get();
+  ResourceTable* split_one = splitter.splits()[0].get();
+  ResourceTable* split_two = splitter.splits()[1].get();
+  ResourceTable* split_three = splitter.splits()[2].get();
 
-    // Just xxhdpi should be in the base.
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(table.get(), "android:drawable/foo",
-                                                              test::parseConfigOrDie("mdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(table.get(), "android:drawable/foo",
-                                                              test::parseConfigOrDie("hdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(table.get(), "android:drawable/foo",
-                                                              test::parseConfigOrDie("xhdpi")));
-    EXPECT_NE(nullptr, test::getValueForConfig<FileReference>(table.get(), "android:drawable/foo",
-                                                              test::parseConfigOrDie("xxhdpi")));
+  // Just xxhdpi should be in the base.
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         table.get(), "android:drawable/foo",
+                         test::ParseConfigOrDie("mdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         table.get(), "android:drawable/foo",
+                         test::ParseConfigOrDie("hdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         table.get(), "android:drawable/foo",
+                         test::ParseConfigOrDie("xhdpi")));
+  EXPECT_NE(nullptr, test::GetValueForConfig<FileReference>(
+                         table.get(), "android:drawable/foo",
+                         test::ParseConfigOrDie("xxhdpi")));
 
-    // Each split should have one and only one drawable.
-    EXPECT_NE(nullptr, test::getValueForConfig<FileReference>(splitOne, "android:drawable/foo",
-                                                              test::parseConfigOrDie("mdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitOne, "android:drawable/foo",
-                                                              test::parseConfigOrDie("hdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitOne, "android:drawable/foo",
-                                                              test::parseConfigOrDie("xhdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitOne, "android:drawable/foo",
-                                                              test::parseConfigOrDie("xxhdpi")));
+  // Each split should have one and only one drawable.
+  EXPECT_NE(nullptr, test::GetValueForConfig<FileReference>(
+                         split_one, "android:drawable/foo",
+                         test::ParseConfigOrDie("mdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         split_one, "android:drawable/foo",
+                         test::ParseConfigOrDie("hdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         split_one, "android:drawable/foo",
+                         test::ParseConfigOrDie("xhdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         split_one, "android:drawable/foo",
+                         test::ParseConfigOrDie("xxhdpi")));
 
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitTwo, "android:drawable/foo",
-                                                              test::parseConfigOrDie("mdpi")));
-    EXPECT_NE(nullptr, test::getValueForConfig<FileReference>(splitTwo, "android:drawable/foo",
-                                                              test::parseConfigOrDie("hdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitTwo, "android:drawable/foo",
-                                                              test::parseConfigOrDie("xhdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitTwo, "android:drawable/foo",
-                                                              test::parseConfigOrDie("xxhdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         split_two, "android:drawable/foo",
+                         test::ParseConfigOrDie("mdpi")));
+  EXPECT_NE(nullptr, test::GetValueForConfig<FileReference>(
+                         split_two, "android:drawable/foo",
+                         test::ParseConfigOrDie("hdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         split_two, "android:drawable/foo",
+                         test::ParseConfigOrDie("xhdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         split_two, "android:drawable/foo",
+                         test::ParseConfigOrDie("xxhdpi")));
 
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitThree, "android:drawable/foo",
-                                                              test::parseConfigOrDie("mdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitThree, "android:drawable/foo",
-                                                              test::parseConfigOrDie("hdpi")));
-    EXPECT_NE(nullptr, test::getValueForConfig<FileReference>(splitThree, "android:drawable/foo",
-                                                              test::parseConfigOrDie("xhdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitThree, "android:drawable/foo",
-                                                              test::parseConfigOrDie("xxhdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         split_three, "android:drawable/foo",
+                         test::ParseConfigOrDie("mdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         split_three, "android:drawable/foo",
+                         test::ParseConfigOrDie("hdpi")));
+  EXPECT_NE(nullptr, test::GetValueForConfig<FileReference>(
+                         split_three, "android:drawable/foo",
+                         test::ParseConfigOrDie("xhdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         split_three, "android:drawable/foo",
+                         test::ParseConfigOrDie("xxhdpi")));
 }
 
 TEST(TableSplitterTest, SplitTableByConfigAndDensity) {
-    ResourceTable table;
+  ResourceTable table;
 
-    const ResourceName foo = test::parseNameOrDie("android:string/foo");
-    ASSERT_TRUE(table.addResource(foo, test::parseConfigOrDie("land-hdpi"), {},
-                                  util::make_unique<Id>(),
-                                  test::getDiagnostics()));
-    ASSERT_TRUE(table.addResource(foo, test::parseConfigOrDie("land-xhdpi"), {},
-                                  util::make_unique<Id>(),
-                                  test::getDiagnostics()));
-    ASSERT_TRUE(table.addResource(foo, test::parseConfigOrDie("land-xxhdpi"), {},
-                                  util::make_unique<Id>(),
-                                  test::getDiagnostics()));
+  const ResourceName foo = test::ParseNameOrDie("android:string/foo");
+  ASSERT_TRUE(table.AddResource(foo, test::ParseConfigOrDie("land-hdpi"), {},
+                                util::make_unique<Id>(),
+                                test::GetDiagnostics()));
+  ASSERT_TRUE(table.AddResource(foo, test::ParseConfigOrDie("land-xhdpi"), {},
+                                util::make_unique<Id>(),
+                                test::GetDiagnostics()));
+  ASSERT_TRUE(table.AddResource(foo, test::ParseConfigOrDie("land-xxhdpi"), {},
+                                util::make_unique<Id>(),
+                                test::GetDiagnostics()));
 
-    std::vector<SplitConstraints> constraints;
-    constraints.push_back(SplitConstraints{ { test::parseConfigOrDie("land-mdpi") } });
-    constraints.push_back(SplitConstraints{ { test::parseConfigOrDie("land-xhdpi") } });
+  std::vector<SplitConstraints> constraints;
+  constraints.push_back(
+      SplitConstraints{{test::ParseConfigOrDie("land-mdpi")}});
+  constraints.push_back(
+      SplitConstraints{{test::ParseConfigOrDie("land-xhdpi")}});
 
-    TableSplitter splitter(constraints, TableSplitterOptions{});
-    splitter.splitTable(&table);
+  TableSplitter splitter(constraints, TableSplitterOptions{});
+  splitter.SplitTable(&table);
 
-    ASSERT_EQ(2u, splitter.getSplits().size());
+  ASSERT_EQ(2u, splitter.splits().size());
 
-    ResourceTable* splitOne = splitter.getSplits()[0].get();
-    ResourceTable* splitTwo = splitter.getSplits()[1].get();
+  ResourceTable* split_one = splitter.splits()[0].get();
+  ResourceTable* split_two = splitter.splits()[1].get();
 
-    // All but the xxhdpi resource should be gone, since there were closer matches in land-xhdpi.
-    EXPECT_EQ(nullptr, test::getValueForConfig<Id>(&table, "android:string/foo",
-                                                   test::parseConfigOrDie("land-hdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<Id>(&table, "android:string/foo",
-                                                   test::parseConfigOrDie("land-xhdpi")));
-    EXPECT_NE(nullptr, test::getValueForConfig<Id>(&table, "android:string/foo",
-                                                   test::parseConfigOrDie("land-xxhdpi")));
+  // All but the xxhdpi resource should be gone, since there were closer matches
+  // in land-xhdpi.
+  EXPECT_EQ(nullptr,
+            test::GetValueForConfig<Id>(&table, "android:string/foo",
+                                        test::ParseConfigOrDie("land-hdpi")));
+  EXPECT_EQ(nullptr,
+            test::GetValueForConfig<Id>(&table, "android:string/foo",
+                                        test::ParseConfigOrDie("land-xhdpi")));
+  EXPECT_NE(nullptr,
+            test::GetValueForConfig<Id>(&table, "android:string/foo",
+                                        test::ParseConfigOrDie("land-xxhdpi")));
 
-    EXPECT_NE(nullptr, test::getValueForConfig<Id>(splitOne, "android:string/foo",
-                                                   test::parseConfigOrDie("land-hdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<Id>(splitOne, "android:string/foo",
-                                                   test::parseConfigOrDie("land-xhdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<Id>(splitOne, "android:string/foo",
-                                                   test::parseConfigOrDie("land-xxhdpi")));
+  EXPECT_NE(nullptr,
+            test::GetValueForConfig<Id>(split_one, "android:string/foo",
+                                        test::ParseConfigOrDie("land-hdpi")));
+  EXPECT_EQ(nullptr,
+            test::GetValueForConfig<Id>(split_one, "android:string/foo",
+                                        test::ParseConfigOrDie("land-xhdpi")));
+  EXPECT_EQ(nullptr,
+            test::GetValueForConfig<Id>(split_one, "android:string/foo",
+                                        test::ParseConfigOrDie("land-xxhdpi")));
 
-    EXPECT_EQ(nullptr, test::getValueForConfig<Id>(splitTwo, "android:string/foo",
-                                                   test::parseConfigOrDie("land-hdpi")));
-    EXPECT_NE(nullptr, test::getValueForConfig<Id>(splitTwo, "android:string/foo",
-                                                   test::parseConfigOrDie("land-xhdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<Id>(splitTwo, "android:string/foo",
-                                                   test::parseConfigOrDie("land-xxhdpi")));
+  EXPECT_EQ(nullptr,
+            test::GetValueForConfig<Id>(split_two, "android:string/foo",
+                                        test::ParseConfigOrDie("land-hdpi")));
+  EXPECT_NE(nullptr,
+            test::GetValueForConfig<Id>(split_two, "android:string/foo",
+                                        test::ParseConfigOrDie("land-xhdpi")));
+  EXPECT_EQ(nullptr,
+            test::GetValueForConfig<Id>(split_two, "android:string/foo",
+                                        test::ParseConfigOrDie("land-xxhdpi")));
 }
 
-} // namespace aapt
+}  // namespace aapt

@@ -15,128 +15,129 @@
  */
 
 #include "compile/IdAssigner.h"
+
 #include "test/Test.h"
 
 namespace aapt {
 
-::testing::AssertionResult verifyIds(ResourceTable* table);
+::testing::AssertionResult VerifyIds(ResourceTable* table);
 
 TEST(IdAssignerTest, AssignIds) {
   std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-                                             .addSimple("android:attr/foo")
-                                             .addSimple("android:attr/bar")
-                                             .addSimple("android:id/foo")
-                                             .setPackageId("android", 0x01)
-                                             .build();
+                                             .AddSimple("android:attr/foo")
+                                             .AddSimple("android:attr/bar")
+                                             .AddSimple("android:id/foo")
+                                             .SetPackageId("android", 0x01)
+                                             .Build();
 
-  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   IdAssigner assigner;
 
-  ASSERT_TRUE(assigner.consume(context.get(), table.get()));
-  ASSERT_TRUE(verifyIds(table.get()));
+  ASSERT_TRUE(assigner.Consume(context.get(), table.get()));
+  ASSERT_TRUE(VerifyIds(table.get()));
 }
 
 TEST(IdAssignerTest, AssignIdsWithReservedIds) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .addSimple("android:id/foo", ResourceId(0x01010000))
-          .addSimple("android:dimen/two")
-          .addSimple("android:integer/three")
-          .addSimple("android:string/five")
-          .addSimple("android:attr/fun", ResourceId(0x01040000))
-          .addSimple("android:attr/foo", ResourceId(0x01040006))
-          .addSimple("android:attr/bar")
-          .addSimple("android:attr/baz")
-          .addSimple("app:id/biz")
-          .setPackageId("android", 0x01)
-          .setPackageId("app", 0x7f)
-          .build();
+          .AddSimple("android:id/foo", ResourceId(0x01010000))
+          .AddSimple("android:dimen/two")
+          .AddSimple("android:integer/three")
+          .AddSimple("android:string/five")
+          .AddSimple("android:attr/fun", ResourceId(0x01040000))
+          .AddSimple("android:attr/foo", ResourceId(0x01040006))
+          .AddSimple("android:attr/bar")
+          .AddSimple("android:attr/baz")
+          .AddSimple("app:id/biz")
+          .SetPackageId("android", 0x01)
+          .SetPackageId("app", 0x7f)
+          .Build();
 
-  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   IdAssigner assigner;
 
-  ASSERT_TRUE(assigner.consume(context.get(), table.get()));
-  ASSERT_TRUE(verifyIds(table.get()));
+  ASSERT_TRUE(assigner.Consume(context.get(), table.get()));
+  ASSERT_TRUE(VerifyIds(table.get()));
 
-  Maybe<ResourceTable::SearchResult> maybeResult;
+  Maybe<ResourceTable::SearchResult> maybe_result;
 
   // Expect to fill in the gaps between 0x0101XXXX and 0x0104XXXX.
 
-  maybeResult = table->findResource(test::parseNameOrDie("android:dimen/two"));
-  AAPT_ASSERT_TRUE(maybeResult);
-  EXPECT_EQ(make_value<uint8_t>(2), maybeResult.value().type->id);
+  maybe_result = table->FindResource(test::ParseNameOrDie("android:dimen/two"));
+  AAPT_ASSERT_TRUE(maybe_result);
+  EXPECT_EQ(make_value<uint8_t>(2), maybe_result.value().type->id);
 
-  maybeResult =
-      table->findResource(test::parseNameOrDie("android:integer/three"));
-  AAPT_ASSERT_TRUE(maybeResult);
-  EXPECT_EQ(make_value<uint8_t>(3), maybeResult.value().type->id);
+  maybe_result =
+      table->FindResource(test::ParseNameOrDie("android:integer/three"));
+  AAPT_ASSERT_TRUE(maybe_result);
+  EXPECT_EQ(make_value<uint8_t>(3), maybe_result.value().type->id);
 
   // Expect to bypass the reserved 0x0104XXXX IDs and use the next 0x0105XXXX
   // IDs.
 
-  maybeResult =
-      table->findResource(test::parseNameOrDie("android:string/five"));
-  AAPT_ASSERT_TRUE(maybeResult);
-  EXPECT_EQ(make_value<uint8_t>(5), maybeResult.value().type->id);
+  maybe_result =
+      table->FindResource(test::ParseNameOrDie("android:string/five"));
+  AAPT_ASSERT_TRUE(maybe_result);
+  EXPECT_EQ(make_value<uint8_t>(5), maybe_result.value().type->id);
 
   // Expect to fill in the gaps between 0x01040000 and 0x01040006.
 
-  maybeResult = table->findResource(test::parseNameOrDie("android:attr/bar"));
-  AAPT_ASSERT_TRUE(maybeResult);
-  EXPECT_EQ(make_value<uint16_t>(1), maybeResult.value().entry->id);
+  maybe_result = table->FindResource(test::ParseNameOrDie("android:attr/bar"));
+  AAPT_ASSERT_TRUE(maybe_result);
+  EXPECT_EQ(make_value<uint16_t>(1), maybe_result.value().entry->id);
 
-  maybeResult = table->findResource(test::parseNameOrDie("android:attr/baz"));
-  AAPT_ASSERT_TRUE(maybeResult);
-  EXPECT_EQ(make_value<uint16_t>(2), maybeResult.value().entry->id);
+  maybe_result = table->FindResource(test::ParseNameOrDie("android:attr/baz"));
+  AAPT_ASSERT_TRUE(maybe_result);
+  EXPECT_EQ(make_value<uint16_t>(2), maybe_result.value().entry->id);
 }
 
 TEST(IdAssignerTest, FailWhenNonUniqueIdsAssigned) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .addSimple("android:attr/foo", ResourceId(0x01040006))
-          .addSimple("android:attr/bar", ResourceId(0x01040006))
-          .setPackageId("android", 0x01)
-          .setPackageId("app", 0x7f)
-          .build();
+          .AddSimple("android:attr/foo", ResourceId(0x01040006))
+          .AddSimple("android:attr/bar", ResourceId(0x01040006))
+          .SetPackageId("android", 0x01)
+          .SetPackageId("app", 0x7f)
+          .Build();
 
-  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   IdAssigner assigner;
 
-  ASSERT_FALSE(assigner.consume(context.get(), table.get()));
+  ASSERT_FALSE(assigner.Consume(context.get(), table.get()));
 }
 
 TEST(IdAssignerTest, AssignIdsWithIdMap) {
   std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-                                             .addSimple("android:attr/foo")
-                                             .addSimple("android:attr/bar")
-                                             .setPackageId("android", 0x01)
-                                             .build();
+                                             .AddSimple("android:attr/foo")
+                                             .AddSimple("android:attr/bar")
+                                             .SetPackageId("android", 0x01)
+                                             .Build();
 
-  std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
-  std::unordered_map<ResourceName, ResourceId> idMap = {
-      {test::parseNameOrDie("android:attr/foo"), ResourceId(0x01010002)}};
-  IdAssigner assigner(&idMap);
-  ASSERT_TRUE(assigner.consume(context.get(), table.get()));
-  ASSERT_TRUE(verifyIds(table.get()));
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unordered_map<ResourceName, ResourceId> id_map = {
+      {test::ParseNameOrDie("android:attr/foo"), ResourceId(0x01010002)}};
+  IdAssigner assigner(&id_map);
+  ASSERT_TRUE(assigner.Consume(context.get(), table.get()));
+  ASSERT_TRUE(VerifyIds(table.get()));
   Maybe<ResourceTable::SearchResult> result =
-      table->findResource(test::parseNameOrDie("android:attr/foo"));
+      table->FindResource(test::ParseNameOrDie("android:attr/foo"));
   AAPT_ASSERT_TRUE(result);
 
-  const ResourceTable::SearchResult& searchResult = result.value();
-  EXPECT_EQ(make_value<uint8_t>(0x01), searchResult.package->id);
-  EXPECT_EQ(make_value<uint8_t>(0x01), searchResult.type->id);
-  EXPECT_EQ(make_value<uint16_t>(0x0002), searchResult.entry->id);
+  const ResourceTable::SearchResult& search_result = result.value();
+  EXPECT_EQ(make_value<uint8_t>(0x01), search_result.package->id);
+  EXPECT_EQ(make_value<uint8_t>(0x01), search_result.type->id);
+  EXPECT_EQ(make_value<uint16_t>(0x0002), search_result.entry->id);
 }
 
-::testing::AssertionResult verifyIds(ResourceTable* table) {
-  std::set<uint8_t> packageIds;
+::testing::AssertionResult VerifyIds(ResourceTable* table) {
+  std::set<uint8_t> package_ids;
   for (auto& package : table->packages) {
     if (!package->id) {
       return ::testing::AssertionFailure() << "package " << package->name
                                            << " has no ID";
     }
 
-    if (!packageIds.insert(package->id.value()).second) {
+    if (!package_ids.insert(package->id.value()).second) {
       return ::testing::AssertionFailure()
              << "package " << package->name << " has non-unique ID " << std::hex
              << (int)package->id.value() << std::dec;
@@ -144,7 +145,7 @@ TEST(IdAssignerTest, AssignIdsWithIdMap) {
   }
 
   for (auto& package : table->packages) {
-    std::set<uint8_t> typeIds;
+    std::set<uint8_t> type_ids;
     for (auto& type : package->types) {
       if (!type->id) {
         return ::testing::AssertionFailure() << "type " << type->type
@@ -152,7 +153,7 @@ TEST(IdAssignerTest, AssignIdsWithIdMap) {
                                              << " has no ID";
       }
 
-      if (!typeIds.insert(type->id.value()).second) {
+      if (!type_ids.insert(type->id.value()).second) {
         return ::testing::AssertionFailure()
                << "type " << type->type << " of package " << package->name
                << " has non-unique ID " << std::hex << (int)type->id.value()
@@ -161,7 +162,7 @@ TEST(IdAssignerTest, AssignIdsWithIdMap) {
     }
 
     for (auto& type : package->types) {
-      std::set<uint16_t> entryIds;
+      std::set<uint16_t> entry_ids;
       for (auto& entry : type->entries) {
         if (!entry->id) {
           return ::testing::AssertionFailure()
@@ -169,7 +170,7 @@ TEST(IdAssignerTest, AssignIdsWithIdMap) {
                  << " of package " << package->name << " has no ID";
         }
 
-        if (!entryIds.insert(entry->id.value()).second) {
+        if (!entry_ids.insert(entry->id.value()).second) {
           return ::testing::AssertionFailure()
                  << "entry " << entry->name << " of type " << type->type
                  << " of package " << package->name << " has non-unique ID "

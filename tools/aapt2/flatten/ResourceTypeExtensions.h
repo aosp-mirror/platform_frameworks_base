@@ -17,7 +17,7 @@
 #ifndef AAPT_RESOURCE_TYPE_EXTENSIONS_H
 #define AAPT_RESOURCE_TYPE_EXTENSIONS_H
 
-#include <androidfw/ResourceTypes.h>
+#include "androidfw/ResourceTypes.h"
 
 namespace aapt {
 

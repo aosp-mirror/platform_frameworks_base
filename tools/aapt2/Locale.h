@@ -17,11 +17,12 @@
 #ifndef AAPT_LOCALE_VALUE_H
 #define AAPT_LOCALE_VALUE_H
 
-#include "util/StringPiece.h"
-
-#include <androidfw/ResourceTypes.h>
 #include <string>
 #include <vector>
+
+#include "androidfw/ResourceTypes.h"
+
+#include "util/StringPiece.h"
 
 namespace aapt {
 
@@ -39,23 +40,23 @@ struct LocaleValue {
   /**
    * Initialize this LocaleValue from a config string.
    */
-  bool initFromFilterString(const StringPiece& config);
+  bool InitFromFilterString(const StringPiece& config);
 
   /**
    * Initialize this LocaleValue from parts of a vector.
    */
-  ssize_t initFromParts(std::vector<std::string>::iterator iter,
+  ssize_t InitFromParts(std::vector<std::string>::iterator iter,
                         std::vector<std::string>::iterator end);
 
   /**
    * Initialize this LocaleValue from a ResTable_config.
    */
-  void initFromResTable(const android::ResTable_config& config);
+  void InitFromResTable(const android::ResTable_config& config);
 
   /**
    * Set the locale in a ResTable_config from this LocaleValue.
    */
-  void writeTo(android::ResTable_config* out) const;
+  void WriteTo(android::ResTable_config* out) const;
 
   inline int compare(const LocaleValue& other) const;
 
@@ -67,10 +68,10 @@ struct LocaleValue {
   inline bool operator>(const LocaleValue& o) const;
 
  private:
-  void setLanguage(const char* language);
-  void setRegion(const char* language);
-  void setScript(const char* script);
-  void setVariant(const char* variant);
+  void set_language(const char* language);
+  void set_region(const char* language);
+  void set_script(const char* script);
+  void set_variant(const char* variant);
 };
 
 //

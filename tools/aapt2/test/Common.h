@@ -17,6 +17,12 @@
 #ifndef AAPT_TEST_COMMON_H
 #define AAPT_TEST_COMMON_H
 
+#include <iostream>
+
+#include "android-base/logging.h"
+#include "android-base/macros.h"
+#include "gtest/gtest.h"
+
 #include "ConfigDescription.h"
 #include "Debug.h"
 #include "ResourceTable.h"
@@ -25,9 +31,6 @@
 #include "io/File.h"
 #include "process/IResourceTableConsumer.h"
 #include "util/StringPiece.h"
-
-#include <gtest/gtest.h>
-#include <iostream>
 
 //
 // GTEST 1.7 doesn't explicitly cast to bool, which causes explicit operators to
@@ -42,80 +45,81 @@ namespace aapt {
 namespace test {
 
 struct DummyDiagnosticsImpl : public IDiagnostics {
-  void log(Level level, DiagMessageActual& actualMsg) override {
+  void Log(Level level, DiagMessageActual& actual_msg) override {
     switch (level) {
       case Level::Note:
         return;
 
       case Level::Warn:
-        std::cerr << actualMsg.source << ": warn: " << actualMsg.message << "."
-                  << std::endl;
+        std::cerr << actual_msg.source << ": warn: " << actual_msg.message
+                  << "." << std::endl;
         break;
 
       case Level::Error:
-        std::cerr << actualMsg.source << ": error: " << actualMsg.message << "."
-                  << std::endl;
+        std::cerr << actual_msg.source << ": error: " << actual_msg.message
+                  << "." << std::endl;
         break;
     }
   }
 };
 
-inline IDiagnostics* getDiagnostics() {
+inline IDiagnostics* GetDiagnostics() {
   static DummyDiagnosticsImpl diag;
   return &diag;
 }
 
-inline ResourceName parseNameOrDie(const StringPiece& str) {
+inline ResourceName ParseNameOrDie(const StringPiece& str) {
   ResourceNameRef ref;
-  bool result = ResourceUtils::parseResourceName(str, &ref);
-  assert(result && "invalid resource name");
-  return ref.toResourceName();
+  CHECK(ResourceUtils::ParseResourceName(str, &ref)) << "invalid resource name";
+  return ref.ToResourceName();
 }
 
-inline ConfigDescription parseConfigOrDie(const StringPiece& str) {
+inline ConfigDescription ParseConfigOrDie(const StringPiece& str) {
   ConfigDescription config;
-  bool result = ConfigDescription::parse(str, &config);
-  assert(result && "invalid configuration");
+  CHECK(ConfigDescription::Parse(str, &config)) << "invalid configuration";
   return config;
 }
 
 template <typename T>
-T* getValueForConfigAndProduct(ResourceTable* table, const StringPiece& resName,
+T* GetValueForConfigAndProduct(ResourceTable* table,
+                               const StringPiece& res_name,
                                const ConfigDescription& config,
                                const StringPiece& product) {
   Maybe<ResourceTable::SearchResult> result =
-      table->findResource(parseNameOrDie(resName));
+      table->FindResource(ParseNameOrDie(res_name));
   if (result) {
-    ResourceConfigValue* configValue =
-        result.value().entry->findValue(config, product);
-    if (configValue) {
-      return valueCast<T>(configValue->value.get());
+    ResourceConfigValue* config_value =
+        result.value().entry->FindValue(config, product);
+    if (config_value) {
+      return ValueCast<T>(config_value->value.get());
     }
   }
   return nullptr;
 }
 
 template <typename T>
-T* getValueForConfig(ResourceTable* table, const StringPiece& resName,
+T* GetValueForConfig(ResourceTable* table, const StringPiece& res_name,
                      const ConfigDescription& config) {
-  return getValueForConfigAndProduct<T>(table, resName, config, {});
+  return GetValueForConfigAndProduct<T>(table, res_name, config, {});
 }
 
 template <typename T>
-T* getValue(ResourceTable* table, const StringPiece& resName) {
-  return getValueForConfig<T>(table, resName, {});
+T* GetValue(ResourceTable* table, const StringPiece& res_name) {
+  return GetValueForConfig<T>(table, res_name, {});
 }
 
 class TestFile : public io::IFile {
- private:
-  Source mSource;
-
  public:
-  explicit TestFile(const StringPiece& path) : mSource(path) {}
+  explicit TestFile(const StringPiece& path) : source_(path) {}
 
-  std::unique_ptr<io::IData> openAsData() override { return {}; }
+  std::unique_ptr<io::IData> OpenAsData() override { return {}; }
 
-  const Source& getSource() const override { return mSource; }
+  const Source& GetSource() const override { return source_; }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(TestFile);
+
+  Source source_;
 };
 
 }  // namespace test

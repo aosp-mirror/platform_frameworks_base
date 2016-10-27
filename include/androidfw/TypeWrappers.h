@@ -18,6 +18,7 @@
 #define __TYPE_WRAPPERS_H
 
 #include <androidfw/ResourceTypes.h>
+#include <utils/ByteOrder.h>
 
 namespace android {
 

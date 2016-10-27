@@ -16,17 +16,19 @@
 
 #include "xml/XmlDom.h"
 
-#include <gtest/gtest.h>
 #include <sstream>
 #include <string>
 
+#include "test/Test.h"
+
 namespace aapt {
 
-constexpr const char* kXmlPreamble = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+constexpr const char* kXmlPreamble =
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 
 TEST(XmlDomTest, Inflate) {
-    std::stringstream in(kXmlPreamble);
-    in << R"EOF(
+  std::stringstream in(kXmlPreamble);
+  in << R"EOF(
         <Layout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -36,15 +38,15 @@ TEST(XmlDomTest, Inflate) {
         </Layout>
     )EOF";
 
-    const Source source = { "test.xml" };
-    StdErrDiagnostics diag;
-    std::unique_ptr<xml::XmlResource> doc = xml::inflate(&in, &diag, source);
-    ASSERT_NE(doc, nullptr);
+  const Source source = {"test.xml"};
+  StdErrDiagnostics diag;
+  std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, &diag, source);
+  ASSERT_NE(doc, nullptr);
 
-    xml::Namespace* ns = xml::nodeCast<xml::Namespace>(doc->root.get());
-    ASSERT_NE(ns, nullptr);
-    EXPECT_EQ(ns->namespaceUri, xml::kSchemaAndroid);
-    EXPECT_EQ(ns->namespacePrefix, "android");
+  xml::Namespace* ns = xml::NodeCast<xml::Namespace>(doc->root.get());
+  ASSERT_NE(ns, nullptr);
+  EXPECT_EQ(ns->namespace_uri, xml::kSchemaAndroid);
+  EXPECT_EQ(ns->namespace_prefix, "android");
 }
 
-} // namespace aapt
+}  // namespace aapt

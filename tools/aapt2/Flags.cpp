@@ -15,97 +15,98 @@
  */
 
 #include "Flags.h"
-#include "util/StringPiece.h"
-#include "util/Util.h"
 
 #include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
 
+#include "util/StringPiece.h"
+#include "util/Util.h"
+
 namespace aapt {
 
-Flags& Flags::requiredFlag(const StringPiece& name,
+Flags& Flags::RequiredFlag(const StringPiece& name,
                            const StringPiece& description, std::string* value) {
   auto func = [value](const StringPiece& arg) -> bool {
-    *value = arg.toString();
+    *value = arg.ToString();
     return true;
   };
 
-  mFlags.push_back(
-      Flag{name.toString(), description.toString(), func, true, 1, false});
+  flags_.push_back(
+      Flag{name.ToString(), description.ToString(), func, true, 1, false});
   return *this;
 }
 
-Flags& Flags::requiredFlagList(const StringPiece& name,
+Flags& Flags::RequiredFlagList(const StringPiece& name,
                                const StringPiece& description,
                                std::vector<std::string>* value) {
   auto func = [value](const StringPiece& arg) -> bool {
-    value->push_back(arg.toString());
+    value->push_back(arg.ToString());
     return true;
   };
 
-  mFlags.push_back(
-      Flag{name.toString(), description.toString(), func, true, 1, false});
+  flags_.push_back(
+      Flag{name.ToString(), description.ToString(), func, true, 1, false});
   return *this;
 }
 
-Flags& Flags::optionalFlag(const StringPiece& name,
+Flags& Flags::OptionalFlag(const StringPiece& name,
                            const StringPiece& description,
                            Maybe<std::string>* value) {
   auto func = [value](const StringPiece& arg) -> bool {
-    *value = arg.toString();
+    *value = arg.ToString();
     return true;
   };
 
-  mFlags.push_back(
-      Flag{name.toString(), description.toString(), func, false, 1, false});
+  flags_.push_back(
+      Flag{name.ToString(), description.ToString(), func, false, 1, false});
   return *this;
 }
 
-Flags& Flags::optionalFlagList(const StringPiece& name,
+Flags& Flags::OptionalFlagList(const StringPiece& name,
                                const StringPiece& description,
                                std::vector<std::string>* value) {
   auto func = [value](const StringPiece& arg) -> bool {
-    value->push_back(arg.toString());
+    value->push_back(arg.ToString());
     return true;
   };
 
-  mFlags.push_back(
-      Flag{name.toString(), description.toString(), func, false, 1, false});
+  flags_.push_back(
+      Flag{name.ToString(), description.ToString(), func, false, 1, false});
   return *this;
 }
 
-Flags& Flags::optionalFlagList(const StringPiece& name,
+Flags& Flags::OptionalFlagList(const StringPiece& name,
                                const StringPiece& description,
                                std::unordered_set<std::string>* value) {
   auto func = [value](const StringPiece& arg) -> bool {
-    value->insert(arg.toString());
+    value->insert(arg.ToString());
     return true;
   };
 
-  mFlags.push_back(
-      Flag{name.toString(), description.toString(), func, false, 1, false});
+  flags_.push_back(
+      Flag{name.ToString(), description.ToString(), func, false, 1, false});
   return *this;
 }
 
-Flags& Flags::optionalSwitch(const StringPiece& name,
+Flags& Flags::OptionalSwitch(const StringPiece& name,
                              const StringPiece& description, bool* value) {
   auto func = [value](const StringPiece& arg) -> bool {
     *value = true;
     return true;
   };
 
-  mFlags.push_back(
-      Flag{name.toString(), description.toString(), func, false, 0, false});
+  flags_.push_back(
+      Flag{name.ToString(), description.ToString(), func, false, 0, false});
   return *this;
 }
 
-void Flags::usage(const StringPiece& command, std::ostream* out) {
+void Flags::Usage(const StringPiece& command, std::ostream* out) {
   constexpr size_t kWidth = 50;
 
   *out << command << " [options]";
-  for (const Flag& flag : mFlags) {
+  for (const Flag& flag : flags_) {
     if (flag.required) {
       *out << " " << flag.name << " arg";
     }
@@ -113,10 +114,10 @@ void Flags::usage(const StringPiece& command, std::ostream* out) {
 
   *out << " files...\n\nOptions:\n";
 
-  for (const Flag& flag : mFlags) {
-    std::string argLine = flag.name;
-    if (flag.numArgs > 0) {
-      argLine += " arg";
+  for (const Flag& flag : flags_) {
+    std::string argline = flag.name;
+    if (flag.num_args > 0) {
+      argline += " arg";
     }
 
     // Split the description by newlines and write out the argument (which is
@@ -124,9 +125,9 @@ void Flags::usage(const StringPiece& command, std::ostream* out) {
     // the first line) followed by the description line. This will make sure
     // that multiline
     // descriptions are still right justified and aligned.
-    for (StringPiece line : util::tokenize(flag.description, '\n')) {
-      *out << " " << std::setw(kWidth) << std::left << argLine << line << "\n";
-      argLine = " ";
+    for (StringPiece line : util::Tokenize(flag.description, '\n')) {
+      *out << " " << std::setw(kWidth) << std::left << argline << line << "\n";
+      argline = " ";
     }
   }
   *out << " " << std::setw(kWidth) << std::left << "-h"
@@ -134,29 +135,29 @@ void Flags::usage(const StringPiece& command, std::ostream* out) {
   out->flush();
 }
 
-bool Flags::parse(const StringPiece& command,
+bool Flags::Parse(const StringPiece& command,
                   const std::vector<StringPiece>& args,
-                  std::ostream* outError) {
+                  std::ostream* out_error) {
   for (size_t i = 0; i < args.size(); i++) {
     StringPiece arg = args[i];
     if (*(arg.data()) != '-') {
-      mArgs.push_back(arg.toString());
+      args_.push_back(arg.ToString());
       continue;
     }
 
     if (arg == "-h" || arg == "--help") {
-      usage(command, outError);
+      Usage(command, out_error);
       return false;
     }
 
     bool match = false;
-    for (Flag& flag : mFlags) {
+    for (Flag& flag : flags_) {
       if (arg == flag.name) {
-        if (flag.numArgs > 0) {
+        if (flag.num_args > 0) {
           i++;
           if (i >= args.size()) {
-            *outError << flag.name << " missing argument.\n\n";
-            usage(command, outError);
+            *out_error << flag.name << " missing argument.\n\n";
+            Usage(command, out_error);
             return false;
           }
           flag.action(args[i]);
@@ -170,22 +171,22 @@ bool Flags::parse(const StringPiece& command,
     }
 
     if (!match) {
-      *outError << "unknown option '" << arg << "'.\n\n";
-      usage(command, outError);
+      *out_error << "unknown option '" << arg << "'.\n\n";
+      Usage(command, out_error);
       return false;
     }
   }
 
-  for (const Flag& flag : mFlags) {
+  for (const Flag& flag : flags_) {
     if (flag.required && !flag.parsed) {
-      *outError << "missing required flag " << flag.name << "\n\n";
-      usage(command, outError);
+      *out_error << "missing required flag " << flag.name << "\n\n";
+      Usage(command, out_error);
       return false;
     }
   }
   return true;
 }
 
-const std::vector<std::string>& Flags::getArgs() { return mArgs; }
+const std::vector<std::string>& Flags::GetArgs() { return args_; }
 
 }  // namespace aapt

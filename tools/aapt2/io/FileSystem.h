@@ -17,9 +17,9 @@
 #ifndef AAPT_IO_FILESYSTEM_H
 #define AAPT_IO_FILESYSTEM_H
 
-#include "io/File.h"
-
 #include <map>
+
+#include "io/File.h"
 
 namespace aapt {
 namespace io {
@@ -31,11 +31,11 @@ class RegularFile : public IFile {
  public:
   explicit RegularFile(const Source& source);
 
-  std::unique_ptr<IData> openAsData() override;
-  const Source& getSource() const override;
+  std::unique_ptr<IData> OpenAsData() override;
+  const Source& GetSource() const override;
 
  private:
-  Source mSource;
+  Source source_;
 };
 
 class FileCollection;
@@ -44,11 +44,11 @@ class FileCollectionIterator : public IFileCollectionIterator {
  public:
   explicit FileCollectionIterator(FileCollection* collection);
 
-  bool hasNext() override;
-  io::IFile* next() override;
+  bool HasNext() override;
+  io::IFile* Next() override;
 
  private:
-  std::map<std::string, std::unique_ptr<IFile>>::const_iterator mCurrent, mEnd;
+  std::map<std::string, std::unique_ptr<IFile>>::const_iterator current_, end_;
 };
 
 /**
@@ -59,13 +59,13 @@ class FileCollection : public IFileCollection {
   /**
    * Adds a file located at path. Returns the IFile representation of that file.
    */
-  IFile* insertFile(const StringPiece& path);
-  IFile* findFile(const StringPiece& path) override;
-  std::unique_ptr<IFileCollectionIterator> iterator() override;
+  IFile* InsertFile(const StringPiece& path);
+  IFile* FindFile(const StringPiece& path) override;
+  std::unique_ptr<IFileCollectionIterator> Iterator() override;
 
  private:
   friend class FileCollectionIterator;
-  std::map<std::string, std::unique_ptr<IFile>> mFiles;
+  std::map<std::string, std::unique_ptr<IFile>> files_;
 };
 
 }  // namespace io

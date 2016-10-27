@@ -17,10 +17,10 @@
 #ifndef AAPT_JAVA_ANNOTATIONPROCESSOR_H
 #define AAPT_JAVA_ANNOTATIONPROCESSOR_H
 
-#include "util/StringPiece.h"
-
 #include <sstream>
 #include <string>
+
+#include "util/StringPiece.h"
 
 namespace aapt {
 
@@ -58,15 +58,15 @@ class AnnotationProcessor {
    * configurations,
    * we need to collect all the comments.
    */
-  void appendComment(const StringPiece& comment);
+  void AppendComment(const StringPiece& comment);
 
-  void appendNewLine();
+  void AppendNewLine();
 
   /**
    * Writes the comments and annotations to the stream, with the given prefix
    * before each line.
    */
-  void writeToStream(std::ostream* out, const StringPiece& prefix) const;
+  void WriteToStream(std::ostream* out, const StringPiece& prefix) const;
 
  private:
   enum : uint32_t {
@@ -74,12 +74,12 @@ class AnnotationProcessor {
     kSystemApi = 0x02,
   };
 
-  std::stringstream mComment;
+  std::stringstream comment_;
   std::stringstream mAnnotations;
-  bool mHasComments = false;
-  uint32_t mAnnotationBitMask = 0;
+  bool has_comments_ = false;
+  uint32_t annotation_bit_mask_ = 0;
 
-  void appendCommentLine(std::string& line);
+  void AppendCommentLine(std::string& line);
 };
 
 }  // namespace aapt

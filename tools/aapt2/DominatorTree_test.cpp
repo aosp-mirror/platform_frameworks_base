@@ -15,12 +15,13 @@
  */
 
 #include "DominatorTree.h"
-#include "test/Test.h"
-#include "util/Util.h"
 
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "test/Test.h"
+#include "util/Util.h"
 
 namespace aapt {
 
@@ -28,54 +29,54 @@ namespace {
 
 class PrettyPrinter : public DominatorTree::Visitor {
  public:
-  explicit PrettyPrinter(const int indent = 2) : mIndent(indent) {}
+  explicit PrettyPrinter(const int indent = 2) : indent_(indent) {}
 
-  void visitTree(const std::string& product,
+  void VisitTree(const std::string& product,
                  DominatorTree::Node* root) override {
     for (auto& child : root->children()) {
-      visitNode(child.get(), 0);
+      VisitNode(child.get(), 0);
     }
   }
 
-  std::string toString(DominatorTree* tree) {
-    mBuffer.str("");
-    mBuffer.clear();
-    tree->accept(this);
-    return mBuffer.str();
+  std::string ToString(DominatorTree* tree) {
+    buffer_.str("");
+    buffer_.clear();
+    tree->Accept(this);
+    return buffer_.str();
   }
 
  private:
-  void visitConfig(const DominatorTree::Node* node, const int indent) {
-    auto configString = node->value()->config.toString();
-    mBuffer << std::string(indent, ' ')
-            << (configString.isEmpty() ? "<default>" : configString)
+  void VisitConfig(const DominatorTree::Node* node, const int indent) {
+    auto config_string = node->value()->config.toString();
+    buffer_ << std::string(indent, ' ')
+            << (config_string.isEmpty() ? "<default>" : config_string)
             << std::endl;
   }
 
-  void visitNode(const DominatorTree::Node* node, const int indent) {
-    visitConfig(node, indent);
+  void VisitNode(const DominatorTree::Node* node, const int indent) {
+    VisitConfig(node, indent);
     for (const auto& child : node->children()) {
-      visitNode(child.get(), indent + mIndent);
+      VisitNode(child.get(), indent + indent_);
     }
   }
 
-  std::stringstream mBuffer;
-  const int mIndent = 2;
+  std::stringstream buffer_;
+  const int indent_ = 2;
 };
 
 }  // namespace
 
 TEST(DominatorTreeTest, DefaultDominatesEverything) {
-  const ConfigDescription defaultConfig = {};
-  const ConfigDescription landConfig = test::parseConfigOrDie("land");
-  const ConfigDescription sw600dpLandConfig =
-      test::parseConfigOrDie("sw600dp-land-v13");
+  const ConfigDescription default_config = {};
+  const ConfigDescription land_config = test::ParseConfigOrDie("land");
+  const ConfigDescription sw600dp_land_config =
+      test::ParseConfigOrDie("sw600dp-land-v13");
 
   std::vector<std::unique_ptr<ResourceConfigValue>> configs;
-  configs.push_back(util::make_unique<ResourceConfigValue>(defaultConfig, ""));
-  configs.push_back(util::make_unique<ResourceConfigValue>(landConfig, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(default_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(land_config, ""));
   configs.push_back(
-      util::make_unique<ResourceConfigValue>(sw600dpLandConfig, ""));
+      util::make_unique<ResourceConfigValue>(sw600dp_land_config, ""));
 
   DominatorTree tree(configs);
   PrettyPrinter printer;
@@ -84,22 +85,22 @@ TEST(DominatorTreeTest, DefaultDominatesEverything) {
       "<default>\n"
       "  land\n"
       "  sw600dp-land-v13\n";
-  EXPECT_EQ(expected, printer.toString(&tree));
+  EXPECT_EQ(expected, printer.ToString(&tree));
 }
 
 TEST(DominatorTreeTest, ProductsAreDominatedSeparately) {
-  const ConfigDescription defaultConfig = {};
-  const ConfigDescription landConfig = test::parseConfigOrDie("land");
-  const ConfigDescription sw600dpLandConfig =
-      test::parseConfigOrDie("sw600dp-land-v13");
+  const ConfigDescription default_config = {};
+  const ConfigDescription land_config = test::ParseConfigOrDie("land");
+  const ConfigDescription sw600dp_land_config =
+      test::ParseConfigOrDie("sw600dp-land-v13");
 
   std::vector<std::unique_ptr<ResourceConfigValue>> configs;
-  configs.push_back(util::make_unique<ResourceConfigValue>(defaultConfig, ""));
-  configs.push_back(util::make_unique<ResourceConfigValue>(landConfig, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(default_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(land_config, ""));
   configs.push_back(
-      util::make_unique<ResourceConfigValue>(defaultConfig, "phablet"));
+      util::make_unique<ResourceConfigValue>(default_config, "phablet"));
   configs.push_back(
-      util::make_unique<ResourceConfigValue>(sw600dpLandConfig, "phablet"));
+      util::make_unique<ResourceConfigValue>(sw600dp_land_config, "phablet"));
 
   DominatorTree tree(configs);
   PrettyPrinter printer;
@@ -109,34 +110,38 @@ TEST(DominatorTreeTest, ProductsAreDominatedSeparately) {
       "  land\n"
       "<default>\n"
       "  sw600dp-land-v13\n";
-  EXPECT_EQ(expected, printer.toString(&tree));
+  EXPECT_EQ(expected, printer.ToString(&tree));
 }
 
 TEST(DominatorTreeTest, MoreSpecificConfigurationsAreDominated) {
-  const ConfigDescription defaultConfig = {};
-  const ConfigDescription enConfig = test::parseConfigOrDie("en");
-  const ConfigDescription enV21Config = test::parseConfigOrDie("en-v21");
-  const ConfigDescription ldrtlConfig = test::parseConfigOrDie("ldrtl-v4");
-  const ConfigDescription ldrtlXhdpiConfig =
-      test::parseConfigOrDie("ldrtl-xhdpi-v4");
-  const ConfigDescription sw300dpConfig = test::parseConfigOrDie("sw300dp-v13");
-  const ConfigDescription sw540dpConfig = test::parseConfigOrDie("sw540dp-v14");
-  const ConfigDescription sw600dpConfig = test::parseConfigOrDie("sw600dp-v14");
-  const ConfigDescription sw720dpConfig = test::parseConfigOrDie("sw720dp-v13");
-  const ConfigDescription v20Config = test::parseConfigOrDie("v20");
+  const ConfigDescription default_config = {};
+  const ConfigDescription en_config = test::ParseConfigOrDie("en");
+  const ConfigDescription en_v21_config = test::ParseConfigOrDie("en-v21");
+  const ConfigDescription ldrtl_config = test::ParseConfigOrDie("ldrtl-v4");
+  const ConfigDescription ldrtl_xhdpi_config =
+      test::ParseConfigOrDie("ldrtl-xhdpi-v4");
+  const ConfigDescription sw300dp_config =
+      test::ParseConfigOrDie("sw300dp-v13");
+  const ConfigDescription sw540dp_config =
+      test::ParseConfigOrDie("sw540dp-v14");
+  const ConfigDescription sw600dp_config =
+      test::ParseConfigOrDie("sw600dp-v14");
+  const ConfigDescription sw720dp_config =
+      test::ParseConfigOrDie("sw720dp-v13");
+  const ConfigDescription v20_config = test::ParseConfigOrDie("v20");
 
   std::vector<std::unique_ptr<ResourceConfigValue>> configs;
-  configs.push_back(util::make_unique<ResourceConfigValue>(defaultConfig, ""));
-  configs.push_back(util::make_unique<ResourceConfigValue>(enConfig, ""));
-  configs.push_back(util::make_unique<ResourceConfigValue>(enV21Config, ""));
-  configs.push_back(util::make_unique<ResourceConfigValue>(ldrtlConfig, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(default_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(en_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(en_v21_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(ldrtl_config, ""));
   configs.push_back(
-      util::make_unique<ResourceConfigValue>(ldrtlXhdpiConfig, ""));
-  configs.push_back(util::make_unique<ResourceConfigValue>(sw300dpConfig, ""));
-  configs.push_back(util::make_unique<ResourceConfigValue>(sw540dpConfig, ""));
-  configs.push_back(util::make_unique<ResourceConfigValue>(sw600dpConfig, ""));
-  configs.push_back(util::make_unique<ResourceConfigValue>(sw720dpConfig, ""));
-  configs.push_back(util::make_unique<ResourceConfigValue>(v20Config, ""));
+      util::make_unique<ResourceConfigValue>(ldrtl_xhdpi_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(sw300dp_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(sw540dp_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(sw600dp_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(sw720dp_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(v20_config, ""));
 
   DominatorTree tree(configs);
   PrettyPrinter printer;
@@ -152,7 +157,7 @@ TEST(DominatorTreeTest, MoreSpecificConfigurationsAreDominated) {
       "      sw600dp-v14\n"
       "    sw720dp-v13\n"
       "  v20\n";
-  EXPECT_EQ(expected, printer.toString(&tree));
+  EXPECT_EQ(expected, printer.ToString(&tree));
 }
 
 }  // namespace aapt

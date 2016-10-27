@@ -15,6 +15,12 @@
  */
 
 #include "ResourceParser.h"
+
+#include <functional>
+#include <sstream>
+
+#include "android-base/logging.h"
+
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
@@ -22,9 +28,6 @@
 #include "util/ImmutableMap.h"
 #include "util/Util.h"
 #include "xml/XmlPullParser.h"
-
-#include <functional>
-#include <sstream>
 
 namespace aapt {
 
@@ -35,12 +38,12 @@ constexpr const char* sXliffNamespaceUri =
  * Returns true if the element is <skip> or <eat-comment> and can be safely
  * ignored.
  */
-static bool shouldIgnoreElement(const StringPiece& ns,
+static bool ShouldIgnoreElement(const StringPiece& ns,
                                 const StringPiece& name) {
   return ns.empty() && (name == "skip" || name == "eat-comment");
 }
 
-static uint32_t parseFormatType(const StringPiece& piece) {
+static uint32_t ParseFormatType(const StringPiece& piece) {
   if (piece == "reference")
     return android::ResTable_map::TYPE_REFERENCE;
   else if (piece == "string")
@@ -64,11 +67,11 @@ static uint32_t parseFormatType(const StringPiece& piece) {
   return 0;
 }
 
-static uint32_t parseFormatAttribute(const StringPiece& str) {
+static uint32_t ParseFormatAttribute(const StringPiece& str) {
   uint32_t mask = 0;
-  for (StringPiece part : util::tokenize(str, '|')) {
-    StringPiece trimmedPart = util::trimWhitespace(part);
-    uint32_t type = parseFormatType(trimmedPart);
+  for (StringPiece part : util::Tokenize(str, '|')) {
+    StringPiece trimmed_part = util::TrimWhitespace(part);
+    uint32_t type = ParseFormatType(trimmed_part);
     if (type == 0) {
       return 0;
     }
@@ -86,45 +89,45 @@ struct ParsedResource {
   std::string product;
   Source source;
   ResourceId id;
-  Maybe<SymbolState> symbolState;
+  Maybe<SymbolState> symbol_state;
   std::string comment;
   std::unique_ptr<Value> value;
-  std::list<ParsedResource> childResources;
+  std::list<ParsedResource> child_resources;
 };
 
 // Recursively adds resources to the ResourceTable.
-static bool addResourcesToTable(ResourceTable* table, IDiagnostics* diag,
+static bool AddResourcesToTable(ResourceTable* table, IDiagnostics* diag,
                                 ParsedResource* res) {
-  StringPiece trimmedComment = util::trimWhitespace(res->comment);
-  if (trimmedComment.size() != res->comment.size()) {
+  StringPiece trimmed_comment = util::TrimWhitespace(res->comment);
+  if (trimmed_comment.size() != res->comment.size()) {
     // Only if there was a change do we re-assign.
-    res->comment = trimmedComment.toString();
+    res->comment = trimmed_comment.ToString();
   }
 
-  if (res->symbolState) {
+  if (res->symbol_state) {
     Symbol symbol;
-    symbol.state = res->symbolState.value();
+    symbol.state = res->symbol_state.value();
     symbol.source = res->source;
     symbol.comment = res->comment;
-    if (!table->setSymbolState(res->name, res->id, symbol, diag)) {
+    if (!table->SetSymbolState(res->name, res->id, symbol, diag)) {
       return false;
     }
   }
 
   if (res->value) {
     // Attach the comment, source and config to the value.
-    res->value->setComment(std::move(res->comment));
-    res->value->setSource(std::move(res->source));
+    res->value->SetComment(std::move(res->comment));
+    res->value->SetSource(std::move(res->source));
 
-    if (!table->addResource(res->name, res->id, res->config, res->product,
+    if (!table->AddResource(res->name, res->id, res->config, res->product,
                             std::move(res->value), diag)) {
       return false;
     }
   }
 
   bool error = false;
-  for (ParsedResource& child : res->childResources) {
-    error |= !addResourcesToTable(table, diag, &child);
+  for (ParsedResource& child : res->child_resources) {
+    error |= !AddResourcesToTable(table, diag, &child);
   }
   return !error;
 }
@@ -136,29 +139,29 @@ ResourceParser::ResourceParser(IDiagnostics* diag, ResourceTable* table,
                                const Source& source,
                                const ConfigDescription& config,
                                const ResourceParserOptions& options)
-    : mDiag(diag),
-      mTable(table),
-      mSource(source),
-      mConfig(config),
-      mOptions(options) {}
+    : diag_(diag),
+      table_(table),
+      source_(source),
+      config_(config),
+      options_(options) {}
 
 /**
  * Build a string from XML that converts nested elements into Span objects.
  */
-bool ResourceParser::flattenXmlSubtree(xml::XmlPullParser* parser,
-                                       std::string* outRawString,
-                                       StyleString* outStyleString) {
-  std::vector<Span> spanStack;
+bool ResourceParser::FlattenXmlSubtree(xml::XmlPullParser* parser,
+                                       std::string* out_raw_string,
+                                       StyleString* out_style_string) {
+  std::vector<Span> span_stack;
 
   bool error = false;
-  outRawString->clear();
-  outStyleString->spans.clear();
+  out_raw_string->clear();
+  out_style_string->spans.clear();
   util::StringBuilder builder;
   size_t depth = 1;
-  while (xml::XmlPullParser::isGoodEvent(parser->next())) {
-    const xml::XmlPullParser::Event event = parser->getEvent();
+  while (xml::XmlPullParser::IsGoodEvent(parser->Next())) {
+    const xml::XmlPullParser::Event event = parser->event();
     if (event == xml::XmlPullParser::Event::kEndElement) {
-      if (!parser->getElementNamespace().empty()) {
+      if (!parser->element_namespace().empty()) {
         // We already warned and skipped the start element, so just skip here
         // too
         continue;
@@ -169,150 +172,151 @@ bool ResourceParser::flattenXmlSubtree(xml::XmlPullParser* parser,
         break;
       }
 
-      spanStack.back().lastChar = builder.utf16Len() - 1;
-      outStyleString->spans.push_back(spanStack.back());
-      spanStack.pop_back();
+      span_stack.back().last_char = builder.Utf16Len() - 1;
+      out_style_string->spans.push_back(span_stack.back());
+      span_stack.pop_back();
 
     } else if (event == xml::XmlPullParser::Event::kText) {
-      outRawString->append(parser->getText());
-      builder.append(parser->getText());
+      out_raw_string->append(parser->text());
+      builder.Append(parser->text());
 
     } else if (event == xml::XmlPullParser::Event::kStartElement) {
-      if (!parser->getElementNamespace().empty()) {
-        if (parser->getElementNamespace() != sXliffNamespaceUri) {
+      if (!parser->element_namespace().empty()) {
+        if (parser->element_namespace() != sXliffNamespaceUri) {
           // Only warn if this isn't an xliff namespace.
-          mDiag->warn(DiagMessage(mSource.withLine(parser->getLineNumber()))
-                      << "skipping element '" << parser->getElementName()
+          diag_->Warn(DiagMessage(source_.WithLine(parser->line_number()))
+                      << "skipping element '" << parser->element_name()
                       << "' with unknown namespace '"
-                      << parser->getElementNamespace() << "'");
+                      << parser->element_namespace() << "'");
         }
         continue;
       }
       depth++;
 
       // Build a span object out of the nested element.
-      std::string spanName = parser->getElementName();
-      const auto endAttrIter = parser->endAttributes();
-      for (auto attrIter = parser->beginAttributes(); attrIter != endAttrIter;
-           ++attrIter) {
-        spanName += ";";
-        spanName += attrIter->name;
-        spanName += "=";
-        spanName += attrIter->value;
+      std::string span_name = parser->element_name();
+      const auto end_attr_iter = parser->end_attributes();
+      for (auto attr_iter = parser->begin_attributes();
+           attr_iter != end_attr_iter; ++attr_iter) {
+        span_name += ";";
+        span_name += attr_iter->name;
+        span_name += "=";
+        span_name += attr_iter->value;
       }
 
-      if (builder.utf16Len() > std::numeric_limits<uint32_t>::max()) {
-        mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
-                     << "style string '" << builder.str() << "' is too long");
+      if (builder.Utf16Len() > std::numeric_limits<uint32_t>::max()) {
+        diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
+                     << "style string '" << builder.ToString()
+                     << "' is too long");
         error = true;
       } else {
-        spanStack.push_back(
-            Span{spanName, static_cast<uint32_t>(builder.utf16Len())});
+        span_stack.push_back(
+            Span{span_name, static_cast<uint32_t>(builder.Utf16Len())});
       }
 
     } else if (event == xml::XmlPullParser::Event::kComment) {
       // Skip
     } else {
-      assert(false);
+      LOG(FATAL) << "unhandled XML event";
     }
   }
-  assert(spanStack.empty() && "spans haven't been fully processed");
+  CHECK(span_stack.empty()) << "spans haven't been fully processed";
 
-  outStyleString->str = builder.str();
+  out_style_string->str = builder.ToString();
   return !error;
 }
 
-bool ResourceParser::parse(xml::XmlPullParser* parser) {
+bool ResourceParser::Parse(xml::XmlPullParser* parser) {
   bool error = false;
-  const size_t depth = parser->getDepth();
-  while (xml::XmlPullParser::nextChildNode(parser, depth)) {
-    if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
+  const size_t depth = parser->depth();
+  while (xml::XmlPullParser::NextChildNode(parser, depth)) {
+    if (parser->event() != xml::XmlPullParser::Event::kStartElement) {
       // Skip comments and text.
       continue;
     }
 
-    if (!parser->getElementNamespace().empty() ||
-        parser->getElementName() != "resources") {
-      mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+    if (!parser->element_namespace().empty() ||
+        parser->element_name() != "resources") {
+      diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
                    << "root element must be <resources>");
       return false;
     }
 
-    error |= !parseResources(parser);
+    error |= !ParseResources(parser);
     break;
   };
 
-  if (parser->getEvent() == xml::XmlPullParser::Event::kBadDocument) {
-    mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
-                 << "xml parser error: " << parser->getLastError());
+  if (parser->event() == xml::XmlPullParser::Event::kBadDocument) {
+    diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
+                 << "xml parser error: " << parser->error());
     return false;
   }
   return !error;
 }
 
-bool ResourceParser::parseResources(xml::XmlPullParser* parser) {
-  std::set<ResourceName> strippedResources;
+bool ResourceParser::ParseResources(xml::XmlPullParser* parser) {
+  std::set<ResourceName> stripped_resources;
 
   bool error = false;
   std::string comment;
-  const size_t depth = parser->getDepth();
-  while (xml::XmlPullParser::nextChildNode(parser, depth)) {
-    const xml::XmlPullParser::Event event = parser->getEvent();
+  const size_t depth = parser->depth();
+  while (xml::XmlPullParser::NextChildNode(parser, depth)) {
+    const xml::XmlPullParser::Event event = parser->event();
     if (event == xml::XmlPullParser::Event::kComment) {
-      comment = parser->getComment();
+      comment = parser->comment();
       continue;
     }
 
     if (event == xml::XmlPullParser::Event::kText) {
-      if (!util::trimWhitespace(parser->getText()).empty()) {
-        mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+      if (!util::TrimWhitespace(parser->text()).empty()) {
+        diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
                      << "plain text not allowed here");
         error = true;
       }
       continue;
     }
 
-    assert(event == xml::XmlPullParser::Event::kStartElement);
+    CHECK(event == xml::XmlPullParser::Event::kStartElement);
 
-    if (!parser->getElementNamespace().empty()) {
+    if (!parser->element_namespace().empty()) {
       // Skip unknown namespace.
       continue;
     }
 
-    std::string elementName = parser->getElementName();
-    if (elementName == "skip" || elementName == "eat-comment") {
+    std::string element_name = parser->element_name();
+    if (element_name == "skip" || element_name == "eat-comment") {
       comment = "";
       continue;
     }
 
-    ParsedResource parsedResource;
-    parsedResource.config = mConfig;
-    parsedResource.source = mSource.withLine(parser->getLineNumber());
-    parsedResource.comment = std::move(comment);
+    ParsedResource parsed_resource;
+    parsed_resource.config = config_;
+    parsed_resource.source = source_.WithLine(parser->line_number());
+    parsed_resource.comment = std::move(comment);
 
     // Extract the product name if it exists.
-    if (Maybe<StringPiece> maybeProduct =
-            xml::findNonEmptyAttribute(parser, "product")) {
-      parsedResource.product = maybeProduct.value().toString();
+    if (Maybe<StringPiece> maybe_product =
+            xml::FindNonEmptyAttribute(parser, "product")) {
+      parsed_resource.product = maybe_product.value().ToString();
     }
 
     // Parse the resource regardless of product.
-    if (!parseResource(parser, &parsedResource)) {
+    if (!ParseResource(parser, &parsed_resource)) {
       error = true;
       continue;
     }
 
-    if (!addResourcesToTable(mTable, mDiag, &parsedResource)) {
+    if (!AddResourcesToTable(table_, diag_, &parsed_resource)) {
       error = true;
     }
   }
 
   // Check that we included at least one variant of each stripped resource.
-  for (const ResourceName& strippedResource : strippedResources) {
-    if (!mTable->findResource(strippedResource)) {
+  for (const ResourceName& stripped_resource : stripped_resources) {
+    if (!table_->FindResource(stripped_resource)) {
       // Failed to find the resource.
-      mDiag->error(DiagMessage(mSource)
-                   << "resource '" << strippedResource
+      diag_->Error(DiagMessage(source_)
+                   << "resource '" << stripped_resource
                    << "' "
                       "was filtered out but no product variant remains");
       error = true;
@@ -322,8 +326,8 @@ bool ResourceParser::parseResources(xml::XmlPullParser* parser) {
   return !error;
 }
 
-bool ResourceParser::parseResource(xml::XmlPullParser* parser,
-                                   ParsedResource* outResource) {
+bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
+                                   ParsedResource* out_resource) {
   struct ItemTypeFormat {
     ResourceType type;
     uint32_t format;
@@ -333,7 +337,7 @@ bool ResourceParser::parseResource(xml::XmlPullParser* parser,
                                           ParsedResource*)>;
 
   static const auto elToItemMap =
-      ImmutableMap<std::string, ItemTypeFormat>::createPreSorted({
+      ImmutableMap<std::string, ItemTypeFormat>::CreatePreSorted({
           {"bool", {ResourceType::kBool, android::ResTable_map::TYPE_BOOLEAN}},
           {"color", {ResourceType::kColor, android::ResTable_map::TYPE_COLOR}},
           {"dimen",
@@ -354,48 +358,49 @@ bool ResourceParser::parseResource(xml::XmlPullParser* parser,
       });
 
   static const auto elToBagMap =
-      ImmutableMap<std::string, BagParseFunc>::createPreSorted({
-          {"add-resource", std::mem_fn(&ResourceParser::parseAddResource)},
-          {"array", std::mem_fn(&ResourceParser::parseArray)},
-          {"attr", std::mem_fn(&ResourceParser::parseAttr)},
+      ImmutableMap<std::string, BagParseFunc>::CreatePreSorted({
+          {"add-resource", std::mem_fn(&ResourceParser::ParseAddResource)},
+          {"array", std::mem_fn(&ResourceParser::ParseArray)},
+          {"attr", std::mem_fn(&ResourceParser::ParseAttr)},
           {"declare-styleable",
-           std::mem_fn(&ResourceParser::parseDeclareStyleable)},
-          {"integer-array", std::mem_fn(&ResourceParser::parseIntegerArray)},
-          {"java-symbol", std::mem_fn(&ResourceParser::parseSymbol)},
-          {"plurals", std::mem_fn(&ResourceParser::parsePlural)},
-          {"public", std::mem_fn(&ResourceParser::parsePublic)},
-          {"public-group", std::mem_fn(&ResourceParser::parsePublicGroup)},
-          {"string-array", std::mem_fn(&ResourceParser::parseStringArray)},
-          {"style", std::mem_fn(&ResourceParser::parseStyle)},
-          {"symbol", std::mem_fn(&ResourceParser::parseSymbol)},
+           std::mem_fn(&ResourceParser::ParseDeclareStyleable)},
+          {"integer-array", std::mem_fn(&ResourceParser::ParseIntegerArray)},
+          {"java-symbol", std::mem_fn(&ResourceParser::ParseSymbol)},
+          {"plurals", std::mem_fn(&ResourceParser::ParsePlural)},
+          {"public", std::mem_fn(&ResourceParser::ParsePublic)},
+          {"public-group", std::mem_fn(&ResourceParser::ParsePublicGroup)},
+          {"string-array", std::mem_fn(&ResourceParser::ParseStringArray)},
+          {"style", std::mem_fn(&ResourceParser::ParseStyle)},
+          {"symbol", std::mem_fn(&ResourceParser::ParseSymbol)},
       });
 
-  std::string resourceType = parser->getElementName();
+  std::string resource_type = parser->element_name();
 
   // The value format accepted for this resource.
-  uint32_t resourceFormat = 0u;
+  uint32_t resource_format = 0u;
 
-  if (resourceType == "item") {
+  if (resource_type == "item") {
     // Items have their type encoded in the type attribute.
-    if (Maybe<StringPiece> maybeType =
-            xml::findNonEmptyAttribute(parser, "type")) {
-      resourceType = maybeType.value().toString();
+    if (Maybe<StringPiece> maybe_type =
+            xml::FindNonEmptyAttribute(parser, "type")) {
+      resource_type = maybe_type.value().ToString();
     } else {
-      mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+      diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
                    << "<item> must have a 'type' attribute");
       return false;
     }
 
-    if (Maybe<StringPiece> maybeFormat =
-            xml::findNonEmptyAttribute(parser, "format")) {
+    if (Maybe<StringPiece> maybe_format =
+            xml::FindNonEmptyAttribute(parser, "format")) {
       // An explicit format for this resource was specified. The resource will
       // retain
       // its type in its name, but the accepted value for this type is
       // overridden.
-      resourceFormat = parseFormatType(maybeFormat.value());
-      if (!resourceFormat) {
-        mDiag->error(DiagMessage(outResource->source)
-                     << "'" << maybeFormat.value() << "' is an invalid format");
+      resource_format = ParseFormatType(maybe_format.value());
+      if (!resource_format) {
+        diag_->Error(DiagMessage(out_resource->source)
+                     << "'" << maybe_format.value()
+                     << "' is an invalid format");
         return false;
       }
     }
@@ -403,65 +408,65 @@ bool ResourceParser::parseResource(xml::XmlPullParser* parser,
 
   // Get the name of the resource. This will be checked later, because not all
   // XML elements require a name.
-  Maybe<StringPiece> maybeName = xml::findNonEmptyAttribute(parser, "name");
+  Maybe<StringPiece> maybe_name = xml::FindNonEmptyAttribute(parser, "name");
 
-  if (resourceType == "id") {
-    if (!maybeName) {
-      mDiag->error(DiagMessage(outResource->source)
-                   << "<" << parser->getElementName()
+  if (resource_type == "id") {
+    if (!maybe_name) {
+      diag_->Error(DiagMessage(out_resource->source)
+                   << "<" << parser->element_name()
                    << "> missing 'name' attribute");
       return false;
     }
 
-    outResource->name.type = ResourceType::kId;
-    outResource->name.entry = maybeName.value().toString();
-    outResource->value = util::make_unique<Id>();
+    out_resource->name.type = ResourceType::kId;
+    out_resource->name.entry = maybe_name.value().ToString();
+    out_resource->value = util::make_unique<Id>();
     return true;
   }
 
-  const auto itemIter = elToItemMap.find(resourceType);
-  if (itemIter != elToItemMap.end()) {
+  const auto item_iter = elToItemMap.find(resource_type);
+  if (item_iter != elToItemMap.end()) {
     // This is an item, record its type and format and start parsing.
 
-    if (!maybeName) {
-      mDiag->error(DiagMessage(outResource->source)
-                   << "<" << parser->getElementName()
+    if (!maybe_name) {
+      diag_->Error(DiagMessage(out_resource->source)
+                   << "<" << parser->element_name()
                    << "> missing 'name' attribute");
       return false;
     }
 
-    outResource->name.type = itemIter->second.type;
-    outResource->name.entry = maybeName.value().toString();
+    out_resource->name.type = item_iter->second.type;
+    out_resource->name.entry = maybe_name.value().ToString();
 
     // Only use the implicit format for this type if it wasn't overridden.
-    if (!resourceFormat) {
-      resourceFormat = itemIter->second.format;
+    if (!resource_format) {
+      resource_format = item_iter->second.format;
     }
 
-    if (!parseItem(parser, outResource, resourceFormat)) {
+    if (!ParseItem(parser, out_resource, resource_format)) {
       return false;
     }
     return true;
   }
 
   // This might be a bag or something.
-  const auto bagIter = elToBagMap.find(resourceType);
-  if (bagIter != elToBagMap.end()) {
+  const auto bag_iter = elToBagMap.find(resource_type);
+  if (bag_iter != elToBagMap.end()) {
     // Ensure we have a name (unless this is a <public-group>).
-    if (resourceType != "public-group") {
-      if (!maybeName) {
-        mDiag->error(DiagMessage(outResource->source)
-                     << "<" << parser->getElementName()
+    if (resource_type != "public-group") {
+      if (!maybe_name) {
+        diag_->Error(DiagMessage(out_resource->source)
+                     << "<" << parser->element_name()
                      << "> missing 'name' attribute");
         return false;
       }
 
-      outResource->name.entry = maybeName.value().toString();
+      out_resource->name.entry = maybe_name.value().ToString();
     }
 
     // Call the associated parse method. The type will be filled in by the
     // parse func.
-    if (!bagIter->second(this, parser, outResource)) {
+    if (!bag_iter->second(this, parser, out_resource)) {
       return false;
     }
     return true;
@@ -469,44 +474,44 @@ bool ResourceParser::parseResource(xml::XmlPullParser* parser,
 
   // Try parsing the elementName (or type) as a resource. These shall only be
   // resources like 'layout' or 'xml' and they can only be references.
-  const ResourceType* parsedType = parseResourceType(resourceType);
-  if (parsedType) {
-    if (!maybeName) {
-      mDiag->error(DiagMessage(outResource->source)
-                   << "<" << parser->getElementName()
+  const ResourceType* parsed_type = ParseResourceType(resource_type);
+  if (parsed_type) {
+    if (!maybe_name) {
+      diag_->Error(DiagMessage(out_resource->source)
+                   << "<" << parser->element_name()
                    << "> missing 'name' attribute");
       return false;
     }
 
-    outResource->name.type = *parsedType;
-    outResource->name.entry = maybeName.value().toString();
-    outResource->value =
-        parseXml(parser, android::ResTable_map::TYPE_REFERENCE, kNoRawString);
-    if (!outResource->value) {
-      mDiag->error(DiagMessage(outResource->source)
-                   << "invalid value for type '" << *parsedType
+    out_resource->name.type = *parsed_type;
+    out_resource->name.entry = maybe_name.value().ToString();
+    out_resource->value =
+        ParseXml(parser, android::ResTable_map::TYPE_REFERENCE, kNoRawString);
+    if (!out_resource->value) {
+      diag_->Error(DiagMessage(out_resource->source)
+                   << "invalid value for type '" << *parsed_type
                    << "'. Expected a reference");
       return false;
     }
     return true;
   }
 
-  mDiag->warn(DiagMessage(outResource->source)
-              << "unknown resource type '" << parser->getElementName() << "'");
+  diag_->Warn(DiagMessage(out_resource->source)
+              << "unknown resource type '" << parser->element_name() << "'");
   return false;
 }
 
-bool ResourceParser::parseItem(xml::XmlPullParser* parser,
-                               ParsedResource* outResource,
+bool ResourceParser::ParseItem(xml::XmlPullParser* parser,
+                               ParsedResource* out_resource,
                                const uint32_t format) {
   if (format == android::ResTable_map::TYPE_STRING) {
-    return parseString(parser, outResource);
+    return ParseString(parser, out_resource);
   }
 
-  outResource->value = parseXml(parser, format, kNoRawString);
-  if (!outResource->value) {
-    mDiag->error(DiagMessage(outResource->source) << "invalid "
-                                                  << outResource->name.type);
+  out_resource->value = ParseXml(parser, format, kNoRawString);
+  if (!out_resource->value) {
+    diag_->Error(DiagMessage(out_resource->source) << "invalid "
+                                                   << out_resource->name.type);
     return false;
   }
   return true;
@@ -519,362 +524,364 @@ bool ResourceParser::parseItem(xml::XmlPullParser* parser,
  * an Item. If allowRawValue is false, nullptr is returned in this
  * case.
  */
-std::unique_ptr<Item> ResourceParser::parseXml(xml::XmlPullParser* parser,
-                                               const uint32_t typeMask,
-                                               const bool allowRawValue) {
-  const size_t beginXmlLine = parser->getLineNumber();
+std::unique_ptr<Item> ResourceParser::ParseXml(xml::XmlPullParser* parser,
+                                               const uint32_t type_mask,
+                                               const bool allow_raw_value) {
+  const size_t begin_xml_line = parser->line_number();
 
-  std::string rawValue;
-  StyleString styleString;
-  if (!flattenXmlSubtree(parser, &rawValue, &styleString)) {
+  std::string raw_value;
+  StyleString style_string;
+  if (!FlattenXmlSubtree(parser, &raw_value, &style_string)) {
     return {};
   }
 
-  if (!styleString.spans.empty()) {
+  if (!style_string.spans.empty()) {
     // This can only be a StyledString.
-    return util::make_unique<StyledString>(mTable->stringPool.makeRef(
-        styleString,
-        StringPool::Context(StringPool::Context::kStylePriority, mConfig)));
+    return util::make_unique<StyledString>(table_->string_pool.MakeRef(
+        style_string,
+        StringPool::Context(StringPool::Context::kStylePriority, config_)));
   }
 
-  auto onCreateReference = [&](const ResourceName& name) {
+  auto on_create_reference = [&](const ResourceName& name) {
     // name.package can be empty here, as it will assume the package name of the
     // table.
     std::unique_ptr<Id> id = util::make_unique<Id>();
-    id->setSource(mSource.withLine(beginXmlLine));
-    mTable->addResource(name, {}, {}, std::move(id), mDiag);
+    id->SetSource(source_.WithLine(begin_xml_line));
+    table_->AddResource(name, {}, {}, std::move(id), diag_);
   };
 
   // Process the raw value.
-  std::unique_ptr<Item> processedItem = ResourceUtils::tryParseItemForAttribute(
-      rawValue, typeMask, onCreateReference);
-  if (processedItem) {
+  std::unique_ptr<Item> processed_item =
+      ResourceUtils::TryParseItemForAttribute(raw_value, type_mask,
+                                              on_create_reference);
+  if (processed_item) {
     // Fix up the reference.
-    if (Reference* ref = valueCast<Reference>(processedItem.get())) {
-      transformReferenceFromNamespace(parser, "", ref);
+    if (Reference* ref = ValueCast<Reference>(processed_item.get())) {
+      TransformReferenceFromNamespace(parser, "", ref);
     }
-    return processedItem;
+    return processed_item;
   }
 
   // Try making a regular string.
-  if (typeMask & android::ResTable_map::TYPE_STRING) {
+  if (type_mask & android::ResTable_map::TYPE_STRING) {
     // Use the trimmed, escaped string.
-    return util::make_unique<String>(mTable->stringPool.makeRef(
-        styleString.str, StringPool::Context(mConfig)));
+    return util::make_unique<String>(table_->string_pool.MakeRef(
+        style_string.str, StringPool::Context(config_)));
   }
 
-  if (allowRawValue) {
+  if (allow_raw_value) {
     // We can't parse this so return a RawString if we are allowed.
     return util::make_unique<RawString>(
-        mTable->stringPool.makeRef(rawValue, StringPool::Context(mConfig)));
+        table_->string_pool.MakeRef(raw_value, StringPool::Context(config_)));
   }
   return {};
 }
 
-bool ResourceParser::parseString(xml::XmlPullParser* parser,
-                                 ParsedResource* outResource) {
+bool ResourceParser::ParseString(xml::XmlPullParser* parser,
+                                 ParsedResource* out_resource) {
   bool formatted = true;
-  if (Maybe<StringPiece> formattedAttr =
-          xml::findAttribute(parser, "formatted")) {
-    Maybe<bool> maybeFormatted =
-        ResourceUtils::parseBool(formattedAttr.value());
-    if (!maybeFormatted) {
-      mDiag->error(DiagMessage(outResource->source)
+  if (Maybe<StringPiece> formatted_attr =
+          xml::FindAttribute(parser, "formatted")) {
+    Maybe<bool> maybe_formatted =
+        ResourceUtils::ParseBool(formatted_attr.value());
+    if (!maybe_formatted) {
+      diag_->Error(DiagMessage(out_resource->source)
                    << "invalid value for 'formatted'. Must be a boolean");
       return false;
     }
-    formatted = maybeFormatted.value();
+    formatted = maybe_formatted.value();
   }
 
-  bool translateable = mOptions.translatable;
-  if (Maybe<StringPiece> translateableAttr =
-          xml::findAttribute(parser, "translatable")) {
-    Maybe<bool> maybeTranslateable =
-        ResourceUtils::parseBool(translateableAttr.value());
-    if (!maybeTranslateable) {
-      mDiag->error(DiagMessage(outResource->source)
+  bool translateable = options_.translatable;
+  if (Maybe<StringPiece> translateable_attr =
+          xml::FindAttribute(parser, "translatable")) {
+    Maybe<bool> maybe_translateable =
+        ResourceUtils::ParseBool(translateable_attr.value());
+    if (!maybe_translateable) {
+      diag_->Error(DiagMessage(out_resource->source)
                    << "invalid value for 'translatable'. Must be a boolean");
       return false;
     }
-    translateable = maybeTranslateable.value();
+    translateable = maybe_translateable.value();
   }
 
-  outResource->value =
-      parseXml(parser, android::ResTable_map::TYPE_STRING, kNoRawString);
-  if (!outResource->value) {
-    mDiag->error(DiagMessage(outResource->source) << "not a valid string");
+  out_resource->value =
+      ParseXml(parser, android::ResTable_map::TYPE_STRING, kNoRawString);
+  if (!out_resource->value) {
+    diag_->Error(DiagMessage(out_resource->source) << "not a valid string");
     return false;
   }
 
-  if (String* stringValue = valueCast<String>(outResource->value.get())) {
-    stringValue->setTranslateable(translateable);
+  if (String* string_value = ValueCast<String>(out_resource->value.get())) {
+    string_value->SetTranslateable(translateable);
 
     if (formatted && translateable) {
-      if (!util::verifyJavaStringFormat(*stringValue->value)) {
-        DiagMessage msg(outResource->source);
+      if (!util::VerifyJavaStringFormat(*string_value->value)) {
+        DiagMessage msg(out_resource->source);
         msg << "multiple substitutions specified in non-positional format; "
                "did you mean to add the formatted=\"false\" attribute?";
-        if (mOptions.errorOnPositionalArguments) {
-          mDiag->error(msg);
+        if (options_.error_on_positional_arguments) {
+          diag_->Error(msg);
           return false;
         }
 
-        mDiag->warn(msg);
+        diag_->Warn(msg);
       }
     }
 
-  } else if (StyledString* stringValue =
-                 valueCast<StyledString>(outResource->value.get())) {
-    stringValue->setTranslateable(translateable);
+  } else if (StyledString* string_value =
+                 ValueCast<StyledString>(out_resource->value.get())) {
+    string_value->SetTranslateable(translateable);
   }
   return true;
 }
 
-bool ResourceParser::parsePublic(xml::XmlPullParser* parser,
-                                 ParsedResource* outResource) {
-  Maybe<StringPiece> maybeType = xml::findNonEmptyAttribute(parser, "type");
-  if (!maybeType) {
-    mDiag->error(DiagMessage(outResource->source)
+bool ResourceParser::ParsePublic(xml::XmlPullParser* parser,
+                                 ParsedResource* out_resource) {
+  Maybe<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type");
+  if (!maybe_type) {
+    diag_->Error(DiagMessage(out_resource->source)
                  << "<public> must have a 'type' attribute");
     return false;
   }
 
-  const ResourceType* parsedType = parseResourceType(maybeType.value());
-  if (!parsedType) {
-    mDiag->error(DiagMessage(outResource->source) << "invalid resource type '"
-                                                  << maybeType.value()
-                                                  << "' in <public>");
+  const ResourceType* parsed_type = ParseResourceType(maybe_type.value());
+  if (!parsed_type) {
+    diag_->Error(DiagMessage(out_resource->source) << "invalid resource type '"
+                                                   << maybe_type.value()
+                                                   << "' in <public>");
     return false;
   }
 
-  outResource->name.type = *parsedType;
+  out_resource->name.type = *parsed_type;
 
-  if (Maybe<StringPiece> maybeIdStr =
-          xml::findNonEmptyAttribute(parser, "id")) {
-    Maybe<ResourceId> maybeId =
-        ResourceUtils::parseResourceId(maybeIdStr.value());
-    if (!maybeId) {
-      mDiag->error(DiagMessage(outResource->source) << "invalid resource ID '"
-                                                    << maybeId.value()
-                                                    << "' in <public>");
+  if (Maybe<StringPiece> maybe_id_str =
+          xml::FindNonEmptyAttribute(parser, "id")) {
+    Maybe<ResourceId> maybe_id =
+        ResourceUtils::ParseResourceId(maybe_id_str.value());
+    if (!maybe_id) {
+      diag_->Error(DiagMessage(out_resource->source) << "invalid resource ID '"
+                                                     << maybe_id.value()
+                                                     << "' in <public>");
       return false;
     }
-    outResource->id = maybeId.value();
+    out_resource->id = maybe_id.value();
   }
 
-  if (*parsedType == ResourceType::kId) {
+  if (*parsed_type == ResourceType::kId) {
     // An ID marked as public is also the definition of an ID.
-    outResource->value = util::make_unique<Id>();
+    out_resource->value = util::make_unique<Id>();
   }
 
-  outResource->symbolState = SymbolState::kPublic;
+  out_resource->symbol_state = SymbolState::kPublic;
   return true;
 }
 
-bool ResourceParser::parsePublicGroup(xml::XmlPullParser* parser,
-                                      ParsedResource* outResource) {
-  Maybe<StringPiece> maybeType = xml::findNonEmptyAttribute(parser, "type");
-  if (!maybeType) {
-    mDiag->error(DiagMessage(outResource->source)
+bool ResourceParser::ParsePublicGroup(xml::XmlPullParser* parser,
+                                      ParsedResource* out_resource) {
+  Maybe<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type");
+  if (!maybe_type) {
+    diag_->Error(DiagMessage(out_resource->source)
                  << "<public-group> must have a 'type' attribute");
     return false;
   }
 
-  const ResourceType* parsedType = parseResourceType(maybeType.value());
-  if (!parsedType) {
-    mDiag->error(DiagMessage(outResource->source) << "invalid resource type '"
-                                                  << maybeType.value()
-                                                  << "' in <public-group>");
+  const ResourceType* parsed_type = ParseResourceType(maybe_type.value());
+  if (!parsed_type) {
+    diag_->Error(DiagMessage(out_resource->source) << "invalid resource type '"
+                                                   << maybe_type.value()
+                                                   << "' in <public-group>");
     return false;
   }
 
-  Maybe<StringPiece> maybeIdStr =
-      xml::findNonEmptyAttribute(parser, "first-id");
-  if (!maybeIdStr) {
-    mDiag->error(DiagMessage(outResource->source)
+  Maybe<StringPiece> maybe_id_str =
+      xml::FindNonEmptyAttribute(parser, "first-id");
+  if (!maybe_id_str) {
+    diag_->Error(DiagMessage(out_resource->source)
                  << "<public-group> must have a 'first-id' attribute");
     return false;
   }
 
-  Maybe<ResourceId> maybeId =
-      ResourceUtils::parseResourceId(maybeIdStr.value());
-  if (!maybeId) {
-    mDiag->error(DiagMessage(outResource->source) << "invalid resource ID '"
-                                                  << maybeIdStr.value()
-                                                  << "' in <public-group>");
+  Maybe<ResourceId> maybe_id =
+      ResourceUtils::ParseResourceId(maybe_id_str.value());
+  if (!maybe_id) {
+    diag_->Error(DiagMessage(out_resource->source) << "invalid resource ID '"
+                                                   << maybe_id_str.value()
+                                                   << "' in <public-group>");
     return false;
   }
 
-  ResourceId nextId = maybeId.value();
+  ResourceId next_id = maybe_id.value();
 
   std::string comment;
   bool error = false;
-  const size_t depth = parser->getDepth();
-  while (xml::XmlPullParser::nextChildNode(parser, depth)) {
-    if (parser->getEvent() == xml::XmlPullParser::Event::kComment) {
-      comment = util::trimWhitespace(parser->getComment()).toString();
+  const size_t depth = parser->depth();
+  while (xml::XmlPullParser::NextChildNode(parser, depth)) {
+    if (parser->event() == xml::XmlPullParser::Event::kComment) {
+      comment = util::TrimWhitespace(parser->comment()).ToString();
       continue;
-    } else if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
+    } else if (parser->event() != xml::XmlPullParser::Event::kStartElement) {
       // Skip text.
       continue;
     }
 
-    const Source itemSource = mSource.withLine(parser->getLineNumber());
-    const std::string& elementNamespace = parser->getElementNamespace();
-    const std::string& elementName = parser->getElementName();
-    if (elementNamespace.empty() && elementName == "public") {
-      Maybe<StringPiece> maybeName = xml::findNonEmptyAttribute(parser, "name");
-      if (!maybeName) {
-        mDiag->error(DiagMessage(itemSource)
+    const Source item_source = source_.WithLine(parser->line_number());
+    const std::string& element_namespace = parser->element_namespace();
+    const std::string& element_name = parser->element_name();
+    if (element_namespace.empty() && element_name == "public") {
+      Maybe<StringPiece> maybe_name =
+          xml::FindNonEmptyAttribute(parser, "name");
+      if (!maybe_name) {
+        diag_->Error(DiagMessage(item_source)
                      << "<public> must have a 'name' attribute");
         error = true;
         continue;
       }
 
-      if (xml::findNonEmptyAttribute(parser, "id")) {
-        mDiag->error(DiagMessage(itemSource)
+      if (xml::FindNonEmptyAttribute(parser, "id")) {
+        diag_->Error(DiagMessage(item_source)
                      << "'id' is ignored within <public-group>");
         error = true;
         continue;
       }
 
-      if (xml::findNonEmptyAttribute(parser, "type")) {
-        mDiag->error(DiagMessage(itemSource)
+      if (xml::FindNonEmptyAttribute(parser, "type")) {
+        diag_->Error(DiagMessage(item_source)
                      << "'type' is ignored within <public-group>");
         error = true;
         continue;
       }
 
-      ParsedResource childResource;
-      childResource.name.type = *parsedType;
-      childResource.name.entry = maybeName.value().toString();
-      childResource.id = nextId;
-      childResource.comment = std::move(comment);
-      childResource.source = itemSource;
-      childResource.symbolState = SymbolState::kPublic;
-      outResource->childResources.push_back(std::move(childResource));
+      ParsedResource child_resource;
+      child_resource.name.type = *parsed_type;
+      child_resource.name.entry = maybe_name.value().ToString();
+      child_resource.id = next_id;
+      child_resource.comment = std::move(comment);
+      child_resource.source = item_source;
+      child_resource.symbol_state = SymbolState::kPublic;
+      out_resource->child_resources.push_back(std::move(child_resource));
 
-      nextId.id += 1;
+      next_id.id += 1;
 
-    } else if (!shouldIgnoreElement(elementNamespace, elementName)) {
-      mDiag->error(DiagMessage(itemSource) << ":" << elementName << ">");
+    } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
+      diag_->Error(DiagMessage(item_source) << ":" << element_name << ">");
       error = true;
     }
   }
   return !error;
 }
 
-bool ResourceParser::parseSymbolImpl(xml::XmlPullParser* parser,
-                                     ParsedResource* outResource) {
-  Maybe<StringPiece> maybeType = xml::findNonEmptyAttribute(parser, "type");
-  if (!maybeType) {
-    mDiag->error(DiagMessage(outResource->source)
-                 << "<" << parser->getElementName()
+bool ResourceParser::ParseSymbolImpl(xml::XmlPullParser* parser,
+                                     ParsedResource* out_resource) {
+  Maybe<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type");
+  if (!maybe_type) {
+    diag_->Error(DiagMessage(out_resource->source)
+                 << "<" << parser->element_name()
                  << "> must have a 'type' attribute");
     return false;
   }
 
-  const ResourceType* parsedType = parseResourceType(maybeType.value());
-  if (!parsedType) {
-    mDiag->error(DiagMessage(outResource->source)
-                 << "invalid resource type '" << maybeType.value() << "' in <"
-                 << parser->getElementName() << ">");
+  const ResourceType* parsed_type = ParseResourceType(maybe_type.value());
+  if (!parsed_type) {
+    diag_->Error(DiagMessage(out_resource->source)
+                 << "invalid resource type '" << maybe_type.value() << "' in <"
+                 << parser->element_name() << ">");
     return false;
   }
 
-  outResource->name.type = *parsedType;
+  out_resource->name.type = *parsed_type;
   return true;
 }
 
-bool ResourceParser::parseSymbol(xml::XmlPullParser* parser,
-                                 ParsedResource* outResource) {
-  if (parseSymbolImpl(parser, outResource)) {
-    outResource->symbolState = SymbolState::kPrivate;
+bool ResourceParser::ParseSymbol(xml::XmlPullParser* parser,
+                                 ParsedResource* out_resource) {
+  if (ParseSymbolImpl(parser, out_resource)) {
+    out_resource->symbol_state = SymbolState::kPrivate;
     return true;
   }
   return false;
 }
 
-bool ResourceParser::parseAddResource(xml::XmlPullParser* parser,
-                                      ParsedResource* outResource) {
-  if (parseSymbolImpl(parser, outResource)) {
-    outResource->symbolState = SymbolState::kUndefined;
+bool ResourceParser::ParseAddResource(xml::XmlPullParser* parser,
+                                      ParsedResource* out_resource) {
+  if (ParseSymbolImpl(parser, out_resource)) {
+    out_resource->symbol_state = SymbolState::kUndefined;
     return true;
   }
   return false;
 }
 
-bool ResourceParser::parseAttr(xml::XmlPullParser* parser,
-                               ParsedResource* outResource) {
-  return parseAttrImpl(parser, outResource, false);
+bool ResourceParser::ParseAttr(xml::XmlPullParser* parser,
+                               ParsedResource* out_resource) {
+  return ParseAttrImpl(parser, out_resource, false);
 }
 
-bool ResourceParser::parseAttrImpl(xml::XmlPullParser* parser,
-                                   ParsedResource* outResource, bool weak) {
-  outResource->name.type = ResourceType::kAttr;
+bool ResourceParser::ParseAttrImpl(xml::XmlPullParser* parser,
+                                   ParsedResource* out_resource, bool weak) {
+  out_resource->name.type = ResourceType::kAttr;
 
   // Attributes only end up in default configuration.
-  if (outResource->config != ConfigDescription::defaultConfig()) {
-    mDiag->warn(DiagMessage(outResource->source)
-                << "ignoring configuration '" << outResource->config
-                << "' for attribute " << outResource->name);
-    outResource->config = ConfigDescription::defaultConfig();
+  if (out_resource->config != ConfigDescription::DefaultConfig()) {
+    diag_->Warn(DiagMessage(out_resource->source)
+                << "ignoring configuration '" << out_resource->config
+                << "' for attribute " << out_resource->name);
+    out_resource->config = ConfigDescription::DefaultConfig();
   }
 
-  uint32_t typeMask = 0;
+  uint32_t type_mask = 0;
 
-  Maybe<StringPiece> maybeFormat = xml::findAttribute(parser, "format");
-  if (maybeFormat) {
-    typeMask = parseFormatAttribute(maybeFormat.value());
-    if (typeMask == 0) {
-      mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
-                   << "invalid attribute format '" << maybeFormat.value()
+  Maybe<StringPiece> maybe_format = xml::FindAttribute(parser, "format");
+  if (maybe_format) {
+    type_mask = ParseFormatAttribute(maybe_format.value());
+    if (type_mask == 0) {
+      diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
+                   << "invalid attribute format '" << maybe_format.value()
                    << "'");
       return false;
     }
   }
 
-  Maybe<int32_t> maybeMin, maybeMax;
+  Maybe<int32_t> maybe_min, maybe_max;
 
-  if (Maybe<StringPiece> maybeMinStr = xml::findAttribute(parser, "min")) {
-    StringPiece minStr = util::trimWhitespace(maybeMinStr.value());
-    if (!minStr.empty()) {
-      std::u16string minStr16 = util::utf8ToUtf16(minStr);
+  if (Maybe<StringPiece> maybe_min_str = xml::FindAttribute(parser, "min")) {
+    StringPiece min_str = util::TrimWhitespace(maybe_min_str.value());
+    if (!min_str.empty()) {
+      std::u16string min_str16 = util::Utf8ToUtf16(min_str);
       android::Res_value value;
-      if (android::ResTable::stringToInt(minStr16.data(), minStr16.size(),
+      if (android::ResTable::stringToInt(min_str16.data(), min_str16.size(),
                                          &value)) {
-        maybeMin = static_cast<int32_t>(value.data);
+        maybe_min = static_cast<int32_t>(value.data);
       }
     }
 
-    if (!maybeMin) {
-      mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
-                   << "invalid 'min' value '" << minStr << "'");
+    if (!maybe_min) {
+      diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
+                   << "invalid 'min' value '" << min_str << "'");
       return false;
     }
   }
 
-  if (Maybe<StringPiece> maybeMaxStr = xml::findAttribute(parser, "max")) {
-    StringPiece maxStr = util::trimWhitespace(maybeMaxStr.value());
-    if (!maxStr.empty()) {
-      std::u16string maxStr16 = util::utf8ToUtf16(maxStr);
+  if (Maybe<StringPiece> maybe_max_str = xml::FindAttribute(parser, "max")) {
+    StringPiece max_str = util::TrimWhitespace(maybe_max_str.value());
+    if (!max_str.empty()) {
+      std::u16string max_str16 = util::Utf8ToUtf16(max_str);
       android::Res_value value;
-      if (android::ResTable::stringToInt(maxStr16.data(), maxStr16.size(),
+      if (android::ResTable::stringToInt(max_str16.data(), max_str16.size(),
                                          &value)) {
-        maybeMax = static_cast<int32_t>(value.data);
+        maybe_max = static_cast<int32_t>(value.data);
       }
     }
 
-    if (!maybeMax) {
-      mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
-                   << "invalid 'max' value '" << maxStr << "'");
+    if (!maybe_max) {
+      diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
+                   << "invalid 'max' value '" << max_str << "'");
       return false;
     }
   }
 
-  if ((maybeMin || maybeMax) &&
-      (typeMask & android::ResTable_map::TYPE_INTEGER) == 0) {
-    mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+  if ((maybe_min || maybe_max) &&
+      (type_mask & android::ResTable_map::TYPE_INTEGER) == 0) {
+    diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
                  << "'min' and 'max' can only be used when format='integer'");
     return false;
   }
@@ -889,68 +896,68 @@ bool ResourceParser::parseAttrImpl(xml::XmlPullParser* parser,
 
   std::string comment;
   bool error = false;
-  const size_t depth = parser->getDepth();
-  while (xml::XmlPullParser::nextChildNode(parser, depth)) {
-    if (parser->getEvent() == xml::XmlPullParser::Event::kComment) {
-      comment = util::trimWhitespace(parser->getComment()).toString();
+  const size_t depth = parser->depth();
+  while (xml::XmlPullParser::NextChildNode(parser, depth)) {
+    if (parser->event() == xml::XmlPullParser::Event::kComment) {
+      comment = util::TrimWhitespace(parser->comment()).ToString();
       continue;
-    } else if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
+    } else if (parser->event() != xml::XmlPullParser::Event::kStartElement) {
       // Skip text.
       continue;
     }
 
-    const Source itemSource = mSource.withLine(parser->getLineNumber());
-    const std::string& elementNamespace = parser->getElementNamespace();
-    const std::string& elementName = parser->getElementName();
-    if (elementNamespace.empty() &&
-        (elementName == "flag" || elementName == "enum")) {
-      if (elementName == "enum") {
-        if (typeMask & android::ResTable_map::TYPE_FLAGS) {
-          mDiag->error(DiagMessage(itemSource)
+    const Source item_source = source_.WithLine(parser->line_number());
+    const std::string& element_namespace = parser->element_namespace();
+    const std::string& element_name = parser->element_name();
+    if (element_namespace.empty() &&
+        (element_name == "flag" || element_name == "enum")) {
+      if (element_name == "enum") {
+        if (type_mask & android::ResTable_map::TYPE_FLAGS) {
+          diag_->Error(DiagMessage(item_source)
                        << "can not define an <enum>; already defined a <flag>");
           error = true;
           continue;
         }
-        typeMask |= android::ResTable_map::TYPE_ENUM;
+        type_mask |= android::ResTable_map::TYPE_ENUM;
 
-      } else if (elementName == "flag") {
-        if (typeMask & android::ResTable_map::TYPE_ENUM) {
-          mDiag->error(DiagMessage(itemSource)
+      } else if (element_name == "flag") {
+        if (type_mask & android::ResTable_map::TYPE_ENUM) {
+          diag_->Error(DiagMessage(item_source)
                        << "can not define a <flag>; already defined an <enum>");
           error = true;
           continue;
         }
-        typeMask |= android::ResTable_map::TYPE_FLAGS;
+        type_mask |= android::ResTable_map::TYPE_FLAGS;
       }
 
       if (Maybe<Attribute::Symbol> s =
-              parseEnumOrFlagItem(parser, elementName)) {
+              ParseEnumOrFlagItem(parser, element_name)) {
         Attribute::Symbol& symbol = s.value();
-        ParsedResource childResource;
-        childResource.name = symbol.symbol.name.value();
-        childResource.source = itemSource;
-        childResource.value = util::make_unique<Id>();
-        outResource->childResources.push_back(std::move(childResource));
+        ParsedResource child_resource;
+        child_resource.name = symbol.symbol.name.value();
+        child_resource.source = item_source;
+        child_resource.value = util::make_unique<Id>();
+        out_resource->child_resources.push_back(std::move(child_resource));
 
-        symbol.symbol.setComment(std::move(comment));
-        symbol.symbol.setSource(itemSource);
+        symbol.symbol.SetComment(std::move(comment));
+        symbol.symbol.SetSource(item_source);
 
-        auto insertResult = items.insert(std::move(symbol));
-        if (!insertResult.second) {
-          const Attribute::Symbol& existingSymbol = *insertResult.first;
-          mDiag->error(DiagMessage(itemSource)
+        auto insert_result = items.insert(std::move(symbol));
+        if (!insert_result.second) {
+          const Attribute::Symbol& existing_symbol = *insert_result.first;
+          diag_->Error(DiagMessage(item_source)
                        << "duplicate symbol '"
-                       << existingSymbol.symbol.name.value().entry << "'");
+                       << existing_symbol.symbol.name.value().entry << "'");
 
-          mDiag->note(DiagMessage(existingSymbol.symbol.getSource())
+          diag_->Note(DiagMessage(existing_symbol.symbol.GetSource())
                       << "first defined here");
           error = true;
         }
       } else {
         error = true;
       }
-    } else if (!shouldIgnoreElement(elementNamespace, elementName)) {
-      mDiag->error(DiagMessage(itemSource) << ":" << elementName << ">");
+    } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
+      diag_->Error(DiagMessage(item_source) << ":" << element_name << ">");
       error = true;
     }
 
@@ -963,134 +970,134 @@ bool ResourceParser::parseAttrImpl(xml::XmlPullParser* parser,
 
   std::unique_ptr<Attribute> attr = util::make_unique<Attribute>(weak);
   attr->symbols = std::vector<Attribute::Symbol>(items.begin(), items.end());
-  attr->typeMask =
-      typeMask ? typeMask : uint32_t(android::ResTable_map::TYPE_ANY);
-  if (maybeMin) {
-    attr->minInt = maybeMin.value();
+  attr->type_mask =
+      type_mask ? type_mask : uint32_t(android::ResTable_map::TYPE_ANY);
+  if (maybe_min) {
+    attr->min_int = maybe_min.value();
   }
 
-  if (maybeMax) {
-    attr->maxInt = maybeMax.value();
+  if (maybe_max) {
+    attr->max_int = maybe_max.value();
   }
-  outResource->value = std::move(attr);
+  out_resource->value = std::move(attr);
   return true;
 }
 
-Maybe<Attribute::Symbol> ResourceParser::parseEnumOrFlagItem(
+Maybe<Attribute::Symbol> ResourceParser::ParseEnumOrFlagItem(
     xml::XmlPullParser* parser, const StringPiece& tag) {
-  const Source source = mSource.withLine(parser->getLineNumber());
+  const Source source = source_.WithLine(parser->line_number());
 
-  Maybe<StringPiece> maybeName = xml::findNonEmptyAttribute(parser, "name");
-  if (!maybeName) {
-    mDiag->error(DiagMessage(source) << "no attribute 'name' found for tag <"
+  Maybe<StringPiece> maybe_name = xml::FindNonEmptyAttribute(parser, "name");
+  if (!maybe_name) {
+    diag_->Error(DiagMessage(source) << "no attribute 'name' found for tag <"
                                      << tag << ">");
     return {};
   }
 
-  Maybe<StringPiece> maybeValue = xml::findNonEmptyAttribute(parser, "value");
-  if (!maybeValue) {
-    mDiag->error(DiagMessage(source) << "no attribute 'value' found for tag <"
+  Maybe<StringPiece> maybe_value = xml::FindNonEmptyAttribute(parser, "value");
+  if (!maybe_value) {
+    diag_->Error(DiagMessage(source) << "no attribute 'value' found for tag <"
                                      << tag << ">");
     return {};
   }
 
-  std::u16string value16 = util::utf8ToUtf16(maybeValue.value());
+  std::u16string value16 = util::Utf8ToUtf16(maybe_value.value());
   android::Res_value val;
   if (!android::ResTable::stringToInt(value16.data(), value16.size(), &val)) {
-    mDiag->error(DiagMessage(source) << "invalid value '" << maybeValue.value()
+    diag_->Error(DiagMessage(source) << "invalid value '" << maybe_value.value()
                                      << "' for <" << tag
                                      << ">; must be an integer");
     return {};
   }
 
   return Attribute::Symbol{
-      Reference(ResourceNameRef({}, ResourceType::kId, maybeName.value())),
+      Reference(ResourceNameRef({}, ResourceType::kId, maybe_name.value())),
       val.data};
 }
 
-bool ResourceParser::parseStyleItem(xml::XmlPullParser* parser, Style* style) {
-  const Source source = mSource.withLine(parser->getLineNumber());
+bool ResourceParser::ParseStyleItem(xml::XmlPullParser* parser, Style* style) {
+  const Source source = source_.WithLine(parser->line_number());
 
-  Maybe<StringPiece> maybeName = xml::findNonEmptyAttribute(parser, "name");
-  if (!maybeName) {
-    mDiag->error(DiagMessage(source) << "<item> must have a 'name' attribute");
+  Maybe<StringPiece> maybe_name = xml::FindNonEmptyAttribute(parser, "name");
+  if (!maybe_name) {
+    diag_->Error(DiagMessage(source) << "<item> must have a 'name' attribute");
     return false;
   }
 
-  Maybe<Reference> maybeKey =
-      ResourceUtils::parseXmlAttributeName(maybeName.value());
-  if (!maybeKey) {
-    mDiag->error(DiagMessage(source) << "invalid attribute name '"
-                                     << maybeName.value() << "'");
+  Maybe<Reference> maybe_key =
+      ResourceUtils::ParseXmlAttributeName(maybe_name.value());
+  if (!maybe_key) {
+    diag_->Error(DiagMessage(source) << "invalid attribute name '"
+                                     << maybe_name.value() << "'");
     return false;
   }
 
-  transformReferenceFromNamespace(parser, "", &maybeKey.value());
-  maybeKey.value().setSource(source);
+  TransformReferenceFromNamespace(parser, "", &maybe_key.value());
+  maybe_key.value().SetSource(source);
 
-  std::unique_ptr<Item> value = parseXml(parser, 0, kAllowRawString);
+  std::unique_ptr<Item> value = ParseXml(parser, 0, kAllowRawString);
   if (!value) {
-    mDiag->error(DiagMessage(source) << "could not parse style item");
+    diag_->Error(DiagMessage(source) << "could not parse style item");
     return false;
   }
 
   style->entries.push_back(
-      Style::Entry{std::move(maybeKey.value()), std::move(value)});
+      Style::Entry{std::move(maybe_key.value()), std::move(value)});
   return true;
 }
 
-bool ResourceParser::parseStyle(xml::XmlPullParser* parser,
-                                ParsedResource* outResource) {
-  outResource->name.type = ResourceType::kStyle;
+bool ResourceParser::ParseStyle(xml::XmlPullParser* parser,
+                                ParsedResource* out_resource) {
+  out_resource->name.type = ResourceType::kStyle;
 
   std::unique_ptr<Style> style = util::make_unique<Style>();
 
-  Maybe<StringPiece> maybeParent = xml::findAttribute(parser, "parent");
-  if (maybeParent) {
+  Maybe<StringPiece> maybe_parent = xml::FindAttribute(parser, "parent");
+  if (maybe_parent) {
     // If the parent is empty, we don't have a parent, but we also don't infer
     // either.
-    if (!maybeParent.value().empty()) {
-      std::string errStr;
-      style->parent = ResourceUtils::parseStyleParentReference(
-          maybeParent.value(), &errStr);
+    if (!maybe_parent.value().empty()) {
+      std::string err_str;
+      style->parent = ResourceUtils::ParseStyleParentReference(
+          maybe_parent.value(), &err_str);
       if (!style->parent) {
-        mDiag->error(DiagMessage(outResource->source) << errStr);
+        diag_->Error(DiagMessage(out_resource->source) << err_str);
         return false;
       }
 
       // Transform the namespace prefix to the actual package name, and mark the
       // reference as
       // private if appropriate.
-      transformReferenceFromNamespace(parser, "", &style->parent.value());
+      TransformReferenceFromNamespace(parser, "", &style->parent.value());
     }
 
   } else {
     // No parent was specified, so try inferring it from the style name.
-    std::string styleName = outResource->name.entry;
-    size_t pos = styleName.find_last_of(u'.');
+    std::string style_name = out_resource->name.entry;
+    size_t pos = style_name.find_last_of(u'.');
     if (pos != std::string::npos) {
-      style->parentInferred = true;
+      style->parent_inferred = true;
       style->parent = Reference(
-          ResourceName({}, ResourceType::kStyle, styleName.substr(0, pos)));
+          ResourceName({}, ResourceType::kStyle, style_name.substr(0, pos)));
     }
   }
 
   bool error = false;
-  const size_t depth = parser->getDepth();
-  while (xml::XmlPullParser::nextChildNode(parser, depth)) {
-    if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
+  const size_t depth = parser->depth();
+  while (xml::XmlPullParser::NextChildNode(parser, depth)) {
+    if (parser->event() != xml::XmlPullParser::Event::kStartElement) {
       // Skip text and comments.
       continue;
     }
 
-    const std::string& elementNamespace = parser->getElementNamespace();
-    const std::string& elementName = parser->getElementName();
-    if (elementNamespace == "" && elementName == "item") {
-      error |= !parseStyleItem(parser, style.get());
+    const std::string& element_namespace = parser->element_namespace();
+    const std::string& element_name = parser->element_name();
+    if (element_namespace == "" && element_name == "item") {
+      error |= !ParseStyleItem(parser, style.get());
 
-    } else if (!shouldIgnoreElement(elementNamespace, elementName)) {
-      mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
-                   << ":" << elementName << ">");
+    } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
+      diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
+                   << ":" << element_name << ">");
       error = true;
     }
   }
@@ -1099,73 +1106,73 @@ bool ResourceParser::parseStyle(xml::XmlPullParser* parser,
     return false;
   }
 
-  outResource->value = std::move(style);
+  out_resource->value = std::move(style);
   return true;
 }
 
-bool ResourceParser::parseArray(xml::XmlPullParser* parser,
-                                ParsedResource* outResource) {
-  return parseArrayImpl(parser, outResource, android::ResTable_map::TYPE_ANY);
+bool ResourceParser::ParseArray(xml::XmlPullParser* parser,
+                                ParsedResource* out_resource) {
+  return ParseArrayImpl(parser, out_resource, android::ResTable_map::TYPE_ANY);
 }
 
-bool ResourceParser::parseIntegerArray(xml::XmlPullParser* parser,
-                                       ParsedResource* outResource) {
-  return parseArrayImpl(parser, outResource,
+bool ResourceParser::ParseIntegerArray(xml::XmlPullParser* parser,
+                                       ParsedResource* out_resource) {
+  return ParseArrayImpl(parser, out_resource,
                         android::ResTable_map::TYPE_INTEGER);
 }
 
-bool ResourceParser::parseStringArray(xml::XmlPullParser* parser,
-                                      ParsedResource* outResource) {
-  return parseArrayImpl(parser, outResource,
+bool ResourceParser::ParseStringArray(xml::XmlPullParser* parser,
+                                      ParsedResource* out_resource) {
+  return ParseArrayImpl(parser, out_resource,
                         android::ResTable_map::TYPE_STRING);
 }
 
-bool ResourceParser::parseArrayImpl(xml::XmlPullParser* parser,
-                                    ParsedResource* outResource,
+bool ResourceParser::ParseArrayImpl(xml::XmlPullParser* parser,
+                                    ParsedResource* out_resource,
                                     const uint32_t typeMask) {
-  outResource->name.type = ResourceType::kArray;
+  out_resource->name.type = ResourceType::kArray;
 
   std::unique_ptr<Array> array = util::make_unique<Array>();
 
-  bool translateable = mOptions.translatable;
-  if (Maybe<StringPiece> translateableAttr =
-          xml::findAttribute(parser, "translatable")) {
-    Maybe<bool> maybeTranslateable =
-        ResourceUtils::parseBool(translateableAttr.value());
-    if (!maybeTranslateable) {
-      mDiag->error(DiagMessage(outResource->source)
+  bool translateable = options_.translatable;
+  if (Maybe<StringPiece> translateable_attr =
+          xml::FindAttribute(parser, "translatable")) {
+    Maybe<bool> maybe_translateable =
+        ResourceUtils::ParseBool(translateable_attr.value());
+    if (!maybe_translateable) {
+      diag_->Error(DiagMessage(out_resource->source)
                    << "invalid value for 'translatable'. Must be a boolean");
       return false;
     }
-    translateable = maybeTranslateable.value();
+    translateable = maybe_translateable.value();
   }
-  array->setTranslateable(translateable);
+  array->SetTranslateable(translateable);
 
   bool error = false;
-  const size_t depth = parser->getDepth();
-  while (xml::XmlPullParser::nextChildNode(parser, depth)) {
-    if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
+  const size_t depth = parser->depth();
+  while (xml::XmlPullParser::NextChildNode(parser, depth)) {
+    if (parser->event() != xml::XmlPullParser::Event::kStartElement) {
       // Skip text and comments.
       continue;
     }
 
-    const Source itemSource = mSource.withLine(parser->getLineNumber());
-    const std::string& elementNamespace = parser->getElementNamespace();
-    const std::string& elementName = parser->getElementName();
-    if (elementNamespace.empty() && elementName == "item") {
-      std::unique_ptr<Item> item = parseXml(parser, typeMask, kNoRawString);
+    const Source item_source = source_.WithLine(parser->line_number());
+    const std::string& element_namespace = parser->element_namespace();
+    const std::string& element_name = parser->element_name();
+    if (element_namespace.empty() && element_name == "item") {
+      std::unique_ptr<Item> item = ParseXml(parser, typeMask, kNoRawString);
       if (!item) {
-        mDiag->error(DiagMessage(itemSource) << "could not parse array item");
+        diag_->Error(DiagMessage(item_source) << "could not parse array item");
         error = true;
         continue;
       }
-      item->setSource(itemSource);
+      item->SetSource(item_source);
       array->items.emplace_back(std::move(item));
 
-    } else if (!shouldIgnoreElement(elementNamespace, elementName)) {
-      mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
-                   << "unknown tag <" << elementNamespace << ":" << elementName
-                   << ">");
+    } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
+      diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
+                   << "unknown tag <" << element_namespace << ":"
+                   << element_name << ">");
       error = true;
     }
   }
@@ -1174,77 +1181,78 @@ bool ResourceParser::parseArrayImpl(xml::XmlPullParser* parser,
     return false;
   }
 
-  outResource->value = std::move(array);
+  out_resource->value = std::move(array);
   return true;
 }
 
-bool ResourceParser::parsePlural(xml::XmlPullParser* parser,
-                                 ParsedResource* outResource) {
-  outResource->name.type = ResourceType::kPlurals;
+bool ResourceParser::ParsePlural(xml::XmlPullParser* parser,
+                                 ParsedResource* out_resource) {
+  out_resource->name.type = ResourceType::kPlurals;
 
   std::unique_ptr<Plural> plural = util::make_unique<Plural>();
 
   bool error = false;
-  const size_t depth = parser->getDepth();
-  while (xml::XmlPullParser::nextChildNode(parser, depth)) {
-    if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
+  const size_t depth = parser->depth();
+  while (xml::XmlPullParser::NextChildNode(parser, depth)) {
+    if (parser->event() != xml::XmlPullParser::Event::kStartElement) {
       // Skip text and comments.
       continue;
     }
 
-    const Source itemSource = mSource.withLine(parser->getLineNumber());
-    const std::string& elementNamespace = parser->getElementNamespace();
-    const std::string& elementName = parser->getElementName();
-    if (elementNamespace.empty() && elementName == "item") {
-      Maybe<StringPiece> maybeQuantity =
-          xml::findNonEmptyAttribute(parser, "quantity");
-      if (!maybeQuantity) {
-        mDiag->error(DiagMessage(itemSource)
+    const Source item_source = source_.WithLine(parser->line_number());
+    const std::string& element_namespace = parser->element_namespace();
+    const std::string& element_name = parser->element_name();
+    if (element_namespace.empty() && element_name == "item") {
+      Maybe<StringPiece> maybe_quantity =
+          xml::FindNonEmptyAttribute(parser, "quantity");
+      if (!maybe_quantity) {
+        diag_->Error(DiagMessage(item_source)
                      << "<item> in <plurals> requires attribute "
                      << "'quantity'");
         error = true;
         continue;
       }
 
-      StringPiece trimmedQuantity = util::trimWhitespace(maybeQuantity.value());
+      StringPiece trimmed_quantity =
+          util::TrimWhitespace(maybe_quantity.value());
       size_t index = 0;
-      if (trimmedQuantity == "zero") {
+      if (trimmed_quantity == "zero") {
         index = Plural::Zero;
-      } else if (trimmedQuantity == "one") {
+      } else if (trimmed_quantity == "one") {
         index = Plural::One;
-      } else if (trimmedQuantity == "two") {
+      } else if (trimmed_quantity == "two") {
         index = Plural::Two;
-      } else if (trimmedQuantity == "few") {
+      } else if (trimmed_quantity == "few") {
         index = Plural::Few;
-      } else if (trimmedQuantity == "many") {
+      } else if (trimmed_quantity == "many") {
         index = Plural::Many;
-      } else if (trimmedQuantity == "other") {
+      } else if (trimmed_quantity == "other") {
         index = Plural::Other;
       } else {
-        mDiag->error(DiagMessage(itemSource)
+        diag_->Error(DiagMessage(item_source)
                      << "<item> in <plural> has invalid value '"
-                     << trimmedQuantity << "' for attribute 'quantity'");
+                     << trimmed_quantity << "' for attribute 'quantity'");
         error = true;
         continue;
       }
 
       if (plural->values[index]) {
-        mDiag->error(DiagMessage(itemSource) << "duplicate quantity '"
-                                             << trimmedQuantity << "'");
+        diag_->Error(DiagMessage(item_source) << "duplicate quantity '"
+                                              << trimmed_quantity << "'");
         error = true;
         continue;
       }
 
-      if (!(plural->values[index] = parseXml(
+      if (!(plural->values[index] = ParseXml(
                 parser, android::ResTable_map::TYPE_STRING, kNoRawString))) {
         error = true;
       }
-      plural->values[index]->setSource(itemSource);
+      plural->values[index]->SetSource(item_source);
 
-    } else if (!shouldIgnoreElement(elementNamespace, elementName)) {
-      mDiag->error(DiagMessage(itemSource)
-                   << "unknown tag <" << elementNamespace << ":" << elementName
-                   << ">");
+    } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
+      diag_->Error(DiagMessage(item_source) << "unknown tag <"
+                                            << element_namespace << ":"
+                                            << element_name << ">");
       error = true;
     }
   }
@@ -1253,47 +1261,48 @@ bool ResourceParser::parsePlural(xml::XmlPullParser* parser,
     return false;
   }
 
-  outResource->value = std::move(plural);
+  out_resource->value = std::move(plural);
   return true;
 }
 
-bool ResourceParser::parseDeclareStyleable(xml::XmlPullParser* parser,
-                                           ParsedResource* outResource) {
-  outResource->name.type = ResourceType::kStyleable;
+bool ResourceParser::ParseDeclareStyleable(xml::XmlPullParser* parser,
+                                           ParsedResource* out_resource) {
+  out_resource->name.type = ResourceType::kStyleable;
 
   // Declare-styleable is kPrivate by default, because it technically only
   // exists in R.java.
-  outResource->symbolState = SymbolState::kPublic;
+  out_resource->symbol_state = SymbolState::kPublic;
 
   // Declare-styleable only ends up in default config;
-  if (outResource->config != ConfigDescription::defaultConfig()) {
-    mDiag->warn(DiagMessage(outResource->source)
-                << "ignoring configuration '" << outResource->config
-                << "' for styleable " << outResource->name.entry);
-    outResource->config = ConfigDescription::defaultConfig();
+  if (out_resource->config != ConfigDescription::DefaultConfig()) {
+    diag_->Warn(DiagMessage(out_resource->source)
+                << "ignoring configuration '" << out_resource->config
+                << "' for styleable " << out_resource->name.entry);
+    out_resource->config = ConfigDescription::DefaultConfig();
   }
 
   std::unique_ptr<Styleable> styleable = util::make_unique<Styleable>();
 
   std::string comment;
   bool error = false;
-  const size_t depth = parser->getDepth();
-  while (xml::XmlPullParser::nextChildNode(parser, depth)) {
-    if (parser->getEvent() == xml::XmlPullParser::Event::kComment) {
-      comment = util::trimWhitespace(parser->getComment()).toString();
+  const size_t depth = parser->depth();
+  while (xml::XmlPullParser::NextChildNode(parser, depth)) {
+    if (parser->event() == xml::XmlPullParser::Event::kComment) {
+      comment = util::TrimWhitespace(parser->comment()).ToString();
       continue;
-    } else if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
+    } else if (parser->event() != xml::XmlPullParser::Event::kStartElement) {
       // Ignore text.
       continue;
     }
 
-    const Source itemSource = mSource.withLine(parser->getLineNumber());
-    const std::string& elementNamespace = parser->getElementNamespace();
-    const std::string& elementName = parser->getElementName();
-    if (elementNamespace.empty() && elementName == "attr") {
-      Maybe<StringPiece> maybeName = xml::findNonEmptyAttribute(parser, "name");
-      if (!maybeName) {
-        mDiag->error(DiagMessage(itemSource)
+    const Source item_source = source_.WithLine(parser->line_number());
+    const std::string& element_namespace = parser->element_namespace();
+    const std::string& element_name = parser->element_name();
+    if (element_namespace.empty() && element_name == "attr") {
+      Maybe<StringPiece> maybe_name =
+          xml::FindNonEmptyAttribute(parser, "name");
+      if (!maybe_name) {
+        diag_->Error(DiagMessage(item_source)
                      << "<attr> tag must have a 'name' attribute");
         error = true;
         continue;
@@ -1302,40 +1311,40 @@ bool ResourceParser::parseDeclareStyleable(xml::XmlPullParser* parser,
       // If this is a declaration, the package name may be in the name. Separate
       // these out.
       // Eg. <attr name="android:text" />
-      Maybe<Reference> maybeRef =
-          ResourceUtils::parseXmlAttributeName(maybeName.value());
-      if (!maybeRef) {
-        mDiag->error(DiagMessage(itemSource) << "<attr> tag has invalid name '"
-                                             << maybeName.value() << "'");
+      Maybe<Reference> maybe_ref =
+          ResourceUtils::ParseXmlAttributeName(maybe_name.value());
+      if (!maybe_ref) {
+        diag_->Error(DiagMessage(item_source) << "<attr> tag has invalid name '"
+                                              << maybe_name.value() << "'");
         error = true;
         continue;
       }
 
-      Reference& childRef = maybeRef.value();
-      xml::transformReferenceFromNamespace(parser, "", &childRef);
+      Reference& child_ref = maybe_ref.value();
+      xml::TransformReferenceFromNamespace(parser, "", &child_ref);
 
       // Create the ParsedResource that will add the attribute to the table.
-      ParsedResource childResource;
-      childResource.name = childRef.name.value();
-      childResource.source = itemSource;
-      childResource.comment = std::move(comment);
+      ParsedResource child_resource;
+      child_resource.name = child_ref.name.value();
+      child_resource.source = item_source;
+      child_resource.comment = std::move(comment);
 
-      if (!parseAttrImpl(parser, &childResource, true)) {
+      if (!ParseAttrImpl(parser, &child_resource, true)) {
         error = true;
         continue;
       }
 
       // Create the reference to this attribute.
-      childRef.setComment(childResource.comment);
-      childRef.setSource(itemSource);
-      styleable->entries.push_back(std::move(childRef));
+      child_ref.SetComment(child_resource.comment);
+      child_ref.SetSource(item_source);
+      styleable->entries.push_back(std::move(child_ref));
 
-      outResource->childResources.push_back(std::move(childResource));
+      out_resource->child_resources.push_back(std::move(child_resource));
 
-    } else if (!shouldIgnoreElement(elementNamespace, elementName)) {
-      mDiag->error(DiagMessage(itemSource)
-                   << "unknown tag <" << elementNamespace << ":" << elementName
-                   << ">");
+    } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
+      diag_->Error(DiagMessage(item_source) << "unknown tag <"
+                                            << element_namespace << ":"
+                                            << element_name << ">");
       error = true;
     }
 
@@ -1346,7 +1355,7 @@ bool ResourceParser::parseDeclareStyleable(xml::XmlPullParser* parser,
     return false;
   }
 
-  outResource->value = std::move(styleable);
+  out_resource->value = std::move(styleable);
   return true;
 }
 

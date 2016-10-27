@@ -17,10 +17,10 @@
 #ifndef AAPT_UTIL_IMMUTABLEMAP_H
 #define AAPT_UTIL_IMMUTABLEMAP_H
 
-#include "util/TypeTraits.h"
-
 #include <utility>
 #include <vector>
+
+#include "util/TypeTraits.h"
 
 namespace aapt {
 
@@ -28,28 +28,20 @@ template <typename TKey, typename TValue>
 class ImmutableMap {
   static_assert(is_comparable<TKey, TKey>::value, "key is not comparable");
 
- private:
-  std::vector<std::pair<TKey, TValue>> mData;
-
-  explicit ImmutableMap(std::vector<std::pair<TKey, TValue>> data)
-      : mData(std::move(data)) {}
-
  public:
-  using const_iterator = typename decltype(mData)::const_iterator;
+  using const_iterator =
+      typename std::vector<std::pair<TKey, TValue>>::const_iterator;
 
   ImmutableMap(ImmutableMap&&) = default;
   ImmutableMap& operator=(ImmutableMap&&) = default;
 
-  ImmutableMap(const ImmutableMap&) = delete;
-  ImmutableMap& operator=(const ImmutableMap&) = delete;
-
-  static ImmutableMap<TKey, TValue> createPreSorted(
+  static ImmutableMap<TKey, TValue> CreatePreSorted(
       std::initializer_list<std::pair<TKey, TValue>> list) {
     return ImmutableMap(
         std::vector<std::pair<TKey, TValue>>(list.begin(), list.end()));
   }
 
-  static ImmutableMap<TKey, TValue> createAndSort(
+  static ImmutableMap<TKey, TValue> CreateAndSort(
       std::initializer_list<std::pair<TKey, TValue>> list) {
     std::vector<std::pair<TKey, TValue>> data(list.begin(), list.end());
     std::sort(data.begin(), data.end());
@@ -64,17 +56,25 @@ class ImmutableMap {
       return candidate.first < target;
     };
 
-    const_iterator endIter = end();
-    auto iter = std::lower_bound(mData.begin(), endIter, key, cmp);
-    if (iter == endIter || iter->first == key) {
+    const_iterator end_iter = end();
+    auto iter = std::lower_bound(data_.begin(), end_iter, key, cmp);
+    if (iter == end_iter || iter->first == key) {
       return iter;
     }
-    return endIter;
+    return end_iter;
   }
 
-  const_iterator begin() const { return mData.begin(); }
+  const_iterator begin() const { return data_.begin(); }
 
-  const_iterator end() const { return mData.end(); }
+  const_iterator end() const { return data_.end(); }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ImmutableMap);
+
+  explicit ImmutableMap(std::vector<std::pair<TKey, TValue>> data)
+      : data_(std::move(data)) {}
+
+  std::vector<std::pair<TKey, TValue>> data_;
 };
 
 }  // namespace aapt

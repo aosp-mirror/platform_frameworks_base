@@ -17,10 +17,10 @@
 #ifndef AAPT_FILTER_CONFIGFILTER_H
 #define AAPT_FILTER_CONFIGFILTER_H
 
-#include "ConfigDescription.h"
-
 #include <set>
 #include <utility>
+
+#include "ConfigDescription.h"
 
 namespace aapt {
 
@@ -34,7 +34,7 @@ class IConfigFilter {
   /**
    * Returns true if the filter matches the configuration, false otherwise.
    */
-  virtual bool match(const ConfigDescription& config) const = 0;
+  virtual bool Match(const ConfigDescription& config) const = 0;
 };
 
 /**
@@ -50,13 +50,13 @@ class IConfigFilter {
  */
 class AxisConfigFilter : public IConfigFilter {
  public:
-  void addConfig(ConfigDescription config);
+  void AddConfig(ConfigDescription config);
 
-  bool match(const ConfigDescription& config) const override;
+  bool Match(const ConfigDescription& config) const override;
 
  private:
-  std::set<std::pair<ConfigDescription, uint32_t>> mConfigs;
-  uint32_t mConfigMask = 0;
+  std::set<std::pair<ConfigDescription, uint32_t>> configs_;
+  uint32_t config_mask_ = 0;
 };
 
 }  // namespace aapt

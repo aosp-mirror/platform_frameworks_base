@@ -14,60 +14,69 @@
  * limitations under the License.
  */
 
-#include "util/Maybe.h"
-#include "util/Util.h"
 #include "xml/XmlUtil.h"
 
 #include <string>
 
+#include "util/Maybe.h"
+#include "util/Util.h"
+
 namespace aapt {
 namespace xml {
 
-std::string buildPackageNamespace(const StringPiece& package, bool privateReference) {
-    std::string result = privateReference ? kSchemaPrivatePrefix : kSchemaPublicPrefix;
-    result.append(package.data(), package.size());
-    return result;
+std::string BuildPackageNamespace(const StringPiece& package,
+                                  bool private_reference) {
+  std::string result =
+      private_reference ? kSchemaPrivatePrefix : kSchemaPublicPrefix;
+  result.append(package.data(), package.size());
+  return result;
 }
 
-Maybe<ExtractedPackage> extractPackageFromNamespace(const std::string& namespaceUri) {
-    if (util::stringStartsWith(namespaceUri, kSchemaPublicPrefix)) {
-        StringPiece schemaPrefix = kSchemaPublicPrefix;
-        StringPiece package = namespaceUri;
-        package = package.substr(schemaPrefix.size(), package.size() - schemaPrefix.size());
-        if (package.empty()) {
-            return {};
-        }
-        return ExtractedPackage{ package.toString(), false /* isPrivate */ };
-
-    } else if (util::stringStartsWith(namespaceUri, kSchemaPrivatePrefix)) {
-        StringPiece schemaPrefix = kSchemaPrivatePrefix;
-        StringPiece package = namespaceUri;
-        package = package.substr(schemaPrefix.size(), package.size() - schemaPrefix.size());
-        if (package.empty()) {
-            return {};
-        }
-        return ExtractedPackage{ package.toString(), true /* isPrivate */ };
-
-    } else if (namespaceUri == kSchemaAuto) {
-        return ExtractedPackage{ std::string(), true /* isPrivate */ };
+Maybe<ExtractedPackage> ExtractPackageFromNamespace(
+    const std::string& namespace_uri) {
+  if (util::StartsWith(namespace_uri, kSchemaPublicPrefix)) {
+    StringPiece schema_prefix = kSchemaPublicPrefix;
+    StringPiece package = namespace_uri;
+    package = package.substr(schema_prefix.size(),
+                             package.size() - schema_prefix.size());
+    if (package.empty()) {
+      return {};
     }
-    return {};
-}
+    return ExtractedPackage{package.ToString(), false /* is_private */};
 
-void transformReferenceFromNamespace(IPackageDeclStack* declStack,
-                                     const StringPiece& localPackage, Reference* inRef) {
-    if (inRef->name) {
-        if (Maybe<ExtractedPackage> transformedPackage =
-                   declStack->transformPackageAlias(inRef->name.value().package, localPackage)) {
-            ExtractedPackage& extractedPackage = transformedPackage.value();
-            inRef->name.value().package = std::move(extractedPackage.package);
-
-            // If the reference was already private (with a * prefix) and the namespace is public,
-            // we keep the reference private.
-            inRef->privateReference |= extractedPackage.privateNamespace;
-        }
+  } else if (util::StartsWith(namespace_uri, kSchemaPrivatePrefix)) {
+    StringPiece schema_prefix = kSchemaPrivatePrefix;
+    StringPiece package = namespace_uri;
+    package = package.substr(schema_prefix.size(),
+                             package.size() - schema_prefix.size());
+    if (package.empty()) {
+      return {};
     }
+    return ExtractedPackage{package.ToString(), true /* is_private */};
+
+  } else if (namespace_uri == kSchemaAuto) {
+    return ExtractedPackage{std::string(), true /* is_private */};
+  }
+  return {};
 }
 
-} // namespace xml
-} // namespace aapt
+void TransformReferenceFromNamespace(IPackageDeclStack* decl_stack,
+                                     const StringPiece& local_package,
+                                     Reference* in_ref) {
+  if (in_ref->name) {
+    if (Maybe<ExtractedPackage> transformed_package =
+            decl_stack->TransformPackageAlias(in_ref->name.value().package,
+                                              local_package)) {
+      ExtractedPackage& extracted_package = transformed_package.value();
+      in_ref->name.value().package = std::move(extracted_package.package);
+
+      // If the reference was already private (with a * prefix) and the
+      // namespace is public,
+      // we keep the reference private.
+      in_ref->private_reference |= extracted_package.private_namespace;
+    }
+  }
+}
+
+}  // namespace xml
+}  // namespace aapt

@@ -17,11 +17,12 @@
 #ifndef AAPT_COMPILE_IMAGE_H
 #define AAPT_COMPILE_IMAGE_H
 
-#include <android-base/macros.h>
 #include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "android-base/macros.h"
 
 namespace aapt {
 
@@ -113,15 +114,15 @@ inline bool operator==(const Bounds& left, const Bounds& right) {
  */
 class NinePatch {
  public:
-  static std::unique_ptr<NinePatch> create(uint8_t** rows, const int32_t width,
+  static std::unique_ptr<NinePatch> Create(uint8_t** rows, const int32_t width,
                                            const int32_t height,
-                                           std::string* errOut);
+                                           std::string* err_out);
 
   /**
    * Packs the RGBA_8888 data pointed to by pixel into a uint32_t
    * with format 0xAARRGGBB (the way 9-patch expects it).
    */
-  static uint32_t packRGBA(const uint8_t* pixel);
+  static uint32_t PackRGBA(const uint8_t* pixel);
 
   /**
    * 9-patch content padding/insets. All positions are relative to the 9-patch
@@ -136,7 +137,7 @@ class NinePatch {
    * See
    * https://developer.android.com/about/versions/android-4.3.html#OpticalBounds
    */
-  Bounds layoutBounds;
+  Bounds layout_bounds;
 
   /**
    * Outline of the image, calculated based on opacity.
@@ -147,51 +148,51 @@ class NinePatch {
    * The computed radius of the outline. If non-zero, the outline is a
    * rounded-rect.
    */
-  float outlineRadius = 0.0f;
+  float outline_radius = 0.0f;
 
   /**
    * The largest alpha value within the outline.
    */
-  uint32_t outlineAlpha = 0x000000ffu;
+  uint32_t outline_alpha = 0x000000ffu;
 
   /**
    * Horizontal regions of the image that are stretchable.
    * All positions are relative to the 9-patch
    * NOT including the 1px thick source border.
    */
-  std::vector<Range> horizontalStretchRegions;
+  std::vector<Range> horizontal_stretch_regions;
 
   /**
    * Vertical regions of the image that are stretchable.
    * All positions are relative to the 9-patch
    * NOT including the 1px thick source border.
    */
-  std::vector<Range> verticalStretchRegions;
+  std::vector<Range> vertical_stretch_regions;
 
   /**
    * The colors within each region, fixed or stretchable.
    * For w*h regions, the color of region (x,y) is addressable
    * via index y*w + x.
    */
-  std::vector<uint32_t> regionColors;
+  std::vector<uint32_t> region_colors;
 
   /**
    * Returns serialized data containing the original basic 9-patch meta data.
    * Optical layout bounds and round rect outline data must be serialized
-   * separately using serializeOpticalLayoutBounds() and
-   * serializeRoundedRectOutline().
+   * separately using SerializeOpticalLayoutBounds() and
+   * SerializeRoundedRectOutline().
    */
-  std::unique_ptr<uint8_t[]> serializeBase(size_t* outLen) const;
+  std::unique_ptr<uint8_t[]> SerializeBase(size_t* out_len) const;
 
   /**
    * Serializes the layout bounds.
    */
-  std::unique_ptr<uint8_t[]> serializeLayoutBounds(size_t* outLen) const;
+  std::unique_ptr<uint8_t[]> SerializeLayoutBounds(size_t* out_len) const;
 
   /**
    * Serializes the rounded-rect outline.
    */
-  std::unique_ptr<uint8_t[]> serializeRoundedRectOutline(size_t* outLen) const;
+  std::unique_ptr<uint8_t[]> SerializeRoundedRectOutline(size_t* out_len) const;
 
  private:
   explicit NinePatch() = default;
@@ -201,7 +202,7 @@ class NinePatch {
 
 ::std::ostream& operator<<(::std::ostream& out, const Range& range);
 ::std::ostream& operator<<(::std::ostream& out, const Bounds& bounds);
-::std::ostream& operator<<(::std::ostream& out, const NinePatch& ninePatch);
+::std::ostream& operator<<(::std::ostream& out, const NinePatch& nine_patch);
 
 }  // namespace aapt
 

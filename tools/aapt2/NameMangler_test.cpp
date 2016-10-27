@@ -15,9 +15,10 @@
  */
 
 #include "NameMangler.h"
-#include "test/Test.h"
 
 #include <string>
+
+#include "test/Test.h"
 
 namespace aapt {
 
@@ -25,21 +26,21 @@ TEST(NameManglerTest, MangleName) {
   std::string package = "android.appcompat";
   std::string name = "Platform.AppCompat";
 
-  std::string mangledName = NameMangler::mangleEntry(package, name);
-  EXPECT_EQ(mangledName, "android.appcompat$Platform.AppCompat");
+  std::string mangled_name = NameMangler::MangleEntry(package, name);
+  EXPECT_EQ(mangled_name, "android.appcompat$Platform.AppCompat");
 
-  std::string unmangledPackage;
-  std::string unmangledName = mangledName;
-  ASSERT_TRUE(NameMangler::unmangle(&unmangledName, &unmangledPackage));
-  EXPECT_EQ(unmangledName, "Platform.AppCompat");
-  EXPECT_EQ(unmangledPackage, "android.appcompat");
+  std::string unmangled_package;
+  std::string unmangled_name = mangled_name;
+  ASSERT_TRUE(NameMangler::Unmangle(&unmangled_name, &unmangled_package));
+  EXPECT_EQ(unmangled_name, "Platform.AppCompat");
+  EXPECT_EQ(unmangled_package, "android.appcompat");
 }
 
 TEST(NameManglerTest, IgnoreUnmangledName) {
   std::string package;
   std::string name = "foo_bar";
 
-  EXPECT_FALSE(NameMangler::unmangle(&name, &package));
+  EXPECT_FALSE(NameMangler::Unmangle(&name, &package));
   EXPECT_EQ(name, "foo_bar");
 }
 

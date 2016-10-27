@@ -15,38 +15,39 @@
  */
 
 #include "java/AnnotationProcessor.h"
+
 #include "test/Test.h"
 
 namespace aapt {
 
 TEST(AnnotationProcessorTest, EmitsDeprecated) {
-    const char* comment = "Some comment, and it should contain a marker word, "
-                          "something that marks this resource as nor needed. "
-                          "{@deprecated That's the marker! }";
+  const char* comment =
+      "Some comment, and it should contain a marker word, "
+      "something that marks this resource as nor needed. "
+      "{@deprecated That's the marker! }";
 
-    AnnotationProcessor processor;
-    processor.appendComment(comment);
+  AnnotationProcessor processor;
+  processor.AppendComment(comment);
 
-    std::stringstream result;
-    processor.writeToStream(&result, "");
-    std::string annotations = result.str();
+  std::stringstream result;
+  processor.WriteToStream(&result, "");
+  std::string annotations = result.str();
 
-    EXPECT_NE(std::string::npos, annotations.find("@Deprecated"));
+  EXPECT_NE(std::string::npos, annotations.find("@Deprecated"));
 }
 
 TEST(AnnotationProcessorTest, EmitsSystemApiAnnotationAndRemovesFromComment) {
-    AnnotationProcessor processor;
-    processor.appendComment("@SystemApi This is a system API");
+  AnnotationProcessor processor;
+  processor.AppendComment("@SystemApi This is a system API");
 
-    std::stringstream result;
-    processor.writeToStream(&result, "");
-    std::string annotations = result.str();
+  std::stringstream result;
+  processor.WriteToStream(&result, "");
+  std::string annotations = result.str();
 
-    EXPECT_NE(std::string::npos, annotations.find("@android.annotation.SystemApi"));
-    EXPECT_EQ(std::string::npos, annotations.find("@SystemApi"));
-    EXPECT_NE(std::string::npos, annotations.find("This is a system API"));
+  EXPECT_NE(std::string::npos,
+            annotations.find("@android.annotation.SystemApi"));
+  EXPECT_EQ(std::string::npos, annotations.find("@SystemApi"));
+  EXPECT_NE(std::string::npos, annotations.find("This is a system API"));
 }
 
-} // namespace aapt
-
-
+}  // namespace aapt

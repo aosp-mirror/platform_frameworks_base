@@ -17,11 +17,12 @@
 #ifndef AAPT_STRING_PIECE_H
 #define AAPT_STRING_PIECE_H
 
-#include <utils/JenkinsHash.h>
-#include <utils/String8.h>
-#include <utils/Unicode.h>
 #include <ostream>
 #include <string>
+
+#include "utils/JenkinsHash.h"
+#include "utils/String8.h"
+#include "utils/Unicode.h"
 
 namespace aapt {
 
@@ -60,7 +61,7 @@ class BasicStringPiece {
   size_t length() const;
   size_t size() const;
   bool empty() const;
-  std::basic_string<TChar> toString() const;
+  std::basic_string<TChar> ToString() const;
 
   bool contains(const BasicStringPiece<TChar>& rhs) const;
   int compare(const BasicStringPiece<TChar>& rhs) const;
@@ -73,8 +74,8 @@ class BasicStringPiece {
   const_iterator end() const;
 
  private:
-  const TChar* mData;
-  size_t mLength;
+  const TChar* data_;
+  size_t length_;
 };
 
 using StringPiece = BasicStringPiece<char>;
@@ -89,43 +90,43 @@ constexpr const size_t BasicStringPiece<TChar>::npos;
 
 template <typename TChar>
 inline BasicStringPiece<TChar>::BasicStringPiece()
-    : mData(nullptr), mLength(0) {}
+    : data_(nullptr), length_(0) {}
 
 template <typename TChar>
 inline BasicStringPiece<TChar>::BasicStringPiece(
     const BasicStringPiece<TChar>& str)
-    : mData(str.mData), mLength(str.mLength) {}
+    : data_(str.data_), length_(str.length_) {}
 
 template <typename TChar>
 inline BasicStringPiece<TChar>::BasicStringPiece(
     const std::basic_string<TChar>& str)
-    : mData(str.data()), mLength(str.length()) {}
+    : data_(str.data()), length_(str.length()) {}
 
 template <>
 inline BasicStringPiece<char>::BasicStringPiece(const char* str)
-    : mData(str), mLength(str != nullptr ? strlen(str) : 0) {}
+    : data_(str), length_(str != nullptr ? strlen(str) : 0) {}
 
 template <>
 inline BasicStringPiece<char16_t>::BasicStringPiece(const char16_t* str)
-    : mData(str), mLength(str != nullptr ? strlen16(str) : 0) {}
+    : data_(str), length_(str != nullptr ? strlen16(str) : 0) {}
 
 template <typename TChar>
 inline BasicStringPiece<TChar>::BasicStringPiece(const TChar* str, size_t len)
-    : mData(str), mLength(len) {}
+    : data_(str), length_(len) {}
 
 template <typename TChar>
 inline BasicStringPiece<TChar>& BasicStringPiece<TChar>::operator=(
     const BasicStringPiece<TChar>& rhs) {
-  mData = rhs.mData;
-  mLength = rhs.mLength;
+  data_ = rhs.data_;
+  length_ = rhs.length_;
   return *this;
 }
 
 template <typename TChar>
 inline BasicStringPiece<TChar>& BasicStringPiece<TChar>::assign(
     const TChar* str, size_t len) {
-  mData = str;
-  mLength = len;
+  data_ = str;
+  length_ = len;
   return *this;
 }
 
@@ -133,13 +134,13 @@ template <typename TChar>
 inline BasicStringPiece<TChar> BasicStringPiece<TChar>::substr(
     size_t start, size_t len) const {
   if (len == npos) {
-    len = mLength - start;
+    len = length_ - start;
   }
 
-  if (start > mLength || start + len > mLength) {
+  if (start > length_ || start + len > length_) {
     return BasicStringPiece<TChar>();
   }
-  return BasicStringPiece<TChar>(mData + start, len);
+  return BasicStringPiece<TChar>(data_ + start, len);
 }
 
 template <typename TChar>
@@ -151,49 +152,49 @@ inline BasicStringPiece<TChar> BasicStringPiece<TChar>::substr(
 
 template <typename TChar>
 inline const TChar* BasicStringPiece<TChar>::data() const {
-  return mData;
+  return data_;
 }
 
 template <typename TChar>
 inline size_t BasicStringPiece<TChar>::length() const {
-  return mLength;
+  return length_;
 }
 
 template <typename TChar>
 inline size_t BasicStringPiece<TChar>::size() const {
-  return mLength;
+  return length_;
 }
 
 template <typename TChar>
 inline bool BasicStringPiece<TChar>::empty() const {
-  return mLength == 0;
+  return length_ == 0;
 }
 
 template <typename TChar>
-inline std::basic_string<TChar> BasicStringPiece<TChar>::toString() const {
-  return std::basic_string<TChar>(mData, mLength);
+inline std::basic_string<TChar> BasicStringPiece<TChar>::ToString() const {
+  return std::basic_string<TChar>(data_, length_);
 }
 
 template <>
 inline bool BasicStringPiece<char>::contains(
     const BasicStringPiece<char>& rhs) const {
-  if (!mData || !rhs.mData) {
+  if (!data_ || !rhs.data_) {
     return false;
   }
-  if (rhs.mLength > mLength) {
+  if (rhs.length_ > length_) {
     return false;
   }
-  return strstr(mData, rhs.mData) != nullptr;
+  return strstr(data_, rhs.data_) != nullptr;
 }
 
 template <>
 inline int BasicStringPiece<char>::compare(
     const BasicStringPiece<char>& rhs) const {
   const char nullStr = '\0';
-  const char* b1 = mData != nullptr ? mData : &nullStr;
-  const char* e1 = b1 + mLength;
-  const char* b2 = rhs.mData != nullptr ? rhs.mData : &nullStr;
-  const char* e2 = b2 + rhs.mLength;
+  const char* b1 = data_ != nullptr ? data_ : &nullStr;
+  const char* e1 = b1 + length_;
+  const char* b2 = rhs.data_ != nullptr ? rhs.data_ : &nullStr;
+  const char* e2 = b2 + rhs.length_;
 
   while (b1 < e1 && b2 < e2) {
     const int d = static_cast<int>(*b1++) - static_cast<int>(*b2++);
@@ -201,7 +202,7 @@ inline int BasicStringPiece<char>::compare(
       return d;
     }
   }
-  return static_cast<int>(mLength - rhs.mLength);
+  return static_cast<int>(length_ - rhs.length_);
 }
 
 inline ::std::ostream& operator<<(::std::ostream& out,
@@ -213,22 +214,22 @@ inline ::std::ostream& operator<<(::std::ostream& out,
 template <>
 inline bool BasicStringPiece<char16_t>::contains(
     const BasicStringPiece<char16_t>& rhs) const {
-  if (!mData || !rhs.mData) {
+  if (!data_ || !rhs.data_) {
     return false;
   }
-  if (rhs.mLength > mLength) {
+  if (rhs.length_ > length_) {
     return false;
   }
-  return strstr16(mData, rhs.mData) != nullptr;
+  return strstr16(data_, rhs.data_) != nullptr;
 }
 
 template <>
 inline int BasicStringPiece<char16_t>::compare(
     const BasicStringPiece<char16_t>& rhs) const {
   const char16_t nullStr = u'\0';
-  const char16_t* b1 = mData != nullptr ? mData : &nullStr;
-  const char16_t* b2 = rhs.mData != nullptr ? rhs.mData : &nullStr;
-  return strzcmp16(b1, mLength, b2, rhs.mLength);
+  const char16_t* b1 = data_ != nullptr ? data_ : &nullStr;
+  const char16_t* b2 = rhs.data_ != nullptr ? rhs.data_ : &nullStr;
+  return strzcmp16(b1, length_, b2, rhs.length_);
 }
 
 template <typename TChar>
@@ -258,13 +259,13 @@ inline bool BasicStringPiece<TChar>::operator!=(
 template <typename TChar>
 inline typename BasicStringPiece<TChar>::const_iterator
 BasicStringPiece<TChar>::begin() const {
-  return mData;
+  return data_;
 }
 
 template <typename TChar>
 inline typename BasicStringPiece<TChar>::const_iterator
 BasicStringPiece<TChar>::end() const {
-  return mData + mLength;
+  return data_ + length_;
 }
 
 inline ::std::ostream& operator<<(::std::ostream& out,

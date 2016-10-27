@@ -17,11 +17,12 @@
 #ifndef AAPT_COMPILE_INLINEXMLFORMATPARSER_H
 #define AAPT_COMPILE_INLINEXMLFORMATPARSER_H
 
-#include "process/IResourceTableConsumer.h"
-
-#include <android-base/macros.h>
 #include <memory>
 #include <vector>
+
+#include "android-base/macros.h"
+
+#include "process/IResourceTableConsumer.h"
 
 namespace aapt {
 
@@ -50,17 +51,17 @@ class InlineXmlFormatParser : public IXmlResourceConsumer {
  public:
   explicit InlineXmlFormatParser() = default;
 
-  bool consume(IAaptContext* context, xml::XmlResource* doc) override;
+  bool Consume(IAaptContext* context, xml::XmlResource* doc) override;
 
   std::vector<std::unique_ptr<xml::XmlResource>>&
-  getExtractedInlineXmlDocuments() {
-    return mQueue;
+  GetExtractedInlineXmlDocuments() {
+    return queue_;
   }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(InlineXmlFormatParser);
 
-  std::vector<std::unique_ptr<xml::XmlResource>> mQueue;
+  std::vector<std::unique_ptr<xml::XmlResource>> queue_;
 };
 
 }  // namespace aapt

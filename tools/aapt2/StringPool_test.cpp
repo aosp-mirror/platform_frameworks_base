@@ -15,25 +15,26 @@
  */
 
 #include "StringPool.h"
-#include "test/Test.h"
-#include "util/Util.h"
 
 #include <string>
+
+#include "test/Test.h"
+#include "util/Util.h"
 
 namespace aapt {
 
 TEST(StringPoolTest, InsertOneString) {
   StringPool pool;
 
-  StringPool::Ref ref = pool.makeRef("wut");
+  StringPool::Ref ref = pool.MakeRef("wut");
   EXPECT_EQ(*ref, "wut");
 }
 
 TEST(StringPoolTest, InsertTwoUniqueStrings) {
   StringPool pool;
 
-  StringPool::Ref ref = pool.makeRef("wut");
-  StringPool::Ref ref2 = pool.makeRef("hey");
+  StringPool::Ref ref = pool.MakeRef("wut");
+  StringPool::Ref ref2 = pool.MakeRef("hey");
 
   EXPECT_EQ(*ref, "wut");
   EXPECT_EQ(*ref2, "hey");
@@ -42,8 +43,8 @@ TEST(StringPoolTest, InsertTwoUniqueStrings) {
 TEST(StringPoolTest, DoNotInsertNewDuplicateString) {
   StringPool pool;
 
-  StringPool::Ref ref = pool.makeRef("wut");
-  StringPool::Ref ref2 = pool.makeRef("wut");
+  StringPool::Ref ref = pool.MakeRef("wut");
+  StringPool::Ref ref2 = pool.MakeRef("wut");
 
   EXPECT_EQ(*ref, "wut");
   EXPECT_EQ(*ref2, "wut");
@@ -53,28 +54,28 @@ TEST(StringPoolTest, DoNotInsertNewDuplicateString) {
 TEST(StringPoolTest, MaintainInsertionOrderIndex) {
   StringPool pool;
 
-  StringPool::Ref ref = pool.makeRef("z");
-  StringPool::Ref ref2 = pool.makeRef("a");
-  StringPool::Ref ref3 = pool.makeRef("m");
+  StringPool::Ref ref = pool.MakeRef("z");
+  StringPool::Ref ref2 = pool.MakeRef("a");
+  StringPool::Ref ref3 = pool.MakeRef("m");
 
-  EXPECT_EQ(0u, ref.getIndex());
-  EXPECT_EQ(1u, ref2.getIndex());
-  EXPECT_EQ(2u, ref3.getIndex());
+  EXPECT_EQ(0u, ref.index());
+  EXPECT_EQ(1u, ref2.index());
+  EXPECT_EQ(2u, ref3.index());
 }
 
 TEST(StringPoolTest, PruneStringsWithNoReferences) {
   StringPool pool;
 
-  StringPool::Ref refA = pool.makeRef("foo");
+  StringPool::Ref refA = pool.MakeRef("foo");
   {
-    StringPool::Ref ref = pool.makeRef("wut");
+    StringPool::Ref ref = pool.MakeRef("wut");
     EXPECT_EQ(*ref, "wut");
     EXPECT_EQ(2u, pool.size());
   }
-  StringPool::Ref refB = pool.makeRef("bar");
+  StringPool::Ref refB = pool.MakeRef("bar");
 
   EXPECT_EQ(3u, pool.size());
-  pool.prune();
+  pool.Prune();
   EXPECT_EQ(2u, pool.size());
   StringPool::const_iterator iter = begin(pool);
   EXPECT_EQ((*iter)->value, "foo");
@@ -87,51 +88,51 @@ TEST(StringPoolTest, PruneStringsWithNoReferences) {
 TEST(StringPoolTest, SortAndMaintainIndexesInReferences) {
   StringPool pool;
 
-  StringPool::Ref ref = pool.makeRef("z");
-  StringPool::StyleRef ref2 = pool.makeRef(StyleString{{"a"}});
-  StringPool::Ref ref3 = pool.makeRef("m");
+  StringPool::Ref ref = pool.MakeRef("z");
+  StringPool::StyleRef ref2 = pool.MakeRef(StyleString{{"a"}});
+  StringPool::Ref ref3 = pool.MakeRef("m");
 
   EXPECT_EQ(*ref, "z");
-  EXPECT_EQ(0u, ref.getIndex());
+  EXPECT_EQ(0u, ref.index());
 
   EXPECT_EQ(*(ref2->str), "a");
-  EXPECT_EQ(1u, ref2.getIndex());
+  EXPECT_EQ(1u, ref2.index());
 
   EXPECT_EQ(*ref3, "m");
-  EXPECT_EQ(2u, ref3.getIndex());
+  EXPECT_EQ(2u, ref3.index());
 
-  pool.sort([](const StringPool::Entry& a, const StringPool::Entry& b) -> bool {
+  pool.Sort([](const StringPool::Entry& a, const StringPool::Entry& b) -> bool {
     return a.value < b.value;
   });
 
   EXPECT_EQ(*ref, "z");
-  EXPECT_EQ(2u, ref.getIndex());
+  EXPECT_EQ(2u, ref.index());
 
   EXPECT_EQ(*(ref2->str), "a");
-  EXPECT_EQ(0u, ref2.getIndex());
+  EXPECT_EQ(0u, ref2.index());
 
   EXPECT_EQ(*ref3, "m");
-  EXPECT_EQ(1u, ref3.getIndex());
+  EXPECT_EQ(1u, ref3.index());
 }
 
 TEST(StringPoolTest, SortAndStillDedupe) {
   StringPool pool;
 
-  StringPool::Ref ref = pool.makeRef("z");
-  StringPool::Ref ref2 = pool.makeRef("a");
-  StringPool::Ref ref3 = pool.makeRef("m");
+  StringPool::Ref ref = pool.MakeRef("z");
+  StringPool::Ref ref2 = pool.MakeRef("a");
+  StringPool::Ref ref3 = pool.MakeRef("m");
 
-  pool.sort([](const StringPool::Entry& a, const StringPool::Entry& b) -> bool {
+  pool.Sort([](const StringPool::Entry& a, const StringPool::Entry& b) -> bool {
     return a.value < b.value;
   });
 
-  StringPool::Ref ref4 = pool.makeRef("z");
-  StringPool::Ref ref5 = pool.makeRef("a");
-  StringPool::Ref ref6 = pool.makeRef("m");
+  StringPool::Ref ref4 = pool.MakeRef("z");
+  StringPool::Ref ref5 = pool.MakeRef("a");
+  StringPool::Ref ref6 = pool.MakeRef("m");
 
-  EXPECT_EQ(ref4.getIndex(), ref.getIndex());
-  EXPECT_EQ(ref5.getIndex(), ref2.getIndex());
-  EXPECT_EQ(ref6.getIndex(), ref3.getIndex());
+  EXPECT_EQ(ref4.index(), ref.index());
+  EXPECT_EQ(ref5.index(), ref2.index());
+  EXPECT_EQ(ref6.index(), ref3.index());
 }
 
 TEST(StringPoolTest, AddStyles) {
@@ -139,27 +140,27 @@ TEST(StringPoolTest, AddStyles) {
 
   StyleString str{{"android"}, {Span{{"b"}, 2, 6}}};
 
-  StringPool::StyleRef ref = pool.makeRef(str);
+  StringPool::StyleRef ref = pool.MakeRef(str);
 
-  EXPECT_EQ(0u, ref.getIndex());
+  EXPECT_EQ(0u, ref.index());
   EXPECT_EQ(std::string("android"), *(ref->str));
   ASSERT_EQ(1u, ref->spans.size());
 
   const StringPool::Span& span = ref->spans.front();
   EXPECT_EQ(*(span.name), "b");
-  EXPECT_EQ(2u, span.firstChar);
-  EXPECT_EQ(6u, span.lastChar);
+  EXPECT_EQ(2u, span.first_char);
+  EXPECT_EQ(6u, span.last_char);
 }
 
 TEST(StringPoolTest, DoNotDedupeStyleWithSameStringAsNonStyle) {
   StringPool pool;
 
-  StringPool::Ref ref = pool.makeRef("android");
+  StringPool::Ref ref = pool.MakeRef("android");
 
   StyleString str{{"android"}};
-  StringPool::StyleRef styleRef = pool.makeRef(str);
+  StringPool::StyleRef styleRef = pool.MakeRef(str);
 
-  EXPECT_NE(ref.getIndex(), styleRef.getIndex());
+  EXPECT_NE(ref.index(), styleRef.index());
 }
 
 TEST(StringPoolTest, FlattenEmptyStringPoolUtf8) {
@@ -167,9 +168,9 @@ TEST(StringPoolTest, FlattenEmptyStringPoolUtf8) {
 
   StringPool pool;
   BigBuffer buffer(1024);
-  StringPool::flattenUtf8(&buffer, pool);
+  StringPool::FlattenUtf8(&buffer, pool);
 
-  std::unique_ptr<uint8_t[]> data = util::copy(buffer);
+  std::unique_ptr<uint8_t[]> data = util::Copy(buffer);
   ResStringPool test;
   ASSERT_EQ(test.setTo(data.get(), buffer.size()), NO_ERROR);
 }
@@ -178,11 +179,11 @@ TEST(StringPoolTest, FlattenOddCharactersUtf16) {
   using namespace android;  // For NO_ERROR on Windows.
 
   StringPool pool;
-  pool.makeRef("\u093f");
+  pool.MakeRef("\u093f");
   BigBuffer buffer(1024);
-  StringPool::flattenUtf16(&buffer, pool);
+  StringPool::FlattenUtf16(&buffer, pool);
 
-  std::unique_ptr<uint8_t[]> data = util::copy(buffer);
+  std::unique_ptr<uint8_t[]> data = util::Copy(buffer);
   ResStringPool test;
   ASSERT_EQ(test.setTo(data.get(), buffer.size()), NO_ERROR);
   size_t len = 0;
@@ -204,58 +205,58 @@ TEST(StringPoolTest, Flatten) {
 
   StringPool pool;
 
-  StringPool::Ref ref1 = pool.makeRef("hello");
-  StringPool::Ref ref2 = pool.makeRef("goodbye");
-  StringPool::Ref ref3 = pool.makeRef(sLongString);
-  StringPool::Ref ref4 = pool.makeRef("");
-  StringPool::StyleRef ref5 = pool.makeRef(
+  StringPool::Ref ref1 = pool.MakeRef("hello");
+  StringPool::Ref ref2 = pool.MakeRef("goodbye");
+  StringPool::Ref ref3 = pool.MakeRef(sLongString);
+  StringPool::Ref ref4 = pool.MakeRef("");
+  StringPool::StyleRef ref5 = pool.MakeRef(
       StyleString{{"style"}, {Span{{"b"}, 0, 1}, Span{{"i"}, 2, 3}}});
 
-  EXPECT_EQ(0u, ref1.getIndex());
-  EXPECT_EQ(1u, ref2.getIndex());
-  EXPECT_EQ(2u, ref3.getIndex());
-  EXPECT_EQ(3u, ref4.getIndex());
-  EXPECT_EQ(4u, ref5.getIndex());
+  EXPECT_EQ(0u, ref1.index());
+  EXPECT_EQ(1u, ref2.index());
+  EXPECT_EQ(2u, ref3.index());
+  EXPECT_EQ(3u, ref4.index());
+  EXPECT_EQ(4u, ref5.index());
 
   BigBuffer buffers[2] = {BigBuffer(1024), BigBuffer(1024)};
-  StringPool::flattenUtf8(&buffers[0], pool);
-  StringPool::flattenUtf16(&buffers[1], pool);
+  StringPool::FlattenUtf8(&buffers[0], pool);
+  StringPool::FlattenUtf16(&buffers[1], pool);
 
   // Test both UTF-8 and UTF-16 buffers.
   for (const BigBuffer& buffer : buffers) {
-    std::unique_ptr<uint8_t[]> data = util::copy(buffer);
+    std::unique_ptr<uint8_t[]> data = util::Copy(buffer);
 
     ResStringPool test;
     ASSERT_EQ(test.setTo(data.get(), buffer.size()), NO_ERROR);
 
-    EXPECT_EQ(std::string("hello"), util::getString(test, 0));
-    EXPECT_EQ(StringPiece16(u"hello"), util::getString16(test, 0));
+    EXPECT_EQ(std::string("hello"), util::GetString(test, 0));
+    EXPECT_EQ(StringPiece16(u"hello"), util::GetString16(test, 0));
 
-    EXPECT_EQ(std::string("goodbye"), util::getString(test, 1));
-    EXPECT_EQ(StringPiece16(u"goodbye"), util::getString16(test, 1));
+    EXPECT_EQ(std::string("goodbye"), util::GetString(test, 1));
+    EXPECT_EQ(StringPiece16(u"goodbye"), util::GetString16(test, 1));
 
-    EXPECT_EQ(StringPiece(sLongString), util::getString(test, 2));
-    EXPECT_EQ(util::utf8ToUtf16(sLongString),
-              util::getString16(test, 2).toString());
+    EXPECT_EQ(StringPiece(sLongString), util::GetString(test, 2));
+    EXPECT_EQ(util::Utf8ToUtf16(sLongString),
+              util::GetString16(test, 2).ToString());
 
     size_t len;
     EXPECT_TRUE(test.stringAt(3, &len) != nullptr ||
                 test.string8At(3, &len) != nullptr);
 
-    EXPECT_EQ(std::string("style"), util::getString(test, 4));
-    EXPECT_EQ(StringPiece16(u"style"), util::getString16(test, 4));
+    EXPECT_EQ(std::string("style"), util::GetString(test, 4));
+    EXPECT_EQ(StringPiece16(u"style"), util::GetString16(test, 4));
 
     const ResStringPool_span* span = test.styleAt(4);
     ASSERT_NE(nullptr, span);
-    EXPECT_EQ(std::string("b"), util::getString(test, span->name.index));
-    EXPECT_EQ(StringPiece16(u"b"), util::getString16(test, span->name.index));
+    EXPECT_EQ(std::string("b"), util::GetString(test, span->name.index));
+    EXPECT_EQ(StringPiece16(u"b"), util::GetString16(test, span->name.index));
     EXPECT_EQ(0u, span->firstChar);
     EXPECT_EQ(1u, span->lastChar);
     span++;
 
     ASSERT_NE(ResStringPool_span::END, span->name.index);
-    EXPECT_EQ(std::string("i"), util::getString(test, span->name.index));
-    EXPECT_EQ(StringPiece16(u"i"), util::getString16(test, span->name.index));
+    EXPECT_EQ(std::string("i"), util::GetString(test, span->name.index));
+    EXPECT_EQ(StringPiece16(u"i"), util::GetString16(test, span->name.index));
     EXPECT_EQ(2u, span->firstChar);
     EXPECT_EQ(3u, span->lastChar);
     span++;

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include "util/StringPiece.h"
-
 #include <iostream>
 #include <vector>
+
+#include "util/StringPiece.h"
 
 namespace aapt {
 
@@ -27,16 +27,16 @@ static const char* sMajorVersion = "2";
 // Update minor version whenever a feature or flag is added.
 static const char* sMinorVersion = "2";
 
-int printVersion() {
+int PrintVersion() {
   std::cerr << "Android Asset Packaging Tool (aapt) " << sMajorVersion << "."
             << sMinorVersion << std::endl;
   return 0;
 }
 
-extern int compile(const std::vector<StringPiece>& args);
-extern int link(const std::vector<StringPiece>& args);
-extern int dump(const std::vector<StringPiece>& args);
-extern int diff(const std::vector<StringPiece>& args);
+extern int Compile(const std::vector<StringPiece>& args);
+extern int Link(const std::vector<StringPiece>& args);
+extern int Dump(const std::vector<StringPiece>& args);
+extern int Diff(const std::vector<StringPiece>& args);
 
 }  // namespace aapt
 
@@ -52,15 +52,15 @@ int main(int argc, char** argv) {
 
     aapt::StringPiece command(argv[0]);
     if (command == "compile" || command == "c") {
-      return aapt::compile(args);
+      return aapt::Compile(args);
     } else if (command == "link" || command == "l") {
-      return aapt::link(args);
+      return aapt::Link(args);
     } else if (command == "dump" || command == "d") {
-      return aapt::dump(args);
+      return aapt::Dump(args);
     } else if (command == "diff") {
-      return aapt::diff(args);
+      return aapt::Diff(args);
     } else if (command == "version") {
-      return aapt::printVersion();
+      return aapt::PrintVersion();
     }
     std::cerr << "unknown command '" << command << "'\n";
   } else {

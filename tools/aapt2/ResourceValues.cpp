@@ -15,94 +15,95 @@
  */
 
 #include "ResourceValues.h"
+
+#include <algorithm>
+#include <limits>
+#include <set>
+
+#include "androidfw/ResourceTypes.h"
+
 #include "Resource.h"
 #include "ResourceUtils.h"
 #include "ValueVisitor.h"
 #include "util/Util.h"
 
-#include <androidfw/ResourceTypes.h>
-#include <algorithm>
-#include <limits>
-#include <set>
-
 namespace aapt {
 
 template <typename Derived>
-void BaseValue<Derived>::accept(RawValueVisitor* visitor) {
-  visitor->visit(static_cast<Derived*>(this));
+void BaseValue<Derived>::Accept(RawValueVisitor* visitor) {
+  visitor->Visit(static_cast<Derived*>(this));
 }
 
 template <typename Derived>
-void BaseItem<Derived>::accept(RawValueVisitor* visitor) {
-  visitor->visit(static_cast<Derived*>(this));
+void BaseItem<Derived>::Accept(RawValueVisitor* visitor) {
+  visitor->Visit(static_cast<Derived*>(this));
 }
 
 RawString::RawString(const StringPool::Ref& ref) : value(ref) {}
 
-bool RawString::equals(const Value* value) const {
-  const RawString* other = valueCast<RawString>(value);
+bool RawString::Equals(const Value* value) const {
+  const RawString* other = ValueCast<RawString>(value);
   if (!other) {
     return false;
   }
   return *this->value == *other->value;
 }
 
-RawString* RawString::clone(StringPool* newPool) const {
-  RawString* rs = new RawString(newPool->makeRef(*value));
-  rs->mComment = mComment;
-  rs->mSource = mSource;
+RawString* RawString::Clone(StringPool* new_pool) const {
+  RawString* rs = new RawString(new_pool->MakeRef(*value));
+  rs->comment_ = comment_;
+  rs->source_ = source_;
   return rs;
 }
 
-bool RawString::flatten(android::Res_value* outValue) const {
-  outValue->dataType = android::Res_value::TYPE_STRING;
-  outValue->data =
-      util::hostToDevice32(static_cast<uint32_t>(value.getIndex()));
+bool RawString::Flatten(android::Res_value* out_value) const {
+  out_value->dataType = android::Res_value::TYPE_STRING;
+  out_value->data = util::HostToDevice32(static_cast<uint32_t>(value.index()));
   return true;
 }
 
-void RawString::print(std::ostream* out) const {
+void RawString::Print(std::ostream* out) const {
   *out << "(raw string) " << *value;
 }
 
-Reference::Reference() : referenceType(Type::kResource) {}
+Reference::Reference() : reference_type(Type::kResource) {}
 
 Reference::Reference(const ResourceNameRef& n, Type t)
-    : name(n.toResourceName()), referenceType(t) {}
+    : name(n.ToResourceName()), reference_type(t) {}
 
 Reference::Reference(const ResourceId& i, Type type)
-    : id(i), referenceType(type) {}
+    : id(i), reference_type(type) {}
 
 Reference::Reference(const ResourceNameRef& n, const ResourceId& i)
-    : name(n.toResourceName()), id(i), referenceType(Type::kResource) {}
+    : name(n.ToResourceName()), id(i), reference_type(Type::kResource) {}
 
-bool Reference::equals(const Value* value) const {
-  const Reference* other = valueCast<Reference>(value);
+bool Reference::Equals(const Value* value) const {
+  const Reference* other = ValueCast<Reference>(value);
   if (!other) {
     return false;
   }
-  return referenceType == other->referenceType &&
-         privateReference == other->privateReference && id == other->id &&
+  return reference_type == other->reference_type &&
+         private_reference == other->private_reference && id == other->id &&
          name == other->name;
 }
 
-bool Reference::flatten(android::Res_value* outValue) const {
-  outValue->dataType = (referenceType == Reference::Type::kResource)
-                           ? android::Res_value::TYPE_REFERENCE
-                           : android::Res_value::TYPE_ATTRIBUTE;
-  outValue->data = util::hostToDevice32(id ? id.value().id : 0);
+bool Reference::Flatten(android::Res_value* out_value) const {
+  out_value->dataType = (reference_type == Reference::Type::kResource)
+                            ? android::Res_value::TYPE_REFERENCE
+                            : android::Res_value::TYPE_ATTRIBUTE;
+  out_value->data = util::HostToDevice32(id ? id.value().id : 0);
   return true;
 }
 
-Reference* Reference::clone(StringPool* /*newPool*/) const {
+Reference* Reference::Clone(StringPool* /*new_pool*/) const {
   return new Reference(*this);
 }
 
-void Reference::print(std::ostream* out) const {
+void Reference::Print(std::ostream* out) const {
   *out << "(reference) ";
-  if (referenceType == Reference::Type::kResource) {
+  if (reference_type == Reference::Type::kResource) {
     *out << "@";
-    if (privateReference) {
+    if (private_reference) {
       *out << "*";
     }
   } else {
@@ -118,128 +119,127 @@ void Reference::print(std::ostream* out) const {
   }
 }
 
-bool Id::equals(const Value* value) const {
-  return valueCast<Id>(value) != nullptr;
+bool Id::Equals(const Value* value) const {
+  return ValueCast<Id>(value) != nullptr;
 }
 
-bool Id::flatten(android::Res_value* out) const {
+bool Id::Flatten(android::Res_value* out) const {
   out->dataType = android::Res_value::TYPE_INT_BOOLEAN;
-  out->data = util::hostToDevice32(0);
+  out->data = util::HostToDevice32(0);
   return true;
 }
 
-Id* Id::clone(StringPool* /*newPool*/) const { return new Id(*this); }
+Id* Id::Clone(StringPool* /*new_pool*/) const { return new Id(*this); }
 
-void Id::print(std::ostream* out) const { *out << "(id)"; }
+void Id::Print(std::ostream* out) const { *out << "(id)"; }
 
 String::String(const StringPool::Ref& ref) : value(ref) {}
 
-bool String::equals(const Value* value) const {
-  const String* other = valueCast<String>(value);
+bool String::Equals(const Value* value) const {
+  const String* other = ValueCast<String>(value);
   if (!other) {
     return false;
   }
   return *this->value == *other->value;
 }
 
-bool String::flatten(android::Res_value* outValue) const {
+bool String::Flatten(android::Res_value* out_value) const {
   // Verify that our StringPool index is within encode-able limits.
-  if (value.getIndex() > std::numeric_limits<uint32_t>::max()) {
+  if (value.index() > std::numeric_limits<uint32_t>::max()) {
     return false;
   }
 
-  outValue->dataType = android::Res_value::TYPE_STRING;
-  outValue->data =
-      util::hostToDevice32(static_cast<uint32_t>(value.getIndex()));
+  out_value->dataType = android::Res_value::TYPE_STRING;
+  out_value->data = util::HostToDevice32(static_cast<uint32_t>(value.index()));
   return true;
 }
 
-String* String::clone(StringPool* newPool) const {
-  String* str = new String(newPool->makeRef(*value));
-  str->mComment = mComment;
-  str->mSource = mSource;
+String* String::Clone(StringPool* new_pool) const {
+  String* str = new String(new_pool->MakeRef(*value));
+  str->comment_ = comment_;
+  str->source_ = source_;
   return str;
 }
 
-void String::print(std::ostream* out) const {
+void String::Print(std::ostream* out) const {
   *out << "(string) \"" << *value << "\"";
 }
 
 StyledString::StyledString(const StringPool::StyleRef& ref) : value(ref) {}
 
-bool StyledString::equals(const Value* value) const {
-  const StyledString* other = valueCast<StyledString>(value);
+bool StyledString::Equals(const Value* value) const {
+  const StyledString* other = ValueCast<StyledString>(value);
   if (!other) {
     return false;
   }
 
   if (*this->value->str == *other->value->str) {
-    const std::vector<StringPool::Span>& spansA = this->value->spans;
-    const std::vector<StringPool::Span>& spansB = other->value->spans;
+    const std::vector<StringPool::Span>& spans_a = this->value->spans;
+    const std::vector<StringPool::Span>& spans_b = other->value->spans;
     return std::equal(
-        spansA.begin(), spansA.end(), spansB.begin(),
+        spans_a.begin(), spans_a.end(), spans_b.begin(),
         [](const StringPool::Span& a, const StringPool::Span& b) -> bool {
-          return *a.name == *b.name && a.firstChar == b.firstChar &&
-                 a.lastChar == b.lastChar;
+          return *a.name == *b.name && a.first_char == b.first_char &&
+                 a.last_char == b.last_char;
         });
   }
   return false;
 }
 
-bool StyledString::flatten(android::Res_value* outValue) const {
-  if (value.getIndex() > std::numeric_limits<uint32_t>::max()) {
+bool StyledString::Flatten(android::Res_value* out_value) const {
+  if (value.index() > std::numeric_limits<uint32_t>::max()) {
     return false;
   }
 
-  outValue->dataType = android::Res_value::TYPE_STRING;
-  outValue->data =
-      util::hostToDevice32(static_cast<uint32_t>(value.getIndex()));
+  out_value->dataType = android::Res_value::TYPE_STRING;
+  out_value->data = util::HostToDevice32(static_cast<uint32_t>(value.index()));
   return true;
 }
 
-StyledString* StyledString::clone(StringPool* newPool) const {
-  StyledString* str = new StyledString(newPool->makeRef(value));
-  str->mComment = mComment;
-  str->mSource = mSource;
+StyledString* StyledString::Clone(StringPool* new_pool) const {
+  StyledString* str = new StyledString(new_pool->MakeRef(value));
+  str->comment_ = comment_;
+  str->source_ = source_;
   return str;
 }
 
-void StyledString::print(std::ostream* out) const {
+void StyledString::Print(std::ostream* out) const {
   *out << "(styled string) \"" << *value->str << "\"";
   for (const StringPool::Span& span : value->spans) {
-    *out << " " << *span.name << ":" << span.firstChar << "," << span.lastChar;
+    *out << " " << *span.name << ":" << span.first_char << ","
+         << span.last_char;
   }
 }
 
 FileReference::FileReference(const StringPool::Ref& _path) : path(_path) {}
 
-bool FileReference::equals(const Value* value) const {
-  const FileReference* other = valueCast<FileReference>(value);
+bool FileReference::Equals(const Value* value) const {
+  const FileReference* other = ValueCast<FileReference>(value);
   if (!other) {
     return false;
   }
   return *path == *other->path;
 }
 
-bool FileReference::flatten(android::Res_value* outValue) const {
-  if (path.getIndex() > std::numeric_limits<uint32_t>::max()) {
+bool FileReference::Flatten(android::Res_value* out_value) const {
+  if (path.index() > std::numeric_limits<uint32_t>::max()) {
     return false;
   }
 
-  outValue->dataType = android::Res_value::TYPE_STRING;
-  outValue->data = util::hostToDevice32(static_cast<uint32_t>(path.getIndex()));
+  out_value->dataType = android::Res_value::TYPE_STRING;
+  out_value->data = util::HostToDevice32(static_cast<uint32_t>(path.index()));
   return true;
 }
 
-FileReference* FileReference::clone(StringPool* newPool) const {
-  FileReference* fr = new FileReference(newPool->makeRef(*path));
+FileReference* FileReference::Clone(StringPool* new_pool) const {
+  FileReference* fr = new FileReference(new_pool->MakeRef(*path));
   fr->file = file;
-  fr->mComment = mComment;
-  fr->mSource = mSource;
+  fr->comment_ = comment_;
+  fr->source_ = source_;
   return fr;
 }
 
-void FileReference::print(std::ostream* out) const {
+void FileReference::Print(std::ostream* out) const {
   *out << "(file) " << *path;
 }
 
@@ -250,8 +250,8 @@ BinaryPrimitive::BinaryPrimitive(uint8_t dataType, uint32_t data) {
   value.data = data;
 }
 
-bool BinaryPrimitive::equals(const Value* value) const {
-  const BinaryPrimitive* other = valueCast<BinaryPrimitive>(value);
+bool BinaryPrimitive::Equals(const Value* value) const {
+  const BinaryPrimitive* other = ValueCast<BinaryPrimitive>(value);
   if (!other) {
     return false;
   }
@@ -259,17 +259,17 @@ bool BinaryPrimitive::equals(const Value* value) const {
          this->value.data == other->value.data;
 }
 
-bool BinaryPrimitive::flatten(android::Res_value* outValue) const {
-  outValue->dataType = value.dataType;
-  outValue->data = util::hostToDevice32(value.data);
+bool BinaryPrimitive::Flatten(android::Res_value* out_value) const {
+  out_value->dataType = value.dataType;
+  out_value->data = util::HostToDevice32(value.data);
   return true;
 }
 
-BinaryPrimitive* BinaryPrimitive::clone(StringPool* /*newPool*/) const {
+BinaryPrimitive* BinaryPrimitive::Clone(StringPool* /*new_pool*/) const {
   return new BinaryPrimitive(*this);
 }
 
-void BinaryPrimitive::print(std::ostream* out) const {
+void BinaryPrimitive::Print(std::ostream* out) const {
   switch (value.dataType) {
     case android::Res_value::TYPE_NULL:
       *out << "(null)";
@@ -297,10 +297,10 @@ void BinaryPrimitive::print(std::ostream* out) const {
 }
 
 Attribute::Attribute(bool w, uint32_t t)
-    : typeMask(t),
-      minInt(std::numeric_limits<int32_t>::min()),
-      maxInt(std::numeric_limits<int32_t>::max()) {
-  mWeak = w;
+    : type_mask(t),
+      min_int(std::numeric_limits<int32_t>::min()),
+      max_int(std::numeric_limits<int32_t>::max()) {
+  weak_ = w;
 }
 
 template <typename T>
@@ -308,8 +308,8 @@ T* addPointer(T& val) {
   return &val;
 }
 
-bool Attribute::equals(const Value* value) const {
-  const Attribute* other = valueCast<Attribute>(value);
+bool Attribute::Equals(const Value* value) const {
+  const Attribute* other = ValueCast<Attribute>(value);
   if (!other) {
     return false;
   }
@@ -318,46 +318,46 @@ bool Attribute::equals(const Value* value) const {
     return false;
   }
 
-  if (typeMask != other->typeMask || minInt != other->minInt ||
-      maxInt != other->maxInt) {
+  if (type_mask != other->type_mask || min_int != other->min_int ||
+      max_int != other->max_int) {
     return false;
   }
 
-  std::vector<const Symbol*> sortedA;
-  std::transform(symbols.begin(), symbols.end(), std::back_inserter(sortedA),
+  std::vector<const Symbol*> sorted_a;
+  std::transform(symbols.begin(), symbols.end(), std::back_inserter(sorted_a),
                  addPointer<const Symbol>);
-  std::sort(sortedA.begin(), sortedA.end(),
+  std::sort(sorted_a.begin(), sorted_a.end(),
             [](const Symbol* a, const Symbol* b) -> bool {
               return a->symbol.name < b->symbol.name;
             });
 
-  std::vector<const Symbol*> sortedB;
+  std::vector<const Symbol*> sorted_b;
   std::transform(other->symbols.begin(), other->symbols.end(),
-                 std::back_inserter(sortedB), addPointer<const Symbol>);
-  std::sort(sortedB.begin(), sortedB.end(),
+                 std::back_inserter(sorted_b), addPointer<const Symbol>);
+  std::sort(sorted_b.begin(), sorted_b.end(),
             [](const Symbol* a, const Symbol* b) -> bool {
               return a->symbol.name < b->symbol.name;
             });
 
-  return std::equal(sortedA.begin(), sortedA.end(), sortedB.begin(),
+  return std::equal(sorted_a.begin(), sorted_a.end(), sorted_b.begin(),
                     [](const Symbol* a, const Symbol* b) -> bool {
-                      return a->symbol.equals(&b->symbol) &&
+                      return a->symbol.Equals(&b->symbol) &&
                              a->value == b->value;
                     });
 }
 
-Attribute* Attribute::clone(StringPool* /*newPool*/) const {
+Attribute* Attribute::Clone(StringPool* /*new_pool*/) const {
   return new Attribute(*this);
 }
 
-void Attribute::printMask(std::ostream* out) const {
-  if (typeMask == android::ResTable_map::TYPE_ANY) {
+void Attribute::PrintMask(std::ostream* out) const {
+  if (type_mask == android::ResTable_map::TYPE_ANY) {
     *out << "any";
     return;
   }
 
   bool set = false;
-  if ((typeMask & android::ResTable_map::TYPE_REFERENCE) != 0) {
+  if ((type_mask & android::ResTable_map::TYPE_REFERENCE) != 0) {
     if (!set) {
       set = true;
     } else {
@@ -366,7 +366,7 @@ void Attribute::printMask(std::ostream* out) const {
     *out << "reference";
   }
 
-  if ((typeMask & android::ResTable_map::TYPE_STRING) != 0) {
+  if ((type_mask & android::ResTable_map::TYPE_STRING) != 0) {
     if (!set) {
       set = true;
     } else {
@@ -375,7 +375,7 @@ void Attribute::printMask(std::ostream* out) const {
     *out << "string";
   }
 
-  if ((typeMask & android::ResTable_map::TYPE_INTEGER) != 0) {
+  if ((type_mask & android::ResTable_map::TYPE_INTEGER) != 0) {
     if (!set) {
       set = true;
     } else {
@@ -384,7 +384,7 @@ void Attribute::printMask(std::ostream* out) const {
     *out << "integer";
   }
 
-  if ((typeMask & android::ResTable_map::TYPE_BOOLEAN) != 0) {
+  if ((type_mask & android::ResTable_map::TYPE_BOOLEAN) != 0) {
     if (!set) {
       set = true;
     } else {
@@ -393,7 +393,7 @@ void Attribute::printMask(std::ostream* out) const {
     *out << "boolean";
   }
 
-  if ((typeMask & android::ResTable_map::TYPE_COLOR) != 0) {
+  if ((type_mask & android::ResTable_map::TYPE_COLOR) != 0) {
     if (!set) {
       set = true;
     } else {
@@ -402,7 +402,7 @@ void Attribute::printMask(std::ostream* out) const {
     *out << "color";
   }
 
-  if ((typeMask & android::ResTable_map::TYPE_FLOAT) != 0) {
+  if ((type_mask & android::ResTable_map::TYPE_FLOAT) != 0) {
     if (!set) {
       set = true;
     } else {
@@ -411,7 +411,7 @@ void Attribute::printMask(std::ostream* out) const {
     *out << "float";
   }
 
-  if ((typeMask & android::ResTable_map::TYPE_DIMENSION) != 0) {
+  if ((type_mask & android::ResTable_map::TYPE_DIMENSION) != 0) {
     if (!set) {
       set = true;
     } else {
@@ -420,7 +420,7 @@ void Attribute::printMask(std::ostream* out) const {
     *out << "dimension";
   }
 
-  if ((typeMask & android::ResTable_map::TYPE_FRACTION) != 0) {
+  if ((type_mask & android::ResTable_map::TYPE_FRACTION) != 0) {
     if (!set) {
       set = true;
     } else {
@@ -429,7 +429,7 @@ void Attribute::printMask(std::ostream* out) const {
     *out << "fraction";
   }
 
-  if ((typeMask & android::ResTable_map::TYPE_ENUM) != 0) {
+  if ((type_mask & android::ResTable_map::TYPE_ENUM) != 0) {
     if (!set) {
       set = true;
     } else {
@@ -438,7 +438,7 @@ void Attribute::printMask(std::ostream* out) const {
     *out << "enum";
   }
 
-  if ((typeMask & android::ResTable_map::TYPE_FLAGS) != 0) {
+  if ((type_mask & android::ResTable_map::TYPE_FLAGS) != 0) {
     if (!set) {
       set = true;
     } else {
@@ -448,96 +448,96 @@ void Attribute::printMask(std::ostream* out) const {
   }
 }
 
-void Attribute::print(std::ostream* out) const {
+void Attribute::Print(std::ostream* out) const {
   *out << "(attr) ";
-  printMask(out);
+  PrintMask(out);
 
   if (!symbols.empty()) {
-    *out << " [" << util::joiner(symbols, ", ") << "]";
+    *out << " [" << util::Joiner(symbols, ", ") << "]";
   }
 
-  if (minInt != std::numeric_limits<int32_t>::min()) {
-    *out << " min=" << minInt;
+  if (min_int != std::numeric_limits<int32_t>::min()) {
+    *out << " min=" << min_int;
   }
 
-  if (maxInt != std::numeric_limits<int32_t>::max()) {
-    *out << " max=" << maxInt;
+  if (max_int != std::numeric_limits<int32_t>::max()) {
+    *out << " max=" << max_int;
   }
 
-  if (isWeak()) {
+  if (IsWeak()) {
     *out << " [weak]";
   }
 }
 
-static void buildAttributeMismatchMessage(DiagMessage* msg,
+static void BuildAttributeMismatchMessage(DiagMessage* msg,
                                           const Attribute* attr,
                                           const Item* value) {
   *msg << "expected";
-  if (attr->typeMask & android::ResTable_map::TYPE_BOOLEAN) {
+  if (attr->type_mask & android::ResTable_map::TYPE_BOOLEAN) {
     *msg << " boolean";
   }
 
-  if (attr->typeMask & android::ResTable_map::TYPE_COLOR) {
+  if (attr->type_mask & android::ResTable_map::TYPE_COLOR) {
     *msg << " color";
   }
 
-  if (attr->typeMask & android::ResTable_map::TYPE_DIMENSION) {
+  if (attr->type_mask & android::ResTable_map::TYPE_DIMENSION) {
     *msg << " dimension";
   }
 
-  if (attr->typeMask & android::ResTable_map::TYPE_ENUM) {
+  if (attr->type_mask & android::ResTable_map::TYPE_ENUM) {
     *msg << " enum";
   }
 
-  if (attr->typeMask & android::ResTable_map::TYPE_FLAGS) {
+  if (attr->type_mask & android::ResTable_map::TYPE_FLAGS) {
     *msg << " flags";
   }
 
-  if (attr->typeMask & android::ResTable_map::TYPE_FLOAT) {
+  if (attr->type_mask & android::ResTable_map::TYPE_FLOAT) {
     *msg << " float";
   }
 
-  if (attr->typeMask & android::ResTable_map::TYPE_FRACTION) {
+  if (attr->type_mask & android::ResTable_map::TYPE_FRACTION) {
     *msg << " fraction";
   }
 
-  if (attr->typeMask & android::ResTable_map::TYPE_INTEGER) {
+  if (attr->type_mask & android::ResTable_map::TYPE_INTEGER) {
     *msg << " integer";
   }
 
-  if (attr->typeMask & android::ResTable_map::TYPE_REFERENCE) {
+  if (attr->type_mask & android::ResTable_map::TYPE_REFERENCE) {
     *msg << " reference";
   }
 
-  if (attr->typeMask & android::ResTable_map::TYPE_STRING) {
+  if (attr->type_mask & android::ResTable_map::TYPE_STRING) {
     *msg << " string";
   }
 
   *msg << " but got " << *value;
 }
 
-bool Attribute::matches(const Item* item, DiagMessage* outMsg) const {
+bool Attribute::Matches(const Item* item, DiagMessage* out_msg) const {
   android::Res_value val = {};
-  item->flatten(&val);
+  item->Flatten(&val);
 
   // Always allow references.
-  const uint32_t mask = typeMask | android::ResTable_map::TYPE_REFERENCE;
-  if (!(mask & ResourceUtils::androidTypeToAttributeTypeMask(val.dataType))) {
-    if (outMsg) {
-      buildAttributeMismatchMessage(outMsg, this, item);
+  const uint32_t mask = type_mask | android::ResTable_map::TYPE_REFERENCE;
+  if (!(mask & ResourceUtils::AndroidTypeToAttributeTypeMask(val.dataType))) {
+    if (out_msg) {
+      BuildAttributeMismatchMessage(out_msg, this, item);
     }
     return false;
 
-  } else if (ResourceUtils::androidTypeToAttributeTypeMask(val.dataType) &
+  } else if (ResourceUtils::AndroidTypeToAttributeTypeMask(val.dataType) &
              android::ResTable_map::TYPE_INTEGER) {
-    if (static_cast<int32_t>(util::deviceToHost32(val.data)) < minInt) {
-      if (outMsg) {
-        *outMsg << *item << " is less than minimum integer " << minInt;
+    if (static_cast<int32_t>(util::DeviceToHost32(val.data)) < min_int) {
+      if (out_msg) {
+        *out_msg << *item << " is less than minimum integer " << min_int;
       }
       return false;
-    } else if (static_cast<int32_t>(util::deviceToHost32(val.data)) > maxInt) {
-      if (outMsg) {
-        *outMsg << *item << " is greater than maximum integer " << maxInt;
+    } else if (static_cast<int32_t>(util::DeviceToHost32(val.data)) > max_int) {
+      if (out_msg) {
+        *out_msg << *item << " is greater than maximum integer " << max_int;
       }
       return false;
     }
@@ -545,14 +545,14 @@ bool Attribute::matches(const Item* item, DiagMessage* outMsg) const {
   return true;
 }
 
-bool Style::equals(const Value* value) const {
-  const Style* other = valueCast<Style>(value);
+bool Style::Equals(const Value* value) const {
+  const Style* other = ValueCast<Style>(value);
   if (!other) {
     return false;
   }
   if (bool(parent) != bool(other->parent) ||
       (parent && other->parent &&
-       !parent.value().equals(&other->parent.value()))) {
+       !parent.value().Equals(&other->parent.value()))) {
     return false;
   }
 
@@ -560,51 +560,51 @@ bool Style::equals(const Value* value) const {
     return false;
   }
 
-  std::vector<const Entry*> sortedA;
-  std::transform(entries.begin(), entries.end(), std::back_inserter(sortedA),
+  std::vector<const Entry*> sorted_a;
+  std::transform(entries.begin(), entries.end(), std::back_inserter(sorted_a),
                  addPointer<const Entry>);
-  std::sort(sortedA.begin(), sortedA.end(),
+  std::sort(sorted_a.begin(), sorted_a.end(),
             [](const Entry* a, const Entry* b) -> bool {
               return a->key.name < b->key.name;
             });
 
-  std::vector<const Entry*> sortedB;
+  std::vector<const Entry*> sorted_b;
   std::transform(other->entries.begin(), other->entries.end(),
-                 std::back_inserter(sortedB), addPointer<const Entry>);
-  std::sort(sortedB.begin(), sortedB.end(),
+                 std::back_inserter(sorted_b), addPointer<const Entry>);
+  std::sort(sorted_b.begin(), sorted_b.end(),
             [](const Entry* a, const Entry* b) -> bool {
               return a->key.name < b->key.name;
             });
 
-  return std::equal(sortedA.begin(), sortedA.end(), sortedB.begin(),
+  return std::equal(sorted_a.begin(), sorted_a.end(), sorted_b.begin(),
                     [](const Entry* a, const Entry* b) -> bool {
-                      return a->key.equals(&b->key) &&
-                             a->value->equals(b->value.get());
+                      return a->key.Equals(&b->key) &&
+                             a->value->Equals(b->value.get());
                     });
 }
 
-Style* Style::clone(StringPool* newPool) const {
+Style* Style::Clone(StringPool* new_pool) const {
   Style* style = new Style();
   style->parent = parent;
-  style->parentInferred = parentInferred;
-  style->mComment = mComment;
-  style->mSource = mSource;
+  style->parent_inferred = parent_inferred;
+  style->comment_ = comment_;
+  style->source_ = source_;
   for (auto& entry : entries) {
     style->entries.push_back(
-        Entry{entry.key, std::unique_ptr<Item>(entry.value->clone(newPool))});
+        Entry{entry.key, std::unique_ptr<Item>(entry.value->Clone(new_pool))});
   }
   return style;
 }
 
-void Style::print(std::ostream* out) const {
+void Style::Print(std::ostream* out) const {
   *out << "(style) ";
   if (parent && parent.value().name) {
-    if (parent.value().privateReference) {
+    if (parent.value().private_reference) {
       *out << "*";
     }
     *out << parent.value().name.value();
   }
-  *out << " [" << util::joiner(entries, ", ") << "]";
+  *out << " [" << util::Joiner(entries, ", ") << "]";
 }
 
 static ::std::ostream& operator<<(::std::ostream& out,
@@ -617,12 +617,12 @@ static ::std::ostream& operator<<(::std::ostream& out,
     out << "???";
   }
   out << " = ";
-  value.value->print(&out);
+  value.value->Print(&out);
   return out;
 }
 
-bool Array::equals(const Value* value) const {
-  const Array* other = valueCast<Array>(value);
+bool Array::Equals(const Value* value) const {
+  const Array* other = ValueCast<Array>(value);
   if (!other) {
     return false;
   }
@@ -634,26 +634,26 @@ bool Array::equals(const Value* value) const {
   return std::equal(items.begin(), items.end(), other->items.begin(),
                     [](const std::unique_ptr<Item>& a,
                        const std::unique_ptr<Item>& b) -> bool {
-                      return a->equals(b.get());
+                      return a->Equals(b.get());
                     });
 }
 
-Array* Array::clone(StringPool* newPool) const {
+Array* Array::Clone(StringPool* new_pool) const {
   Array* array = new Array();
-  array->mComment = mComment;
-  array->mSource = mSource;
+  array->comment_ = comment_;
+  array->source_ = source_;
   for (auto& item : items) {
-    array->items.emplace_back(std::unique_ptr<Item>(item->clone(newPool)));
+    array->items.emplace_back(std::unique_ptr<Item>(item->Clone(new_pool)));
   }
   return array;
 }
 
-void Array::print(std::ostream* out) const {
-  *out << "(array) [" << util::joiner(items, ", ") << "]";
+void Array::Print(std::ostream* out) const {
+  *out << "(array) [" << util::Joiner(items, ", ") << "]";
 }
 
-bool Plural::equals(const Value* value) const {
-  const Plural* other = valueCast<Plural>(value);
+bool Plural::Equals(const Value* value) const {
+  const Plural* other = ValueCast<Plural>(value);
   if (!other) {
     return false;
   }
@@ -668,24 +668,24 @@ bool Plural::equals(const Value* value) const {
                       if (bool(a) != bool(b)) {
                         return false;
                       }
-                      return bool(a) == bool(b) || a->equals(b.get());
+                      return bool(a) == bool(b) || a->Equals(b.get());
                     });
 }
 
-Plural* Plural::clone(StringPool* newPool) const {
+Plural* Plural::Clone(StringPool* new_pool) const {
   Plural* p = new Plural();
-  p->mComment = mComment;
-  p->mSource = mSource;
+  p->comment_ = comment_;
+  p->source_ = source_;
   const size_t count = values.size();
   for (size_t i = 0; i < count; i++) {
     if (values[i]) {
-      p->values[i] = std::unique_ptr<Item>(values[i]->clone(newPool));
+      p->values[i] = std::unique_ptr<Item>(values[i]->Clone(new_pool));
     }
   }
   return p;
 }
 
-void Plural::print(std::ostream* out) const {
+void Plural::Print(std::ostream* out) const {
   *out << "(plural)";
   if (values[Zero]) {
     *out << " zero=" << *values[Zero];
@@ -713,8 +713,8 @@ static ::std::ostream& operator<<(::std::ostream& out,
   return out << *item;
 }
 
-bool Styleable::equals(const Value* value) const {
-  const Styleable* other = valueCast<Styleable>(value);
+bool Styleable::Equals(const Value* value) const {
+  const Styleable* other = ValueCast<Styleable>(value);
   if (!other) {
     return false;
   }
@@ -725,21 +725,21 @@ bool Styleable::equals(const Value* value) const {
 
   return std::equal(entries.begin(), entries.end(), other->entries.begin(),
                     [](const Reference& a, const Reference& b) -> bool {
-                      return a.equals(&b);
+                      return a.Equals(&b);
                     });
 }
 
-Styleable* Styleable::clone(StringPool* /*newPool*/) const {
+Styleable* Styleable::Clone(StringPool* /*new_pool*/) const {
   return new Styleable(*this);
 }
 
-void Styleable::print(std::ostream* out) const {
+void Styleable::Print(std::ostream* out) const {
   *out << "(styleable) "
-       << " [" << util::joiner(entries, ", ") << "]";
+       << " [" << util::Joiner(entries, ", ") << "]";
 }
 
 bool operator<(const Reference& a, const Reference& b) {
-  int cmp = a.name.valueOrDefault({}).compare(b.name.valueOrDefault({}));
+  int cmp = a.name.value_or_default({}).compare(b.name.value_or_default({}));
   if (cmp != 0) return cmp < 0;
   return a.id < b.id;
 }
@@ -758,7 +758,7 @@ struct NameOnlyComparator {
   }
 };
 
-void Styleable::mergeWith(Styleable* other) {
+void Styleable::MergeWith(Styleable* other) {
   // Compare only names, because some References may already have their IDs
   // assigned
   // (framework IDs that don't change).

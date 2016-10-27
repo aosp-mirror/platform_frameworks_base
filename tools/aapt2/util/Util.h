@@ -17,40 +17,53 @@
 #ifndef AAPT_UTIL_H
 #define AAPT_UTIL_H
 
-#include "util/BigBuffer.h"
-#include "util/Maybe.h"
-#include "util/StringPiece.h"
-
-#include <androidfw/ResourceTypes.h>
 #include <functional>
 #include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
 
+#include "androidfw/ResourceTypes.h"
+#include "utils/ByteOrder.h"
+
+#include "util/BigBuffer.h"
+#include "util/Maybe.h"
+#include "util/StringPiece.h"
+
+#ifdef _WIN32
+// TODO(adamlesinski): remove once http://b/32447322 is resolved.
+// utils/ByteOrder.h includes winsock2.h on WIN32,
+// which will pull in the ERROR definition. This conflicts
+// with android-base/logging.h, which takes care of undefining
+// ERROR, but it gets included too early (before winsock2.h).
+#ifdef ERROR
+#undef ERROR
+#endif
+#endif
+
 namespace aapt {
 namespace util {
 
-std::vector<std::string> split(const StringPiece& str, char sep);
-std::vector<std::string> splitAndLowercase(const StringPiece& str, char sep);
+std::vector<std::string> Split(const StringPiece& str, char sep);
+std::vector<std::string> SplitAndLowercase(const StringPiece& str, char sep);
 
 /**
  * Returns true if the string starts with prefix.
  */
-bool stringStartsWith(const StringPiece& str, const StringPiece& prefix);
+bool StartsWith(const StringPiece& str, const StringPiece& prefix);
 
 /**
  * Returns true if the string ends with suffix.
  */
-bool stringEndsWith(const StringPiece& str, const StringPiece& suffix);
+bool EndsWith(const StringPiece& str, const StringPiece& suffix);
 
 /**
  * Creates a new StringPiece16 that points to a substring
  * of the original string without leading or trailing whitespace.
  */
-StringPiece trimWhitespace(const StringPiece& str);
+StringPiece TrimWhitespace(const StringPiece& str);
 
-StringPiece trimWhitespace(const StringPiece& str);
+StringPiece TrimWhitespace(const StringPiece& str);
 
 /**
  * UTF-16 isspace(). It basically checks for lower range characters that are
@@ -62,18 +75,18 @@ inline bool isspace16(char16_t c) { return c < 0x0080 && isspace(c); }
  * Returns an iterator to the first character that is not alpha-numeric and that
  * is not in the allowedChars set.
  */
-StringPiece::const_iterator findNonAlphaNumericAndNotInSet(
-    const StringPiece& str, const StringPiece& allowedChars);
+StringPiece::const_iterator FindNonAlphaNumericAndNotInSet(
+    const StringPiece& str, const StringPiece& allowed_chars);
 
 /**
  * Tests that the string is a valid Java class name.
  */
-bool isJavaClassName(const StringPiece& str);
+bool IsJavaClassName(const StringPiece& str);
 
 /**
  * Tests that the string is a valid Java package name.
  */
-bool isJavaPackageName(const StringPiece& str);
+bool IsJavaPackageName(const StringPiece& str);
 
 /**
  * Converts the class name to a fully qualified class name from the given
@@ -84,8 +97,8 @@ bool isJavaPackageName(const StringPiece& str);
  * .a.b         --> package.a.b
  * asdf.adsf    --> asdf.adsf
  */
-Maybe<std::string> getFullyQualifiedClassName(const StringPiece& package,
-                                              const StringPiece& className);
+Maybe<std::string> GetFullyQualifiedClassName(const StringPiece& package,
+                                              const StringPiece& class_name);
 
 /**
  * Makes a std::unique_ptr<> with the template parameter inferred by the
@@ -103,37 +116,18 @@ std::unique_ptr<T> make_unique(Args&&... args) {
  * separator.
  */
 template <typename Container>
-::std::function<::std::ostream&(::std::ostream&)> joiner(
+::std::function<::std::ostream&(::std::ostream&)> Joiner(
     const Container& container, const char* sep) {
   using std::begin;
   using std::end;
-  const auto beginIter = begin(container);
-  const auto endIter = end(container);
-  return [beginIter, endIter, sep](::std::ostream& out) -> ::std::ostream& {
-    for (auto iter = beginIter; iter != endIter; ++iter) {
-      if (iter != beginIter) {
+  const auto begin_iter = begin(container);
+  const auto end_iter = end(container);
+  return [begin_iter, end_iter, sep](::std::ostream& out) -> ::std::ostream& {
+    for (auto iter = begin_iter; iter != end_iter; ++iter) {
+      if (iter != begin_iter) {
         out << sep;
       }
       out << *iter;
-    }
-    return out;
-  };
-}
-
-inline ::std::function<::std::ostream&(::std::ostream&)> formatSize(
-    size_t size) {
-  return [size](::std::ostream& out) -> ::std::ostream& {
-    constexpr size_t K = 1024u;
-    constexpr size_t M = K * K;
-    constexpr size_t G = M * K;
-    if (size < K) {
-      out << size << "B";
-    } else if (size < M) {
-      out << (double(size) / K) << " KiB";
-    } else if (size < G) {
-      out << (double(size) / M) << " MiB";
-    } else {
-      out << (double(size) / G) << " GiB";
     }
     return out;
   };
@@ -144,7 +138,7 @@ inline ::std::function<::std::ostream&(::std::ostream&)> formatSize(
  * stored as UTF-8,
  * the conversion to UTF-16 happens within ResStringPool.
  */
-StringPiece16 getString16(const android::ResStringPool& pool, size_t idx);
+StringPiece16 GetString16(const android::ResStringPool& pool, size_t idx);
 
 /**
  * Helper method to extract a UTF-8 string from a StringPool. If the string is
@@ -154,7 +148,7 @@ StringPiece16 getString16(const android::ResStringPool& pool, size_t idx);
  * which maintains no state or cache. This means we must return an std::string
  * copy.
  */
-std::string getString(const android::ResStringPool& pool, size_t idx);
+std::string GetString(const android::ResStringPool& pool, size_t idx);
 
 /**
  * Checks that the Java string format contains no non-positional arguments
@@ -165,53 +159,53 @@ std::string getString(const android::ResStringPool& pool, size_t idx);
  * which will
  * break the string interpolation.
  */
-bool verifyJavaStringFormat(const StringPiece& str);
+bool VerifyJavaStringFormat(const StringPiece& str);
 
 class StringBuilder {
  public:
-  StringBuilder& append(const StringPiece& str);
-  const std::string& str() const;
-  const std::string& error() const;
+  StringBuilder& Append(const StringPiece& str);
+  const std::string& ToString() const;
+  const std::string& Error() const;
 
   // When building StyledStrings, we need UTF-16 indices into the string,
   // which is what the Java layer expects when dealing with java
   // String.charAt().
-  size_t utf16Len() const;
+  size_t Utf16Len() const;
 
-  operator bool() const;
+  explicit operator bool() const;
 
  private:
-  std::string mStr;
-  size_t mUtf16Len = 0;
-  bool mQuote = false;
-  bool mTrailingSpace = false;
-  bool mLastCharWasEscape = false;
-  std::string mError;
+  std::string str_;
+  size_t utf16_len_ = 0;
+  bool quote_ = false;
+  bool trailing_space_ = false;
+  bool last_char_was_escape_ = false;
+  std::string error_;
 };
 
-inline const std::string& StringBuilder::str() const { return mStr; }
+inline const std::string& StringBuilder::ToString() const { return str_; }
 
-inline const std::string& StringBuilder::error() const { return mError; }
+inline const std::string& StringBuilder::Error() const { return error_; }
 
-inline size_t StringBuilder::utf16Len() const { return mUtf16Len; }
+inline size_t StringBuilder::Utf16Len() const { return utf16_len_; }
 
-inline StringBuilder::operator bool() const { return mError.empty(); }
+inline StringBuilder::operator bool() const { return error_.empty(); }
 
 /**
  * Converts a UTF8 string to a UTF16 string.
  */
-std::u16string utf8ToUtf16(const StringPiece& utf8);
-std::string utf16ToUtf8(const StringPiece16& utf16);
+std::u16string Utf8ToUtf16(const StringPiece& utf8);
+std::string Utf16ToUtf8(const StringPiece16& utf16);
 
 /**
  * Writes the entire BigBuffer to the output stream.
  */
-bool writeAll(std::ostream& out, const BigBuffer& buffer);
+bool WriteAll(std::ostream& out, const BigBuffer& buffer);
 
 /*
  * Copies the entire BigBuffer into a single buffer.
  */
-std::unique_ptr<uint8_t[]> copy(const BigBuffer& buffer);
+std::unique_ptr<uint8_t[]> Copy(const BigBuffer& buffer);
 
 /**
  * A Tokenizer implemented as an iterable collection. It does not allocate
@@ -226,7 +220,7 @@ class Tokenizer {
 
     iterator& operator++();
 
-    StringPiece operator*() { return mToken; }
+    StringPiece operator*() { return token_; }
     bool operator==(const iterator& rhs) const;
     bool operator!=(const iterator& rhs) const;
 
@@ -235,34 +229,34 @@ class Tokenizer {
 
     iterator(StringPiece s, char sep, StringPiece tok, bool end);
 
-    StringPiece mStr;
-    char mSeparator;
-    StringPiece mToken;
-    bool mEnd;
+    StringPiece str_;
+    char separator_;
+    StringPiece token_;
+    bool end_;
   };
 
   Tokenizer(StringPiece str, char sep);
 
-  iterator begin() { return mBegin; }
+  iterator begin() { return begin_; }
 
-  iterator end() { return mEnd; }
+  iterator end() { return end_; }
 
  private:
-  const iterator mBegin;
-  const iterator mEnd;
+  const iterator begin_;
+  const iterator end_;
 };
 
-inline Tokenizer tokenize(const StringPiece& str, char sep) {
+inline Tokenizer Tokenize(const StringPiece& str, char sep) {
   return Tokenizer(str, sep);
 }
 
-inline uint16_t hostToDevice16(uint16_t value) { return htods(value); }
+inline uint16_t HostToDevice16(uint16_t value) { return htods(value); }
 
-inline uint32_t hostToDevice32(uint32_t value) { return htodl(value); }
+inline uint32_t HostToDevice32(uint32_t value) { return htodl(value); }
 
-inline uint16_t deviceToHost16(uint16_t value) { return dtohs(value); }
+inline uint16_t DeviceToHost16(uint16_t value) { return dtohs(value); }
 
-inline uint32_t deviceToHost32(uint32_t value) { return dtohl(value); }
+inline uint32_t DeviceToHost32(uint32_t value) { return dtohl(value); }
 
 /**
  * Given a path like: res/xml-sw600dp/foo.xml
@@ -273,8 +267,8 @@ inline uint32_t deviceToHost32(uint32_t value) { return dtohl(value); }
  *
  * Returns true if successful.
  */
-bool extractResFilePathParts(const StringPiece& path, StringPiece* outPrefix,
-                             StringPiece* outEntry, StringPiece* outSuffix);
+bool ExtractResFilePathParts(const StringPiece& path, StringPiece* out_prefix,
+                             StringPiece* out_entry, StringPiece* out_suffix);
 
 }  // namespace util
 

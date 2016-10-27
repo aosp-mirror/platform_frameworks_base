@@ -17,41 +17,41 @@
 #ifndef AAPT_FLAGS_H
 #define AAPT_FLAGS_H
 
-#include "util/Maybe.h"
-#include "util/StringPiece.h"
-
 #include <functional>
 #include <ostream>
 #include <string>
 #include <unordered_set>
 #include <vector>
 
+#include "util/Maybe.h"
+#include "util/StringPiece.h"
+
 namespace aapt {
 
 class Flags {
  public:
-  Flags& requiredFlag(const StringPiece& name, const StringPiece& description,
+  Flags& RequiredFlag(const StringPiece& name, const StringPiece& description,
                       std::string* value);
-  Flags& requiredFlagList(const StringPiece& name,
+  Flags& RequiredFlagList(const StringPiece& name,
                           const StringPiece& description,
                           std::vector<std::string>* value);
-  Flags& optionalFlag(const StringPiece& name, const StringPiece& description,
+  Flags& OptionalFlag(const StringPiece& name, const StringPiece& description,
                       Maybe<std::string>* value);
-  Flags& optionalFlagList(const StringPiece& name,
+  Flags& OptionalFlagList(const StringPiece& name,
                           const StringPiece& description,
                           std::vector<std::string>* value);
-  Flags& optionalFlagList(const StringPiece& name,
+  Flags& OptionalFlagList(const StringPiece& name,
                           const StringPiece& description,
                           std::unordered_set<std::string>* value);
-  Flags& optionalSwitch(const StringPiece& name, const StringPiece& description,
+  Flags& OptionalSwitch(const StringPiece& name, const StringPiece& description,
                         bool* value);
 
-  void usage(const StringPiece& command, std::ostream* out);
+  void Usage(const StringPiece& command, std::ostream* out);
 
-  bool parse(const StringPiece& command, const std::vector<StringPiece>& args,
+  bool Parse(const StringPiece& command, const std::vector<StringPiece>& args,
              std::ostream* outError);
 
-  const std::vector<std::string>& getArgs();
+  const std::vector<std::string>& GetArgs();
 
  private:
   struct Flag {
@@ -59,13 +59,13 @@ class Flags {
     std::string description;
     std::function<bool(const StringPiece& value)> action;
     bool required;
-    size_t numArgs;
+    size_t num_args;
 
     bool parsed;
   };
 
-  std::vector<Flag> mFlags;
-  std::vector<std::string> mArgs;
+  std::vector<Flag> flags_;
+  std::vector<std::string> args_;
 };
 
 }  // namespace aapt

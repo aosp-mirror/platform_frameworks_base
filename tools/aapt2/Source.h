@@ -17,11 +17,11 @@
 #ifndef AAPT_SOURCE_H
 #define AAPT_SOURCE_H
 
-#include "util/Maybe.h"
-#include "util/StringPiece.h"
-
 #include <ostream>
 #include <string>
+
+#include "util/Maybe.h"
+#include "util/StringPiece.h"
 
 namespace aapt {
 
@@ -36,13 +36,13 @@ struct Source {
   Source() = default;
 
   inline Source(const StringPiece& path)
-      : path(path.toString()) {  // NOLINT(implicit)
+      : path(path.ToString()) {  // NOLINT(implicit)
   }
 
   inline Source(const StringPiece& path, size_t line)
-      : path(path.toString()), line(line) {}
+      : path(path.ToString()), line(line) {}
 
-  inline Source withLine(size_t line) const { return Source(path, line); }
+  inline Source WithLine(size_t line) const { return Source(path, line); }
 };
 
 //
