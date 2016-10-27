@@ -536,6 +536,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public boolean isShowingDreamLw() {
+        return false;
+    }
+
+    @Override
     public void onKeyguardOccludedChangedLw(boolean occluded) {
     }
 

@@ -511,6 +511,11 @@ public interface WindowManagerPolicy {
          * Retrieves the {@param outBounds} from the stack with id {@param stackId}.
          */
         void getStackBounds(int stackId, Rect outBounds);
+
+        /**
+         * Notifies window manager that {@link #isShowingDreamLw} has changed.
+         */
+        void notifyShowingDreamChanged();
     }
 
     public interface PointerEventListener {
@@ -1169,6 +1174,8 @@ public interface WindowManagerPolicy {
      * @return true if the keyguard has drawn.
      */
     public boolean isKeyguardDrawnLw();
+
+    public boolean isShowingDreamLw();
 
     /**
      * Given an orientation constant, returns the appropriate surface rotation,

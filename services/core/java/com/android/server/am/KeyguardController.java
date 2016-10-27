@@ -167,6 +167,7 @@ class KeyguardController {
                 mDismissingKeyguardActivity = stack.getTopDismissingKeyguardActivity();
             }
         }
+        mOccluded |= mWindowManager.isShowingDream();
         if (mOccluded != lastOccluded) {
             handleOccludedChanged();
         }

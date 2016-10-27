@@ -597,6 +597,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     boolean mShowingLockscreen;
     boolean mShowingDream;
+    private boolean mLastShowingDream;
     boolean mDreamingLockscreen;
     boolean mDreamingSleepTokenNeeded;
     SleepToken mDreamingSleepToken;
@@ -5343,6 +5344,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             changes |= FINISH_LAYOUT_REDO_LAYOUT;
         }
 
+        if (mShowingDream != mLastShowingDream) {
+            mLastShowingDream = mShowingDream;
+            mWindowManagerFuncs.notifyShowingDreamChanged();
+        }
+
         // update since mAllowLockscreenWhenOn might have changed
         updateLockScreenTimeout();
         return changes;
@@ -6591,6 +6597,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         synchronized (mLock) {
             return mKeyguardDrawnOnce;
         }
+    }
+
+    @Override
+    public boolean isShowingDreamLw() {
+        return mShowingDream;
     }
 
     @Override

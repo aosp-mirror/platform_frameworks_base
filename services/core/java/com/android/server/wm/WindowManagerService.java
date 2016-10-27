@@ -3504,6 +3504,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
+    public void notifyShowingDreamChanged() {
+        notifyKeyguardFlagsChanged(null /* callback */);
+    }
+
     /**
      * Re-sizes a stack and its containing tasks.
      * @param stackId Id of stack to resize.
@@ -3814,6 +3819,12 @@ public class WindowManagerService extends IWindowManager.Stub
             return mPolicy.isKeyguardSecure(userId);
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    public boolean isShowingDream() {
+        synchronized (mWindowMap) {
+            return mPolicy.isShowingDreamLw();
         }
     }
 
