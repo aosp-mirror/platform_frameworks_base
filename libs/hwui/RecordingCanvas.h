@@ -26,7 +26,6 @@
 #include "hwui/Canvas.h"
 #include "utils/LinearAllocator.h"
 #include "utils/Macros.h"
-#include "utils/NinePatch.h"
 
 #include <SkDrawFilter.h>
 #include <SkPaint.h>

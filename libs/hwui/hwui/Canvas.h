@@ -21,7 +21,7 @@
 
 #include "GlFunctorLifecycleListener.h"
 #include "utils/Macros.h"
-#include "utils/NinePatch.h"
+#include <androidfw/ResourceTypes.h>
 
 #include <SkBitmap.h>
 #include <SkCanvas.h>
