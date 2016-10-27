@@ -72,7 +72,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ಇನ್‌ಪುಟ್‌ಗಾಗಿ ಬಳಸು"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"ಜೋಡಿ"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ಜೋಡಿ ಮಾಡು"</string>
-    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ರದ್ದುಮಾಡು"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ರದ್ದುಮಾಡಿ"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"ಸಂಪರ್ಕಪಡಿಸಿದಾಗ, ಜೋಡಿಸುವಿಕೆಯು ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು ಮತ್ತು ಕರೆ ಇತಿಹಾಸಕ್ಕೆ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಣೆ ಮಾಡಲಾಗಲಿಲ್ಲ."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ತಪ್ಪಾಗಿರುವ ಪಿನ್‌ ಅಥವಾ ಪಾಸ್‌ಕೀ ಕಾರಣದಿಂದಾಗಿ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
