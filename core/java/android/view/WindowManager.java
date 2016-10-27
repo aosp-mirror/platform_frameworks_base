@@ -599,13 +599,6 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_MAGNIFICATION_OVERLAY = FIRST_SYSTEM_WINDOW+27;
 
         /**
-         * Window type: keyguard scrim window. Shows if keyguard needs to be restarted.
-         * In multiuser systems shows on all users' windows.
-         * @hide
-         */
-        public static final int TYPE_KEYGUARD_SCRIM           = FIRST_SYSTEM_WINDOW+29;
-
-        /**
          * Window type: Window for Presentation on top of private
          * virtual display.
          */

@@ -20,7 +20,6 @@ import java.util.Comparator;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
@@ -402,9 +401,8 @@ class WindowToken extends WindowContainer<WindowState> {
             // is currently on screen, i.e. not hidden by policy.
             int insertionIndex = 0;
             if (visible && wallpaperTarget != null) {
-                final int type = wallpaperTarget.mAttrs.type;
                 final int privateFlags = wallpaperTarget.mAttrs.privateFlags;
-                if (((privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 || type == TYPE_KEYGUARD_SCRIM)) {
+                if ((privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                     insertionIndex = Math.min(windowList.indexOf(wallpaperTarget),
                             findLowestWindowOnScreen(windowList));
                 }

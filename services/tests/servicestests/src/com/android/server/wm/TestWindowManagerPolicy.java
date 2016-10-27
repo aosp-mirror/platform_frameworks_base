@@ -55,7 +55,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
@@ -191,9 +190,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             case TYPE_INPUT_METHOD_DIALOG:
                 // on-screen keyboards and other such input method user interfaces go here.
                 return 13;
-            case TYPE_KEYGUARD_SCRIM:
-                // the safety window that shows behind keyguard while keyguard is starting
-                return 14;
             case TYPE_STATUS_BAR_SUB_PANEL:
                 return 15;
             case TYPE_STATUS_BAR:

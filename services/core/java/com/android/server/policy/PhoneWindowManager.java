@@ -25,13 +25,82 @@ import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.res.Configuration.EMPTY;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
-import static android.view.WindowManager.DOCKED_TOP;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
+import static android.view.WindowManager.DOCKED_TOP;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
+import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
+import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+import static android.view.WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_ATTACHED_IN_DECOR;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.LAST_SYSTEM_WINDOW;
+import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
+import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static android.view.WindowManager.LayoutParams.TYPE_DRAG;
+import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
+import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
+import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
+import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
+import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
+import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
+import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
 import static android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION;
-import static android.view.WindowManager.LayoutParams.*;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
@@ -113,10 +182,10 @@ import android.telecom.TelecomManager;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.MutableBoolean;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.LongSparseArray;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -144,10 +213,11 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.policy.PhoneWindow;
 import com.android.internal.policy.IShortcutService;
+import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.widget.PointerLocationView;
@@ -282,8 +352,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /**
      * Keyguard stuff
      */
-    private WindowState mKeyguardScrim;
-    private boolean mKeyguardHidden;
     private boolean mKeyguardDrawnOnce;
 
     /* Table of Application Launch keys.  Maps from key codes to intent categories.
@@ -2303,7 +2371,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_BOOT_PROGRESS:
             case TYPE_DISPLAY_OVERLAY:
             case TYPE_INPUT_CONSUMER:
-            case TYPE_KEYGUARD_SCRIM:
             case TYPE_KEYGUARD_DIALOG:
             case TYPE_MAGNIFICATION_OVERLAY:
             case TYPE_NAVIGATION_BAR:
@@ -2520,9 +2587,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         case TYPE_INPUT_METHOD_DIALOG:
             // on-screen keyboards and other such input method user interfaces go here.
             return 13;
-        case TYPE_KEYGUARD_SCRIM:
-            // the safety window that shows behind keyguard while keyguard is starting
-            return 14;
         case TYPE_STATUS_BAR_SUB_PANEL:
             return 15;
         case TYPE_STATUS_BAR:
@@ -2671,7 +2735,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_NAVIGATION_BAR:
             case TYPE_WALLPAPER:
             case TYPE_DREAM:
-            case TYPE_KEYGUARD_SCRIM:
                 return false;
             default:
                 // Hide only windows below the keyguard host window.
@@ -2908,12 +2971,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         android.Manifest.permission.STATUS_BAR_SERVICE,
                         "PhoneWindowManager");
                 break;
-            case TYPE_KEYGUARD_SCRIM:
-                if (mKeyguardScrim != null) {
-                    return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
-                }
-                mKeyguardScrim = win;
-                break;
         }
         return WindowManagerGlobal.ADD_OKAY;
     }
@@ -2924,11 +2981,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mStatusBar == win) {
             mStatusBar = null;
             mStatusBarController.setWindow(null);
-            mKeyguardDelegate.showScrim();
-        } else if (mKeyguardScrim == win) {
-            Log.v(TAG, "Removing keyguard scrim");
-            mKeyguardScrim = null;
-        } if (mNavigationBar == win) {
+        } else if (mNavigationBar == win) {
             mNavigationBar = null;
             mNavigationBarController.setWindow(null);
         }
@@ -3240,8 +3293,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             WindowManager.LayoutParams attrs = win != null ? win.getAttrs() : null;
             if (attrs != null) {
                 final int type = attrs.type;
-                if (type == WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM
-                        || type == WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
+                if (type == TYPE_KEYGUARD_DIALOG
                         || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                     // the "app" is keyguard, so give it the key
                     return 0;
