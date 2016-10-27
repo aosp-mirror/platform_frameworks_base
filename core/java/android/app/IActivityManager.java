@@ -580,8 +580,6 @@ public interface IActivityManager extends IInterface {
 
     public IActivityContainer createStackOnDisplay(int displayId) throws RemoteException;
 
-    public void deleteActivityContainer(IActivityContainer container) throws RemoteException;
-
     public int getActivityDisplayId(IBinder activityToken) throws RemoteException;
 
     public void startSystemLockTaskMode(int taskId) throws RemoteException;

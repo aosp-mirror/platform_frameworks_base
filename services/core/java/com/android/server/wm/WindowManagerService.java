@@ -3407,18 +3407,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void detachStack(int stackId) {
+    public void removeStack(int stackId) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);
             if (stack != null) {
                 stack.removeIfPossible();
+                mStackIdToStack.remove(stackId);
             }
-        }
-    }
-
-    public void removeStack(int stackId) {
-        synchronized (mWindowMap) {
-            mStackIdToStack.remove(stackId);
         }
     }
 
