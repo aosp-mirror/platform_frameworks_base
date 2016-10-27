@@ -18,7 +18,6 @@ package android.bluetooth.le;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallbackWrapper;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothManager;
