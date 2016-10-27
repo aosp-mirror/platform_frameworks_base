@@ -309,10 +309,12 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
   if ((options_.min_sdk_version_default ||
        options_.target_sdk_version_default) &&
       root->FindChild({}, "uses-sdk") == nullptr) {
-    // Auto insert a <uses-sdk> element.
+    // Auto insert a <uses-sdk> element. This must be inserted before the
+    // <application> tag. The device runtime PackageParser will make SDK version
+    // decisions while parsing <application>.
     std::unique_ptr<xml::Element> uses_sdk = util::make_unique<xml::Element>();
     uses_sdk->name = "uses-sdk";
-    root->AddChild(std::move(uses_sdk));
+    root->InsertChild(0, std::move(uses_sdk));
   }
 
   xml::XmlActionExecutor executor;
@@ -327,7 +329,8 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
 
   if (options_.rename_manifest_package) {
     // Rename manifest package outside of the XmlActionExecutor.
-    // We need to extract the old package name and FullyQualify all class names.
+    // We need to extract the old package name and FullyQualify all class
+    // names.
     if (!RenameManifestPackage(options_.rename_manifest_package.value(),
                                root)) {
       return false;

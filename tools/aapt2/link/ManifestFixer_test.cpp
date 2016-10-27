@@ -168,6 +168,50 @@ TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
   EXPECT_EQ("22", attr->value);
 }
 
+TEST_F(ManifestFixerTest, UsesSdkMustComeBeforeApplication) {
+  ManifestFixerOptions options = {std::string("8"), std::string("22")};
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                    package="android">
+            <application android:name=".MainApplication" />
+          </manifest>)EOF",
+                                                            options);
+  ASSERT_NE(nullptr, doc);
+
+  xml::Element* manifest_el = xml::FindRootElement(doc.get());
+  ASSERT_NE(nullptr, manifest_el);
+  ASSERT_EQ("manifest", manifest_el->name);
+
+  xml::Element* application_el = manifest_el->FindChild("", "application");
+  ASSERT_NE(nullptr, application_el);
+
+  xml::Element* uses_sdk_el = manifest_el->FindChild("", "uses-sdk");
+  ASSERT_NE(nullptr, uses_sdk_el);
+
+  // Check that the uses_sdk_el comes before application_el in the children
+  // vector.
+  // Since there are no namespaces here, these children are direct descendants
+  // of manifest.
+  auto uses_sdk_iter =
+      std::find_if(manifest_el->children.begin(), manifest_el->children.end(),
+                   [&](const std::unique_ptr<xml::Node>& child) {
+                     return child.get() == uses_sdk_el;
+                   });
+
+  auto application_iter =
+      std::find_if(manifest_el->children.begin(), manifest_el->children.end(),
+                   [&](const std::unique_ptr<xml::Node>& child) {
+                     return child.get() == application_el;
+                   });
+
+  ASSERT_NE(manifest_el->children.end(), uses_sdk_iter);
+  ASSERT_NE(manifest_el->children.end(), application_iter);
+
+  // The distance should be positive, meaning uses_sdk_iter comes before
+  // application_iter.
+  EXPECT_GT(std::distance(uses_sdk_iter, application_iter), 0);
+}
+
 TEST_F(ManifestFixerTest, RenameManifestPackageAndFullyQualifyClasses) {
   ManifestFixerOptions options;
   options.rename_manifest_package = std::string("com.android");

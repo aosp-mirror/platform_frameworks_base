@@ -1356,8 +1356,8 @@ class LinkCommand {
     application_el->attributes.push_back(
         xml::Attribute{xml::kSchemaAndroid, "hasCode", "false"});
 
-    manifest_el->AddChild(std::move(application_el));
-    namespace_android->AddChild(std::move(manifest_el));
+    manifest_el->AppendChild(std::move(application_el));
+    namespace_android->AppendChild(std::move(manifest_el));
     doc->root = std::move(namespace_android);
     return doc;
   }
