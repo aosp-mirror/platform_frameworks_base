@@ -16,6 +16,9 @@
 
 package com.android.server.connectivity;
 
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+
 import android.content.Context;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
@@ -30,22 +33,21 @@ import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
 import android.os.Parcelable;
 import android.util.Base64;
+
 import com.android.server.connectivity.metrics.IpConnectivityLogClass;
-import com.google.protobuf.nano.MessageNano;
+
+import junit.framework.TestCase;
+
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import junit.framework.TestCase;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class IpConnectivityMetricsTest extends TestCase {
     static final IpReachabilityEvent FAKE_EV =
@@ -254,8 +256,7 @@ public class IpConnectivityMetricsTest extends TestCase {
         try {
             byte[] got = Base64.decode(output, Base64.DEFAULT);
             IpConnectivityLogClass.IpConnectivityLog log =
-                    new IpConnectivityLogClass.IpConnectivityLog();
-            MessageNano.mergeFrom(log, got);
+                    IpConnectivityLogClass.IpConnectivityLog.parseFrom(got);
             assertEquals(want, log.toString());
         } catch (Exception e) {
             fail(e.toString());

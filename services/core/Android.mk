@@ -8,7 +8,6 @@ LOCAL_AIDL_INCLUDES := system/netd/server/binder
 
 LOCAL_SRC_FILES += \
     $(call all-java-files-under,java) \
-    $(call all-proto-files-under, proto) \
     java/com/android/server/EventLogTags.logtags \
     java/com/android/server/am/EventLogTags.logtags \
     ../../../../system/netd/server/binder/android/net/INetd.aidl \
@@ -24,7 +23,6 @@ LOCAL_JAVA_LIBRARIES := \
     android.hardware.light@2.0-java
 
 LOCAL_STATIC_JAVA_LIBRARIES := tzdata_update
-LOCAL_PROTOC_OPTIMIZE_TYPE := nano
 
 ifneq ($(INCREMENTAL_BUILDS),)
     LOCAL_PROGUARD_ENABLED := disabled
