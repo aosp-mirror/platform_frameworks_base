@@ -95,7 +95,8 @@ import android.text.format.Time;
 import android.util.Log;
 import android.util.TrustedTime;
 
-import com.android.server.BroadcastInterceptingContext.FutureIntent;
+import com.android.internal.util.test.BroadcastInterceptingContext;
+import com.android.internal.util.test.BroadcastInterceptingContext.FutureIntent;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.net.NetworkPolicyManagerService;
 
