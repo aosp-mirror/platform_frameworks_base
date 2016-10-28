@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.util;
+package com.android.internal.util.test;
 
 import android.net.Uri;
 import android.os.Bundle;

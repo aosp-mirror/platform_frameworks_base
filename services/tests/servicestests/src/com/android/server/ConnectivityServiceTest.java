@@ -75,8 +75,8 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import android.util.LogPrinter;
 
-import com.android.internal.util.FakeSettingsProvider;
 import com.android.internal.util.WakeupMessage;
+import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
 import com.android.server.connectivity.NetworkMonitor.CaptivePortalProbeResult;
