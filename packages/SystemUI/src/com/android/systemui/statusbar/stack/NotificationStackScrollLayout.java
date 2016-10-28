@@ -769,11 +769,17 @@ public class NotificationStackScrollLayout extends ViewGroup
      *         Measured in absolute height.
      */
     private float getAppearEndPosition() {
-        int firstItemHeight = mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()
-                ? mHeadsUpManager.getTopHeadsUpPinnedHeight() + mBottomStackPeekSize
-                        + mBottomStackSlowDownHeight
-                : getFirstItemMinHeight() + mShelf.getIntrinsicHeight();
-        return firstItemHeight + (onKeyguard() ? mTopPadding : mIntrinsicPadding);
+        int appearPosition;
+        if (mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()) {
+            appearPosition = mHeadsUpManager.getTopHeadsUpPinnedHeight() + mBottomStackPeekSize
+                    + mBottomStackSlowDownHeight;
+        } else {
+            appearPosition = getFirstItemMinHeight();
+            if (mAmbientState.getShelfIndex() > 1) {
+                appearPosition += mShelf.getIntrinsicHeight();
+            }
+        }
+        return appearPosition + (onKeyguard() ? mTopPadding : mIntrinsicPadding);
     }
 
     /**
