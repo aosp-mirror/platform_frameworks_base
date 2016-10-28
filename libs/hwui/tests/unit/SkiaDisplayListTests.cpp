@@ -91,27 +91,12 @@ TEST(SkiaDisplayList, reuseDisplayList) {
     ASSERT_EQ(availableList.get(), nullptr);
 }
 
-// This must be in an anonymous namespace as this class name is used in multiple
-// cpp files for different purposes and without the namespace the linker can
-// arbitrarily choose which class to link against.
-namespace {
-class TestFunctor : public Functor {
-public:
-    bool didSync = false;
-
-    virtual status_t operator ()(int what, void* data) {
-        if (what == DrawGlInfo::kModeSync) { didSync = true; }
-        return DrawGlInfo::kStatusDone;
-    }
-};
-}; // end anonymous namespace
-
 TEST(SkiaDisplayList, syncContexts) {
     SkRect bounds = SkRect::MakeWH(200, 200);
     SkiaDisplayList skiaDL(bounds);
 
     SkCanvas dummyCanvas;
-    TestFunctor functor;
+    TestUtils::MockFunctor functor;
     skiaDL.mChildFunctors.emplace_back(&functor, nullptr, &dummyCanvas);
 
     VectorDrawableRoot vectorDrawable(new VectorDrawable::Group());
@@ -121,7 +106,7 @@ TEST(SkiaDisplayList, syncContexts) {
     // ensure that the functor and vectorDrawable are properly synced
     skiaDL.syncContents();
 
-    ASSERT_TRUE(functor.didSync);
+    ASSERT_EQ(functor.getLastMode(), DrawGlInfo::kModeSync);
     ASSERT_EQ(vectorDrawable.mutateProperties()->getBounds(), bounds);
 }
 
