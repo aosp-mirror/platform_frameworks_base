@@ -281,7 +281,15 @@ public class Session {
             parentSession.getFullMethodPath(sb);
             sb.append(SUBSESSION_SEPARATION_CHAR);
         }
-        sb.append(mShortMethodName);
+        // Encapsulate the external session's method name so it is obvious what part of the session
+        // is external.
+        if (isExternal()) {
+            sb.append("(");
+            sb.append(mShortMethodName);
+            sb.append(")");
+        } else {
+            sb.append(mShortMethodName);
+        }
 
         if(isSessionStarted) {
             // Cache this value so that we do not have to do this work next time!
