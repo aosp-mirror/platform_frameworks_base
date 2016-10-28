@@ -91,6 +91,10 @@ TEST(SkiaDisplayList, reuseDisplayList) {
     ASSERT_EQ(availableList.get(), nullptr);
 }
 
+// This must be in an anonymous namespace as this class name is used in multiple
+// cpp files for different purposes and without the namespace the linker can
+// arbitrarily choose which class to link against.
+namespace {
 class TestFunctor : public Functor {
 public:
     bool didSync = false;
@@ -100,6 +104,7 @@ public:
         return DrawGlInfo::kStatusDone;
     }
 };
+}; // end anonymous namespace
 
 TEST(SkiaDisplayList, syncContexts) {
     SkRect bounds = SkRect::MakeWH(200, 200);
