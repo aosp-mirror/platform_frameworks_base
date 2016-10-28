@@ -1233,9 +1233,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         int nextState = mCurState;
         if (f.mRemoving) {
             if (f.isInBackStack()) {
-                nextState = Fragment.CREATED;
+                nextState = Math.min(nextState, Fragment.CREATED);
             } else {
-                nextState = Fragment.INITIALIZING;
+                nextState = Math.min(nextState, Fragment.INITIALIZING);
             }
         }
 
