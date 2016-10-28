@@ -47,7 +47,8 @@ class Node {
 
   virtual ~Node() = default;
 
-  void AddChild(std::unique_ptr<Node> child);
+  void AppendChild(std::unique_ptr<Node> child);
+  void InsertChild(size_t index, std::unique_ptr<Node> child);
   virtual void Accept(RawVisitor* visitor) = 0;
   virtual std::unique_ptr<Node> Clone() = 0;
 };

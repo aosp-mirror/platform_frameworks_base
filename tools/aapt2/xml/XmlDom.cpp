@@ -66,7 +66,7 @@ static void AddToStack(Stack* stack, XML_Parser parser,
 
   Node* this_node = node.get();
   if (!stack->node_stack.empty()) {
-    stack->node_stack.top()->AddChild(std::move(node));
+    stack->node_stack.top()->AppendChild(std::move(node));
   } else {
     stack->root = std::move(node);
   }
@@ -325,7 +325,7 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len,
         root = std::move(new_node);
       } else {
         CHECK(!node_stack.empty()) << "node stack should not be empty";
-        node_stack.top()->AddChild(std::move(new_node));
+        node_stack.top()->AppendChild(std::move(new_node));
       }
 
       if (!NodeCast<Text>(this_node)) {
@@ -346,7 +346,7 @@ std::unique_ptr<Node> Namespace::Clone() {
 
   ns->children.reserve(children.size());
   for (const std::unique_ptr<xml::Node>& child : children) {
-    ns->AddChild(child->Clone());
+    ns->AppendChild(child->Clone());
   }
   return std::move(ns);
 }
@@ -372,9 +372,14 @@ Element* FindRootElement(Node* node) {
   return el;
 }
 
-void Node::AddChild(std::unique_ptr<Node> child) {
+void Node::AppendChild(std::unique_ptr<Node> child) {
   child->parent = this;
   children.push_back(std::move(child));
+}
+
+void Node::InsertChild(size_t index, std::unique_ptr<Node> child) {
+  child->parent = this;
+  children.insert(children.begin() + index, std::move(child));
 }
 
 Attribute* Element::FindAttribute(const StringPiece& ns,
@@ -456,7 +461,7 @@ std::unique_ptr<Node> Element::Clone() {
 
   el->children.reserve(children.size());
   for (const std::unique_ptr<xml::Node>& child : children) {
-    el->AddChild(child->Clone());
+    el->AppendChild(child->Clone());
   }
   return std::move(el);
 }
