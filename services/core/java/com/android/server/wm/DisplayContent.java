@@ -1085,12 +1085,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return null;
     }
 
-    int addAppWindowToWindowList(final WindowState win) {
+    void addAppWindowToWindowList(final WindowState win) {
         final IWindow client = win.mClient;
 
         WindowList tokenWindowList = getTokenWindowsOnDisplay(win.mToken);
         if (!tokenWindowList.isEmpty()) {
-            return addAppWindowExisting(win, tokenWindowList);
+            addAppWindowExisting(win, tokenWindowList);
+            return;
         }
 
         // No windows from this token on this display
@@ -1128,7 +1129,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
             }
             addWindowToListBefore(win, pos);
-            return 0;
+            return;
         }
 
         // Continue looking down until we find the first token that has windows on this display.
@@ -1154,7 +1155,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
             }
             addWindowToListAfter(win, pos);
-            return 0;
+            return;
         }
 
         // Just search for the start of this layer.
@@ -1175,7 +1176,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 + mWindows.size());
         mWindows.add(i + 1, win);
         mService.mWindowsChanged = true;
-        return 0;
     }
 
     /** Adds this non-app window to the window list. */
@@ -1778,23 +1778,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mLayoutNeeded;
     }
 
-    private int addAppWindowExisting(WindowState win, WindowList tokenWindowList) {
+    private void addAppWindowExisting(WindowState win, WindowList tokenWindowList) {
 
-        int tokenWindowsPos;
         // If this application has existing windows, we simply place the new window on top of
         // them... but keep the starting window on top.
         if (win.mAttrs.type == TYPE_BASE_APPLICATION) {
             // Base windows go behind everything else.
             final WindowState lowestWindow = tokenWindowList.get(0);
             addWindowToListBefore(win, lowestWindow);
-            tokenWindowsPos = win.mToken.getWindowIndex(lowestWindow);
         } else {
             final AppWindowToken atoken = win.mAppToken;
             final int windowListPos = tokenWindowList.size();
             final WindowState lastWindow = tokenWindowList.get(windowListPos - 1);
             if (atoken != null && lastWindow == atoken.startingWindow) {
                 addWindowToListBefore(win, lastWindow);
-                tokenWindowsPos = win.mToken.getWindowIndex(lastWindow);
             } else {
                 int newIdx = findIdxBasedOnAppTokens(win);
                 // There is a window above this one associated with the same apptoken note that the
@@ -1804,16 +1801,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         "not Base app: Adding window " + win + " at " + (newIdx + 1) + " of "
                                 + mWindows.size());
                 mWindows.add(newIdx + 1, win);
-                if (newIdx < 0) {
-                    // No window from token found on win's display.
-                    tokenWindowsPos = 0;
-                } else {
-                    tokenWindowsPos = win.mToken.getWindowIndex(mWindows.get(newIdx)) + 1;
-                }
                 mService.mWindowsChanged = true;
             }
         }
-        return tokenWindowsPos;
     }
 
     /** Places the first input window after the second input window in the window list. */

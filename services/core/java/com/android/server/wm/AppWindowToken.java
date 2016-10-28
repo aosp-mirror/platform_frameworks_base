@@ -676,6 +676,34 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mPendingRelaunchCount = 0;
     }
 
+    /**
+     * Returns true if the new child window we are adding to this token is considered greater than
+     * the existing child window in this token in terms of z-order.
+     */
+    @Override
+    protected boolean isFirstChildWindowGreaterThanSecond(WindowState newWindow,
+            WindowState existingWindow) {
+        final int type1 = newWindow.mAttrs.type;
+        final int type2 = existingWindow.mAttrs.type;
+
+        // Base application windows should be z-ordered BELOW all other windows in the app token.
+        if (type1 == TYPE_BASE_APPLICATION && type2 != TYPE_BASE_APPLICATION) {
+            return false;
+        } else if (type1 != TYPE_BASE_APPLICATION && type2 == TYPE_BASE_APPLICATION) {
+            return true;
+        }
+
+        // Starting windows should be z-ordered ABOVE all other windows in the app token.
+        if (type1 == TYPE_APPLICATION_STARTING && type2 != TYPE_APPLICATION_STARTING) {
+            return true;
+        } else if (type1 != TYPE_APPLICATION_STARTING && type2 == TYPE_APPLICATION_STARTING) {
+            return false;
+        }
+
+        // Otherwise the new window is greater than the existing window.
+        return true;
+    }
+
     @Override
     void addWindow(WindowState w) {
         super.addWindow(w);

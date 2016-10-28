@@ -24,6 +24,7 @@ import android.util.Slog;
 import android.view.DisplayInfo;
 
 import java.io.PrintWriter;
+import java.util.Comparator;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
@@ -81,6 +82,26 @@ class WindowToken extends WindowContainer<WindowState> {
 
     // The display this token is on.
     private DisplayContent mDisplayContent;
+
+    /**
+     * Compares two child window of this token and returns -1 if the first is lesser than the
+     * second in terms of z-order and 1 otherwise.
+     */
+    private final Comparator<WindowState> mWindowComparator =
+            (WindowState newWindow, WindowState existingWindow) -> {
+        final WindowToken token = WindowToken.this;
+        if (newWindow.mToken != token) {
+            throw new IllegalArgumentException("newWindow=" + newWindow
+                    + " is not a child of token=" + token);
+        }
+
+        if (existingWindow.mToken != token) {
+            throw new IllegalArgumentException("existingWindow=" + existingWindow
+                    + " is not a child of token=" + token);
+        }
+
+        return isFirstChildWindowGreaterThanSecond(newWindow, existingWindow) ? 1 : -1;
+    };
 
     WindowToken(WindowManagerService service, IBinder _token, int type, boolean _explicit,
             DisplayContent dc) {
@@ -168,19 +189,31 @@ class WindowToken extends WindowContainer<WindowState> {
         return -1;
     }
 
+    /**
+     * Returns true if the new window is considered greater than the existing window in terms of
+     * z-order.
+     */
+    protected boolean isFirstChildWindowGreaterThanSecond(WindowState newWindow,
+            WindowState existingWindow) {
+        // By default the first window isn't greater than the second to preserve existing logic of
+        // how new windows are added to the token
+        return false;
+    }
+
     void addWindow(final WindowState win) {
-        if (DEBUG_FOCUS) Slog.d(TAG_WM, "addWindow: win=" + win + " Callers=" + Debug.getCallers(5));
+        if (DEBUG_FOCUS) Slog.d(TAG_WM,
+                "addWindow: win=" + win + " Callers=" + Debug.getCallers(5));
 
         if (!win.isChildWindow()) {
-            int tokenWindowsPos = 0;
             if (asAppWindowToken() != null) {
-                tokenWindowsPos = mDisplayContent.addAppWindowToWindowList(win);
+                mDisplayContent.addAppWindowToWindowList(win);
             } else {
                 mDisplayContent.addNonAppWindowToWindowList(win);
             }
+
             if (!mChildren.contains(win)) {
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + this);
-                addChild(win, tokenWindowsPos);
+                addChild(win, mWindowComparator);
             }
         } else {
             mDisplayContent.addChildWindowToWindowList(win);
