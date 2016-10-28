@@ -23,7 +23,6 @@ import android.bluetooth.BluetoothGattService;
  */
 oneway interface IBluetoothGattServerCallback {
     void onServerRegistered(in int status, in int serverIf);
-    void onScanResult(in String address, in int rssi, in byte[] advData);
     void onServerConnectionState(in int status, in int serverIf,
                                  in boolean connected, in String address);
     void onServiceAdded(in int status, in BluetoothGattService service);

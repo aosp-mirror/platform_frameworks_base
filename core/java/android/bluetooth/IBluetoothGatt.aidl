@@ -29,6 +29,7 @@ import android.os.WorkSource;
 import android.bluetooth.IBluetoothGattCallback;
 import android.bluetooth.IBluetoothGattServerCallback;
 import android.bluetooth.le.IAdvertiserCallback;
+import android.bluetooth.le.IScannerCallback;
 
 /**
  * API for interacting with BLE / GATT
@@ -37,11 +38,12 @@ import android.bluetooth.le.IAdvertiserCallback;
 interface IBluetoothGatt {
     List<BluetoothDevice> getDevicesMatchingConnectionStates(in int[] states);
 
-    void startScan(in int appIf, in boolean isServer, in ScanSettings settings,
-                   in List<ScanFilter> filters, in WorkSource workSource, in List scanStorages,
-                   in String callingPackage);
-    void stopScan(in int appIf, in boolean isServer);
-    void flushPendingBatchResults(in int appIf, in boolean isServer);
+    void registerScanner(in IScannerCallback callback);
+    void unregisterScanner(in int scannerId);
+    void startScan(in int scannerId, in ScanSettings settings, in List<ScanFilter> filters,
+                   in WorkSource workSource, in List scanStorages, in String callingPackage);
+    void stopScan(in int scannerId);
+    void flushPendingBatchResults(in int scannerId);
 
     void registerAdvertiser(in IAdvertiserCallback callback);
     void unregisterAdvertiser(in int advertiserId);

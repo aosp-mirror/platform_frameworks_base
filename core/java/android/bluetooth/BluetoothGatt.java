@@ -135,7 +135,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Bluetooth GATT callbacks. Overrides the default BluetoothGattCallback implementation.
      */
     private final IBluetoothGattCallback mBluetoothGattCallback =
-        new BluetoothGattCallbackWrapper() {
+        new IBluetoothGattCallback.Stub() {
             /**
              * Application interface registered - app is ready to go
              * @hide
