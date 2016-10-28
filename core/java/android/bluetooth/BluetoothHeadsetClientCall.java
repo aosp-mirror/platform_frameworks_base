@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 
 import java.util.UUID;
 
@@ -70,6 +71,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
     private boolean mMultiParty;
     private final boolean mOutgoing;
     private final UUID mUUID;
+    private final long mCreationElapsedMilli;
 
     /**
      * Creates BluetoothHeadsetClientCall instance.
@@ -88,6 +90,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
         mNumber = number != null ? number : "";
         mMultiParty = multiParty;
         mOutgoing = outgoing;
+        mCreationElapsedMilli = SystemClock.elapsedRealtime();
     }
 
     /**
@@ -168,6 +171,15 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
      */
     public String getNumber() {
         return mNumber;
+    }
+
+    /**
+     * Gets call's creation time in millis since epoch.
+     *
+     * @return long representing the creation time.
+     */
+    public long getCreationElapsedMilli() {
+        return mCreationElapsedMilli;
     }
 
     /**
