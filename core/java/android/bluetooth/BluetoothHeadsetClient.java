@@ -27,6 +27,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Public API to control Hands Free Profile (HFP role only).
@@ -799,7 +800,9 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * Works only when Extended Call Control is supported by Audio Gateway.
      *
      * @param device    remote device
-     * @param index     index of the call to be terminated
+     * @param call      Handle of call obtained in {@link dial()} or obtained via
+     *                  {@link ACTION_CALL_CHANGED}. {@code call} may be null in which
+     *                  case we will hangup all active calls.
      * @return          <code>true</code> if command has been issued successfully;
      *                   <code>false</code> otherwise;
      *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
@@ -809,12 +812,12 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * {@link #EXTRA_AG_FEATURE_ECC}.
      * This method invocation will fail silently when feature is not supported.</p>
      */
-    public boolean terminateCall(BluetoothDevice device, int index) {
+    public boolean terminateCall(BluetoothDevice device, BluetoothHeadsetClientCall call) {
         if (DBG) log("terminateCall()");
         if (mService != null && isEnabled() &&
                 isValidDevice(device)) {
             try {
-                return mService.terminateCall(device, index);
+                return mService.terminateCall(device, call);
             } catch (RemoteException e) {
                 Log.e(TAG,  Log.getStackTraceString(new Throwable()));
             }
@@ -883,41 +886,18 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     }
 
     /**
-     * Redials last number from Audio Gateway.
-     *
-     * @param device    remote device
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-     *                   intent in case of success; {@link #ACTION_RESULT} is sent
-     *                   otherwise;
-     */
-    public boolean redial(BluetoothDevice device) {
-        if (DBG) log("redial()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
-            try {
-                return mService.redial(device);
-            } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
-            }
-        }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
-        return false;
-    }
-
-    /**
      * Places a call with specified number.
      *
      * @param device    remote device
      * @param number    valid phone number
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-     *                   intent in case of success; {@link #ACTION_RESULT} is sent
-     *                   otherwise;
+     * @return          <code>{@link BluetoothHeadsetClientCall} call</code> if command has been
+     *                  issued successfully;
+     *                  <code>{@link null}</code> otherwise;
+     *                  upon completion HFP sends {@link #ACTION_CALL_CHANGED}
+     *                  intent in case of success; {@link #ACTION_RESULT} is sent
+     *                  otherwise;
      */
-    public boolean dial(BluetoothDevice device, String number) {
+    public BluetoothHeadsetClientCall dial(BluetoothDevice device, String number) {
         if (DBG) log("dial()");
         if (mService != null && isEnabled() &&
                 isValidDevice(device)) {
@@ -928,32 +908,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
             }
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
-        return false;
-    }
-
-    /**
-     * Places a call to the number under specified memory location.
-     *
-     * @param device    remote device
-     * @param location  valid memory location
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-     *                   intent in case of success; {@link #ACTION_RESULT} is sent
-     *                   otherwise;
-     */
-    public boolean dialMemory(BluetoothDevice device, int location) {
-        if (DBG) log("dialMemory()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
-            try {
-                return mService.dialMemory(device, location);
-            } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
-            }
-        }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
-        return false;
+        return null;
     }
 
     /**
