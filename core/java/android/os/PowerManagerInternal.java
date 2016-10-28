@@ -147,9 +147,17 @@ public abstract class PowerManagerInternal {
 
     public abstract void setDeviceIdleTempWhitelist(int[] appids);
 
+    public abstract void startUidChanges();
+
+    public abstract void finishUidChanges();
+
     public abstract void updateUidProcState(int uid, int procState);
 
     public abstract void uidGone(int uid);
+
+    public abstract void uidActive(int uid);
+
+    public abstract void uidIdle(int uid);
 
     /**
      * The hintId sent through this method should be in-line with the
