@@ -390,7 +390,9 @@ setComponent()} method.</dd>
     <dd>The package part of the component name, as per the {@link
 android.content.Intent#setComponent setComponent()} method.</dd>
 </dl>
-
+<p class="note"><strong>Note: </strong>You must use string literals as the values for these
+intent attributes. You cannot use resource strings, such as <code>@string/foo</code>, to define the attributes.
+</p>
 
 
 <h2 id="Activity">Creating a Preference Activity</h2>
