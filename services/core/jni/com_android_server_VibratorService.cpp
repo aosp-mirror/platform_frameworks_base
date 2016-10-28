@@ -29,7 +29,6 @@
 
 #include <stdio.h>
 
-using android::hardware::getService;
 using android::hardware::vibrator::V1_0::IVibrator;
 using android::hardware::vibrator::V1_0::Status;
 
