@@ -16,14 +16,50 @@
 
 #include "TestHelpers.h"
 
+#include <libgen.h>
 #include <unistd.h>
 
+#include <memory>
+#include <string>
+
+#include "android-base/file.h"
 #include "android-base/logging.h"
+#include "android-base/strings.h"
 #include "ziparchive/zip_archive.h"
 
 namespace android {
 
 static std::string sTestDataPath;
+
+// Extract the directory of the current executable path.
+static std::string GetExecutableDir() {
+  const std::string path = base::GetExecutablePath();
+  std::unique_ptr<char, decltype(&std::free)> mutable_path = {strdup(path.c_str()), std::free};
+  std::string executable_dir = dirname(mutable_path.get());
+  return executable_dir;
+}
+
+void InitializeTest(int* argc, char** argv) {
+  // Set the default test data path to be the executable path directory.
+  SetTestDataPath(GetExecutableDir());
+
+  for (int i = 1; i < *argc; i++) {
+    const std::string arg = argv[i];
+    if (base::StartsWith(arg, "--testdata=")) {
+      SetTestDataPath(arg.substr(strlen("--testdata=")));
+      for (int j = i; j != *argc; j++) {
+        argv[j] = argv[j + 1];
+      }
+      --(*argc);
+      --i;
+    } else if (arg == "-h" || arg == "--help") {
+      std::cerr << "\nAdditional options specific to this test:\n"
+                   "  --testdata=[PATH]\n"
+                   "      Specify the location of test data used within the tests.\n";
+      exit(1);
+    }
+  }
+}
 
 void SetTestDataPath(const std::string& path) { sTestDataPath = path; }
 
@@ -88,6 +124,11 @@ const std::string& GetTestDataPath() {
     return ::testing::AssertionFailure() << actual_str.string();
   }
   return ::testing::AssertionSuccess() << actual_str.string();
+}
+
+std::string GetStringFromPool(const ResStringPool* pool, uint32_t idx) {
+  String8 str = pool->string8ObjectAt(idx);
+  return std::string(str.string(), str.length());
 }
 
 }  // namespace android

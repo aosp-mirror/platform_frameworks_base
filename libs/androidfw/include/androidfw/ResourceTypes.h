@@ -265,7 +265,7 @@ struct Res_value
     uint8_t res0;
         
     // Type of the data value.
-    enum {
+    enum : uint8_t {
         // The 'data' is either 0 or 1, specifying this resource is either
         // undefined or empty, respectively.
         TYPE_NULL = 0x00,

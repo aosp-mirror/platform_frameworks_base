@@ -39,6 +39,7 @@
     <public type="style" name="StyleOne" id="0x7f020000" />
     <style name="StyleOne">
         <item name="attr_one">1</item>
+        <item name="attr_two">2</item>
     </style>
 
     <public type="style" name="StyleTwo" id="0x7f020001" />
@@ -47,6 +48,15 @@
         <item name="attr_two">"string"</item>
         <item name="attr_three">?attr/attr_indirect</item>
         <item name="attr_five">@string/string_one</item>
+    </style>
+    
+    <public type="attr" name="attr_six" id="0x7f010006" />
+    <attr name="attr_six" />
+    
+    <public type="style" name="StyleThree" id="0x7f020002" />
+    <style name="StyleThree">
+        <item name="attr_six">6</item>
+        <item name="attr_five">5</item>
     </style>
 
 </resources>

@@ -1,0 +1,298 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef ANDROIDFW_ASSETMANAGER2_H_
+#define ANDROIDFW_ASSETMANAGER2_H_
+
+#include "android-base/macros.h"
+
+#include <limits>
+#include <unordered_map>
+
+#include "androidfw/ApkAssets.h"
+#include "androidfw/Asset.h"
+#include "androidfw/AssetManager.h"
+#include "androidfw/ResourceTypes.h"
+#include "androidfw/Util.h"
+
+namespace android {
+
+class Theme;
+
+using ApkAssetsCookie = int32_t;
+
+enum : ApkAssetsCookie {
+  kInvalidCookie = -1,
+};
+
+// Holds a bag that has been merged with its parent, if one exists.
+struct ResolvedBag {
+  // A single key-value entry in a bag.
+  struct Entry {
+    // The key, as described in ResTable_map::name.
+    uint32_t key;
+
+    Res_value value;
+
+    // Which ApkAssets this entry came from.
+    ApkAssetsCookie cookie;
+
+    ResStringPool* key_pool;
+    ResStringPool* type_pool;
+  };
+
+  // Denotes the configuration axis that this bag varies with.
+  // If a configuration changes with respect to one of these axis,
+  // the bag should be reloaded.
+  uint32_t type_spec_flags;
+
+  // The number of entries in this bag. Access them by indexing into `entries`.
+  uint32_t entry_count;
+
+  // The array of entries for this bag. An empty array is a neat trick to force alignment
+  // of the Entry structs that follow this structure and avoids a bunch of casts.
+  Entry entries[0];
+};
+
+// AssetManager2 is the main entry point for accessing assets and resources.
+// AssetManager2 provides caching of resources retrieved via the underlying
+// ApkAssets.
+class AssetManager2 : public ::AAssetManager {
+ public:
+  struct ResourceName {
+    const char* package = nullptr;
+    size_t package_len = 0u;
+
+    const char* type = nullptr;
+    const char16_t* type16 = nullptr;
+    size_t type_len = 0u;
+
+    const char* entry = nullptr;
+    const char16_t* entry16 = nullptr;
+    size_t entry_len = 0u;
+  };
+
+  AssetManager2();
+
+  // Sets/resets the underlying ApkAssets for this AssetManager. The ApkAssets
+  // are not owned by the AssetManager, and must have a longer lifetime.
+  //
+  // Only pass invalidate_caches=false when it is known that the structure
+  // change in ApkAssets is due to a safe addition of resources with completely
+  // new resource IDs.
+  bool SetApkAssets(const std::vector<const ApkAssets*>& apk_assets, bool invalidate_caches = true);
+
+  const std::vector<const ApkAssets*> GetApkAssets() const;
+
+  // Returns the string pool for the given asset cookie.
+  // Use the string pool returned here with a valid Res_value object of
+  // type Res_value::TYPE_STRING.
+  const ResStringPool* GetStringPoolForCookie(ApkAssetsCookie cookie) const;
+
+  // Sets/resets the configuration for this AssetManager. This will cause all
+  // caches that are related to the configuration change to be invalidated.
+  void SetConfiguration(const ResTable_config& configuration);
+
+  const ResTable_config& GetConfiguration() const;
+
+  // Searches the set of APKs loaded by this AssetManager and opens the first one found located
+  // in the assets/ directory.
+  // `mode` controls how the file is opened.
+  //
+  // NOTE: The loaded APKs are searched in reverse order.
+  std::unique_ptr<Asset> Open(const std::string& filename, Asset::AccessMode mode);
+
+  // Opens a file within the assets/ directory of the APK specified by `cookie`.
+  // `mode` controls how the file is opened.
+  std::unique_ptr<Asset> Open(const std::string& filename, ApkAssetsCookie cookie,
+                              Asset::AccessMode mode);
+
+  // Searches the set of APKs loaded by this AssetManager and opens the first one found.
+  // `mode` controls how the file is opened.
+  // `out_cookie` is populated with the cookie of the APK this file was found in.
+  //
+  // NOTE: The loaded APKs are searched in reverse order.
+  std::unique_ptr<Asset> OpenNonAsset(const std::string& filename, Asset::AccessMode mode,
+                                      ApkAssetsCookie* out_cookie = nullptr);
+
+  // Opens a file in the APK specified by `cookie`. `mode` controls how the file is opened.
+  // This is typically used to open a specific AndroidManifest.xml, or a binary XML file
+  // referenced by a resource lookup with GetResource().
+  std::unique_ptr<Asset> OpenNonAsset(const std::string& filename, ApkAssetsCookie cookie,
+                                      Asset::AccessMode mode);
+
+  // Populates the `out_name` parameter with resource name information.
+  // Utf8 strings are preferred, and only if they are unavailable are
+  // the Utf16 variants populated.
+  // Returns false if the resource was not found or the name was missing/corrupt.
+  bool GetResourceName(uint32_t resid, ResourceName* out_name);
+
+  // Populates `out_flags` with the bitmask of configuration axis that this resource varies with.
+  // See ResTable_config for the list of configuration axis.
+  // Returns false if the resource was not found.
+  bool GetResourceFlags(uint32_t resid, uint32_t* out_flags);
+
+  // Retrieves the best matching resource with ID `resid`. The resource value is filled into
+  // `out_value` and the configuration for the selected value is populated in `out_selected_config`.
+  // `out_flags` holds the same flags as retrieved with GetResourceFlags().
+  // If `density_override` is non-zero, the configuration to match against is overridden with that
+  // density.
+  //
+  // Returns a valid cookie if the resource was found. If the resource was not found, or if the
+  // resource was a map/bag type, then kInvalidCookie is returned. If `may_be_bag` is false,
+  // this function logs if the resource was a map/bag type before returning kInvalidCookie.
+  ApkAssetsCookie GetResource(uint32_t resid, bool may_be_bag, uint16_t density_override,
+                              Res_value* out_value, ResTable_config* out_selected_config,
+                              uint32_t* out_flags);
+
+  // Retrieves the best matching bag/map resource with ID `resid`.
+  // This method will resolve all parent references for this bag and merge keys with the child.
+  // To iterate over the keys, use the following idiom:
+  //
+  //  const AssetManager2::ResolvedBag* bag = asset_manager->GetBag(id);
+  //  if (bag != nullptr) {
+  //    for (auto iter = begin(bag); iter != end(bag); ++iter) {
+  //      ...
+  //    }
+  //  }
+  const ResolvedBag* GetBag(uint32_t resid);
+
+  // Creates a new Theme from this AssetManager.
+  std::unique_ptr<Theme> NewTheme();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(AssetManager2);
+
+  // Finds the best entry for `resid` amongst all the ApkAssets. The entry can be a simple
+  // Res_value, or a complex map/bag type.
+  //
+  // `density_override` overrides the density of the current configuration when doing a search.
+  //
+  // When `stop_at_first_match` is true, the first match found is selected and the search
+  // terminates. This is useful for methods that just look up the name of a resource and don't
+  // care about the value. In this case, the value of `out_flags` is incomplete and should not
+  // be used.
+  //
+  // `out_flags` stores the resulting bitmask of configuration axis with which the resource
+  // value varies.
+  ApkAssetsCookie FindEntry(uint32_t resid, uint16_t density_override, bool stop_at_first_match,
+                            LoadedArsc::Entry* out_entry, ResTable_config* out_selected_config,
+                            uint32_t* out_flags);
+
+  // Purge all resources that are cached and vary by the configuration axis denoted by the
+  // bitmask `diff`.
+  void InvalidateCaches(uint32_t diff);
+
+  // The ordered list of ApkAssets to search. These are not owned by the AssetManager, and must
+  // have a longer lifetime.
+  std::vector<const ApkAssets*> apk_assets_;
+
+  // The current configuration set for this AssetManager. When this changes, cached resources
+  // may need to be purged.
+  ResTable_config configuration_;
+
+  // Cached set of bags. These are cached because they can inherit keys from parent bags,
+  // which involves some calculation.
+  std::unordered_map<uint32_t, util::unique_cptr<ResolvedBag>> cached_bags_;
+};
+
+class Theme {
+  friend class AssetManager2;
+
+ public:
+  // Applies the style identified by `resid` to this theme. This can be called
+  // multiple times with different styles. By default, any theme attributes that
+  // are already defined before this call are not overridden. If `force` is set
+  // to true, this behavior is changed and all theme attributes from the style at
+  // `resid` are applied.
+  // Returns false if the style failed to apply.
+  bool ApplyStyle(uint32_t resid, bool force = false);
+
+  // Sets this Theme to be a copy of `o` if `o` has the same AssetManager as this Theme.
+  // Returns false if the AssetManagers of the Themes were not compatible.
+  bool SetTo(const Theme& o);
+
+  void Clear();
+
+  inline const AssetManager2* GetAssetManager() const { return asset_manager_; }
+
+  // Returns a bit mask of configuration changes that will impact this
+  // theme (and thus require completely reloading it).
+  inline uint32_t GetChangingConfigurations() const { return type_spec_flags_; }
+
+  // Retrieve a value in the theme. If the theme defines this value,
+  // returns an asset cookie indicating which ApkAssets it came from
+  // and populates `out_value` with the value. If `out_flags` is non-null,
+  // populates it with a bitmask of the configuration axis the resource
+  // varies with.
+  //
+  // If the attribute is not found, returns kInvalidCookie.
+  //
+  // NOTE: This function does not do reference traversal. If you want
+  // to follow references to other resources to get the "real" value to
+  // use, you need to call ResolveReference() after this function.
+  ApkAssetsCookie GetAttribute(uint32_t resid, Res_value* out_value,
+                               uint32_t* out_flags = nullptr) const;
+
+  // This is like AssetManager2::ResolveReference(), but also takes
+  // care of resolving attribute references to the theme.
+  ApkAssetsCookie ResolveAttributeReference(Res_value* in_out_value, ApkAssetsCookie src_cookie,
+                                            uint32_t* out_last_ref = nullptr,
+                                            uint32_t* in_out_type_spec_flags = nullptr,
+                                            ResTable_config* out_selected_config = nullptr) const;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Theme);
+
+  // Called by AssetManager2.
+  explicit inline Theme(AssetManager2* asset_manager) : asset_manager_(asset_manager) {}
+
+  struct Entry {
+    ApkAssetsCookie cookie;
+    uint32_t type_spec_flags;
+    Res_value value;
+  };
+
+  struct Type {
+    // Use uint32_t for fewer cycles when loading from memory.
+    uint32_t entry_count;
+    uint32_t entry_capacity;
+    Entry entries[0];
+  };
+
+  static constexpr const size_t kPackageCount = std::numeric_limits<uint8_t>::max() + 1;
+  static constexpr const size_t kTypeCount = std::numeric_limits<uint8_t>::max() + 1;
+
+  struct Package {
+    // Each element of Type will be a dynamically sized object
+    // allocated to have the entries stored contiguously with the Type.
+    util::unique_cptr<Type> types[kTypeCount];
+  };
+
+  AssetManager2* asset_manager_;
+  uint32_t type_spec_flags_ = 0u;
+  std::unique_ptr<Package> packages_[kPackageCount];
+};
+
+inline const ResolvedBag::Entry* begin(const ResolvedBag* bag) { return bag->entries; }
+
+inline const ResolvedBag::Entry* end(const ResolvedBag* bag) {
+  return bag->entries + bag->entry_count;
+}
+
+}  // namespace android
+
+#endif /* ANDROIDFW_ASSETMANAGER2_H_ */

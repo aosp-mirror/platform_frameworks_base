@@ -17,9 +17,10 @@
 #ifndef __BYTE_BUCKET_ARRAY_H
 #define __BYTE_BUCKET_ARRAY_H
 
-#include <utils/Log.h>
-#include <stdint.h>
-#include <string.h>
+#include <cstdint>
+#include <cstring>
+
+#include "android-base/logging.h"
 
 namespace android {
 
@@ -27,71 +28,65 @@ namespace android {
  * Stores a sparsely populated array. Has a fixed size of 256
  * (number of entries that a byte can represent).
  */
-template<typename T>
+template <typename T>
 class ByteBucketArray {
-public:
-    ByteBucketArray() : mDefault() {
-        memset(mBuckets, 0, sizeof(mBuckets));
+ public:
+  ByteBucketArray() : default_() { memset(buckets_, 0, sizeof(buckets_)); }
+
+  ~ByteBucketArray() {
+    for (size_t i = 0; i < kNumBuckets; i++) {
+      if (buckets_[i] != NULL) {
+        delete[] buckets_[i];
+      }
+    }
+    memset(buckets_, 0, sizeof(buckets_));
+  }
+
+  inline size_t size() const { return kNumBuckets * kBucketSize; }
+
+  inline const T& get(size_t index) const { return (*this)[index]; }
+
+  const T& operator[](size_t index) const {
+    if (index >= size()) {
+      return default_;
     }
 
-    ~ByteBucketArray() {
-        for (size_t i = 0; i < NUM_BUCKETS; i++) {
-            if (mBuckets[i] != NULL) {
-                delete [] mBuckets[i];
-            }
-        }
-        memset(mBuckets, 0, sizeof(mBuckets));
+    uint8_t bucket_index = static_cast<uint8_t>(index) >> 4;
+    T* bucket = buckets_[bucket_index];
+    if (bucket == NULL) {
+      return default_;
+    }
+    return bucket[0x0f & static_cast<uint8_t>(index)];
+  }
+
+  T& editItemAt(size_t index) {
+    CHECK(index < size()) << "ByteBucketArray.getOrCreate(index=" << index
+                          << ") with size=" << size();
+
+    uint8_t bucket_index = static_cast<uint8_t>(index) >> 4;
+    T* bucket = buckets_[bucket_index];
+    if (bucket == NULL) {
+      bucket = buckets_[bucket_index] = new T[kBucketSize]();
+    }
+    return bucket[0x0f & static_cast<uint8_t>(index)];
+  }
+
+  bool set(size_t index, const T& value) {
+    if (index >= size()) {
+      return false;
     }
 
-    inline size_t size() const {
-        return NUM_BUCKETS * BUCKET_SIZE;
-    }
+    editItemAt(index) = value;
+    return true;
+  }
 
-    inline const T& get(size_t index) const {
-        return (*this)[index];
-    }
+ private:
+  enum { kNumBuckets = 16, kBucketSize = 16 };
 
-    const T& operator[](size_t index) const {
-        if (index >= size()) {
-            return mDefault;
-        }
-
-        uint8_t bucketIndex = static_cast<uint8_t>(index) >> 4;
-        T* bucket = mBuckets[bucketIndex];
-        if (bucket == NULL) {
-            return mDefault;
-        }
-        return bucket[0x0f & static_cast<uint8_t>(index)];
-    }
-
-    T& editItemAt(size_t index) {
-        ALOG_ASSERT(index < size(), "ByteBucketArray.getOrCreate(index=%u) with size=%u",
-                (uint32_t) index, (uint32_t) size());
-
-        uint8_t bucketIndex = static_cast<uint8_t>(index) >> 4;
-        T* bucket = mBuckets[bucketIndex];
-        if (bucket == NULL) {
-            bucket = mBuckets[bucketIndex] = new T[BUCKET_SIZE]();
-        }
-        return bucket[0x0f & static_cast<uint8_t>(index)];
-    }
-
-    bool set(size_t index, const T& value) {
-        if (index >= size()) {
-            return false;
-        }
-
-        editItemAt(index) = value;
-        return true;
-    }
-
-private:
-    enum { NUM_BUCKETS = 16, BUCKET_SIZE = 16 };
-
-    T*  mBuckets[NUM_BUCKETS];
-    T   mDefault;
+  T* buckets_[kNumBuckets];
+  T default_;
 };
 
-} // namespace android
+}  // namespace android
 
-#endif // __BYTE_BUCKET_ARRAY_H
+#endif  // __BYTE_BUCKET_ARRAY_H
