@@ -237,7 +237,6 @@ android.app.ApplicationPackageManager
 android.app.ApplicationPackageManager$MoveCallbackDelegate
 android.app.ApplicationPackageManager$OnPermissionsChangeListenerDelegate
 android.app.ApplicationPackageManager$ResourceName
-android.app.ApplicationThreadNative
 android.app.ApplicationThreadProxy
 android.app.AutomaticZenRule
 android.app.BackStackRecord
@@ -313,6 +312,8 @@ android.app.IAppTask
 android.app.IAppTask$Stub
 android.app.IAppTask$Stub$Proxy
 android.app.IApplicationThread
+android.app.IApplicationThread$Stub
+android.app.IApplicationThread$Stub$Proxy
 android.app.IInstrumentationWatcher
 android.app.IInstrumentationWatcher$Stub
 android.app.INotificationManager
