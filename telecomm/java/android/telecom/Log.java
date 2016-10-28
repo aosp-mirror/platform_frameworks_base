@@ -184,6 +184,10 @@ public class Log {
         getSessionManager().startSession(shortMethodName, null);
     }
 
+    public static void startSession(Session.Info info, String shortMethodName) {
+        getSessionManager().startSession(info, shortMethodName, null);
+    }
+
     public static void startSession(String shortMethodName, String callerIdentification) {
         getSessionManager().startSession(shortMethodName, callerIdentification);
     }
@@ -193,12 +197,12 @@ public class Log {
         getSessionManager().startSession(info, shortMethodName, callerIdentification);
     }
 
-    public static void startExternalSession(Session.Info sessionInfo, String shortMethodName) {
-        getSessionManager().startExternalSession(sessionInfo, shortMethodName);
-    }
-
     public static Session createSubsession() {
         return getSessionManager().createSubsession();
+    }
+
+    public static Session.Info getExternalSession() {
+        return getSessionManager().getExternalSession();
     }
 
     public static void cancelSubsession(Session subsession) {

@@ -19,6 +19,7 @@ package com.android.internal.telecom;
 import android.os.Bundle;
 import android.telecom.CallAudioState;
 import android.telecom.ConnectionRequest;
+import android.telecom.Logging.Session;
 import android.telecom.PhoneAccountHandle;
 
 import com.android.internal.telecom.IConnectionServiceAdapter;
@@ -31,54 +32,58 @@ import com.android.internal.telecom.IConnectionServiceAdapter;
  * @hide
  */
 oneway interface IConnectionService {
-    void addConnectionServiceAdapter(in IConnectionServiceAdapter adapter);
+    void addConnectionServiceAdapter(in IConnectionServiceAdapter adapter,
+    in Session.Info sessionInfo);
 
-    void removeConnectionServiceAdapter(in IConnectionServiceAdapter adapter);
+    void removeConnectionServiceAdapter(in IConnectionServiceAdapter adapter,
+    in Session.Info sessionInfo);
 
     void createConnection(
             in PhoneAccountHandle connectionManagerPhoneAccount,
             String callId,
             in ConnectionRequest request,
             boolean isIncoming,
-            boolean isUnknown);
+            boolean isUnknown,
+            in Session.Info sessionInfo);
 
-    void abort(String callId);
+    void abort(String callId, in Session.Info sessionInfo);
 
-    void answerVideo(String callId, int videoState);
+    void answerVideo(String callId, int videoState, in Session.Info sessionInfo);
 
-    void answer(String callId);
+    void answer(String callId, in Session.Info sessionInfo);
 
-    void reject(String callId);
+    void reject(String callId, in Session.Info sessionInfo);
 
-    void rejectWithMessage(String callId, String message);
+    void rejectWithMessage(String callId, String message, in Session.Info sessionInfo);
 
-    void disconnect(String callId);
+    void disconnect(String callId, in Session.Info sessionInfo);
 
-    void silence(String callId);
+    void silence(String callId, in Session.Info sessionInfo);
 
-    void hold(String callId);
+    void hold(String callId, in Session.Info sessionInfo);
 
-    void unhold(String callId);
+    void unhold(String callId, in Session.Info sessionInfo);
 
-    void onCallAudioStateChanged(String activeCallId, in CallAudioState callAudioState);
+    void onCallAudioStateChanged(String activeCallId, in CallAudioState callAudioState,
+    in Session.Info sessionInfo);
 
-    void playDtmfTone(String callId, char digit);
+    void playDtmfTone(String callId, char digit, in Session.Info sessionInfo);
 
-    void stopDtmfTone(String callId);
+    void stopDtmfTone(String callId, in Session.Info sessionInfo);
 
-    void conference(String conferenceCallId, String callId);
+    void conference(String conferenceCallId, String callId, in Session.Info sessionInfo);
 
-    void splitFromConference(String callId);
+    void splitFromConference(String callId, in Session.Info sessionInfo);
 
-    void mergeConference(String conferenceCallId);
+    void mergeConference(String conferenceCallId, in Session.Info sessionInfo);
 
-    void swapConference(String conferenceCallId);
+    void swapConference(String conferenceCallId, in Session.Info sessionInfo);
 
-    void onPostDialContinue(String callId, boolean proceed);
+    void onPostDialContinue(String callId, boolean proceed, in Session.Info sessionInfo);
 
-    void pullExternalCall(String callId);
+    void pullExternalCall(String callId, in Session.Info sessionInfo);
 
-    void sendCallEvent(String callId, String event, in Bundle extras);
+    void sendCallEvent(String callId, String event, in Bundle extras, in Session.Info sessionInfo);
 
-    void onExtrasChanged(String callId, in Bundle extras);
+    void onExtrasChanged(String callId, in Bundle extras, in Session.Info sessionInfo);
 }

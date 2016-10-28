@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.telecom.Logging.Session;
 
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IConnectionService;
@@ -83,6 +84,32 @@ public abstract class ConnectionService extends Service {
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 
+    // Session Definitions
+    private static final String SESSION_HANDLER = "H.";
+    private static final String SESSION_ADD_CS_ADAPTER = "CS.aCSA";
+    private static final String SESSION_REMOVE_CS_ADAPTER = "CS.rCSA";
+    private static final String SESSION_CREATE_CONN = "CS.crCo";
+    private static final String SESSION_ABORT = "CS.ab";
+    private static final String SESSION_ANSWER = "CS.an";
+    private static final String SESSION_ANSWER_VIDEO = "CS.anV";
+    private static final String SESSION_REJECT = "CS.r";
+    private static final String SESSION_REJECT_MESSAGE = "CS.rWM";
+    private static final String SESSION_SILENCE = "CS.s";
+    private static final String SESSION_DISCONNECT = "CS.d";
+    private static final String SESSION_HOLD = "CS.h";
+    private static final String SESSION_UNHOLD = "CS.u";
+    private static final String SESSION_CALL_AUDIO_SC = "CS.cASC";
+    private static final String SESSION_PLAY_DTMF = "CS.pDT";
+    private static final String SESSION_STOP_DTMF = "CS.sDT";
+    private static final String SESSION_CONFERENCE = "CS.c";
+    private static final String SESSION_SPLIT_CONFERENCE = "CS.sFC";
+    private static final String SESSION_MERGE_CONFERENCE = "CS.mC";
+    private static final String SESSION_SWAP_CONFERENCE = "CS.sC";
+    private static final String SESSION_POST_DIAL_CONT = "CS.oPDC";
+    private static final String SESSION_PULL_EXTERNAL_CALL = "CS.pEC";
+    private static final String SESSION_SEND_CALL_EVENT = "CS.sCE";
+    private static final String SESSION_EXTRAS_CHANGED = "CS.oEC";
+
     private static final int MSG_ADD_CONNECTION_SERVICE_ADAPTER = 1;
     private static final int MSG_CREATE_CONNECTION = 2;
     private static final int MSG_ABORT = 3;
@@ -125,12 +152,30 @@ public abstract class ConnectionService extends Service {
 
     private final IBinder mBinder = new IConnectionService.Stub() {
         @Override
-        public void addConnectionServiceAdapter(IConnectionServiceAdapter adapter) {
-            mHandler.obtainMessage(MSG_ADD_CONNECTION_SERVICE_ADAPTER, adapter).sendToTarget();
+        public void addConnectionServiceAdapter(IConnectionServiceAdapter adapter,
+                Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_ADD_CS_ADAPTER);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = adapter;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ADD_CONNECTION_SERVICE_ADAPTER, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
-        public void removeConnectionServiceAdapter(IConnectionServiceAdapter adapter) {
-            mHandler.obtainMessage(MSG_REMOVE_CONNECTION_SERVICE_ADAPTER, adapter).sendToTarget();
+        public void removeConnectionServiceAdapter(IConnectionServiceAdapter adapter,
+                Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_REMOVE_CS_ADAPTER);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = adapter;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_REMOVE_CONNECTION_SERVICE_ADAPTER, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
@@ -139,136 +184,292 @@ public abstract class ConnectionService extends Service {
                 String id,
                 ConnectionRequest request,
                 boolean isIncoming,
-                boolean isUnknown) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = connectionManagerPhoneAccount;
-            args.arg2 = id;
-            args.arg3 = request;
-            args.argi1 = isIncoming ? 1 : 0;
-            args.argi2 = isUnknown ? 1 : 0;
-            mHandler.obtainMessage(MSG_CREATE_CONNECTION, args).sendToTarget();
+                boolean isUnknown,
+                Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_CREATE_CONN);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = connectionManagerPhoneAccount;
+                args.arg2 = id;
+                args.arg3 = request;
+                args.arg4 = Log.createSubsession();
+                args.argi1 = isIncoming ? 1 : 0;
+                args.argi2 = isUnknown ? 1 : 0;
+                mHandler.obtainMessage(MSG_CREATE_CONNECTION, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void abort(String callId) {
-            mHandler.obtainMessage(MSG_ABORT, callId).sendToTarget();
+        public void abort(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_ABORT);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ABORT, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void answerVideo(String callId, int videoState) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = callId;
-            args.argi1 = videoState;
-            mHandler.obtainMessage(MSG_ANSWER_VIDEO, args).sendToTarget();
+        public void answerVideo(String callId, int videoState, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_ANSWER_VIDEO);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                args.argi1 = videoState;
+                mHandler.obtainMessage(MSG_ANSWER_VIDEO, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void answer(String callId) {
-            mHandler.obtainMessage(MSG_ANSWER, callId).sendToTarget();
+        public void answer(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_ANSWER);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ANSWER, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void reject(String callId) {
-            mHandler.obtainMessage(MSG_REJECT, callId).sendToTarget();
+        public void reject(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_REJECT);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_REJECT, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void rejectWithMessage(String callId, String message) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = callId;
-            args.arg2 = message;
-            mHandler.obtainMessage(MSG_REJECT_WITH_MESSAGE, args).sendToTarget();
+        public void rejectWithMessage(String callId, String message, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_REJECT_MESSAGE);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = message;
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_REJECT_WITH_MESSAGE, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void silence(String callId) {
-            mHandler.obtainMessage(MSG_SILENCE, callId).sendToTarget();
+        public void silence(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_SILENCE);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_SILENCE, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void disconnect(String callId) {
-            mHandler.obtainMessage(MSG_DISCONNECT, callId).sendToTarget();
+        public void disconnect(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_DISCONNECT);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_DISCONNECT, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void hold(String callId) {
-            mHandler.obtainMessage(MSG_HOLD, callId).sendToTarget();
+        public void hold(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_HOLD);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_HOLD, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void unhold(String callId) {
-            mHandler.obtainMessage(MSG_UNHOLD, callId).sendToTarget();
+        public void unhold(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_UNHOLD);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_UNHOLD, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void onCallAudioStateChanged(String callId, CallAudioState callAudioState) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = callId;
-            args.arg2 = callAudioState;
-            mHandler.obtainMessage(MSG_ON_CALL_AUDIO_STATE_CHANGED, args).sendToTarget();
+        public void onCallAudioStateChanged(String callId, CallAudioState callAudioState,
+                Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_CALL_AUDIO_SC);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = callAudioState;
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ON_CALL_AUDIO_STATE_CHANGED, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void playDtmfTone(String callId, char digit) {
-            mHandler.obtainMessage(MSG_PLAY_DTMF_TONE, digit, 0, callId).sendToTarget();
+        public void playDtmfTone(String callId, char digit, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_PLAY_DTMF);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = digit;
+                args.arg2 = callId;
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_PLAY_DTMF_TONE, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void stopDtmfTone(String callId) {
-            mHandler.obtainMessage(MSG_STOP_DTMF_TONE, callId).sendToTarget();
+        public void stopDtmfTone(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_STOP_DTMF);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_STOP_DTMF_TONE, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void conference(String callId1, String callId2) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = callId1;
-            args.arg2 = callId2;
-            mHandler.obtainMessage(MSG_CONFERENCE, args).sendToTarget();
+        public void conference(String callId1, String callId2, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_CONFERENCE);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId1;
+                args.arg2 = callId2;
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_CONFERENCE, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void splitFromConference(String callId) {
-            mHandler.obtainMessage(MSG_SPLIT_FROM_CONFERENCE, callId).sendToTarget();
+        public void splitFromConference(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_SPLIT_CONFERENCE);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_SPLIT_FROM_CONFERENCE, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void mergeConference(String callId) {
-            mHandler.obtainMessage(MSG_MERGE_CONFERENCE, callId).sendToTarget();
+        public void mergeConference(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_MERGE_CONFERENCE);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_MERGE_CONFERENCE, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void swapConference(String callId) {
-            mHandler.obtainMessage(MSG_SWAP_CONFERENCE, callId).sendToTarget();
+        public void swapConference(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_SWAP_CONFERENCE);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_SWAP_CONFERENCE, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void onPostDialContinue(String callId, boolean proceed) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = callId;
-            args.argi1 = proceed ? 1 : 0;
-            mHandler.obtainMessage(MSG_ON_POST_DIAL_CONTINUE, args).sendToTarget();
+        public void onPostDialContinue(String callId, boolean proceed, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_POST_DIAL_CONT);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                args.argi1 = proceed ? 1 : 0;
+                mHandler.obtainMessage(MSG_ON_POST_DIAL_CONTINUE, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void pullExternalCall(String callId) {
-            mHandler.obtainMessage(MSG_PULL_EXTERNAL_CALL, callId).sendToTarget();
+        public void pullExternalCall(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_PULL_EXTERNAL_CALL);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_PULL_EXTERNAL_CALL, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void sendCallEvent(String callId, String event, Bundle extras) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = callId;
-            args.arg2 = event;
-            args.arg3 = extras;
-            mHandler.obtainMessage(MSG_SEND_CALL_EVENT, args).sendToTarget();
+        public void sendCallEvent(String callId, String event, Bundle extras,
+                Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_SEND_CALL_EVENT);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = event;
+                args.arg3 = extras;
+                args.arg4 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_SEND_CALL_EVENT, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
 
         @Override
-        public void onExtrasChanged(String callId, Bundle extras) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = callId;
-            args.arg2 = extras;
-            mHandler.obtainMessage(MSG_ON_EXTRAS_CHANGED, args).sendToTarget();
+        public void onExtrasChanged(String callId, Bundle extras, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_EXTRAS_CHANGED);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = extras;
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ON_EXTRAS_CHANGED, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
         }
     };
 
@@ -276,15 +477,35 @@ public abstract class ConnectionService extends Service {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_ADD_CONNECTION_SERVICE_ADAPTER:
-                    mAdapter.addAdapter((IConnectionServiceAdapter) msg.obj);
-                    onAdapterAttached();
+                case MSG_ADD_CONNECTION_SERVICE_ADAPTER: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        IConnectionServiceAdapter adapter = (IConnectionServiceAdapter) args.arg1;
+                        Log.continueSession((Session) args.arg2,
+                                SESSION_HANDLER + SESSION_ADD_CS_ADAPTER);
+                        mAdapter.addAdapter(adapter);
+                        onAdapterAttached();
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
-                case MSG_REMOVE_CONNECTION_SERVICE_ADAPTER:
-                    mAdapter.removeAdapter((IConnectionServiceAdapter) msg.obj);
+                }
+                case MSG_REMOVE_CONNECTION_SERVICE_ADAPTER: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg2,
+                                SESSION_HANDLER + SESSION_REMOVE_CS_ADAPTER);
+                        mAdapter.removeAdapter((IConnectionServiceAdapter) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
+                }
                 case MSG_CREATE_CONNECTION: {
                     SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg4, SESSION_HANDLER + SESSION_CREATE_CONN);
                     try {
                         final PhoneAccountHandle connectionManagerPhoneAccount =
                                 (PhoneAccountHandle) args.arg1;
@@ -315,122 +536,253 @@ public abstract class ConnectionService extends Service {
                         }
                     } finally {
                         args.recycle();
+                        Log.endSession();
                     }
                     break;
                 }
-                case MSG_ABORT:
-                    abort((String) msg.obj);
+                case MSG_ABORT: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg2, SESSION_HANDLER + SESSION_ABORT);
+                    try {
+                        abort((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
-                case MSG_ANSWER:
-                    answer((String) msg.obj);
+                }
+                case MSG_ANSWER: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg2, SESSION_HANDLER + SESSION_ANSWER);
+                    try {
+                        answer((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
+                }
                 case MSG_ANSWER_VIDEO: {
                     SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg2,
+                            SESSION_HANDLER + SESSION_ANSWER_VIDEO);
                     try {
                         String callId = (String) args.arg1;
                         int videoState = args.argi1;
                         answerVideo(callId, videoState);
                     } finally {
                         args.recycle();
+                        Log.endSession();
                     }
                     break;
                 }
-                case MSG_REJECT:
-                    reject((String) msg.obj);
+                case MSG_REJECT: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg2, SESSION_HANDLER + SESSION_REJECT);
+                    try {
+                        reject((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
+                }
                 case MSG_REJECT_WITH_MESSAGE: {
                     SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg3,
+                            SESSION_HANDLER + SESSION_REJECT_MESSAGE);
                     try {
                         reject((String) args.arg1, (String) args.arg2);
                     } finally {
                         args.recycle();
+                        Log.endSession();
                     }
                     break;
                 }
-                case MSG_DISCONNECT:
-                    disconnect((String) msg.obj);
+                case MSG_DISCONNECT: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg2, SESSION_HANDLER + SESSION_DISCONNECT);
+                    try {
+                        disconnect((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
-                case MSG_SILENCE:
-                    silence((String) msg.obj);
+                }
+                case MSG_SILENCE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg2, SESSION_HANDLER + SESSION_SILENCE);
+                    try {
+                        silence((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
-                case MSG_HOLD:
-                    hold((String) msg.obj);
+                }
+                case MSG_HOLD: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg2, SESSION_HANDLER + SESSION_REJECT);
+                    try {
+                        hold((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
-                case MSG_UNHOLD:
-                    unhold((String) msg.obj);
+                }
+                case MSG_UNHOLD: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg2, SESSION_HANDLER + SESSION_UNHOLD);
+                    try {
+                        unhold((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
+                }
                 case MSG_ON_CALL_AUDIO_STATE_CHANGED: {
                     SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg3,
+                            SESSION_HANDLER + SESSION_CALL_AUDIO_SC);
                     try {
                         String callId = (String) args.arg1;
                         CallAudioState audioState = (CallAudioState) args.arg2;
                         onCallAudioStateChanged(callId, new CallAudioState(audioState));
                     } finally {
                         args.recycle();
+                        Log.endSession();
                     }
                     break;
                 }
-                case MSG_PLAY_DTMF_TONE:
-                    playDtmfTone((String) msg.obj, (char) msg.arg1);
+                case MSG_PLAY_DTMF_TONE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg3,
+                                SESSION_HANDLER + SESSION_PLAY_DTMF);
+                        playDtmfTone((String) args.arg2, (char) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
-                case MSG_STOP_DTMF_TONE:
-                    stopDtmfTone((String) msg.obj);
+                }
+                case MSG_STOP_DTMF_TONE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg2,
+                                SESSION_HANDLER + SESSION_STOP_DTMF);
+                        stopDtmfTone((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
+                }
                 case MSG_CONFERENCE: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
+                        Log.continueSession((Session) args.arg3,
+                                SESSION_HANDLER + SESSION_CONFERENCE);
                         String callId1 = (String) args.arg1;
                         String callId2 = (String) args.arg2;
                         conference(callId1, callId2);
                     } finally {
                         args.recycle();
+                        Log.endSession();
                     }
                     break;
                 }
-                case MSG_SPLIT_FROM_CONFERENCE:
-                    splitFromConference((String) msg.obj);
+                case MSG_SPLIT_FROM_CONFERENCE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg2,
+                                SESSION_HANDLER + SESSION_SPLIT_CONFERENCE);
+                        splitFromConference((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
-                case MSG_MERGE_CONFERENCE:
-                    mergeConference((String) msg.obj);
+                }
+                case MSG_MERGE_CONFERENCE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg2,
+                                SESSION_HANDLER + SESSION_MERGE_CONFERENCE);
+                        mergeConference((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
-                case MSG_SWAP_CONFERENCE:
-                    swapConference((String) msg.obj);
+                }
+                case MSG_SWAP_CONFERENCE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg2,
+                                SESSION_HANDLER + SESSION_SWAP_CONFERENCE);
+                        swapConference((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
+                }
                 case MSG_ON_POST_DIAL_CONTINUE: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
+                        Log.continueSession((Session) args.arg2,
+                                SESSION_HANDLER + SESSION_POST_DIAL_CONT);
                         String callId = (String) args.arg1;
                         boolean proceed = (args.argi1 == 1);
                         onPostDialContinue(callId, proceed);
                     } finally {
                         args.recycle();
+                        Log.endSession();
                     }
                     break;
                 }
                 case MSG_PULL_EXTERNAL_CALL: {
-                    pullExternalCall((String) msg.obj);
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg2,
+                                SESSION_HANDLER + SESSION_PULL_EXTERNAL_CALL);
+                        pullExternalCall((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
                     break;
                 }
                 case MSG_SEND_CALL_EVENT: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
+                        Log.continueSession((Session) args.arg4,
+                                SESSION_HANDLER + SESSION_SEND_CALL_EVENT);
                         String callId = (String) args.arg1;
                         String event = (String) args.arg2;
                         Bundle extras = (Bundle) args.arg3;
                         sendCallEvent(callId, event, extras);
                     } finally {
                         args.recycle();
+                        Log.endSession();
                     }
                     break;
                 }
                 case MSG_ON_EXTRAS_CHANGED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
+                        Log.continueSession((Session) args.arg3,
+                                SESSION_HANDLER + SESSION_EXTRAS_CHANGED);
                         String callId = (String) args.arg1;
                         Bundle extras = (Bundle) args.arg2;
                         handleExtrasChanged(callId, extras);
                     } finally {
                         args.recycle();
+                        Log.endSession();
                     }
                     break;
                 }
@@ -698,7 +1050,7 @@ public abstract class ConnectionService extends Service {
                 mAdapter.putExtras(id, extras);
             }
         }
-        
+
         public void onExtrasRemoved(Connection c, List<String> keys) {
             String id = mIdByConnection.get(c);
             if (id != null) {
@@ -1274,15 +1626,11 @@ public abstract class ConnectionService extends Service {
      * call created using
      * {@code TelecomManager#addNewIncomingCall(PhoneAccountHandle, android.os.Bundle)}.
      *
-     * @param connectionManagerPhoneAccount
-     * @param request
-     * @return
-     *
      * @hide
      */
     public Connection onCreateUnknownConnection(PhoneAccountHandle connectionManagerPhoneAccount,
             ConnectionRequest request) {
-       return null;
+        return null;
     }
 
     /**
@@ -1509,7 +1857,7 @@ public abstract class ConnectionService extends Service {
      * @return The call ID.
      */
     private int getNextCallId() {
-        synchronized(mIdSyncRoot) {
+        synchronized (mIdSyncRoot) {
             return ++mId;
         }
     }
