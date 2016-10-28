@@ -76,6 +76,7 @@ import android.util.Log;
 import android.util.LogPrinter;
 
 import com.android.internal.util.WakeupMessage;
+import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
