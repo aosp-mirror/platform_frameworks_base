@@ -33,7 +33,6 @@ import static com.android.shell.BugreportProgressService.EXTRA_PID;
 import static com.android.shell.BugreportProgressService.EXTRA_SCREENSHOT;
 import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_FINISHED;
 import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_STARTED;
-import static com.android.shell.BugreportProgressService.POLLING_FREQUENCY;
 import static com.android.shell.BugreportProgressService.SCREENSHOT_DELAY_SECONDS;
 
 import static org.junit.Assert.assertEquals;
@@ -65,6 +64,7 @@ import libcore.io.Streams;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -116,7 +116,7 @@ public class BugreportReceiverTest {
     private static final String TAG = "BugreportReceiverTest";
 
     // Timeout for UI operations, in milliseconds.
-    private static final int TIMEOUT = (int) POLLING_FREQUENCY * 4;
+    private static final int TIMEOUT = (int) (5 * DateUtils.SECOND_IN_MILLIS);
 
     // Timeout for when waiting for a screenshot to finish.
     private static final int SAFE_SCREENSHOT_DELAY = SCREENSHOT_DELAY_SECONDS + 10;
@@ -209,6 +209,12 @@ public class BugreportReceiverTest {
         }
     }
 
+    /*
+     * TODO: this test is incomplete because:
+     * - the assertProgressNotification() is not really asserting the progress because the
+     *   UI automation API doesn't provide a way to check the notification progress bar value
+     * - it should use the binder object instead of SystemProperties to update progress
+     */
     @Test
     public void testProgress() throws Exception {
         resetProperties();
@@ -227,7 +233,6 @@ public class BugreportReceiverTest {
 
         // Make sure progress never goes back...
         SystemProperties.set(MAX_PROPERTY, "2000");
-        sleep(POLLING_FREQUENCY + DateUtils.SECOND_IN_MILLIS);
         assertProgressNotification(NAME, 95.00f);
 
         SystemProperties.set(PROGRESS_PROPERTY, "1000");
