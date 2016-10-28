@@ -305,6 +305,11 @@ public class PluginInstanceManager<T extends Plugin> {
             }
             return getBaseContext().getSystemService(name);
         }
+
+        @Override
+        public Context getApplicationContext() {
+            return this;
+        }
     }
 
     private static class PluginInfo<T> {
