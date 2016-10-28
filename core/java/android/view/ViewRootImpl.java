@@ -19,7 +19,6 @@ package android.view;
 import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
 import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
@@ -3542,20 +3541,7 @@ public final class ViewRootImpl implements ViewParent,
                     mWinFrame.bottom = t + h;
 
                     mPendingBackDropFrame.set(mWinFrame);
-
-                    // Suppress layouts during resizing - a correct layout will happen when resizing
-                    // is done, and this just increases system load.
-                    boolean isDockedDivider = mWindowAttributes.type == TYPE_DOCK_DIVIDER;
-                    boolean suppress = (mDragResizing && mResizeMode == RESIZE_MODE_DOCKED_DIVIDER)
-                            || isDockedDivider;
-                    if (!suppress) {
-                        if (mView != null) {
-                            forceLayout(mView);
-                        }
-                        requestLayout();
-                    } else {
-                        maybeHandleWindowMove(mWinFrame);
-                    }
+                    maybeHandleWindowMove(mWinFrame);
                 }
                 break;
             case MSG_WINDOW_FOCUS_CHANGED: {
