@@ -43,6 +43,10 @@ RENDERTHREAD_TEST(CanvasContext, create) {
     canvasContext->destroy(nullptr);
 }
 
+// This must be in an anonymous namespace as this class name is used in multiple
+// cpp files for different purposes and without the namespace the linker can
+// arbitrarily choose which class to link against.
+namespace {
 class TestFunctor : public Functor {
 public:
     bool didProcess = false;
@@ -52,6 +56,7 @@ public:
         return DrawGlInfo::kStatusDone;
     }
 };
+}; // end anonymous namespace
 
 RENDERTHREAD_TEST(CanvasContext, invokeFunctor) {
     TestFunctor functor;
