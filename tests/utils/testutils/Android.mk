@@ -28,4 +28,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     legacy-android-test \
     mockito-target
 
+LOCAL_JAVA_LIBRARIES := android.test.runner
+
 include $(BUILD_STATIC_JAVA_LIBRARY)
