@@ -76,7 +76,7 @@ public class RemoteConnectionManager {
     public void conferenceRemoteConnections(RemoteConnection a, RemoteConnection b) {
         if (a.getConnectionService() == b.getConnectionService()) {
             try {
-                a.getConnectionService().conference(a.getId(), b.getId());
+                a.getConnectionService().conference(a.getId(), b.getId(), null /*Session.Info*/);
             } catch (RemoteException e) {
             }
         } else {
