@@ -19,6 +19,7 @@
 
 #include "Debug.h"
 #include "Texture.h"
+#include "hwui/Bitmap.h"
 #include "thread/Task.h"
 #include "thread/TaskProcessor.h"
 #include "utils/Macros.h"
@@ -32,7 +33,6 @@
 
 #include <vector>
 
-class SkBitmap;
 class SkCanvas;
 class SkPaint;
 struct SkRect;
@@ -41,7 +41,6 @@ namespace android {
 namespace uirenderer {
 
 class Caches;
-
 ///////////////////////////////////////////////////////////////////////////////
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,6 +55,21 @@ class Caches;
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
+
+struct PathTexture;
+class PathTask: public Task<sk_sp<Bitmap>> {
+public:
+    PathTask(const SkPath* path, const SkPaint* paint, PathTexture* texture):
+        path(*path), paint(*paint), texture(texture) {
+    }
+
+    // copied, since input path not guaranteed to survive for duration of task
+    const SkPath path;
+
+    // copied, since input paint may not be immutable
+    const SkPaint paint;
+    PathTexture* texture;
+};
 
 /**
  * Alpha texture used to represent a path.
@@ -83,11 +97,11 @@ struct PathTexture: public Texture {
      */
     float offset = 0;
 
-    sp<Task<SkBitmap*> > task() const {
+    sp<PathTask> task() const {
         return mTask;
     }
 
-    void setTask(const sp<Task<SkBitmap*> >& task) {
+    void setTask(const sp<PathTask>& task) {
         mTask = task;
     }
 
@@ -98,7 +112,7 @@ struct PathTexture: public Texture {
     }
 
 private:
-    sp<Task<SkBitmap*> > mTask;
+    sp<PathTask> mTask;
 }; // struct PathTexture
 
 enum class ShapeType {
@@ -222,13 +236,12 @@ public:
 private:
     PathTexture* addTexture(const PathDescription& entry,
             const SkPath *path, const SkPaint* paint);
-    PathTexture* addTexture(const PathDescription& entry, SkBitmap* bitmap);
 
     /**
      * Generates the texture from a bitmap into the specified texture structure.
      */
-    void generateTexture(SkBitmap& bitmap, Texture* texture);
-    void generateTexture(const PathDescription& entry, SkBitmap* bitmap, PathTexture* texture,
+    void generateTexture(Bitmap& bitmap, Texture* texture);
+    void generateTexture(const PathDescription& entry, Bitmap& bitmap, PathTexture* texture,
             bool addToCache = true);
 
     PathTexture* get(const PathDescription& entry) {
@@ -245,30 +258,13 @@ private:
 
     void init();
 
-    class PathTask: public Task<SkBitmap*> {
-    public:
-        PathTask(const SkPath* path, const SkPaint* paint, PathTexture* texture):
-            path(*path), paint(*paint), texture(texture) {
-        }
 
-        ~PathTask() {
-            delete future()->get();
-        }
-
-        // copied, since input path not guaranteed to survive for duration of task
-        const SkPath path;
-
-        // copied, since input paint may not be immutable
-        const SkPaint paint;
-        PathTexture* texture;
-    };
-
-    class PathProcessor: public TaskProcessor<SkBitmap*> {
+    class PathProcessor: public TaskProcessor<sk_sp<Bitmap> > {
     public:
         explicit PathProcessor(Caches& caches);
         ~PathProcessor() { }
 
-        virtual void onProcess(const sp<Task<SkBitmap*> >& task) override;
+        virtual void onProcess(const sp<Task<sk_sp<Bitmap> > >& task) override;
 
     private:
         uint32_t mMaxTextureSize;

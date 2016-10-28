@@ -48,37 +48,34 @@ static int bytesPerPixel(GLint glFormat) {
     }
 }
 
-void Texture::setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture, bool force,
-        GLenum renderTarget) {
+void Texture::setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture, bool force) {
 
     if (force || wrapS != mWrapS || wrapT != mWrapT) {
         mWrapS = wrapS;
         mWrapT = wrapT;
 
         if (bindTexture) {
-            mCaches.textureState().bindTexture(renderTarget, mId);
+            mCaches.textureState().bindTexture(mTarget, mId);
         }
 
-        glTexParameteri(renderTarget, GL_TEXTURE_WRAP_S, wrapS);
-        glTexParameteri(renderTarget, GL_TEXTURE_WRAP_T, wrapT);
+        glTexParameteri(mTarget, GL_TEXTURE_WRAP_S, wrapS);
+        glTexParameteri(mTarget, GL_TEXTURE_WRAP_T, wrapT);
     }
 }
 
-void Texture::setFilterMinMag(GLenum min, GLenum mag, bool bindTexture, bool force,
-        GLenum renderTarget) {
-
+void Texture::setFilterMinMag(GLenum min, GLenum mag, bool bindTexture, bool force) {
     if (force || min != mMinFilter || mag != mMagFilter) {
         mMinFilter = min;
         mMagFilter = mag;
 
         if (bindTexture) {
-            mCaches.textureState().bindTexture(renderTarget, mId);
+            mCaches.textureState().bindTexture(mTarget, mId);
         }
 
         if (mipMap && min == GL_LINEAR) min = GL_LINEAR_MIPMAP_LINEAR;
 
-        glTexParameteri(renderTarget, GL_TEXTURE_MIN_FILTER, min);
-        glTexParameteri(renderTarget, GL_TEXTURE_MAG_FILTER, mag);
+        glTexParameteri(mTarget, GL_TEXTURE_MIN_FILTER, min);
+        glTexParameteri(mTarget, GL_TEXTURE_MAG_FILTER, mag);
     }
 }
 
@@ -87,15 +84,20 @@ void Texture::deleteTexture() {
     mId = 0;
 }
 
-bool Texture::updateSize(uint32_t width, uint32_t height, GLint internalFormat, GLint format) {
-    if (mWidth == width && mHeight == height &&
-            mFormat == format && mInternalFormat == internalFormat) {
+bool Texture::updateSize(uint32_t width, uint32_t height, GLint internalFormat,
+        GLint format, GLenum target) {
+    if (mWidth == width
+            && mHeight == height
+            && mFormat == format
+            && mInternalFormat == internalFormat
+            && mTarget == target) {
         return false;
     }
     mWidth = width;
     mHeight = height;
     mFormat = format;
     mInternalFormat = internalFormat;
+    mTarget = target;
     notifySizeChanged(mWidth * mHeight * bytesPerPixel(internalFormat));
     return true;
 }
@@ -110,7 +112,7 @@ void Texture::resetCachedParams() {
 void Texture::upload(GLint internalFormat, uint32_t width, uint32_t height,
         GLenum format, GLenum type, const void* pixels) {
     GL_CHECKPOINT(MODERATE);
-    bool needsAlloc = updateSize(width, height, internalFormat, format);
+    bool needsAlloc = updateSize(width, height, internalFormat, format, GL_TEXTURE_2D);
     if (!mId) {
         glGenTextures(1, &mId);
         needsAlloc = true;
@@ -171,12 +173,6 @@ static void uploadToTexture(bool resize, GLint internalFormat, GLenum format, GL
     }
 }
 
-static void uploadSkBitmapToTexture(const SkBitmap& bitmap,
-        bool resize, GLint internalFormat, GLenum format, GLenum type) {
-    uploadToTexture(resize, internalFormat, format, type, bitmap.rowBytesAsPixels(),
-            bitmap.bytesPerPixel(), bitmap.width(), bitmap.height(), bitmap.getPixels());
-}
-
 static void colorTypeToGlFormatAndType(const Caches& caches, SkColorType colorType,
         bool needSRGB, GLint* outInternalFormat, GLint* outFormat, GLint* outType) {
     switch (colorType) {
@@ -218,9 +214,7 @@ static void colorTypeToGlFormatAndType(const Caches& caches, SkColorType colorTy
     }
 }
 
-void Texture::upload(const SkBitmap& bitmap) {
-    SkAutoLockPixels alp(bitmap);
-
+void Texture::upload(Bitmap& bitmap) {
     if (!bitmap.readyToDraw()) {
         ALOGE("Cannot generate texture from bitmap");
         return;
@@ -244,12 +238,12 @@ void Texture::upload(const SkBitmap& bitmap) {
     }
 
     sk_sp<SkColorSpace> sRGB = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
-    bool needSRGB = bitmap.colorSpace() == sRGB.get();
+    bool needSRGB = bitmap.info().colorSpace() == sRGB.get();
 
     GLint internalFormat, format, type;
     colorTypeToGlFormatAndType(mCaches, bitmap.colorType(), needSRGB, &internalFormat, &format, &type);
 
-    if (updateSize(bitmap.width(), bitmap.height(), internalFormat, format)) {
+    if (updateSize(bitmap.width(), bitmap.height(), internalFormat, format, GL_TEXTURE_2D)) {
         needsAlloc = true;
     }
 
@@ -264,15 +258,21 @@ void Texture::upload(const SkBitmap& bitmap) {
 
         SkBitmap rgbaBitmap;
         rgbaBitmap.allocPixels(SkImageInfo::MakeN32(
-                mWidth, mHeight, bitmap.alphaType(), hasSRGB ? sRGB : nullptr));
+                mWidth, mHeight, bitmap.info().alphaType(), hasSRGB ? sRGB : nullptr));
         rgbaBitmap.eraseColor(0);
 
         SkCanvas canvas(rgbaBitmap);
-        canvas.drawBitmap(bitmap, 0.0f, 0.0f, nullptr);
+        SkBitmap skBitmap;
+        bitmap.getSkBitmap(&skBitmap);
+        canvas.drawBitmap(skBitmap, 0.0f, 0.0f, nullptr);
 
-        uploadSkBitmapToTexture(rgbaBitmap, needsAlloc, internalFormat, format, type);
+        uploadToTexture(needsAlloc, internalFormat, format, type, rgbaBitmap.rowBytesAsPixels(),
+                rgbaBitmap.bytesPerPixel(), rgbaBitmap.width(),
+                rgbaBitmap.height(), rgbaBitmap.getPixels());
+
     } else {
-        uploadSkBitmapToTexture(bitmap, needsAlloc, internalFormat, format, type);
+        uploadToTexture(needsAlloc, internalFormat, format, type, bitmap.rowBytesAsPixels(),
+                bitmap.info().bytesPerPixel(), bitmap.width(), bitmap.height(), bitmap.pixels());
     }
 
     if (canMipMap) {
@@ -288,12 +288,14 @@ void Texture::upload(const SkBitmap& bitmap) {
     }
 }
 
-void Texture::wrap(GLuint id, uint32_t width, uint32_t height, GLint internalFormat, GLint format) {
+void Texture::wrap(GLuint id, uint32_t width, uint32_t height,
+        GLint internalFormat, GLint format, GLenum target) {
     mId = id;
     mWidth = width;
     mHeight = height;
     mFormat = format;
     mInternalFormat = internalFormat;
+    mTarget = target;
     // We're wrapping an existing texture, so don't double count this memory
     notifySizeChanged(0);
 }

@@ -127,9 +127,7 @@ Texture* TextureCache::getCachedTexture(Bitmap* bitmap) {
             texture = new Texture(Caches::getInstance());
             texture->bitmapSize = size;
             texture->generation = bitmap->getGenerationID();
-            SkBitmap skBitmap;
-            bitmap->getSkBitmap(&skBitmap);
-            texture->upload(skBitmap);
+            texture->upload(*bitmap);
 
             mSize += size;
             TEXTURE_LOGD("TextureCache::get: create texture(%p): name, size, mSize = %d, %d, %d",
@@ -142,9 +140,7 @@ Texture* TextureCache::getCachedTexture(Bitmap* bitmap) {
     } else if (!texture->isInUse && bitmap->getGenerationID() != texture->generation) {
         // Texture was in the cache but is dirty, re-upload
         // TODO: Re-adjust the cache size if the bitmap's dimensions have changed
-        SkBitmap skBitmap;
-        bitmap->getSkBitmap(&skBitmap);
-        texture->upload(skBitmap);
+        texture->upload(*bitmap);
         texture->generation = bitmap->getGenerationID();
     }
 
@@ -174,9 +170,7 @@ Texture* TextureCache::get(Bitmap* bitmap) {
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
         texture = new Texture(Caches::getInstance());
         texture->bitmapSize = size;
-        SkBitmap skBitmap;
-        bitmap->getSkBitmap(&skBitmap);
-        texture->upload(skBitmap);
+        texture->upload(*bitmap);
         texture->generation = bitmap->getGenerationID();
         texture->cleanup = true;
     }

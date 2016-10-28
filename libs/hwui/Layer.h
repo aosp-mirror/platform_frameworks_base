@@ -75,7 +75,8 @@ public:
     }
 
     void setSize(uint32_t width, uint32_t height) {
-        texture.updateSize(width, height, texture.internalFormat(), texture.format());
+        texture.updateSize(width, height, texture.internalFormat(), texture.format(),
+                texture.target());
     }
 
     inline void setBlend(bool blend) {
@@ -120,23 +121,23 @@ public:
     }
 
     inline GLenum getRenderTarget() const {
-        return renderTarget;
+        return texture.target();
     }
 
     inline void setRenderTarget(GLenum renderTarget) {
-        this->renderTarget = renderTarget;
+        texture.mTarget = renderTarget;
     }
 
     inline bool isRenderable() const {
-        return renderTarget != GL_NONE;
+        return texture.target() != GL_NONE;
     }
 
     void setWrap(GLenum wrap, bool bindTexture = false, bool force = false) {
-        texture.setWrap(wrap, bindTexture, force, renderTarget);
+        texture.setWrap(wrap, bindTexture, force);
     }
 
     void setFilter(GLenum filter, bool bindTexture = false, bool force = false) {
-        texture.setFilter(filter, bindTexture, force, renderTarget);
+        texture.setFilter(filter, bindTexture, force);
     }
 
     inline SkColorFilter* getColorFilter() const {
@@ -184,11 +185,6 @@ private:
      * The texture backing this layer.
      */
     Texture texture;
-
-    /**
-     * Indicates the render target.
-     */
-    GLenum renderTarget = GL_TEXTURE_2D;
 
     /**
      * Color filter used to draw this layer. Optional.

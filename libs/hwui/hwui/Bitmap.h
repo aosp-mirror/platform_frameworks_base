@@ -57,6 +57,11 @@ public:
     // doing on a Bitmap type, not a SkPixelRef, so static
     // dispatching will do what we want.
     size_t rowBytes() const { return mRowBytes; }
+
+    int rowBytesAsPixels() const {
+        return mRowBytes >> info().shiftPerPixel();
+    }
+
     void reconfigure(const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
     void reconfigure(const SkImageInfo& info);
     void setAlphaType(SkAlphaType alphaType);
@@ -73,6 +78,9 @@ public:
     SkColorType colorType() const { return info().colorType(); }
     void getBounds(SkRect* bounds) const;
 
+    bool readyToDraw() const {
+        return this->colorType() != kIndex_8_SkColorType || mColorTable;
+    }
 protected:
     virtual bool onNewLockPixels(LockRec* rec) override;
     virtual void onUnlockPixels() override { };
