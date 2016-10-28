@@ -39,8 +39,8 @@
     <color name="tertiary_material_settings">@color/material_blue_grey_700</color>
     <color name="quaternary_material_settings">@color/material_blue_grey_200</color>
 
-    <color name="accent_material_light">@color/material_deep_teal_500</color>
-    <color name="accent_material_dark">@color/material_deep_teal_200</color>
+    <color name="accent_material_light">@color/material_pixel_blue_bright</color>
+    <color name="accent_material_dark">@color/material_pixel_blue_bright</color>
 
     <color name="button_material_dark">#ff5a595b</color>
     <color name="button_material_light">#ffd6d7d7</color>
@@ -108,14 +108,18 @@
     <color name="material_red_A100">#ff8a80</color>
     <color name="material_red_A700">#d50000</color>
 
+    <color name="material_pixel_blue_light">#ff3e4147</color>
+    <color name="material_pixel_blue_dark">#ff2a2c31</color>
+    <color name="material_pixel_blue_bright">#ff4285f4</color>
+
     <!-- Time picker defaults when no theme is set -->
     <eat-comment />
 
     <color name="timepicker_default_background_material">@color/primary_text_default_material_light</color>
     <color name="timepicker_default_text_color_material">@color/black</color>
-    <color name="timepicker_default_ampm_selected_background_color_material">@color/material_deep_teal_200</color>
+    <color name="timepicker_default_ampm_selected_background_color_material">@color/material_pixel_blue_bright</color>
     <color name="timepicker_default_ampm_unselected_background_color_material">@color/transparent</color>
-    <color name="timepicker_default_selector_color_material">@color/material_deep_teal_200</color>
+    <color name="timepicker_default_selector_color_material">@color/material_pixel_blue_bright</color>
     <color name="timepicker_default_numbers_background_color_material">@color/transparent</color>
 
     <!-- DatePicker colors -->
@@ -139,8 +143,8 @@
     <color name="datepicker_default_pressed_text_color_material_light">#ff0099cc</color>
     <color name="datepicker_default_pressed_text_color_material_dark">#ff0099cc</color>
 
-    <color name="datepicker_default_circle_background_color_material_light">@color/material_deep_teal_500</color>
-    <color name="datepicker_default_circle_background_color_material_dark">@color/material_deep_teal_200</color>
+    <color name="datepicker_default_circle_background_color_material_light">@color/material_pixel_blue_bright</color>
+    <color name="datepicker_default_circle_background_color_material_dark">@color/material_pixel_blue_bright</color>
 
     <color name="datepicker_default_view_animator_color_material_light">#fff2f2f2</color>
     <color name="datepicker_default_view_animator_color_material_dark">#ff303030</color>

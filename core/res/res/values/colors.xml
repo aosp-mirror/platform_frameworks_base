@@ -60,10 +60,10 @@
     <color name="dim_foreground_light_inverse">#bebebe</color>
     <color name="dim_foreground_light_inverse_disabled">#80bebebe</color>
     <color name="hint_foreground_light">#808080</color>
-    <color name="highlighted_text_dark">#9983CC39</color>
-    <color name="highlighted_text_light">#9983CC39</color>
-    <color name="link_text_dark">#5c5cff</color>
-    <color name="link_text_light">#0000ee</color>
+    <color name="highlighted_text_dark">@color/material_pixel_blue_bright</color>
+    <color name="highlighted_text_light">@color/material_pixel_blue_bright</color>
+    <color name="link_text_dark">@color/material_pixel_blue_bright</color>
+    <color name="link_text_light">@color/material_pixel_blue_bright</color>
     <color name="suggestion_highlight_text">#177bbd</color>
 
     <drawable name="stat_notify_sync_noanim">@drawable/stat_notify_sync_anim0</drawable>
@@ -164,7 +164,7 @@
     <color name="accessibility_focus_highlight">#bf39b500</color>
     <color name="autofilled_highlight">#4dffeb3b</color>
 
-    <color name="system_notification_accent_color">#ff607D8B</color>
+    <color name="system_notification_accent_color">@color/material_pixel_blue_bright</color>
 
     <!-- Default user icon colors -->
     <color name="user_icon_1">@android:color/accent_device_default_light</color>
@@ -187,18 +187,18 @@
     <color name="instant_app_badge">#ff757575</color><!-- Grey -->
 
     <!-- Multi-sim sim colors -->
-    <color name="Teal_700">#ff00796b</color>
-    <color name="Teal_800">#ff00695c</color>
-    <color name="Blue_700">#ff3367d6</color>
-    <color name="Blue_800">#ff2a56c6</color>
-    <color name="Indigo_700">#ff303f9f</color>
-    <color name="Indigo_800">#ff283593</color>
-    <color name="Purple_700">#ff7b1fa2</color>
-    <color name="Purple_800">#ff6a1b9a</color>
-    <color name="Pink_700">#ffc2185b</color>
-    <color name="Pink_800">#ffad1457</color>
-    <color name="Red_700">#ffc53929</color>
-    <color name="Red_800">#ffb93221</color>
+    <color name="Teal_700">@color/material_pixel_blue_light</color>
+    <color name="Teal_800">@color/material_pixel_blue_dark</color>
+    <color name="Blue_700">@color/material_pixel_blue_light</color>
+    <color name="Blue_800">@color/material_pixel_blue_dark</color>
+    <color name="Indigo_700">@color/material_pixel_blue_light</color>
+    <color name="Indigo_800">@color/material_pixel_blue_dark</color>
+    <color name="Purple_700">@color/material_pixel_blue_light</color>
+    <color name="Purple_800">@color/material_pixel_blue_dark</color>
+    <color name="Pink_700">@color/material_pixel_blue_light</color>
+    <color name="Pink_800">@color/material_pixel_blue_dark</color>
+    <color name="Red_700">@color/material_pixel_blue_light</color>
+    <color name="Red_800">@color/material_pixel_blue_dark</color>
 
     <!-- Status bar color for semi transparent mode. -->
     <color name="system_bar_background_semi_transparent">#66000000</color> <!-- 40% black -->
