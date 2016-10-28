@@ -232,8 +232,7 @@ public abstract class WallpaperService extends Service {
                         "Wallpapers do not support keep screen on");
             }
 
-            @Override
-            public Canvas lockCanvas() {
+            private void prepareToDraw() {
                 if (mDisplayState == Display.STATE_DOZE
                         || mDisplayState == Display.STATE_DOZE_SUSPEND) {
                     try {
@@ -242,7 +241,24 @@ public abstract class WallpaperService extends Service {
                         // System server died, can be ignored.
                     }
                 }
+            }
+
+            @Override
+            public Canvas lockCanvas() {
+                prepareToDraw();
                 return super.lockCanvas();
+            }
+
+            @Override
+            public Canvas lockCanvas(Rect dirty) {
+                prepareToDraw();
+                return super.lockCanvas(dirty);
+            }
+
+            @Override
+            public Canvas lockHardwareCanvas() {
+                prepareToDraw();
+                return super.lockHardwareCanvas();
             }
         };
 
