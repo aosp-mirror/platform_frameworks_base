@@ -3483,6 +3483,21 @@ public class Intent implements Parcelable, Cloneable {
     public static final String CATEGORY_OPENABLE = "android.intent.category.OPENABLE";
 
     /**
+     * Used to indicate that an intent filter can accept files which are not necessarily
+     * openable by {@link ContentResolver#openFileDescriptor(Uri, String)}, but
+     * at least streamable via
+     * {@link ContentResolver#openTypedAssetFileDescriptor(Uri, String, Bundle)}
+     * using one of the stream types exposed via
+     * {@link ContentResolver#getStreamTypes(Uri, String)}.
+     *
+     * @see #ACTION_SEND
+     * @see #ACTION_SEND_MULTIPLE
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_TYPED_OPENABLE  =
+            "android.intent.category.TYPED_OPENABLE";
+
+    /**
      * To be used as code under test for framework instrumentation tests.
      */
     public static final String CATEGORY_FRAMEWORK_INSTRUMENTATION_TEST =
