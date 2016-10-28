@@ -61,7 +61,7 @@ import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 import android.util.ArrayMap;
 
-import com.android.internal.util.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
 import com.android.server.retaildemo.RetailDemoModeService.Injector;
