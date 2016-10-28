@@ -257,7 +257,7 @@ void GlopBuilder::setFill(int color, float alphaScale,
             // If the blend mode cannot be implemented using shaders, fall
             // back to the default SrcOver blend mode instead
             if (CC_UNLIKELY(mCaches.extensions().hasFramebufferFetch())) {
-                mDescription.framebufferMode = (SkXfermode::Mode)mode;
+                mDescription.framebufferMode = mode;
                 mDescription.swapSrcDst = (modeUsage == Blend::ModeOrderSwap::Swap);
                 // blending in shader, don't enable
             } else {
@@ -271,11 +271,11 @@ void GlopBuilder::setFill(int color, float alphaScale,
 
     if (colorFilter) {
         SkColor color;
-        SkXfermode::Mode xmode;
+        SkBlendMode bmode;
         SkScalar srcColorMatrix[20];
-        if (colorFilter->asColorMode(&color, &xmode)) {
+        if (colorFilter->asColorMode(&color, &bmode)) {
             mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::ColorFilterMode::Blend;
-            mDescription.colorMode = xmode;
+            mDescription.colorMode = bmode;
             mOutGlop->fill.filter.color.set(color);
         } else if (colorFilter->asColorMatrix(srcColorMatrix)) {
             mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::ColorFilterMode::Matrix;

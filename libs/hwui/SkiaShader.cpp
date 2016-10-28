@@ -309,10 +309,7 @@ bool tryStoreCompose(Caches& caches, const SkShader& shader, const Matrix4& mode
         storeCompose(caches, *rec.fShaderB, *rec.fShaderA,
                 transform, textureUnit, description, outData);
     }
-    if (!SkXfermode::AsMode(rec.fMode, &description->shadersMode)) {
-        // TODO: Support other modes.
-        description->shadersMode = SkXfermode::kSrcOver_Mode;
-    }
+    description->shadersMode = rec.fBlendMode;
     return true;
 }
 

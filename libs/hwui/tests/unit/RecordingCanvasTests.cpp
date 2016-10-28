@@ -776,7 +776,7 @@ TEST(RecordingCanvas, refBitmapInShader_composeShader) {
                 SkShader::TileMode::kRepeat_TileMode);
 
         sk_sp<SkShader> composeShader = SkShader::MakeComposeShader(std::move(shader1), std::move(shader2),
-                SkXfermode::kMultiply_Mode);
+                SkBlendMode::kMultiply);
         paint.setShader(std::move(composeShader));
         canvas.drawRoundRect(0, 0, 100, 100, 20.0f, 20.0f, paint);
     });

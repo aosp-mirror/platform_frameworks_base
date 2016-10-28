@@ -140,8 +140,9 @@ void SkiaCanvasProxy::onDrawBitmapNine(const SkBitmap& bitmap, const SkIRect& ce
 }
 
 void SkiaCanvasProxy::onDrawVertices(VertexMode mode, int vertexCount, const SkPoint vertices[],
-        const SkPoint texs[], const SkColor colors[], SkXfermode*, const uint16_t indices[],
+        const SkPoint texs[], const SkColor colors[], SkBlendMode, const uint16_t indices[],
         int indexCount, const SkPaint& paint) {
+    // TODO: should we pass through blendmode
     if (mFilterHwuiCalls) {
         return;
     }
@@ -374,7 +375,7 @@ void SkiaCanvasProxy::onDrawTextBlob(const SkTextBlob* blob, SkScalar x, SkScala
 }
 
 void SkiaCanvasProxy::onDrawPatch(const SkPoint cubics[12], const SkColor colors[4],
-        const SkPoint texCoords[4], SkXfermode* xmode, const SkPaint& paint) {
+        const SkPoint texCoords[4], SkBlendMode bmode, const SkPaint& paint) {
     if (mFilterHwuiCalls) {
         return;
     }
@@ -388,7 +389,7 @@ void SkiaCanvasProxy::onDrawPatch(const SkPoint cubics[12], const SkColor colors
     // If it fails to generate the vertices, then we do not draw.
     if (SkPatchUtils::getVertexData(&data, cubics, colors, texCoords, lod.width(), lod.height())) {
         this->drawVertices(SkCanvas::kTriangles_VertexMode, data.fVertexCount, data.fPoints,
-                           data.fTexCoords, data.fColors, xmode, data.fIndices, data.fIndexCount,
+                           data.fTexCoords, data.fColors, bmode, data.fIndices, data.fIndexCount,
                            paint);
     }
 }

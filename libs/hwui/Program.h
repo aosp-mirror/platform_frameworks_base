@@ -22,7 +22,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include <SkXfermode.h>
+#include <SkBlendMode.h>
 
 #include "Debug.h"
 #include "FloatColor.h"
@@ -142,7 +142,7 @@ struct ProgramDescription {
     Gradient gradientType;
     bool isSimpleGradient;
 
-    SkXfermode::Mode shadersMode;
+    SkBlendMode shadersMode;
 
     bool isBitmapFirst;
     GLenum bitmapWrapS;
@@ -150,11 +150,11 @@ struct ProgramDescription {
 
     // Color operations
     ColorFilterMode colorOp;
-    SkXfermode::Mode colorMode;
+    SkBlendMode colorMode;
 
     // Framebuffer blending (requires Extensions.hasFramebufferFetch())
-    // Ignored for all values < SkXfermode::kPlus_Mode
-    SkXfermode::Mode framebufferMode;
+    // Ignored for all values < SkBlendMode::kPlus
+    SkBlendMode framebufferMode;
     bool swapSrcDst;
 
     bool hasDebugHighlight;
@@ -186,16 +186,16 @@ struct ProgramDescription {
         gradientType = kGradientLinear;
         isSimpleGradient = false;
 
-        shadersMode = SkXfermode::kClear_Mode;
+        shadersMode = SkBlendMode::kClear;
 
         isBitmapFirst = false;
         bitmapWrapS = GL_CLAMP_TO_EDGE;
         bitmapWrapT = GL_CLAMP_TO_EDGE;
 
         colorOp = ColorFilterMode::None;
-        colorMode = SkXfermode::kClear_Mode;
+        colorMode = SkBlendMode::kClear;
 
-        framebufferMode = SkXfermode::kClear_Mode;
+        framebufferMode = SkBlendMode::kClear;
         swapSrcDst = false;
 
         hasDebugHighlight = false;
@@ -244,7 +244,7 @@ struct ProgramDescription {
         key |= programid(gradientType) << PROGRAM_GRADIENT_TYPE_SHIFT;
         if (isBitmapFirst) key |= PROGRAM_KEY_BITMAP_FIRST;
         if (hasBitmap && hasGradient) {
-            key |= (shadersMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_SHADER_SHIFT;
+            key |= ((int)shadersMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_SHADER_SHIFT;
         }
         switch (colorOp) {
             case ColorFilterMode::Matrix:
@@ -252,12 +252,12 @@ struct ProgramDescription {
                 break;
             case ColorFilterMode::Blend:
                 key |= PROGRAM_KEY_COLOR_BLEND;
-                key |= (colorMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_COLOR_OP_SHIFT;
+                key |= ((int)colorMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_COLOR_OP_SHIFT;
                 break;
             case ColorFilterMode::None:
                 break;
         }
-        key |= (framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
+        key |= ((int)framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
         if (swapSrcDst) key |= PROGRAM_KEY_SWAP_SRC_DST;
         if (modulate) key |= programid(0x1) << PROGRAM_MODULATE_SHIFT;
         if (hasVertexAlpha) key |= programid(0x1) << PROGRAM_HAS_VERTEX_ALPHA_SHIFT;

@@ -30,7 +30,6 @@
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkPaint.h>
-#include <SkXfermode.h>
 #pragma GCC diagnostic pop
 
 #include <android/native_window.h>

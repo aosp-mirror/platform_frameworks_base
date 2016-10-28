@@ -31,7 +31,7 @@
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkPaint.h>
-#include <SkXfermode.h>
+#include <SkBlendMode.h>
 #pragma GCC diagnostic pop
 
 namespace android {

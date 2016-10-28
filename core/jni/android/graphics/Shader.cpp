@@ -2,7 +2,7 @@
 #include "SkGradientShader.h"
 #include "SkImagePriv.h"
 #include "SkShader.h"
-#include "SkXfermode.h"
+#include "SkBlendMode.h"
 #include "core_jni_helpers.h"
 
 #include <Caches.h>
@@ -237,7 +237,7 @@ static jlong ComposeShader_create(JNIEnv* env, jobject o,
     SkBlendMode mode = static_cast<SkBlendMode>(xfermodeHandle);
     SkShader* shader = SkShader::MakeComposeShader(sk_ref_sp(shaderA),
                                                    sk_ref_sp(shaderB),
-                                                   (SkXfermode::Mode)mode).release();
+                                                   mode).release();
     return reinterpret_cast<jlong>(shader);
 }
 

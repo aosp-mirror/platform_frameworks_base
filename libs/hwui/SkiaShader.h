@@ -22,7 +22,6 @@
 
 #include <GLES2/gl2.h>
 #include <SkShader.h>
-#include <SkXfermode.h>
 #include <cutils/compiler.h>
 
 namespace android {
