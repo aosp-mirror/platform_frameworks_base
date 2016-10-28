@@ -47,6 +47,8 @@ public abstract class ExpandableView extends FrameLayout {
     private boolean mClipToActualHeight = true;
     private boolean mChangingPosition = false;
     private ViewGroup mTransientContainer;
+    private boolean mInShelf;
+    private boolean mTransformingInShelf;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -473,6 +475,29 @@ public abstract class ExpandableView extends FrameLayout {
      */
     public boolean hasNoContentHeight() {
         return false;
+    }
+
+    /**
+     * @param inShelf whether the view is currently fully in the notification shelf.
+     */
+    public void setInShelf(boolean inShelf) {
+        mInShelf = inShelf;
+    }
+
+    public boolean isInShelf() {
+        return mInShelf;
+    }
+
+    /**
+     * @param transformingInShelf whether the view is currently transforming into the shelf in an
+     *                            animated way
+     */
+    public void setTransformingInShelf(boolean transformingInShelf) {
+        mTransformingInShelf = transformingInShelf;
+    }
+
+    public boolean isTransformingIntoShelf() {
+        return mTransformingInShelf;
     }
 
     /**

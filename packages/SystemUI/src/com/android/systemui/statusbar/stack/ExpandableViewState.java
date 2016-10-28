@@ -86,6 +86,7 @@ public class ExpandableViewState extends ViewState {
     public boolean hideSensitive;
     public boolean belowShelf;
     public float shadowAlpha;
+    public boolean inShelf;
 
     /**
      * How much the child overlaps with the previous child on top. This is used to
@@ -171,6 +172,9 @@ public class ExpandableViewState extends ViewState {
             if (oldClipTopAmount != this.clipTopAmount) {
                 expandableView.setClipTopAmount(this.clipTopAmount);
             }
+
+            expandableView.setTransformingInShelf(false);
+            expandableView.setInShelf(inShelf);
         }
     }
 
@@ -220,6 +224,11 @@ public class ExpandableViewState extends ViewState {
         if (properties.wasAdded(child)) {
             expandableView.performAddAnimation(properties.delay, properties.duration);
         }
+
+        if (!expandableView.isInShelf() && this.inShelf) {
+            expandableView.setTransformingInShelf(true);
+        }
+        expandableView.setInShelf(this.inShelf);
     }
 
     private void startHeightAnimation(final ExpandableView child, AnimationProperties properties) {

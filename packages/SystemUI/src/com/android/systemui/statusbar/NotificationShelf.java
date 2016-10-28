@@ -60,6 +60,8 @@ public class NotificationShelf extends ActivatableNotificationView {
     private NotificationStackScrollLayout mHostLayout;
     private int mMaxLayoutHeight;
     private int mPaddingBetweenElements;
+    private int mNotGoneIndex;
+    private boolean mHasItemsInStableShelf;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -154,9 +156,14 @@ public class NotificationShelf extends ActivatableNotificationView {
             mShelfState.shadowAlpha = 1.0f;
             mShelfState.isBottomClipped = false;
             mShelfState.hideSensitive = false;
+            if (mNotGoneIndex != -1) {
+                mShelfState.notGoneIndex = Math.min(mShelfState.notGoneIndex, mNotGoneIndex);
+            }
+            mShelfState.hasItemsInStableShelf = lastViewState.inShelf;
         } else {
             mShelfState.hidden = true;
             mShelfState.location = ExpandableViewState.LOCATION_GONE;
+            mShelfState.hasItemsInStableShelf = false;
         }
     }
 
@@ -169,6 +176,7 @@ public class NotificationShelf extends ActivatableNotificationView {
                 mNotificationIconContainer.resetViewStates();
         float numIconsInShelf = 0.0f;
         int shelfIndex = mAmbientState.getShelfIndex();
+        mNotGoneIndex = -1;
         //  find the first view that doesn't overlap with the shelf
         for (int i = shelfIndex - 1; i >= 0; i--) {
             ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
@@ -198,6 +206,9 @@ public class NotificationShelf extends ActivatableNotificationView {
             updateNotificationClipHeight(row, notificationClipEnd);
             updateIconAppearance(shelfStart, row, iconState, icon);
             numIconsInShelf += iconState.iconAppearAmount;
+            if (row.getTranslationY() >= getTranslationY()) {
+                mNotGoneIndex = i;
+            }
         }
         for (int i = mHostLayout.getChildCount() - 1; i >= shelfIndex; i--) {
             // We need to reset the clipping in case a notification switches from high to low
@@ -301,6 +312,13 @@ public class NotificationShelf extends ActivatableNotificationView {
         iconState.hidden = transitionAmount == 0.0f;
         row.setIconTransformationAmount(transitionAmount);
         icon.setVisibility(transitionAmount == 0.0f ? INVISIBLE : VISIBLE);
+        if (row.isInShelf() && !row.isTransformingIntoShelf()) {
+            iconState.iconAppearAmount = 1.0f;
+            iconState.alpha = 1.0f;
+            iconState.scaleX = shelfIconSize / icon.getHeight();
+            iconState.scaleY = iconState.scaleX;
+            iconState.hidden = false;
+        }
     }
 
     private float getFullyClosedTranslation() {
@@ -335,6 +353,10 @@ public class NotificationShelf extends ActivatableNotificationView {
         updateOutline();
     }
 
+    public boolean hidesBackground() {
+        return mHideBackground;
+    }
+
     @Override
     protected boolean needsOutline() {
         return !mHideBackground && super.needsOutline();
@@ -353,14 +375,35 @@ public class NotificationShelf extends ActivatableNotificationView {
         mMaxLayoutHeight = maxLayoutHeight;
     }
 
+    /**
+     * @return the index of the notification at which the shelf visually resides
+     */
+    public int getNotGoneIndex() {
+        return mNotGoneIndex;
+    }
+
+    private void setHasItemsInStableShelf(boolean hasItemsInStableShelf) {
+        mHasItemsInStableShelf = hasItemsInStableShelf;
+    }
+
+    /**
+     * @return whether the shelf has any icons in it when a potential animation has finished, i.e
+     *         if the current state would be applied right now
+     */
+    public boolean hasItemsInStableShelf() {
+        return mHasItemsInStableShelf;
+    }
+
     private class ShelfState extends ExpandableViewState {
         private float iconContainerTranslation;
+        private boolean hasItemsInStableShelf;
 
         @Override
         public void applyToView(View view) {
             super.applyToView(view);
             updateAppearance();
             setIconContainerTranslation(iconContainerTranslation);
+            setHasItemsInStableShelf(hasItemsInStableShelf);
         }
 
         @Override
@@ -368,6 +411,7 @@ public class NotificationShelf extends ActivatableNotificationView {
             super.animateTo(child, properties);
             updateAppearance();
             setIconContainerTranslation(iconContainerTranslation);
+            setHasItemsInStableShelf(hasItemsInStableShelf);
         }
     }
 }

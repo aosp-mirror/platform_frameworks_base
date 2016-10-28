@@ -2127,10 +2127,17 @@ public class NotificationStackScrollLayout extends ViewGroup
                 top = (int) firstView.getTranslationY();
             }
         }
-        ActivatableNotificationView lastView = mLastVisibleBackgroundChild;
+        ActivatableNotificationView lastView = mShelf.hasItemsInStableShelf()
+                ? mShelf
+                : mLastVisibleBackgroundChild;
         int bottom = 0;
         if (lastView != null) {
-            int finalTranslationY = (int) ViewState.getFinalTranslationY(lastView);
+            int finalTranslationY;
+            if (lastView == mShelf) {
+                finalTranslationY = (int) mShelf.getTranslationY();
+            } else {
+                finalTranslationY = (int) ViewState.getFinalTranslationY(lastView);
+            }
             int finalHeight = ExpandableViewState.getFinalActualHeight(lastView);
             int finalBottom = finalTranslationY + finalHeight;
             finalBottom = Math.min(finalBottom, getHeight());
@@ -3979,6 +3986,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         addView(mShelf, index);
         mAmbientState.setShelf(shelf);
+        mStateAnimator.setShelf(shelf);
         shelf.bind(mAmbientState, this);
     }
 

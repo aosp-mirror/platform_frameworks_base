@@ -28,6 +28,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.NotificationShelf;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -75,6 +76,7 @@ public class StackStateAnimator {
     private int mHeadsUpAppearHeightBottom;
     private boolean mShadeExpanded;
     private ArrayList<View> mChildrenToClearFromOverlay = new ArrayList<>();
+    private NotificationShelf mShelf;
 
     public StackStateAnimator(NotificationStackScrollLayout hostLayout) {
         mHostLayout = hostLayout;
@@ -287,9 +289,18 @@ public class StackStateAnimator {
     }
 
     private long calculateDelayGoToFullShade(ExpandableViewState viewState) {
+        int shelfIndex = mShelf.getNotGoneIndex();
         float index = viewState.notGoneIndex;
+        long result = 0;
+        if (index > shelfIndex) {
+            float diff = index - shelfIndex;
+            diff = (float) Math.pow(diff, 0.7f);
+            result += (long) (diff * ANIMATION_DELAY_PER_ELEMENT_GO_TO_FULL_SHADE * 0.25);
+            index = shelfIndex;
+        }
         index = (float) Math.pow(index, 0.7f);
-        return (long) (index * ANIMATION_DELAY_PER_ELEMENT_GO_TO_FULL_SHADE);
+        result += (long) (index * ANIMATION_DELAY_PER_ELEMENT_GO_TO_FULL_SHADE);
+        return result;
     }
 
     /**
@@ -500,5 +511,9 @@ public class StackStateAnimator {
 
     public void setShadeExpanded(boolean shadeExpanded) {
         mShadeExpanded = shadeExpanded;
+    }
+
+    public void setShelf(NotificationShelf shelf) {
+        mShelf = shelf;
     }
 }

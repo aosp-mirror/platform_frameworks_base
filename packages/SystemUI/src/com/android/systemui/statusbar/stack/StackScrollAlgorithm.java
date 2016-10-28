@@ -501,6 +501,7 @@ public class StackScrollAlgorithm {
         childViewState.yTranslation = Math.min(childViewState.yTranslation, shelfStart);
         if (childViewState.yTranslation >= shelfStart) {
             childViewState.hidden = true;
+            childViewState.inShelf = true;
         }
         if (!ambientState.isShadeExpanded()) {
             childViewState.height = (int) (mStatusBarHeight - childViewState.yTranslation);
