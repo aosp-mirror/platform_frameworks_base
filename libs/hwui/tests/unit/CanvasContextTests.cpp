@@ -43,24 +43,8 @@ RENDERTHREAD_TEST(CanvasContext, create) {
     canvasContext->destroy(nullptr);
 }
 
-// This must be in an anonymous namespace as this class name is used in multiple
-// cpp files for different purposes and without the namespace the linker can
-// arbitrarily choose which class to link against.
-namespace {
-class TestFunctor : public Functor {
-public:
-    bool didProcess = false;
-
-    virtual status_t operator ()(int what, void* data) {
-        if (what == DrawGlInfo::kModeProcess) { didProcess = true; }
-        return DrawGlInfo::kStatusDone;
-    }
-};
-}; // end anonymous namespace
-
 RENDERTHREAD_TEST(CanvasContext, invokeFunctor) {
-    TestFunctor functor;
-    ASSERT_FALSE(functor.didProcess);
+    TestUtils::MockFunctor functor;
     CanvasContext::invokeFunctor(renderThread, &functor);
-    ASSERT_TRUE(functor.didProcess);
+    ASSERT_EQ(functor.getLastMode(), DrawGlInfo::kModeProcess);
 }

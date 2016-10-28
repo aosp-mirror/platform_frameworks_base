@@ -249,6 +249,17 @@ public:
 
     static std::unique_ptr<uint16_t[]> asciiToUtf16(const char* str);
 
+    class MockFunctor : public Functor {
+     public:
+         virtual status_t operator ()(int what, void* data) {
+             mLastMode = what;
+             return DrawGlInfo::kStatusDone;
+         }
+         int getLastMode() const { return mLastMode; }
+     private:
+         int mLastMode = -1;
+     };
+
 private:
     static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {
         node->syncProperties();
