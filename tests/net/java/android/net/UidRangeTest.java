@@ -26,7 +26,7 @@ import static org.junit.Assert.assertArrayEquals;
 public class UidRangeTest extends TestCase {
 
     static {
-        System.loadLibrary("servicestestsjni");
+        System.loadLibrary("frameworksnettestsjni");
     }
 
     private static native byte[] readAndWriteNative(byte[] inParcel);

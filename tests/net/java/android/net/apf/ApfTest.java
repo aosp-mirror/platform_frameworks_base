@@ -35,7 +35,7 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import static android.system.OsConstants.*;
 
-import com.android.frameworks.servicestests.R;
+import com.android.frameworks.tests.net.R;
 import com.android.internal.util.HexDump;
 
 import org.mockito.ArgumentCaptor;
@@ -75,7 +75,7 @@ public class ApfTest extends AndroidTestCase {
         super.setUp();
         MockitoAnnotations.initMocks(this);
         // Load up native shared library containing APF interpreter exposed via JNI.
-        System.loadLibrary("servicestestsjni");
+        System.loadLibrary("frameworksnettestsjni");
     }
 
     // Expected return codes from APF interpreter.
