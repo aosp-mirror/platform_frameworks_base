@@ -365,7 +365,6 @@ android.app.ApplicationErrorReport$CrashInfo
 android.app.ApplicationLoaders
 android.app.ApplicationPackageManager
 android.app.ApplicationPackageManager$ResourceName
-android.app.ApplicationThreadNative
 android.app.BackStackRecord
 android.app.BackStackRecord$Op
 android.app.BackStackRecord$TransitionState
@@ -393,6 +392,8 @@ android.app.IAlarmManager
 android.app.IAlarmManager$Stub
 android.app.IAlarmManager$Stub$Proxy
 android.app.IApplicationThread
+android.app.IApplicationThread$Stub
+android.app.IApplicationThread$Stub$Proxy
 android.app.IInstrumentationWatcher
 android.app.IInstrumentationWatcher$Stub
 android.app.INotificationManager
