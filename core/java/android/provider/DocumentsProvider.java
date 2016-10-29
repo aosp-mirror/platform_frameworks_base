@@ -927,14 +927,20 @@ public abstract class DocumentsProvider extends ContentProvider {
                     ? DocumentsContract.getTreeDocumentId(documentUri)
                     : null;
 
-            final Path path = findPath(documentId, parentDocumentId);
+            Path path = findPath(documentId, parentDocumentId);
 
             // Ensure provider doesn't leak information to unprivileged callers.
-            if (isTreeUri
-                    && (path.getRootId() != null
-                        || !Objects.equals(path.getPath().get(0), parentDocumentId))) {
-                throw new IllegalStateException(
-                        "Provider returns an invalid result for findPath.");
+            if (isTreeUri) {
+                if (!Objects.equals(path.getPath().get(0), parentDocumentId)) {
+                    Log.wtf(TAG, "Provider doesn't return path from the tree root. Expected: "
+                            + parentDocumentId + " found: " + path.getPath().get(0));
+                }
+
+                if (path.getRootId() != null) {
+                    Log.wtf(TAG, "Provider returns root id :"
+                            + path.getRootId() + " unexpectedly. Erase root id.");
+                    path = new Path(null, path.getPath());
+                }
             }
 
             out.putParcelable(DocumentsContract.EXTRA_RESULT, path);
