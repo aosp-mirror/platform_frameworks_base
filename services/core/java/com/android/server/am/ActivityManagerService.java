@@ -1212,6 +1212,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * Set while we are wanting to sleep, to prevent any
      * activities from being started/resumed.
+     *
+     * TODO(b/33594039): Clarify the actual state transitions represented by mSleeping.
+     *
+     * Currently mSleeping is set to true when transitioning into the sleep state, and remains true
+     * while in the sleep state until there is a pending transition out of sleep, in which case
+     * mSleeping is set to false, and remains false while awake.
+     *
+     * Whether mSleeping can quickly toggled between true/false without the device actually
+     * display changing states is undefined.
      */
     private boolean mSleeping = false;
 
@@ -1537,8 +1546,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG = 66;
     static final int NOTIFY_FORCED_RESIZABLE_MSG = 67;
     static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG = 68;
-    static final int VR_MODE_APPLY_IF_NEEDED_MSG = 69;
-    static final int SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG = 70;
+    static final int SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG = 69;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2353,14 +2361,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 vrService.setVrMode(vrMode, requestedPackage, userId, callingPackage);
             } break;
-            case VR_MODE_APPLY_IF_NEEDED_MSG: {
-                final ActivityRecord r = (ActivityRecord) msg.obj;
-                final boolean needsVrMode = r != null && r.requestedVrComponent != null;
-                if (needsVrMode) {
-                    applyVrMode(msg.arg1 == 1, r.requestedVrComponent, r.userId,
-                            r.info.getComponentName(), false);
-                }
-            } break;
             }
         }
     };
@@ -3159,20 +3159,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mHandler.obtainMessage(VR_MODE_CHANGE_MSG, 0, 0, r));
     }
 
-    private void applyVrModeIfNeededLocked(ActivityRecord r, boolean enable) {
-        mHandler.sendMessage(
-                mHandler.obtainMessage(VR_MODE_APPLY_IF_NEEDED_MSG, enable ? 1 : 0, 0, r));
-    }
-
-    private void applyVrMode(boolean enabled, ComponentName packageName, int userId,
-            ComponentName callingPackage, boolean immediate) {
-        VrManagerInternal vrService =
-                LocalServices.getService(VrManagerInternal.class);
-        if (immediate) {
-            vrService.setVrModeImmediate(enabled, packageName, userId, callingPackage);
-        } else {
-            vrService.setVrMode(enabled, packageName, userId, callingPackage);
+    private void notifyVrManagerOfSleepState(boolean isSleeping) {
+        final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
+        if (vrService == null) {
+            return;
         }
+        vrService.onSleepStateChanged(isSleeping);
     }
 
     final void showAskCompatModeDialogLocked(ActivityRecord r) {
@@ -6754,7 +6746,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                     // Some stack visibility might change (e.g. docked stack)
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-                    applyVrModeIfNeededLocked(mFocusedActivity, true);
                 }
             }
         } finally {
@@ -11683,6 +11674,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             startTimeTrackingFocusedActivityLocked();
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
             mStackSupervisor.comeOutOfSleepIfNeededLocked();
+            notifyVrManagerOfSleepState(false);
             updateOomAdjLocked();
         } else if (!mSleeping && shouldSleepLocked()) {
             mSleeping = true;
@@ -11691,6 +11683,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP_SLEEPING;
             mStackSupervisor.goingToSleepLocked();
+            notifyVrManagerOfSleepState(true);
             updateOomAdjLocked();
 
             // Initialize the wake times of all processes.
@@ -21915,21 +21908,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public SleepToken acquireSleepToken(String tag) {
             Preconditions.checkNotNull(tag);
-
-            ComponentName requestedVrService = null;
-            ComponentName callingVrActivity = null;
-            int userId = -1;
-            synchronized (ActivityManagerService.this) {
-                if (mFocusedActivity != null) {
-                    requestedVrService = mFocusedActivity.requestedVrComponent;
-                    callingVrActivity = mFocusedActivity.info.getComponentName();
-                    userId = mFocusedActivity.userId;
-                }
-            }
-
-            if (requestedVrService != null) {
-                applyVrMode(false, requestedVrService, userId, callingVrActivity, true);
-            }
 
             synchronized (ActivityManagerService.this) {
                 SleepTokenImpl token = new SleepTokenImpl(tag);
