@@ -343,7 +343,7 @@ public class ZygoteInit {
                     continue;
                 }
 
-                Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadClass " + line);
+                Trace.traceBegin(Trace.TRACE_TAG_DALVIK, line);
                 try {
                     if (false) {
                         Log.v(TAG, "Preloading " + line + "...");
