@@ -48,8 +48,6 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
 
     /** Input surface configured by native camera framework based on user-specified configuration */
     private final Surface mInput;
-    /** User-specified set of surfaces used as the configuration outputs */
-    private final List<Surface> mOutputs;
     /**
      * User-specified state callback, used for outgoing events; calls to this object will be
      * automatically {@link Handler#post(Runnable) posted} to {@code mStateHandler}.
@@ -87,21 +85,17 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
      * There must be no pending actions
      * (e.g. no pending captures, no repeating requests, no flush).</p>
      */
-    CameraCaptureSessionImpl(int id, Surface input, List<Surface> outputs,
+    CameraCaptureSessionImpl(int id, Surface input,
             CameraCaptureSession.StateCallback callback, Handler stateHandler,
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
             Handler deviceStateHandler, boolean configureSuccess) {
-        if (outputs == null || outputs.isEmpty()) {
-            throw new IllegalArgumentException("outputs must be a non-null, non-empty list");
-        } else if (callback == null) {
+        if (callback == null) {
             throw new IllegalArgumentException("callback must not be null");
         }
 
         mId = id;
         mIdString = String.format("Session %d: ", mId);
 
-        // TODO: extra verification of outputs
-        mOutputs = outputs;
         mInput = input;
         mStateHandler = checkHandler(stateHandler);
         mStateCallback = createUserStateCallbackProxy(mStateHandler, callback);

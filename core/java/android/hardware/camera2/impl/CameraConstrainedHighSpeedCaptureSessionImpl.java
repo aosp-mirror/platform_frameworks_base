@@ -58,14 +58,14 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
      * There must be no pending actions
      * (e.g. no pending captures, no repeating requests, no flush).</p>
      */
-    CameraConstrainedHighSpeedCaptureSessionImpl(int id, List<Surface> outputs,
+    CameraConstrainedHighSpeedCaptureSessionImpl(int id,
             CameraCaptureSession.StateCallback callback, Handler stateHandler,
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
             Handler deviceStateHandler, boolean configureSuccess,
             CameraCharacteristics characteristics) {
         mCharacteristics = characteristics;
         CameraCaptureSession.StateCallback wrapperCallback = new WrapperCallback(callback);
-        mSessionImpl = new CameraCaptureSessionImpl(id, /*input*/null, outputs, wrapperCallback,
+        mSessionImpl = new CameraCaptureSessionImpl(id, /*input*/null, wrapperCallback,
                 stateHandler, deviceImpl, deviceStateHandler, configureSuccess);
     }
 
