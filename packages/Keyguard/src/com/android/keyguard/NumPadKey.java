@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
@@ -103,7 +104,8 @@ public class NumPadKey extends ViewGroup {
 
         updateText();
         a = context.obtainStyledAttributes(attrs, android.R.styleable.View);
-        if (!a.hasValueOrEmpty(android.R.styleable.View_background)) {
+        if ((!a.hasValueOrEmpty(android.R.styleable.View_background)) 
+                && isBackgroundRippleEnabled()) {
             setBackground(mContext.getDrawable(R.drawable.ripple_drawable));
         }
         a.recycle();
@@ -124,6 +126,11 @@ public class NumPadKey extends ViewGroup {
 
         // Reset the "announced headset" flag when detached.
         ObscureSpeechDelegate.sAnnouncedHeadset = false;
+    }
+
+    private boolean isBackgroundRippleEnabled() {
+        return (Settings.System.getInt(getContext().getContentResolver(),
+                Settings.System.LOCKSCREEN_PIN_RIPPLE, 1) == 1);
     }
 
     public void setDigit(int digit) {
