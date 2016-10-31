@@ -242,6 +242,9 @@
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to the setup wizard app -->
         <flag name="setup" value="0x800" />
+        <!-- Additional flag from base permission type: this permission can be granted to ephemeral
+             apps -->
+        <flag name="ephemeral" value="0x1000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->

@@ -7659,7 +7659,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 PermissionInfo info = mActivityManagerService.mContext.getPackageManager()
                         .getPermissionInfo(permission, 0);
-                return info.protectionLevel == PermissionInfo.PROTECTION_DANGEROUS;
+                return (info.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
+                        == PermissionInfo.PROTECTION_DANGEROUS;
             } catch (NameNotFoundException nnfe) {
                 Slog.e(TAG, "No such permission: "+ permission, nnfe);
             }

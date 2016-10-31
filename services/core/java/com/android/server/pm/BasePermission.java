@@ -94,4 +94,8 @@ final class BasePermission {
                 == PermissionInfo.PROTECTION_SIGNATURE
                 && (protectionLevel & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0;
     }
+
+    public boolean isEphemeral() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_EPHEMERAL) != 0;
+    }
 }
