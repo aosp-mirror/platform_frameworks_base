@@ -97,6 +97,7 @@ import android.view.IApplicationToken;
 import android.view.IDockedStackListener;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
+import android.view.IPinnedStackListener;
 import android.view.IRotationWatcher;
 import android.view.IWindow;
 import android.view.IWindowId;
@@ -166,12 +167,14 @@ import java.util.HashMap;
 import java.util.List;
 
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
+import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -529,6 +532,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private final SparseIntArray mTmpTaskIds = new SparseIntArray();
 
     boolean mForceResizableTasks = false;
+    boolean mSupportsPictureInPicture = false;
 
     int getDragLayerLocked() {
         return mPolicy.windowTypeToLayerLw(TYPE_DRAG) * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
@@ -3386,6 +3390,36 @@ public class WindowManagerService extends IWindowManager.Stub
     void setDockedStackCreateStateLocked(int mode, Rect bounds) {
         mDockedStackCreateMode = mode;
         mDockedStackCreateBounds = bounds;
+    }
+
+    @Override
+    public Rect getPictureInPictureDefaultBounds(int displayId) {
+        synchronized (mWindowMap) {
+            if (!mSupportsPictureInPicture) {
+                return new Rect();
+            }
+
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            return displayContent.getPinnedStackController().getDefaultBounds();
+        }
+    }
+
+    @Override
+    public Rect getPictureInPictureMovementBounds(int displayId) {
+        synchronized (mWindowMap) {
+            if (!mSupportsPictureInPicture) {
+                return new Rect();
+            }
+
+            final Rect stackBounds = new Rect();
+            getStackBounds(PINNED_STACK_ID, stackBounds);
+            if (stackBounds.isEmpty()) {
+                return stackBounds;
+            }
+
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            return displayContent.getPinnedStackController().getMovementBounds(stackBounds);
+        }
     }
 
     /**
@@ -8331,6 +8365,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("    a[animator]: animator state");
                 pw.println("    s[essions]: active sessions");
                 pw.println("    surfaces: active surfaces (debugging enabled only)");
+                pw.println("    pip: PIP state");
                 pw.println("    d[isplays]: active display contents");
                 pw.println("    t[okens]: token list");
                 pw.println("    w[indows]: window list");
@@ -8401,6 +8436,18 @@ public class WindowManagerService extends IWindowManager.Stub
                     StringBuilder output = new StringBuilder();
                     mRoot.dumpChildrenNames(output, " ");
                     pw.println(output.toString());
+                }
+                return;
+            } else if ("pip".equals(cmd)) {
+                synchronized(mWindowMap) {
+                    pw.print("defaultBounds=");
+                    getPictureInPictureDefaultBounds(DEFAULT_DISPLAY).printShortString(pw);
+                    pw.println();
+                    pw.print("movementBounds=");
+                    getPictureInPictureMovementBounds(DEFAULT_DISPLAY).printShortString(pw);
+                    pw.println();
+                    getDefaultDisplayContentLocked().getPinnedStackController().dump("", pw);
+                    pw.println();
                 }
                 return;
             } else {
@@ -8677,19 +8724,40 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void setSupportsPictureInPicture(boolean supportsPictureInPicture) {
+        synchronized (mWindowMap) {
+            mSupportsPictureInPicture = supportsPictureInPicture;
+        }
+    }
+
     static int dipToPixel(int dip, DisplayMetrics displayMetrics) {
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, displayMetrics);
     }
 
     @Override
     public void registerDockedStackListener(IDockedStackListener listener) {
-        if (!checkCallingPermission(android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS,
+        if (!checkCallingPermission(REGISTER_WINDOW_MANAGER_LISTENERS,
                 "registerDockedStackListener()")) {
             return;
         }
         // TODO(multi-display): The listener is registered on the default display only.
         getDefaultDisplayContentLocked().mDividerControllerLocked.registerDockedStackListener(
                 listener);
+    }
+
+    @Override
+    public void registerPinnedStackListener(int displayId, IPinnedStackListener listener) {
+        if (!checkCallingPermission(REGISTER_WINDOW_MANAGER_LISTENERS,
+                "registerPinnedStackListener()")) {
+            return;
+        }
+        if (!mSupportsPictureInPicture) {
+            return;
+        }
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            displayContent.getPinnedStackController().registerPinnedStackListener(listener);
+        }
     }
 
     @Override
@@ -8865,8 +8933,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void registerShortcutKey(long shortcutCode, IShortcutService shortcutKeyReceiver)
             throws RemoteException {
-        if (!checkCallingPermission(Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS,
-                "registerShortcutKey")) {
+        if (!checkCallingPermission(REGISTER_WINDOW_MANAGER_LISTENERS, "registerShortcutKey")) {
             throw new SecurityException(
                     "Requires REGISTER_WINDOW_MANAGER_LISTENERS permission");
         }

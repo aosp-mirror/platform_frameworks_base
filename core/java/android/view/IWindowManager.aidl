@@ -34,6 +34,7 @@ import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
 import android.view.IOnKeyguardExitResult;
+import android.view.IPinnedStackListener;
 import android.view.IRotationWatcher;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
@@ -424,6 +425,21 @@ interface IWindowManager
      * the docked stack gets added/removed.
      */
     void registerDockedStackListener(IDockedStackListener listener);
+
+    /**
+     * Registers a listener that will be called when the pinned stack state changes.
+     */
+    void registerPinnedStackListener(int displayId, IPinnedStackListener listener);
+
+    /**
+     * Returns the initial bounds that PIP will be shown when it is first started.
+     */
+    Rect getPictureInPictureDefaultBounds(int displayId);
+
+    /**
+     * Returns the bounds that the PIP can move on the screen in the current PIP state.
+     */
+    Rect getPictureInPictureMovementBounds(int displayId);
 
     /**
      * Updates the dim layer used while resizing.

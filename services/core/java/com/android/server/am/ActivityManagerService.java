@@ -1392,12 +1392,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final long[] mTmpLong = new long[2];
 
-    // The size and position information that describes where the pinned stack will go by default.
-    // In particular, the size is defined in DPs.
-    Size mDefaultPinnedStackSizeDp;
-    Size mDefaultPinnedStackScreenEdgeInsetsDp;
-    int mDefaultPinnedStackGravity;
-
     static final class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
         static final int CHANGE_PROCESS_STATE = 1<<1;
@@ -7483,92 +7477,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // current bounds.
                 final ActivityStack pinnedStack = mStackSupervisor.getStack(PINNED_STACK_ID);
                 final Rect bounds = (pinnedStack != null)
-                        ? pinnedStack.mBounds : getDefaultPictureInPictureBounds(DEFAULT_DISPLAY);
+                        ? pinnedStack.mBounds
+                        : mWindowManager.getPictureInPictureDefaultBounds(DEFAULT_DISPLAY);
 
                 mStackSupervisor.moveActivityToPinnedStackLocked(
                         r, "enterPictureInPictureMode", bounds);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    @Override
-    public Rect getDefaultPictureInPictureBounds(int displayId) {
-        final long origId = Binder.clearCallingIdentity();
-        final Rect defaultBounds = new Rect();
-        try {
-            synchronized(this) {
-                if (!mSupportsPictureInPicture) {
-                    return new Rect();
-                }
-
-                // Convert the sizes to for the current display state
-                final DisplayMetrics dm = mStackSupervisor.getDisplayRealMetrics(displayId);
-                final int stackWidth = (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP,
-                        mDefaultPinnedStackSizeDp.getWidth(), dm);
-                final int stackHeight = (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP,
-                        mDefaultPinnedStackSizeDp.getHeight(), dm);
-                final Rect maxBounds = new Rect();
-                getPictureInPictureBounds(displayId, maxBounds);
-                Gravity.apply(mDefaultPinnedStackGravity, stackWidth, stackHeight,
-                        maxBounds, 0, 0, defaultBounds);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-        return defaultBounds;
-    }
-
-    @Override
-    public Rect getPictureInPictureMovementBounds(int displayId) {
-        final long origId = Binder.clearCallingIdentity();
-        final Rect maxBounds = new Rect();
-        try {
-            synchronized(this) {
-                if (!mSupportsPictureInPicture) {
-                    return new Rect();
-                }
-
-                getPictureInPictureBounds(displayId, maxBounds);
-
-                // Adjust the max bounds by the current stack dimensions
-                final StackInfo pinnedStackInfo = mStackSupervisor.getStackInfoLocked(
-                        PINNED_STACK_ID);
-                if (pinnedStackInfo != null) {
-                    maxBounds.right = Math.max(maxBounds.left, maxBounds.right -
-                            pinnedStackInfo.bounds.width());
-                    maxBounds.bottom = Math.max(maxBounds.top, maxBounds.bottom -
-                            pinnedStackInfo.bounds.height());
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-        return maxBounds;
-    }
-
-    /**
-     * Calculate the bounds where the pinned stack can move in the current display state.
-     */
-    private void getPictureInPictureBounds(int displayId, Rect outRect) {
-        // Convert the insets to for the current display state
-        final DisplayMetrics dm = mStackSupervisor.getDisplayRealMetrics(displayId);
-        final int insetsLR = (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP,
-                mDefaultPinnedStackScreenEdgeInsetsDp.getWidth(), dm);
-        final int insetsTB = (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP,
-                mDefaultPinnedStackScreenEdgeInsetsDp.getHeight(), dm);
-        try {
-            final Point displaySize = mStackSupervisor.getDisplayRealSize(displayId);
-            final Rect insets = new Rect();
-            mWindowManager.getStableInsets(displayId, insets);
-
-            // Calculate the insets from the system decorations and apply the gravity
-            outRect.set(insets.left + insetsLR, insets.top + insetsTB,
-                    displaySize.x - insets.right - insetsLR,
-                    displaySize.y - insets.bottom - insetsTB);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to calculate PIP movement bounds", e);
         }
     }
 
@@ -13083,7 +12999,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             mLenientBackgroundCheck = lenientBackgroundCheck;
             mSupportsLeanbackOnly = supportsLeanbackOnly;
             mForceResizableActivities = forceResizable;
-            mWindowManager.setForceResizableTasks(mForceResizableActivities);
             if (supportsMultiWindow || forceResizable) {
                 mSupportsMultiWindow = true;
                 mSupportsFreeformWindowManagement = freeformWindowManagement || forceResizable;
@@ -13093,6 +13008,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mSupportsFreeformWindowManagement = false;
                 mSupportsPictureInPicture = false;
             }
+            mWindowManager.setForceResizableTasks(mForceResizableActivities);
+            mWindowManager.setSupportsPictureInPicture(mSupportsPictureInPicture);
             // This happens before any activities are started, so we can change global configuration
             // in-place.
             updateConfigurationLocked(configuration, null, true);
@@ -13106,12 +13023,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     com.android.internal.R.dimen.thumbnail_width);
             mThumbnailHeight = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.thumbnail_height);
-            mDefaultPinnedStackSizeDp = Size.parseSize(res.getString(
-                    com.android.internal.R.string.config_defaultPictureInPictureSize));
-            mDefaultPinnedStackScreenEdgeInsetsDp = Size.parseSize(res.getString(
-                    com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets));
-            mDefaultPinnedStackGravity = res.getInteger(
-                    com.android.internal.R.integer.config_defaultPictureInPictureGravity);
             mAppErrors.loadAppsNotReportingCrashesFromConfigLocked(res.getString(
                     com.android.internal.R.string.config_appsNotReportingCrashes));
             mUserController.mUserSwitchUiEnabled = !res.getBoolean(
@@ -14193,13 +14104,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             } else if ("locks".equals(cmd)) {
                 LockGuard.dump(fd, pw, args);
-            } else if ("pip".equals(cmd)) {
-                Rect bounds = getDefaultPictureInPictureBounds(DEFAULT_DISPLAY);
-                pw.print("defaultBounds="); bounds.printShortString(pw);
-                pw.println();
-                bounds = getPictureInPictureMovementBounds(DEFAULT_DISPLAY);
-                pw.print("movementBounds="); bounds.printShortString(pw);
-                pw.println();
             } else {
                 // Dumping a single activity?
                 if (!dumpActivity(fd, pw, cmd, args, opti, dumpAll, dumpVisibleStacks)) {

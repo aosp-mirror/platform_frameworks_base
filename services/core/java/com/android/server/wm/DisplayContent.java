@@ -196,6 +196,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private boolean mDeferredRemoval;
 
     final DockedStackDividerController mDividerControllerLocked;
+    final PinnedStackController mPinnedStackControllerLocked;
 
     final DimLayerController mDimLayerController;
 
@@ -237,6 +238,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mService = service;
         initializeDisplayBaseInfo();
         mDividerControllerLocked = new DockedStackDividerController(service, this);
+        mPinnedStackControllerLocked = new PinnedStackController(service, this);
         mDimLayerController = new DimLayerController(this);
 
         // These are the only direct children we should ever have and they are permanent.
@@ -307,6 +309,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mDividerControllerLocked;
     }
 
+    PinnedStackController getPinnedStackController() {
+        return mPinnedStackControllerLocked;
+    }
+
     /**
      * Returns true if the specified UID has access to this display.
      */
@@ -345,6 +351,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mService.reconfigureDisplayLocked(this);
 
         getDockedDividerController().onConfigurationChanged();
+        getPinnedStackController().onConfigurationChanged();
     }
 
     /**
@@ -788,6 +795,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mDividerControllerLocked.setAdjustedForIme(
                     false /*ime*/, false /*divider*/, dockVisible /*animate*/, imeWin, imeHeight);
         }
+        mPinnedStackControllerLocked.setAdjustedForIme(imeVisible, imeHeight);
     }
 
     void setInputMethodAnimLayerAdjustment(int adj) {
@@ -930,6 +938,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDimLayerController.dump(prefix + "  ", pw);
         pw.println();
         mDividerControllerLocked.dump(prefix + "  ", pw);
+        pw.println();
+        mPinnedStackControllerLocked.dump(prefix + "  ", pw);
 
         if (mInputMethodAnimLayerAdjustment != 0) {
             pw.println(subPrefix

@@ -17,15 +17,16 @@
 package com.android.systemui.pip.phone;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
 import static com.android.systemui.Interpolators.FAST_OUT_LINEAR_IN;
 import static com.android.systemui.Interpolators.FAST_OUT_SLOW_IN;
-import static com.android.systemui.recents.misc.Utilities.RECT_EVALUATOR;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityManager.StackInfo;
 import android.app.IActivityManager;
 import android.content.Context;
@@ -34,6 +35,8 @@ import android.graphics.Rect;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.IPinnedStackController;
+import android.view.IPinnedStackListener;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputEvent;
@@ -41,9 +44,9 @@ import android.view.InputEventReceiver;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
-import android.view.animation.Interpolator;
 
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.policy.PipMotionHelper;
 import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.tuner.TunerService;
@@ -65,12 +68,16 @@ public class PipTouchHandler implements TunerService.Tunable {
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
+    private final IWindowManager mWindowManager;
     private final ViewConfiguration mViewConfig;
     private final InputChannel mInputChannel = new InputChannel();
+    private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
+    private IPinnedStackController mPinnedStackController;
 
     private final PipInputEventReceiver mInputEventReceiver;
     private PipDismissViewController mDismissViewController;
     private PipSnapAlgorithm mSnapAlgorithm;
+    private PipMotionHelper mMotionHelper;
 
     private boolean mEnableSwipeToDismiss = true;
     private boolean mEnableDragToDismiss = true;
@@ -78,6 +85,13 @@ public class PipTouchHandler implements TunerService.Tunable {
     private final Rect mPinnedStackBounds = new Rect();
     private final Rect mBoundedPinnedStackBounds = new Rect();
     private ValueAnimator mPinnedStackBoundsAnimator = null;
+    private ValueAnimator.AnimatorUpdateListener mUpdatePinnedStackBoundsListener =
+            new AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            mPinnedStackBounds.set((Rect) animation.getAnimatedValue());
+        }
+    };
 
     private final PointF mDownTouch = new PointF();
     private final PointF mLastTouch = new PointF();
@@ -88,10 +102,13 @@ public class PipTouchHandler implements TunerService.Tunable {
     private final FlingAnimationUtils mFlingAnimationUtils;
     private VelocityTracker mVelocityTracker;
 
+    private final Rect mTmpBounds = new Rect();
+
     /**
      * Input handler used for Pip windows.
      */
     private final class PipInputEventReceiver extends InputEventReceiver {
+
         public PipInputEventReceiver(InputChannel inputChannel, Looper looper) {
             super(inputChannel, looper);
         }
@@ -111,6 +128,22 @@ public class PipTouchHandler implements TunerService.Tunable {
         }
     }
 
+    /**
+     * Handler for messages from the PIP controller.
+     */
+    private class PinnedStackListener extends IPinnedStackListener.Stub {
+
+        @Override
+        public void onListenerRegistered(IPinnedStackController controller) {
+            mPinnedStackController = controller;
+        }
+
+        @Override
+        public void onBoundsChanged(boolean adjustedForIme) {
+            // Do nothing
+        }
+    }
+
     public PipTouchHandler(Context context, IActivityManager activityManager,
             IWindowManager windowManager) {
 
@@ -118,17 +151,20 @@ public class PipTouchHandler implements TunerService.Tunable {
         try {
             windowManager.destroyInputConsumer(INPUT_CONSUMER_PIP);
             windowManager.createInputConsumer(INPUT_CONSUMER_PIP, mInputChannel);
+            windowManager.registerPinnedStackListener(DEFAULT_DISPLAY, mPinnedStackListener);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to create PIP input consumer", e);
         }
         mContext = context;
         mActivityManager = activityManager;
+        mWindowManager = windowManager;
         mViewConfig = ViewConfiguration.get(context);
         mInputEventReceiver = new PipInputEventReceiver(mInputChannel, Looper.myLooper());
         if (mEnableDragToDismiss) {
             mDismissViewController = new PipDismissViewController(context);
         }
         mFlingAnimationUtils = new FlingAnimationUtils(context, 2f);
+        mMotionHelper = new PipMotionHelper(BackgroundThread.getHandler());
 
         // Register any tuner settings changes
         TunerService.get(context).addTunable(this, TUNER_KEY_SWIPE_TO_DISMISS,
@@ -137,12 +173,15 @@ public class PipTouchHandler implements TunerService.Tunable {
 
     @Override
     public void onTuningChanged(String key, String newValue) {
+        if (newValue == null) {
+            return;
+        }
         switch (key) {
             case TUNER_KEY_SWIPE_TO_DISMISS:
-                mEnableSwipeToDismiss = (newValue != null) && Integer.parseInt(newValue) != 0;
+                mEnableSwipeToDismiss = Integer.parseInt(newValue) != 0;
                 break;
             case TUNER_KEY_DRAG_TO_DISMISS:
-                mEnableDragToDismiss = (newValue != null) && Integer.parseInt(newValue) != 0;
+                mEnableDragToDismiss = Integer.parseInt(newValue) != 0;
                 break;
         }
     }
@@ -152,6 +191,11 @@ public class PipTouchHandler implements TunerService.Tunable {
     }
 
     private void handleTouchEvent(MotionEvent ev) {
+        // Skip touch handling until we are bound to the controller
+        if (mPinnedStackController == null) {
+            return;
+        }
+
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN: {
                 // Cancel any existing animations on the pinned stack
@@ -166,6 +210,11 @@ public class PipTouchHandler implements TunerService.Tunable {
                 mLastTouch.set(ev.getX(), ev.getY());
                 mDownTouch.set(mLastTouch);
                 mIsDragging = false;
+                try {
+                    mPinnedStackController.setInInteractiveMode(true);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not set dragging state", e);
+                }
                 if (mEnableDragToDismiss) {
                     // TODO: Consider setting a timer such at after X time, we show the dismiss
                     //       target if the user hasn't already dragged some distance
@@ -203,8 +252,12 @@ public class PipTouchHandler implements TunerService.Tunable {
 
                 if (mIsSwipingToDismiss) {
                     // Ignore the vertical movement
-                    top = mPinnedStackBounds.top;
-                    movePinnedStack(left, top);
+                    mTmpBounds.set(mPinnedStackBounds);
+                    mTmpBounds.offsetTo((int) left, mPinnedStackBounds.top);
+                    if (!mTmpBounds.equals(mPinnedStackBounds)) {
+                        mPinnedStackBounds.set(mTmpBounds);
+                        mMotionHelper.resizeToBounds(mPinnedStackBounds);
+                    }
                 } else if (mIsDragging) {
                     // Move the pinned stack
                     if (!DEBUG_ALLOW_OUT_OF_BOUNDS_STACK) {
@@ -213,7 +266,12 @@ public class PipTouchHandler implements TunerService.Tunable {
                         top = Math.max(mBoundedPinnedStackBounds.top, Math.min(
                                 mBoundedPinnedStackBounds.bottom, top));
                     }
-                    movePinnedStack(left, top);
+                    mTmpBounds.set(mPinnedStackBounds);
+                    mTmpBounds.offsetTo((int) left, (int) top);
+                    if (!mTmpBounds.equals(mPinnedStackBounds)) {
+                        mPinnedStackBounds.set(mTmpBounds);
+                        mMotionHelper.resizeToBounds(mPinnedStackBounds);
+                    }
                 }
                 mLastTouch.set(ev.getX(), ev.getY());
                 break;
@@ -275,6 +333,11 @@ public class PipTouchHandler implements TunerService.Tunable {
             case MotionEvent.ACTION_CANCEL: {
                 mIsDragging = false;
                 mIsSwipingToDismiss = false;
+                try {
+                    mPinnedStackController.setInInteractiveMode(false);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not set dragging state", e);
+                }
                 recycleVelocityTracker();
                 break;
             }
@@ -303,8 +366,8 @@ public class PipTouchHandler implements TunerService.Tunable {
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mBoundedPinnedStackBounds,
                 mPinnedStackBounds, velocityX, velocityY);
         if (!mPinnedStackBounds.equals(toBounds)) {
-            mPinnedStackBoundsAnimator = createResizePinnedStackAnimation(
-                toBounds, 0, FAST_OUT_SLOW_IN);
+            mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
+                toBounds, 0, FAST_OUT_SLOW_IN, mUpdatePinnedStackBoundsListener);
             mFlingAnimationUtils.apply(mPinnedStackBoundsAnimator, 0,
                 distanceBetweenRectOffsets(mPinnedStackBounds, toBounds),
                 velocity);
@@ -319,8 +382,8 @@ public class PipTouchHandler implements TunerService.Tunable {
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mBoundedPinnedStackBounds,
                 mPinnedStackBounds);
         if (!mPinnedStackBounds.equals(toBounds)) {
-            mPinnedStackBoundsAnimator = createResizePinnedStackAnimation(
-                toBounds, SNAP_STACK_DURATION, FAST_OUT_SLOW_IN);
+            mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
+                toBounds, SNAP_STACK_DURATION, FAST_OUT_SLOW_IN, mUpdatePinnedStackBoundsListener);
             mPinnedStackBoundsAnimator.start();
         }
     }
@@ -335,8 +398,8 @@ public class PipTouchHandler implements TunerService.Tunable {
         Rect toBounds = new Rect(mPinnedStackBounds);
         toBounds.offsetTo((int) offsetX, toBounds.top);
         if (!mPinnedStackBounds.equals(toBounds)) {
-            mPinnedStackBoundsAnimator = createResizePinnedStackAnimation(
-                toBounds, 0, FAST_OUT_SLOW_IN);
+            mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
+                toBounds, 0, FAST_OUT_SLOW_IN, mUpdatePinnedStackBoundsListener);
             mFlingAnimationUtils.apply(mPinnedStackBoundsAnimator, 0,
                 distanceBetweenRectOffsets(mPinnedStackBounds, toBounds),
                 velocityX);
@@ -364,8 +427,8 @@ public class PipTouchHandler implements TunerService.Tunable {
             dismissBounds.centerY(),
             dismissBounds.centerX() + 1,
             dismissBounds.centerY() + 1);
-        mPinnedStackBoundsAnimator = createResizePinnedStackAnimation(
-            toBounds, DISMISS_STACK_DURATION, FAST_OUT_LINEAR_IN);
+        mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
+            toBounds, DISMISS_STACK_DURATION, FAST_OUT_LINEAR_IN, mUpdatePinnedStackBoundsListener);
         mPinnedStackBoundsAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -404,66 +467,13 @@ public class PipTouchHandler implements TunerService.Tunable {
             StackInfo info = mActivityManager.getStackInfo(PINNED_STACK_ID);
             if (info != null) {
                 mPinnedStackBounds.set(info.bounds);
-                mBoundedPinnedStackBounds.set(mActivityManager.getPictureInPictureMovementBounds(
+                mBoundedPinnedStackBounds.set(mWindowManager.getPictureInPictureMovementBounds(
                         info.displayId));
-                mSnapAlgorithm = new PipSnapAlgorithm(mContext, info.displayId);
+                mSnapAlgorithm = new PipSnapAlgorithm(mContext);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Could not fetch PIP movement bounds.", e);
         }
-    }
-
-    /**
-     * Moves the pinned stack to the given {@param left} and {@param top} offsets.
-     */
-    private void movePinnedStack(float left, float top) {
-        if ((int) left != mPinnedStackBounds.left || (int) top != mPinnedStackBounds.top) {
-            mPinnedStackBounds.offsetTo((int) left, (int) top);
-            BackgroundThread.getHandler().post(() -> {
-                try {
-                    mActivityManager.resizePinnedStack(mPinnedStackBounds,
-                            null /* tempPinnedBounds */);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Could not move pinned stack to offset: (" + left + ", " + top + ")",
-                            e);
-                }
-            });
-        }
-    }
-
-    /**
-     * Resizes the pinned stack to the given {@param bounds}.
-     */
-    private void resizePinnedStack(Rect bounds) {
-        if (!mPinnedStackBounds.equals(bounds)) {
-            mPinnedStackBounds.set(bounds);
-            BackgroundThread.getHandler().post(() -> {
-                try {
-                    mActivityManager.resizePinnedStack(bounds, null);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Could not resize pinned stack to bounds: (" + bounds + ")");
-                }
-            });
-        }
-    }
-
-    /**
-     * Creates a resize-stack animation.
-     */
-    private ValueAnimator createResizePinnedStackAnimation(Rect toBounds, int duration,
-            Interpolator interpolator) {
-        ValueAnimator anim = ValueAnimator.ofObject(RECT_EVALUATOR,
-                mPinnedStackBounds, toBounds);
-        anim.setDuration(duration);
-        anim.setInterpolator(interpolator);
-        anim.addUpdateListener(
-                new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator animation) {
-                        resizePinnedStack((Rect) animation.getAnimatedValue());
-                    }
-                });
-        return anim;
     }
 
     /**

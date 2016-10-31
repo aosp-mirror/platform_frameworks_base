@@ -48,21 +48,12 @@ public class PipSnapAlgorithm {
     private final ArrayList<Integer> mSnapGravities = new ArrayList<>();
     private final int mSnapMode = SNAP_MODE_CORNERS_ONLY;
 
-    private final Scroller mScroller;
-    private final Rect mDisplayBounds = new Rect();
+    private Scroller mScroller;
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
-    public PipSnapAlgorithm(Context context, int displayId) {
-        final DisplayManager displayManager =
-                (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
-        final ViewConfiguration viewConfig = ViewConfiguration.get(context);
-        final Point displaySize = new Point();
-        displayManager.getDisplay(displayId).getRealSize(displaySize);
+    public PipSnapAlgorithm(Context context) {
         mContext = context;
-        mDisplayBounds.set(0, 0, displaySize.x, displaySize.y);
         mOrientation = context.getResources().getConfiguration().orientation;
-        mScroller = new Scroller(context);
-        mScroller.setFriction(viewConfig.getScrollFriction() * SCROLL_FRICTION_MULTIPLIER);
         calculateSnapTargets();
     }
 
@@ -74,7 +65,12 @@ public class PipSnapAlgorithm {
     public Rect findClosestSnapBounds(Rect movementBounds, Rect stackBounds, float velocityX,
             float velocityY) {
         final Rect finalStackBounds = new Rect(stackBounds);
-        mScroller.fling(stackBounds.left, stackBounds.top,
+        if (mScroller == null) {
+            final ViewConfiguration viewConfig = ViewConfiguration.get(mContext);
+            mScroller = new Scroller(mContext);
+            mScroller.setFriction(viewConfig.getScrollFriction() * SCROLL_FRICTION_MULTIPLIER);
+        }
+        mScroller.fling(sItackBounds.left, stackBounds.top,
                 (int) velocityX, (int) velocityY,
                 movementBounds.left, movementBounds.right,
                 movementBounds.top, movementBounds.bottom);

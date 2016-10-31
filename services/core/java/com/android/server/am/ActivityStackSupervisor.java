@@ -3420,18 +3420,6 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
         mHandler.sendMessage(mHandler.obtainMessage(HANDLE_DISPLAY_CHANGED, displayId, 0));
     }
 
-    DisplayMetrics getDisplayRealMetrics(int displayId) {
-        final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
-        activityDisplay.mDisplay.getRealMetrics(activityDisplay.mRealMetrics);
-        return activityDisplay.mRealMetrics;
-    }
-
-    Point getDisplayRealSize(int displayId) {
-        final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
-        activityDisplay.mDisplay.getRealSize(activityDisplay.mRealSize);
-        return activityDisplay.mRealSize;
-    }
-
     private void handleDisplayAdded(int displayId) {
         boolean newDisplay;
         synchronized (mService) {
