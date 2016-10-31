@@ -987,6 +987,7 @@ public class ZenModeHelper {
             final boolean isVibrate = ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE;
 
             int newZen = -1;
+            ringerModeInternalOut = ringerModeInternal;
             switch (ringerModeNew) {
                 case AudioManager.RINGER_MODE_SILENT:
                     if (isChange) {
@@ -995,14 +996,14 @@ public class ZenModeHelper {
                         }
                         ringerModeInternalOut = isVibrate ? AudioManager.RINGER_MODE_VIBRATE
                                 : AudioManager.RINGER_MODE_SILENT;
-                    } else {
-                        ringerModeInternalOut = ringerModeInternal;
                     }
                     break;
                 case AudioManager.RINGER_MODE_VIBRATE:
                 case AudioManager.RINGER_MODE_NORMAL:
-                    if (mZenMode != Global.ZEN_MODE_OFF) {
-                        newZen = Global.ZEN_MODE_OFF;
+                     if (isChange) {
+                        if (mZenMode != Global.ZEN_MODE_OFF) {
+                            newZen = Global.ZEN_MODE_OFF;
+                        }
                     }
                     break;
             }
