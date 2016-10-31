@@ -344,19 +344,6 @@ public class TaskStackLayoutAlgorithm {
         mContext = context;
         mCb = cb;
         mFreeformLayoutAlgorithm = new FreeformWorkspaceLayoutAlgorithm(context);
-        mMinMargin = res.getDimensionPixelSize(R.dimen.recents_layout_min_margin);
-        mBaseTopMargin = getDimensionForDevice(context,
-                R.dimen.recents_layout_top_margin_phone,
-                R.dimen.recents_layout_top_margin_tablet,
-                R.dimen.recents_layout_top_margin_tablet_xlarge);
-        mBaseSideMargin = getDimensionForDevice(context,
-                R.dimen.recents_layout_side_margin_phone,
-                R.dimen.recents_layout_side_margin_tablet,
-                R.dimen.recents_layout_side_margin_tablet_xlarge);
-        mBaseBottomMargin = res.getDimensionPixelSize(R.dimen.recents_layout_bottom_margin);
-        mFreeformStackGap =
-                res.getDimensionPixelSize(R.dimen.recents_freeform_layout_bottom_margin);
-
         reloadOnConfigurationChange(context);
     }
 
@@ -390,6 +377,18 @@ public class TaskStackLayoutAlgorithm {
                 R.dimen.recents_layout_initial_bottom_offset_tablet,
                 R.dimen.recents_layout_initial_bottom_offset_tablet);
         mFreeformLayoutAlgorithm.reloadOnConfigurationChange(context);
+        mMinMargin = res.getDimensionPixelSize(R.dimen.recents_layout_min_margin);
+        mBaseTopMargin = getDimensionForDevice(context,
+                R.dimen.recents_layout_top_margin_phone,
+                R.dimen.recents_layout_top_margin_tablet,
+                R.dimen.recents_layout_top_margin_tablet_xlarge);
+        mBaseSideMargin = getDimensionForDevice(context,
+                R.dimen.recents_layout_side_margin_phone,
+                R.dimen.recents_layout_side_margin_tablet,
+                R.dimen.recents_layout_side_margin_tablet_xlarge);
+        mBaseBottomMargin = res.getDimensionPixelSize(R.dimen.recents_layout_bottom_margin);
+        mFreeformStackGap =
+                res.getDimensionPixelSize(R.dimen.recents_freeform_layout_bottom_margin);
     }
 
     /**
