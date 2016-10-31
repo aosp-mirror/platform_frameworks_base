@@ -35,6 +35,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.FILL_PARENT;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the {@link WindowState#computeFrameLw} method and other window frame machinery.
@@ -99,6 +100,63 @@ public class WindowFrameTests {
         assertEquals(top, rect.top);
         assertEquals(right, rect.right);
         assertEquals(bottom, rect.bottom);
+    }
+
+    @Test
+    public void testLayoutInFullscreenTaskInsets() throws Exception {
+        Task task = new TaskWithBounds(null); // fullscreen task doesn't use bounds for computeFrame
+        WindowState w = createWindow(task, FILL_PARENT, FILL_PARENT);
+        w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
+
+        final int bottomContentInset = 100;
+        final int topContentInset = 50;
+        final int bottomVisibleInset = 30;
+        final int topVisibleInset = 70;
+        final int leftStableInset = 20;
+        final int rightStableInset = 90;
+
+        // With no insets or system decor all the frames incoming from PhoneWindowManager
+        // are identical.
+        final Rect pf = new Rect(0, 0, 1000, 1000);
+        final Rect df = pf;
+        final Rect of = df;
+        final Rect cf = new Rect(pf);
+        // Produce some insets
+        cf.top += 50;
+        cf.bottom -= 100;
+        final Rect vf = new Rect(pf);
+        vf.top += topVisibleInset;
+        vf.bottom -= bottomVisibleInset;
+        final Rect sf = new Rect(pf);
+        sf.left += leftStableInset;
+        sf.right -= rightStableInset;
+
+        final Rect dcf = pf;
+        // When mFrame extends past cf, the content insets are
+        // the difference between mFrame and ContentFrame. Visible
+        // and stable frames work the same way.
+        w.computeFrameLw(pf, df, of, cf, vf, dcf, sf, null);
+        assertRect(w.mFrame,0, 0, 1000, 1000);
+        assertRect(w.mContentInsets, 0, topContentInset, 0, bottomContentInset);
+        assertRect(w.mVisibleInsets, 0, topVisibleInset, 0, bottomVisibleInset);
+        assertRect(w.mStableInsets, leftStableInset, 0, rightStableInset, 0);
+        // The frames remain as passed in shrunk to the window frame
+        assertTrue(cf.equals(w.getContentFrameLw()));
+        assertTrue(vf.equals(w.getVisibleFrameLw()));
+        assertTrue(sf.equals(w.getStableFrameLw()));
+        // On the other hand mFrame doesn't extend past cf we won't get any insets
+        w.mAttrs.x = 100;
+        w.mAttrs.y = 100;
+        w.mAttrs.width = 100; w.mAttrs.height = 100; //have to clear MATCH_PARENT
+        w.mRequestedWidth = 100;
+        w.mRequestedHeight = 100;
+        w.computeFrameLw(pf, df, of, cf, vf, dcf, sf, null);
+        assertRect(w.mFrame, 100, 100, 200, 200);
+        assertRect(w.mContentInsets, 0, 0, 0, 0);
+        // In this case the frames are shrunk to the window frame.
+        assertTrue(w.mFrame.equals(w.getContentFrameLw()));
+        assertTrue(w.mFrame.equals(w.getVisibleFrameLw()));
+        assertTrue(w.mFrame.equals(w.getStableFrameLw()));
     }
 
     @Test
