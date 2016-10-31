@@ -70,7 +70,7 @@ public class PipSnapAlgorithm {
             mScroller = new Scroller(mContext);
             mScroller.setFriction(viewConfig.getScrollFriction() * SCROLL_FRICTION_MULTIPLIER);
         }
-        mScroller.fling(sItackBounds.left, stackBounds.top,
+        mScroller.fling(stackBounds.left, stackBounds.top,
                 (int) velocityX, (int) velocityY,
                 movementBounds.left, movementBounds.right,
                 movementBounds.top, movementBounds.bottom);
