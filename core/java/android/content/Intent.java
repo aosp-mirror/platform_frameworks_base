@@ -3120,6 +3120,11 @@ public class Intent implements Parcelable, Cloneable {
      * URIs that can be opened with
      * {@link ContentResolver#openFileDescriptor(Uri, String)}.
      * <p>
+     * Callers can set a document URI through {@link #setData(Uri)} to indicate
+     * the initial location of documents navigator. System will do its best to
+     * launch the navigator in the specified document if it's a folder, or the
+     * folder that contains the specified document if not.
+     * <p>
      * Output: The URI of the item that was picked, returned in
      * {@link #getData()}. This must be a {@code content://} URI so that any
      * receiver can access it. If multiple documents were selected, they are
@@ -3156,6 +3161,11 @@ public class Intent implements Parcelable, Cloneable {
      * URIs that can be opened with
      * {@link ContentResolver#openFileDescriptor(Uri, String)}.
      * <p>
+     * Callers can set a document URI through {@link #setData(Uri)} to indicate
+     * the initial location of documents navigator. System will do its best to
+     * launch the navigator in the specified document if it's a folder, or the
+     * folder that contains the specified document if not.
+     * <p>
      * Output: The URI of the item that was created. This must be a
      * {@code content://} URI so that any receiver can access it.
      *
@@ -3177,6 +3187,11 @@ public class Intent implements Parcelable, Cloneable {
      * {@link DocumentsContract#buildDocumentUriUsingTree(Uri, String)} and
      * {@link DocumentsContract#buildChildDocumentsUriUsingTree(Uri, String)}
      * with the returned URI.
+     * <p>
+     * Callers can set a document URI through {@link #setData(Uri)} to indicate
+     * the initial location of documents navigator. System will do its best to
+     * initiate the navigator in the specified document if it's a folder, or
+     * the folder that contains the specified document if not.
      * <p>
      * Output: The URI representing the selected directory tree.
      *
