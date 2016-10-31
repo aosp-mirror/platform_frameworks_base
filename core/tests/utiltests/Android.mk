@@ -14,6 +14,7 @@ LOCAL_SRC_FILES += src/android/util/IRemoteMemoryIntArray.aidl
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
+    frameworks-base-testutils \
     mockito-target-minus-junit4
 
 LOCAL_JAVA_LIBRARIES := android.test.runner

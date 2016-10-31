@@ -34,7 +34,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.test.mock.MockContentResolver;
 
-import com.android.internal.util.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.After;
 import org.junit.Before;
