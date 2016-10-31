@@ -31,8 +31,8 @@ class RoundScrollbarRenderer {
     private static final int MAX_SCROLLBAR_ANGLE_SWIPE = 16;
     private static final int MIN_SCROLLBAR_ANGLE_SWIPE = 6;
     private static final float WIDTH_PERCENTAGE = 0.02f;
-    private static final int DEFAULT_THUMB_COLOR = 0xFF757575;
-    private static final int DEFAULT_TRACK_COLOR = 0x21FFFFFF;
+    private static final int DEFAULT_THUMB_COLOR = 0x4CFFFFFF;
+    private static final int DEFAULT_TRACK_COLOR = 0x26FFFFFF;
 
     private final Paint mThumbPaint = new Paint();
     private final Paint mTrackPaint = new Paint();
