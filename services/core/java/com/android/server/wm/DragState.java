@@ -271,7 +271,7 @@ class DragState {
             Slog.d(TAG_WM, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
         }
 
-        final WindowList windows = mDisplayContent.getWindowList();
+        final ReadOnlyWindowList windows = mDisplayContent.getReadOnlyWindowList();
         final int N = windows.size();
         for (int i = 0; i < N; i++) {
             sendDragStartedLw(windows.get(i), touchX, touchY, mDataDescription);

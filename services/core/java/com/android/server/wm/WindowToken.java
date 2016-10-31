@@ -235,7 +235,6 @@ class WindowToken extends WindowContainer<WindowState> {
         if (!mChildren.contains(win)) {
             addChild(win, null);
         }
-        mService.mWindowsChanged = true;
         mDisplayContent.moveInputMethodDialogs(pos + 1);
     }
 
@@ -338,8 +337,9 @@ class WindowToken extends WindowContainer<WindowState> {
         }
     }
 
-    boolean updateWallpaperWindowsPlacement(WindowList windowList, WindowState wallpaperTarget,
-            int wallpaperTargetIndex, boolean visible, int dw, int dh, int wallpaperAnimLayerAdj) {
+    boolean updateWallpaperWindowsPlacement(ReadOnlyWindowList windowList,
+            WindowState wallpaperTarget, int wallpaperTargetIndex, boolean visible, int dw, int dh,
+            int wallpaperAnimLayerAdj) {
 
         boolean changed = false;
         if (hidden == visible) {
@@ -379,8 +379,7 @@ class WindowToken extends WindowContainer<WindowState> {
             if (oldIndex >= 0) {
                 if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG,
                         "Wallpaper removing at " + oldIndex + ": " + wallpaper);
-                windowList.remove(oldIndex);
-                mService.mWindowsChanged = true;
+                mDisplayContent.removeFromWindowList(wallpaper);
                 if (oldIndex < wallpaperTargetIndex) {
                     wallpaperTargetIndex--;
                 }
@@ -403,8 +402,7 @@ class WindowToken extends WindowContainer<WindowState> {
                     || (DEBUG_ADD_REMOVE && oldIndex != insertionIndex)) Slog.v(TAG,
                     "Moving wallpaper " + wallpaper + " from " + oldIndex + " to " + insertionIndex);
 
-            windowList.add(insertionIndex, wallpaper);
-            mService.mWindowsChanged = true;
+            mDisplayContent.addToWindowList(wallpaper, insertionIndex);
             changed = true;
         }
 
@@ -415,7 +413,7 @@ class WindowToken extends WindowContainer<WindowState> {
      * @return The index in {@param windows} of the lowest window that is currently on screen and
      *         not hidden by the policy.
      */
-    private int findLowestWindowOnScreen(WindowList windowList) {
+    private int findLowestWindowOnScreen(ReadOnlyWindowList windowList) {
         final int size = windowList.size();
         for (int index = 0; index < size; index++) {
             final WindowState win = windowList.get(index);

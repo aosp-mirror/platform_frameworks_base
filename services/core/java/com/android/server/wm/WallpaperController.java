@@ -374,7 +374,7 @@ class WallpaperController {
         return mWallpaperAnimLayerAdjustment;
     }
 
-    private void findWallpaperTarget(WindowList windows, FindWallpaperTargetResult result) {
+    private void findWallpaperTarget(ReadOnlyWindowList windows, FindWallpaperTargetResult result) {
         final WindowAnimator winAnimator = mService.mAnimator;
         result.reset();
         WindowState w = null;
@@ -457,7 +457,7 @@ class WallpaperController {
 
     /** Updates the target wallpaper if needed and returns true if an update happened. */
     private boolean updateWallpaperWindowsTarget(
-            WindowList windows, FindWallpaperTargetResult result) {
+            ReadOnlyWindowList windows, FindWallpaperTargetResult result) {
 
         WindowState wallpaperTarget = result.wallpaperTarget;
         int wallpaperTargetIndex = result.wallpaperTargetIndex;
@@ -558,7 +558,7 @@ class WallpaperController {
         return true;
     }
 
-    private boolean updateWallpaperWindowsTargetByLayer(WindowList windows,
+    private boolean updateWallpaperWindowsTargetByLayer(ReadOnlyWindowList windows,
             FindWallpaperTargetResult result) {
 
         WindowState wallpaperTarget = result.wallpaperTarget;
@@ -609,7 +609,7 @@ class WallpaperController {
         return visible;
     }
 
-    private boolean updateWallpaperWindowsPlacement(WindowList windows,
+    private boolean updateWallpaperWindowsPlacement(ReadOnlyWindowList windows,
             WindowState wallpaperTarget, int wallpaperTargetIndex, boolean visible) {
 
         // TODO(multidisplay): Wallpapers on main screen only.
@@ -628,7 +628,7 @@ class WallpaperController {
         return changed;
     }
 
-    boolean adjustWallpaperWindows(WindowList windows) {
+    boolean adjustWallpaperWindows(ReadOnlyWindowList windows) {
         mService.mRoot.mWallpaperMayChange = false;
 
         // First find top-most window that has asked to be on top of the wallpaper;

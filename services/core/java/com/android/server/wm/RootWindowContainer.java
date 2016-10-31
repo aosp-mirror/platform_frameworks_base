@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.app.AppOpsManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.power.V1_0.PowerHint;
@@ -34,35 +33,26 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayInfo;
-import android.view.InputChannel;
 import android.view.WindowManager;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.EventLogTags;
-import com.android.server.input.InputWindowHandle;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.app.AppOpsManager.OP_NONE;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
-import static android.view.WindowManager.INPUT_CONSUMER_PIP;
-import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
-import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
@@ -72,7 +62,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIO
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEEP_SCREEN_ON;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
@@ -89,7 +78,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.REPORT_LOSING_FOCUS;
 import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
-import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
@@ -104,8 +92,6 @@ import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PEN
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
 
 /** Root {@link WindowContainer} for the device. */
-// TODO: Several methods in here are accessing children of this container's children through various
-// references (WindowList I am looking at you :/). See if we can delegate instead.
 class RootWindowContainer extends WindowContainer<DisplayContent> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RootWindowContainer" : TAG_WM;
 
@@ -118,13 +104,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     private float mButtonBrightness = -1;
     private long mUserActivityTimeout = -1;
     private boolean mUpdateRotation = false;
-    private boolean mObscured = false;
-    private boolean mSyswin = false;
-    // Set to true when the display contains content to show the user.
-    // When false, the display manager may choose to mirror or blank the display.
-    private boolean mDisplayHasContent = false;
-    private float mPreferredRefreshRate = 0;
-    private int mPreferredModeId = 0;
     // Following variables are for debugging screen wakelock only.
     // Last window that requires screen wakelock
     WindowState mHoldScreenWindow = null;
@@ -146,8 +125,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     boolean mWallpaperActionPending = false;
 
     private final ArrayList<Integer> mChangedStackList = new ArrayList();
-
-    private final LinkedList<AppWindowToken> mTmpUpdateAllDrawn = new LinkedList();
 
     private final ArrayList<WindowToken> mTmpTokensList = new ArrayList();
 
@@ -305,14 +282,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         final int count = mChildren.size();
         for (int i = 0; i < count; ++i) {
             final DisplayContent dc = mChildren.get(i);
-            output.addAll(dc.getWindowList());
+            dc.getWindows(output);
         }
     }
 
     void getWindows(WindowList output, boolean visibleOnly, boolean appsOnly) {
         final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final WindowList windowList = mChildren.get(displayNdx).getWindowList();
+            final ReadOnlyWindowList windowList = mChildren.get(displayNdx).getReadOnlyWindowList();
             for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState w = windowList.get(winNdx);
                 if ((!visibleOnly || w.mWinAnimator.getShown())
@@ -333,7 +310,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
         final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final WindowList windowList = mChildren.get(displayNdx).getWindowList();
+            final ReadOnlyWindowList windowList = mChildren.get(displayNdx).getReadOnlyWindowList();
             for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState w = windowList.get(winNdx);
                 if (name != null) {
@@ -350,7 +327,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     WindowState findWindow(int hashCode) {
         final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final WindowList windows = mChildren.get(displayNdx).getWindowList();
+            final ReadOnlyWindowList windows = mChildren.get(displayNdx).getReadOnlyWindowList();
             final int numWindows = windows.size();
             for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
                 final WindowState w = windows.get(winNdx);
@@ -645,7 +622,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
     void setSecureSurfaceState(int userId, boolean disabled) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowList windows = mChildren.get(i).getWindowList();
+            final ReadOnlyWindowList windows = mChildren.get(i).getReadOnlyWindowList();
             for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState win = windows.get(winNdx);
                 if (win.mHasSurface && userId == UserHandle.getUserId(win.mOwnerUid)) {
@@ -658,17 +635,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     void updateAppOpsState() {
         final int count = mChildren.size();
         for (int i = 0; i < count; ++i) {
-            final WindowList windows = mChildren.get(i).getWindowList();
+            final ReadOnlyWindowList windows = mChildren.get(i).getReadOnlyWindowList();
             final int numWindows = windows.size();
             for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
                 final WindowState win = windows.get(winNdx);
-                if (win.mAppOp == AppOpsManager.OP_NONE) {
+                if (win.mAppOp == OP_NONE) {
                     continue;
                 }
                 final int mode = mService.mAppOps.checkOpNoThrow(win.mAppOp, win.getOwningUid(),
                         win.getOwningPackage());
-                win.setAppOpVisibilityLw(mode == AppOpsManager.MODE_ALLOWED ||
-                        mode == AppOpsManager.MODE_DEFAULT);
+                win.setAppOpVisibilityLw(mode == MODE_ALLOWED || mode == MODE_DEFAULT);
             }
         }
     }
@@ -676,7 +652,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     boolean canShowStrictModeViolation(int pid) {
         final int count = mChildren.size();
         for (int i = 0; i < count; ++i) {
-            final WindowList windows = mChildren.get(i).getWindowList();
+            final ReadOnlyWindowList windows = mChildren.get(i).getReadOnlyWindowList();
             final int numWindows = windows.size();
             for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
                 final WindowState ws = windows.get(winNdx);
@@ -691,7 +667,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     void closeSystemDialogs(String reason) {
         final int count = mChildren.size();
         for (int i = 0; i < count; ++i) {
-            final WindowList windows = mChildren.get(i).getWindowList();
+            final ReadOnlyWindowList windows = mChildren.get(i).getReadOnlyWindowList();
             final int numWindows = windows.size();
             for (int j = 0; j < numWindows; ++j) {
                 final WindowState w = windows.get(j);
@@ -711,7 +687,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         try {
             for (int i = mChildren.size() - 1; i >= 0; i--) {
                 DisplayContent dc = mChildren.get(i);
-                final WindowList windows = dc.getWindowList();
+                final ReadOnlyWindowList windows = mChildren.get(i).getReadOnlyWindowList();
                 for (int j = windows.size() - 1; j >= 0; j--) {
                     final WindowState win = windows.get(j);
                     final AppWindowToken aToken = win.mAppToken;
@@ -745,84 +721,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     void updateInputWindows(InputMonitor inputMonitor, WindowState inputFocus, boolean inDrag) {
-        final InputConsumerImpl navInputConsumer =
-                mService.mInputMonitor.getInputConsumer(INPUT_CONSUMER_NAVIGATION);
-        final InputConsumerImpl pipInputConsumer =
-                mService.mInputMonitor.getInputConsumer(INPUT_CONSUMER_PIP);
-        final InputConsumerImpl wallpaperInputConsumer =
-                mService.mInputMonitor.getInputConsumer(INPUT_CONSUMER_WALLPAPER);
-        boolean addInputConsumerHandle = navInputConsumer != null;
-        boolean addPipInputConsumerHandle = pipInputConsumer != null;
-        boolean addWallpaperInputConsumerHandle = wallpaperInputConsumer != null;
-        final Rect pipTouchableBounds = addPipInputConsumerHandle ? new Rect() : null;
-        boolean disableWallpaperTouchEvents = false;
-
         final int count = mChildren.size();
         for (int i = 0; i < count; ++i) {
             final DisplayContent dc = mChildren.get(i);
-            final WindowList windows = dc.getWindowList();
-            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                final WindowState child = windows.get(winNdx);
-                final InputChannel inputChannel = child.mInputChannel;
-                final InputWindowHandle inputWindowHandle = child.mInputWindowHandle;
-                if (inputChannel == null || inputWindowHandle == null || child.mRemoved
-                        || child.isAdjustedForMinimizedDock()) {
-                    // Skip this window because it cannot possibly receive input.
-                    continue;
-                }
-
-                if (addPipInputConsumerHandle
-                        && child.getStackId() == PINNED_STACK_ID
-                        && inputWindowHandle.layer <= pipInputConsumer.mWindowHandle.layer) {
-                    // Update the bounds of the Pip input consumer to match the Pinned stack
-                    child.getStack().getBounds(pipTouchableBounds);
-                    pipInputConsumer.mWindowHandle.touchableRegion.set(pipTouchableBounds);
-                    inputMonitor.addInputWindowHandle(pipInputConsumer.mWindowHandle);
-                    addPipInputConsumerHandle = false;
-                }
-
-                if (addInputConsumerHandle
-                        && inputWindowHandle.layer <= navInputConsumer.mWindowHandle.layer) {
-                    inputMonitor.addInputWindowHandle(navInputConsumer.mWindowHandle);
-                    addInputConsumerHandle = false;
-                }
-
-                if (addWallpaperInputConsumerHandle) {
-                    if (child.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER &&
-                            child.isVisibleLw()) {
-                        // Add the wallpaper input consumer above the first visible wallpaper.
-                        inputMonitor.addInputWindowHandle(wallpaperInputConsumer.mWindowHandle);
-                        addWallpaperInputConsumerHandle = false;
-                    }
-                }
-
-                final int flags = child.mAttrs.flags;
-                final int privateFlags = child.mAttrs.privateFlags;
-                final int type = child.mAttrs.type;
-
-                final boolean hasFocus = child == inputFocus;
-                final boolean isVisible = child.isVisibleLw();
-                if ((privateFlags & PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS) != 0) {
-                    disableWallpaperTouchEvents = true;
-                }
-                final boolean hasWallpaper = dc.mWallpaperController.isWallpaperTarget(child)
-                        && (privateFlags & PRIVATE_FLAG_KEYGUARD) == 0
-                        && !disableWallpaperTouchEvents;
-
-                // If there's a drag in progress and 'child' is a potential drop target,
-                // make sure it's been told about the drag
-                if (inDrag && isVisible && dc.isDefaultDisplay) {
-                    mService.mDragState.sendDragStartedIfNeededLw(child);
-                }
-
-                inputMonitor.addInputWindowHandle(
-                        inputWindowHandle, child, flags, type, isVisible, hasFocus, hasWallpaper);
-            }
-        }
-
-        if (addWallpaperInputConsumerHandle) {
-            // No visible wallpaper found, add the wallpaper input consumer at the end.
-            inputMonitor.addInputWindowHandle(wallpaperInputConsumer.mWindowHandle);
+            dc.updateInputWindows(inputMonitor, inputFocus, inDrag);
         }
     }
 
@@ -837,57 +739,33 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         final long callingIdentity = Binder.clearCallingIdentity();
         try {
-            // There was some problem...   first, do a sanity check of the window list to make sure
+            // There was some problem...first, do a sanity check of the window list to make sure
             // we haven't left any dangling surfaces around.
 
             Slog.i(TAG_WM, "Out of memory for surface!  Looking for leaks...");
             final int numDisplays = mChildren.size();
             for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-                final WindowList windows = mChildren.get(displayNdx).getWindowList();
-                final int numWindows = windows.size();
-                for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
-                    final WindowState ws = windows.get(winNdx);
-                    final WindowStateAnimator wsa = ws.mWinAnimator;
-                    if (wsa.mSurfaceController == null) {
-                        continue;
-                    }
-                    if (!mService.mSessions.contains(wsa.mSession)) {
-                        Slog.w(TAG_WM, "LEAKED SURFACE (session doesn't exist): "
-                                + ws + " surface=" + wsa.mSurfaceController
-                                + " token=" + ws.mToken
-                                + " pid=" + ws.mSession.mPid
-                                + " uid=" + ws.mSession.mUid);
-                        wsa.destroySurface();
-                        mService.mForceRemoves.add(ws);
-                        leakedSurface = true;
-                    } else if (ws.mAppToken != null && ws.mAppToken.clientHidden) {
-                        Slog.w(TAG_WM, "LEAKED SURFACE (app token hidden): "
-                                + ws + " surface=" + wsa.mSurfaceController
-                                + " token=" + ws.mAppToken
-                                + " saved=" + ws.hasSavedSurface());
-                        if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", false);
-                        wsa.destroySurface();
-                        leakedSurface = true;
-                    }
-                }
+                leakedSurface |= mChildren.get(displayNdx).destroyLeakedSurfaces();
             }
 
             if (!leakedSurface) {
                 Slog.w(TAG_WM, "No leaked surfaces; killing applications!");
-                SparseIntArray pidCandidates = new SparseIntArray();
+                final SparseIntArray pidCandidates = new SparseIntArray();
                 for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-                    final WindowList windows = mChildren.get(displayNdx).getWindowList();
+                    final ReadOnlyWindowList windows =
+                            mChildren.get(displayNdx).getReadOnlyWindowList();
                     final int numWindows = windows.size();
                     for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
                         final WindowState ws = windows.get(winNdx);
                         if (mService.mForceRemoves.contains(ws)) {
                             continue;
                         }
-                        WindowStateAnimator wsa = ws.mWinAnimator;
+                        final WindowStateAnimator wsa = ws.mWinAnimator;
                         if (wsa.mSurfaceController != null) {
                             pidCandidates.append(wsa.mSession.mPid, wsa.mSession.mPid);
                         }
                     }
+
                     if (pidCandidates.size() > 0) {
                         int[] pids = new int[pidCandidates.size()];
                         for (int i = 0; i < pids.length; i++) {
@@ -1238,8 +1116,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 "performSurfacePlacementInner exit: animating=" + mService.mAnimator.isAnimating());
     }
 
-    // TODO: Super crazy long method that should be broken down...
-    private void applySurfaceChangesTransaction(boolean recoveringMemory, int defaultDw, int defaultDh) {
+    private void applySurfaceChangesTransaction(boolean recoveringMemory, int defaultDw,
+            int defaultDh) {
         mHoldScreenWindow = null;
         mObscuringWindow = null;
 
@@ -1262,214 +1140,31 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         final int count = mChildren.size();
         for (int j = 0; j < count; ++j) {
             final DisplayContent dc = mChildren.get(j);
-            WindowList windows = dc.getWindowList();
-            DisplayInfo displayInfo = dc.getDisplayInfo();
-            final int displayId = dc.getDisplayId();
-            final int dw = displayInfo.logicalWidth;
-            final int dh = displayInfo.logicalHeight;
-            final boolean isDefaultDisplay = (displayId == DEFAULT_DISPLAY);
-            final WindowSurfacePlacer surfacePlacer = mService.mWindowPlacerLocked;
-
-            // Reset for each display.
-            mDisplayHasContent = false;
-            mPreferredRefreshRate = 0;
-            mPreferredModeId = 0;
-            mTmpUpdateAllDrawn.clear();
-
-            int repeats = 0;
-            do {
-                repeats++;
-                if (repeats > 6) {
-                    Slog.w(TAG, "Animation repeat aborted after too many iterations");
-                    dc.clearLayoutNeeded();
-                    break;
-                }
-
-                if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats(
-                        "On entry to LockedInner", dc.pendingLayoutChanges);
-
-                if ((dc.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
-                    dc.adjustWallpaperWindows();
-                }
-
-                if (isDefaultDisplay
-                        && (dc.pendingLayoutChanges & FINISH_LAYOUT_REDO_CONFIG) != 0) {
-                    if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
-                    if (mService.updateOrientationFromAppTokensLocked(true, displayId)) {
-                        dc.setLayoutNeeded();
-                        mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
-                    }
-                }
-
-                if ((dc.pendingLayoutChanges & FINISH_LAYOUT_REDO_LAYOUT) != 0) {
-                    dc.setLayoutNeeded();
-                }
-
-                // FIRST LOOP: Perform a layout, if needed.
-                if (repeats < LAYOUT_REPEAT_THRESHOLD) {
-                    surfacePlacer.performLayoutLockedInner(dc, repeats == 1,
-                            false /* updateInputWindows */);
-                } else {
-                    Slog.w(TAG, "Layout repeat skipped after too many iterations");
-                }
-
-                // FIRST AND ONE HALF LOOP: Make WindowManagerPolicy think
-                // it is animating.
-                dc.pendingLayoutChanges = 0;
-
-                if (isDefaultDisplay) {
-                    mService.mPolicy.beginPostLayoutPolicyLw(dw, dh);
-                    for (int i = windows.size() - 1; i >= 0; i--) {
-                        WindowState w = windows.get(i);
-                        if (w.mHasSurface) {
-                            mService.mPolicy.applyPostLayoutPolicyLw(
-                                    w, w.mAttrs, w.getParentWindow());
-                        }
-                    }
-                    dc.pendingLayoutChanges |=
-                            mService.mPolicy.finishPostLayoutPolicyLw();
-                    if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats(
-                            "after finishPostLayoutPolicyLw", dc.pendingLayoutChanges);
-                }
-            } while (dc.pendingLayoutChanges != 0);
-
-            mObscured = false;
-            mSyswin = false;
-            dc.resetDimming();
-
-            // Only used if default window
-            final boolean someoneLosingFocus = !mService.mLosingFocus.isEmpty();
-
-            for (int i = windows.size() - 1; i >= 0; i--) {
-                WindowState w = windows.get(i);
-                final Task task = w.getTask();
-                final boolean obscuredChanged = w.mObscured != mObscured;
-
-                // Update effect.
-                w.mObscured = mObscured;
-                if (!mObscured) {
-                    handleNotObscuredLocked(w, displayInfo);
-                }
-
-                w.applyDimLayerIfNeeded();
-
-                if (isDefaultDisplay && obscuredChanged && w.isVisibleLw()
-                        && dc.mWallpaperController.isWallpaperTarget(w)) {
-                    // This is the wallpaper target and its obscured state changed... make sure the
-                    // current wallpaper's visibility has been updated accordingly.
-                    dc.mWallpaperController.updateWallpaperVisibility();
-                }
-
-                w.handleWindowMovedIfNeeded();
-
-                final WindowStateAnimator winAnimator = w.mWinAnimator;
-
-                //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
-                w.mContentChanged = false;
-
-                // Moved from updateWindowsAndWallpaperLocked().
-                if (w.mHasSurface) {
-                    // Take care of the window being ready to display.
-                    final boolean committed = winAnimator.commitFinishDrawingLocked();
-                    if (isDefaultDisplay && committed) {
-                        if (w.mAttrs.type == TYPE_DREAM) {
-                            // HACK: When a dream is shown, it may at that point hide the lock
-                            // screen. So we need to redo the layout to let the phone window manager
-                            // make this happen.
-                            dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_LAYOUT;
-                            if (DEBUG_LAYOUT_REPEATS) {
-                                surfacePlacer.debugLayoutRepeats(
-                                        "dream and commitFinishDrawingLocked true",
-                                        dc.pendingLayoutChanges);
-                            }
-                        }
-                        if ((w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
-                            if (DEBUG_WALLPAPER_LIGHT)
-                                Slog.v(TAG, "First draw done in potential wallpaper target " + w);
-                            mWallpaperMayChange = true;
-                            dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-                            if (DEBUG_LAYOUT_REPEATS) {
-                                surfacePlacer.debugLayoutRepeats(
-                                        "wallpaper and commitFinishDrawingLocked true",
-                                        dc.pendingLayoutChanges);
-                            }
-                        }
-                    }
-                    if (!winAnimator.isAnimationStarting() && !winAnimator.isWaitingForOpening()) {
-                        // Updates the shown frame before we set up the surface. This is needed
-                        // because the resizing could change the top-left position (in addition to
-                        // size) of the window. setSurfaceBoundariesLocked uses mShownPosition to
-                        // position the surface.
-                        //
-                        // If an animation is being started, we can't call this method because the
-                        // animation hasn't processed its initial transformation yet, but in general
-                        // we do want to update the position if the window is animating.
-                        winAnimator.computeShownFrameLocked();
-                    }
-                    winAnimator.setSurfaceBoundariesLocked(recoveringMemory);
-                }
-
-                final AppWindowToken atoken = w.mAppToken;
-                if (atoken != null) {
-                    final boolean updateAllDrawn = atoken.updateDrawnWindowStates(w);
-                    if (updateAllDrawn && !mTmpUpdateAllDrawn.contains(atoken)) {
-                        mTmpUpdateAllDrawn.add(atoken);
-                    }
-                }
-
-                if (isDefaultDisplay && someoneLosingFocus && w == mService.mCurrentFocus
-                        && w.isDisplayedLw()) {
-                    focusDisplayed = true;
-                }
-
-                w.updateResizingWindowIfNeeded();
-            }
-
-            mService.mDisplayManagerInternal.setDisplayProperties(displayId,
-                    mDisplayHasContent,
-                    mPreferredRefreshRate,
-                    mPreferredModeId,
-                    true /* inTraversal, must call performTraversalInTrans... below */);
-
-            dc.stopDimmingIfNeeded();
-
-            while (!mTmpUpdateAllDrawn.isEmpty()) {
-                final AppWindowToken atoken = mTmpUpdateAllDrawn.removeLast();
-                // See if any windows have been drawn, so they (and others associated with them)
-                // can now be shown.
-                atoken.updateAllDrawn(dc);
-            }
+            focusDisplayed |= dc.applySurfaceChangesTransaction(recoveringMemory);
         }
 
         if (focusDisplayed) {
             mService.mH.sendEmptyMessage(REPORT_LOSING_FOCUS);
         }
 
-        // Give the display manager a chance to adjust properties
-        // like display rotation if it needs to.
+        // Give the display manager a chance to adjust properties like display rotation if it needs
+        // to.
         mService.mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
     }
 
     /**
      * @param w WindowState this method is applied to.
-     * @param dispInfo info of the display that the window's obscuring state is checked against.
+     * @param obscured True if there is a window on top of this obscuring the display.
+     * @param syswin System window?
+     * @return True when the display contains content to show the user. When false, the display
+     *          manager may choose to mirror or blank the display.
      */
-    private void handleNotObscuredLocked(final WindowState w, final DisplayInfo dispInfo) {
+    boolean handleNotObscuredLocked(WindowState w, boolean obscured, boolean syswin) {
         final WindowManager.LayoutParams attrs = w.mAttrs;
         final int attrFlags = attrs.flags;
         final boolean canBeSeen = w.isDisplayedLw();
         final int privateflags = attrs.privateFlags;
-
-        if (canBeSeen && w.isObscuringFullscreen(dispInfo)) {
-            // This window completely covers everything behind it,
-            // so we want to leave all of them as undimmed (for
-            // performance reasons).
-            if (!mObscured) {
-                mObscuringWindow = w;
-            }
-
-            mObscured = true;
-        }
+        boolean displayHasContent = false;
 
         if (w.mHasSurface && canBeSeen) {
             if ((attrFlags & FLAG_KEEP_SCREEN_ON) != 0) {
@@ -1480,22 +1175,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                         + "screen wakelock but no longer has FLAG_KEEP_SCREEN_ON!!! called by"
                         + Debug.getCallers(10));
             }
-            if (!mSyswin && w.mAttrs.screenBrightness >= 0 && mScreenBrightness < 0) {
+            if (!syswin && w.mAttrs.screenBrightness >= 0 && mScreenBrightness < 0) {
                 mScreenBrightness = w.mAttrs.screenBrightness;
             }
-            if (!mSyswin && w.mAttrs.buttonBrightness >= 0 && mButtonBrightness < 0) {
+            if (!syswin && w.mAttrs.buttonBrightness >= 0 && mButtonBrightness < 0) {
                 mButtonBrightness = w.mAttrs.buttonBrightness;
             }
-            if (!mSyswin && w.mAttrs.userActivityTimeout >= 0 && mUserActivityTimeout < 0) {
+            if (!syswin && w.mAttrs.userActivityTimeout >= 0 && mUserActivityTimeout < 0) {
                 mUserActivityTimeout = w.mAttrs.userActivityTimeout;
             }
 
             final int type = attrs.type;
-            if (type == TYPE_SYSTEM_DIALOG || type == TYPE_SYSTEM_ERROR
-                    || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
-                mSyswin = true;
-            }
-
             // This function assumes that the contents of the default display are processed first
             // before secondary displays.
             final DisplayContent displayContent = w.getDisplayContent();
@@ -1506,23 +1196,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 if (type == TYPE_DREAM || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                     mObscureApplicationContentOnSecondaryDisplays = true;
                 }
-                mDisplayHasContent = true;
+                displayHasContent = true;
             } else if (displayContent != null &&
                     (!mObscureApplicationContentOnSecondaryDisplays
-                            || (mObscured && type == TYPE_KEYGUARD_DIALOG))) {
+                            || (obscured && type == TYPE_KEYGUARD_DIALOG))) {
                 // Allow full screen keyguard presentation dialogs to be seen.
-                mDisplayHasContent = true;
-            }
-            if (mPreferredRefreshRate == 0 && w.mAttrs.preferredRefreshRate != 0) {
-                mPreferredRefreshRate = w.mAttrs.preferredRefreshRate;
-            }
-            if (mPreferredModeId == 0 && w.mAttrs.preferredDisplayModeId != 0) {
-                mPreferredModeId = w.mAttrs.preferredDisplayModeId;
+                displayHasContent = true;
             }
             if ((privateflags & PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE) != 0) {
                 mSustainedPerformanceModeCurrent = true;
             }
         }
+
+        return displayHasContent;
     }
 
     boolean copyAnimToLayoutParams() {
@@ -1619,7 +1305,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     void dumpWindowsNoHeader(PrintWriter pw, boolean dumpAll, ArrayList<WindowState> windows) {
         final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final WindowList windowList = mChildren.get(displayNdx).getWindowList();
+            final ReadOnlyWindowList windowList = mChildren.get(displayNdx).getReadOnlyWindowList();
             for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState w = windowList.get(winNdx);
                 if (windows == null || windows.contains(w)) {

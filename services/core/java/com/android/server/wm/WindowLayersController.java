@@ -19,7 +19,6 @@ package com.android.server.wm;
 import android.util.Slog;
 import android.view.Display;
 
-import java.io.PrintWriter;
 import java.util.ArrayDeque;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
@@ -27,7 +26,6 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
 import static com.android.server.wm.WindowManagerService.WINDOW_LAYER_MULTIPLIER;
 
 /**
@@ -63,7 +61,7 @@ class WindowLayersController {
     private WindowState mDockDivider = null;
     private ArrayDeque<WindowState> mReplacingWindows = new ArrayDeque<>();
 
-    final void assignWindowLayers(WindowList windows) {
+    final void assignWindowLayers(ReadOnlyWindowList windows) {
         if (DEBUG_LAYERS) Slog.v(TAG_WM, "Assigning layers based on windows=" + windows,
                 new RuntimeException("here").fillInStackTrace());
 
@@ -113,7 +111,7 @@ class WindowLayersController {
         if (DEBUG_LAYERS) logDebugLayers(windows);
     }
 
-    private void logDebugLayers(WindowList windows) {
+    private void logDebugLayers(ReadOnlyWindowList windows) {
         for (int i = 0, n = windows.size(); i < n; i++) {
             final WindowState w = windows.get(i);
             final WindowStateAnimator winAnimator = w.mWinAnimator;

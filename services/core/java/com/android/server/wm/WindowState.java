@@ -136,9 +136,51 @@ import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 
 class WindowList extends ArrayList<WindowState> {
-    WindowList() {}
-    WindowList(WindowList windowList) {
-        super(windowList);
+
+    /**
+     * Read-only interface for the window list that the creator of the window list can pass-out to
+     * other users to prevent them from modifying the window list.
+     */
+    private ReadOnlyWindowList mReadOnly;
+
+    WindowList() {
+        mReadOnly = new ReadOnlyWindowList(this);
+    }
+
+    /** Returns the read-only interface for this window list. */
+    ReadOnlyWindowList getReadOnly() {
+        return mReadOnly;
+    }
+}
+
+/**
+ * Read-only interface for a list of windows. It is common for the owner of a list of windows to
+ * want to provide a way for external classes to iterate of its windows, but prevent them from
+ * modifying the list in any way. This call provides a way for them to do that by wrapping the
+ * original window list and only exposing the read-only APIs.
+ */
+final class ReadOnlyWindowList {
+    // List of windows this read-only class is tied to.
+    private final WindowList mWindows;
+
+    ReadOnlyWindowList(WindowList windows) {
+        mWindows = windows;
+    }
+
+    WindowState get(int index) {
+        return mWindows.get(index);
+    }
+
+    int indexOf(WindowState w) {
+        return mWindows.indexOf(w);
+    }
+
+    int size() {
+        return mWindows.size();
+    }
+
+    boolean isEmpty() {
+        return mWindows.isEmpty();
     }
 }
 
@@ -3873,7 +3915,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             dc.addToWindowList(this, index);
             index++;
         }
-        mService.mWindowsChanged = true;
         return index;
     }
 
