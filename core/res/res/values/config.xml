@@ -1407,6 +1407,9 @@
     <!-- Whether supported profiles should be reloaded upon enabling bluetooth -->
     <bool name="config_bluetooth_reload_supported_profiles_when_enabled">false</bool>
 
+    <!-- Enabling autoconnect over pan -->
+    <bool name="config_bluetooth_pan_enable_autoconnect">false</bool>
+
     <!-- The default data-use polling period. -->
     <integer name="config_datause_polling_period_sec">600</integer>
 
