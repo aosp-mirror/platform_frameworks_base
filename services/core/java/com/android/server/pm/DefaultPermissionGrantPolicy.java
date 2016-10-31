@@ -693,7 +693,7 @@ final class DefaultPermissionGrantPolicy {
                     "org.chromium.chrome", userId);
             if (chromiumPackage != null) {
                 grantRuntimePermissionsLPw(chromiumPackage, CONTACTS_PERMISSIONS, userId);
-                grantRuntimePermissionsLPw(chromiumPackage, STORAGE_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(chromiumPackage, STORAGE_PERMISSIONS, true, userId);
             }
 
             mService.mSettings.onDefaultRuntimePermissionsGrantedLPr(userId);
@@ -789,6 +789,15 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(setupwizardPackage, PHONE_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(setupwizardPackage, LOCATION_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(setupwizardPackage, CAMERA_PERMISSIONS, userId);
+            }
+
+            // Google Calendar
+            PackageParser.Package googlecalendarPackage = getSystemPackageLPr(
+                    "com.google.android.calendar");
+            if (googlecalendarPackage != null && doesPackageSupportRuntimePermissions(googlecalendarPackage)) {
+                grantRuntimePermissionsLPw(googlecalendarPackage, CALENDAR_PERMISSIONS, true, userId);
+                grantRuntimePermissionsLPw(googlecalendarPackage, CONTACTS_PERMISSIONS, true, userId);
+                grantRuntimePermissionsLPw(googlecalendarPackage, PHONE_PERMISSIONS, userId);
             }
 
             // Google Play Store
