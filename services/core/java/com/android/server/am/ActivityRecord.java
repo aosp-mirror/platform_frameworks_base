@@ -922,8 +922,26 @@ final class ActivityRecord {
                 && info.resizeMode != RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
     }
 
+    /**
+     * @return whether this activity's resize mode supports PIP.
+     */
     boolean supportsPictureInPicture() {
         return !isHomeActivity() && info.resizeMode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+    }
+
+    /**
+     * @return whether this activity is currently allowed to enter PIP.
+     */
+    boolean canEnterPictureInPicture() {
+        if (supportsPictureInPicture() && visible) {
+            switch (state) {
+                case RESUMED:
+                case PAUSING:
+                case PAUSED:
+                    return true;
+            }
+        }
+        return false;
     }
 
     boolean canGoInDockedStack() {

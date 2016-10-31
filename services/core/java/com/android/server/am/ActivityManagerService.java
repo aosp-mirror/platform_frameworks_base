@@ -7517,9 +7517,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + "Can't find activity for token=" + token);
                 }
 
-                if (!r.supportsPictureInPicture()) {
+                if (!r.canEnterPictureInPicture()) {
                     throw new IllegalArgumentException("enterPictureInPictureMode: "
-                            + "Picture-In-Picture not supported for r=" + r);
+                            + "Current activity does not support picture-in-picture or is not "
+                            + "visible r=" + r);
                 }
 
                 if (aspectRatio != null && !isValidPictureInPictureAspectRatio(aspectRatio)) {
