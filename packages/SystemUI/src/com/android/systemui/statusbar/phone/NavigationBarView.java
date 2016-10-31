@@ -105,7 +105,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private boolean mInCarMode = false;
     private boolean mDockedStackExists;
 
-    private final SparseArray<ButtonDispatcher> mButtonDisatchers = new SparseArray<>();
+    private final SparseArray<ButtonDispatcher> mButtonDispatchers = new SparseArray<>();
     private Configuration mConfiguration;
 
     private NavigationBarInflaterView mNavigationInflaterView;
@@ -206,11 +206,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         mBarTransitions = new NavigationBarTransitions(this);
 
-        mButtonDisatchers.put(R.id.back, new ButtonDispatcher(R.id.back));
-        mButtonDisatchers.put(R.id.home, new ButtonDispatcher(R.id.home));
-        mButtonDisatchers.put(R.id.recent_apps, new ButtonDispatcher(R.id.recent_apps));
-        mButtonDisatchers.put(R.id.menu, new ButtonDispatcher(R.id.menu));
-        mButtonDisatchers.put(R.id.ime_switcher, new ButtonDispatcher(R.id.ime_switcher));
+        mButtonDispatchers.put(R.id.back, new ButtonDispatcher(R.id.back));
+        mButtonDispatchers.put(R.id.home, new ButtonDispatcher(R.id.home));
+        mButtonDispatchers.put(R.id.recent_apps, new ButtonDispatcher(R.id.recent_apps));
+        mButtonDispatchers.put(R.id.menu, new ButtonDispatcher(R.id.menu));
+        mButtonDispatchers.put(R.id.ime_switcher, new ButtonDispatcher(R.id.ime_switcher));
     }
 
     public BarTransitions getBarTransitions() {
@@ -262,23 +262,23 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     public ButtonDispatcher getRecentsButton() {
-        return mButtonDisatchers.get(R.id.recent_apps);
+        return mButtonDispatchers.get(R.id.recent_apps);
     }
 
     public ButtonDispatcher getMenuButton() {
-        return mButtonDisatchers.get(R.id.menu);
+        return mButtonDispatchers.get(R.id.menu);
     }
 
     public ButtonDispatcher getBackButton() {
-        return mButtonDisatchers.get(R.id.back);
+        return mButtonDispatchers.get(R.id.back);
     }
 
     public ButtonDispatcher getHomeButton() {
-        return mButtonDisatchers.get(R.id.home);
+        return mButtonDispatchers.get(R.id.home);
     }
 
     public ButtonDispatcher getImeSwitchButton() {
-        return mButtonDisatchers.get(R.id.ime_switcher);
+        return mButtonDispatchers.get(R.id.ime_switcher);
     }
 
     private void updateCarModeIcons(Context ctx) {
@@ -495,7 +495,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mNavigationInflaterView = (NavigationBarInflaterView) findViewById(
                 R.id.navigation_inflater);
         updateRotatedViews();
-        mNavigationInflaterView.setButtonDispatchers(mButtonDisatchers);
+        mNavigationInflaterView.setButtonDispatchers(mButtonDispatchers);
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
@@ -556,8 +556,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
         mNavigationInflaterView.setAlternativeOrder(rot == Surface.ROTATION_90);
-        for (int i = 0; i < mButtonDisatchers.size(); i++) {
-            mButtonDisatchers.valueAt(i).setCurrentView(mCurrentView);
+        for (int i = 0; i < mButtonDispatchers.size(); i++) {
+            mButtonDispatchers.valueAt(i).setCurrentView(mCurrentView);
         }
         updateLayoutTransitionsEnabled();
         mCurrentRotation = rot;
