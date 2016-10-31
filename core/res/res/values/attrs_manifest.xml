@@ -575,6 +575,20 @@
          transtion from one VR activity to another. -->
     <attr name="enableVrMode" format="string" />
 
+    <!-- Flag allowing the activity to specify which screen rotation animation
+         it desires.  Valid values are "rotate", "crossfade", and "jumpcut"
+         as described in {@link android.view.WindowManager.LayoutParams#rotationAnimation}.
+         Specifying your Rotation animation in the WindowManager.LayoutParams
+         may be racy with app startup and updattransitions occuring during application startup and thusly
+         the manifest attribute is preferred.
+    -->
+    <attr name="rotationAnimation">
+      <flag name="rotate" value= "0" />
+      <flag name="crossfade" value = "1" />
+      <flag name="jumpcut" value = "2" />
+      <flag name="seamless" value = "3" />
+    </attr>
+
     <!-- Specify the order in which content providers hosted by a process
          are instantiated when that process is created.  Not needed unless
          you have providers with dependencies between each other, to make
@@ -1923,6 +1937,7 @@
         <!-- @hide This activity is a launcher which should always show up on the top of others.
              This attribute is ignored if the activity isn't a launcher. -->
         <attr name="onTopLauncher" format="boolean" />
+        <attr name="rotationAnimation"/>
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new

@@ -664,10 +664,18 @@ final class ActivityRecord {
         hasBeenLaunched = false;
         mStackSupervisor = supervisor;
         mInitialActivityContainer = container;
+
+        mRotationAnimationHint = aInfo.rotationAnimation;
+
         if (options != null) {
             pendingOptions = options;
             mLaunchTaskBehind = pendingOptions.getLaunchTaskBehind();
-            mRotationAnimationHint = pendingOptions.getRotationAnimationHint();
+
+            final int rotationAnimation = pendingOptions.getRotationAnimationHint();
+            // Only override manifest supplied option if set.
+            if (rotationAnimation >= 0) {
+                mRotationAnimationHint = rotationAnimation;
+            }
             PendingIntent usageReport = pendingOptions.getUsageTimeReport();
             if (usageReport != null) {
                 appTimeTracker = new AppTimeTracker(usageReport);
