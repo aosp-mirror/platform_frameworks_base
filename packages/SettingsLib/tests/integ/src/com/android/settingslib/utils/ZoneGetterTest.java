@@ -19,6 +19,9 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.filters.SmallTest;
+import android.text.Spanned;
+import android.text.style.TtsSpan;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,14 +58,41 @@ public class ZoneGetterTest {
         testTimeZoneOffsetAndNameInner(TIME_ZONE_LA_ID, "Pacific Daylight Time");
     }
 
+    @Test
+    public void getZonesList_checkTypes() {
+        final List<Map<String, Object>> zones =
+                ZoneGetter.getZonesList(InstrumentationRegistry.getContext());
+        for (Map<String, Object> zone : zones) {
+            assertTrue(zone.get(ZoneGetter.KEY_DISPLAYNAME) instanceof String);
+            assertTrue(zone.get(ZoneGetter.KEY_DISPLAY_LABEL) instanceof CharSequence);
+            assertTrue(zone.get(ZoneGetter.KEY_OFFSET) instanceof Integer);
+            assertTrue(zone.get(ZoneGetter.KEY_OFFSET_LABEL) instanceof CharSequence);
+            assertTrue(zone.get(ZoneGetter.KEY_ID) instanceof String);
+            assertTrue(zone.get(ZoneGetter.KEY_GMT) instanceof String);
+        }
+    }
+
+    @Test
+    public void getTimeZoneOffsetAndName_withTtsSpan() {
+        final Context context = InstrumentationRegistry.getContext();
+        final TimeZone timeZone = TimeZone.getTimeZone(TIME_ZONE_LA_ID);
+
+        CharSequence timeZoneString = ZoneGetter.getTimeZoneOffsetAndName(context, timeZone,
+                mCalendar.getTime());
+        assertTrue("Time zone string should be spanned", timeZoneString instanceof Spanned);
+        assertTrue("Time zone display name should have TTS spans",
+                ((Spanned) timeZoneString).getSpans(
+                    0, timeZoneString.length(), TtsSpan.class).length > 0);
+    }
+
     private void testTimeZoneOffsetAndNameInner(String timeZoneId, String expectedName) {
         final Context context = InstrumentationRegistry.getContext();
         final TimeZone timeZone = TimeZone.getTimeZone(timeZoneId);
 
-        String timeZoneString = ZoneGetter.getTimeZoneOffsetAndName(context, timeZone,
+        CharSequence timeZoneString = ZoneGetter.getTimeZoneOffsetAndName(context, timeZone,
                 mCalendar.getTime());
 
-        assertTrue(timeZoneString.endsWith(expectedName));
+        assertTrue(timeZoneString.toString().endsWith(expectedName));
     }
 
 }
