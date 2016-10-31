@@ -2172,9 +2172,9 @@
     -->
     <string-array translatable="false" name="config_telephonyHardware">
         <!-- modem -->
-        <item>"0,modem,0,0,0,1,1,1"</item>
+        <item>0,modem,0,0,0,1,1,1</item>
         <!-- sim -->
-        <item>"1,sim,0,modem"</item>
+        <item>1,sim,0,modem</item>
     </string-array>
 
     <!-- This string array can be overriden to add an additional DRM support for WebView EME. -->
