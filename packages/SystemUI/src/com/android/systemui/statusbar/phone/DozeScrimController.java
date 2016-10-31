@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.Interpolator;
 
 import com.android.systemui.Interpolators;
@@ -40,6 +41,8 @@ public class DozeScrimController {
     private final Handler mHandler = new Handler();
     private final ScrimController mScrimController;
 
+    private final View mStackScroller;
+
     private boolean mDozing;
     private DozeHost.PulseCallback mPulseCallback;
     private int mPulseReason;
@@ -48,7 +51,9 @@ public class DozeScrimController {
     private float mInFrontTarget;
     private float mBehindTarget;
 
-    public DozeScrimController(ScrimController scrimController, Context context) {
+    public DozeScrimController(ScrimController scrimController, Context context,
+            View stackScroller) {
+        mStackScroller = stackScroller;
         mScrimController = scrimController;
         mDozeParameters = new DozeParameters(context);
     }
@@ -59,7 +64,11 @@ public class DozeScrimController {
         if (mDozing) {
             abortAnimations();
             mScrimController.setDozeBehindAlpha(1f);
-            mScrimController.setDozeInFrontAlpha(1f);
+            mScrimController.setDozeInFrontAlpha(mDozeParameters.getAlwaysOn() ? 0f : 1f);
+            if (mDozeParameters.getAlwaysOn()) {
+                mStackScroller.setAlpha(0f);
+                mHandler.postDelayed(() -> mStackScroller.setAlpha(0f), 30);
+            }
         } else {
             cancelPulsing();
             if (animate) {
@@ -73,6 +82,9 @@ public class DozeScrimController {
                 abortAnimations();
                 mScrimController.setDozeBehindAlpha(0f);
                 mScrimController.setDozeInFrontAlpha(0f);
+            }
+            if (mDozeParameters.getAlwaysOn()) {
+                mStackScroller.setAlpha(1f);
             }
         }
     }
@@ -93,7 +105,9 @@ public class DozeScrimController {
         // be invoked when we're done so that the caller can drop the pulse wakelock.
         mPulseCallback = callback;
         mPulseReason = reason;
-        mHandler.post(mPulseIn);
+        if (mDozeParameters.getAlwaysOn()) {
+            mHandler.post(mPulseIn);
+        }
     }
 
     /**
@@ -111,6 +125,9 @@ public class DozeScrimController {
         if (isPulsing()) {
             final boolean pickupOrDoubleTap = mPulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP
                     || mPulseReason == DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP;
+            if (mDozeParameters.getAlwaysOn()) {
+                mStackScroller.setAlpha(1f);
+            }
             startScrimAnimation(true /* inFront */, 0f,
                     mDozeParameters.getPulseInDuration(pickupOrDoubleTap),
                     pickupOrDoubleTap ? Interpolators.LINEAR_OUT_SLOW_IN : Interpolators.ALPHA_OUT,
@@ -245,6 +262,10 @@ public class DozeScrimController {
 
             // Signal that the pulse is ready to turn the screen on and draw.
             pulseStarted();
+
+            if (mDozeParameters.getAlwaysOn()) {
+                mHandler.post(DozeScrimController.this::onScreenTurnedOn);
+            }
         }
     };
 
@@ -262,7 +283,8 @@ public class DozeScrimController {
         public void run() {
             if (DEBUG) Log.d(TAG, "Pulse out, mDozing=" + mDozing);
             if (!mDozing) return;
-            startScrimAnimation(true /* inFront */, 1f, mDozeParameters.getPulseOutDuration(),
+            startScrimAnimation(true /* inFront */, mDozeParameters.getAlwaysOn() ? 0 : 1,
+                    mDozeParameters.getPulseOutDuration(),
                     Interpolators.ALPHA_IN, mPulseOutFinished);
         }
     };
@@ -271,6 +293,9 @@ public class DozeScrimController {
         @Override
         public void run() {
             if (DEBUG) Log.d(TAG, "Pulse out finished");
+            if (mDozeParameters.getAlwaysOn()) {
+                mStackScroller.setAlpha(0f);
+            }
             DozeLog.tracePulseFinish();
 
             // Signal that the pulse is all finished so we can turn the screen off now.

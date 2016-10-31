@@ -16,6 +16,7 @@
 
 package com.android.systemui.doze;
 
+import android.app.AlarmManager;
 import android.app.UiModeManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -43,7 +44,9 @@ import com.android.systemui.util.Assert;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class DozeService extends DreamService implements DozeSensors.Callback {
     private static final String TAG = "DozeService";
@@ -77,6 +80,7 @@ public class DozeService extends DreamService implements DozeSensors.Callback {
     private long mNotificationPulseTime;
 
     private AmbientDisplayConfiguration mConfig;
+    private AlarmManager mAlarmManager;
 
     public DozeService() {
         if (DEBUG) Log.d(mTag, "new DozeService()");
@@ -114,6 +118,7 @@ public class DozeService extends DreamService implements DozeSensors.Callback {
         setWindowless(true);
 
         mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
+        mAlarmManager = (AlarmManager) mContext.getSystemService(AlarmManager.class);
         mConfig = new AmbientDisplayConfiguration(mContext);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
@@ -168,6 +173,10 @@ public class DozeService extends DreamService implements DozeSensors.Callback {
                 // stopDozing because can we just keep dozing until the bitter end.
             }
         }));
+
+        if (mDozeParameters.getAlwaysOn()) {
+            mTimeTick.onAlarm();
+        }
     }
 
     @Override
@@ -184,6 +193,7 @@ public class DozeService extends DreamService implements DozeSensors.Callback {
 
         // Tell the host that it's over.
         mHost.stopDozing();
+        mAlarmManager.cancel(mTimeTick);
     }
 
     private void requestPulse(final int reason) {
@@ -264,7 +274,11 @@ public class DozeService extends DreamService implements DozeSensors.Callback {
 
     private void turnDisplayOff() {
         if (DEBUG) Log.d(mTag, "Display off");
-        setDozeScreenState(Display.STATE_OFF);
+        if (mDozeParameters.getAlwaysOn()) {
+            turnDisplayOn();
+        } else {
+            setDozeScreenState(Display.STATE_OFF);
+        }
     }
 
     private void turnDisplayOn() {
@@ -350,6 +364,26 @@ public class DozeService extends DreamService implements DozeSensors.Callback {
             if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
                 mDozeSensors.onUserSwitched();
             }
+        }
+    };
+
+    private AlarmManager.OnAlarmListener mTimeTick = new AlarmManager.OnAlarmListener() {
+        @Override
+        public void onAlarm() {
+            mHost.dozeTimeTick();
+
+            // Keep wakelock until a frame has been pushed.
+            mHandler.post(mWakeLock.wrap(()->{}));
+
+            Calendar calendar = GregorianCalendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.set(Calendar.MILLISECOND, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.add(Calendar.MINUTE, 1);
+
+            long delta = calendar.getTimeInMillis() - System.currentTimeMillis();
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + delta, "doze_time_tick", mTimeTick, mHandler);
         }
     };
 
