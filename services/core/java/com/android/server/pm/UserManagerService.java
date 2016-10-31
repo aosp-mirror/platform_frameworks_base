@@ -2490,7 +2490,10 @@ public class UserManagerService extends IUserManager.Stub {
             Log.w(LOG_TAG, "Cannot remove user. DISALLOW_REMOVE_USER is enabled.");
             return false;
         }
+        return removeUserUnchecked(userHandle);
+    }
 
+    private boolean removeUserUnchecked(int userHandle) {
         long ident = Binder.clearCallingIdentity();
         try {
             final UserData userData;
@@ -3565,6 +3568,11 @@ public class UserManagerService extends IUserManager.Stub {
                 setUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, true, user.id);
             }
             return user;
+        }
+
+        @Override
+        public boolean removeUserEvenWhenDisallowed(int userId) {
+            return removeUserUnchecked(userId);
         }
 
         @Override

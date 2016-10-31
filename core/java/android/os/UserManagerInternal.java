@@ -128,6 +128,13 @@ public abstract class UserManagerInternal {
     public abstract UserInfo createUserEvenWhenDisallowed(String name, int flags);
 
     /**
+     * Same as {@link UserManager#removeUser(int userHandle)}, but bypasses the check for
+     * {@link UserManager#DISALLOW_REMOVE_USER} and does not require the
+     * {@link android.Manifest.permission#MANAGE_USERS} permission.
+     */
+    public abstract boolean removeUserEvenWhenDisallowed(int userId);
+
+    /**
      * Return whether the given user is running in an
      * {@code UserState.STATE_RUNNING_UNLOCKING} or
      * {@code UserState.STATE_RUNNING_UNLOCKED} state.
