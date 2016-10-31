@@ -24,7 +24,8 @@ import android.util.ArrayMap;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
+
+import com.android.internal.view.OneShotPreDrawListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -320,16 +321,9 @@ class FragmentTransition {
                 && exitingFragment.mHidden && exitingFragment.mHiddenChanged) {
             exitingFragment.setHideReplaced(true);
             final View fragmentView = exitingFragment.getView();
-            final ViewGroup container = exitingFragment.mContainer;
-            container.getViewTreeObserver().addOnPreDrawListener(
-                    new ViewTreeObserver.OnPreDrawListener() {
-                        @Override
-                        public boolean onPreDraw() {
-                            container.getViewTreeObserver().removeOnPreDrawListener(this);
-                            setViewVisibility(exitingViews, View.INVISIBLE);
-                            return true;
-                        }
-                    });
+            OneShotPreDrawListener.add(exitingFragment.mContainer, () -> {
+                setViewVisibility(exitingViews, View.INVISIBLE);
+            });
             exitTransition.addListener(new Transition.TransitionListenerAdapter() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
@@ -364,30 +358,22 @@ class FragmentTransition {
             final Transition enterTransition, final ArrayList<View> enteringViews,
             final Transition exitTransition, final ArrayList<View> exitingViews) {
 
-        sceneRoot.getViewTreeObserver().addOnPreDrawListener(
-                new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        sceneRoot.getViewTreeObserver().removeOnPreDrawListener(this);
+        OneShotPreDrawListener.add(sceneRoot, () -> {
+            if (enterTransition != null) {
+                enterTransition.removeTarget(nonExistentView);
+                ArrayList<View> views = configureEnteringExitingViews(
+                        enterTransition, inFragment, sharedElementsIn, nonExistentView);
+                enteringViews.addAll(views);
+            }
 
-                        if (enterTransition != null) {
-                            enterTransition.removeTarget(nonExistentView);
-                            ArrayList<View> views = configureEnteringExitingViews(
-                                    enterTransition, inFragment, sharedElementsIn, nonExistentView);
-                            enteringViews.addAll(views);
-                        }
-
-                        if (exitingViews != null) {
-                            ArrayList<View> tempExiting = new ArrayList<>();
-                            tempExiting.add(nonExistentView);
-                            replaceTargets(exitTransition, exitingViews, tempExiting);
-                            exitingViews.clear();
-                            exitingViews.add(nonExistentView);
-                        }
-
-                        return true;
-                    }
-                });
+            if (exitingViews != null) {
+                ArrayList<View> tempExiting = new ArrayList<>();
+                tempExiting.add(nonExistentView);
+                replaceTargets(exitTransition, exitingViews, tempExiting);
+                exitingViews.clear();
+                exitingViews.add(nonExistentView);
+            }
+        });
     }
 
     /**
@@ -541,19 +527,13 @@ class FragmentTransition {
             epicenterView = null;
         }
 
-        sceneRoot.getViewTreeObserver().addOnPreDrawListener(
-                new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        sceneRoot.getViewTreeObserver().removeOnPreDrawListener(this);
-                        callSharedElementStartEnd(inFragment, outFragment, inIsPop,
-                                inSharedElements, false);
-                        if (epicenterView != null) {
-                            epicenterView.getBoundsOnScreen(epicenter);
-                        }
-                        return true;
-                    }
-                });
+        OneShotPreDrawListener.add(sceneRoot, () -> {
+            callSharedElementStartEnd(inFragment, outFragment, inIsPop,
+                    inSharedElements, false);
+            if (epicenterView != null) {
+                epicenterView.getBoundsOnScreen(epicenter);
+            }
+        });
         return sharedElementTransition;
     }
 
@@ -643,36 +623,30 @@ class FragmentTransition {
 
         TransitionSet finalSharedElementTransition = sharedElementTransition;
 
-        sceneRoot.getViewTreeObserver().addOnPreDrawListener(
-                new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        sceneRoot.getViewTreeObserver().removeOnPreDrawListener(this);
-                        ArrayMap<String, View> inSharedElements = captureInSharedElements(
-                                nameOverrides, finalSharedElementTransition, fragments);
+        OneShotPreDrawListener.add(sceneRoot, () -> {
+            ArrayMap<String, View> inSharedElements = captureInSharedElements(
+                    nameOverrides, finalSharedElementTransition, fragments);
 
-                        if (inSharedElements != null) {
-                            sharedElementsIn.addAll(inSharedElements.values());
-                            sharedElementsIn.add(nonExistentView);
-                        }
+            if (inSharedElements != null) {
+                sharedElementsIn.addAll(inSharedElements.values());
+                sharedElementsIn.add(nonExistentView);
+            }
 
-                        callSharedElementStartEnd(inFragment, outFragment, inIsPop,
-                                inSharedElements, false);
-                        if (finalSharedElementTransition != null) {
-                            finalSharedElementTransition.getTargets().clear();
-                            finalSharedElementTransition.getTargets().addAll(sharedElementsIn);
-                            replaceTargets(finalSharedElementTransition, sharedElementsOut,
-                                    sharedElementsIn);
+            callSharedElementStartEnd(inFragment, outFragment, inIsPop,
+                    inSharedElements, false);
+            if (finalSharedElementTransition != null) {
+                finalSharedElementTransition.getTargets().clear();
+                finalSharedElementTransition.getTargets().addAll(sharedElementsIn);
+                replaceTargets(finalSharedElementTransition, sharedElementsOut,
+                        sharedElementsIn);
 
-                            final View inEpicenterView = getInEpicenterView(inSharedElements,
-                                    fragments, enterTransition, inIsPop);
-                            if (inEpicenterView != null) {
-                                inEpicenterView.getBoundsOnScreen(inEpicenter);
-                            }
-                        }
-                        return true;
-                    }
-                });
+                final View inEpicenterView = getInEpicenterView(inSharedElements,
+                        fragments, enterTransition, inIsPop);
+                if (inEpicenterView != null) {
+                    inEpicenterView.getBoundsOnScreen(inEpicenter);
+                }
+            }
+        });
         return sharedElementTransition;
     }
 
