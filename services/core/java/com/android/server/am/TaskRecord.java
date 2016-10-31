@@ -298,6 +298,7 @@ final class TaskRecord extends ConfigurationContainer {
         setIntent(_intent, info);
         setMinDimensions(info);
         touchActiveTime();
+        mService.mTaskChangeNotificationController.notifyTaskCreated(_taskId, realActivity);
     }
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
@@ -329,6 +330,7 @@ final class TaskRecord extends ConfigurationContainer {
         mTaskToReturnTo = HOME_ACTIVITY_TYPE;
         lastTaskDescription = _taskDescription;
         touchActiveTime();
+        mService.mTaskChangeNotificationController.notifyTaskCreated(_taskId, realActivity);
     }
 
     private TaskRecord(ActivityManagerService service, int _taskId, Intent _intent,
@@ -383,6 +385,7 @@ final class TaskRecord extends ConfigurationContainer {
         mPrivileged = privileged;
         mMinWidth = minWidth;
         mMinHeight = minHeight;
+        mService.mTaskChangeNotificationController.notifyTaskCreated(_taskId, realActivity);
     }
 
     void touchActiveTime() {
@@ -861,7 +864,7 @@ final class TaskRecord extends ConfigurationContainer {
             // We normally notify listeners of task stack changes on pause, however pinned stack
             // activities are normally in the paused state so no notification will be sent there
             // before the activity is removed. We send it here so instead.
-            mService.notifyTaskStackChangedLocked();
+            mService.mTaskChangeNotificationController.notifyTaskStackChanged();
         }
 
         if (mActivities.isEmpty()) {

@@ -964,6 +964,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case UNREGISTER_TASK_STACK_LISTENER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            unregisterTaskStackListener(ITaskStackListener.Stub.asInterface(token));
+            reply.writeNoException();
+            return true;
+        }
+
         case GET_TASK_FOR_ACTIVITY_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -4204,6 +4212,18 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(listener.asBinder());
         mRemote.transact(REGISTER_TASK_STACK_LISTENER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    @Override
+    public void unregisterTaskStackListener(ITaskStackListener listener) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(listener.asBinder());
+        mRemote.transact(UNREGISTER_TASK_STACK_LISTENER_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

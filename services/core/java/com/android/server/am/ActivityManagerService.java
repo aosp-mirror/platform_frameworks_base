@@ -76,6 +76,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
+import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
@@ -524,9 +525,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int ALLOW_NON_FULL_IN_PROFILE = 1;
     static final int ALLOW_FULL_ONLY = 2;
 
-    // Delay in notifying task stack change listeners (in millis)
-    static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
-
     // Necessary ApplicationInfo flags to mark an app as persistent
     private static final int PERSISTENT_MASK =
             ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT;
@@ -554,9 +552,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final ActivityStarter mActivityStarter;
 
-    /** Task stack change listeners. */
-    private final RemoteCallbackList<ITaskStackListener> mTaskStackListeners =
-            new RemoteCallbackList<ITaskStackListener>();
+    final TaskChangeNotificationController mTaskChangeNotificationController;
 
     final InstrumentationReporter mInstrumentationReporter = new InstrumentationReporter();
 
@@ -1526,29 +1522,23 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int START_USER_SWITCH_UI_MSG = 46;
     static final int SEND_LOCALE_TO_MOUNT_DAEMON_MSG = 47;
     static final int DISMISS_DIALOG_UI_MSG = 48;
-    static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG = 49;
-    static final int NOTIFY_CLEARTEXT_NETWORK_MSG = 50;
-    static final int POST_DUMP_HEAP_NOTIFICATION_MSG = 51;
-    static final int DELETE_DUMPHEAP_MSG = 52;
-    static final int FOREGROUND_PROFILE_CHANGED_MSG = 53;
-    static final int DISPATCH_UIDS_CHANGED_UI_MSG = 54;
-    static final int REPORT_TIME_TRACKER_MSG = 55;
-    static final int REPORT_USER_SWITCH_COMPLETE_MSG = 56;
-    static final int SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG = 57;
-    static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG = 59;
-    static final int IDLE_UIDS_MSG = 60;
-    static final int SYSTEM_USER_UNLOCK_MSG = 61;
-    static final int LOG_STACK_STATE = 62;
-    static final int VR_MODE_CHANGE_MSG = 63;
-    static final int NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG = 64;
-    static final int NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 65;
-    static final int NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG = 66;
-    static final int NOTIFY_FORCED_RESIZABLE_MSG = 67;
-    static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG = 68;
-    static final int VR_MODE_APPLY_IF_NEEDED_MSG = 69;
-    static final int SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG = 70;
-    static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 71;
-    static final int REPORT_LOCKED_BOOT_COMPLETE_MSG = 72;
+    static final int NOTIFY_CLEARTEXT_NETWORK_MSG = 49;
+    static final int POST_DUMP_HEAP_NOTIFICATION_MSG = 50;
+    static final int DELETE_DUMPHEAP_MSG = 51;
+    static final int FOREGROUND_PROFILE_CHANGED_MSG = 52;
+    static final int DISPATCH_UIDS_CHANGED_UI_MSG = 53;
+    static final int REPORT_TIME_TRACKER_MSG = 54;
+    static final int REPORT_USER_SWITCH_COMPLETE_MSG = 55;
+    static final int SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG = 56;
+    static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG = 57;
+    static final int IDLE_UIDS_MSG = 58;
+    static final int SYSTEM_USER_UNLOCK_MSG = 59;
+    static final int LOG_STACK_STATE = 60;
+    static final int VR_MODE_CHANGE_MSG = 61;
+    static final int VR_MODE_APPLY_IF_NEEDED_MSG = 62;
+    static final int SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG = 63;
+    static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 64;
+    static final int REPORT_LOCKED_BOOT_COMPLETE_MSG = 65;
     static final int START_USER_SWITCH_FG_MSG = 712;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
@@ -2105,92 +2095,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 break;
             }
-            case NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    for (int i = mTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
-                        try {
-                            // Make a one-way callback to the listener
-                            mTaskStackListeners.getBroadcastItem(i).onTaskStackChanged();
-                        } catch (RemoteException e){
-                            // Handled by the RemoteCallbackList
-                        }
-                    }
-                    mTaskStackListeners.finishBroadcast();
-                }
-                break;
-            }
-            case NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    for (int i = mTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
-                        try {
-                            // Make a one-way callback to the listener
-                            mTaskStackListeners.getBroadcastItem(i).onActivityPinned();
-                        } catch (RemoteException e){
-                            // Handled by the RemoteCallbackList
-                        }
-                    }
-                    mTaskStackListeners.finishBroadcast();
-                }
-                break;
-            }
-            case NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    for (int i = mTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
-                        try {
-                            // Make a one-way callback to the listener
-                            mTaskStackListeners.getBroadcastItem(i).onPinnedActivityRestartAttempt();
-                        } catch (RemoteException e){
-                            // Handled by the RemoteCallbackList
-                        }
-                    }
-                    mTaskStackListeners.finishBroadcast();
-                }
-                break;
-            }
-            case NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    for (int i = mTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
-                        try {
-                            // Make a one-way callback to the listener
-                            mTaskStackListeners.getBroadcastItem(i).onPinnedStackAnimationEnded();
-                        } catch (RemoteException e){
-                            // Handled by the RemoteCallbackList
-                        }
-                    }
-                    mTaskStackListeners.finishBroadcast();
-                }
-                break;
-            }
-            case NOTIFY_FORCED_RESIZABLE_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    for (int i = mTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
-                        try {
-                            // Make a one-way callback to the listener
-                            mTaskStackListeners.getBroadcastItem(i).onActivityForcedResizable(
-                                    (String) msg.obj, msg.arg1);
-                        } catch (RemoteException e){
-                            // Handled by the RemoteCallbackList
-                        }
-                    }
-                    mTaskStackListeners.finishBroadcast();
-                }
-                break;
-            }
-                case NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG: {
-                    synchronized (ActivityManagerService.this) {
-                        for (int i = mTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
-                            try {
-                                // Make a one-way callback to the listener
-                                mTaskStackListeners.getBroadcastItem(i)
-                                        .onActivityDismissingDockedStack();
-                            } catch (RemoteException e){
-                                // Handled by the RemoteCallbackList
-                            }
-                        }
-                        mTaskStackListeners.finishBroadcast();
-                    }
-                    break;
-                }
             case NOTIFY_CLEARTEXT_NETWORK_MSG: {
                 final int uid = msg.arg1;
                 final byte[] firstPacket = (byte[]) msg.obj;
@@ -2321,11 +2225,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case IDLE_UIDS_MSG: {
                 idleUids();
-            } break;
-            case LOG_STACK_STATE: {
-                synchronized (ActivityManagerService.this) {
-                    mStackSupervisor.logStackState();
-                }
             } break;
             case VR_MODE_CHANGE_MSG: {
                 VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
@@ -2730,6 +2629,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         mStackSupervisor.onConfigurationChanged(mTempConfig);
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
+        mTaskChangeNotificationController =
+                new TaskChangeNotificationController(this, mStackSupervisor, mHandler);
         mActivityStarter = new ActivityStarter(this, mStackSupervisor);
         mRecentTasks = new RecentTasks(this, mStackSupervisor);
 
@@ -3104,12 +3005,17 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public void registerTaskStackListener(ITaskStackListener listener) throws RemoteException {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "registerTaskStackListener()");
-        synchronized (this) {
-            if (listener != null) {
-                mTaskStackListeners.register(listener);
-            }
-        }
+        mTaskChangeNotificationController.registerTaskStackListener(listener);
     }
+
+    /**
+     * Unregister a task stack listener so that it stops receiving callbacks.
+     */
+    @Override
+    public void unregisterTaskStackListener(ITaskStackListener listener) throws RemoteException {
+         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "unregisterTaskStackListener()");
+         mTaskChangeNotificationController.unregisterTaskStackListener(listener);
+     }
 
     @Override
     public void notifyActivityDrawn(IBinder token) {
@@ -9411,7 +9317,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 task.setLastThumbnailLocked(thumbnail);
                 task.freeLastThumbnail();
-
                 return task.taskId;
             }
         } finally {
@@ -9433,6 +9338,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (r != null) {
                 r.setTaskDescription(td);
                 r.task.updateTaskDescription();
+                mTaskChangeNotificationController.notifyTaskDescriptionChanged(r.task.taskId, td);
             }
         }
     }
@@ -11714,38 +11620,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         mRecentTasks.notifyTaskPersisterLocked(task, flush);
     }
 
-    /** Notifies all listeners when the task stack has changed. */
-    void notifyTaskStackChangedLocked() {
-        mHandler.sendEmptyMessage(LOG_STACK_STATE);
-        mHandler.removeMessages(NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG);
-        Message nmsg = mHandler.obtainMessage(NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG);
-        mHandler.sendMessageDelayed(nmsg, NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY);
-    }
-
-    /** Notifies all listeners when an Activity is pinned. */
-    void notifyActivityPinnedLocked() {
-        mHandler.removeMessages(NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG);
-        mHandler.obtainMessage(NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG).sendToTarget();
-    }
-
-    /**
-     * Notifies all listeners when an attempt was made to start an an activity that is already
-     * running in the pinned stack and the activity was not actually started, but the task is
-     * either brought to the front or a new Intent is delivered to it.
-     */
-    void notifyPinnedActivityRestartAttemptLocked() {
-        mHandler.removeMessages(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG);
-        mHandler.obtainMessage(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG).sendToTarget();
-    }
-
     /** Notifies all listeners when the pinned stack animation ends. */
     @Override
     public void notifyPinnedStackAnimationEnded() {
-        synchronized (this) {
-            mHandler.removeMessages(NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG);
-            mHandler.obtainMessage(
-                    NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG).sendToTarget();
-        }
+        mTaskChangeNotificationController.notifyPinnedStackAnimationEnded();
     }
 
     @Override

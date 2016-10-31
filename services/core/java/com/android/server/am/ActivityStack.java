@@ -1279,7 +1279,7 @@ final class ActivityStack extends ConfigurationContainer {
         // task stack changes, because its positioning may depend on it.
         if (mStackSupervisor.mAppVisibilitiesChangedSinceLastPause
                 || mService.mStackSupervisor.getStack(PINNED_STACK_ID) != null) {
-            mService.notifyTaskStackChangedLocked();
+            mService.mTaskChangeNotificationController.notifyTaskStackChanged();
             mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = false;
         }
 
@@ -3314,9 +3314,11 @@ final class ActivityStack extends ConfigurationContainer {
         final boolean endTask = index <= 0;
         final int transit = endTask ? TRANSIT_TASK_CLOSE : TRANSIT_ACTIVITY_CLOSE;
         if (mResumedActivity == r) {
-
             if (DEBUG_VISIBILITY || DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                     "Prepare close transition: finishing " + r);
+            if (endTask) {
+                mService.mTaskChangeNotificationController.notifyTaskRemovalStarted(task.taskId);
+            }
             mWindowManager.prepareAppTransition(transit, false);
 
             // Tell window manager to prepare for this one to be removed.
@@ -4138,6 +4140,8 @@ final class ActivityStack extends ConfigurationContainer {
 
         mStackSupervisor.resumeFocusedStackTopActivityLocked();
         EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, tr.taskId);
+
+        mService.mTaskChangeNotificationController.notifyTaskMovedToFront(tr.taskId);
     }
 
     /**
@@ -4690,6 +4694,7 @@ final class ActivityStack extends ConfigurationContainer {
                 // default configuration the next time it launches.
                 task.updateOverrideConfiguration(null);
             }
+            mService.mTaskChangeNotificationController.notifyTaskRemoved(task.taskId);
         }
 
         final ActivityRecord r = mResumedActivity;

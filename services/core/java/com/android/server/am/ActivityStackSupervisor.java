@@ -157,8 +157,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
-import static com.android.server.am.ActivityManagerService.NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG;
-import static com.android.server.am.ActivityManagerService.NOTIFY_FORCED_RESIZABLE_MSG;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
@@ -2582,7 +2580,7 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
         resumeFocusedStackTopActivityLocked();
 
         mWindowManager.animateResizePinnedStack(bounds, -1);
-        mService.notifyActivityPinnedLocked();
+        mService.mTaskChangeNotificationController.notifyActivityPinned();
     }
 
     boolean moveFocusableActivityStackToFrontLocked(ActivityRecord r, String reason) {
@@ -2904,7 +2902,7 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
         r.mLaunchTaskBehind = false;
         task.setLastThumbnailLocked(r.screenshotActivityLocked());
         mRecentTasks.addLocked(task);
-        mService.notifyTaskStackChangedLocked();
+        mService.mTaskChangeNotificationController.notifyTaskStackChanged();
         mWindowManager.setAppVisibility(r.appToken, false);
 
         // When launching tasks behind, update the last active time of the top task after the new
@@ -3588,7 +3586,7 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
         final ActivityRecord topActivity = task.getTopActivity();
         if (!task.canGoInDockedStack() || forceNonResizable) {
             // Display a warning toast that we tried to put a non-dockable task in the docked stack.
-            mService.mHandler.sendEmptyMessage(NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG);
+            mService.mTaskChangeNotificationController.notifyActivityDismissingDockedStack();
 
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
@@ -3596,8 +3594,8 @@ public final class ActivityStackSupervisor extends ConfigurationContainer
         } else if (topActivity != null && topActivity.isNonResizableOrForced()
                 && !topActivity.noDisplay) {
             String packageName = topActivity.appInfo.packageName;
-            mService.mHandler.obtainMessage(NOTIFY_FORCED_RESIZABLE_MSG, task.taskId, 0,
-                    packageName).sendToTarget();
+            mService.mTaskChangeNotificationController.notifyActivityForcedResizable(
+                    task.taskId, packageName);
         }
     }
 
