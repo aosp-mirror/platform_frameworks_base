@@ -18,6 +18,12 @@ hwui_src_files := \
     hwui/MinikinUtils.cpp \
     hwui/PaintImpl.cpp \
     hwui/Typeface.cpp \
+    pipeline/skia/GLFunctorDrawable.cpp \
+    pipeline/skia/LayerDrawable.cpp \
+    pipeline/skia/RenderNodeDrawable.cpp \
+    pipeline/skia/ReorderBarrierDrawables.cpp \
+    pipeline/skia/SkiaDisplayList.cpp \
+    pipeline/skia/SkiaRecordingCanvas.cpp \
     renderstate/Blend.cpp \
     renderstate/MeshState.cpp \
     renderstate/OffscreenBufferPool.cpp \
@@ -94,7 +100,6 @@ hwui_src_files := \
     ShadowTessellator.cpp \
     SkiaCanvas.cpp \
     SkiaCanvasProxy.cpp \
-    SkiaDisplayList.cpp \
     SkiaShader.cpp \
     Snapshot.cpp \
     SpotShadow.cpp \
@@ -169,6 +174,7 @@ endef
 hwui_c_includes += \
     external/skia/include/private \
     external/skia/src/core \
+    external/skia/src/effects \
     external/harfbuzz_ng/src \
     external/freetype/include
 
@@ -284,6 +290,7 @@ LOCAL_SRC_FILES += \
     tests/unit/MeshStateTests.cpp \
     tests/unit/OffscreenBufferPoolTests.cpp \
     tests/unit/OpDumperTests.cpp \
+    tests/unit/RenderNodeDrawableTests.cpp \
     tests/unit/RecordingCanvasTests.cpp \
     tests/unit/RenderNodeTests.cpp \
     tests/unit/RenderPropertiesTests.cpp \

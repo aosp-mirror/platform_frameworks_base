@@ -32,7 +32,7 @@
 #include "DisplayList.h"
 #include "Matrix.h"
 #include "RenderProperties.h"
-#include "SkiaDisplayList.h"
+#include "pipeline/skia/SkiaDisplayList.h"
 
 #include <vector>
 
@@ -50,7 +50,6 @@ class DisplayListOp;
 class FrameBuilder;
 class OffscreenBuffer;
 class Rect;
-class SkiaDisplayList;
 class SkiaShader;
 struct RenderNodeOp;
 
@@ -59,6 +58,10 @@ class TreeObserver;
 
 namespace proto {
 class RenderNode;
+}
+
+namespace skiapipeline {
+    class SkiaDisplayList;
 }
 
 /**
@@ -294,14 +297,14 @@ public:
      * Detach and transfer ownership of an already allocated displayList for use
      * in recording updated content for this renderNode
      */
-    std::unique_ptr<SkiaDisplayList> detachAvailableList() {
+    std::unique_ptr<skiapipeline::SkiaDisplayList> detachAvailableList() {
         return std::move(mAvailableDisplayList);
     }
 
     /**
      * Attach unused displayList to this node for potential future reuse.
      */
-    void attachAvailableList(SkiaDisplayList* skiaDisplayList) {
+    void attachAvailableList(skiapipeline::SkiaDisplayList* skiaDisplayList) {
         mAvailableDisplayList.reset(skiaDisplayList);
     }
 
@@ -337,7 +340,7 @@ private:
      *  2) It is replaced with the displayList from the next completed frame
      *  3) It is detached and used to to record a new displayList for a later frame
      */
-    std::unique_ptr<SkiaDisplayList> mAvailableDisplayList;
+    std::unique_ptr<skiapipeline::SkiaDisplayList> mAvailableDisplayList;
 
     /**
      * An offscreen rendering target used to contain the contents this RenderNode

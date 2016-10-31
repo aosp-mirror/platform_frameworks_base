@@ -40,6 +40,8 @@ public:
      */
     explicit SkiaCanvas(SkCanvas* canvas);
 
+    virtual ~SkiaCanvas();
+
     virtual SkCanvas* asSkCanvas() override {
         return mCanvas.get();
     }

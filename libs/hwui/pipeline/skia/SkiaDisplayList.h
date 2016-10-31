@@ -17,7 +17,8 @@
 #pragma once
 
 #include "DisplayList.h"
-#include "SkiaDrawables.h"
+#include "GLFunctorDrawable.h"
+#include "RenderNodeDrawable.h"
 
 #include <deque>
 #include <SkLiteDL.h>
@@ -25,6 +26,7 @@
 
 namespace android {
 namespace uirenderer {
+namespace skiapipeline {
 
 /**
  * This class is intended to be self contained, but still subclasses from
@@ -148,5 +150,6 @@ private:
     bool mPinnedImages = false;
 };
 
+}; // namespace skiapipeline
 }; // namespace uirenderer
 }; // namespace android
