@@ -731,8 +731,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf, Rect dcf, Rect sf,
-            Rect osf) {
+    public void computeFrameLw(Rect parentFrame, Rect displayFrame, Rect overscanFrame,
+            Rect contentFrame, Rect visibleFrame, Rect decorFrame, Rect stableFrame,
+            Rect outsetFrame) {
         if (mWillReplaceWindow && (mAnimatingExit || !mReplacingRemoveRequested)) {
             // This window is being replaced and either already got information that it's being
             // removed or we are still waiting for some information. Because of this we don't
@@ -768,10 +769,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int layoutYDiff;
         if (fullscreenTask || layoutInParentFrame()) {
             // We use the parent frame as the containing frame for fullscreen and child windows
-            mContainingFrame.set(pf);
-            mDisplayFrame.set(df);
-            layoutDisplayFrame = df;
-            layoutContainingFrame = pf;
+            mContainingFrame.set(parentFrame);
+            mDisplayFrame.set(displayFrame);
+            layoutDisplayFrame = displayFrame;
+            layoutContainingFrame = parentFrame;
             layoutXDiff = 0;
             layoutYDiff = 0;
         } else {
@@ -787,15 +788,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final WindowState imeWin = mService.mInputMethodWindow;
             // IME is up and obscuring this window. Adjust the window position so it is visible.
             if (imeWin != null && imeWin.isVisibleNow() && mService.mInputMethodTarget == this) {
-                    if (windowsAreFloating && mContainingFrame.bottom > cf.bottom) {
+                    if (windowsAreFloating && mContainingFrame.bottom > contentFrame.bottom) {
                         // In freeform we want to move the top up directly.
-                        // TODO: Investigate why this is cf not pf.
-                        mContainingFrame.top -= mContainingFrame.bottom - cf.bottom;
-                    } else if (mContainingFrame.bottom > pf.bottom) {
+                        // TODO: Investigate why this is contentFrame not parentFrame.
+                        mContainingFrame.top -= mContainingFrame.bottom - contentFrame.bottom;
+                    } else if (mContainingFrame.bottom > parentFrame.bottom) {
                         // But in docked we want to behave like fullscreen
                         // and behave as if the task were given smaller bounds
                         // for the purposes of layout.
-                        mContainingFrame.bottom = pf.bottom;
+                        mContainingFrame.bottom = parentFrame.bottom;
                     }
             }
 
@@ -804,7 +805,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // if it wasn't set already. No need to intersect it with the (visible)
                 // "content frame" since it is allowed to be outside the visible desktop.
                 if (mContainingFrame.isEmpty()) {
-                    mContainingFrame.set(cf);
+                    mContainingFrame.set(contentFrame);
                 }
             }
             mDisplayFrame.set(mContainingFrame);
@@ -812,22 +813,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             layoutYDiff = !mInsetFrame.isEmpty() ? mInsetFrame.top - mContainingFrame.top : 0;
             layoutContainingFrame = !mInsetFrame.isEmpty() ? mInsetFrame : mContainingFrame;
             mTmpRect.set(0, 0, dc.getDisplayInfo().logicalWidth, dc.getDisplayInfo().logicalHeight);
-            subtractInsets(mDisplayFrame, layoutContainingFrame, df, mTmpRect);
+            subtractInsets(mDisplayFrame, layoutContainingFrame, displayFrame, mTmpRect);
             if (!layoutInParentFrame()) {
-                subtractInsets(mContainingFrame, layoutContainingFrame, pf, mTmpRect);
-                subtractInsets(mInsetFrame, layoutContainingFrame, pf, mTmpRect);
+                subtractInsets(mContainingFrame, layoutContainingFrame, parentFrame, mTmpRect);
+                subtractInsets(mInsetFrame, layoutContainingFrame, parentFrame, mTmpRect);
             }
-            layoutDisplayFrame = df;
+            layoutDisplayFrame = displayFrame;
             layoutDisplayFrame.intersect(layoutContainingFrame);
         }
 
         final int pw = mContainingFrame.width();
         final int ph = mContainingFrame.height();
 
-        if (!mParentFrame.equals(pf)) {
+        if (!mParentFrame.equals(parentFrame)) {
             //Slog.i(TAG_WM, "Window " + this + " content frame from " + mParentFrame
-            //        + " to " + pf);
-            mParentFrame.set(pf);
+            //        + " to " + parentFrame);
+            mParentFrame.set(parentFrame);
             mContentChanged = true;
         }
         if (mRequestedWidth != mLastRequestedWidth || mRequestedHeight != mLastRequestedHeight) {
@@ -836,14 +837,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mContentChanged = true;
         }
 
-        mOverscanFrame.set(of);
-        mContentFrame.set(cf);
-        mVisibleFrame.set(vf);
-        mDecorFrame.set(dcf);
-        mStableFrame.set(sf);
-        final boolean hasOutsets = osf != null;
+        mOverscanFrame.set(overscanFrame);
+        mContentFrame.set(contentFrame);
+        mVisibleFrame.set(visibleFrame);
+        mDecorFrame.set(decorFrame);
+        mStableFrame.set(stableFrame);
+        final boolean hasOutsets = outsetFrame != null;
         if (hasOutsets) {
-            mOutsetFrame.set(osf);
+            mOutsetFrame.set(outsetFrame);
         }
 
         final int fw = mFrame.width();
