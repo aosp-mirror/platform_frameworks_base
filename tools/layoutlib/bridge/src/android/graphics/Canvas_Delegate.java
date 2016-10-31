@@ -123,7 +123,7 @@ public final class Canvas_Delegate {
     /*package*/ static long initRaster(@Nullable Bitmap bitmap) {
         long nativeBitmapOrZero = 0;
         if (bitmap != null) {
-            nativeBitmapOrZero = bitmap.refSkPixelRef();
+            nativeBitmapOrZero = bitmap.getNativeInstance();
         }
         if (nativeBitmapOrZero > 0) {
             // get the Bitmap from the int
