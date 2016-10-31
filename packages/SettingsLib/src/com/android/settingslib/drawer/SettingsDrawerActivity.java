@@ -28,10 +28,8 @@ import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.support.annotation.VisibleForTesting;
 import android.support.v4.widget.DrawerLayout;
 import android.util.ArraySet;
 import android.util.Log;
@@ -312,7 +310,7 @@ public class SettingsDrawerActivity extends Activity {
             return true;
         }
         try {
-            updateUserHandlesIfNeeded(tile);
+            ProfileSelectDialog.updateUserHandlesIfNeeded(this /* context */, tile);
             int numUserHandles = tile.userHandle.size();
             if (numUserHandles > 1) {
                 ProfileSelectDialog.show(getFragmentManager(), tile);
@@ -332,24 +330,6 @@ public class SettingsDrawerActivity extends Activity {
             Log.w(TAG, "Couldn't find tile " + tile.intent, e);
         }
         return true;
-    }
-
-    private void updateUserHandlesIfNeeded(Tile tile) {
-        List<UserHandle> userHandles = tile.userHandle;
-
-        for (int i = userHandles.size() - 1; i >= 0; i--) {
-            if (mUserManager.getUserInfo(userHandles.get(i).getIdentifier()) == null) {
-                if (DEBUG) {
-                    Log.d(TAG, "Delete the user: " + userHandles.get(i).getIdentifier());
-                }
-                userHandles.remove(i);
-            }
-        }
-    }
-
-    @VisibleForTesting
-    public void setUserManager(UserManager userManager) {
-        mUserManager = userManager;
     }
 
     protected void onTileClicked(Tile tile) {

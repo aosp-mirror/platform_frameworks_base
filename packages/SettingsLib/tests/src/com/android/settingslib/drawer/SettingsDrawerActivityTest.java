@@ -19,25 +19,16 @@ package com.android.settingslib.drawer;
 import android.app.Instrumentation;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
-import android.annotation.Nullable;
-import android.content.Intent;
-import android.content.pm.UserInfo;
-import android.os.Bundle;
-import android.os.UserHandle;
-import android.os.UserManager;
 import android.support.test.filters.SmallTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.android.settingslib.drawer.SettingsDrawerActivity;
-import com.android.settingslib.drawer.Tile;
 import com.android.settingslib.R;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import static android.support.test.espresso.Espresso.onView;
@@ -45,66 +36,19 @@ import static android.support.test.espresso.assertion.ViewAssertions.doesNotExis
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
-import static junit.framework.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SettingsDrawerActivityTest {
-    @Mock
-    private UserManager mUserManager;
+
 
     @Rule
     public ActivityTestRule<TestActivity> mActivityRule =
             new ActivityTestRule<>(TestActivity.class, true, true);
 
-    private static final UserHandle NORMAL_USER = UserHandle.of(1111);
-    private static final UserHandle REMOVED_USER = UserHandle.of(2222);
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
-        final UserInfo userInfo = new UserInfo(
-                NORMAL_USER.getIdentifier(), "test_user", UserInfo.FLAG_RESTRICTED);
-        when(mUserManager.getUserInfo(NORMAL_USER.getIdentifier())).thenReturn(userInfo);
-    }
-
-    @Test
-    public void testUpdateUserHandlesIfNeeded_Normal() {
-        TestActivity activity = mActivityRule.getActivity();
-        activity.setUserManager(mUserManager);
-
-        Tile tile = new Tile();
-        tile.intent = new Intent();
-        tile.userHandle.add(NORMAL_USER);
-
-        activity.openTile(tile);
-
-        assertEquals(tile.userHandle.size(), 1);
-        assertEquals(tile.userHandle.get(0).getIdentifier(), NORMAL_USER.getIdentifier());
-        verify(mUserManager, times(1)).getUserInfo(NORMAL_USER.getIdentifier());
-    }
-
-    @Test
-    public void testUpdateUserHandlesIfNeeded_Remove() {
-        TestActivity activity = mActivityRule.getActivity();
-        activity.setUserManager(mUserManager);
-
-        Tile tile = new Tile();
-        tile.intent = new Intent();
-        tile.userHandle.add(REMOVED_USER);
-        tile.userHandle.add(NORMAL_USER);
-        tile.userHandle.add(REMOVED_USER);
-
-        activity.openTile(tile);
-
-        assertEquals(tile.userHandle.size(), 1);
-        assertEquals(tile.userHandle.get(0).getIdentifier(), NORMAL_USER.getIdentifier());
-        verify(mUserManager, times(1)).getUserInfo(NORMAL_USER.getIdentifier());
-        verify(mUserManager, times(2)).getUserInfo(REMOVED_USER.getIdentifier());
     }
 
     @Test
