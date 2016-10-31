@@ -387,24 +387,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         switch (mStackId) {
             case PINNED_STACK_ID:
-                // Keep the pinned stack in the same aspect ratio as in the old orientation, but
-                // move it into the position in the rotated space, and snap to the closest space
-                // in the new orientation.
-
-                try {
-                    final IActivityManager am = mService.mActivityManager;
-                    final Rect movementBounds = am.getPictureInPictureMovementBounds(
-                            mDisplayContent.getDisplayId());
-                    final int width = mBounds.width();
-                    final int height = mBounds.height();
-                    final int left = mTmpRect2.centerX() - (width / 2);
-                    final int top = mTmpRect2.centerY() - (height / 2);
-                    mTmpRect2.set(left, top, left + width, top + height);
-
-                    final PipSnapAlgorithm snapAlgorithm = new PipSnapAlgorithm(mService.mContext,
-                            mDisplayContent.getDisplayId());
-                    mTmpRect2.set(snapAlgorithm.findClosestSnapBounds(movementBounds, mTmpRect2));
-                } catch (RemoteException e) {}
+                mTmpRect2 = mDisplayContent.getPinnedStackController().getPostRotationBounds(
+                        mBounds, mTmpRect2);
                 break;
             case DOCKED_STACK_ID:
                 repositionDockedStackAfterRotation(mTmpRect2);

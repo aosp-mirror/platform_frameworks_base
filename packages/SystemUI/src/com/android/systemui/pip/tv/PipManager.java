@@ -39,6 +39,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.IWindowManager;
+import android.view.WindowManagerGlobal;
+
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -135,6 +137,7 @@ public class PipManager {
     private Context mContext;
     private PipRecentsOverlayManager mPipRecentsOverlayManager;
     private IActivityManager mActivityManager;
+    private IWindowManager mWindowManager;
     private MediaSessionManager mMediaSessionManager;
     private int mState = STATE_NO_PIP;
     private final Handler mHandler = new Handler();
@@ -205,6 +208,7 @@ public class PipManager {
         mContext = context;
 
         mActivityManager = ActivityManagerNative.getDefault();
+        mWindowManager = WindowManagerGlobal.getWindowManagerService();
         SystemServicesProxy.getInstance(context).registerTaskStackListener(mTaskStackListener);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
@@ -221,7 +225,7 @@ public class PipManager {
     private void loadConfigurationsAndApply() {
         Resources res = mContext.getResources();
         try {
-            mDefaultPipBounds = mActivityManager.getDefaultPictureInPictureBounds(
+            mDefaultPipBounds = mWindowManager.getPictureInPictureDefaultBounds(
                     Display.DEFAULT_DISPLAY);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get default PIP bounds", e);

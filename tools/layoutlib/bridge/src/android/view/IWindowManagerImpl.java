@@ -591,6 +591,20 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void registerPinnedStackListener(int displayId, IPinnedStackListener listener) throws RemoteException {
+    }
+
+    @Override
+    public Rect getPictureInPictureDefaultBounds(int displayId) {
+        return null;
+    }
+
+    @Override
+    public Rect getPictureInPictureMovementBounds(int displayId)  {
+        return null;
+    }
+
+    @Override
     public void setResizeDimLayer(boolean visible, int targetStackId, float alpha)
             throws RemoteException {
     }

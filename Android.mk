@@ -299,6 +299,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/IInputFilter.aidl \
 	core/java/android/view/IInputFilterHost.aidl \
 	core/java/android/view/IOnKeyguardExitResult.aidl \
+	core/java/android/view/IPinnedStackController.aidl \
+	core/java/android/view/IPinnedStackListener.aidl \
 	core/java/android/view/IRotationWatcher.aidl \
 	core/java/android/view/IWindow.aidl \
 	core/java/android/view/IWindowFocusObserver.aidl \
