@@ -46,7 +46,9 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
+import com.android.server.FgThread;
 import com.android.server.SystemService;
 
 import org.json.JSONArray;
@@ -111,6 +113,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private Context mContext;
     private long mHalDeviceId;
     private int mFailedAttempts;
+    @GuardedBy("this")
     private IFingerprintDaemon mDaemon;
     private final PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
@@ -195,35 +198,41 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     public void binderDied() {
         Slog.v(TAG, "fingerprintd died");
         MetricsLogger.count(mContext, "fingerprintd_died", 1);
-        mDaemon = null;
+        synchronized (this) {
+            mDaemon = null;
+        }
         mCurrentUserId = UserHandle.USER_CURRENT;
         handleError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
     }
 
     public IFingerprintDaemon getFingerprintDaemon() {
-        if (mDaemon == null) {
-            mDaemon = IFingerprintDaemon.Stub.asInterface(ServiceManager.getService(FINGERPRINTD));
-            if (mDaemon != null) {
-                try {
-                    mDaemon.asBinder().linkToDeath(this, 0);
-                    mDaemon.init(mDaemonCallback);
-                    mHalDeviceId = mDaemon.openHal();
-                    if (mHalDeviceId != 0) {
-                        updateActiveGroup(ActivityManager.getCurrentUser(), null);
-                    } else {
-                        Slog.w(TAG, "Failed to open Fingerprint HAL!");
-                        MetricsLogger.count(mContext, "fingerprintd_openhal_error", 1);
-                        mDaemon = null;
+        synchronized (this) {
+            if (mDaemon == null) {
+                mDaemon = IFingerprintDaemon.Stub
+                        .asInterface(ServiceManager.getService(FINGERPRINTD));
+                if (mDaemon != null) {
+                    try {
+                        mDaemon.asBinder().linkToDeath(this, 0);
+                        mDaemon.init(mDaemonCallback);
+                        mHalDeviceId = mDaemon.openHal();
+                        if (DEBUG) Slog.v(TAG, "Fingerprint HAL id: " + mHalDeviceId);
+                        if (mHalDeviceId != 0) {
+                            updateActiveGroup(ActivityManager.getCurrentUser(), null);
+                        } else {
+                            Slog.w(TAG, "Failed to open Fingerprint HAL!");
+                            MetricsLogger.count(mContext, "fingerprintd_openhal_error", 1);
+                            mDaemon = null;
+                        }
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Failed to open fingeprintd HAL", e);
+                        mDaemon = null; // try again later!
                     }
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to open fingeprintd HAL", e);
-                    mDaemon = null; // try again later!
+                } else {
+                    Slog.w(TAG, "fingerprint service not available");
                 }
-            } else {
-                Slog.w(TAG, "fingerprint service not available");
             }
+            return mDaemon;
         }
-        return mDaemon;
     }
 
     protected void handleEnumerate(long deviceId, int[] fingerIds, int[] groupIds) {
@@ -1005,8 +1014,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     @Override
     public void onStart() {
         publishBinderService(Context.FINGERPRINT_SERVICE, new FingerprintServiceWrapper());
-        IFingerprintDaemon daemon = getFingerprintDaemon();
-        if (DEBUG) Slog.v(TAG, "Fingerprint HAL id: " + mHalDeviceId);
+        FgThread.getHandler().post(() -> getFingerprintDaemon());
         listenForUserSwitches();
     }
 
