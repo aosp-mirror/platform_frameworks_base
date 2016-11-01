@@ -650,6 +650,19 @@ void RenderProxy::prepareToDraw(Bitmap& bitmap) {
     }
 }
 
+CREATE_BRIDGE2(allocateHardwareBitmap, RenderThread* thread, SkBitmap* bitmap) {
+    sk_sp<Bitmap> hardwareBitmap = Bitmap::allocateHardwareBitmap(*args->thread, *args->bitmap);
+    return hardwareBitmap.release();
+}
+
+sk_sp<Bitmap> RenderProxy::allocateHardwareBitmap(SkBitmap& bitmap) {
+    SETUP_TASK(allocateHardwareBitmap);
+    args->bitmap = &bitmap;
+    args->thread = &RenderThread::getInstance();
+    sk_sp<Bitmap> hardwareBitmap(reinterpret_cast<Bitmap*>(staticPostAndWait(task)));
+    return hardwareBitmap;
+}
+
 void RenderProxy::post(RenderTask* task) {
     mRenderThread.queue(task);
 }

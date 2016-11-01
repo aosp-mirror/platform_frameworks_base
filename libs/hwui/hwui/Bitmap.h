@@ -20,6 +20,7 @@
 #include <SkImageInfo.h>
 #include <SkPixelRef.h>
 #include <cutils/compiler.h>
+#include <ui/GraphicBuffer.h>
 
 namespace android {
 
@@ -27,7 +28,16 @@ enum class PixelStorageType {
     External,
     Heap,
     Ashmem,
+    Hardware,
 };
+
+namespace uirenderer {
+namespace renderthread {
+    class RenderThread;
+}
+}
+
+class PixelStorage;
 
 typedef void (*FreeFunc)(void* addr, void* context);
 
@@ -36,17 +46,24 @@ public:
     static sk_sp<Bitmap> allocateHeapBitmap(SkBitmap* bitmap, SkColorTable* ctable);
     static sk_sp<Bitmap> allocateHeapBitmap(const SkImageInfo& info);
 
+    static sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& bitmap);
+
     static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap, SkColorTable* ctable);
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t allocSize, const SkImageInfo& info,
         size_t rowBytes, SkColorTable* ctable);
 
     static sk_sp<Bitmap> createFrom(const SkImageInfo&, SkPixelRef&);
+
+    static sk_sp<Bitmap> allocateHardwareBitmap(uirenderer::renderthread::RenderThread&,
+            SkBitmap& bitmap);
+
     Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes,
             SkColorTable* ctable);
     Bitmap(void* address, void* context, FreeFunc freeFunc,
             const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
             size_t rowBytes, SkColorTable* ctable);
+    Bitmap(sp<GraphicBuffer>&& buffer, const SkImageInfo& info);
 
     int width() const { return info().width(); }
     int height() const { return info().height(); }
@@ -81,13 +98,18 @@ public:
     bool readyToDraw() const {
         return this->colorType() != kIndex_8_SkColorType || mColorTable;
     }
+
+    bool isHardware() const {
+        return mPixelStorageType == PixelStorageType::Hardware;
+    }
+
+    GraphicBuffer* graphicBuffer();
 protected:
     virtual bool onNewLockPixels(LockRec* rec) override;
     virtual void onUnlockPixels() override { };
     virtual size_t getAllocatedSizeInBytes() const override;
 private:
     virtual ~Bitmap();
-    void doFreePixels();
     void* getStorage() const;
 
     PixelStorageType mPixelStorageType;
@@ -111,6 +133,9 @@ private:
             void* address;
             size_t size;
         } heap;
+        struct {
+            GraphicBuffer* buffer;
+        } hardware;
     } mPixelStorage;
 };
 

@@ -16,10 +16,26 @@
 #include "Bitmap.h"
 
 #include "Caches.h"
+#include "renderthread/RenderThread.h"
+#include "renderthread/RenderProxy.h"
 
 #include <cutils/log.h>
 #include <sys/mman.h>
 #include <cutils/ashmem.h>
+
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
+
+#include <gui/IGraphicBufferAlloc.h>
+#include <gui/ISurfaceComposer.h>
+#include <private/gui/ComposerService.h>
+#include <binder/IServiceManager.h>
+#include <ui/PixelFormat.h>
+
+#include <SkCanvas.h>
 
 namespace android {
 
@@ -74,6 +90,167 @@ static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& info, si
         return nullptr;
     }
     return sk_sp<Bitmap>(new Bitmap(addr, size, info, rowBytes, ctable));
+}
+
+#define FENCE_TIMEOUT 2000000000
+
+// TODO: handle SRGB sanely
+static PixelFormat internalFormatToPixelFormat(GLint internalFormat) {
+    switch (internalFormat) {
+    case GL_ALPHA:
+        return PIXEL_FORMAT_TRANSPARENT;
+    case GL_LUMINANCE:
+        return PIXEL_FORMAT_RGBA_8888;
+    case GL_SRGB8_ALPHA8:
+        return PIXEL_FORMAT_RGBA_8888;
+    case GL_RGBA:
+        return PIXEL_FORMAT_RGBA_8888;
+    default:
+        LOG_ALWAYS_FATAL("Unsupported bitmap colorType: %d", internalFormat);
+        return PIXEL_FORMAT_UNKNOWN;
+    }
+}
+
+class AutoEglFence {
+public:
+    AutoEglFence(EGLDisplay display)
+            : mDisplay(display) {
+        fence = eglCreateSyncKHR(mDisplay, EGL_SYNC_FENCE_KHR, NULL);
+    }
+
+    ~AutoEglFence() {
+        if (fence != EGL_NO_SYNC_KHR) {
+            eglDestroySyncKHR(mDisplay, fence);
+        }
+    }
+
+    EGLSyncKHR fence = EGL_NO_SYNC_KHR;
+private:
+    EGLDisplay mDisplay = EGL_NO_DISPLAY;
+};
+
+class AutoEglImage {
+public:
+    AutoEglImage(EGLDisplay display, EGLClientBuffer clientBuffer)
+            : mDisplay(display) {
+        EGLint imageAttrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE };
+        image = eglCreateImageKHR(display, EGL_NO_CONTEXT,
+                EGL_NATIVE_BUFFER_ANDROID, clientBuffer, imageAttrs);
+    }
+
+    ~AutoEglImage() {
+        if (image != EGL_NO_IMAGE_KHR) {
+            eglDestroyImageKHR(mDisplay, image);
+        }
+    }
+
+    EGLImageKHR image = EGL_NO_IMAGE_KHR;
+private:
+    EGLDisplay mDisplay = EGL_NO_DISPLAY;
+};
+
+static bool uploadBitmapToGraphicBuffer(uirenderer::Caches& caches, SkBitmap& bitmap,
+        GraphicBuffer& buffer, GLint format, GLint type) {
+    SkAutoLockPixels alp(bitmap);
+    EGLDisplay display = eglGetCurrentDisplay();
+    LOG_ALWAYS_FATAL_IF(display == EGL_NO_DISPLAY,
+                "Failed to get EGL_DEFAULT_DISPLAY! err=%s",
+                uirenderer::renderthread::EglManager::eglErrorString());
+    // These objects are initialized below but the default "null"
+    // values are used to cleanup properly at any point in the
+    // initialization sequenc
+    GLuint texture = 0;
+    // We use an EGLImage to access the content of the GraphicBuffer
+    // The EGL image is later bound to a 2D texture
+    EGLClientBuffer clientBuffer = (EGLClientBuffer) buffer.getNativeBuffer();
+    AutoEglImage autoImage(display, clientBuffer);
+    if (autoImage.image == EGL_NO_IMAGE_KHR) {
+        ALOGW("Could not create EGL image, err =%s",
+                uirenderer::renderthread::EglManager::eglErrorString());
+        return false;
+    }
+    glGenTextures(1, &texture);
+    caches.textureState().bindTexture(texture);
+    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, autoImage.image);
+
+    GL_CHECKPOINT(MODERATE);
+
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap.width(), bitmap.height(),
+            format, type, bitmap.getPixels());
+
+    GL_CHECKPOINT(MODERATE);
+
+    // The fence is used to wait for the texture upload to finish
+    // properly. We cannot rely on glFlush() and glFinish() as
+    // some drivers completely ignore these API calls
+    AutoEglFence autoFence(display);
+    if (autoFence.fence == EGL_NO_SYNC_KHR) {
+        LOG_ALWAYS_FATAL("Could not create sync fence %#x", eglGetError());
+        return false;
+    }
+    // The flag EGL_SYNC_FLUSH_COMMANDS_BIT_KHR will trigger a
+    // pipeline flush (similar to what a glFlush() would do.)
+    EGLint waitStatus = eglClientWaitSyncKHR(display, autoFence.fence,
+            EGL_SYNC_FLUSH_COMMANDS_BIT_KHR, FENCE_TIMEOUT);
+    if (waitStatus != EGL_CONDITION_SATISFIED_KHR) {
+        LOG_ALWAYS_FATAL("Failed to wait for the fence %#x", eglGetError());
+        return false;
+    }
+    return true;
+}
+
+sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThread& renderThread,
+        SkBitmap& skBitmap) {
+    renderThread.eglManager().initialize();
+    uirenderer::Caches& caches = uirenderer::Caches::getInstance();
+
+    sp<ISurfaceComposer> composer(ComposerService::getComposerService());
+    sp<IGraphicBufferAlloc> alloc(composer->createGraphicBufferAlloc());
+    if (alloc == NULL) {
+        ALOGW("createGraphicBufferAlloc() failed in GraphicBuffer.create()");
+        return nullptr;
+    }
+
+    const SkImageInfo& info = skBitmap.info();
+    if (info.colorType() == kUnknown_SkColorType) {
+        ALOGW("unable to create hardware bitmap of configuration");
+        return nullptr;
+    }
+
+    sk_sp<SkColorSpace> sRGB = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
+    bool needSRGB = skBitmap.info().colorSpace() == sRGB.get();
+    bool hasSRGB = caches.extensions().hasSRGB();
+    GLint format, type, internalFormat;
+    uirenderer::Texture::colorTypeToGlFormatAndType(caches, skBitmap.colorType(),
+            needSRGB, &internalFormat, &format, &type);
+
+    PixelFormat pixelFormat = internalFormatToPixelFormat(internalFormat);
+    status_t error;
+    sp<GraphicBuffer> buffer = alloc->createGraphicBuffer(info.width(), info.height(), pixelFormat,
+            GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER
+            | GraphicBuffer::USAGE_SW_READ_NEVER , &error);
+
+    if (!buffer.get()) {
+        ALOGW("createGraphicBuffer() failed in GraphicBuffer.create()");
+        return nullptr;
+    }
+
+    SkBitmap bitmap;
+    if (CC_UNLIKELY(uirenderer::Texture::hasUnsupportedColorType(skBitmap.info(),
+            hasSRGB, sRGB.get()))) {
+        bitmap = uirenderer::Texture::uploadToN32(skBitmap, hasSRGB, std::move(sRGB));
+    } else {
+        bitmap = skBitmap;
+    }
+
+    if (!uploadBitmapToGraphicBuffer(caches, bitmap, *buffer, format, type)) {
+        return nullptr;
+    }
+    return sk_sp<Bitmap>(new Bitmap(std::move(buffer), info));
+}
+
+sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(SkBitmap& bitmap) {
+    return uirenderer::renderthread::RenderProxy::allocateHardwareBitmap(bitmap);
 }
 
 sk_sp<Bitmap> Bitmap::allocateHeapBitmap(SkBitmap* bitmap, SkColorTable* ctable) {
@@ -183,6 +360,16 @@ Bitmap::Bitmap(void* address, int fd, size_t mappedSize,
     reconfigure(info, rowBytes, ctable);
 }
 
+Bitmap::Bitmap(sp<GraphicBuffer>&& buffer, const SkImageInfo& info)
+        : SkPixelRef(info)
+        , mPixelStorageType(PixelStorageType::Hardware) {
+    auto rawBuffer = buffer.get();
+    mPixelStorage.hardware.buffer = rawBuffer;
+    if (rawBuffer) {
+        rawBuffer->incStrong(rawBuffer);
+    }
+    mRowBytes = bytesPerPixel(buffer->getPixelFormat()) * buffer->getStride();
+}
 Bitmap::~Bitmap() {
     switch (mPixelStorageType) {
     case PixelStorageType::External:
@@ -196,6 +383,12 @@ Bitmap::~Bitmap() {
     case PixelStorageType::Heap:
         free(mPixelStorage.heap.address);
         break;
+    case PixelStorageType::Hardware:
+        auto buffer = mPixelStorage.hardware.buffer;
+        buffer->decStrong(buffer);
+        mPixelStorage.hardware.buffer = nullptr;
+        break;
+
     }
 
     if (android::uirenderer::Caches::hasInstance()) {
@@ -219,6 +412,9 @@ void* Bitmap::getStorage() const {
         return mPixelStorage.ashmem.address;
     case PixelStorageType::Heap:
         return mPixelStorage.heap.address;
+    case PixelStorageType::Hardware:
+        LOG_ALWAYS_FATAL_IF("Can't get address for hardware bitmap");
+        return nullptr;
     }
 }
 
@@ -264,6 +460,11 @@ void Bitmap::setAlphaType(SkAlphaType alphaType) {
 }
 
 void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
+    if (isHardware()) {
+        //TODO: use readback to get pixels
+        LOG_ALWAYS_FATAL("Not implemented");
+        return;
+    }
     outBitmap->setInfo(info(), rowBytes());
     outBitmap->setPixelRef(this);
     outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
@@ -272,6 +473,13 @@ void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
 void Bitmap::getBounds(SkRect* bounds) const {
     SkASSERT(bounds);
     bounds->set(0, 0, SkIntToScalar(info().width()), SkIntToScalar(info().height()));
+}
+
+GraphicBuffer* Bitmap::graphicBuffer() {
+    if (isHardware()) {
+        return mPixelStorage.hardware.buffer;
+    }
+    return nullptr;
 }
 
 } // namespace android

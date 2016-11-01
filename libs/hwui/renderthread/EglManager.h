@@ -55,6 +55,7 @@ private:
 // and EGLConfig, which are re-used by CanvasContext
 class EglManager {
 public:
+    static const char* eglErrorString();
     // Returns true on success, false on failure
     void initialize();
 
@@ -83,7 +84,6 @@ public:
 
 private:
     friend class RenderThread;
-
     explicit EglManager(RenderThread& thread);
     // EglContext is never destroyed, method is purposely not implemented
     ~EglManager();
