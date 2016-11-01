@@ -16,12 +16,11 @@
 
 package android.net.wifi.hotspot2.pps;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import java.util.HashMap;
 
 import org.junit.Test;
 
@@ -47,13 +46,76 @@ public class HomeSPTest {
         assertTrue(readHomeSp.equals(writeHomeSp));
     }
 
+    /**
+     * Verify parcel read/write for an empty HomeSP.
+     *
+     * @throws Exception
+     */
     @Test
     public void verifyParcelWithEmptyHomeSP() throws Exception {
         verifyParcel(new HomeSP());
     }
 
+    /**
+     * Verify parcel read/write for a valid HomeSP.
+     *
+     * @throws Exception
+     */
     @Test
     public void verifyParcelWithValidHomeSP() throws Exception {
         verifyParcel(createHomeSp());
+    }
+
+    /**
+     * Verify that a HomeSP is valid when both FQDN and Friendly Name
+     * are provided.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateValidHomeSP() throws Exception {
+        HomeSP homeSp = new HomeSP();
+        homeSp.fqdn = "fqdn";
+        homeSp.friendlyName = "friendly name";
+        assertTrue(homeSp.validate());
+    }
+
+    /**
+     * Verify that a HomeSP is not valid when FQDN is not provided
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateHomeSpWithoutFqdn() throws Exception {
+        HomeSP homeSp = new HomeSP();
+        homeSp.friendlyName = "friendly name";
+        assertFalse(homeSp.validate());
+    }
+
+    /**
+     * Verify that a HomeSP is not valid when Friendly Name is not provided
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateHomeSpWithoutFriendlyName() throws Exception {
+        HomeSP homeSp = new HomeSP();
+        homeSp.fqdn = "fqdn";
+        assertFalse(homeSp.validate());
+    }
+
+    /**
+     * Verify that a HomeSP is valid when the optional Roaming Consortium OIs are
+     * provided.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateHomeSpWithRoamingConsoritums() throws Exception {
+        HomeSP homeSp = new HomeSP();
+        homeSp.fqdn = "fqdn";
+        homeSp.friendlyName = "friendly name";
+        homeSp.roamingConsortiumOIs = new long[] {0x55, 0x66};
+        assertTrue(homeSp.validate());
     }
 }
