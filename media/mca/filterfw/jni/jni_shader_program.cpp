@@ -46,21 +46,14 @@ jboolean Java_android_filterfw_core_ShaderProgram_allocate(JNIEnv* env,
   // Create the shader
   if (!fragment_shader || !gl_env_ptr)
     return false;
-  else if (!vertex_shader)
-    return ToJBool(WrapObjectInJava(new ShaderProgram(
-      gl_env_ptr,
-      ToCppString(env, fragment_shader)),
-      env,
-      thiz,
-      true));
+
+  std::unique_ptr<ShaderProgram> shader;
+  if (!vertex_shader)
+    shader.reset(new ShaderProgram(gl_env_ptr, ToCppString(env, fragment_shader)));
   else
-    return ToJBool(WrapObjectInJava(new ShaderProgram(
-      gl_env_ptr,
-      ToCppString(env, vertex_shader),
-      ToCppString(env, fragment_shader)),
-      env,
-      thiz,
-      true));
+    shader.reset(new ShaderProgram(gl_env_ptr, ToCppString(env, vertex_shader),
+                                   ToCppString(env, fragment_shader)));
+  return ToJBool(WrapOwnedObjectInJava(std::move(shader), env, thiz, true));
 }
 
 jboolean Java_android_filterfw_core_ShaderProgram_deallocate(JNIEnv* env, jobject thiz) {
