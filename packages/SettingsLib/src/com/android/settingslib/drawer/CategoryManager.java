@@ -17,6 +17,7 @@ package com.android.settingslib.drawer;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.support.annotation.VisibleForTesting;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
@@ -109,18 +110,21 @@ public class CategoryManager {
             for (DashboardCategory category : mCategories) {
                 mCategoryByKeyMap.put(category.key, category);
             }
-            backwardCompatCleanupForCategory();
+            backwardCompatCleanupForCategory(mTileByComponentCache, mCategoryByKeyMap);
         }
     }
 
-    private synchronized void backwardCompatCleanupForCategory() {
+    @VisibleForTesting
+    synchronized void backwardCompatCleanupForCategory(
+            Map<Pair<String, String>, Tile> tileByComponentCache,
+            Map<String, DashboardCategory> categoryByKeyMap) {
         // A package can use a) CategoryKey, b) old category keys, c) both.
         // Check if a package uses old category key only.
         // If yes, map them to new category key.
 
         // Build a package name -> tile map first.
         final Map<String, List<Tile>> packageToTileMap = new HashMap<>();
-        for (Entry<Pair<String, String>, Tile> tileEntry : mTileByComponentCache.entrySet()) {
+        for (Entry<Pair<String, String>, Tile> tileEntry : tileByComponentCache.entrySet()) {
             final String packageName = tileEntry.getKey().first;
             List<Tile> tiles = packageToTileMap.get(packageName);
             if (tiles == null) {
@@ -149,7 +153,11 @@ public class CategoryManager {
                     final String newCategoryKey = CategoryKey.KEY_COMPAT_MAP.get(tile.category);
                     tile.category = newCategoryKey;
                     // move tile to new category.
-                    final DashboardCategory newCategory = mCategoryByKeyMap.get(newCategoryKey);
+                    DashboardCategory newCategory = categoryByKeyMap.get(newCategoryKey);
+                    if (newCategory == null) {
+                        newCategory = new DashboardCategory();
+                        categoryByKeyMap.put(newCategoryKey, newCategory);
+                    }
                     newCategory.tiles.add(tile);
                 }
             }
