@@ -1353,25 +1353,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * Like {@link #isVisibleLw}, but also counts a window that is currently "hidden" behind the
-     * keyguard as visible.  This allows us to apply things like window flags that impact the
-     * keyguard. XXX I am starting to think we need to have ANOTHER visibility flag for this
-     * "hidden behind keyguard" state rather than overloading mPolicyVisibility.  Ungh.
-     */
-    @Override
-    public boolean isVisibleOrBehindKeyguardLw() {
-        if (mToken.waitingToShow && mService.mAppTransition.isTransitionSet()) {
-            return false;
-        }
-        final AppWindowToken atoken = mAppToken;
-        final boolean animating = atoken != null && atoken.mAppAnimator.animation != null;
-        return mHasSurface && !mDestroying && !mAnimatingExit
-                && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
-                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mToken.hidden)
-                        || mWinAnimator.mAnimation != null || animating);
-    }
-
-    /**
      * Is this window visible, ignoring its app token? It is not visible if there is no surface,
      * or we are in the process of running an exit animation that will remove the surface.
      */
@@ -1418,14 +1399,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * being visible.
      */
     boolean isOnScreen() {
-        return mPolicyVisibility && isOnScreenIgnoringKeyguard();
-    }
-
-    /**
-     * Like isOnScreen(), but ignores any force hiding of the window due
-     * to the keyguard.
-     */
-    private boolean isOnScreenIgnoringKeyguard() {
         if (!mHasSurface || mDestroying) {
             return false;
         }
@@ -1449,7 +1422,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mightAffectAllDrawn(boolean visibleOnly) {
         final boolean isViewVisible = (mAppToken == null || !mAppToken.clientHidden)
                 && (mViewVisibility == View.VISIBLE) && !mWindowRemovalAllowed;
-        return (isOnScreenIgnoringKeyguard() && (!visibleOnly || isViewVisible)
+        return (isOnScreen() && (!visibleOnly || isViewVisible)
                 || mWinAnimator.mAttrType == TYPE_BASE_APPLICATION
                 || mWinAnimator.mAttrType == TYPE_DRAWN_APPLICATION)
                 && !mAnimatingExit && !mDestroying;
@@ -1476,28 +1449,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mToken.hidden)
                         || mWinAnimator.mAnimation != null
                         || ((mAppToken != null) && (mAppToken.mAppAnimator.animation != null)));
-    }
-
-    /**
-     * Like isReadyForDisplay(), but ignores any force hiding of the window due
-     * to the keyguard.
-     */
-    boolean isReadyForDisplayIgnoringKeyguard() {
-        if (mToken.waitingToShow && mService.mAppTransition.isTransitionSet()) {
-            return false;
-        }
-        final AppWindowToken atoken = mAppToken;
-        if (atoken == null && !mPolicyVisibility) {
-            // If this is not an app window, and the policy has asked to force
-            // hide, then we really do want to hide.
-            return false;
-        }
-        return mHasSurface && !mDestroying
-                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mToken.hidden)
-                        || mWinAnimator.mAnimation != null
-                        || ((atoken != null) && (atoken.mAppAnimator.animation != null)
-                                && !mWinAnimator.isDummyAnimation())
-                        || isAnimatingWithSavedSurface());
     }
 
     /**
@@ -3771,7 +3722,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         logPerformShow("performShow on ");
 
-        if (mWinAnimator.mDrawState != READY_TO_SHOW || !isReadyForDisplayIgnoringKeyguard()) {
+        if (mWinAnimator.mDrawState != READY_TO_SHOW || !isReadyForDisplay()) {
             return false;
         }
 
@@ -3821,7 +3772,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || (DEBUG_STARTING_WINDOW && mAttrs.type == TYPE_APPLICATION_STARTING)) {
             Slog.v(TAG, prefix + this
                     + ": mDrawState=" + mWinAnimator.drawStateToString()
-                    + " readyForDisplay=" + isReadyForDisplayIgnoringKeyguard()
+                    + " readyForDisplay=" + isReadyForDisplay()
                     + " starting=" + (mAttrs.type == TYPE_APPLICATION_STARTING)
                     + " during animation: policyVis=" + mPolicyVisibility
                     + " parentHidden=" + isParentWindowHidden()
