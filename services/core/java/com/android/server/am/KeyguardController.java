@@ -154,6 +154,14 @@ class KeyguardController {
         }
     }
 
+    /**
+     * @return True if we may show an activity while Keyguard is showing because we are in the
+     *         process of dismissing it anyways, false otherwise.
+     */
+    boolean canShowActivityWhileKeyguardShowing(boolean dismissKeyguard) {
+        return dismissKeyguard && canDismissKeyguard();
+    }
+
     private void visibilitiesUpdated() {
         final boolean lastOccluded = mOccluded;
         final ActivityRecord lastDismissingKeyguardActivity = mDismissingKeyguardActivity;
@@ -215,7 +223,6 @@ class KeyguardController {
                     && mWindowManager.getPendingAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE) {
                 mWindowManager.prepareAppTransition(mBeforeUnoccludeTransit,
                         false /* alwaysKeepCurrent */, 0 /* flags */, true /* forceOverride */);
-                mKeyguardGoingAway = true;
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 mWindowManager.executeAppTransition();
             }

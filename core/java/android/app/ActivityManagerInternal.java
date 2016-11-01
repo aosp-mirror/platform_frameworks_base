@@ -194,4 +194,9 @@ public abstract class ActivityManagerInternal {
      * @return {@code true} if system is ready, {@code false} otherwise.
      */
     public abstract boolean isSystemReady();
+
+    /**
+     * Called when the trusted state of Keyguard has changed.
+     */
+    public abstract void notifyKeyguardTrustedChanged();
 }

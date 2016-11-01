@@ -1,7 +1,5 @@
 package com.android.server.policy.keyguard;
 
-import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.content.ComponentName;
 import android.content.Context;
@@ -15,13 +13,11 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
-import android.view.View;
 import android.view.WindowManagerPolicy.OnKeyguardExitResult;
 
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
-import com.android.server.LocalServices;
 import com.android.server.UiThread;
 
 import java.io.PrintWriter;
@@ -47,6 +43,8 @@ public class KeyguardServiceDelegate {
     private final Context mContext;
     private final Handler mHandler;
     private final KeyguardState mKeyguardState = new KeyguardState();
+    private final KeyguardStateMonitor.StateCallback mCallback;
+
     private DrawnListener mDrawnListenerWhenConnect;
 
     private static final class KeyguardState {
@@ -119,9 +117,10 @@ public class KeyguardServiceDelegate {
         }
     };
 
-    public KeyguardServiceDelegate(Context context) {
+    public KeyguardServiceDelegate(Context context, KeyguardStateMonitor.StateCallback callback) {
         mContext = context;
         mHandler = UiThread.getHandler();
+        mCallback = callback;
     }
 
     public void bindService(Context context) {
@@ -155,7 +154,7 @@ public class KeyguardServiceDelegate {
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG) Log.v(TAG, "*** Keyguard connected (yay!)");
             mKeyguardService = new KeyguardServiceWrapper(mContext,
-                    IKeyguardService.Stub.asInterface(service));
+                    IKeyguardService.Stub.asInterface(service), mCallback);
             if (mKeyguardState.systemIsReady) {
                 // If the system is ready, it means keyguard crashed and restarted.
                 mKeyguardService.onSystemReady();
