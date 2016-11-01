@@ -1030,6 +1030,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mVisibleFrame;
     }
 
+    Rect getStableFrameLw() {
+        return mStableFrame;
+    }
+
     @Override
     public boolean getGivenInsetsPendingLw() {
         return mGivenInsetsPending;
