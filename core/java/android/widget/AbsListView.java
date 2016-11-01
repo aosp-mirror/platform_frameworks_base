@@ -2168,7 +2168,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         layoutChildren();
-        mInLayout = false;
 
         mOverscrollMax = (b - t) / OVERSCROLL_LIMIT_DIVISOR;
 
@@ -2176,6 +2175,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mFastScroll != null) {
             mFastScroll.onItemCountChanged(getChildCount(), mItemCount);
         }
+        mInLayout = false;
     }
 
     /**
@@ -2705,6 +2705,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * fail to relayout them properly to accommodate for new bounds.
      */
     void handleBoundsChange() {
+        if (mInLayout) {
+            return;
+        }
         final int childCount = getChildCount();
         if (childCount > 0) {
             mDataChanged = true;
