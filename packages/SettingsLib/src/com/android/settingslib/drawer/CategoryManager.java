@@ -23,8 +23,11 @@ import android.util.Pair;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 public class CategoryManager {
@@ -106,7 +109,50 @@ public class CategoryManager {
             for (DashboardCategory category : mCategories) {
                 mCategoryByKeyMap.put(category.key, category);
             }
+            backwardCompatCleanupForCategory();
         }
     }
 
+    private synchronized void backwardCompatCleanupForCategory() {
+        // A package can use a) CategoryKey, b) old category keys, c) both.
+        // Check if a package uses old category key only.
+        // If yes, map them to new category key.
+
+        // Build a package name -> tile map first.
+        final Map<String, List<Tile>> packageToTileMap = new HashMap<>();
+        for (Entry<Pair<String, String>, Tile> tileEntry : mTileByComponentCache.entrySet()) {
+            final String packageName = tileEntry.getKey().first;
+            List<Tile> tiles = packageToTileMap.get(packageName);
+            if (tiles == null) {
+                tiles = new ArrayList<>();
+                packageToTileMap.put(packageName, tiles);
+            }
+            tiles.add(tileEntry.getValue());
+        }
+
+        for (Entry<String, List<Tile>> entry : packageToTileMap.entrySet()) {
+            final List<Tile> tiles = entry.getValue();
+            // Loop map, find if all tiles from same package uses old key only.
+            boolean useNewKey = false;
+            boolean useOldKey = false;
+            for (Tile tile : tiles) {
+                if (CategoryKey.KEY_COMPAT_MAP.containsKey(tile.category)) {
+                    useOldKey = true;
+                } else {
+                    useNewKey = true;
+                    break;
+                }
+            }
+            // Uses only old key, map them to new keys one by one.
+            if (useOldKey && !useNewKey) {
+                for (Tile tile : tiles) {
+                    final String newCategoryKey = CategoryKey.KEY_COMPAT_MAP.get(tile.category);
+                    tile.category = newCategoryKey;
+                    // move tile to new category.
+                    final DashboardCategory newCategory = mCategoryByKeyMap.get(newCategoryKey);
+                    newCategory.tiles.add(tile);
+                }
+            }
+        }
+    }
 }
