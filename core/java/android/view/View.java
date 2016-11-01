@@ -7194,7 +7194,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Gets the unique identifier of this view on the screen for accessibility purposes.
-     * If this {@link View} is not attached to any window, {@value #NO_ID} is returned.
      *
      * @return The view accessibility id.
      *
