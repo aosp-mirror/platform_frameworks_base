@@ -102,6 +102,11 @@ public class UserInfo implements Parcelable {
     public long creationTime;
     public long lastLoggedInTime;
     public String lastLoggedInFingerprint;
+    /**
+     * If this user is a parent user, it would be its own user id.
+     * If this user is a child user, it would be its parent user id.
+     * Otherwise, it would be {@link #NO_PROFILE_GROUP_ID}.
+     */
     public int profileGroupId;
     public int restrictedProfileParentId;
 
