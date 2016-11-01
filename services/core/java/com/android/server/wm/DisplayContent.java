@@ -2650,7 +2650,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
                 if (mService.updateOrientationFromAppTokensLocked(true, mDisplayId)) {
                     setLayoutNeeded();
-                    mService.mH.sendEmptyMessage(SEND_NEW_CONFIGURATION);
+                    mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, mDisplayId).sendToTarget();
                 }
             }
 
