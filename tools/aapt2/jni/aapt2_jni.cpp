@@ -46,8 +46,8 @@ static std::vector<ScopedUtfChars> list_to_utfchars(JNIEnv *env, jobject obj) {
 
   // Now, iterate all strings in the list
   // (note: generic erasure means get() return an Object)
-  jmethodID get_method_id =
-      env->GetMethodID(list_cls, "get", "()Ljava/lang/Object;");
+  jmethodID get_method_id = env->GetMethodID(list_cls, "get", "(I)Ljava/lang/Object;");
+  CHECK(get_method_id != 0);
   for (jint i = 0; i < size; i++) {
     // Call get(i) to get the string in the ith position.
     jobject string_obj_uncast = env->CallObjectMethod(obj, get_method_id, i);
@@ -91,4 +91,9 @@ JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2_nativeLink(
       list_to_utfchars(env, arguments_obj);
   std::vector<aapt::StringPiece> link_args = extract_pieces(link_args_jni);
   aapt::Link(link_args);
+}
+
+JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2_ping(
+        JNIEnv *env, jclass aapt_obj) {
+  // This is just a dummy method to see if the library has been loaded.
 }
