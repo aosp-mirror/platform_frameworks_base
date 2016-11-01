@@ -1806,7 +1806,7 @@ final class ActivityStack {
                     // them. However, when they don't have the wallpaper behind them, we want to
                     // show activities in the next application stack behind them vs. another
                     // task in the home stack like recents.
-                    behindFullscreenActivity = true;
+                    behindFullscreenActivity = task.getTopActivity() != null;
                 } else if (task.isRecentsTask()
                         && task.getTaskToReturnTo() == APPLICATION_ACTIVITY_TYPE) {
                     if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
