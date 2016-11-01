@@ -15,6 +15,8 @@
 
 package com.android.server;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import com.android.internal.content.PackageMonitor;
@@ -1481,8 +1483,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurToken = new Binder();
             try {
                 if (true || DEBUG) Slog.v(TAG, "Adding window token: " + mCurToken);
-                mIWindowManager.addWindowToken(mCurToken,
-                        WindowManager.LayoutParams.TYPE_INPUT_METHOD);
+                mIWindowManager.addWindowToken(mCurToken, TYPE_INPUT_METHOD, DEFAULT_DISPLAY);
             } catch (RemoteException e) {
             }
             return new InputBindResult(null, null, mCurId, mCurSeq,
@@ -1590,7 +1591,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // The current IME is shown. Hence an IME switch (transition) is happening.
                     mWindowManagerInternal.saveLastInputMethodWindowForTransition();
                 }
-                mIWindowManager.removeWindowToken(mCurToken);
+                mIWindowManager.removeWindowToken(mCurToken, DEFAULT_DISPLAY);
             } catch (RemoteException e) {
             }
             mCurToken = null;

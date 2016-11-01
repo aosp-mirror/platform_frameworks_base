@@ -1166,8 +1166,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean hasParent = parentWindow != null;
             // Use existing parent window token for child windows since they go in the same token
             // as there parent window so we can apply the same policy on them.
-            WindowToken token = mRoot.getWindowToken(
-                    hasParent ? parentWindow.mAttrs.token : attrs.token, displayContent);
+            WindowToken token = displayContent.getWindowToken(
+                    hasParent ? parentWindow.mAttrs.token : attrs.token);
             // If this is a child window, we want to apply the same type checking rules as the
             // parent window type.
             final int rootType = hasParent ? parentWindow.mAttrs.type : type;
@@ -2395,18 +2395,29 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void addWindowToken(IBinder token, int type) {
+    public void addWindowToken(IBinder binder, int type, int displayId) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "addWindowToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
-            mRoot.addWindowToken(token, type);
+            final DisplayContent dc = mRoot.getDisplayContentOrCreate(displayId);
+            WindowToken token = dc.getWindowToken(binder);
+            if (token != null) {
+                Slog.w(TAG_WM, "addWindowToken: Attempted to add binder token: " + binder
+                        + " for already created window token: " + token
+                        + " displayId=" + displayId);
+                return;
+            }
+            token = new WindowToken(this, binder, type, true, dc);
+            if (type == TYPE_WALLPAPER) {
+                dc.mWallpaperController.addWallpaperToken(token);
+            }
         }
     }
 
     @Override
-    public void removeWindowToken(IBinder token) {
+    public void removeWindowToken(IBinder binder, int displayId) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "removeWindowToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
@@ -2414,22 +2425,26 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mWindowMap) {
-                final ArrayList<WindowToken> removedTokens = mRoot.removeWindowToken(token);
-                if (removedTokens == null || removedTokens.isEmpty()) {
-                    Slog.w(TAG_WM,
-                            "removeWindowToken: Attempted to remove non-existing token: " + token);
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    Slog.w(TAG_WM, "removeWindowToken: Attempted to remove token: " + binder
+                            + " for non-exiting displayId=" + displayId);
                     return;
                 }
 
-                for (int i = removedTokens.size() - 1; i >= 0; --i) {
-                    final WindowToken wtoken = removedTokens.get(i);
-                    wtoken.setExiting();
-                    if (wtoken.windowType == TYPE_WALLPAPER) {
-                        wtoken.getDisplayContent().mWallpaperController.removeWallpaperToken(wtoken);
-                    }
-
-                    mInputMonitor.updateInputWindowsLw(true /*force*/);
+                final WindowToken token = dc.removeWindowToken(binder);
+                if (token == null) {
+                    Slog.w(TAG_WM,
+                            "removeWindowToken: Attempted to remove non-existing token: " + binder);
+                    return;
                 }
+
+                token.setExiting();
+                if (token.windowType == TYPE_WALLPAPER) {
+                    dc.mWallpaperController.removeWallpaperToken(token);
+                }
+
+                mInputMonitor.updateInputWindowsLw(true /*force*/);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -3262,7 +3277,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void removeAppToken(IBinder token) {
+    public void removeAppToken(IBinder binder, int displayId) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "removeAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
@@ -3270,7 +3285,13 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(mWindowMap) {
-                mRoot.removeAppToken(token);
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    Slog.w(TAG_WM, "removeAppToken: Attempted to remove binder token: " + binder
+                            + " from non-existing displayId=" + displayId);
+                    return;
+                }
+                dc.removeAppToken(binder);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -5790,33 +5811,29 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean mEventDispatchingEnabled;
 
     @Override
-    public void pauseKeyDispatching(IBinder _token) {
+    public void pauseKeyDispatching(IBinder binder) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "pauseKeyDispatching()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized (mWindowMap) {
-            final ArrayList<WindowToken> tokens = mRoot.getWindowTokens(_token);
-            if (tokens != null && !tokens.isEmpty()) {
-                for (int i = tokens.size() - 1; i >= 0; --i) {
-                    mInputMonitor.pauseDispatchingLw(tokens.get(i));
-                }
+            WindowToken token = mRoot.getAppWindowToken(binder);
+            if (token != null) {
+                mInputMonitor.pauseDispatchingLw(token);
             }
         }
     }
 
     @Override
-    public void resumeKeyDispatching(IBinder _token) {
+    public void resumeKeyDispatching(IBinder binder) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "resumeKeyDispatching()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized (mWindowMap) {
-            final ArrayList<WindowToken> tokens = mRoot.getWindowTokens(_token);
-            if (tokens != null && !tokens.isEmpty()) {
-                for (int i = tokens.size() - 1; i >= 0; --i) {
-                    mInputMonitor.resumeDispatchingLw(tokens.get(i));
-                }
+            WindowToken token = mRoot.getAppWindowToken(binder);
+            if (token != null) {
+                mInputMonitor.resumeDispatchingLw(token);
             }
         }
     }
@@ -8807,23 +8824,31 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void addWindowToken(IBinder token, int type) {
-            WindowManagerService.this.addWindowToken(token, type);
+        public void addWindowToken(IBinder token, int type, int displayId) {
+            WindowManagerService.this.addWindowToken(token, type, displayId);
         }
 
         @Override
-        public void removeWindowToken(IBinder token, boolean removeWindows) {
+        public void removeWindowToken(IBinder binder, boolean removeWindows, int displayId) {
             synchronized(mWindowMap) {
                 if (removeWindows) {
-                    final ArrayList<WindowToken> removedTokens = mRoot.removeWindowToken(token);
-                    if (removedTokens != null && !removedTokens.isEmpty()) {
-                        for (int i = removedTokens.size() - 1; i >= 0; --i) {
-                            final WindowToken wtoken = removedTokens.get(i);
-                            wtoken.removeAllWindows();
-                        }
+                    final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                    if (dc == null) {
+                        Slog.w(TAG_WM, "removeWindowToken: Attempted to remove token: " + binder
+                                + " for non-exiting displayId=" + displayId);
+                        return;
                     }
+
+                    final WindowToken token = dc.removeWindowToken(binder);
+                    if (token == null) {
+                        Slog.w(TAG_WM, "removeWindowToken: Attempted to remove non-existing token: "
+                                + binder);
+                        return;
+                    }
+
+                    token.removeAllWindows();
                 }
-                WindowManagerService.this.removeWindowToken(token);
+                WindowManagerService.this.removeWindowToken(binder, displayId);
             }
         }
 

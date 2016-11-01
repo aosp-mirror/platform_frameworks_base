@@ -26,22 +26,27 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_ACTIVITY_DRAWN;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_STARTING_WINDOW_DRAWN;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.logWithStack;
 
+import android.os.Debug;
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.wm.WindowManagerService.H;
 
@@ -396,6 +401,63 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             removeIfPossible();
         }
         return super.checkCompleteDeferredRemoval();
+    }
+
+    void onRemovedFromDisplay() {
+        AppWindowToken startingToken = null;
+
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Removing app token: " + this);
+
+        boolean delayed = setVisibility(null, false, TRANSIT_UNSET, true, voiceInteraction);
+
+        mService.mOpeningApps.remove(this);
+        waitingToShow = false;
+        if (mService.mClosingApps.contains(this)) {
+            delayed = true;
+        } else if (mService.mAppTransition.isTransitionSet()) {
+            mService.mClosingApps.add(this);
+            delayed = true;
+        }
+
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Removing app " + this + " delayed=" + delayed
+                + " animation=" + mAppAnimator.animation + " animating=" + mAppAnimator.animating);
+
+        if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM, "removeAppToken: "
+                + this + " delayed=" + delayed + " Callers=" + Debug.getCallers(4));
+
+        final TaskStack stack = mTask.mStack;
+        if (delayed && !isEmpty()) {
+            // set the token aside because it has an active animation to be finished
+            if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM,
+                    "removeAppToken make exiting: " + this);
+            stack.mExitingAppTokens.add(this);
+            mIsExiting = true;
+        } else {
+            // Make sure there is no animation running on this token, so any windows associated
+            // with it will be removed as soon as their animations are complete
+            mAppAnimator.clearAnimation();
+            mAppAnimator.animating = false;
+            removeIfPossible();
+        }
+
+        removed = true;
+        if (startingData != null) {
+            startingToken = this;
+        }
+        stopFreezingScreen(true, true);
+        if (mService.mFocusedApp == this) {
+            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Removing focused app token:" + this);
+            mService.mFocusedApp = null;
+            mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
+            mService.mInputMonitor.setFocusedAppLw(null);
+        }
+
+        if (!delayed) {
+            updateReportedVisibilityLocked();
+        }
+
+        // Will only remove if startingToken non null.
+        mService.scheduleRemoveStartingWindowLocked(startingToken);
     }
 
     void clearAnimatingFlags() {

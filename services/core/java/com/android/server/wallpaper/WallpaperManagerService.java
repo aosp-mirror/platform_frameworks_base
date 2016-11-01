@@ -22,6 +22,8 @@ import static android.os.ParcelFileDescriptor.MODE_CREATE;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -1692,8 +1694,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 if (wallpaper.userId == mCurrentUserId) {
                     if (DEBUG)
                         Slog.v(TAG, "Adding window token: " + newConn.mToken);
-                    mIWindowManager.addWindowToken(newConn.mToken,
-                            WindowManager.LayoutParams.TYPE_WALLPAPER);
+                    mIWindowManager.addWindowToken(newConn.mToken, TYPE_WALLPAPER, DEFAULT_DISPLAY);
                     mLastWallpaper = wallpaper;
                 }
             } catch (RemoteException e) {
@@ -1728,7 +1729,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             try {
                 if (DEBUG)
                     Slog.v(TAG, "Removing window token: " + wallpaper.connection.mToken);
-                mIWindowManager.removeWindowToken(wallpaper.connection.mToken);
+                mIWindowManager.removeWindowToken(wallpaper.connection.mToken, DEFAULT_DISPLAY);
             } catch (RemoteException e) {
             }
             wallpaper.connection.mService = null;
@@ -1745,7 +1746,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     void attachServiceLocked(WallpaperConnection conn, WallpaperData wallpaper) {
         try {
             conn.mService.attach(conn, conn.mToken,
-                    WindowManager.LayoutParams.TYPE_WALLPAPER, false,
+                    TYPE_WALLPAPER, false,
                     wallpaper.width, wallpaper.height, wallpaper.padding);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed attaching wallpaper; clearing", e);

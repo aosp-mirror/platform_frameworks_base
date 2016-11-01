@@ -126,15 +126,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
     private final ArrayList<Integer> mChangedStackList = new ArrayList();
 
-    private final ArrayList<WindowToken> mTmpTokensList = new ArrayList();
-
-    // Collection of binder tokens mapped to their window type we are allowed to create window
-    // tokens for but that are not current attached to any display. We need to track this here
-    // because a binder token can be added through {@link WindowManagerService#addWindowToken},
-    // but we don't know what display windows for the token will be added to until
-    // {@link WindowManagerService#addWindow} is called.
-    private final HashMap<IBinder, Integer> mUnattachedBinderTokens = new HashMap();
-
     // State for the RemoteSurfaceTrace system used in testing. If this is enabled SurfaceControl
     // instances will be replaced with an instance that writes a binary representation of all
     // commands to mSurfaceTraceFd.
@@ -340,36 +331,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         return null;
     }
 
-    /** Return the window token associated with the input binder token on the input display */
-    WindowToken getWindowToken(IBinder binder, DisplayContent dc) {
-        final WindowToken token = dc.getWindowToken(binder);
-        if (token != null) {
-            return token;
-        }
-
-        // There is no window token mapped to the binder on the display. Create and map a window
-        // token if it is currently allowed.
-        if (!mUnattachedBinderTokens.containsKey(binder)) {
-            return null;
-        }
-
-        final int type = mUnattachedBinderTokens.get(binder);
-        return new WindowToken(mService, binder, type, true, dc);
-    }
-
-    /** Returns all window tokens mapped to the input binder. */
-    ArrayList<WindowToken> getWindowTokens(IBinder binder) {
-        mTmpTokensList.clear();
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final DisplayContent dc = mChildren.get(i);
-            final WindowToken token = dc.getWindowToken(binder);
-            if (token != null) {
-                mTmpTokensList.add(token);
-            }
-        }
-        return mTmpTokensList;
-    }
-
     /**
      * Returns the app window token for the input binder if it exist in the system.
      * NOTE: Only one AppWindowToken is allowed to exist in the system for a binder token, since
@@ -401,140 +362,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
 
         return null;
-    }
-
-    void addWindowToken(IBinder binder, int type) {
-        if (mUnattachedBinderTokens.containsKey(binder)) {
-            Slog.w(TAG_WM, "addWindowToken: Attempted to add existing binder token: " + binder);
-            return;
-        }
-
-        final ArrayList<WindowToken> tokens = getWindowTokens(binder);
-
-        if (!tokens.isEmpty()) {
-            Slog.w(TAG_WM, "addWindowToken: Attempted to add binder token: " + binder
-                    + " for already created window tokens: " + tokens);
-            return;
-        }
-
-        mUnattachedBinderTokens.put(binder, type);
-
-        // TODO(multi-display): By default we add this to the default display, but maybe we
-        // should provide an API for a token to be added to any display?
-        final DisplayContent dc = getDisplayContent(DEFAULT_DISPLAY);
-        final WindowToken token = new WindowToken(mService, binder, type, true, dc);
-        if (type == TYPE_WALLPAPER) {
-            dc.mWallpaperController.addWallpaperToken(token);
-        }
-    }
-
-    ArrayList<WindowToken> removeWindowToken(IBinder binder) {
-        mUnattachedBinderTokens.remove(binder);
-
-        mTmpTokensList.clear();
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final DisplayContent dc = mChildren.get(i);
-            final WindowToken token = dc.removeWindowToken(binder);
-            if (token != null) {
-                mTmpTokensList.add(token);
-            }
-        }
-        return mTmpTokensList;
-    }
-
-    /**
-     * Removed the mapping to the input binder for the system if it no longer as a window token
-     * associated with it on any display.
-     */
-    void removeWindowTokenIfPossible(IBinder binder) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final DisplayContent dc = mChildren.get(i);
-            final WindowToken token = dc.getWindowToken(binder);
-            if (token != null) {
-                return;
-            }
-        }
-
-        mUnattachedBinderTokens.remove(binder);
-    }
-
-    void removeAppToken(IBinder binder) {
-        final ArrayList<WindowToken> removedTokens = removeWindowToken(binder);
-        if (removedTokens == null || removedTokens.isEmpty()) {
-            Slog.w(TAG_WM, "removeAppToken: Attempted to remove non-existing token: " + binder);
-            return;
-        }
-
-        for (int i = removedTokens.size() - 1; i >= 0; --i) {
-            WindowToken wtoken = removedTokens.get(i);
-            AppWindowToken appToken = wtoken.asAppWindowToken();
-
-            if (appToken == null) {
-                Slog.w(TAG_WM,
-                        "Attempted to remove non-App token: " + binder + " wtoken=" + wtoken);
-                continue;
-            }
-
-            AppWindowToken startingToken = null;
-
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Removing app token: " + appToken);
-
-            boolean delayed = appToken.setVisibility(null, false, TRANSIT_UNSET, true,
-                    appToken.voiceInteraction);
-
-            mService.mOpeningApps.remove(appToken);
-            mService.mUnknownAppVisibilityController.appRemoved(appToken);
-            appToken.waitingToShow = false;
-            if (mService.mClosingApps.contains(appToken)) {
-                delayed = true;
-            } else if (mService.mAppTransition.isTransitionSet()) {
-                mService.mClosingApps.add(appToken);
-                delayed = true;
-            }
-
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Removing app " + appToken
-                    + " delayed=" + delayed
-                    + " animation=" + appToken.mAppAnimator.animation
-                    + " animating=" + appToken.mAppAnimator.animating);
-
-            if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM, "removeAppToken: "
-                    + appToken + " delayed=" + delayed + " Callers=" + Debug.getCallers(4));
-
-            final TaskStack stack = appToken.mTask.mStack;
-            if (delayed && !appToken.isEmpty()) {
-                // set the token aside because it has an active animation to be finished
-                if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM,
-                        "removeAppToken make exiting: " + appToken);
-                stack.mExitingAppTokens.add(appToken);
-                appToken.mIsExiting = true;
-            } else {
-                // Make sure there is no animation running on this token, so any windows associated
-                // with it will be removed as soon as their animations are complete
-                appToken.mAppAnimator.clearAnimation();
-                appToken.mAppAnimator.animating = false;
-                appToken.removeIfPossible();
-            }
-
-            appToken.removed = true;
-            if (appToken.startingData != null) {
-                startingToken = appToken;
-            }
-            appToken.stopFreezingScreen(true, true);
-            if (mService.mFocusedApp == appToken) {
-                if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Removing focused app token:" + appToken);
-                mService.mFocusedApp = null;
-                mService.updateFocusedWindowLocked(
-                        UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
-                mService.mInputMonitor.setFocusedAppLw(null);
-            }
-
-            if (!delayed) {
-                appToken.updateReportedVisibilityLocked();
-            }
-
-            // Will only remove if startingToken non null.
-            mService.scheduleRemoveStartingWindowLocked(startingToken);
-        }
     }
 
     // TODO: Users would have their own window containers under the display container?

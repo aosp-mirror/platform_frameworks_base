@@ -44,6 +44,9 @@ import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import libcore.util.Objects;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
+
 public class CustomTile extends QSTile<QSTile.State> implements TileChangeListener {
     public static final String PREFIX = "custom(";
 
@@ -171,7 +174,7 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
         mIsShowingDialog = false;
         try {
             if (DEBUG) Log.d(TAG, "Removing token");
-            mWindowManager.removeWindowToken(mToken);
+            mWindowManager.removeWindowToken(mToken, DEFAULT_DISPLAY);
         } catch (RemoteException e) {
         }
     }
@@ -193,7 +196,7 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
                 if (mIsTokenGranted && !mIsShowingDialog) {
                     try {
                         if (DEBUG) Log.d(TAG, "Removing token");
-                        mWindowManager.removeWindowToken(mToken);
+                        mWindowManager.removeWindowToken(mToken, DEFAULT_DISPLAY);
                     } catch (RemoteException e) {
                     }
                     mIsTokenGranted = false;
@@ -212,7 +215,7 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
         if (mIsTokenGranted) {
             try {
                 if (DEBUG) Log.d(TAG, "Removing token");
-                mWindowManager.removeWindowToken(mToken);
+                mWindowManager.removeWindowToken(mToken, DEFAULT_DISPLAY);
             } catch (RemoteException e) {
             }
         }
@@ -252,7 +255,7 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
         }
         try {
             if (DEBUG) Log.d(TAG, "Adding token");
-            mWindowManager.addWindowToken(mToken, WindowManager.LayoutParams.TYPE_QS_DIALOG);
+            mWindowManager.addWindowToken(mToken, TYPE_QS_DIALOG, DEFAULT_DISPLAY);
             mIsTokenGranted = true;
         } catch (RemoteException e) {
         }

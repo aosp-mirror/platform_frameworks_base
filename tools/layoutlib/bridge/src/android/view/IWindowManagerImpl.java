@@ -86,7 +86,7 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void addWindowToken(IBinder arg0, int arg1) throws RemoteException {
+    public void addWindowToken(IBinder arg0, int arg1, int arg2) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
@@ -277,13 +277,13 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void removeAppToken(IBinder arg0) throws RemoteException {
+    public void removeAppToken(IBinder arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void removeWindowToken(IBinder arg0) throws RemoteException {
+    public void removeWindowToken(IBinder arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }

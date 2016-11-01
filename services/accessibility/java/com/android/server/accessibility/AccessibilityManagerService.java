@@ -17,6 +17,8 @@
 package com.android.server.accessibility;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -3129,7 +3131,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final long identity = Binder.clearCallingIdentity();
             try {
                 mWindowManagerService.addWindowToken(mOverlayWindowToken,
-                        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY);
+                        TYPE_ACCESSIBILITY_OVERLAY, DEFAULT_DISPLAY);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -3138,7 +3140,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public void onRemoved() {
             final long identity = Binder.clearCallingIdentity();
             try {
-                mWindowManagerService.removeWindowToken(mOverlayWindowToken, true);
+                mWindowManagerService.removeWindowToken(mOverlayWindowToken, true, DEFAULT_DISPLAY);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -3668,7 +3670,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     return AccessibilityWindowInfo.TYPE_SPLIT_SCREEN_DIVIDER;
                 }
 
-                case WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY: {
+                case TYPE_ACCESSIBILITY_OVERLAY: {
                     return AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY;
                 }
 

@@ -241,16 +241,19 @@ public abstract class WindowManagerInternal {
      *
      * @param token The token to add.
      * @param type The window type.
+     * @param displayId The display to add the token to.
      */
-    public abstract void addWindowToken(android.os.IBinder token, int type);
+    public abstract void addWindowToken(android.os.IBinder token, int type, int displayId);
 
     /**
      * Removes a window token.
      *
      * @param token The toke to remove.
      * @param removeWindows Whether to also remove the windows associated with the token.
+     * @param displayId The display to remove the token from.
      */
-    public abstract void removeWindowToken(android.os.IBinder token, boolean removeWindows);
+    public abstract void removeWindowToken(android.os.IBinder token, boolean removeWindows,
+            int displayId);
 
     /**
      * Registers a listener to be notified about app transition events.

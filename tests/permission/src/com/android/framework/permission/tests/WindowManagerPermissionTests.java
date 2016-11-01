@@ -73,7 +73,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.addWindowToken(null, 0);
+            mWm.addWindowToken(null, 0, DEFAULT_DISPLAY);
             fail("IWindowManager.addWindowToken did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -83,7 +83,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.removeWindowToken(null);
+            mWm.removeWindowToken(null, DEFAULT_DISPLAY);
             fail("IWindowManager.removeWindowToken did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -126,7 +126,7 @@ public class WindowManagerPermissionTests extends TestCase {
 
         try {
             mWm.setAppOrientation(null, 0);
-            mWm.addWindowToken(null, 0);
+            mWm.addWindowToken(null, 0, DEFAULT_DISPLAY);
             fail("IWindowManager.setAppOrientation did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -206,7 +206,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.removeAppToken(null);
+            mWm.removeAppToken(null, DEFAULT_DISPLAY);
             fail("IWindowManager.removeAppToken did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
