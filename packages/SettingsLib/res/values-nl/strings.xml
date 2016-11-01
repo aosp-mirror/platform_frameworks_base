@@ -132,10 +132,10 @@
     <item msgid="8903157781070679765">"Normaal"</item>
     <item msgid="164347302621392996">"Snel"</item>
     <item msgid="5794028588101562009">"Sneller"</item>
-    <item msgid="7163942783888652942">"Zeer snel"</item>
-    <item msgid="7831712693748700507">"Vlug"</item>
-    <item msgid="5194774745031751806">"Zeer vlug"</item>
-    <item msgid="9085102246155045744">"Snelst"</item>
+    <item msgid="7163942783888652942">"Nog sneller"</item>
+    <item msgid="7831712693748700507">"Heel erg snel"</item>
+    <item msgid="5194774745031751806">"Snelst"</item>
+    <item msgid="9085102246155045744">"Allerallersnelst"</item>
   </string-array>
     <string name="choose_profile" msgid="8229363046053568878">"Profiel kiezen"</string>
     <string name="category_personal" msgid="1299663247844969448">"Persoonlijk"</string>
