@@ -91,7 +91,7 @@
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Point d\'accès Wi-Fi mobile"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Via Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Partage de connexion"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Partage de connexion et point d\'accès mobile"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Partage de connexion"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Toutes les applis profess."</string>
     <string name="user_guest" msgid="8475274842845401871">"Invité"</string>
     <string name="unknown" msgid="1592123443519355854">"Inconnu"</string>
