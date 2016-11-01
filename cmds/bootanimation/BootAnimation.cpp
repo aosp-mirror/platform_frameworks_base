@@ -74,6 +74,7 @@ static const char LAST_TIME_CHANGED_FILE_NAME[] = "last_time_change";
 static const char LAST_TIME_CHANGED_FILE_PATH[] = "/data/system/time/last_time_change";
 static const char ACCURATE_TIME_FLAG_FILE_NAME[] = "time_is_accurate";
 static const char ACCURATE_TIME_FLAG_FILE_PATH[] = "/data/system/time/time_is_accurate";
+static const char TIME_FORMAT_12_HOUR_FLAG_FILE_PATH[] = "/data/system/time/time_format_12_hour";
 // Java timestamp format. Don't show the clock if the date is before 2000-01-01 00:00:00.
 static const long long ACCURATE_TIME_EPOCH = 946684800000;
 static constexpr char FONT_BEGIN_CHAR = ' ';
@@ -99,7 +100,7 @@ static const std::vector<std::string> PLAY_SOUND_BOOTREASON_BLACKLIST {
 // ---------------------------------------------------------------------------
 
 BootAnimation::BootAnimation() : Thread(false), mClockEnabled(true), mTimeIsAccurate(false),
-        mTimeCheckThread(NULL) {
+        mTimeFormat12Hour(false), mTimeCheckThread(NULL) {
     mSession = new SurfaceComposerClient();
 
     // If the system has already booted, the animation is not being used for a boot.
@@ -590,9 +591,10 @@ void BootAnimation::drawText(const char* str, const Font& font, bool bold, int* 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-// We render 24 hour time.
+// We render 12 or 24 hour time.
 void BootAnimation::drawClock(const Font& font, const int xPos, const int yPos) {
-    static constexpr char TIME_FORMAT[] = "%H:%M";
+    static constexpr char TIME_FORMAT_12[] = "%l:%M";
+    static constexpr char TIME_FORMAT_24[] = "%H:%M";
     static constexpr int TIME_LENGTH = 6;
 
     time_t rawtime;
@@ -600,7 +602,8 @@ void BootAnimation::drawClock(const Font& font, const int xPos, const int yPos) 
     struct tm* timeInfo = localtime(&rawtime);
 
     char timeBuff[TIME_LENGTH];
-    size_t length = strftime(timeBuff, TIME_LENGTH, TIME_FORMAT, timeInfo);
+    const char* timeFormat = mTimeFormat12Hour ? TIME_FORMAT_12 : TIME_FORMAT_24;
+    size_t length = strftime(timeBuff, TIME_LENGTH, timeFormat, timeInfo);
 
     if (length != TIME_LENGTH - 1) {
         ALOGE("Couldn't format time; abandoning boot animation clock");
@@ -1062,6 +1065,11 @@ bool BootAnimation::updateIsTimeAccurate() {
     }
 
     struct stat statResult;
+
+    if(stat(TIME_FORMAT_12_HOUR_FLAG_FILE_PATH, &statResult) == 0) {
+        mTimeFormat12Hour = true;
+    }
+
     if(stat(ACCURATE_TIME_FLAG_FILE_PATH, &statResult) == 0) {
         mTimeIsAccurate = true;
         return true;
