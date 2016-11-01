@@ -34,6 +34,7 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -57,7 +58,7 @@ import static com.android.systemui.Prefs.Key.TV_PICTURE_IN_PICTURE_ONBOARDING_SH
  */
 public class PipManager {
     private static final String TAG = "PipManager";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean DEBUG_FORCE_ONBOARDING =
             SystemProperties.getBoolean("debug.tv.pip_force_onboarding", false);
 
@@ -588,6 +589,10 @@ public class PipManager {
     private TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
         public void onTaskStackChanged() {
+            if (DEBUG) Log.d(TAG, "onTaskStackChanged()");
+            if (!checkCurrentUserId()) {
+                return;
+            }
             if (mState != STATE_NO_PIP) {
                 boolean hasPip = false;
 
@@ -622,6 +627,9 @@ public class PipManager {
         @Override
         public void onActivityPinned() {
             if (DEBUG) Log.d(TAG, "onActivityPinned()");
+            if (!checkCurrentUserId()) {
+                return;
+            }
             StackInfo stackInfo = getPinnedStackInfo();
             if (stackInfo == null) {
                 Log.w(TAG, "Cannot find pinned stack");
@@ -652,6 +660,9 @@ public class PipManager {
         @Override
         public void onPinnedActivityRestartAttempt() {
             if (DEBUG) Log.d(TAG, "onPinnedActivityRestartAttempt()");
+            if (!checkCurrentUserId()) {
+                return;
+            }
             // If PIPed activity is launched again by Launcher or intent, make it fullscreen.
             movePipToFullscreen();
         }
@@ -659,6 +670,9 @@ public class PipManager {
         @Override
         public void onPinnedStackAnimationEnded() {
             if (DEBUG) Log.d(TAG, "onPinnedStackAnimationEnded()");
+            if (!checkCurrentUserId()) {
+                return;
+            }
             switch (mState) {
                 case STATE_PIP_OVERLAY:
                     if (!mPipRecentsOverlayManager.isRecentsShown()) {
@@ -678,6 +692,26 @@ public class PipManager {
                     showPipMenu();
                     break;
             }
+        }
+
+        // {@link android.app.ITaskStackListener} isn't multi-user aware.
+        // Check the current uid and current SystemUI's running uid
+        // so we can handle the PIP status change only once.
+        private boolean checkCurrentUserId() {
+            try {
+                int processUserId = UserHandle.myUserId();
+                int currentUserId = mActivityManager.getCurrentUser().id;
+                if (processUserId != currentUserId) {
+                    if (DEBUG) {
+                        Log.d(TAG, "UID mismatch. SystemUI is running uid=" + processUserId
+                            + " and the current user is uid=" + currentUserId);
+                    }
+                    return false;
+                }
+            } catch (RemoteException e) {
+                Log.w(TAG, "Unable to get current user.");
+            }
+            return true;
         }
     };
 
