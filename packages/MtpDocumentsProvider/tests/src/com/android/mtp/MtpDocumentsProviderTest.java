@@ -21,9 +21,9 @@ import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
 import android.os.storage.StorageManager;
 import android.provider.DocumentsContract.Document;
+import android.provider.DocumentsContract.Path;
 import android.provider.DocumentsContract.Root;
 import android.system.Os;
 import android.system.OsConstants;
@@ -34,6 +34,9 @@ import android.test.suitebuilder.annotation.MediumTest;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Objects;
+import java.util.Queue;
 import java.util.concurrent.TimeoutException;
 
 import static com.android.mtp.MtpDatabase.strings;
@@ -770,6 +773,64 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals(0x400000000L, cursor.getLong(0));
     }
 
+    public void testFindPath_singleStorage_toRoot() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
+        setupHierarchyDocuments("1");
+
+        final Path path = mProvider.findPath("15", null);
+        assertEquals("1", path.getRootId());
+        assertEquals(4, path.getPath().size());
+        assertEquals("1", path.getPath().get(0));
+        assertEquals("3", path.getPath().get(1));
+        assertEquals("6", path.getPath().get(2));
+        assertEquals("15", path.getPath().get(3));
+    }
+
+    public void testFindPath_singleStorage_toDoc() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
+        setupHierarchyDocuments("1");
+
+        final Path path = mProvider.findPath("18", "3");
+        assertNull(path.getRootId());
+        assertEquals(3, path.getPath().size());
+        assertEquals("3", path.getPath().get(0));
+        assertEquals("7", path.getPath().get(1));
+        assertEquals("18", path.getPath().get(2));
+    }
+
+    public void testFindPath_multiStorage_toRoot() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        setupRoots(0, new MtpRoot[] {
+                new MtpRoot(0, 0, "Storage A", 1000, 1000, ""),
+                new MtpRoot(0, 1, "Storage B", 1000, 1000, "") });
+        setupHierarchyDocuments("2");
+
+        final Path path = mProvider.findPath("16", null);
+        assertEquals("2", path.getRootId());
+        assertEquals(4, path.getPath().size());
+        assertEquals("2", path.getPath().get(0));
+        assertEquals("4", path.getPath().get(1));
+        assertEquals("7", path.getPath().get(2));
+        assertEquals("16", path.getPath().get(3));
+    }
+
+    public void testFindPath_multiStorage_toDoc() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        setupRoots(0, new MtpRoot[] {
+                new MtpRoot(0, 0, "Storage A", 1000, 1000, ""),
+                new MtpRoot(0, 1, "Storage B", 1000, 1000, "") });
+        setupHierarchyDocuments("2");
+
+        final Path path = mProvider.findPath("19", "4");
+        assertNull(path.getRootId());
+        assertEquals(3, path.getPath().size());
+        assertEquals("4", path.getPath().get(0));
+        assertEquals("8", path.getPath().get(1));
+        assertEquals("19", path.getPath().get(2));
+    }
+
     private void setupProvider(int flag) {
         mDatabase = new MtpDatabase(getContext(), flag);
         mProvider = new MtpDocumentsProvider();
@@ -816,11 +877,70 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         final int[] handles = new int[objects.length];
         int i = 0;
         for (final MtpObjectInfo info : objects) {
-            handles[i] = info.getObjectHandle();
+            handles[i++] = info.getObjectHandle();
             mMtpManager.setObjectInfo(deviceId, info);
         }
         mMtpManager.setObjectHandles(deviceId, storageId, parentHandle, handles);
         return getStrings(mProvider.queryChildDocuments(
                 parentDocumentId, strings(DocumentsContract.Document.COLUMN_DOCUMENT_ID), null));
+    }
+
+    static class HierarchyDocument {
+        int depth;
+        String documentId;
+        int objectHandle;
+        int parentHandle;
+
+        HierarchyDocument createChildDocument(int newHandle) {
+            final HierarchyDocument doc = new HierarchyDocument();
+            doc.depth = depth - 1;
+            doc.objectHandle = newHandle;
+            doc.parentHandle = objectHandle;
+            return doc;
+        }
+
+        MtpObjectInfo toObjectInfo() {
+            return new MtpObjectInfo.Builder()
+                    .setName("doc_" + documentId)
+                    .setFormat(depth > 0 ?
+                            MtpConstants.FORMAT_ASSOCIATION : MtpConstants.FORMAT_TEXT)
+                    .setObjectHandle(objectHandle)
+                    .setParent(parentHandle)
+                    .build();
+        }
+    }
+
+    private void setupHierarchyDocuments(String documentId) throws Exception {
+        final Queue<HierarchyDocument> ids = new LinkedList<>();
+        final HierarchyDocument firstDocument = new HierarchyDocument();
+        firstDocument.depth = 3;
+        firstDocument.documentId = documentId;
+        firstDocument.objectHandle = MtpManager.OBJECT_HANDLE_ROOT_CHILDREN;
+        ids.add(firstDocument);
+
+        int objectHandle = 100;
+        while (!ids.isEmpty()) {
+            final HierarchyDocument document = ids.remove();
+            final HierarchyDocument[] children = new HierarchyDocument[] {
+                    document.createChildDocument(objectHandle++),
+                    document.createChildDocument(objectHandle++),
+                    document.createChildDocument(objectHandle++),
+            };
+            final String[] childDocIds = setupDocuments(
+                    0, 0, document.objectHandle, document.documentId, new MtpObjectInfo[] {
+                            children[0].toObjectInfo(),
+                            children[1].toObjectInfo(),
+                            children[2].toObjectInfo(),
+                    });
+            children[0].documentId = childDocIds[0];
+            children[1].documentId = childDocIds[1];
+            children[2].documentId = childDocIds[2];
+
+            if (children[0].depth > 0) {
+                ids.add(children[0]);
+                ids.add(children[1]);
+                ids.add(children[2]);
+            }
+        }
     }
 }
