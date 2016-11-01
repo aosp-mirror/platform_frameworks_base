@@ -563,7 +563,11 @@ public class Binder implements IBinder {
         boolean res;
         // Log any exceptions as warnings, don't silently suppress them.
         // If the call was FLAG_ONEWAY then these exceptions disappear into the ether.
+        final boolean tracingEnabled = Binder.isTracingEnabled();
         try {
+            if (tracingEnabled) {
+                Trace.traceBegin(Trace.TRACE_TAG_ALWAYS, getClass().getName() + ":" + code);
+            }
             res = onTransact(code, data, reply, flags);
         } catch (RemoteException|RuntimeException e) {
             if (LOG_RUNTIME_EXCEPTION) {
@@ -587,6 +591,10 @@ public class Binder implements IBinder {
             reply.setDataPosition(0);
             reply.writeException(re);
             res = true;
+        } finally {
+            if (tracingEnabled) {
+                Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
+            }
         }
         checkParcel(this, code, reply, "Unreasonably large binder reply buffer");
         reply.recycle();
@@ -613,8 +621,21 @@ final class BinderProxy implements IBinder {
 
     public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
         Binder.checkParcel(this, code, data, "Unreasonably large binder buffer");
-        if (Binder.isTracingEnabled()) { Binder.getTransactionTracker().addTrace(); }
-        return transactNative(code, data, reply, flags);
+        final boolean tracingEnabled = Binder.isTracingEnabled();
+        if (tracingEnabled) {
+            final Throwable tr = new Throwable();
+            Binder.getTransactionTracker().addTrace(tr);
+            StackTraceElement stackTraceElement = tr.getStackTrace()[1];
+            Trace.traceBegin(Trace.TRACE_TAG_ALWAYS,
+                    stackTraceElement.getClassName() + "." + stackTraceElement.getMethodName());
+        }
+        try {
+            return transactNative(code, data, reply, flags);
+        } finally {
+            if (tracingEnabled) {
+                Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
+            }
+        }
     }
 
     public native String getInterfaceDescriptor() throws RemoteException;
