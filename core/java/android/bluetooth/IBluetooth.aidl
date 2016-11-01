@@ -63,6 +63,7 @@ interface IBluetooth
     boolean removeBond(in BluetoothDevice device);
     int getBondState(in BluetoothDevice device);
     boolean isBondingInitiatedLocally(in BluetoothDevice device);
+    long getSupportedProfiles();
     int getConnectionState(in BluetoothDevice device);
 
     String getRemoteName(in BluetoothDevice device);
