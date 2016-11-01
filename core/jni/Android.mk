@@ -217,7 +217,6 @@ LOCAL_C_INCLUDES += \
     external/skia/src/images \
     external/sqlite/dist \
     external/sqlite/android \
-    external/expat/lib \
     external/tremor/Tremor \
     external/harfbuzz_ng/src \
     libcore/include \
@@ -234,17 +233,14 @@ LOCAL_SHARED_LIBRARIES := \
     libandroidfw \
     libappfuse \
     libbase \
-    libexpat \
     libnativehelper \
     liblog \
     libcutils \
     libutils \
     libbinder \
-    libnetutils \
     libui \
     libgui \
     libinput \
-    libinputflinger \
     libcamera_client \
     libcamera_metadata \
     libskia \
@@ -257,18 +253,13 @@ LOCAL_SHARED_LIBRARIES := \
     libhardware \
     libhardware_legacy \
     libselinux \
-    libsonivox \
-    libcrypto \
-    libssl \
     libicuuc \
-    libicui18n \
     libmedia \
     libaudioclient \
     libjpeg \
     libusbhost \
     libharfbuzz_ng \
     libz \
-    libaudioutils \
     libpdfium \
     libimg_utils \
     libnetd_client \
