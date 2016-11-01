@@ -28,7 +28,8 @@ using android::filterfw::NativeFrame;
 using android::filterfw::NativeProgram;
 
 jboolean Java_android_filterfw_core_NativeProgram_allocate(JNIEnv* env, jobject thiz) {
-  return ToJBool(WrapObjectInJava(new NativeProgram(), env, thiz, true));
+  std::unique_ptr<NativeProgram> program(new NativeProgram());
+  return ToJBool(WrapOwnedObjectInJava(std::move(program), env, thiz, true));
 }
 
 jboolean Java_android_filterfw_core_NativeProgram_deallocate(JNIEnv* env, jobject thiz) {
