@@ -860,32 +860,35 @@ public interface InputConnection {
             android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;  // 0x00000001
 
     /**
-     * Called by the input method to commit a content such as PNG image to the editor.
+     * Called by the input method to commit content such as a PNG image to the editor.
      *
-     * <p>In order to avoid variety of compatibility issues, this focuses on a simple use case,
-     * where we expect editors and IMEs work cooperatively as follows:</p>
+     * <p>In order to avoid a variety of compatibility issues, this focuses on a simple use case,
+     * where editors and IMEs are expected to work cooperatively as follows:</p>
      * <ul>
-     *     <li>Editor must keep {@link EditorInfo#contentMimeTypes} to be {@code null} if it does
+     *     <li>Editor must keep {@link EditorInfo#contentMimeTypes} equal to {@code null} if it does
      *     not support this method at all.</li>
      *     <li>Editor can ignore this request when the MIME type specified in
-     *     {@code inputContentInfo} does not match to any of {@link EditorInfo#contentMimeTypes}.
+     *     {@code inputContentInfo} does not match any of {@link EditorInfo#contentMimeTypes}.
      *     </li>
-     *     <li>Editor can ignore the cursor position when inserting the provided context.</li>
+     *     <li>Editor can ignore the cursor position when inserting the provided content.</li>
      *     <li>Editor can return {@code true} asynchronously, even before it starts loading the
      *     content.</li>
-     *     <li>Editor should provide a way to delete the content inserted by this method, or revert
-     *     the effect caused by this method.</li>
+     *     <li>Editor should provide a way to delete the content inserted by this method or to
+     *     revert the effect caused by this method.</li>
      *     <li>IME should not call this method when there is any composing text, in case calling
-     *     this method causes focus change.</li>
+     *     this method causes a focus change.</li>
      *     <li>IME should grant a permission for the editor to read the content. See
      *     {@link EditorInfo#packageName} about how to obtain the package name of the editor.</li>
      * </ul>
      *
      * @param inputContentInfo Content to be inserted.
-     * @param flags {@code 0} or {@link #INPUT_CONTENT_GRANT_READ_URI_PERMISSION}.
+     * @param flags {@link #INPUT_CONTENT_GRANT_READ_URI_PERMISSION} if the content provider
+     * allows {@link android.R.styleable#AndroidManifestProvider_grantUriPermissions
+     * grantUriPermissions} or {@code 0} if the application does not need to call
+     * {@link InputContentInfo#requestPermission()}.
      * @param opts optional bundle data. This can be {@code null}.
-     * @return {@code true} if this request is accepted by the application, no matter if the request
-     * is already handled or still being handled in background.
+     * @return {@code true} if this request is accepted by the application, whether the request
+     * is already handled or still being handled in background, {@code false} otherwise.
      */
     public boolean commitContent(@NonNull InputContentInfo inputContentInfo, int flags,
             @Nullable Bundle opts);
