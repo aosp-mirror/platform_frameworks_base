@@ -60,7 +60,7 @@ public class DocumentsProviderTest extends ProviderTestCase2<TestDocumentsProvid
                 DocumentsContract.buildDocumentUri(TestDocumentsProvider.AUTHORITY, DOCUMENT_ID);
         try (ContentProviderClient client =
                      mResolver.acquireUnstableContentProviderClient(docUri)) {
-            final Path actual = DocumentsContract.findPath(client, docUri);
+            final Path actual = DocumentsContract.findDocumentPath(client, docUri);
             assertEquals(expected, actual);
         }
     }
@@ -73,7 +73,7 @@ public class DocumentsProviderTest extends ProviderTestCase2<TestDocumentsProvid
 
         final Uri docUri = buildTreeDocumentUri(
                 TestDocumentsProvider.AUTHORITY, PARENT_DOCUMENT_ID, DOCUMENT_ID);
-        final List<String> actual = DocumentsContract.findPath(mResolver, docUri);
+        final List<String> actual = DocumentsContract.findDocumentPath(mResolver, docUri);
 
         assertEquals(expected.getPath(), actual);
     }
@@ -83,7 +83,7 @@ public class DocumentsProviderTest extends ProviderTestCase2<TestDocumentsProvid
 
         final Uri docUri = buildTreeDocumentUri(
                 TestDocumentsProvider.AUTHORITY, PARENT_DOCUMENT_ID, DOCUMENT_ID);
-        assertNull(DocumentsContract.findPath(mResolver, docUri));
+        assertNull(DocumentsContract.findDocumentPath(mResolver, docUri));
     }
 
     public void testFindPath_treeUri_erasesNonNullRootId() throws Exception {
@@ -95,7 +95,7 @@ public class DocumentsProviderTest extends ProviderTestCase2<TestDocumentsProvid
                 TestDocumentsProvider.AUTHORITY, PARENT_DOCUMENT_ID, DOCUMENT_ID);
         try (ContentProviderClient client =
                      mResolver.acquireUnstableContentProviderClient(docUri)) {
-            Path path = DocumentsContract.findPath(client, docUri);
+            Path path = DocumentsContract.findDocumentPath(client, docUri);
             assertNull(path.getRootId());
         }
     }

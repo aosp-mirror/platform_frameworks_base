@@ -20,7 +20,7 @@ import static android.provider.DocumentsContract.METHOD_COPY_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_CREATE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_DELETE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_EJECT_ROOT;
-import static android.provider.DocumentsContract.METHOD_FIND_PATH;
+import static android.provider.DocumentsContract.METHOD_FIND_DOCUMENT_PATH;
 import static android.provider.DocumentsContract.METHOD_IS_CHILD_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_MOVE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_REMOVE_DOCUMENT;
@@ -350,17 +350,17 @@ public abstract class DocumentsProvider extends ContentProvider {
      * document.
      *
      * @param childDocumentId the document which path is requested.
-     * @param parentDocumentId the document with which path starts if not null, or
-     *     null to indicate path to root is requested.
+     * @param parentDocumentId the document from which the path starts if not null,
+     *     or null to indicate a path from the root is requested.
      * @return the path of the requested document. If parentDocumentId is null
      *     returned root ID must not be null. If parentDocumentId is not null
      *     returned root ID must be null.
      *
      * @hide
      */
-    public Path findPath(String childDocumentId, @Nullable String parentDocumentId)
+    public Path findDocumentPath(String childDocumentId, @Nullable String parentDocumentId)
             throws FileNotFoundException {
-        throw new UnsupportedOperationException("findPath not supported.");
+        throw new UnsupportedOperationException("findDocumentPath not supported.");
     }
 
     /**
@@ -914,7 +914,7 @@ public abstract class DocumentsProvider extends ContentProvider {
 
             // It's responsibility of the provider to revoke any grants, as the document may be
             // still attached to another parents.
-        } else if (METHOD_FIND_PATH.equals(method)) {
+        } else if (METHOD_FIND_DOCUMENT_PATH.equals(method)) {
             final boolean isTreeUri = isTreeUri(documentUri);
 
             if (isTreeUri) {
@@ -927,7 +927,7 @@ public abstract class DocumentsProvider extends ContentProvider {
                     ? DocumentsContract.getTreeDocumentId(documentUri)
                     : null;
 
-            Path path = findPath(documentId, parentDocumentId);
+            Path path = findDocumentPath(documentId, parentDocumentId);
 
             // Ensure provider doesn't leak information to unprivileged callers.
             if (isTreeUri) {

@@ -636,7 +636,7 @@ public final class DocumentsContract {
     /** {@hide} */
     public static final String METHOD_EJECT_ROOT = "android:ejectRoot";
     /** {@hide} */
-    public static final String METHOD_FIND_PATH = "android:findPath";
+    public static final String METHOD_FIND_DOCUMENT_PATH = "android:findDocumentPath";
 
     /** {@hide} */
     public static final String EXTRA_PARENT_URI = "parentUri";
@@ -1304,22 +1304,22 @@ public final class DocumentsContract {
      * from the top of the tree or the root document to the requested document,
      * both inclusive.
      *
-     * Document id should be unique across roots.
+     * Document ID should be unique across roots.
      *
      * @param treeUri treeUri of the document which path is requested.
      * @return a list of documents ID starting from the top of the tree to the
      *      requested document, or {@code null} if failed.
-     * @see DocumentsProvider#findPath(String, String)
+     * @see DocumentsProvider#findDocumentPath(String, String)
      *
      * {@hide}
      */
-    public static List<String> findPath(ContentResolver resolver, Uri treeUri) {
+    public static List<String> findDocumentPath(ContentResolver resolver, Uri treeUri) {
         checkArgument(isTreeUri(treeUri), treeUri + " is not a tree uri.");
 
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 treeUri.getAuthority());
         try {
-            return findPath(client, treeUri).getPath();
+            return findDocumentPath(client, treeUri).getPath();
         } catch (Exception e) {
             Log.w(TAG, "Failed to find path", e);
             return null;
@@ -1339,15 +1339,15 @@ public final class DocumentsContract {
      * @param uri uri of the document which path is requested. It can be either a
      *          plain document uri or a tree uri.
      * @return the path of the document.
-     * @see DocumentsProvider#findPath(String, String)
+     * @see DocumentsProvider#findDocumentPath(String, String)
      *
      * {@hide}
      */
-    public static Path findPath(ContentProviderClient client, Uri uri) throws RemoteException {
+    public static Path findDocumentPath(ContentProviderClient client, Uri uri) throws RemoteException {
         final Bundle in = new Bundle();
         in.putParcelable(DocumentsContract.EXTRA_URI, uri);
 
-        final Bundle out = client.call(METHOD_FIND_PATH, null, in);
+        final Bundle out = client.call(METHOD_FIND_DOCUMENT_PATH, null, in);
 
         return out.getParcelable(DocumentsContract.EXTRA_RESULT);
     }
