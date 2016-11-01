@@ -194,14 +194,14 @@ include $(BUILD_HOST_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := libaapt2_jni
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
-LOCAL_MODULE_HOST_OS := darwin linux
+LOCAL_MODULE_HOST_OS := darwin linux windows
 LOCAL_CFLAGS := $(cFlags)
 LOCAL_CFLAGS_darwin := $(cFlags_darwin)
 LOCAL_CFLAGS_windows := $(cFlags_windows)
 LOCAL_CPPFLAGS := $(cppFlags)
 LOCAL_C_INCLUDES := $(protoIncludes)
 LOCAL_SRC_FILES := $(toolSources) $(sourcesJni)
-LOCAL_STATIC_LIBRARIES := libaapt2 libnativehelper $(hostStaticLibs)
+LOCAL_STATIC_LIBRARIES := libaapt2 $(hostStaticLibs)
 LOCAL_STATIC_LIBRARIES_windows := $(hostStaticLibs_windows)
 LOCAL_LDLIBS := $(hostLdLibs)
 LOCAL_LDLIBS_darwin := $(hostLdLibs_darwin)
