@@ -38,29 +38,29 @@ interface IMountService {
     /**
      * Registers an IMountServiceListener for receiving async notifications.
      */
-    void registerListener(IMountServiceListener listener) = 1;
+    void registerListener(IMountServiceListener listener) = 0;
     /**
      * Unregisters an IMountServiceListener
      */
-    void unregisterListener(IMountServiceListener listener) = 2;
+    void unregisterListener(IMountServiceListener listener) = 1;
     /**
      * Returns true if a USB mass storage host is connected
      */
-    boolean isUsbMassStorageConnected() = 3;
+    boolean isUsbMassStorageConnected() = 2;
     /**
      * Enables / disables USB mass storage. The caller should check actual
      * status of enabling/disabling USB mass storage via StorageEventListener.
      */
-    void setUsbMassStorageEnabled(boolean enable) = 4;
+    void setUsbMassStorageEnabled(boolean enable) = 3;
     /**
      * Returns true if a USB mass storage host is enabled (media is shared)
      */
-    boolean isUsbMassStorageEnabled() = 5;
+    boolean isUsbMassStorageEnabled() = 4;
     /**
      * Mount external storage at given mount point. Returns an int consistent
      * with MountServiceResultCode
      */
-    int mountVolume(in String mountPoint) = 6;
+    int mountVolume(in String mountPoint) = 5;
     /**
      * Safely unmount external storage at given mount point. The unmount is an
      * asynchronous operation. Applications should register StorageEventListener
@@ -71,75 +71,75 @@ interface IMountService {
      * @param removeEncryption whether or not encryption mapping should be removed from the volume.
      *     This value implies {@code force}.
      */
-    void unmountVolume(in String mountPoint, boolean force, boolean removeEncryption) = 7;
+    void unmountVolume(in String mountPoint, boolean force, boolean removeEncryption) = 6;
     /**
      * Format external storage given a mount point. Returns an int consistent
      * with MountServiceResultCode
      */
-    int formatVolume(in String mountPoint) = 8;
+    int formatVolume(in String mountPoint) = 7;
     /**
      * Returns an array of pids with open files on the specified path.
      */
-    int[] getStorageUsers(in String path) = 9;
+    int[] getStorageUsers(in String path) = 8;
     /**
      * Gets the state of a volume via its mountpoint.
      */
-    String getVolumeState(in String mountPoint) = 10;
+    String getVolumeState(in String mountPoint) = 9;
     /*
      * Creates a secure container with the specified parameters. Returns an int
      * consistent with MountServiceResultCode
      */
     int createSecureContainer(in String id, int sizeMb, in String fstype, in String key,
-            int ownerUid, boolean external) = 11;
+            int ownerUid, boolean external) = 10;
     /*
      * Finalize a container which has just been created and populated. After
      * finalization, the container is immutable. Returns an int consistent with
      * MountServiceResultCode
      */
-    int finalizeSecureContainer(in String id) = 12;
+    int finalizeSecureContainer(in String id) = 11;
     /*
      * Destroy a secure container, and free up all resources associated with it.
      * NOTE: Ensure all references are released prior to deleting. Returns an
      * int consistent with MountServiceResultCode
      */
-    int destroySecureContainer(in String id, boolean force) = 13;
+    int destroySecureContainer(in String id, boolean force) = 12;
     /*
      * Mount a secure container with the specified key and owner UID. Returns an
      * int consistent with MountServiceResultCode
      */
-    int mountSecureContainer(in String id, in String key, int ownerUid, boolean readOnly) = 14;
+    int mountSecureContainer(in String id, in String key, int ownerUid, boolean readOnly) = 13;
     /*
      * Unount a secure container. Returns an int consistent with
      * MountServiceResultCode
      */
-    int unmountSecureContainer(in String id, boolean force) = 15;
+    int unmountSecureContainer(in String id, boolean force) = 14;
     /*
      * Returns true if the specified container is mounted
      */
-    boolean isSecureContainerMounted(in String id) = 16;
+    boolean isSecureContainerMounted(in String id) = 15;
     /*
      * Rename an unmounted secure container. Returns an int consistent with
      * MountServiceResultCode
      */
-    int renameSecureContainer(in String oldId, in String newId) = 17;
+    int renameSecureContainer(in String oldId, in String newId) = 16;
     /*
      * Returns the filesystem path of a mounted secure container.
      */
-    String getSecureContainerPath(in String id) = 18;
+    String getSecureContainerPath(in String id) = 17;
     /**
      * Gets an Array of currently known secure container IDs
      */
-    String[] getSecureContainerList() = 19;
+    String[] getSecureContainerList() = 18;
     /**
      * Shuts down the MountService and gracefully unmounts all external media.
      * Invokes call back once the shutdown is complete.
      */
-    void shutdown(IMountShutdownObserver observer) = 20;
+    void shutdown(IMountShutdownObserver observer) = 19;
     /**
      * Call into MountService by PackageManager to notify that its done
      * processing the media status update request.
      */
-    void finishMediaUpdate() = 21;
+    void finishMediaUpdate() = 20;
     /**
      * Mounts an Opaque Binary Blob (OBB) with the specified decryption key and
      * only allows the calling process's UID access to the contents.
@@ -147,43 +147,43 @@ interface IMountService {
      * it of the terminal state of the call.
      */
     void mountObb(in String rawPath, in String canonicalPath, in String key,
-            IObbActionListener token, int nonce) = 22;
+            IObbActionListener token, int nonce) = 21;
     /**
      * Unmounts an Opaque Binary Blob (OBB). When the force flag is specified,
      * any program using it will be forcibly killed to unmount the image.
      * MountService will call back to the supplied IObbActionListener to inform
      * it of the terminal state of the call.
      */
-    void unmountObb(in String rawPath, boolean force, IObbActionListener token, int nonce) = 23;
+    void unmountObb(in String rawPath, boolean force, IObbActionListener token, int nonce) = 22;
     /**
      * Checks whether the specified Opaque Binary Blob (OBB) is mounted
      * somewhere.
      */
-    boolean isObbMounted(in String rawPath) = 24;
+    boolean isObbMounted(in String rawPath) = 23;
     /**
      * Gets the path to the mounted Opaque Binary Blob (OBB).
      */
-    String getMountedObbPath(in String rawPath) = 25;
+    String getMountedObbPath(in String rawPath) = 24;
     /**
      * Returns whether or not the external storage is emulated.
      */
-    boolean isExternalStorageEmulated() = 26;
+    boolean isExternalStorageEmulated() = 25;
     /**
      * Decrypts any encrypted volumes.
      */
-    int decryptStorage(in String password) = 27;
+    int decryptStorage(in String password) = 26;
     /**
      * Encrypts storage.
      */
-    int encryptStorage(int type, in String password) = 28;
+    int encryptStorage(int type, in String password) = 27;
     /**
      * Changes the encryption password.
      */
-    int changeEncryptionPassword(int type, in String password) = 29;
+    int changeEncryptionPassword(int type, in String password) = 28;
     /**
      * Returns list of all mountable volumes.
      */
-    StorageVolume[] getVolumeList(int uid, in String packageName, int flags) = 30;
+    StorageVolume[] getVolumeList(int uid, in String packageName, int flags) = 29;
     /**
      * Gets the path on the filesystem for the ASEC container itself.
      *
@@ -191,7 +191,7 @@ interface IMountService {
      * @return path to filesystem or {@code null} if it's not found
      * @throws RemoteException
      */
-    String getSecureContainerFilesystemPath(in String cid) = 31;
+    String getSecureContainerFilesystemPath(in String cid) = 30;
     /**
      * Determines the encryption state of the volume.
      * @return a numerical value. See {@code ENCRYPTION_STATE_*} for possible
@@ -201,17 +201,17 @@ interface IMountService {
      * This is still useful to get the error state when encryption has failed
      * and CryptKeeper needs to throw up a screen advising the user what to do
      */
-    int getEncryptionState() = 32;
+    int getEncryptionState() = 31;
     /**
      * Verify the encryption password against the stored volume.  This method
      * may only be called by the system process.
      */
-    int verifyEncryptionPassword(in String password) = 33;
+    int verifyEncryptionPassword(in String password) = 32;
     /*
      * Fix permissions in a container which has just been created and populated.
      * Returns an int consistent with MountServiceResultCode
      */
-    int fixPermissionsSecureContainer(in String id, int gid, in String filename) = 34;
+    int fixPermissionsSecureContainer(in String id, int gid, in String filename) = 33;
     /**
      * Ensure that all directories along given path exist, creating parent
      * directories as needed. Validates that given path is absolute and that it
@@ -219,73 +219,73 @@ interface IMountService {
      * path belongs to a volume managed by vold, and that path is either
      * external storage data or OBB directory belonging to calling app.
      */
-    int mkdirs(in String callingPkg, in String path) = 35;
+    int mkdirs(in String callingPkg, in String path) = 34;
     /**
      * Determines the type of the encryption password
      * @return PasswordType
      */
-    int getPasswordType() = 36;
+    int getPasswordType() = 35;
     /**
      * Get password from vold
      * @return password or empty string
      */
-    String getPassword() = 37;
+    String getPassword() = 36;
     /**
      * Securely clear password from vold
      */
-    oneway void clearPassword() = 38;
+    oneway void clearPassword() = 37;
     /**
      * Set a field in the crypto header.
      * @param field field to set
      * @param contents contents to set in field
      */
-    oneway void setField(in String field, in String contents) = 39;
+    oneway void setField(in String field, in String contents) = 38;
     /**
      * Gets a field from the crypto header.
      * @param field field to get
      * @return contents of field
      */
-    String getField(in String field) = 40;
-    int resizeSecureContainer(in String id, int sizeMb, in String key) = 41;
+    String getField(in String field) = 39;
+    int resizeSecureContainer(in String id, int sizeMb, in String key) = 40;
     /**
      * Report the time of the last maintenance operation such as fstrim.
      * @return Timestamp of the last maintenance operation, in the
      *     System.currentTimeMillis() time base
      * @throws RemoteException
      */
-    long lastMaintenance() = 42;
+    long lastMaintenance() = 41;
     /**
      * Kick off an immediate maintenance operation
      * @throws RemoteException
      */
-    void runMaintenance() = 43;
-    void waitForAsecScan() = 44;
-    DiskInfo[] getDisks() = 45;
-    VolumeInfo[] getVolumes(int flags) = 46;
-    VolumeRecord[] getVolumeRecords(int flags) = 47;
-    void mount(in String volId) = 48;
-    void unmount(in String volId) = 49;
-    void format(in String volId) = 50;
-    void partitionPublic(in String diskId) = 51;
-    void partitionPrivate(in String diskId) = 52;
-    void partitionMixed(in String diskId, int ratio) = 53;
-    void setVolumeNickname(in String fsUuid, in String nickname) = 54;
-    void setVolumeUserFlags(in String fsUuid, int flags, int mask) = 55;
-    void forgetVolume(in String fsUuid) = 56;
-    void forgetAllVolumes() = 57;
-    String getPrimaryStorageUuid() = 58;
-    void setPrimaryStorageUuid(in String volumeUuid, IPackageMoveObserver callback) = 59;
-    long benchmark(in String volId) = 60;
-    void setDebugFlags(int flags, int mask) = 61;
-    void createUserKey(int userId, int serialNumber, boolean ephemeral) = 62;
-    void destroyUserKey(int userId) = 63;
-    void unlockUserKey(int userId, int serialNumber, in byte[] token, in byte[] secret) = 64;
-    void lockUserKey(int userId) = 65;
-    boolean isUserKeyUnlocked(int userId) = 66;
-    void prepareUserStorage(in String volumeUuid, int userId, int serialNumber, int flags) = 67;
-    void destroyUserStorage(in String volumeUuid, int userId, int flags) = 68;
-    boolean isConvertibleToFBE() = 69;
-    ParcelFileDescriptor mountAppFuse(in String name) = 70;
-    void addUserKeyAuth(int userId, int serialNumber, in byte[] token, in byte[] secret) = 71;
-    void fixateNewestUserKeyAuth(int userId) = 72;
+    void runMaintenance() = 42;
+    void waitForAsecScan() = 43;
+    DiskInfo[] getDisks() = 44;
+    VolumeInfo[] getVolumes(int flags) = 45;
+    VolumeRecord[] getVolumeRecords(int flags) = 46;
+    void mount(in String volId) = 47;
+    void unmount(in String volId) = 48;
+    void format(in String volId) = 49;
+    void partitionPublic(in String diskId) = 50;
+    void partitionPrivate(in String diskId) = 51;
+    void partitionMixed(in String diskId, int ratio) = 52;
+    void setVolumeNickname(in String fsUuid, in String nickname) = 53;
+    void setVolumeUserFlags(in String fsUuid, int flags, int mask) = 54;
+    void forgetVolume(in String fsUuid) = 55;
+    void forgetAllVolumes() = 56;
+    String getPrimaryStorageUuid() = 57;
+    void setPrimaryStorageUuid(in String volumeUuid, IPackageMoveObserver callback) = 58;
+    long benchmark(in String volId) = 59;
+    void setDebugFlags(int flags, int mask) = 60;
+    void createUserKey(int userId, int serialNumber, boolean ephemeral) = 61;
+    void destroyUserKey(int userId) = 62;
+    void unlockUserKey(int userId, int serialNumber, in byte[] token, in byte[] secret) = 63;
+    void lockUserKey(int userId) = 64;
+    boolean isUserKeyUnlocked(int userId) = 65;
+    void prepareUserStorage(in String volumeUuid, int userId, int serialNumber, int flags) = 66;
+    void destroyUserStorage(in String volumeUuid, int userId, int flags) = 67;
+    boolean isConvertibleToFBE() = 68;
+    ParcelFileDescriptor mountAppFuse(in String name) = 69;
+    void addUserKeyAuth(int userId, int serialNumber, in byte[] token, in byte[] secret) = 70;
+    void fixateNewestUserKeyAuth(int userId) = 71;
 }

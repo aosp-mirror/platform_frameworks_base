@@ -35,7 +35,7 @@ oneway interface IMountServiceListener {
      *
      * @param available true if a UMS host is connected.
      */
-    void onUsbMassStorageConnectionChanged(boolean connected) = 1;
+    void onUsbMassStorageConnectionChanged(boolean connected) = 0;
 
     /**
      * Storage state has changed.
@@ -45,17 +45,17 @@ oneway interface IMountServiceListener {
      * @param newState The new state of the volume. Note: State is one of the
      *            values returned by Environment.getExternalStorageState()
      */
-    void onStorageStateChanged(in String path, in String oldState, in String newState) = 2;
+    void onStorageStateChanged(in String path, in String oldState, in String newState) = 1;
 
-    void onVolumeStateChanged(in VolumeInfo vol, int oldState, int newState) = 3;
+    void onVolumeStateChanged(in VolumeInfo vol, int oldState, int newState) = 2;
 
-    void onVolumeRecordChanged(in VolumeRecord rec) = 4;
+    void onVolumeRecordChanged(in VolumeRecord rec) = 3;
 
-    void onVolumeForgotten(in String fsUuid) = 5;
+    void onVolumeForgotten(in String fsUuid) = 4;
 
-    void onDiskScanned(in DiskInfo disk, int volumeCount) = 6;
+    void onDiskScanned(in DiskInfo disk, int volumeCount) = 5;
 
-    void onDiskDestroyed(in DiskInfo disk) = 7;
+    void onDiskDestroyed(in DiskInfo disk) = 6;
 
     /**
      * Don't change the existing transaction Ids as they could be used in the native code.
