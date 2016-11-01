@@ -26,10 +26,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.Log;
+
+import java.util.List;
 
 public class ProfileSelectDialog extends DialogFragment implements OnClickListener {
 
+    private static final String TAG = "ProfileSelectDialog";
     private static final String ARG_SELECTED_TILE = "selectedTile";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private Tile mSelectedTile;
 
@@ -67,5 +72,21 @@ public class ProfileSelectDialog extends DialogFragment implements OnClickListen
         mSelectedTile.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         getActivity().startActivityAsUser(mSelectedTile.intent, user);
         ((SettingsDrawerActivity) getActivity()).onProfileTileOpen();
+    }
+
+    public static void updateUserHandlesIfNeeded(Context context, Tile tile) {
+        List<UserHandle> userHandles = tile.userHandle;
+        if (tile.userHandle == null || tile.userHandle.size() <= 1) {
+            return;
+        }
+        final UserManager userManager = UserManager.get(context);
+        for (int i = userHandles.size() - 1; i >= 0; i--) {
+            if (userManager.getUserInfo(userHandles.get(i).getIdentifier()) == null) {
+                if (DEBUG) {
+                    Log.d(TAG, "Delete the user: " + userHandles.get(i).getIdentifier());
+                }
+                userHandles.remove(i);
+            }
+        }
     }
 }
