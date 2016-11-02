@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (c) 2015 SlimRoms
+    Copyright (c) 2016 AICP
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -15,20 +15,12 @@
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="15.994dp"
-    android:height="16dp"
-    android:viewportWidth="15.994"
-    android:viewportHeight="16">
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="88"
+    android:viewportHeight="88">
 
     <path
-        android:fillColor="#fff"
-        android:pathData="M1.3726
-15.991c-0.44225-0.05-0.85907-0.307-1.1131-0.685-0.12559-0.188-0.2033-0.386-0.24654-0.628-0.017518-0.098-0.017518-13.257-0.000006-13.354
-0.032624-0.183 0.083475-0.33675 0.15818-0.47875 0.24568-0.46682 0.69859-0.77903
-1.2121-0.83553 0.1154-0.012711 13.112-0.013066 13.226-0.0004167 0.179 0.020001
-0.338 0.065692 0.501 0.14393 0.467 0.22422 0.793 0.66542 0.872 1.1791 0.009
-0.0608 0.012 1.2834 0.012 6.6684 0 5.3853-0.002 6.6083-0.012 6.6683-0.108
-0.701-0.671 1.245-1.373 1.323-0.098 0.011-13.14
-0.011-13.236-0.001zm12.609-7.9903v-5.9762h-5.9846-5.985v5.9762 5.9763h5.985
-5.9846v-5.9763z" />
+        android:fillColor="@color/icon_color_overview"
+        android:pathData="M14.01,19.99C13.73,16.72 16.63,13.75 19.92,14.03C35.29,13.94 50.66,14.06 66.03,13.97C68.2,14.01 70.73,13.86 72.33,15.61C74.13,17.21 74.01,19.77 74.06,21.97C74.03,36.98 74.05,52 74.06,67.02C73.99,68.58 73.87,70.18 73.32,71.65C71.62,73.28 69.39,74.21 67.01,74.02C51.66,73.99 36.3,73.99 20.95,74.02C18.54,74.22 16.33,73.23 14.61,71.59C13.88,69.13 13.9,66.54 13.93,64.01C14.03,49.34 13.86,34.66 14.01,19.99Z"/>
 </vector>

@@ -15,6 +15,15 @@
      limitations under the License.
 -->
 <resources>
+
     <!-- carrier label color -->
     <color name="status_bar_carrier_color">#FFFFFFFF</color>
+
+    <!-- Navbar icon Colors -->
+    <color name="icon_color_back">@android:color/white</color>
+    <color name="icon_color_ime_switcher">@android:color/white</color>
+    <color name="icon_color_split_screen">@android:color/white</color>
+    <color name="icon_color_home">@android:color/white</color>
+    <color name="icon_color_overview">@android:color/white</color>
+
 </resources>

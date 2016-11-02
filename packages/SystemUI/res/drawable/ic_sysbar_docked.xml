@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2016 AICP
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="88"
+    android:viewportHeight="88">
+
+    <path
+        android:fillColor="@color/icon_color_split_screen"
+        android:pathData="M15.79,15.82C17.36,14.06 19.84,13.97 22.03,13.98C37.02,14.03 52.03,13.97 67.02,14.01C70.11,13.68 73.39,15.78 73.86,18.95C74.25,22.61 73.95,26.3 74.07,29.97C74,32.58 74.31,35.42 72.94,37.77C71.26,39.11 69.3,40.16 67.08,39.99C51.7,40.01 36.32,40.01 20.94,39.99C18.7,40.17 16.72,39.1 15.04,37.72C13.19,34.11 14.19,29.86 13.95,25.97C14.17,22.59 13.1,18.48 15.79,15.82Z"/>
+    <path
+        android:fillColor="@color/icon_color_split_screen"
+        android:pathData="M15.75,49.85C17.31,48.08 19.8,47.96 21.99,47.98C37.02,48.03 52.05,47.97 67.07,48.01C70.14,47.69 73.38,49.79 73.85,52.92C74.26,56.92 73.94,60.95 74.08,64.97C74,67.25 74.18,69.74 72.92,71.77C71.25,73.13 69.27,74.14 67.06,73.99C53.35,74.04 39.64,73.95 25.94,74.02C22.22,74 17.98,74.6 15.05,71.76C13.19,68.14 14.19,63.89 13.95,59.99C14.17,56.62 13.11,52.52 15.75,49.85Z"/>
+</vector>
