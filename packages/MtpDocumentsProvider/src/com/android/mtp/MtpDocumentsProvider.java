@@ -349,6 +349,34 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 throw new UnsupportedOperationException(
                         "Writing operation is not supported by the device.");
             }
+
+            final int parentObjectHandle;
+            final int storageId;
+            switch (parentId.mDocumentType) {
+                case MtpDatabaseConstants.DOCUMENT_TYPE_DEVICE:
+                    final String[] storageDocumentIds =
+                            mDatabase.getStorageDocumentIds(parentId.mDocumentId);
+                    if (storageDocumentIds.length == 1) {
+                        final String newDocumentId =
+                                createDocument(storageDocumentIds[0], mimeType, displayName);
+                        notifyChildDocumentsChange(parentDocumentId);
+                        return newDocumentId;
+                    } else {
+                        throw new UnsupportedOperationException(
+                                "Cannot create a file under the device.");
+                    }
+                case MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE:
+                    storageId = parentId.mStorageId;
+                    parentObjectHandle = -1;
+                    break;
+                case MtpDatabaseConstants.DOCUMENT_TYPE_OBJECT:
+                    storageId = parentId.mStorageId;
+                    parentObjectHandle = parentId.mObjectHandle;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unexpected document type.");
+            }
+
             pipe = ParcelFileDescriptor.createReliablePipe();
             int objectHandle = -1;
             MtpObjectInfo info = null;
@@ -359,8 +387,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                         MtpConstants.FORMAT_ASSOCIATION :
                         MediaFile.getFormatCode(displayName, mimeType);
                 info = new MtpObjectInfo.Builder()
-                        .setStorageId(parentId.mStorageId)
-                        .setParent(parentId.mObjectHandle)
+                        .setStorageId(storageId)
+                        .setParent(parentObjectHandle)
                         .setFormat(formatCode)
                         .setName(displayName)
                         .build();
