@@ -2631,9 +2631,18 @@ public final class PowerManagerService extends SystemService
                 state = new UidState(uid);
                 mUidState.put(uid, state);
             }
+            final boolean oldShouldAllow = state.mProcState
+                    <= ActivityManager.PROCESS_STATE_RECEIVER;
             state.mProcState = procState;
-            if (mDeviceIdleMode && state.mNumWakeLocks > 0) {
-                handleUidStateChangeLocked();
+            if (state.mNumWakeLocks > 0) {
+                if (mDeviceIdleMode) {
+                    handleUidStateChangeLocked();
+                } else if (!state.mActive && oldShouldAllow !=
+                        (procState <= ActivityManager.PROCESS_STATE_RECEIVER)) {
+                    // If this uid is not active, but the process state has changed such
+                    // that we may still want to allow it to hold a wake lock, then take care of it.
+                    handleUidStateChangeLocked();
+                }
             }
         }
     }
@@ -2721,7 +2730,8 @@ public final class PowerManagerService extends SystemService
                         disabled = true;
                     }
                 } else {
-                    disabled = !wakeLock.mUidState.mActive;
+                    disabled = !wakeLock.mUidState.mActive &&
+                            wakeLock.mUidState.mProcState > ActivityManager.PROCESS_STATE_RECEIVER;
                 }
             }
             if (wakeLock.mDisabled != disabled) {
