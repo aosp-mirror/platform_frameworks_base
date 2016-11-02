@@ -360,7 +360,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
     }
 
     /**
-     * Get unread messages.  Unread messages will be published via {@LINK #ACTION_MESSAGE_RECEIVED}.
+     * Get unread messages.  Unread messages will be published via {@link #ACTION_MESSAGE_RECEIVED}.
      *
      * @param device Bluetooth device
      * @return true if the message is enqueued, false on error
