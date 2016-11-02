@@ -18,6 +18,7 @@ package com.android.server.notification;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import com.android.internal.util.FastXmlSerializer;
 
 import org.mockito.Mock;
@@ -52,6 +53,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 @SmallTest
@@ -74,6 +76,8 @@ public class RankingHelperTest {
     private RankingHelper mHelper;
     private final String pkg = "com.android.server.notification";
     private final int uid = 0;
+    private final String pkg2 = "pkg2";
+    private final int uid2 = 1111111;
 
     private Context getContext() {
         return InstrumentationRegistry.getTargetContext();
@@ -134,8 +138,11 @@ public class RankingHelperTest {
 
         final ApplicationInfo legacy = new ApplicationInfo();
         legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
+        final ApplicationInfo upgrade = new ApplicationInfo();
+        upgrade.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
         try {
-            when(mPm.getApplicationInfo(anyString(), anyInt())).thenReturn(legacy);
+            when(mPm.getApplicationInfo(eq(pkg), anyInt())).thenReturn(legacy);
+            when(mPm.getApplicationInfo(eq(pkg2), anyInt())).thenReturn(upgrade);
         } catch (PackageManager.NameNotFoundException e) {}
     }
 
@@ -293,60 +300,156 @@ public class RankingHelperTest {
                 pkg, uid, NotificationChannel.DEFAULT_CHANNEL_ID).getImportance());
     }
 
-    // TODO: test with hardcoded N xml.
     @Test
     public void testChannelXml_upgradeCreateDefaultChannel() throws Exception {
-        mHelper.setImportance(pkg, uid, NotificationManager.IMPORTANCE_HIGH);
-        mHelper.setPriority(pkg, uid, Notification.PRIORITY_MAX);
-        mHelper.setVisibilityOverride(pkg, uid, Notification.VISIBILITY_SECRET);
-        // pre-O xml won't have channels.
-        mHelper.deleteNotificationChannel(pkg, uid, NotificationChannel.DEFAULT_CHANNEL_ID);
-
-        ByteArrayOutputStream baos =
-                writeXmlAndPurge(pkg, uid, NotificationChannel.DEFAULT_CHANNEL_ID);
-
+        final String preupgradeXml = "<ranking version=\"1\">\n"
+             + "<package name=\"" + pkg + "\" importance=\"" + NotificationManager.IMPORTANCE_HIGH
+            + "\" priority=\"" + Notification.PRIORITY_MAX + "\" visibility=\""
+            + Notification.VISIBILITY_SECRET + "\"" +" uid=\"" + uid + "\" />\n"
+            + "<package name=\"" + pkg2 + "\" uid=\"" + uid2 + "\" visibility=\""
+            + Notification.VISIBILITY_PRIVATE + "\" />\n"
+            + "</ranking>";
         XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray())),
-                null);
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(preupgradeXml.getBytes())),
+            null);
         parser.nextTag();
         mHelper.readXml(parser, false);
 
-        final NotificationChannel updated =
-                mHelper.getNotificationChannel(pkg, uid, NotificationChannel.DEFAULT_CHANNEL_ID);
-        assertEquals(NotificationManager.IMPORTANCE_HIGH, updated.getImportance());
-        assertTrue(updated.canBypassDnd());
-        assertEquals(Notification.VISIBILITY_SECRET, updated.getLockscreenVisibility());
+        final NotificationChannel updated1 =
+            mHelper.getNotificationChannel(pkg, uid, NotificationChannel.DEFAULT_CHANNEL_ID);
+        assertEquals(NotificationManager.IMPORTANCE_HIGH, updated1.getImportance());
+        assertTrue(updated1.canBypassDnd());
+        assertEquals(Notification.VISIBILITY_SECRET, updated1.getLockscreenVisibility());
         assertEquals(NotificationChannel.USER_LOCKED_IMPORTANCE
-                | NotificationChannel.USER_LOCKED_PRIORITY
-                | NotificationChannel.USER_LOCKED_VISIBILITY, updated.getUserLockedFields());
+            | NotificationChannel.USER_LOCKED_PRIORITY
+            | NotificationChannel.USER_LOCKED_VISIBILITY, updated1.getUserLockedFields());
+
+        final NotificationChannel updated2 =
+            mHelper.getNotificationChannel(pkg2, uid2, NotificationChannel.DEFAULT_CHANNEL_ID);
+        // clamped
+        assertEquals(NotificationManager.IMPORTANCE_LOW, updated2.getImportance());
+        assertFalse(updated2.canBypassDnd());
+        assertEquals(Notification.VISIBILITY_PRIVATE, updated2.getLockscreenVisibility());
+        assertEquals(NotificationChannel.USER_LOCKED_VISIBILITY, updated2.getUserLockedFields());
     }
 
-    // TODO: test lock individually.
     @Test
-    public void testUpdate_userLockedChannelFields() throws Exception {
+    public void testUpdate_userLockedImportance() throws Exception {
         // all fields locked by user
         final NotificationChannel channel =
-                new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
-        channel.setRingtone(new Uri.Builder().scheme("test").build());
-        channel.setLights(true);
-        channel.setBypassDnd(true);
+            new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
+        channel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
+
+        mHelper.createNotificationChannel(pkg, uid, channel);
+
+        // same id, try to update
+        final NotificationChannel channel2 =
+            new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
+
+        mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
+
+        // no fields should be changed
+        assertEquals(channel, mHelper.getNotificationChannel(pkg, uid, channel.getId()));
+    }
+
+    @Test
+    public void testUpdate_userLockedVisibility() throws Exception {
+        // all fields locked by user
+        final NotificationChannel channel =
+            new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
         channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
-        channel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE
-                | NotificationChannel.USER_LOCKED_VISIBILITY
-                | NotificationChannel.USER_LOCKED_VIBRATION
-                | NotificationChannel.USER_LOCKED_LIGHTS
-                | NotificationChannel.USER_LOCKED_PRIORITY
-                | NotificationChannel.USER_LOCKED_RINGTONE);
+        channel.lockFields(NotificationChannel.USER_LOCKED_VISIBILITY);
+
+        mHelper.createNotificationChannel(pkg, uid, channel);
+
+        // same id, try to update
+        final NotificationChannel channel2 =
+            new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
+        channel2.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+
+        mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
+
+        // no fields should be changed
+        assertEquals(channel, mHelper.getNotificationChannel(pkg, uid, channel.getId()));
+    }
+
+    @Test
+    public void testUpdate_userLockedVibration() throws Exception {
+        // all fields locked by user
+        final NotificationChannel channel =
+            new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
+        channel.setLights(false);
+        channel.lockFields(NotificationChannel.USER_LOCKED_VIBRATION);
+
+        mHelper.createNotificationChannel(pkg, uid, channel);
+
+        // same id, try to update
+        final NotificationChannel channel2 =
+            new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
+        channel2.setVibration(true);
+
+        mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
+
+        // no fields should be changed
+        assertEquals(channel, mHelper.getNotificationChannel(pkg, uid, channel.getId()));
+    }
+
+    @Test
+    public void testUpdate_userLockedLights() throws Exception {
+        // all fields locked by user
+        final NotificationChannel channel =
+            new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
+        channel.setLights(false);
+        channel.lockFields(NotificationChannel.USER_LOCKED_LIGHTS);
+
+        mHelper.createNotificationChannel(pkg, uid, channel);
+
+        // same id, try to update
+        final NotificationChannel channel2 =
+            new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
+        channel2.setLights(true);
+
+        mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
+
+        // no fields should be changed
+        assertEquals(channel, mHelper.getNotificationChannel(pkg, uid, channel.getId()));
+    }
+
+    @Test
+    public void testUpdate_userLockedPriority() throws Exception {
+        // all fields locked by user
+        final NotificationChannel channel =
+            new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
+        channel.setBypassDnd(true);
+        channel.lockFields(NotificationChannel.USER_LOCKED_PRIORITY);
 
         mHelper.createNotificationChannel(pkg, uid, channel);
 
         // same id, try to update all fields
         final NotificationChannel channel2 =
-                new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
-        channel2.setRingtone(new Uri.Builder().scheme("test2").build());
-        channel2.setLights(false);
+            new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
         channel2.setBypassDnd(false);
-        channel2.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+
+        mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
+
+        // no fields should be changed
+        assertEquals(channel, mHelper.getNotificationChannel(pkg, uid, channel.getId()));
+    }
+
+    @Test
+    public void testUpdate_userLockedRingtone() throws Exception {
+        // all fields locked by user
+        final NotificationChannel channel =
+            new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
+        channel.setRingtone(new Uri.Builder().scheme("test").build());
+        channel.lockFields(NotificationChannel.USER_LOCKED_RINGTONE);
+
+        mHelper.createNotificationChannel(pkg, uid, channel);
+
+        // same id, try to update all fields
+        final NotificationChannel channel2 =
+            new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
+        channel2.setRingtone(new Uri.Builder().scheme("test2").build());
 
         mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
 
