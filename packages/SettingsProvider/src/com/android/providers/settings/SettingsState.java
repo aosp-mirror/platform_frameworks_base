@@ -350,8 +350,11 @@ final class SettingsState {
                 pw.print(" ");
                 pw.print(operation.mOperation);
                 if (operation.mSetting != null) {
-                    pw.print("  ");
-                    pw.print(operation.mSetting);
+                    pw.print(" ");
+                    // Only print the name of the setting, since we don't know the
+                    // historical package and values for it so they would be misleading
+                    // to print here (all we could print is what the current data is).
+                    pw.print(operation.mSetting.getName());
                 }
                 pw.println();
             }
