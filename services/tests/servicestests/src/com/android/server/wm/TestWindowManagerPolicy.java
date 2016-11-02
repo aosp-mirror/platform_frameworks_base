@@ -55,7 +55,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
@@ -111,11 +110,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public boolean isDefaultOrientationForced() {
-        return false;
-    }
-
-    @Override
-    public boolean canShowDismissingWindowWhileLockedLw() {
         return false;
     }
 
@@ -196,9 +190,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             case TYPE_INPUT_METHOD_DIALOG:
                 // on-screen keyboards and other such input method user interfaces go here.
                 return 13;
-            case TYPE_KEYGUARD_SCRIM:
-                // the safety window that shows behind keyguard while keyguard is starting
-                return 14;
             case TYPE_STATUS_BAR_SUB_PANEL:
                 return 15;
             case TYPE_STATUS_BAR:
@@ -299,24 +290,13 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean isForceHiding(WindowManager.LayoutParams attrs) {
-        return false;
-    }
-
-    @Override
     public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs) {
         return false;
     }
 
     @Override
-    public boolean canBeForceHidden(WindowState win,
-            WindowManager.LayoutParams attrs) {
+    public boolean canBeHiddenByKeyguardLw(WindowState win) {
         return false;
-    }
-
-    @Override
-    public WindowState getWinShowWhenLockedLw() {
-        return null;
     }
 
     @Override
@@ -359,13 +339,13 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public Animation createForceHideEnterAnimation(boolean onWallpaper,
+    public Animation createHiddenByKeyguardExit(boolean onWallpaper,
             boolean goingToNotificationShade) {
         return null;
     }
 
     @Override
-    public Animation createForceHideWallpaperExitAnimation(boolean goingToNotificationShade) {
+    public Animation createKeyguardWallpaperExit(boolean goingToNotificationShade) {
         return null;
     }
 
@@ -432,8 +412,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void applyPostLayoutPolicyLw(WindowState win,
-            WindowManager.LayoutParams attrs, WindowState attached) {
-
+            WindowManager.LayoutParams attrs, WindowState attached, WindowState imeTarget) {
     }
 
     @Override
@@ -523,7 +502,12 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean isKeyguardShowingOrOccluded() {
+    public boolean isKeyguardOccluded() {
+        return false;
+    }
+
+    @Override
+    public boolean isKeyguardTrustedLw() {
         return false;
     }
 
@@ -543,13 +527,17 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void notifyActivityDrawnForKeyguardLw() {
-
+    public boolean isKeyguardDrawnLw() {
+        return false;
     }
 
     @Override
-    public boolean isKeyguardDrawnLw() {
+    public boolean isShowingDreamLw() {
         return false;
+    }
+
+    @Override
+    public void onKeyguardOccludedChangedLw(boolean occluded) {
     }
 
     @Override

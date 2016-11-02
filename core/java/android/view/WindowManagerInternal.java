@@ -99,19 +99,30 @@ public abstract class WindowManagerInternal {
 
         /**
          * Called when a pending app transition gets cancelled.
+         *
+         * @param transit transition type indicating what kind of transition got cancelled
          */
-        public void onAppTransitionCancelledLocked() {}
+        public void onAppTransitionCancelledLocked(int transit) {}
 
         /**
          * Called when an app transition gets started
          *
+         * @param transit transition type indicating what kind of transition gets run, must be one
+         *                of AppTransition.TRANSIT_* values
          * @param openToken the token for the opening app
          * @param closeToken the token for the closing app
          * @param openAnimation the animation for the opening app
          * @param closeAnimation the animation for the closing app
+         *
+         * @return Return any bit set of {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_LAYOUT},
+         * {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_CONFIG},
+         * {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_WALLPAPER},
+         * or {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_ANIM}.
          */
-        public void onAppTransitionStartingLocked(IBinder openToken, IBinder closeToken,
-                Animation openAnimation, Animation closeAnimation) {}
+        public int onAppTransitionStartingLocked(int transit, IBinder openToken, IBinder closeToken,
+                Animation openAnimation, Animation closeAnimation) {
+            return 0;
+        }
 
         /**
          * Called when an app transition is finished running.

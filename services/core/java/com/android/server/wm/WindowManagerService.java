@@ -178,10 +178,12 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
@@ -218,7 +220,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEYGUARD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
@@ -518,8 +519,6 @@ public class WindowManagerService extends IWindowManager.Stub
     int mLastOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mAltOrientation = false;
 
-    private boolean mKeyguardWaitingForActivityDrawn;
-
     int mDockedStackCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
     Rect mDockedStackCreateBounds;
 
@@ -583,6 +582,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final ArraySet<AppWindowToken> mOpeningApps = new ArraySet<>();
     final ArraySet<AppWindowToken> mClosingApps = new ArraySet<>();
+
+    final UnknownAppVisibilityController mUnknownAppVisibilityController =
+            new UnknownAppVisibilityController(this);
 
     boolean mIsTouchDevice;
 
@@ -889,7 +891,7 @@ public class WindowManagerService extends IWindowManager.Stub
             = new WindowManagerInternal.AppTransitionListener() {
 
         @Override
-        public void onAppTransitionCancelledLocked() {
+        public void onAppTransitionCancelledLocked(int transit) {
             mH.sendEmptyMessage(H.NOTIFY_APP_TRANSITION_CANCELLED);
         }
 
@@ -1926,6 +1928,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         | WindowManager.LayoutParams.SYSTEM_UI_VISIBILITY_CHANGED)) != 0) {
                     win.mLayoutNeeded = true;
                 }
+                if (win.mAppToken != null && ((flagChanges & FLAG_SHOW_WHEN_LOCKED) != 0
+                        || (flagChanges & FLAG_DISMISS_KEYGUARD) != 0)) {
+                    win.mAppToken.checkKeyguardFlagsChanged();
+                }
             }
 
             if (DEBUG_LAYOUT) Slog.v(TAG_WM, "Relayout " + win + ": viewVisibility=" + viewVisibility
@@ -2067,6 +2073,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (wallpaperMayMove) {
                 win.getDisplayContent().pendingLayoutChanges |=
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+            }
+
+            if (win.mAppToken != null) {
+                mUnknownAppVisibilityController.notifyRelayouted(win.mAppToken);
             }
 
             win.setDisplayLayoutNeeded();
@@ -2351,8 +2361,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + atoken);
                 final int containingWidth = frame.width();
                 final int containingHeight = frame.height();
-                atoken.mAppAnimator.setAnimation(a, containingWidth, containingHeight,
-                        mAppTransition.canSkipFirstFrame(), mAppTransition.getAppStackClipMode());
+                atoken.mAppAnimator.setAnimation(a, containingWidth, containingHeight, width,
+                        height, mAppTransition.canSkipFirstFrame(),
+                        mAppTransition.getAppStackClipMode(),
+                        transit, mAppTransition.getTransitFlags());
             }
         } else {
             atoken.mAppAnimator.clearAnimation();
@@ -2738,20 +2750,28 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
+    public void prepareAppTransition(int transit, boolean alwaysKeepCurrent) {
+        prepareAppTransition(transit, alwaysKeepCurrent, 0 /* flags */, false /* forceOverride */);
+    }
+
     /**
      * @param transit What kind of transition is happening. Use one of the constants
      *                AppTransition.TRANSIT_*.
      * @param alwaysKeepCurrent If true and a transition is already set, new transition will NOT
      *                          be set.
+     * @param flags Additional flags for the app transition, Use a combination of the constants
+     *              AppTransition.TRANSIT_FLAG_*.
+     * @param forceOverride Always override the transit, not matter what was set previously.
      */
-    @Override
-    public void prepareAppTransition(int transit, boolean alwaysKeepCurrent) {
+    public void prepareAppTransition(int transit, boolean alwaysKeepCurrent, int flags,
+            boolean forceOverride) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "prepareAppTransition()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
         synchronized(mWindowMap) {
-            boolean prepared = mAppTransition.prepareAppTransitionLocked(
-                    transit, alwaysKeepCurrent);
+            boolean prepared = mAppTransition.prepareAppTransitionLocked(transit, alwaysKeepCurrent,
+                    flags, forceOverride);
             if (prepared && okToDisplay()) {
                 mSkipAppTransitionAnimation = false;
             }
@@ -3186,6 +3206,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * Notifies that we launched an app that might be visible or not visible depending on what kind
+     * of Keyguard flags it's going to set on its windows.
+     */
+    public void notifyUnknownAppVisibilityLaunched(IBinder token) {
+        synchronized(mWindowMap) {
+            AppWindowToken appWindow = mRoot.getAppWindowToken(token);
+            if (appWindow != null) {
+                mUnknownAppVisibilityController.notifyLaunched(appWindow);
+            }
+        }
+    }
+
     @Override
     public void startAppFreezingScreen(IBinder token, int configChanges) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "setAppFreezingScreen()")) {
@@ -3475,8 +3508,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void overridePlayingAppAnimationsLw(Animation a) {
-        getDefaultDisplayContentLocked().overridePlayingAppAnimations(a);
+    public void notifyShowingDreamChanged() {
+        notifyKeyguardFlagsChanged(null /* callback */);
     }
 
     /**
@@ -3616,6 +3649,46 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * @return true if the activity contains windows that have
+     *         {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} set
+     */
+    public boolean containsShowWhenLockedWindow(IBinder token) {
+        synchronized (mWindowMap) {
+            final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
+            return wtoken != null && wtoken.containsShowWhenLockedWindow();
+        }
+    }
+
+    /**
+     * @return true if the activity contains windows that have
+     *         {@link LayoutParams#FLAG_DISMISS_KEYGUARD} set
+     */
+    public boolean containsDismissKeyguardWindow(IBinder token) {
+        synchronized (mWindowMap) {
+            final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
+            return wtoken != null && wtoken.containsDismissKeyguardWindow();
+        }
+    }
+
+    /**
+     * Notifies activity manager that some Keyguard flags have changed and that it needs to
+     * reevaluate the visibilities of the activities.
+     * @param callback Runnable to be called when activity manager is done reevaluating visibilities
+     */
+    void notifyKeyguardFlagsChanged(@Nullable Runnable callback) {
+        final Runnable wrappedCallback = callback != null
+                ? () -> { synchronized (mWindowMap) { callback.run(); } }
+                : null;
+        mH.obtainMessage(H.NOTIFY_KEYGUARD_FLAGS_CHANGED, wrappedCallback).sendToTarget();
+    }
+
+    public boolean isKeyguardTrusted() {
+        synchronized (mWindowMap) {
+            return mPolicy.isKeyguardTrustedLw();
+        }
+    }
+
     // -------------------------------------------------------------
     // Misc IWindowSession methods
     // -------------------------------------------------------------
@@ -3752,6 +3825,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public boolean isShowingDream() {
+        synchronized (mWindowMap) {
+            return mPolicy.isShowingDreamLw();
+        }
+    }
+
     @Override
     public void dismissKeyguard() {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
@@ -3765,51 +3844,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void keyguardGoingAway(int flags) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires DISABLE_KEYGUARD permission");
-        }
-        if (DEBUG_KEYGUARD) Slog.d(TAG_WM,
-                "keyguardGoingAway: flags=0x" + Integer.toHexString(flags));
-        synchronized (mWindowMap) {
-            mAnimator.mKeyguardGoingAway = true;
-            mAnimator.mKeyguardGoingAwayFlags = flags;
-            mWindowPlacerLocked.requestTraversal();
-        }
     }
 
-    public void keyguardWaitingForActivityDrawn() {
-        if (DEBUG_KEYGUARD) Slog.d(TAG_WM, "keyguardWaitingForActivityDrawn");
+    public void onKeyguardOccludedChanged(boolean occluded) {
         synchronized (mWindowMap) {
-            mKeyguardWaitingForActivityDrawn = true;
-        }
-    }
-
-    public void notifyActivityDrawnForKeyguard() {
-        if (DEBUG_KEYGUARD) Slog.d(TAG_WM, "notifyActivityDrawnForKeyguard: waiting="
-                + mKeyguardWaitingForActivityDrawn + " Callers=" + Debug.getCallers(5));
-        synchronized (mWindowMap) {
-            if (mKeyguardWaitingForActivityDrawn) {
-                mPolicy.notifyActivityDrawnForKeyguardLw();
-                mKeyguardWaitingForActivityDrawn = false;
-            }
-        }
-    }
-
-    @Override
-    public void setKeyguardAnimatingIn(boolean animating) {
-        if (!checkCallingPermission(Manifest.permission.CONTROL_KEYGUARD,
-                "keyguardAnimatingIn()")) {
-            throw new SecurityException("Requires CONTROL_KEYGUARD permission");
-        }
-        synchronized (mWindowMap) {
-            mAnimator.mKeyguardAnimatingIn = animating;
-        }
-    }
-
-    public boolean isKeyguardAnimatingIn() {
-        synchronized (mWindowMap) {
-            return mAnimator.mKeyguardAnimatingIn;
+            mPolicy.onKeyguardOccludedChangedLw(occluded);
         }
     }
 
@@ -6014,7 +6053,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED = 53;
         public static final int SEAMLESS_ROTATION_TIMEOUT = 54;
         public static final int RESTORE_POINTER_ICON = 55;
-
+        public static final int NOTIFY_KEYGUARD_FLAGS_CHANGED = 56;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -6650,6 +6689,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 break;
+                case NOTIFY_KEYGUARD_FLAGS_CHANGED: {
+                    mAmInternal.notifyKeyguardFlagsChanged((Runnable) msg.obj);
+                }
             }
             if (DEBUG_WINDOW_TRACE) {
                 Slog.v(TAG_WM, "handleMessage: exit");
@@ -7688,6 +7730,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void notifyAppResumedFinished(IBinder token) {
+        synchronized (mWindowMap) {
+            final AppWindowToken appWindow = mRoot.getAppWindowToken(token);
+            if (appWindow != null) {
+                mUnknownAppVisibilityController.notifyAppResumedFinished(appWindow);
+            }
+        }
+    }
+
     @Override
     public int getDockedDividerInsetsLw() {
         return getDefaultDisplayContentLocked().getDockedDividerController().getContentInsets();
@@ -7878,6 +7929,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println();
 
         mInputMonitor.dump(pw, "  ");
+        mUnknownAppVisibilityController.dump(pw, "  ");
 
         if (dumpAll) {
             pw.print("  mSystemDecorLayer="); pw.print(mSystemDecorLayer);
@@ -8316,7 +8368,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public int getDockedStackSide() {
         synchronized (mWindowMap) {
             final TaskStack dockedStack = getDefaultDisplayContentLocked()
-                    .getDockedStackVisibleForUserLocked();
+                    .getDockedStackIgnoringVisibility();
             return dockedStack == null ? DOCKED_INVALID : dockedStack.getDockSide();
         }
     }

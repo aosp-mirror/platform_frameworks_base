@@ -26,7 +26,6 @@ import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
-import com.android.server.policy.keyguard.KeyguardStateMonitor.OnShowingStateChangedCallback;
 
 import java.io.PrintWriter;
 
@@ -40,26 +39,15 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     private IKeyguardService mService;
     private String TAG = "KeyguardServiceWrapper";
 
-    public KeyguardServiceWrapper(Context context, IKeyguardService service,
-            OnShowingStateChangedCallback showingStateChangedCallback) {
+    public KeyguardServiceWrapper(Context context, IKeyguardService service) {
         mService = service;
-        mKeyguardStateMonitor = new KeyguardStateMonitor(context, service,
-                showingStateChangedCallback);
+        mKeyguardStateMonitor = new KeyguardStateMonitor(context, service);
     }
 
     @Override // Binder interface
     public void verifyUnlock(IKeyguardExitCallback callback) {
         try {
             mService.verifyUnlock(callback);
-        } catch (RemoteException e) {
-            Slog.w(TAG , "Remote Exception", e);
-        }
-    }
-
-    @Override // Binder interface
-    public void keyguardDone(boolean authenticated, boolean wakeup) {
-        try {
-            mService.keyguardDone(authenticated, wakeup);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }
@@ -223,15 +211,6 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
         try {
             mService.startKeyguardExitAnimation(startTime, fadeoutDuration);
-        } catch (RemoteException e) {
-            Slog.w(TAG , "Remote Exception", e);
-        }
-    }
-
-    @Override // Binder interface
-    public void onActivityDrawn() {
-        try {
-            mService.onActivityDrawn();
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }

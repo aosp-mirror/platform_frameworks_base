@@ -871,7 +871,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             mAdjustImeAmount = adjustAmount;
             mAdjustDividerAmount = adjustDividerAmount;
             updateAdjustedBounds();
-            return isVisible(true /* ignoreKeyguard */);
+            return isVisible();
         } else {
             return false;
         }
@@ -907,7 +907,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         if (minimizeAmount != mMinimizeAmount) {
             mMinimizeAmount = minimizeAmount;
             updateAdjustedBounds();
-            return isVisible(true /* ignoreKeyguard */);
+            return isVisible();
         } else {
             return false;
         }
@@ -1216,21 +1216,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         } else {
             return DOCKED_INVALID;
         }
-    }
-
-    boolean isVisible() {
-        return isVisible(false /* ignoreKeyguard */);
-    }
-
-    boolean isVisible(boolean ignoreKeyguard) {
-        final boolean keyguardOn = mService.mPolicy.isKeyguardShowingOrOccluded()
-                && !mService.mAnimator.mKeyguardGoingAway;
-        if (!ignoreKeyguard && keyguardOn && !StackId.isAllowedOverLockscreen(mStackId)) {
-            // The keyguard is showing and the stack shouldn't show on top of the keyguard.
-            return false;
-        }
-
-        return super.isVisible();
     }
 
     boolean hasTaskForUser(int userId) {

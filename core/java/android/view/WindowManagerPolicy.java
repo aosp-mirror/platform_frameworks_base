@@ -136,10 +136,10 @@ public interface WindowManagerPolicy {
             throws RemoteException;
 
     /**
-     * @return true if windows with FLAG_DISMISS_KEYGUARD should be allowed to show even if
-     *         the keyguard is locked.
+     * Called when the Keyguard occluded state changed.
+     * @param occluded Whether Keyguard is currently occluded or not.
      */
-    boolean canShowDismissingWindowWhileLockedLw();
+    void onKeyguardOccludedChangedLw(boolean occluded);
 
     /**
      * Interface to the Window Manager state associated with a particular
@@ -424,6 +424,10 @@ public interface WindowManagerPolicy {
         public boolean isInMultiWindowMode();
 
         public int getRotationAnimationHint();
+
+        public boolean isInputMethodWindow();
+
+        public int getDisplayId();
     }
 
     /**
@@ -509,9 +513,9 @@ public interface WindowManagerPolicy {
         void getStackBounds(int stackId, Rect outBounds);
 
         /**
-         * Overrides all currently playing app animations with {@param a}.
+         * Notifies window manager that {@link #isShowingDreamLw} has changed.
          */
-        void overridePlayingAppAnimationsLw(Animation a);
+        void notifyShowingDreamChanged();
     }
 
     public interface PointerEventListener {
@@ -699,31 +703,15 @@ public interface WindowManagerPolicy {
             int uiMode);
 
     /**
-     * Return whether the given window is forcibly hiding all windows except windows with
-     * FLAG_SHOW_WHEN_LOCKED set.  Typically returns true for the keyguard.
-     */
-    public boolean isForceHiding(WindowManager.LayoutParams attrs);
-
-
-    /**
-     * Return whether the given window can become one that passes isForceHiding() test.
-     * Typically returns true for the StatusBar.
+     * Return whether the given window can become the Keyguard window. Typically returns true for
+     * the StatusBar.
      */
     public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs);
 
     /**
-     * Determine if a window that is behind one that is force hiding
-     * (as determined by {@link #isForceHiding}) should actually be hidden.
-     * For example, typically returns false for the status bar.  Be careful
-     * to return false for any window that you may hide yourself, since this
-     * will conflict with what you set.
+     * @return whether {@param win} can be hidden by Keyguard
      */
-    public boolean canBeForceHidden(WindowState win, WindowManager.LayoutParams attrs);
-
-    /**
-     * Return the window that is hiding the keyguard, if such a thing exists.
-     */
-    public WindowState getWinShowWhenLockedLw();
+    public boolean canBeHiddenByKeyguardLw(WindowState win);
 
     /**
      * Called when the system would like to show a UI to indicate that an
@@ -834,16 +822,16 @@ public interface WindowManagerPolicy {
             boolean forceDefault);
 
     /**
-     * Create and return an animation to re-display a force hidden window.
+     * Create and return an animation to re-display a window that was force hidden by Keyguard.
      */
-    public Animation createForceHideEnterAnimation(boolean onWallpaper,
+    public Animation createHiddenByKeyguardExit(boolean onWallpaper,
             boolean goingToNotificationShade);
 
     /**
-     * Create and return an animation to let the wallpaper disappear after being shown on a force
-     * hiding window.
+     * Create and return an animation to let the wallpaper disappear after being shown behind
+     * Keyguard.
      */
-    public Animation createForceHideWallpaperExitAnimation(boolean goingToNotificationShade);
+    public Animation createKeyguardWallpaperExit(boolean goingToNotificationShade);
 
     /**
      * Called from the input reader thread before a key is enqueued.
@@ -1000,7 +988,7 @@ public interface WindowManagerPolicy {
      * @param attached For sub-windows, the window it is attached to. Otherwise null.
      */
     public void applyPostLayoutPolicyLw(WindowState win,
-            WindowManager.LayoutParams attrs, WindowState attached);
+            WindowManager.LayoutParams attrs, WindowState attached, WindowState imeTarget);
 
     /**
      * Called following layout of all windows and after policy has been applied
@@ -1147,16 +1135,21 @@ public interface WindowManagerPolicy {
     public boolean isKeyguardSecure(int userId);
 
     /**
-     * Return whether the keyguard is on.
+     * Return whether the keyguard is currently occluded.
      *
-     * @return true if in keyguard is on.
+     * @return true if in keyguard is occluded, false otherwise
      */
-    public boolean isKeyguardShowingOrOccluded();
+    public boolean isKeyguardOccluded();
 
     /**
      * @return true if in keyguard is on and not occluded.
      */
     public boolean isKeyguardShowingAndNotOccluded();
+
+    /**
+     * @return whether Keyguard is in trusted state and can be dismissed without credentials
+     */
+    public boolean isKeyguardTrustedLw();
 
     /**
      * inKeyguardRestrictedKeyInputMode
@@ -1175,17 +1168,14 @@ public interface WindowManagerPolicy {
     public void dismissKeyguardLw();
 
     /**
-     * Notifies the keyguard that the activity has drawn it was waiting for.
-     */
-    public void notifyActivityDrawnForKeyguardLw();
-
-    /**
      * Ask the policy whether the Keyguard has drawn. If the Keyguard is disabled, this method
      * returns true as soon as we know that Keyguard is disabled.
      *
      * @return true if the keyguard has drawn.
      */
     public boolean isKeyguardDrawnLw();
+
+    public boolean isShowingDreamLw();
 
     /**
      * Given an orientation constant, returns the appropriate surface rotation,

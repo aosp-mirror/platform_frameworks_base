@@ -44,7 +44,6 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.IDockedStackListener;
-import android.view.SurfaceControl;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
@@ -57,7 +56,6 @@ import com.android.server.wm.DimLayer.DimLayerUser;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 /**
  * Keeps information about the docked stack divider.
@@ -283,7 +281,7 @@ public class DockedStackDividerController implements DimLayerUser {
         if (mWindow == null) {
             return;
         }
-        TaskStack stack = mDisplayContent.mService.mStackIdToStack.get(DOCKED_STACK_ID);
+        TaskStack stack = mDisplayContent.getDockedStackIgnoringVisibility();
 
         // If the stack is invisible, we policy force hide it in WindowAnimator.shouldForceHide
         final boolean visible = stack != null;
@@ -536,7 +534,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private void checkMinimizeChanged(boolean animate) {
-        if (mDisplayContent.getDockedStackVisibleForUserLocked() == null) {
+        if (mDisplayContent.getDockedStackIgnoringVisibility() == null) {
             return;
         }
         final TaskStack homeStack = mDisplayContent.getHomeStack();
@@ -683,7 +681,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private boolean setMinimizedDockedStack(boolean minimized) {
-        final TaskStack stack = mDisplayContent.getDockedStackVisibleForUserLocked();
+        final TaskStack stack = mDisplayContent.getDockedStackIgnoringVisibility();
         notifyDockedStackMinimizedChanged(minimized, 0);
         return stack != null && stack.setAdjustedForMinimizedDock(minimized ? 1f : 0f);
     }

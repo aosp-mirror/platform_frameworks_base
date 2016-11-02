@@ -87,6 +87,7 @@ import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
@@ -1211,7 +1212,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return displayContent != null ? displayContent.getDisplayInfo() : null;
     }
 
-    int getDisplayId() {
+    @Override
+    public int getDisplayId() {
         final DisplayContent displayContent = getDisplayContent();
         if (displayContent == null) {
             return -1;
@@ -2711,13 +2713,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        Task task = getTask();
-        if (task == null || task.inHomeStack()) {
-            // Don't save surfaces for home stack apps. These usually resume and draw
-            // first frame very fast. Saving surfaces are mostly a waste of memory.
-            return false;
-        }
-
+        final Task task = getTask();
         final AppWindowToken taskTop = task.getTopVisibleAppToken();
         if (taskTop != null && taskTop != mAppToken) {
             // Don't save if the window is not the topmost window.
@@ -3751,12 +3747,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return null;
     }
 
+    @Override
     public int getRotationAnimationHint() {
         if (mAppToken != null) {
             return mAppToken.mRotationAnimationHint;
         } else {
             return -1;
         }
+    }
+
+    @Override
+    public boolean isInputMethodWindow() {
+        return mIsImWindow;
     }
 
     // This must be called while inside a transaction.

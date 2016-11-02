@@ -16,20 +16,11 @@
 
 package com.android.server.wm;
 
-import android.os.Bundle;
-import android.os.Debug;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.util.Slog;
-import android.view.DisplayInfo;
-
-import java.io.PrintWriter;
 import java.util.Comparator;
-
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM;
+
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
@@ -38,6 +29,16 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
+
+import android.os.Bundle;
+import android.os.Debug;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Slog;
+import android.view.DisplayInfo;
+import android.view.animation.Animation;
+
+import java.io.PrintWriter;
 
 /**
  * Container of a set of related windows in the window manager. Often this is an AppWindowToken,
@@ -337,6 +338,16 @@ class WindowToken extends WindowContainer<WindowState> {
         }
     }
 
+    /**
+     * Starts {@param anim} on all children.
+     */
+    void startAnimation(Animation anim) {
+        for (int ndx = mChildren.size() - 1; ndx >= 0; ndx--) {
+            final WindowState windowState = mChildren.get(ndx);
+            windowState.mWinAnimator.setAnimation(anim);
+        }
+    }
+
     boolean updateWallpaperWindowsPlacement(ReadOnlyWindowList windowList,
             WindowState wallpaperTarget, int wallpaperTargetIndex, boolean visible, int dw, int dh,
             int wallpaperAnimLayerAdj) {
@@ -390,10 +401,8 @@ class WindowToken extends WindowContainer<WindowState> {
             // is currently on screen, i.e. not hidden by policy.
             int insertionIndex = 0;
             if (visible && wallpaperTarget != null) {
-                final int type = wallpaperTarget.mAttrs.type;
                 final int privateFlags = wallpaperTarget.mAttrs.privateFlags;
-                if (((privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 || type == TYPE_KEYGUARD_SCRIM)
-                        && !mService.isKeyguardAnimatingIn()) {
+                if ((privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                     insertionIndex = Math.min(windowList.indexOf(wallpaperTarget),
                             findLowestWindowOnScreen(windowList));
                 }

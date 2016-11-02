@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -179,4 +180,13 @@ public abstract class ActivityManagerInternal {
      * (-1).
      */
     public abstract int getUidProcessState(int uid);
+
+    /**
+     * Called when Keyguard flags might have changed.
+     *
+     * @param callback Callback to run after activity visibilities have been reevaluated. This can
+     *                 be used from window manager so that when the callback is called, it's
+     *                 guaranteed that all apps have their visibility updated accordingly.
+     */
+    public abstract void notifyKeyguardFlagsChanged(@Nullable Runnable callback);
 }

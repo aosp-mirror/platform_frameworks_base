@@ -187,9 +187,6 @@ class WindowStateAnimator {
 
     private boolean mAnimationStartDelayed;
 
-    boolean mKeyguardGoingAwayAnimation;
-    boolean mKeyguardGoingAwayWithWallpaper;
-
     /** The pixel format of the underlying SurfaceControl */
     int mSurfaceFormat;
 
@@ -294,8 +291,6 @@ class WindowStateAnimator {
             mLocalAnimating = false;
             mAnimation.cancel();
             mAnimation = null;
-            mKeyguardGoingAwayAnimation = false;
-            mKeyguardGoingAwayWithWallpaper = false;
             mStackClip = STACK_CLIP_BEFORE_ANIM;
         }
     }
@@ -451,8 +446,6 @@ class WindowStateAnimator {
             + (mWin.mAppToken != null ? mWin.mAppToken.reportedVisible : false));
 
         mAnimating = false;
-        mKeyguardGoingAwayAnimation = false;
-        mKeyguardGoingAwayWithWallpaper = false;
         mLocalAnimating = false;
         if (mAnimation != null) {
             mAnimation.cancel();
@@ -1268,11 +1261,6 @@ class WindowStateAnimator {
             return;
         }
 
-        final WindowState winShowWhenLocked = (WindowState) mPolicy.getWinShowWhenLockedLw();
-        if (w == winShowWhenLocked && mPolicy.isKeyguardShowingOrOccluded()) {
-            return;
-        }
-
         final TaskStack stack = task.mStack;
         stack.getDimBounds(mTmpStackBounds);
         final Rect surfaceInsets = w.getAttrs().surfaceInsets;
@@ -1688,17 +1676,9 @@ class WindowStateAnimator {
      * @return true if an animation has been loaded.
      */
     boolean applyAnimationLocked(int transit, boolean isEntrance) {
-        if ((mLocalAnimating && mAnimationIsEntrance == isEntrance)
-                || mKeyguardGoingAwayAnimation) {
+        if (mLocalAnimating && mAnimationIsEntrance == isEntrance) {
             // If we are trying to apply an animation, but already running
             // an animation of the same type, then just leave that one alone.
-
-            // If we are in a keyguard exit animation, and the window should animate away, modify
-            // keyguard exit animation such that it also fades out.
-            if (mAnimation != null && mKeyguardGoingAwayAnimation
-                    && transit == WindowManagerPolicy.TRANSIT_PREVIEW_DONE) {
-                applyFadeoutDuringKeyguardExitAnimation();
-            }
             return true;
         }
 
