@@ -220,6 +220,11 @@ public final class DisplayManagerService extends SystemService {
     private final DisplayViewport mTempDefaultViewport = new DisplayViewport();
     private final DisplayViewport mTempExternalTouchViewport = new DisplayViewport();
 
+    // The default color mode for default displays. Overrides the usual
+    // Display.Display.COLOR_MODE_DEFAULT for displays with the
+    // DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY flag set.
+    private final int mDefaultDisplayDefaultColorMode;
+
     // Temporary list of deferred work to perform when setting the display state.
     // Only used by requestDisplayState.  The field is self-synchronized and only
     // intended for use inside of the requestGlobalDisplayStateInternal function.
@@ -232,6 +237,8 @@ public final class DisplayManagerService extends SystemService {
         mUiHandler = UiThread.getHandler();
         mDisplayAdapterListener = new DisplayAdapterListener();
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
+        mDefaultDisplayDefaultColorMode = mContext.getResources().getInteger(
+            com.android.internal.R.integer.config_defaultDisplayDefaultColorMode);
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
@@ -703,6 +710,14 @@ public final class DisplayManagerService extends SystemService {
         }
         if (display != null && display.getPrimaryDisplayDeviceLocked() == device) {
             int colorMode = mPersistentDataStore.getColorMode(device);
+            if (colorMode == Display.COLOR_MODE_INVALID) {
+                if ((device.getDisplayDeviceInfoLocked().flags
+                     & DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY) != 0) {
+                    colorMode = mDefaultDisplayDefaultColorMode;
+                } else {
+                    colorMode = Display.COLOR_MODE_DEFAULT;
+                }
+            }
             display.setRequestedColorModeLocked(colorMode);
         }
         scheduleTraversalLocked(false);
@@ -1043,6 +1058,7 @@ public final class DisplayManagerService extends SystemService {
             pw.println("  mNextNonDefaultDisplayId=" + mNextNonDefaultDisplayId);
             pw.println("  mDefaultViewport=" + mDefaultViewport);
             pw.println("  mExternalTouchViewport=" + mExternalTouchViewport);
+            pw.println("  mDefaultDisplayDefaultColorMode=" + mDefaultDisplayDefaultColorMode);
             pw.println("  mSingleDisplayDemoMode=" + mSingleDisplayDemoMode);
             pw.println("  mWifiDisplayScanRequestCount=" + mWifiDisplayScanRequestCount);
 
