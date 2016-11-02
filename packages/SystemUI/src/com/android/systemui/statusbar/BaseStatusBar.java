@@ -2237,8 +2237,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         mStackScroller.changeViewPosition(mDismissView, mStackScroller.getChildCount() - 1);
         mStackScroller.changeViewPosition(mEmptyShadeView, mStackScroller.getChildCount() - 2);
-        mStackScroller.changeViewPosition(mNotificationShelf,
-                mStackScroller.getChildCount() - 3);
+        mStackScroller.changeViewPosition(mNotificationShelf, mStackScroller.getChildCount() - 3);
     }
 
     public boolean shouldShowOnKeyguard(StatusBarNotification sbn) {

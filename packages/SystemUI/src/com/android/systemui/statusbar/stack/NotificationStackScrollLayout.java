@@ -539,7 +539,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void updateShelfIndex(int newIndex, boolean noAmbient) {
         mAmbientState.setShelfIndex(newIndex);
-        changeViewPosition(mShelf, newIndex);
         mNoAmbient = noAmbient;
     }
 

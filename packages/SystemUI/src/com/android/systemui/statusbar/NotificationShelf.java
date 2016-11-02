@@ -178,8 +178,11 @@ public class NotificationShelf extends ActivatableNotificationView {
         int shelfIndex = mAmbientState.getShelfIndex();
         mNotGoneIndex = -1;
         //  find the first view that doesn't overlap with the shelf
-        for (int i = shelfIndex - 1; i >= 0; i--) {
-            ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
+        int notificationIndex = 0;
+        int notGoneNotifications = 0;
+        while (notGoneNotifications < shelfIndex) {
+            ExpandableView child = (ExpandableView) mHostLayout.getChildAt(notificationIndex);
+            notificationIndex++;
             if (!(child instanceof ExpandableNotificationRow)
                     || child.getVisibility() == GONE) {
                 continue;
@@ -188,12 +191,10 @@ public class NotificationShelf extends ActivatableNotificationView {
             StatusBarIconView icon = row.getEntry().expandedIcon;
             IconState iconState = iconStates.get(icon);
             float notificationClipEnd;
-            float shelfStart;
-            if (i == shelfIndex - 1) {
-                shelfStart = getTranslationY();
+            float shelfStart = getTranslationY();
+            if (notGoneNotifications == shelfIndex - 1) {
                 notificationClipEnd = shelfStart + getIntrinsicHeight();
             } else {
-                shelfStart = getTranslationY();
                 notificationClipEnd = shelfStart - mPaddingBetweenElements;
                 float height = notificationClipEnd - row.getTranslationY();
                 if (height <= getNotificationMergeSize()) {
@@ -206,14 +207,15 @@ public class NotificationShelf extends ActivatableNotificationView {
             updateNotificationClipHeight(row, notificationClipEnd);
             updateIconAppearance(shelfStart, row, iconState, icon);
             numIconsInShelf += iconState.iconAppearAmount;
-            if (row.getTranslationY() >= getTranslationY()) {
-                mNotGoneIndex = i;
+            if (row.getTranslationY() >= getTranslationY() && mNotGoneIndex == -1) {
+                mNotGoneIndex = notGoneNotifications;
             }
+            notGoneNotifications++;
         }
-        for (int i = mHostLayout.getChildCount() - 1; i >= shelfIndex; i--) {
+        while (notificationIndex < mHostLayout.getChildCount()) {
             // We need to reset the clipping in case a notification switches from high to low
             // priority.
-            ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
+            ExpandableView child = (ExpandableView) mHostLayout.getChildAt(notificationIndex);
             if (child.getClipBottomAmount() != 0) {
                 child.setClipBottomAmount(0);
             }
@@ -221,7 +223,7 @@ public class NotificationShelf extends ActivatableNotificationView {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
                 row.setIconTransformationAmount(0);
             }
-
+            notificationIndex++;
         }
         mNotificationIconContainer.calculateIconTranslations();
         mNotificationIconContainer.applyIconStates();
