@@ -59,6 +59,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
+
 final class VoiceInteractionSessionConnection implements ServiceConnection {
 
     final static String TAG = "VoiceInteractionServiceManager";
@@ -198,8 +201,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                         | Context.BIND_ALLOW_OOM_MANAGEMENT, new UserHandle(mUser));
         if (mBound) {
             try {
-                mIWindowManager.addWindowToken(mToken,
-                        WindowManager.LayoutParams.TYPE_VOICE_INTERACTION);
+                mIWindowManager.addWindowToken(mToken, TYPE_VOICE_INTERACTION, DEFAULT_DISPLAY);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed adding window token", e);
             }
@@ -501,7 +503,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             }
             mContext.unbindService(this);
             try {
-                mIWindowManager.removeWindowToken(mToken);
+                mIWindowManager.removeWindowToken(mToken, DEFAULT_DISPLAY);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed removing window token", e);
             }

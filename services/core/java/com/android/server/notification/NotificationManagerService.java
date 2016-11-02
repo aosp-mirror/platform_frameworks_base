@@ -43,6 +43,8 @@ import static android.service.notification.NotificationListenerService.SUPPRESSE
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 
 import android.Manifest;
@@ -1402,8 +1404,7 @@ public class NotificationManagerService extends SystemService {
                         }
 
                         Binder token = new Binder();
-                        mWindowManagerInternal.addWindowToken(token,
-                                WindowManager.LayoutParams.TYPE_TOAST);
+                        mWindowManagerInternal.addWindowToken(token, TYPE_TOAST, DEFAULT_DISPLAY);
                         record = new ToastRecord(callingPid, pkg, callback, duration, token);
                         mToastQueue.add(record);
                         index = mToastQueue.size() - 1;
@@ -3253,7 +3254,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         ToastRecord lastToast = mToastQueue.remove(index);
-        mWindowManagerInternal.removeWindowToken(lastToast.token, true);
+        mWindowManagerInternal.removeWindowToken(lastToast.token, true, DEFAULT_DISPLAY);
 
         keepProcessAliveIfNeededLocked(record.pid);
         if (mToastQueue.size() > 0) {

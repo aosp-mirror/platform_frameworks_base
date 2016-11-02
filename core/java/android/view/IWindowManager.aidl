@@ -85,8 +85,8 @@ interface IWindowManager
     void pauseKeyDispatching(IBinder token);
     void resumeKeyDispatching(IBinder token);
     void setEventDispatching(boolean enabled);
-    void addWindowToken(IBinder token, int type);
-    void removeWindowToken(IBinder token);
+    void addWindowToken(IBinder token, int type, int displayId);
+    void removeWindowToken(IBinder token, int displayId);
     /**
      * Adds an application token to the specified task Id.
      * @param addPos The position to add the token to in the task.
@@ -183,7 +183,7 @@ interface IWindowManager
     void notifyAppStopped(IBinder token);
     void startAppFreezingScreen(IBinder token, int configChanges);
     void stopAppFreezingScreen(IBinder token, boolean force);
-    void removeAppToken(IBinder token);
+    void removeAppToken(IBinder token, int displayId);
 
     /** Used by system ui to report that recents has shown itself. */
     void endProlongedAnimations();

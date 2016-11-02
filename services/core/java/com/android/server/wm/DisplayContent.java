@@ -62,7 +62,6 @@ import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
@@ -312,6 +311,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mNonAppWindowContainers.removeChild(token);
         }
         return token;
+    }
+
+    void removeAppToken(IBinder binder) {
+        final WindowToken token = removeWindowToken(binder);
+        if (token == null) {
+            Slog.w(TAG_WM, "removeAppToken: Attempted to remove non-existing token: " + binder);
+            return;
+        }
+
+        final AppWindowToken appToken = token.asAppWindowToken();
+
+        if (appToken == null) {
+            Slog.w(TAG_WM, "Attempted to remove non-App token: " + binder + " token=" + token);
+            return;
+        }
+
+        appToken.onRemovedFromDisplay();
     }
 
     Display getDisplay() {
@@ -638,7 +654,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         rebuildAppWindowList();
     }
 
-    void resetAnimationBackgroundAnimator() {
+    private void resetAnimationBackgroundAnimator() {
         for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
             mTaskStackContainers.get(stackNdx).resetAnimationBackgroundAnimator();
         }

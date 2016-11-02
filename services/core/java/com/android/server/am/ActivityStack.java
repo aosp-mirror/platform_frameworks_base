@@ -3714,7 +3714,7 @@ final class ActivityStack extends ConfigurationContainer {
         r.state = ActivityState.DESTROYED;
         if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during remove for activity " + r);
         r.app = null;
-        mWindowManager.removeAppToken(r.appToken);
+        mWindowManager.removeAppToken(r.appToken, r.getDisplayId());
         final TaskRecord task = r.task;
         if (task != null && task.removeActivity(r)) {
             if (DEBUG_STACK) Slog.i(TAG_STACK,
