@@ -2721,11 +2721,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void setFocusTaskRegionLocked() {
-        if (mFocusedApp != null) {
-            final Task task = mFocusedApp.mTask;
-            final DisplayContent displayContent = task.getDisplayContent();
+        final Task focusedTask = mFocusedApp != null ? mFocusedApp.mTask : null;
+        if (focusedTask != null) {
+            final DisplayContent displayContent = focusedTask.getDisplayContent();
             if (displayContent != null) {
-                displayContent.setTouchExcludeRegion(task);
+                displayContent.setTouchExcludeRegion(focusedTask);
             }
         }
     }
@@ -3425,24 +3425,63 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Create a new TaskStack and place it on a DisplayContent.
+     * Place a TaskStack on a DisplayContent. Will create a new TaskStack if none is found with
+     * specified stackId.
      * @param stackId The unique identifier of the new stack.
      * @param displayId The unique identifier of the DisplayContent.
      * @param onTop If true the stack will be place at the top of the display,
-     *              else at the bottom
-     * @return The initial bounds the stack was created with. null means fullscreen.
+     *              else at the bottom.
+     * @return The bounds that the stack has after adding. null means fullscreen.
      */
-    public Rect attachStack(int stackId, int displayId, boolean onTop) {
+    public Rect addStackToDisplay(int stackId, int displayId, boolean onTop) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mWindowMap) {
-                return mRoot.addStackToDisplay(stackId, displayId, onTop);
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    throw new IllegalArgumentException("Trying to add stackId=" + stackId
+                            + " to unknown displayId=" + displayId);
+                }
+
+                return dc.addStackToDisplay(stackId, onTop);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
     }
 
+    /**
+     * Move a TaskStack from current DisplayContent to specified one.
+     * @param stackId The unique identifier of the new stack.
+     * @param displayId The unique identifier of the new display.
+     */
+    public Rect moveStackToDisplay(int stackId, int displayId) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mWindowMap) {
+                TaskStack stack = mStackIdToStack.get(stackId);
+                if (stack == null) {
+                    throw new IllegalArgumentException("Trying to move unknown stackId=" + stackId
+                            + " to displayId=" + displayId);
+                }
+
+                final DisplayContent targetDisplayContent = mRoot.getDisplayContent(displayId);
+                if (targetDisplayContent == null) {
+                    throw new IllegalArgumentException("Trying to move stackId=" + stackId
+                            + " to unknown displayId=" + displayId);
+                }
+
+                return targetDisplayContent.moveStackToDisplay(stack);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Remove a TaskStack completely.
+     * @param stackId The unique identifier of the stack.
+     */
     public void removeStack(int stackId) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);

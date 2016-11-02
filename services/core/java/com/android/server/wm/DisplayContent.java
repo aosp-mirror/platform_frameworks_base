@@ -74,6 +74,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEAT
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREEN_ON;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
@@ -184,6 +185,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // Accessed directly by all users.
     private boolean mLayoutNeeded;
     int pendingLayoutChanges;
+    // TODO(multi-display): remove some of the usages.
     final boolean isDefaultDisplay;
 
     /** Window tokens that are in the process of exiting, but still on screen for animations. */
@@ -535,9 +537,72 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         out.set(mContentRect);
     }
 
-    /** Refer to {@link WindowManagerService#attachStack(int, int, boolean)} */
-    void attachStack(TaskStack stack, boolean onTop) {
-        mTaskStackContainers.attachStack(stack, onTop);
+    /**
+     * Adds the stack to this display.
+     * @see WindowManagerService#addStackToDisplay(int, int, boolean)
+     */
+    Rect addStackToDisplay(int stackId, boolean onTop) {
+        boolean attachedToDisplay = false;
+        TaskStack stack = mService.mStackIdToStack.get(stackId);
+        if (stack == null) {
+            if (DEBUG_STACK) Slog.d(TAG_WM, "Create new stackId=" + stackId + " on displayId="
+                    + mDisplayId);
+
+            stack = getStackById(stackId);
+            if (stack != null) {
+                // It's already attached to the display...clear mDeferRemoval and move stack to
+                // appropriate z-order on display as needed.
+                stack.mDeferRemoval = false;
+                moveStack(stack, onTop);
+                attachedToDisplay = true;
+            } else {
+                stack = new TaskStack(mService, stackId);
+            }
+
+            mService.mStackIdToStack.put(stackId, stack);
+            if (stackId == DOCKED_STACK_ID) {
+                mDividerControllerLocked.notifyDockedStackExistsChanged(true);
+            }
+        } else {
+            final DisplayContent currentDC = stack.getDisplayContent();
+            if (currentDC != null) {
+                throw new IllegalStateException("Trying to add stackId=" + stackId
+                        + "to displayId=" + mDisplayId + ", but it's already attached to displayId="
+                        + currentDC.getDisplayId());
+            }
+        }
+
+        if (!attachedToDisplay) {
+            mTaskStackContainers.addStackToDisplay(stack, onTop);
+        }
+
+        if (stack.getRawFullscreen()) {
+            return null;
+        }
+        final Rect bounds = new Rect();
+        stack.getRawBounds(bounds);
+        return bounds;
+    }
+
+    /** Removes the stack from the display and prepares for changing the parent. */
+    private void removeStackFromDisplay(TaskStack stack) {
+        mTaskStackContainers.removeStackFromDisplay(stack);
+    }
+
+    /** Moves the stack to this display and returns the updated bounds. */
+    Rect moveStackToDisplay(TaskStack stack) {
+        final DisplayContent currentDisplayContent = stack.getDisplayContent();
+        if (currentDisplayContent == null) {
+            throw new IllegalStateException("Trying to move stackId=" + stack.mStackId
+                    + " which is not currently attached to any display");
+        }
+        if (stack.getDisplayContent().getDisplayId() == mDisplayId) {
+            throw new IllegalArgumentException("Trying to move stackId=" + stack.mStackId
+                    + " to its current displayId=" + mDisplayId);
+        }
+
+        currentDisplayContent.removeStackFromDisplay(stack);
+        return addStackToDisplay(stack.mStackId, true /* onTop */);
     }
 
     void moveStack(TaskStack stack, boolean toTop) {
@@ -2394,7 +2459,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats("On entry to LockedInner",
                     pendingLayoutChanges);
 
-            if ((pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
+            // TODO(multi-display): For now adjusting wallpaper only on primary display to avoid
+            // the wallpaper window jumping across displays.
+            // Remove check for default display when there will be support for multiple wallpaper
+            // targets (on different displays).
+            if (isDefaultDisplay && (pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
                 adjustWallpaperWindows();
             }
 
@@ -3078,7 +3147,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     private class TaskStackContainers extends DisplayChildWindowContainer<TaskStack> {
 
-        void attachStack(TaskStack stack, boolean onTop) {
+        /**
+         * Adds the stack to this container.
+         * @see WindowManagerService#addStackToDisplay(int, int, boolean)
+         */
+        void addStackToDisplay(TaskStack stack, boolean onTop) {
             if (stack.mStackId == HOME_STACK_ID) {
                 if (mHomeStack != null) {
                     throw new IllegalArgumentException("attachStack: HOME_STACK_ID (0) not first.");
@@ -3087,6 +3160,21 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
             addChild(stack, onTop);
             stack.onDisplayChanged(DisplayContent.this);
+        }
+
+        /** Removes the stack from its container and prepare for changing the parent. */
+        void removeStackFromDisplay(TaskStack stack) {
+            removeChild(stack);
+            stack.onRemovedFromDisplay();
+            // TODO: remove when window list will be gone.
+            // Manually remove records from window list and tap excluded windows list.
+            for (int i = mWindows.size() - 1; i >= 0; --i) {
+                final WindowState windowState = mWindows.get(i);
+                if (stack == windowState.getStack()) {
+                    mWindows.remove(i);
+                    mTapExcludedWindows.remove(windowState);
+                }
+            }
         }
 
         void moveStack(TaskStack stack, boolean toTop) {

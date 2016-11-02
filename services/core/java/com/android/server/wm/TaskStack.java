@@ -793,6 +793,14 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     void removeImmediately() {
         super.removeImmediately();
 
+        onRemovedFromDisplay();
+    }
+
+    /**
+     * Removes the stack it from its current parent, so it can be either destroyed completely or
+     * re-parented.
+     */
+    void onRemovedFromDisplay() {
         mDisplayContent.mDimLayerController.removeDimLayerUser(this);
         EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
 
@@ -800,15 +808,13 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             mAnimationBackgroundSurface.destroySurface();
             mAnimationBackgroundSurface = null;
         }
-        final DockedStackDividerController dividerController =
-                mDisplayContent.mDividerControllerLocked;
-        mDisplayContent = null;
-
-        mService.mWindowPlacerLocked.requestTraversal();
 
         if (mStackId == DOCKED_STACK_ID) {
-            dividerController.notifyDockedStackExistsChanged(false);
+            mDisplayContent.mDividerControllerLocked.notifyDockedStackExistsChanged(false);
         }
+
+        mDisplayContent = null;
+        mService.mWindowPlacerLocked.requestTraversal();
     }
 
     void resetAnimationBackgroundAnimator() {

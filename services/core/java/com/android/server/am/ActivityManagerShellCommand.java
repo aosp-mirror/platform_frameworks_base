@@ -215,6 +215,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runGetInactive(pw);
                 case "send-trim-memory":
                     return runSendTrimMemory(pw);
+                case "display":
+                    return runDisplay(pw);
                 case "stack":
                     return runStack(pw);
                 case "task":
@@ -1631,12 +1633,23 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int runDisplay(PrintWriter pw) throws RemoteException {
+        String op = getNextArgRequired();
+        switch (op) {
+            case "move-stack":
+                return runDisplayMoveStack(pw);
+            default:
+                getErrPrintWriter().println("Error: unknown command '" + op + "'");
+                return -1;
+        }
+    }
+
     int runStack(PrintWriter pw) throws RemoteException {
         String op = getNextArgRequired();
         switch (op) {
             case "start":
                 return runStackStart(pw);
-            case "movetask":
+            case "move-task":
                 return runStackMoveTask(pw);
             case "resize":
                 return runStackResize(pw);
@@ -1689,6 +1702,15 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return null;
         }
         return new Rect(left, top, right, bottom);
+    }
+
+    int runDisplayMoveStack(PrintWriter pw) throws RemoteException {
+        String stackIdStr = getNextArgRequired();
+        int stackId = Integer.parseInt(stackIdStr);
+        String displayIdStr = getNextArgRequired();
+        int displayId = Integer.parseInt(displayIdStr);
+        mInterface.moveStackToDisplay(stackId, displayId);
+        return 0;
     }
 
     int runStackStart(PrintWriter pw) throws RemoteException {
@@ -2450,10 +2472,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  send-trim-memory [--user <USER_ID>] <PROCESS>");
             pw.println("          [HIDDEN|RUNNING_MODERATE|BACKGROUND|RUNNING_LOW|MODERATE|RUNNING_CRITICAL|COMPLETE]");
             pw.println("      Send a memory trim event to a <PROCESS>.");
+            pw.println("  display [COMMAND] [...]: sub-commands for operating on displays.");
+            pw.println("       move-stack <STACK_ID> <DISPLAY_ID>");
+            pw.println("           Move <STACK_ID> from its current display to <DISPLAY_ID>.");
             pw.println("  stack [COMMAND] [...]: sub-commands for operating on activity stacks.");
             pw.println("       start <DISPLAY_ID> <INTENT>");
             pw.println("           Start a new activity on <DISPLAY_ID> using <INTENT>");
-            pw.println("       movetask <TASK_ID> <STACK_ID> [true|false]");
+            pw.println("       move-task <TASK_ID> <STACK_ID> [true|false]");
             pw.println("           Move <TASK_ID> from its current stack to the top (true) or");
             pw.println("           bottom (false) of <STACK_ID>.");
             pw.println("       resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>");
