@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
+import android.text.TextUtils;
 
 /**
  * Contains phone state and service related information.
@@ -587,6 +588,24 @@ public class ServiceState implements Parcelable {
      */
     public String getDataOperatorAlphaShort() {
         return mDataOperatorAlphaShort;
+    }
+
+    /**
+     * Get current registered operator name in long alphanumeric format if
+     * available or short otherwise.
+     *
+     * @see #getOperatorAlphaLong
+     * @see #getOperatorAlphaShort
+     *
+     * @return name of operator, null if unregistered or unknown
+     * @hide
+     */
+    public String getOperatorAlpha() {
+        if (TextUtils.isEmpty(mVoiceOperatorAlphaLong)) {
+            return mVoiceOperatorAlphaShort;
+        }
+
+        return mVoiceOperatorAlphaLong;
     }
 
     /**
