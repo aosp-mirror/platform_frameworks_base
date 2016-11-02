@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -35,6 +36,7 @@ import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for RemoteViews.
@@ -42,6 +44,9 @@ import static org.junit.Assert.assertSame;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class RemoteViewsTest {
+
+    // This can point to any other package which exists on the device.
+    private static final String OTHER_PACKAGE = "com.android.systemui";
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -121,4 +126,44 @@ public class RemoteViewsTest {
         clone.apply(mContext, mContainer);
     }
 
+    @Test
+    public void parcelSize_nestedViews() {
+        RemoteViews original = new RemoteViews(mPackage, R.layout.remote_views_test);
+        // We don't care about the actual layout id.
+        RemoteViews child = new RemoteViews(mPackage, 33);
+        int expectedSize = getParcelSize(original) + getParcelSize(child);
+        original.addView(R.id.layout, child);
+
+        // The application info will get written only once.
+        assertTrue(getParcelSize(original) < expectedSize);
+        assertEquals(getParcelSize(original), getParcelSize(original.clone()));
+
+        original = new RemoteViews(mPackage, R.layout.remote_views_test);
+        child = new RemoteViews(OTHER_PACKAGE, 33);
+        expectedSize = getParcelSize(original) + getParcelSize(child);
+        original.addView(R.id.layout, child);
+
+        // Both the views will get written completely along with an additional view operation
+        assertTrue(getParcelSize(original) > expectedSize);
+        assertEquals(getParcelSize(original), getParcelSize(original.clone()));
+    }
+
+    @Test
+    public void parcelSize_differentOrientation() {
+        RemoteViews landscape = new RemoteViews(mPackage, R.layout.remote_views_test);
+        RemoteViews portrait = new RemoteViews(mPackage, 33);
+
+        // The application info will get written only once.
+        RemoteViews views = new RemoteViews(landscape, portrait);
+        assertTrue(getParcelSize(views) < (getParcelSize(landscape) + getParcelSize(portrait)));
+        assertEquals(getParcelSize(views), getParcelSize(views.clone()));
+    }
+
+    private int getParcelSize(RemoteViews view) {
+        Parcel parcel = Parcel.obtain();
+        view.writeToParcel(parcel, 0);
+        int size = parcel.dataSize();
+        parcel.recycle();
+        return size;
+    }
 }
