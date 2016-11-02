@@ -51,14 +51,16 @@ static jobject newZipEntry(JNIEnv* env, const ZipEntry& entry, jstring entryName
                         static_cast<jlong>(entry.offset));
 }
 
-static jlong StrictJarFile_nativeOpenJarFile(JNIEnv* env, jobject, jstring fileName) {
-  ScopedUtfChars fileChars(env, fileName);
-  if (fileChars.c_str() == NULL) {
+static jlong StrictJarFile_nativeOpenJarFile(JNIEnv* env, jobject, jstring name, jint fd) {
+  // Name argument is used for logging, and can be any string.
+  ScopedUtfChars nameChars(env, name);
+  if (nameChars.c_str() == NULL) {
     return static_cast<jlong>(-1);
   }
 
   ZipArchiveHandle handle;
-  int32_t error = OpenArchive(fileChars.c_str(), &handle);
+  int32_t error = OpenArchiveFd(fd, nameChars.c_str(), &handle,
+      false /* owned by Java side */);
   if (error) {
     CloseArchive(handle);
     throwIoException(env, error);
@@ -154,7 +156,7 @@ static void StrictJarFile_nativeClose(JNIEnv*, jobject, jlong nativeHandle) {
 }
 
 static JNINativeMethod gMethods[] = {
-  NATIVE_METHOD(StrictJarFile, nativeOpenJarFile, "(Ljava/lang/String;)J"),
+  NATIVE_METHOD(StrictJarFile, nativeOpenJarFile, "(Ljava/lang/String;I)J"),
   NATIVE_METHOD(StrictJarFile, nativeStartIteration, "(JLjava/lang/String;)J"),
   NATIVE_METHOD(StrictJarFile, nativeNextEntry, "(J)Ljava/util/zip/ZipEntry;"),
   NATIVE_METHOD(StrictJarFile, nativeFindEntry, "(JLjava/lang/String;)Ljava/util/zip/ZipEntry;"),
