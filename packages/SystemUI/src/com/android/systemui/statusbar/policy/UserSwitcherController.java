@@ -55,9 +55,9 @@ import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUISecondaryUserService;
-import com.android.systemui.plugins.qs.QSContainer.DetailAdapter;
+import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.tiles.UserDetailView;
-import com.android.systemui.plugins.qs.QSContainer.ActivityStarter;
+import com.android.systemui.plugins.qs.QS.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.io.FileDescriptor;

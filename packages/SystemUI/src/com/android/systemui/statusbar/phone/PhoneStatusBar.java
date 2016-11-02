@@ -141,11 +141,13 @@ import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.plugins.qs.QSContainer.ActivityStarter;
-import com.android.systemui.plugins.qs.QSContainer.BaseStatusBarHeader;
-import com.android.systemui.plugins.qs.QSContainer;
+import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.plugins.qs.QS.ActivityStarter;
+import com.android.systemui.plugins.qs.QS.BaseStatusBarHeader;
 import com.android.systemui.qs.QSContainerImpl;
+import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.recents.events.EventBus;
@@ -923,9 +925,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         // Set up the quick settings tile panel
-        AutoReinflateContainer container = (AutoReinflateContainer) mStatusBarWindow.findViewById(
-                R.id.qs_auto_reinflate_container);
+        View container = mStatusBarWindow.findViewById(R.id.qs_frame);
         if (container != null) {
+            FragmentHostManager fragmentHostManager = FragmentHostManager.get(container);
+            fragmentHostManager.getFragmentManager().beginTransaction()
+                    .replace(R.id.qs_frame, new QSFragment(), QS.TAG)
+                    .commit();
             final QSTileHost qsh = SystemUIFactory.getInstance().createQSTileHost(mContext, this,
                     mBluetoothController, mLocationController, mRotationLockController,
                     mNetworkController, mZenModeController, mHotspotController,
@@ -934,21 +939,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mSecurityController, mBatteryController, mIconController,
                     mNextAlarmController);
             mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
-            container.addInflateListener(new InflateListener() {
-                @Override
-                public void onInflated(View v) {
-                    QSContainer qsContainer = (QSContainer) v.findViewById(
-                            R.id.quick_settings_container);
-                    if (qsContainer instanceof QSContainerImpl) {
-                        ((QSContainerImpl) qsContainer).setHost(qsh);
-                        mQSPanel = ((QSContainerImpl) qsContainer).getQsPanel();
-                        mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
-                        mKeyguardStatusBar.setQSPanel(mQSPanel);
-                    }
-                    mHeader = qsContainer.getHeader();
-                    initSignalCluster(mHeader);
-                    mHeader.setActivityStarter(PhoneStatusBar.this);
+            fragmentHostManager.addTagListener(QS.TAG, (tag, f) -> {
+                QS qs = (QS) f;
+                if (qs instanceof QSFragment) {
+                    ((QSFragment) qs).setHost(qsh);
+                    mQSPanel = ((QSFragment) qs).getQsPanel();
+                    mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
+                    mKeyguardStatusBar.setQSPanel(mQSPanel);
                 }
+                mHeader = qs.getHeader();
+                initSignalCluster(mHeader);
+                mHeader.setActivityStarter(PhoneStatusBar.this);
             });
         }
 

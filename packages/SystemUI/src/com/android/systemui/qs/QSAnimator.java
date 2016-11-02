@@ -20,7 +20,7 @@ import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnLayoutChangeListener;
 import android.widget.TextView;
 
-import com.android.systemui.plugins.qs.QSContainer;
+import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.PagedTileLayout.PageListener;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSTile.Host.Callback;
@@ -47,7 +47,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private final ArrayList<View> mTopFiveQs = new ArrayList<>();
     private final QuickQSPanel mQuickQsPanel;
     private final QSPanel mQsPanel;
-    private final QSContainer mQsContainer;
+    private final QS mQs;
 
     private PagedTileLayout mPagedLayout;
 
@@ -67,12 +67,15 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private float mLastPosition;
     private QSTileHost mHost;
 
-    public QSAnimator(QSContainer container, QuickQSPanel quickPanel, QSPanel panel) {
-        mQsContainer = container;
+    public QSAnimator(QS qs, QuickQSPanel quickPanel, QSPanel panel) {
+        mQs = qs;
         mQuickQsPanel = quickPanel;
         mQsPanel = panel;
         mQsPanel.addOnAttachStateChangeListener(this);
-        container.addOnLayoutChangeListener(this);
+        qs.getView().addOnLayoutChangeListener(this);
+        if (mQsPanel.isAttachedToWindow()) {
+            onViewAttachedToWindow(null);
+        }
         QSTileLayout tileLayout = mQsPanel.getTileLayout();
         if (tileLayout instanceof PagedTileLayout) {
             mPagedLayout = ((PagedTileLayout) tileLayout);
@@ -102,7 +105,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     @Override
     public void onViewAttachedToWindow(View v) {
-        TunerService.get(mQsContainer.getContext()).addTunable(this, ALLOW_FANCY_ANIMATION,
+        TunerService.get(mQs.getContext()).addTunable(this, ALLOW_FANCY_ANIMATION,
                 MOVE_FULL_ROWS, QuickQSPanel.NUM_QUICK_TILES);
     }
 
@@ -111,7 +114,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         if (mHost != null) {
             mHost.removeCallback(this);
         }
-        TunerService.get(mQsContainer.getContext()).removeTunable(this);
+        TunerService.get(mQs.getContext()).removeTunable(this);
     }
 
     @Override
@@ -124,7 +127,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         } else if (MOVE_FULL_ROWS.equals(key)) {
             mFullRows = newValue == null || Integer.parseInt(newValue) != 0;
         } else if (QuickQSPanel.NUM_QUICK_TILES.equals(key)) {
-            mNumQuickTiles = mQuickQsPanel.getNumQuickTiles(mQsContainer.getContext());
+            mNumQuickTiles = mQuickQsPanel.getNumQuickTiles(mQs.getContext());
             clearAnimationState();
         }
         updateAnimators();
@@ -166,13 +169,14 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             }
             final TextView label = ((QSTileView) tileView).getLabel();
             final View tileIcon = tileView.getIcon().getIconView();
+            View view = mQs.getView();
             if (count < mNumQuickTiles && mAllowFancy) {
                 // Quick tiles.
                 QSTileBaseView quickTileView = mQuickQsPanel.getTileView(tile);
 
                 lastX = loc1[0];
-                getRelativePosition(loc1, quickTileView.getIcon().getIconView(), mQsContainer);
-                getRelativePosition(loc2, tileIcon, mQsContainer);
+                getRelativePosition(loc1, quickTileView.getIcon().getIconView(), view);
+                getRelativePosition(loc2, tileIcon, view);
                 final int xDiff = loc2[0] - loc1[0];
                 final int yDiff = loc2[1] - loc1[1];
                 lastXDiff = loc1[0] - lastX;
@@ -198,7 +202,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 // This makes the extra icons seems as if they are coming from positions in the
                 // quick panel.
                 loc1[0] += lastXDiff;
-                getRelativePosition(loc2, tileIcon, mQsContainer);
+                getRelativePosition(loc2, tileIcon, view);
                 final int xDiff = loc2[0] - loc1[0];
                 final int yDiff = loc2[1] - loc1[1];
 

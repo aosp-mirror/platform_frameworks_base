@@ -39,15 +39,15 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
-        <com.android.systemui.PluginInflateContainer
-            android:id="@+id/qs_auto_reinflate_container"
+        <FrameLayout
+            android:id="@+id/qs_frame"
             android:layout="@layout/qs_panel"
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="match_parent"
             android:layout_gravity="@integer/notification_panel_layout_gravity"
             android:clipToPadding="false"
             android:clipChildren="false"
-            systemui:viewType="com.android.systemui.plugins.qs.QSContainer" />
+            systemui:viewType="com.android.systemui.plugins.qs.QS" />
 
         <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"
