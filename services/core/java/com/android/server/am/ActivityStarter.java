@@ -31,6 +31,7 @@ import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.isStaticStack;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -50,6 +51,8 @@ import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
+import static android.view.Display.INVALID_DISPLAY;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
@@ -1952,12 +1955,14 @@ class ActivityStarter {
 
         // The fullscreen stack can contain any task regardless of if the task is resizeable
         // or not. So, we let the task go in the fullscreen task if it is the focus stack.
+        // Same also applies to dynamic stacks, as they behave similar to fullscreen stack.
         // If the freeform or docked stack has focus, and the activity to be launched is resizeable,
         // we can also put it in the focused stack.
         final int focusedStackId = mSupervisor.mFocusedStack.mStackId;
         final boolean canUseFocusedStack = focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID
                 || (focusedStackId == DOCKED_STACK_ID && r.canGoInDockedStack())
-                || (focusedStackId == FREEFORM_WORKSPACE_STACK_ID && r.isResizeableOrForced());
+                || (focusedStackId == FREEFORM_WORKSPACE_STACK_ID && r.isResizeableOrForced())
+                || !isStaticStack(focusedStackId);
         if (canUseFocusedStack && (!newTask
                 || mSupervisor.mFocusedStack.mActivityContainer.isEligibleForNewTasks())) {
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
@@ -1965,7 +1970,7 @@ class ActivityStarter {
             return mSupervisor.mFocusedStack;
         }
 
-        // We first try to put the task in the first dynamic stack.
+        // We first try to put the task in the first dynamic stack on home display.
         final ArrayList<ActivityStack> homeDisplayStacks = mSupervisor.mHomeStack.mStacks;
         for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             stack = homeDisplayStacks.get(stackNdx);
@@ -1994,15 +1999,28 @@ class ActivityStarter {
             return mReuseTask.getStack();
         }
 
+        final int launchDisplayId =
+                (aOptions != null) ? aOptions.getLaunchDisplayId() : INVALID_DISPLAY;
+
         final int launchStackId =
                 (aOptions != null) ? aOptions.getLaunchStackId() : INVALID_STACK_ID;
 
+        if (launchStackId != INVALID_STACK_ID && launchDisplayId != INVALID_DISPLAY) {
+            throw new IllegalArgumentException(
+                    "Stack and display id can't be set at the same time.");
+        }
+
         if (isValidLaunchStackId(launchStackId, r)) {
             return mSupervisor.getStack(launchStackId, CREATE_IF_NEEDED, ON_TOP);
-        } else if (launchStackId == DOCKED_STACK_ID) {
+        }
+        if (launchStackId == DOCKED_STACK_ID) {
             // The preferred launch stack is the docked stack, but it isn't a valid launch stack
             // for this activity, so we put the activity in the fullscreen stack.
             return mSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
+        }
+        if (launchDisplayId != INVALID_DISPLAY) {
+            // Stack id has higher priority than display id.
+            return mSupervisor.getValidLaunchStackOnDisplay(launchDisplayId, r);
         }
 
         if ((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0) {
@@ -2047,9 +2065,8 @@ class ActivityStarter {
         }
     }
 
-    private boolean isValidLaunchStackId(int stackId, ActivityRecord r) {
-        if (stackId == INVALID_STACK_ID || stackId == HOME_STACK_ID
-                || !StackId.isStaticStack(stackId)) {
+    boolean isValidLaunchStackId(int stackId, ActivityRecord r) {
+        if (stackId == INVALID_STACK_ID || stackId == HOME_STACK_ID) {
             return false;
         }
 
