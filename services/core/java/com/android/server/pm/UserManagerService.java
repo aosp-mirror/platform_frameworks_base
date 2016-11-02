@@ -1487,8 +1487,7 @@ public class UserManagerService extends IUserManager.Stub {
         // Skip over users being removed
         for (int i = 0; i < totalUserCount; i++) {
             UserInfo user = mUsers.valueAt(i).info;
-            if (!mRemovingUserIds.get(user.id)
-                    && !user.isGuest() && !user.partial) {
+            if (!mRemovingUserIds.get(user.id) && !user.isGuest()) {
                 aliveUserCount++;
             }
         }

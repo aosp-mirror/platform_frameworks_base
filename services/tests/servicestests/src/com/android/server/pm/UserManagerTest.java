@@ -37,6 +37,10 @@ import com.android.internal.util.ArrayUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** Test {@link UserManager} functionality. */
 public class UserManagerTest extends AndroidTestCase {
@@ -441,6 +445,33 @@ public class UserManagerTest extends AndroidTestCase {
         switchUser(startUser);
     }
 
+    @MediumTest
+    public void testConcurrentUserCreate() throws Exception {
+        int userCount = mUserManager.getUserCount();
+        int maxSupportedUsers = UserManager.getMaxSupportedUsers();
+        int canBeCreatedCount = maxSupportedUsers - userCount;
+        // Test exceeding the limit while running in parallel
+        int createUsersCount = canBeCreatedCount + 5;
+        ExecutorService es = Executors.newCachedThreadPool();
+        AtomicInteger created = new AtomicInteger();
+        for (int i = 0; i < createUsersCount; i++) {
+            final String userName = "testConcUser" + i;
+            es.submit(() -> {
+                UserInfo user = mUserManager.createUser(userName, 0);
+                if (user != null) {
+                    created.incrementAndGet();
+                    synchronized (mUserRemoveLock) {
+                        usersToRemove.add(user.id);
+                    }
+                }
+            });
+        }
+        es.shutdown();
+        es.awaitTermination(20, TimeUnit.SECONDS);
+        assertEquals(maxSupportedUsers, mUserManager.getUserCount());
+        assertEquals(canBeCreatedCount, created.get());
+    }
+
     private boolean isPackageInstalledForUser(String packageName, int userId) {
         try {
             return mPackageManager.getPackageInfoAsUser(packageName, 0, userId) != null;
@@ -523,4 +554,5 @@ public class UserManagerTest extends AndroidTestCase {
         }
         return profile;
     }
+
 }
