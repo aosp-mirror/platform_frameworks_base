@@ -35,23 +35,21 @@ import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.storage.StorageManager;
 import android.provider.DocumentsContract.Document;
+import android.provider.DocumentsContract.Path;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.provider.Settings;
 import android.system.ErrnoException;
-import android.system.Os;
-import android.system.OsConstants;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
@@ -411,6 +409,51 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         } catch (IOException error) {
             Log.e(TAG, "createDocument", error);
             throw new IllegalStateException(error);
+        }
+    }
+
+    @Override
+    public Path findPath(String childDocumentId, String parentDocumentId)
+            throws FileNotFoundException {
+        final LinkedList<String> ids = new LinkedList<>();
+        final Identifier childIdentifier = mDatabase.createIdentifier(childDocumentId);
+
+        Identifier i = childIdentifier;
+        outer: while (true) {
+            if (i.mDocumentId.equals(parentDocumentId)) {
+                ids.addFirst(i.mDocumentId);
+                break;
+            }
+            switch (i.mDocumentType) {
+                case MtpDatabaseConstants.DOCUMENT_TYPE_OBJECT:
+                    ids.addFirst(i.mDocumentId);
+                    i = mDatabase.getParentIdentifier(i.mDocumentId);
+                    break;
+                case MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE: {
+                    // Check if there is the multiple storage.
+                    final Identifier deviceIdentifier =
+                            mDatabase.getParentIdentifier(i.mDocumentId);
+                    final String[] storageIds =
+                            mDatabase.getStorageDocumentIds(deviceIdentifier.mDocumentId);
+                    // Add storage's document ID to the path only when the device has multiple
+                    // storages.
+                    if (storageIds.length > 1) {
+                        ids.addFirst(i.mDocumentId);
+                        break outer;
+                    }
+                    i = deviceIdentifier;
+                    break;
+                }
+                case MtpDatabaseConstants.DOCUMENT_TYPE_DEVICE:
+                    ids.addFirst(i.mDocumentId);
+                    break outer;
+            }
+        }
+
+        if (parentDocumentId != null) {
+            return new Path(null, ids);
+        } else {
+            return new Path(/* Should be same with root ID */ i.mDocumentId, ids);
         }
     }
 
