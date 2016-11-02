@@ -49,6 +49,8 @@ import android.os.IProgressListener;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.os.ServiceManager;
@@ -79,6 +81,7 @@ import com.android.server.LockSettingsStorage.CredentialHash;
 import libcore.util.HexEncoding;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -1583,6 +1586,31 @@ public class LockSettingsService extends ILockSettings.Stub {
     public int getStrongAuthForUser(int userId) {
         checkPasswordReadPermission(userId);
         return mStrongAuthTracker.getStrongAuthForUser(userId);
+    }
+
+    private boolean isCallerShell() {
+        final int callingUid = Binder.getCallingUid();
+        return callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID;
+    }
+
+    private void enforceShell() {
+        if (!isCallerShell()) {
+            throw new SecurityException("Caller must be shell");
+        }
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver)
+            throws RemoteException {
+        enforceShell();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            (new LockSettingsShellCommand(mContext, new LockPatternUtils(mContext))).exec(
+                    this, in, out, err, args, callback, resultReceiver);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     private static final String[] VALID_SETTINGS = new String[] {
