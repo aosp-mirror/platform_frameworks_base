@@ -32,7 +32,7 @@
 #include "SkPathEffect.h"
 #include "SkRasterizer.h"
 #include "SkShader.h"
-#include "SkXfermode.h"
+#include "SkBlendMode.h"
 #include "unicode/uloc.h"
 #include "unicode/ushape.h"
 #include "utils/Blur.h"

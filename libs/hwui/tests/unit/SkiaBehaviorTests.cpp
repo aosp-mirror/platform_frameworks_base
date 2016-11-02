@@ -69,10 +69,10 @@ TEST(SkiaBehavior, lightingColorFilter_simplify) {
                 SkColorMatrixFilter::MakeLightingFilter(0x11223344, 0));
 
         SkColor observedColor;
-        SkXfermode::Mode observedMode;
+        SkBlendMode observedMode;
         ASSERT_TRUE(filter->asColorMode(&observedColor, &observedMode));
         EXPECT_EQ(0xFF223344, observedColor);
-        EXPECT_EQ(SkXfermode::Mode::kModulate_Mode, observedMode);
+        EXPECT_EQ(SkBlendMode::kModulate, observedMode);
     }
 
     {

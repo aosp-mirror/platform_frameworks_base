@@ -29,7 +29,7 @@
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkMatrix.h>
-#include <SkXfermode.h>
+#include <SkBlendMode.h>
 
 #include <DeferredLayerUpdater.h>
 #include <SkiaShader.h>

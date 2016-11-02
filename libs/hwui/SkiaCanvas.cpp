@@ -546,7 +546,7 @@ void SkiaCanvas::drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
 #endif
     const int ptCount = vertexCount >> 1;
     mCanvas->drawVertices(vertexMode, ptCount, (SkPoint*)verts, (SkPoint*)texs,
-                          (SkColor*)colors, NULL, indices, indexCount, paint);
+                          (SkColor*)colors, indices, indexCount, paint);
 }
 
 // ----------------------------------------------------------------------------
@@ -670,7 +670,7 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeigh
     tmpPaint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode));
 
     mCanvas->drawVertices(SkCanvas::kTriangles_VertexMode, ptCount, (SkPoint*)vertices,
-                         texs, (const SkColor*)colors, NULL, indices,
+                         texs, (const SkColor*)colors, indices,
                          indexCount, tmpPaint);
 }
 

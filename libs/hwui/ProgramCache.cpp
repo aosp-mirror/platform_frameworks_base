@@ -572,7 +572,7 @@ static bool shaderOp(const ProgramDescription& description, String8& shader,
 String8 ProgramCache::generateFragmentShader(const ProgramDescription& description) {
     String8 shader(gFS_Header_Start);
 
-    const bool blendFramebuffer = description.framebufferMode >= SkXfermode::kPlus_Mode;
+    const bool blendFramebuffer = description.framebufferMode >= SkBlendMode::kPlus;
     if (blendFramebuffer) {
         shader.append(gFS_Header_Extension_FramebufferFetch);
     }
@@ -809,12 +809,12 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     return shader;
 }
 
-void ProgramCache::generateBlend(String8& shader, const char* name, SkXfermode::Mode mode) {
+void ProgramCache::generateBlend(String8& shader, const char* name, SkBlendMode mode) {
     shader.append("\nvec4 ");
     shader.append(name);
     shader.append("(vec4 src, vec4 dst) {\n");
     shader.append("    ");
-    shader.append(gBlendOps[mode]);
+    shader.append(gBlendOps[(int)mode]);
     shader.append("}\n");
 }
 

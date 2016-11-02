@@ -130,7 +130,7 @@ static bool layerNeedsPaint(const LayerProperties& properties,
             || properties.colorFilter() != nullptr) {
         paint->setAlpha(properties.alpha() * alphaMultiplier);
         paint->setBlendMode(properties.xferMode());
-        paint->setColorFilter(properties.colorFilter());
+        paint->setColorFilter(sk_ref_sp(properties.colorFilter()));
         return true;
     }
     return false;

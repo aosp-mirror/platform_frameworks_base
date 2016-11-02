@@ -21,7 +21,6 @@
 #include <SkColorFilter.h>
 #include <SkDrawLooper.h>
 #include <SkShader.h>
-#include <SkXfermode.h>
 
 namespace android {
 namespace uirenderer {
