@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
@@ -27,9 +28,11 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pools;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
@@ -331,14 +334,28 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             mSnoozedPackages.put(snoozeKey(packageName, mUser),
                     SystemClock.elapsedRealtime() + mSnoozeLengthMs);
             if (mSnoozeLengthMs != 0) {
+                String appName = null;
+                try {
+                    appName = (String) mContext.getPackageManager().getApplicationLabel(
+                        mContext.getPackageManager().getApplicationInfo(packageName,
+                            PackageManager.GET_META_DATA));
+                } catch (PackageManager.NameNotFoundException e) {
+                    appName = packageName;
+                }
                 if (mSnoozeLengthMs == 60000) {
-                    Toast.makeText(mContext,
-                    mContext.getString(R.string.heads_up_snooze_message_one_minute),
-                    Toast.LENGTH_LONG).show();
+                    Toast toast = Toast.makeText(mContext,
+                    mContext.getString(R.string.heads_up_snooze_message_one_minute, appName),
+                            Toast.LENGTH_LONG);
+                    TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+                    if( v != null) v.setGravity(Gravity.CENTER);
+                    toast.show();
                 } else {
-                    Toast.makeText(mContext,
-                    mContext.getString(R.string.heads_up_snooze_message,
-                    mSnoozeLengthMs / 60 / 1000), Toast.LENGTH_LONG).show();
+                    Toast toast = Toast.makeText(mContext,
+                    mContext.getString(R.string.heads_up_snooze_message, appName,
+                    mSnoozeLengthMs / 60 / 1000), Toast.LENGTH_LONG);
+                    TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+                    if( v != null) v.setGravity(Gravity.CENTER);
+                    toast.show();
                 }
             }
         }
