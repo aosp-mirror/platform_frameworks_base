@@ -803,7 +803,7 @@ int doDump(Bundle* bundle)
             ResXMLTree tree(dynamicRefTable);
             asset = assets.openNonAsset(assetsCookie, resname, Asset::ACCESS_BUFFER);
             if (asset == NULL) {
-                fprintf(stderr, "ERROR: dump failed because resource %s found\n", resname);
+                fprintf(stderr, "ERROR: dump failed because resource %s not found\n", resname);
                 goto bail;
             }
 
