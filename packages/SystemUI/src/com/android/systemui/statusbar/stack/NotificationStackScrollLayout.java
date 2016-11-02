@@ -760,6 +760,13 @@ public class NotificationStackScrollLayout extends ViewGroup
      *         Measured in absolute height.
      */
     private float getAppearStartPosition() {
+        if (mTrackingHeadsUp && mFirstVisibleBackgroundChild != null) {
+            if (mFirstVisibleBackgroundChild.isAboveShelf()) {
+                // If we ever expanded beyond the first notification, it's allowed to merge into
+                // the shelf
+                return mFirstVisibleBackgroundChild.getPinnedHeadsUpHeight();
+            }
+        }
         return getMinExpansionHeight();
     }
 
@@ -4002,10 +4009,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getMinExpansionHeight() {
-        return mTrackingHeadsUp
-                ? mHeadsUpManager.getTopHeadsUpPinnedHeight()
-                : mShelf.getIntrinsicHeight()
-                        - (mShelf.getIntrinsicHeight() - mStatusBarHeight) / 2;
+        return mShelf.getIntrinsicHeight() - (mShelf.getIntrinsicHeight() - mStatusBarHeight) / 2;
     }
 
     public void setInHeadsUpPinnedMode(boolean inHeadsUpPinnedMode) {

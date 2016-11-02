@@ -289,6 +289,11 @@ public abstract class ExpandableView extends FrameLayout {
     public void setBelowShelf(boolean below) {
     }
 
+    public int getPinnedHeadsUpHeight() {
+        return getIntrinsicHeight();
+    }
+
+
     /**
      * Sets the translation of the view.
      */
@@ -498,6 +503,10 @@ public abstract class ExpandableView extends FrameLayout {
 
     public boolean isTransformingIntoShelf() {
         return mTransformingInShelf;
+    }
+
+    public boolean isAboveShelf() {
+        return false;
     }
 
     /**

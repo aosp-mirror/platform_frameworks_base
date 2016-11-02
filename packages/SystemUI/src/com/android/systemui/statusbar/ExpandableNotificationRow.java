@@ -192,6 +192,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mRefocusOnDismiss;
     private float mIconTransformationAmount;
     private boolean mIconsVisible = true;
+    private boolean mAboveShelf;
 
     public boolean isGroupExpansionChanging() {
         if (isChildInGroup()) {
@@ -341,6 +342,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
         if (intrinsicBefore != getIntrinsicHeight()) {
             notifyHeightChanged(false  /* needsAnimation */);
+        }
+        if (isHeadsUp) {
+            setAboveShelf(true);
         }
     }
 
@@ -529,12 +533,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mIsPinned;
     }
 
+    @Override
+    public int getPinnedHeadsUpHeight() {
+        return getPinnedHeadsUpHeight(true /* atLeastMinHeight */);
+    }
+
     /**
      * @param atLeastMinHeight should the value returned be at least the minimum height.
      *                         Used to avoid cyclic calls
      * @return the height of the heads up notification when pinned
      */
-    public int getPinnedHeadsUpHeight(boolean atLeastMinHeight) {
+    private int getPinnedHeadsUpHeight(boolean atLeastMinHeight) {
         if (mIsSummaryWithChildren) {
             return mChildrenContainer.getIntrinsicHeight();
         }
@@ -1776,6 +1785,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     @Override
     public ExpandableViewState createNewViewState(StackScrollState stackScrollState) {
         return new NotificationViewState(stackScrollState);
+    }
+
+    @Override
+    public boolean isAboveShelf() {
+        return mIsPinned || mHeadsupDisappearRunning || (mIsHeadsUp && mAboveShelf);
+    }
+
+    public void setAboveShelf(boolean aboveShelf) {
+        mAboveShelf = aboveShelf;
     }
 
     public class NotificationViewState extends ExpandableViewState {

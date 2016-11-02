@@ -346,10 +346,10 @@ public class StackScrollAlgorithm {
         int childHeight = getMaxAllowedChildHeight(child);
         int collapsedHeight = child.getCollapsedHeight();
         childViewState.yTranslation = currentYPosition;
-        if (i == 0) {
-            updateFirstChildHeight(child, childViewState, childHeight, ambientState);
-        }
         boolean belowShelf = i >= ambientState.getShelfIndex();
+        if (i == 0) {
+            updateFirstChildHeight(child, childViewState, childHeight, ambientState, belowShelf);
+        }
 
         // The y position after this element
         float nextYPosition = currentYPosition + childHeight +
@@ -422,7 +422,10 @@ public class StackScrollAlgorithm {
             if (mIsExpanded) {
                 // Ensure that the heads up is always visible even when scrolled off
                 clampHunToTop(ambientState, row, childState);
-                clampHunToMaxTranslation(ambientState, row, childState);
+                if (i == 0) {
+                    // the first hun can't get off screen.
+                    clampHunToMaxTranslation(ambientState, row, childState);
+                }
             }
             if (row.isPinned()) {
                 childState.yTranslation = Math.max(childState.yTranslation, 0);
@@ -570,20 +573,27 @@ public class StackScrollAlgorithm {
 
     /**
      * Update the height of the first child i.e clamp it to the bottom stack
-     *
-     * @param child the child to update
+     *  @param child the child to update
      * @param childViewState the viewstate of the child
      * @param childHeight the height of the child
      * @param ambientState The ambient state of the algorithm
+     * @param belowShelf
      */
     protected void updateFirstChildHeight(ExpandableView child, ExpandableViewState childViewState,
-                                          int childHeight, AmbientState ambientState) {
+            int childHeight, AmbientState ambientState, boolean belowShelf) {
 
+        int bottomStart;
+        if (belowShelf) {
             // The starting position of the bottom stack peek
-            int bottomPeekStart = ambientState.getInnerHeight() - mBottomStackPeekSize -
-                    mBottomStackSlowDownLength + ambientState.getScrollY();
+            bottomStart = ambientState.getInnerHeight() - mBottomStackPeekSize -
+                    mBottomStackSlowDownLength;
+        } else {
+            bottomStart = ambientState.getInnerHeight()
+                    - ambientState.getShelf().getIntrinsicHeight() - mPaddingBetweenElements;
+        }
+        bottomStart += ambientState.getScrollY();
             // Collapse and expand the first child while the shade is being expanded
-        childViewState.height = (int) Math.max(Math.min(bottomPeekStart, (float) childHeight),
+        childViewState.height = (int) Math.max(Math.min(bottomStart, (float) childHeight),
                     child.getCollapsedHeight());
     }
 
@@ -643,6 +653,22 @@ public class StackScrollAlgorithm {
             }
             childViewState.zTranslation = baseZ
                     + childrenOnTop * zDistanceBetweenElements;
+        } else if (i == 0 && child.isAboveShelf()) {
+            // In case this is a new view that has never been measured before, we don't want to
+            // elevate if we are currently expanded more then the notification
+            int shelfHeight = ambientState.getShelf().getIntrinsicHeight();
+            float shelfStart = ambientState.getInnerHeight()
+                    - shelfHeight + ambientState.getTopPadding()
+                    + ambientState.getStackTranslation();
+            float notificationEnd = childViewState.yTranslation + child.getPinnedHeadsUpHeight()
+                    + mPaddingBetweenElements;
+            if (shelfStart > notificationEnd) {
+                childViewState.zTranslation = baseZ;
+            } else {
+                float factor = (notificationEnd - shelfStart) / shelfHeight;
+                factor = Math.min(factor, 1.0f);
+                childViewState.zTranslation = baseZ + factor * zDistanceBetweenElements;
+            }
         } else {
             childViewState.zTranslation = baseZ;
         }
