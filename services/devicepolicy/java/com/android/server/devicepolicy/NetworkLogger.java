@@ -16,9 +16,16 @@
 
 package com.android.server.devicepolicy;
 
+import android.app.admin.ConnectEvent;
+import android.app.admin.DnsEvent;
+import android.app.admin.NetworkEvent;
 import android.content.pm.PackageManagerInternal;
 import android.net.IIpConnectivityMetrics;
 import android.net.INetdEventCallback;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
@@ -40,6 +47,8 @@ final class NetworkLogger {
     private final PackageManagerInternal mPm;
 
     private IIpConnectivityMetrics mIpConnectivityMetrics;
+    private ServiceThread mHandlerThread;
+    private NetworkLoggingHandler mNetworkLoggingHandler;
     private boolean mIsLoggingEnabled;
 
     private final INetdEventCallback mNetdEventCallback = new INetdEventCallback.Stub() {
@@ -49,7 +58,9 @@ final class NetworkLogger {
             if (!mIsLoggingEnabled) {
                 return;
             }
-            // TODO(mkarpinski): send msg with data to Handler
+            DnsEvent dnsEvent = new DnsEvent(hostname, ipAddresses, ipAddressesCount,
+                    mPm.getNameForUid(uid), timestamp);
+            sendNetworkEvent(dnsEvent);
         }
 
         @Override
@@ -57,7 +68,18 @@ final class NetworkLogger {
             if (!mIsLoggingEnabled) {
                 return;
             }
-            // TODO(mkarpinski): send msg with data to Handler
+            ConnectEvent connectEvent = new ConnectEvent(ipAddr, port, mPm.getNameForUid(uid),
+                    timestamp);
+            sendNetworkEvent(connectEvent);
+        }
+
+        private void sendNetworkEvent(NetworkEvent event) {
+            Message msg = mNetworkLoggingHandler.obtainMessage(
+                    NetworkLoggingHandler.LOG_NETWORK_EVENT_MSG);
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(NetworkLoggingHandler.NETWORK_EVENT_KEY, event);
+            msg.setData(bundle);
+            mNetworkLoggingHandler.sendMessage(msg);
         }
     };
 
@@ -87,7 +109,13 @@ final class NetworkLogger {
         }
         try {
            if (mIpConnectivityMetrics.registerNetdEventCallback(mNetdEventCallback)) {
-                // TODO(mkarpinski): start a new ServiceThread, instantiate a Handler etc.
+                mHandlerThread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND,
+                        /* allowIo */ false);
+                mHandlerThread.start();
+                mNetworkLoggingHandler = new NetworkLoggingHandler(mHandlerThread.getLooper(),
+                        mDpm);
+                mNetworkLoggingHandler.scheduleBatchFinalization(
+                        NetworkLoggingHandler.BATCH_FINALIZATION_TIMEOUT_MS);
                 mIsLoggingEnabled = true;
                 return true;
             } else {
@@ -101,7 +129,7 @@ final class NetworkLogger {
 
     boolean stopNetworkLogging() {
         Log.d(TAG, "Stopping network logging");
-        // stop the logging regardless of whether we failed to unregister listener
+        // stop the logging regardless of whether we fail to unregister listener
         mIsLoggingEnabled = false;
         try {
             if (!checkIpConnectivityMetricsService()) {
@@ -114,8 +142,12 @@ final class NetworkLogger {
         } catch (RemoteException re) {
             Slog.wtf(TAG, "Failed to make remote calls to unregister the callback", re);
         } finally {
-            // TODO(mkarpinski): quitSafely() the Handler
+            mHandlerThread.quitSafely();
             return true;
         }
+    }
+
+    List<NetworkEvent> retrieveLogs() {
+        return mNetworkLoggingHandler.retrieveFullLogBatch();
     }
 }
