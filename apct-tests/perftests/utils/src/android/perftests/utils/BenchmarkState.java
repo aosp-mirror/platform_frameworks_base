@@ -19,8 +19,11 @@ package android.perftests.utils;
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.os.Bundle;
+import android.os.Debug;
+import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -45,6 +48,7 @@ import java.util.concurrent.TimeUnit;
 public final class BenchmarkState {
 
     private static final String TAG = "BenchmarkState";
+    private static final boolean ENABLE_PROFILING = false;
 
     private static final int NOT_STARTED = 0;  // The benchmark has not started yet.
     private static final int WARMUP = 1; // The benchmark is warming up.
@@ -146,6 +150,11 @@ public final class BenchmarkState {
     }
 
     private void beginBenchmark(long warmupDuration, int iterations) {
+        if (ENABLE_PROFILING) {
+            File f = new File(InstrumentationRegistry.getContext().getDataDir(), "benchprof");
+            Log.d(TAG, "Tracing to: " + f.getAbsolutePath());
+            Debug.startMethodTracingSampling(f.getAbsolutePath(), 16 * 1024 * 1024, 100);
+        }
         mMaxIterations = (int) (TARGET_TEST_DURATION_NS / (warmupDuration / iterations));
         mMaxIterations = Math.min(MAX_TEST_ITERATIONS,
                 Math.max(mMaxIterations, MIN_TEST_ITERATIONS));
@@ -161,6 +170,9 @@ public final class BenchmarkState {
         mResults.add((currentTime - mStartTimeNs - mPausedDurationNs) / mMaxIterations);
         mRepeatCount++;
         if (mRepeatCount >= REPEAT_COUNT) {
+            if (ENABLE_PROFILING) {
+                Debug.stopMethodTracing();
+            }
             calculateSatistics();
             mState = FINISHED;
             return false;
