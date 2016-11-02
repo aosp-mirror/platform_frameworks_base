@@ -229,7 +229,8 @@ public class BuzzBeepBlinkTest {
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, id, mTag, mUid, mPid,
                 mScore, n, mUser, System.currentTimeMillis());
         NotificationRecord r = new NotificationRecord(getContext(), sbn,
-                new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID, "misc"));
+                new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID, "misc",
+                        NotificationManager.IMPORTANCE_DEFAULT));
         mService.addNotification(r);
         return r;
     }
@@ -334,7 +335,7 @@ public class BuzzBeepBlinkTest {
     @Test
     public void testBeepFromChannel() throws Exception {
         NotificationRecord r = getQuietNotification();
-        r.getChannel().setDefaultRingtone(Settings.System.DEFAULT_NOTIFICATION_URI);
+        r.getChannel().setRingtone(Settings.System.DEFAULT_NOTIFICATION_URI);
         r.setImportance(NotificationManager.IMPORTANCE_DEFAULT, "for testing");
 
         mService.buzzBeepBlinkLocked(r);
@@ -388,7 +389,7 @@ public class BuzzBeepBlinkTest {
     @Test
     public void testChannelNoOverwriteCustomBeep() throws Exception {
         NotificationRecord r = getCustomBeepyNotification();
-        r.getChannel().setDefaultRingtone(Settings.System.DEFAULT_RINGTONE_URI);
+        r.getChannel().setRingtone(Settings.System.DEFAULT_RINGTONE_URI);
 
         mService.buzzBeepBlinkLocked(r);
 
@@ -408,7 +409,7 @@ public class BuzzBeepBlinkTest {
     @Test
     public void testNoInterruptionForMin() throws Exception {
         NotificationRecord r = getBeepyNotification();
-        r.setImportance(Ranking.IMPORTANCE_MIN, "foo");
+        r.setImportance(NotificationManager.IMPORTANCE_MIN, "foo");
 
         mService.buzzBeepBlinkLocked(r);
 

@@ -16,8 +16,6 @@
 
 package android.ext.services.notification;
 
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
-
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.Adjustment;
@@ -36,6 +34,7 @@ import android.ext.services.R;
 
 /**
  * Class that provides an updatable ranker module for the notification manager.
+ * TODO: delete
  */
 public final class Ranker extends NotificationRankerService {
     private static final String TAG = "RocketRanker";

@@ -33,8 +33,10 @@ public interface RankingConfig {
     int getImportance(String packageName, int uid);
 
     void createNotificationChannel(String pkg, int uid, NotificationChannel channel);
-    void updateNotificationChannel(int callingUid, String pkg, int uid, NotificationChannel channel);
+    void updateNotificationChannel(String pkg, int uid, NotificationChannel channel);
+    void updateNotificationChannelFromRanker(String pkg, int uid, NotificationChannel channel);
     NotificationChannel getNotificationChannel(String pkg, int uid, String channelId);
+    NotificationChannel getNotificationChannelWithFallback(String pkg, int uid, String channelId);
     void deleteNotificationChannel(String pkg, int uid, String channelId);
     ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid);
 }

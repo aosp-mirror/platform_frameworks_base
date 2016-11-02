@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package android.app;
 
 import org.json.JSONException;
@@ -33,12 +48,45 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_IMPORTANCE = "importance";
     private static final String ATT_LIGHTS = "lights";
     private static final String ATT_VIBRATION = "vibration";
-    private static final String ATT_DEFAULT_RINGTONE = "ringtone";
+    private static final String ATT_RINGTONE = "ringtone";
+    private static final String ATT_USER_APPROVED = "approved";
+    private static final String ATT_USER_LOCKED = "locked";
+
+    /**
+     * @hide
+     */
+    @SystemApi
+    public static final int USER_LOCKED_PRIORITY = 0x00000001;
+    /**
+     * @hide
+     */
+    @SystemApi
+    public static final int USER_LOCKED_VISIBILITY = 0x00000002;
+    /**
+     * @hide
+     */
+    @SystemApi
+    public static final int USER_LOCKED_IMPORTANCE = 0x00000004;
+    /**
+     * @hide
+     */
+    @SystemApi
+    public static final int USER_LOCKED_LIGHTS = 0x00000008;
+    /**
+     * @hide
+     */
+    @SystemApi
+    public static final int USER_LOCKED_VIBRATION = 0x00000010;
+    /**
+     * @hide
+     */
+    @SystemApi
+    public static final int USER_LOCKED_RINGTONE = 0x00000020;
 
     private static final int DEFAULT_VISIBILITY =
-            NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE;
+            NotificationManager.VISIBILITY_NO_OVERRIDE;
     private static final int DEFAULT_IMPORTANCE =
-            NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
+            NotificationManager.IMPORTANCE_UNSPECIFIED;
 
     private final String mId;
     private CharSequence mName;
@@ -48,16 +96,21 @@ public final class NotificationChannel implements Parcelable {
     private Uri mRingtone;
     private boolean mLights;
     private boolean mVibration;
+    private int mUserLockedFields;
 
     /**
      * Creates a notification channel.
      *
      * @param id The id of the channel. Must be unique per package.
      * @param name The user visible name of the channel.
+     * @param importance The importance of the channel. This controls how interruptive notifications
+     *                   posted to this channel are. See e.g.
+     *                   {@link NotificationManager#IMPORTANCE_DEFAULT}.
      */
-    public NotificationChannel(String id, CharSequence name) {
+    public NotificationChannel(String id, CharSequence name, int importance) {
         this.mId = id;
         this.mName = name;
+        this.mImportance = importance;
     }
 
     protected NotificationChannel(Parcel in) {
@@ -77,6 +130,7 @@ public final class NotificationChannel implements Parcelable {
         }
         mLights = in.readByte() != 0;
         mVibration = in.readByte() != 0;
+        mUserLockedFields = in.readInt();
     }
 
     @Override
@@ -99,54 +153,67 @@ public final class NotificationChannel implements Parcelable {
         }
         dest.writeByte(mLights ? (byte) 1 : (byte) 0);
         dest.writeByte(mVibration ? (byte) 1 : (byte) 0);
-    }
-
-    // Only modifiable by users.
-    /**
-     * @hide
-     */
-    @SystemApi
-    public void setName(CharSequence name) {
-        this.mName = name;
+        dest.writeInt(mUserLockedFields);
     }
 
     /**
      * @hide
      */
     @SystemApi
-    public void setImportance(int importance) {
-        this.mImportance = importance;
+    public void lockFields(int field) {
+        mUserLockedFields |= field;
     }
 
+    // Modifiable by a notification ranker.
+
     /**
-     * @hide
+     * Only modifiable by the system and notification ranker.
+     *
+     * Sets whether or not this notification can interrupt the user in
+     * {@link android.app.NotificationManager.Policy#INTERRUPTION_FILTER_PRIORITY} mode.
      */
-    @SystemApi
     public void setBypassDnd(boolean bypassDnd) {
         this.mBypassDnd = bypassDnd;
     }
 
     /**
-     * @hide
+     * Only modifiable by the system and notification ranker.
+     *
+     * Sets whether this notification appears on the lockscreen or not, and if so, whether it
+     * appears in a redacted form. See e.g. {@link Notification#VISIBILITY_SECRET}.
      */
-    @SystemApi
     public void setLockscreenVisibility(int lockscreenVisibility) {
         this.mLockscreenVisibility = lockscreenVisibility;
+    }
+
+    /**
+     * Only modifiable by the system and notification ranker.
+     *
+     * Sets the level of interruption of this notification channel.
+     *
+     * @param importance the amount the user should be interrupted by notifications from this
+     *                   channel. See e.g.
+     *                   {@link android.app.NotificationManager#IMPORTANCE_DEFAULT}.
+     */
+    public void setImportance(int importance) {
+        this.mImportance = importance;
     }
 
     // Modifiable by apps on channel creation.
 
     /**
      * Sets the ringtone that should be played for notifications posted to this channel if
-     * the notifications don't supply a ringtone. Only modifiable on channel creation.
+     * the notifications don't supply a ringtone. Only modifiable before the channel is submitted
+     * to the NotificationManager.
      */
-    public void setDefaultRingtone(Uri defaultRingtone) {
-        this.mRingtone = defaultRingtone;
+    public void setRingtone(Uri ringtone) {
+        this.mRingtone = ringtone;
     }
 
     /**
      * Sets whether notifications posted to this channel should display notification lights,
-     * on devices that support that feature. Only modifiable on channel creation.
+     * on devices that support that feature. Only modifiable before the channel is submitted to
+     * the NotificationManager.
      */
     public void setLights(boolean lights) {
         this.mLights = lights;
@@ -154,7 +221,8 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Sets whether notification posted to this channel should vibrate, even if individual
-     * notifications are marked as having vibration only modifiable on channel creation.
+     * notifications are marked as having vibration only modifiable before the channel is submitted
+     * to the NotificationManager.
      */
     public void setVibration(boolean vibration) {
         this.mVibration = vibration;
@@ -193,7 +261,7 @@ public final class NotificationChannel implements Parcelable {
     /**
      * Returns the notification sound for this channel.
      */
-    public Uri getDefaultRingtone() {
+    public Uri getRingtone() {
         return mRingtone;
     }
 
@@ -212,9 +280,9 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * @hide
+     * Returns whether or not notifications posted to this channel are shown on the lockscreen in
+     * full or redacted form.
      */
-    @SystemApi
     public int getLockscreenVisibility() {
         return mLockscreenVisibility;
     }
@@ -223,15 +291,23 @@ public final class NotificationChannel implements Parcelable {
      * @hide
      */
     @SystemApi
+    public int getUserLockedFields() {
+        return mUserLockedFields;
+    }
+
+    /**
+     * @hide
+     */
+    @SystemApi
     public void populateFromXml(XmlPullParser parser) {
-        // Name and id are set in the constructor.
-        setImportance(safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE));
+        // Name, id, and importance are set in the constructor.
         setBypassDnd(Notification.PRIORITY_DEFAULT
                 != safeInt(parser, ATT_PRIORITY, Notification.PRIORITY_DEFAULT));
         setLockscreenVisibility(safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY));
-        setDefaultRingtone(safeUri(parser, ATT_DEFAULT_RINGTONE));
+        setRingtone(safeUri(parser, ATT_RINGTONE));
         setLights(safeBool(parser, ATT_LIGHTS, false));
         setVibration(safeBool(parser, ATT_VIBRATION, false));
+        lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
     }
 
     /**
@@ -254,8 +330,8 @@ public final class NotificationChannel implements Parcelable {
             out.attribute(null, ATT_VISIBILITY,
                     Integer.toString(getLockscreenVisibility()));
         }
-        if (getDefaultRingtone() != null) {
-            out.attribute(null, ATT_DEFAULT_RINGTONE, getDefaultRingtone().toString());
+        if (getRingtone() != null) {
+            out.attribute(null, ATT_RINGTONE, getRingtone().toString());
         }
         if (shouldShowLights()) {
             out.attribute(null, ATT_LIGHTS, Boolean.toString(shouldShowLights()));
@@ -263,6 +339,10 @@ public final class NotificationChannel implements Parcelable {
         if (shouldVibrate()) {
             out.attribute(null, ATT_VIBRATION, Boolean.toString(shouldVibrate()));
         }
+        if (getUserLockedFields() != 0) {
+            out.attribute(null, ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
+        }
+
         out.endTag(null, TAG_CHANNEL);
     }
 
@@ -284,11 +364,12 @@ public final class NotificationChannel implements Parcelable {
         if (getLockscreenVisibility() != DEFAULT_VISIBILITY) {
             record.put(ATT_VISIBILITY, Notification.visibilityToString(getLockscreenVisibility()));
         }
-        if (getDefaultRingtone() != null) {
-            record.put(ATT_DEFAULT_RINGTONE, getDefaultRingtone().toString());
+        if (getRingtone() != null) {
+            record.put(ATT_RINGTONE, getRingtone().toString());
         }
         record.put(ATT_LIGHTS, Boolean.toString(shouldShowLights()));
         record.put(ATT_VIBRATION, Boolean.toString(shouldVibrate()));
+        record.put(ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
 
         return record;
     }
@@ -342,15 +423,32 @@ public final class NotificationChannel implements Parcelable {
 
         NotificationChannel that = (NotificationChannel) o;
 
-        if (mImportance != that.mImportance) return false;
+        if (getImportance() != that.getImportance()) return false;
         if (mBypassDnd != that.mBypassDnd) return false;
-        if (mLockscreenVisibility != that.mLockscreenVisibility) return false;
+        if (getLockscreenVisibility() != that.getLockscreenVisibility()) return false;
         if (mLights != that.mLights) return false;
         if (mVibration != that.mVibration) return false;
-        if (!mId.equals(that.mId)) return false;
-        if (mName != null ? !mName.equals(that.mName) : that.mName != null) return false;
-        return mRingtone != null ? mRingtone.equals(
-                that.mRingtone) : that.mRingtone == null;
+        if (getUserLockedFields() != that.getUserLockedFields()) return false;
+        if (getId() != null ? !getId().equals(that.getId()) : that.getId() != null) return false;
+        if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null)
+            return false;
+        return getRingtone() != null ? getRingtone().equals(
+                that.getRingtone()) : that.getRingtone() == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getId() != null ? getId().hashCode() : 0;
+        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        result = 31 * result + getImportance();
+        result = 31 * result + (mBypassDnd ? 1 : 0);
+        result = 31 * result + getLockscreenVisibility();
+        result = 31 * result + (getRingtone() != null ? getRingtone().hashCode() : 0);
+        result = 31 * result + (mLights ? 1 : 0);
+        result = 31 * result + (mVibration ? 1 : 0);
+        result = 31 * result + getUserLockedFields();
+        return result;
     }
 
     @Override
@@ -361,22 +459,10 @@ public final class NotificationChannel implements Parcelable {
                 ", mImportance=" + mImportance +
                 ", mBypassDnd=" + mBypassDnd +
                 ", mLockscreenVisibility=" + mLockscreenVisibility +
-                ", mRingtone='" + mRingtone + '\'' +
+                ", mRingtone=" + mRingtone +
                 ", mLights=" + mLights +
                 ", mVibration=" + mVibration +
+                ", mUserLockedFields=" + mUserLockedFields +
                 '}';
-    }
-
-    @Override
-    public int hashCode() {
-        int result = mId.hashCode();
-        result = 31 * result + (mName != null ? mName.hashCode() : 0);
-        result = 31 * result + mImportance;
-        result = 31 * result + (mBypassDnd ? 1 : 0);
-        result = 31 * result + mLockscreenVisibility;
-        result = 31 * result + (mRingtone != null ? mRingtone.hashCode() : 0);
-        result = 31 * result + (mLights ? 1 : 0);
-        result = 31 * result + (mVibration ? 1 : 0);
-        return result;
     }
 }

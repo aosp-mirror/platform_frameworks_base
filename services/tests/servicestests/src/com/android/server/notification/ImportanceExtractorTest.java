@@ -90,8 +90,8 @@ public class ImportanceExtractorTest {
 
         when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
           NotificationManager.IMPORTANCE_MIN);
-        NotificationChannel channel = new NotificationChannel("a", "a");
-        channel.setImportance(NotificationManager.IMPORTANCE_UNSPECIFIED);
+        NotificationChannel channel =
+                new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_UNSPECIFIED);
 
         NotificationRecord r = getNotificationRecord(channel);
 
@@ -107,8 +107,8 @@ public class ImportanceExtractorTest {
 
         when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
           NotificationManager.IMPORTANCE_MIN);
-        NotificationChannel channel = new NotificationChannel("a", "a");
-        channel.setImportance(NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel channel =
+                new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_HIGH);
 
         NotificationRecord r = getNotificationRecord(channel);
 
@@ -124,8 +124,8 @@ public class ImportanceExtractorTest {
 
         when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
           NotificationManager.IMPORTANCE_HIGH);
-        NotificationChannel channel = new NotificationChannel("a", "a");
-        channel.setImportance(NotificationManager.IMPORTANCE_MIN);
+        NotificationChannel channel =
+                new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_MIN);
 
         NotificationRecord r = getNotificationRecord(channel);
 
@@ -141,8 +141,8 @@ public class ImportanceExtractorTest {
 
         when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
           NotificationManager.IMPORTANCE_UNSPECIFIED);
-        NotificationChannel channel = new NotificationChannel("a", "a");
-        channel.setImportance(NotificationManager.IMPORTANCE_MIN);
+        NotificationChannel channel =
+                new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_MIN);
 
         NotificationRecord r = getNotificationRecord(channel);
 
@@ -158,8 +158,8 @@ public class ImportanceExtractorTest {
 
         when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
           NotificationManager.IMPORTANCE_UNSPECIFIED);
-        NotificationChannel channel = new NotificationChannel("a", "a");
-        channel.setImportance(NotificationManager.IMPORTANCE_UNSPECIFIED);
+        NotificationChannel channel =
+                new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_UNSPECIFIED);
 
         NotificationRecord r = getNotificationRecord(channel);
 

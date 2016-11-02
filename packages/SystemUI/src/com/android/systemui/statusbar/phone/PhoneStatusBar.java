@@ -39,6 +39,7 @@ import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -1562,7 +1563,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + notification.getKey());
                 }
             } else if (mNotificationData.getImportance(notification.getKey())
-                    < NotificationListenerService.Ranking.IMPORTANCE_MAX) {
+                    < NotificationManager.IMPORTANCE_HIGH) {
                 if (DEBUG) {
                     Log.d(TAG, "No Fullscreen intent: not important enough: "
                             + notification.getKey());

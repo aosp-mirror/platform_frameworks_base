@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
@@ -186,8 +187,8 @@ public class NotificationData {
         public int compare(Entry a, Entry b) {
             final StatusBarNotification na = a.notification;
             final StatusBarNotification nb = b.notification;
-            int aImportance = Ranking.IMPORTANCE_DEFAULT;
-            int bImportance = Ranking.IMPORTANCE_DEFAULT;
+            int aImportance = NotificationManager.IMPORTANCE_DEFAULT;
+            int bImportance = NotificationManager.IMPORTANCE_DEFAULT;
             int aRank = 0;
             int bRank = 0;
 
@@ -205,13 +206,13 @@ public class NotificationData {
 
             // IMPORTANCE_MIN media streams are allowed to drift to the bottom
             final boolean aMedia = a.key.equals(mediaNotification)
-                    && aImportance > Ranking.IMPORTANCE_MIN;
+                    && aImportance > NotificationManager.IMPORTANCE_MIN;
             final boolean bMedia = b.key.equals(mediaNotification)
-                    && bImportance > Ranking.IMPORTANCE_MIN;
+                    && bImportance > NotificationManager.IMPORTANCE_MIN;
 
-            boolean aSystemMax = aImportance >= Ranking.IMPORTANCE_MAX &&
+            boolean aSystemMax = aImportance >= NotificationManager.IMPORTANCE_HIGH &&
                     isSystemNotification(na);
-            boolean bSystemMax = bImportance >= Ranking.IMPORTANCE_MAX &&
+            boolean bSystemMax = bImportance >= NotificationManager.IMPORTANCE_HIGH &&
                     isSystemNotification(nb);
 
             boolean isHeadsUp = a.row.isHeadsUp();
@@ -318,7 +319,7 @@ public class NotificationData {
             mRankingMap.getRanking(key, mTmpRanking);
             return mTmpRanking.getImportance();
         }
-        return Ranking.IMPORTANCE_UNSPECIFIED;
+        return NotificationManager.IMPORTANCE_UNSPECIFIED;
     }
 
     public String getOverrideGroupKey(String key) {
