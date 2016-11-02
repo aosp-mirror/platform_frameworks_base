@@ -15,6 +15,9 @@
  */
 package com.android.settingslib.drawer;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public final class CategoryKey {
 
     // Activities in this category shows up in Settings homepage.
@@ -33,4 +36,14 @@ public final class CategoryKey {
     public static final String CATEGORY_SECURITY = "com.android.settings.category.ia.security";
     public static final String CATEGORY_ACCOUNT = "com.android.settings.category.ia.accounts";
     public static final String CATEGORY_SYSTEM = "com.android.settings.category.ia.system";
+
+    public static final Map<String, String> KEY_COMPAT_MAP;
+
+    static {
+        KEY_COMPAT_MAP = new HashMap<>();
+        KEY_COMPAT_MAP.put("com.android.settings.category.wireless", CATEGORY_NETWORK);
+        KEY_COMPAT_MAP.put("com.android.settings.category.device", CATEGORY_SYSTEM);
+        KEY_COMPAT_MAP.put("com.android.settings.category.personal", CATEGORY_SYSTEM);
+        KEY_COMPAT_MAP.put("com.android.settings.category.system", CATEGORY_SYSTEM);
+    }
 }
