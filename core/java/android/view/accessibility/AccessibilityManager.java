@@ -353,7 +353,18 @@ public final class AccessibilityManager {
                 return;
             }
             if (!mIsEnabled) {
-                throw new IllegalStateException("Accessibility off. Did you forget to check that?");
+                Looper myLooper = Looper.myLooper();
+                if (myLooper == Looper.getMainLooper()) {
+                    throw new IllegalStateException(
+                            "Accessibility off. Did you forget to check that?");
+                } else {
+                    // If we're not running on the thread with the main looper, it's possible for
+                    // the state of accessibility to change between checking isEnabled and
+                    // calling this method. So just log the error rather than throwing the
+                    // exception.
+                    Log.e(LOG_TAG, "Interrupt called with accessibility disabled");
+                    return;
+                }
             }
             userId = mUserId;
         }
