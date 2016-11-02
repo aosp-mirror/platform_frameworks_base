@@ -53,6 +53,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
@@ -137,9 +139,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * Utility class for keeping track of the WindowStates and other pertinent contents of a
@@ -154,14 +153,24 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /** Unique identifier of this stack. */
     private final int mDisplayId;
 
-    // The display only has 2 child window containers. mTaskStackContainers which contains all
-    // window containers that are related to apps (Activities) and mNonAppWindowContainers which
-    // contains all window containers not related to apps (e.g. Status bar).
+    /** The containers below are the only child containers the display can have. */
+    // Contains all window containers that are related to apps (Activities)
     private final TaskStackContainers mTaskStackContainers = new TaskStackContainers();
-    private final NonAppWindowContainers mNonAppWindowContainers = new NonAppWindowContainers();
+    // Contains all non-app window containers that should be displayed above the app containers
+    // (e.g. Status bar)
+    private final NonAppWindowContainers mAboveAppWindowsContainers =
+            new NonAppWindowContainers("mAboveAppWindowsContainers");
+    // Contains all non-app window containers that should be displayed below the app containers
+    // (e.g. Wallpaper).
+    private final NonAppWindowContainers mBelowAppWindowsContainers =
+            new NonAppWindowContainers("mBelowAppWindowsContainers");
+    // Contains all IME window containers. Note that the z-ordering of the IME windows will depend
+    // on the IME target. We mainly have this container grouping so we can keep track of all the IME
+    // window containers together and move them in-sync if/when needed.
+    private final NonAppWindowContainers mImeWindowsContainers =
+            new NonAppWindowContainers("mImeWindowsContainers");
 
-    /** Z-ordered (bottom-most first) list of all Window objects. Assigned to an element
-     * from mDisplayWindows; */
+    // Z-ordered (bottom-most first) list of all Window objects.
     private final WindowList mWindows = new WindowList();
 
     // Mapping from a token IBinder to a WindowToken object on this display.
@@ -266,8 +275,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDimLayerController = new DimLayerController(this);
 
         // These are the only direct children we should ever have and they are permanent.
+        super.addChild(mBelowAppWindowsContainers, null);
         super.addChild(mTaskStackContainers, null);
-        super.addChild(mNonAppWindowContainers, null);
+        super.addChild(mAboveAppWindowsContainers, null);
+        super.addChild(mImeWindowsContainers, null);
     }
 
     int getDisplayId() {
@@ -301,14 +312,36 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (token.asAppWindowToken() == null) {
             // Add non-app token to container hierarchy on the display. App tokens are added through
             // the parent container managing them (e.g. Tasks).
-            mNonAppWindowContainers.addChild(token, null);
+            switch (token.windowType) {
+                case TYPE_WALLPAPER:
+                    mBelowAppWindowsContainers.addChild(token);
+                    break;
+                case TYPE_INPUT_METHOD:
+                case TYPE_INPUT_METHOD_DIALOG:
+                    mImeWindowsContainers.addChild(token);
+                    break;
+                default:
+                    mAboveAppWindowsContainers.addChild(token);
+                    break;
+            }
         }
     }
 
     WindowToken removeWindowToken(IBinder binder) {
         final WindowToken token = mTokenMap.remove(binder);
         if (token != null && token.asAppWindowToken() == null) {
-            mNonAppWindowContainers.removeChild(token);
+            switch (token.windowType) {
+                case TYPE_WALLPAPER:
+                    mBelowAppWindowsContainers.removeChild(token);
+                    break;
+                case TYPE_INPUT_METHOD:
+                case TYPE_INPUT_METHOD_DIALOG:
+                    mImeWindowsContainers.removeChild(token);
+                    break;
+                default:
+                    mAboveAppWindowsContainers.removeChild(token);
+                    break;
+            }
         }
         return token;
     }
@@ -3076,7 +3109,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Window container class that contains all containers on this display relating to Apps.
      * I.e Activities.
      */
-    private class TaskStackContainers extends DisplayChildWindowContainer<TaskStack> {
+    private final class TaskStackContainers extends DisplayChildWindowContainer<TaskStack> {
 
         void attachStack(TaskStack stack, boolean onTop) {
             if (stack.mStackId == HOME_STACK_ID) {
@@ -3158,7 +3191,28 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Window container class that contains all containers on this display that are not related to
      * Apps. E.g. status bar.
      */
-    private static class NonAppWindowContainers extends DisplayChildWindowContainer<WindowToken> {
+    private final class NonAppWindowContainers extends DisplayChildWindowContainer<WindowToken> {
+        /**
+         * Compares two child window tokens returns -1 if the first is lesser than the second in
+         * terms of z-order and 1 otherwise.
+         */
+        final Comparator<WindowToken> mWindowComparator = (token1, token2) ->
+                // Tokens with higher base layer are z-ordered on-top.
+                mService.mPolicy.windowTypeToLayerLw(token1.windowType)
+                < mService.mPolicy.windowTypeToLayerLw(token2.windowType) ? -1 : 1;
 
+        private final String mName;
+        NonAppWindowContainers(String name) {
+            mName = name;
+        }
+
+        void addChild(WindowToken token) {
+            addChild(token, mWindowComparator);
+        }
+
+        @Override
+        String getName() {
+            return mName;
+        }
     }
 }

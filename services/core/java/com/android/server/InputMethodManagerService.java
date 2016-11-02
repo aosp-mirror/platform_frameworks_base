@@ -16,7 +16,9 @@
 package com.android.server;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import com.android.internal.content.PackageMonitor;
@@ -113,6 +115,7 @@ import android.view.InputChannel;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerInternal;
 import android.view.inputmethod.EditorInfo;
@@ -468,6 +471,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private AlertDialog.Builder mDialogBuilder;
     private AlertDialog mSwitchingDialog;
+    private IBinder mSwitchingDialogToken = new Binder();
     private View mSwitchingDialogTitleView;
     private Toast mSubtypeSwitchedByShortCutToast;
     private InputMethodInfo[] mIms;
@@ -3288,11 +3292,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             mSwitchingDialog = mDialogBuilder.create();
             mSwitchingDialog.setCanceledOnTouchOutside(true);
-            mSwitchingDialog.getWindow().setType(
-                    WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG);
-            mSwitchingDialog.getWindow().getAttributes().privateFlags |=
-                    WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-            mSwitchingDialog.getWindow().getAttributes().setTitle("Select input method");
+            final Window w = mSwitchingDialog.getWindow();
+            final WindowManager.LayoutParams attrs = w.getAttributes();
+            w.setType(TYPE_INPUT_METHOD_DIALOG);
+            // Use an alternate token for the dialog for that window manager can group the token
+            // with other IME windows based on type vs. grouping based on whichever token happens
+            // to get selected by the system later on.
+            attrs.token = mSwitchingDialogToken;
+            attrs.privateFlags |= PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+            attrs.setTitle("Select input method");
+            w.setAttributes(attrs);
             updateSystemUi(mCurToken, mImeWindowVis, mBackDisposition);
             mSwitchingDialog.show();
         }
