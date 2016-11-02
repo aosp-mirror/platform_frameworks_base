@@ -2760,6 +2760,10 @@
         <public name="font" />
         <public name="fontWeight" />
         <public name="tooltip" />
+        <public name="autoSizeText" />
+        <public name="autoSizeStepGranularity" />
+        <public name="autoSizeStepSizeSet" />
+        <public name="autoSizeMinTextSize" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
