@@ -23,6 +23,7 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -697,23 +698,23 @@ public class PackageParser {
     public static PackageLite parsePackageLite(File packageFile, int flags)
             throws PackageParserException {
         if (packageFile.isDirectory()) {
-            return parseClusterPackageLite(packageFile, flags);
+            return parseClusterPackageLite(packageFile, flags, null);
         } else {
-            return parseMonolithicPackageLite(packageFile, flags);
+            return parseMonolithicPackageLite(packageFile, flags, null);
         }
     }
 
-    private static PackageLite parseMonolithicPackageLite(File packageFile, int flags)
-            throws PackageParserException {
+    private static PackageLite parseMonolithicPackageLite(File packageFile, int flags,
+            AssetManager cachedAssetManager) throws PackageParserException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parseApkLite");
-        final ApkLite baseApk = parseApkLite(packageFile, flags);
+        final ApkLite baseApk = parseApkLite(packageFile, flags, cachedAssetManager);
         final String packagePath = packageFile.getAbsolutePath();
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         return new PackageLite(packagePath, baseApk, null, null, null);
     }
 
-    private static PackageLite parseClusterPackageLite(File packageDir, int flags)
-            throws PackageParserException {
+    private static PackageLite parseClusterPackageLite(File packageDir, int flags,
+            AssetManager cachedAssetManager) throws PackageParserException {
         final File[] files = packageDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
@@ -727,7 +728,7 @@ public class PackageParser {
         final ArrayMap<String, ApkLite> apks = new ArrayMap<>();
         for (File file : files) {
             if (isApkFile(file)) {
-                final ApkLite lite = parseApkLite(file, flags);
+                final ApkLite lite = parseApkLite(file, flags, cachedAssetManager);
 
                 // Assert that all package names and version codes are
                 // consistent with the first one we encounter.
@@ -820,16 +821,16 @@ public class PackageParser {
      * must be done separately in {@link #collectCertificates(Package, int)}.
      */
     private Package parseClusterPackage(File packageDir, int flags) throws PackageParserException {
-        final PackageLite lite = parseClusterPackageLite(packageDir, 0);
+        final AssetManager assets = newConfiguredAssetManager();
+        final PackageLite lite = parseClusterPackageLite(packageDir, 0, assets);
 
         if (mOnlyCoreApps && !lite.coreApp) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
                     "Not a coreApp: " + packageDir);
         }
 
-        final AssetManager assets = new AssetManager();
         try {
-            // Load the base and all splits into the AssetManager
+            // Load all splits into the AssetManager (base has already been loaded earlier)
             // so that resources can be overriden when parsing the manifests.
             loadApkIntoAssetManager(assets, lite.baseCodePath, flags);
 
@@ -879,7 +880,8 @@ public class PackageParser {
      */
     @Deprecated
     public Package parseMonolithicPackage(File apkFile, int flags) throws PackageParserException {
-        final PackageLite lite = parseMonolithicPackageLite(apkFile, flags);
+        final AssetManager assets = newConfiguredAssetManager();
+        final PackageLite lite = parseMonolithicPackageLite(apkFile, flags, assets);
         if (mOnlyCoreApps) {
             if (!lite.coreApp) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
@@ -887,7 +889,6 @@ public class PackageParser {
             }
         }
 
-        final AssetManager assets = new AssetManager();
         try {
             final Package pkg = parseBaseApk(apkFile, assets, flags);
             pkg.setCodePath(apkFile.getAbsolutePath());
@@ -937,8 +938,6 @@ public class PackageParser {
         XmlResourceParser parser = null;
         try {
             res = new Resources(assets, mMetrics, null);
-            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    Build.VERSION.RESOURCES_SDK_INT);
             parser = assets.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
 
             final String[] outError = new String[1];
@@ -1304,6 +1303,13 @@ public class PackageParser {
         return res;
     }
 
+    private static AssetManager newConfiguredAssetManager() {
+        AssetManager assetManager = new AssetManager();
+        assetManager.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                Build.VERSION.RESOURCES_SDK_INT);
+        return assetManager;
+    }
+
     /**
      * Utility method that retrieves lightweight details about a single APK
      * file, including package name, split name, and install location.
@@ -1314,15 +1320,17 @@ public class PackageParser {
      */
     public static ApkLite parseApkLite(File apkFile, int flags)
             throws PackageParserException {
+        return parseApkLite(apkFile, flags, null);
+    }
+
+    private static ApkLite parseApkLite(File apkFile, int flags,
+            @Nullable AssetManager cachedAssetManager) throws PackageParserException {
         final String apkPath = apkFile.getAbsolutePath();
 
         AssetManager assets = null;
         XmlResourceParser parser = null;
         try {
-            assets = new AssetManager();
-            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    Build.VERSION.RESOURCES_SDK_INT);
-
+            assets = cachedAssetManager == null ? newConfiguredAssetManager() : cachedAssetManager;
             int cookie = assets.addAssetPath(apkPath);
             if (cookie == 0) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
@@ -1361,7 +1369,9 @@ public class PackageParser {
                     "Failed to parse " + apkPath, e);
         } finally {
             IoUtils.closeQuietly(parser);
-            IoUtils.closeQuietly(assets);
+            if (cachedAssetManager == null) {
+                IoUtils.closeQuietly(assets);
+            }
         }
     }
 
