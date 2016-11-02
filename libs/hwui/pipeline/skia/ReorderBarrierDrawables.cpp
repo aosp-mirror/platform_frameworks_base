@@ -23,7 +23,7 @@
 #include <SkBlurMaskFilter.h>
 #include <SkGaussianEdgeShader.h>
 #include <SkPathOps.h>
-#include <SkRRectsGaussianEdgeShader.h>
+#include <SkRRectsGaussianEdgeMaskFilter.h>
 
 namespace android {
 namespace uirenderer {
@@ -341,7 +341,7 @@ static void DrawRRectShadows(const SkRect& casterRect, SkScalar casterCornerRadi
         paint.setAntiAlias(true);
 
         // If the area of the stroked geometry is larger than the fill geometry, just fill it.
-        if (strokedArea > filledArea || casterAlpha < 1.0f) {
+        if (strokedArea > filledArea || casterAlpha < 1.0f || insetAmount < 0.0f) {
             paint.setStyle(SkPaint::kStrokeAndFill_Style);
             paint.setStrokeWidth(srcSpaceSpotRadius);
         } else {
@@ -433,8 +433,8 @@ static void DrawRRectShadowsWithClip(const SkRect& casterRect, SkScalar casterCo
 
         SkPaint paint;
         paint.setColor(SkColorSetARGB((unsigned char) ambientAlpha, 0, 0, 0));
-        paint.setShader(SkRRectsGaussianEdgeShader::Make(devSpaceAmbientRRect,
-                devSpaceAmbientClipRR, devSpaceAmbientRadius));
+        paint.setMaskFilter(SkRRectsGaussianEdgeMaskFilter::Make(devSpaceAmbientRRect,
+            devSpaceAmbientClipRR, devSpaceAmbientRadius));
         canvas->drawRect(cover, paint);
     }
 
@@ -514,8 +514,8 @@ static void DrawRRectShadowsWithClip(const SkRect& casterRect, SkScalar casterCo
             devSpaceSpotClipRR = SkRRect::MakeRect(devSpaceScaledClipRect);
         }
 
-        paint.setShader(SkRRectsGaussianEdgeShader::Make(devSpaceSpotRRect, devSpaceSpotClipRR,
-                devSpaceSpotRadius));
+        paint.setMaskFilter(SkRRectsGaussianEdgeMaskFilter::Make(devSpaceSpotRRect,
+            devSpaceSpotClipRR, devSpaceSpotRadius));
 
         SkRect cover = srcSpaceScaledClipRect;
         if (!cover.intersect(srcSpaceSpotRRect.rect())) {
@@ -556,8 +556,8 @@ static bool DrawShadowsAsRRects(const SkRect& casterRect, SkScalar casterCornerR
         return false;
     }
 
-    // The casterClipRect will contain the casterRect when bounds clipping is disabled
-    bool casterIsClippedByRect = !casterClipRect.contains(casterRect);
+    // The casterClipRect will be empty when bounds clipping is disabled
+    bool casterIsClippedByRect = !casterClipRect.isEmpty();
     bool uniformScale = scaleFactors[0] == scaleFactors[1];
 
     if (revealClip.willClip()) {
@@ -639,11 +639,15 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
 
     bool clippedToBounds = casterProperties.getClippingFlags() & CLIP_TO_CLIP_BOUNDS;
 
-    SkRect casterClipRect = SkRect::MakeLargest();
+    SkRect casterClipRect = SkRect::MakeEmpty();
     if (clippedToBounds) {
         Rect clipBounds;
         casterProperties.getClippingRectForFlags(CLIP_TO_CLIP_BOUNDS, &clipBounds);
         casterClipRect = clipBounds.toSkRect();
+        if (casterClipRect.isEmpty()) {
+            // An empty clip rect means nothing is drawn
+            return;
+        }
     }
 
     SkAutoCanvasRestore acr(canvas, true);

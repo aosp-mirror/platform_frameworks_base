@@ -15,6 +15,7 @@
  */
 
 #include "LayerDrawable.h"
+#include "SkColorFilter.h"
 #include "gl/GrGLTypes.h"
 
 namespace android {
@@ -40,12 +41,12 @@ void LayerDrawable::onDraw(SkCanvas* canvas) {
     textureDescription.fConfig = kRGBA_8888_GrPixelConfig;
     textureDescription.fOrigin = kTopLeft_GrSurfaceOrigin;
     textureDescription.fTextureHandle = reinterpret_cast<GrBackendObject>(&externalTexture);
-    sk_sp<SkImage> layerImage(SkImage::NewFromTexture(context, textureDescription));
+    sk_sp<SkImage> layerImage = SkImage::MakeFromTexture(context, textureDescription);
     if (layerImage) {
         SkPaint paint;
         paint.setAlpha(mLayer->getAlpha());
         paint.setBlendMode(mLayer->getMode());
-        paint.setColorFilter(mLayer->getColorFilter());
+        paint.setColorFilter(sk_ref_sp(mLayer->getColorFilter()));
         canvas->drawImage(layerImage, 0, 0, &paint);
     }
     // restore the original matrix
