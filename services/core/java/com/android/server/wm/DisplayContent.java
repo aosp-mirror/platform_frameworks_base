@@ -928,7 +928,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     + " mLayoutNeeded=" + mLayoutNeeded);
 
         pw.println();
-        pw.println("  Application tokens in top down Z order:");
+        pw.println(prefix + "Application tokens in top down Z order:");
         for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.get(stackNdx);
             stack.dump(prefix + "  ", pw);
@@ -947,11 +947,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
         pw.println();
-        mDimLayerController.dump(prefix + "  ", pw);
+        mDimLayerController.dump(prefix, pw);
         pw.println();
-        mDividerControllerLocked.dump(prefix + "  ", pw);
+        mDividerControllerLocked.dump(prefix, pw);
         pw.println();
-        mPinnedStackControllerLocked.dump(prefix + "  ", pw);
+        mPinnedStackControllerLocked.dump(prefix, pw);
 
         if (mInputMethodAnimLayerAdjustment != 0) {
             pw.println(subPrefix
