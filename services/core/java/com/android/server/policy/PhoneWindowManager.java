@@ -1042,6 +1042,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void interceptBackKeyDown() {
+        MetricsLogger.count(mContext, "key_back_down", 1);
         // Reset back key state for long press
         mBackKeyHandled = false;
 
