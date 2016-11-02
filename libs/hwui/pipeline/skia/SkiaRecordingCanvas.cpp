@@ -107,7 +107,7 @@ void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
     }
 
     // record the child node
-    mDisplayList->mChildNodes.emplace_back(renderNode, asSkCanvas());
+    mDisplayList->mChildNodes.emplace_back(renderNode, asSkCanvas(), true, mCurrentBarrier);
     drawDrawable(&mDisplayList->mChildNodes.back());
 
     // use staging property, since recording on UI thread

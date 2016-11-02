@@ -56,10 +56,12 @@ public:
      *      we should draw into the contents of the layer or compose the existing contents of the
      *      layer into the canvas.
      */
-    explicit RenderNodeDrawable(RenderNode* node, SkCanvas* canvas, bool composeLayer = true)
+    explicit RenderNodeDrawable(RenderNode* node, SkCanvas* canvas, bool composeLayer = true,
+            bool inReorderingSection = false)
             : mRenderNode(node)
             , mRecordedTransform(canvas->getTotalMatrix())
-            , mComposeLayer(composeLayer) {}
+            , mComposeLayer(composeLayer)
+            , mInReorderingSection(inReorderingSection) {}
 
     /**
      * Draws into the canvas this render node and its children. If the node is marked as a
@@ -136,6 +138,11 @@ private:
      * parent when looking for a projection receiver.
      */
     std::vector<ProjectedChild>* mNextProjectedChildrenTarget = nullptr;
+
+    /*
+     * True if the render node is in a reordering section
+     */
+    bool mInReorderingSection;
 
     /*
      *  Draw the content into a canvas, depending on the render node layer type and mComposeLayer.

@@ -51,85 +51,56 @@ TEST(RenderNodeDrawable, create) {
     ASSERT_EQ(drawable.getRecordedMatrix(), canvas.getTotalMatrix());
 }
 
-TEST(RenderNodeDrawable, drawContent) {
-    auto surface = SkSurface::MakeRasterN32Premul(1, 1);
-    SkCanvas& canvas = *surface->getCanvas();
-    canvas.drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-
-    //create a RenderNodeDrawable backed by a RenderNode backed by a SkLiteRecorder
-    auto rootNode = TestUtils::createSkiaNode(0, 0, 1, 1,
-        [](RenderProperties& props, SkiaRecordingCanvas& recorder) {
-            recorder.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
-        });
-    RenderNodeDrawable drawable(rootNode.get(), &canvas, false);
-
-    //negative and positive Z order are drawn out of order
-    rootNode->animatorProperties().setElevation(10.0f);
-    canvas.drawDrawable(&drawable);
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-    rootNode->animatorProperties().setElevation(-10.0f);
-    canvas.drawDrawable(&drawable);
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-
-    //zero Z are drawn immediately
-    rootNode->animatorProperties().setElevation(0.0f);
-    canvas.drawDrawable(&drawable);
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
+static void drawOrderedRect(Canvas* canvas, uint8_t expectedDrawOrder) {
+    SkPaint paint;
+    // order put in blue channel, transparent so overlapped content doesn't get rejected
+    paint.setColor(SkColorSetARGB(1, 0, 0, expectedDrawOrder));
+    canvas->drawRect(0, 0, 100, 100, paint);
 }
 
-//TODO: another test that verifies equal z values are drawn in order, and barriers prevent Z
-//intermixing (model after FrameBuilder zReorder)
-TEST(RenderNodeDrawable, drawAndReorder) {
-    //this test exercises StartReorderBarrierDrawable, EndReorderBarrierDrawable and
-    //SkiaRecordingCanvas
-    auto surface = SkSurface::MakeRasterN32Premul(4, 4);
-    SkCanvas& canvas = *surface->getCanvas();
+static void drawOrderedNode(Canvas* canvas, uint8_t expectedDrawOrder, float z) {
+    auto node = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [expectedDrawOrder, z](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedRect(&canvas, expectedDrawOrder);
+        props.setTranslationZ(z);
+    });
+    canvas->drawRenderNode(node.get()); // canvas takes reference/sole ownership
+}
 
-    canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
+TEST(RenderNodeDrawable, zReorder) {
+    class ZReorderCanvas : public SkCanvas {
+    public:
+        ZReorderCanvas(int width, int height) : SkCanvas(width, height) {}
+        void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
+            int expectedOrder = SkColorGetB(paint.getColor()); // extract order from blue channel
+            EXPECT_EQ(expectedOrder, mIndex++) << "An op was drawn out of order";
+        }
+        int getIndex() { return mIndex; }
+    protected:
+        int mIndex = 0;
+    };
 
-    //-z draws to all 4 pixels (RED)
-    auto redNode = TestUtils::createSkiaNode(0, 0, 4, 4,
-        [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
-            redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
-            props.setElevation(-10.0f);
-        }, "redNode");
+    auto parent = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, 10.0f); // in reorder=false at this point, so played inorder
+        drawOrderedRect(&canvas, 1);
+        canvas.insertReorderBarrier(true);
+        drawOrderedNode(&canvas, 6, 2.0f);
+        drawOrderedRect(&canvas, 3);
+        drawOrderedNode(&canvas, 4, 0.0f);
+        drawOrderedRect(&canvas, 5);
+        drawOrderedNode(&canvas, 2, -2.0f);
+        drawOrderedNode(&canvas, 7, 2.0f);
+        canvas.insertReorderBarrier(false);
+        drawOrderedRect(&canvas, 8);
+        drawOrderedNode(&canvas, 9, -10.0f); // in reorder=false at this point, so played inorder
+    });
 
-    //0z draws to bottom 2 pixels (GREEN)
-    auto bottomHalfGreenNode = TestUtils::createSkiaNode(0, 0, 4, 4,
-            [](RenderProperties& props, SkiaRecordingCanvas& bottomHalfGreenCanvas) {
-                SkPaint greenPaint;
-                greenPaint.setColor(SK_ColorGREEN);
-                greenPaint.setStyle(SkPaint::kFill_Style);
-                bottomHalfGreenCanvas.drawRect(0, 2, 4, 4, greenPaint);
-                props.setElevation(0.0f);
-            }, "bottomHalfGreenNode");
-
-    //+z draws to right 2 pixels (BLUE)
-    auto rightHalfBlueNode = TestUtils::createSkiaNode(0, 0, 4, 4,
-        [](RenderProperties& props, SkiaRecordingCanvas& rightHalfBlueCanvas) {
-            SkPaint bluePaint;
-            bluePaint.setColor(SK_ColorBLUE);
-            bluePaint.setStyle(SkPaint::kFill_Style);
-            rightHalfBlueCanvas.drawRect(2, 0, 4, 4, bluePaint);
-            props.setElevation(10.0f);
-        }, "rightHalfBlueNode");
-
-    auto rootNode = TestUtils::createSkiaNode(0, 0, 4, 4,
-            [&](RenderProperties& props, SkiaRecordingCanvas& rootRecorder) {
-                rootRecorder.insertReorderBarrier(true);
-                //draw in reverse Z order, so Z alters draw order
-                rootRecorder.drawRenderNode(rightHalfBlueNode.get());
-                rootRecorder.drawRenderNode(bottomHalfGreenNode.get());
-                rootRecorder.drawRenderNode(redNode.get());
-            }, "rootNode");
-
-    RenderNodeDrawable drawable3(rootNode.get(), &canvas, false);
-    canvas.drawDrawable(&drawable3);
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 3), SK_ColorGREEN);
-    ASSERT_EQ(TestUtils::getColor(surface, 3, 3), SK_ColorBLUE);
+    //create a canvas not backed by any device/pixels, but with dimensions to avoid quick rejection
+    ZReorderCanvas canvas(100, 100);
+    RenderNodeDrawable drawable(parent.get(), &canvas, false);
+    canvas.drawDrawable(&drawable);
+    EXPECT_EQ(10, canvas.getIndex());
 }
 
 TEST(RenderNodeDrawable, composeOnLayer)
