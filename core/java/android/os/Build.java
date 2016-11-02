@@ -755,6 +755,11 @@ public class Build {
          * N MR1: Nougat++.
          */
         public static final int N_MR1 = 25;
+
+        /**
+         * O.
+         */
+        public static final int O = CUR_DEVELOPMENT; // STOPSHIP Replace with the real version.
     }
 
     /** The type of build, like "user" or "eng". */
