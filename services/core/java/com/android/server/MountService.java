@@ -169,6 +169,11 @@ class MountService extends IMountService.Stub
         }
 
         @Override
+        public void onSwitchUser(int userHandle) {
+            mMountService.mCurrentUserId = userHandle;
+        }
+
+        @Override
         public void onStartUser(int userHandle) {
             mMountService.onStartUser(userHandle);
         }
@@ -306,6 +311,8 @@ class MountService extends IMountService.Stub
     private IPackageMoveObserver mMoveCallback;
     @GuardedBy("mLock")
     private String mMoveTargetUuid;
+
+    private volatile int mCurrentUserId = UserHandle.USER_OWNER;
 
     private VolumeInfo findVolumeByIdOrThrow(String id) {
         synchronized (mLock) {
@@ -1189,7 +1196,7 @@ class MountService extends IMountService.Stub
                 vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
             }
 
-            vol.mountUserId = UserHandle.USER_OWNER;
+            vol.mountUserId = mCurrentUserId;
             mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
 
         } else if (vol.type == VolumeInfo.TYPE_PRIVATE) {
