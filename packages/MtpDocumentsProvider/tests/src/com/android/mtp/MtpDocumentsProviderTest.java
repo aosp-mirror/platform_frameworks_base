@@ -546,7 +546,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testOpenDocument_writing() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         setupRoots(0, new MtpRoot[] {
-                new MtpRoot(0, 0, "Storage", 0, 0, "")
+                new MtpRoot(0, 100, "Storage", 0, 0, "")
         });
         final String documentId = mProvider.createDocument("2", "text/plain", "test.txt");
         {
@@ -685,6 +685,29 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 cursor.moveToNext();
                 assertEquals(String.valueOf(documentIdOffset + i + 1), cursor.getString(0));
             }
+        }
+    }
+
+    public void testCreateDocument() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        setupRoots(0, new MtpRoot[] {
+                new MtpRoot(0, 100, "Storage A", 100, 100, null)
+        });
+        final String documentId = mProvider.createDocument("1", "text/plain", "note.txt");
+        final Uri deviceUri = DocumentsContract.buildChildDocumentsUri(
+                MtpDocumentsProvider.AUTHORITY, "1");
+        final Uri storageUri = DocumentsContract.buildChildDocumentsUri(
+                MtpDocumentsProvider.AUTHORITY, "2");
+        mResolver.waitForNotification(storageUri, 1);
+        mResolver.waitForNotification(deviceUri, 1);
+        try (final Cursor cursor = mProvider.queryDocument(documentId, null)) {
+            assertTrue(cursor.moveToNext());
+            assertEquals(
+                    "note.txt",
+                    cursor.getString(cursor.getColumnIndex(Document.COLUMN_DISPLAY_NAME)));
+            assertEquals(
+                    "text/plain",
+                    cursor.getString(cursor.getColumnIndex(Document.COLUMN_MIME_TYPE)));
         }
     }
 
