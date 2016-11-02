@@ -30,13 +30,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
-import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -104,7 +101,7 @@ public class DozeSensors {
         return null;
     }
 
-    public void setListen(boolean listen) {
+    public void setListening(boolean listen) {
         for (TriggerSensor s : mSensors) {
             s.setListening(listen);
             if (listen) {
@@ -209,8 +206,7 @@ public class DozeSensors {
         @AnyThread
         public void onTrigger(TriggerEvent event) {
             mHandler.post(mWakeLock.wrap(() -> {
-                if (DEBUG)
-                    Log.d(TAG, "onTrigger: " + triggerEventToString(event));
+                if (DEBUG) Log.d(TAG, "onTrigger: " + triggerEventToString(event));
                 boolean sensorPerformsProxCheck = false;
                 if (mSensor.getType() == Sensor.TYPE_PICK_UP_GESTURE) {
                     int subType = (int) event.values[0];
@@ -250,6 +246,12 @@ public class DozeSensors {
     }
 
     public interface Callback {
+
+        /**
+         * Called when a sensor requests a pulse
+         * @param pulseReason Requesting sensor, e.g. {@link DozeLog#PULSE_REASON_SENSOR_PICKUP}
+         * @param sensorPerformedProxCheck true if the sensor already checked for FAR proximity.
+         */
         void onSensorPulse(int pulseReason, boolean sensorPerformedProxCheck);
     }
 }
