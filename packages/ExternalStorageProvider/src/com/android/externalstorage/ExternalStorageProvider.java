@@ -445,7 +445,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     @Override
-    public Path findPath(String childDocId, @Nullable String parentDocId)
+    public Path findDocumentPath(String childDocId, @Nullable String parentDocId)
             throws FileNotFoundException {
         LinkedList<String> path = new LinkedList<>();
 
