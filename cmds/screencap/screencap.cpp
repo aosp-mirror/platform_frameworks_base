@@ -177,7 +177,7 @@ int main(int argc, char** argv)
         if (png) {
             const SkImageInfo info = SkImageInfo::Make(w, h, flinger2skia(f),
                                                        kPremul_SkAlphaType);
-            SkAutoTUnref<SkData> data(SkImageEncoder::EncodeData(info, base, s*bytesPerPixel(f),
+            sk_sp<SkData> data(SkImageEncoder::EncodeData(info, base, s*bytesPerPixel(f),
                     SkImageEncoder::kPNG_Type, SkImageEncoder::kDefaultQuality));
             if (data.get()) {
                 write(fd, data->data(), data->size());

@@ -315,7 +315,7 @@ private:
     const ClipBase* mDeferredBarrierClip = nullptr;
     DisplayList* mDisplayList = nullptr;
     bool mHighContrastText = false;
-    SkAutoTUnref<SkDrawFilter> mDrawFilter;
+    sk_sp<SkDrawFilter> mDrawFilter;
 }; // class RecordingCanvas
 
 }; // namespace uirenderer

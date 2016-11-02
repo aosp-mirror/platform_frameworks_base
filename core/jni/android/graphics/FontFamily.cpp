@@ -106,7 +106,7 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, 
     SkFontMgr::FontParameters params;
     params.setCollectionIndex(ttcIndex);
 
-    SkAutoTUnref<SkFontMgr> fm(SkFontMgr::RefDefault());
+    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
     sk_sp<SkTypeface> face(fm->createFromStream(fontData.release(), params));
     if (face == NULL) {
         ALOGE("addFont failed to create font");
@@ -172,7 +172,7 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
     params.setCollectionIndex(ttcIndex);
     params.setAxes(skiaAxes.get(), skiaAxesLength);
 
-    SkAutoTUnref<SkFontMgr> fm(SkFontMgr::RefDefault());
+    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
     sk_sp<SkTypeface> face(fm->createFromStream(fontData.release(), params));
     if (face == NULL) {
         ALOGE("addFont failed to create font, invalid request");
@@ -216,7 +216,7 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
     sk_sp<SkData> data(SkData::MakeWithProc(buf, asset->getLength(), releaseAsset, asset));
     std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
 
-    SkAutoTUnref<SkFontMgr> fm(SkFontMgr::RefDefault());
+    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
     sk_sp<SkTypeface> face(fm->createFromStream(fontData.release(), SkFontMgr::FontParameters()));
     if (face == NULL) {
         ALOGE("addFontFromAsset failed to create font %s", str.c_str());
