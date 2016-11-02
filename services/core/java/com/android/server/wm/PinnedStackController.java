@@ -34,7 +34,7 @@ import android.util.Log;
 import android.util.Size;
 import android.util.Slog;
 import android.util.TypedValue;
-import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
@@ -68,8 +68,10 @@ class PinnedStackController {
     private boolean mInInteractiveMode;
     private boolean mIsImeShowing;
     private int mImeHeight;
-    private final Rect mPreImeShowingBounds = new Rect();
     private ValueAnimator mBoundsAnimator = null;
+
+    // Used to calculate stack bounds across rotations
+    private final DisplayInfo mDisplayInfo = new DisplayInfo();
 
     // The size and position information that describes where the pinned stack will go by default.
     private int mDefaultStackGravity;
@@ -93,7 +95,6 @@ class PinnedStackController {
                     mBoundsAnimator.cancel();
                 }
                 mInInteractiveMode = inInteractiveMode;
-                mPreImeShowingBounds.setEmpty();
             });
         }
     }
@@ -116,6 +117,7 @@ class PinnedStackController {
         mDisplayContent = displayContent;
         mSnapAlgorithm = new PipSnapAlgorithm(service.mContext);
         mMotionHelper = new PipMotionHelper(BackgroundThread.getHandler());
+        mDisplayInfo.copyFrom(mDisplayContent.getDisplayInfo());
         reloadResources();
     }
 
@@ -159,12 +161,8 @@ class PinnedStackController {
      * @return the default bounds to show the PIP when there is no active PIP.
      */
     Rect getDefaultBounds() {
-        final Display display = mDisplayContent.getDisplay();
         final Rect insetBounds = new Rect();
-        final Point displaySize = new Point();
-        display.getRealSize(displaySize);
-        mService.getStableInsetsLocked(mDisplayContent.getDisplayId(), mTmpInsets);
-        getInsetBounds(displaySize, mTmpInsets, insetBounds);
+        getInsetBounds(insetBounds);
 
         final Rect defaultBounds = new Rect();
         Gravity.apply(mDefaultStackGravity, mDefaultStackSize.getWidth(),
@@ -177,12 +175,16 @@ class PinnedStackController {
      *         controller.
      */
     Rect getMovementBounds(Rect stackBounds) {
-        final Display display = mDisplayContent.getDisplay();
+        return getMovementBounds(stackBounds, true /* adjustForIme */);
+    }
+
+    /**
+     * @return the movement bounds for the given {@param stackBounds} and the current state of the
+     *         controller.
+     */
+    Rect getMovementBounds(Rect stackBounds, boolean adjustForIme) {
         final Rect movementBounds = new Rect();
-        final Point displaySize = new Point();
-        display.getRealSize(displaySize);
-        mService.getStableInsetsLocked(mDisplayContent.getDisplayId(), mTmpInsets);
-        getInsetBounds(displaySize, mTmpInsets, movementBounds);
+        getInsetBounds(movementBounds);
 
         // Adjust the right/bottom to ensure the stack bounds never goes offscreen
         movementBounds.right = Math.max(movementBounds.left, movementBounds.right -
@@ -190,30 +192,34 @@ class PinnedStackController {
         movementBounds.bottom = Math.max(movementBounds.top, movementBounds.bottom -
                 stackBounds.height());
 
-        // Adjust the top if the ime is open
-        if (mIsImeShowing) {
-            movementBounds.bottom -= mImeHeight;
+        // Apply the movement bounds adjustments based on the current state
+        if (adjustForIme) {
+            if (mIsImeShowing) {
+                movementBounds.bottom -= mImeHeight;
+            }
         }
-
         return movementBounds;
     }
 
     /**
-     * @return the PIP bounds given it's bounds pre-rotation, and post-rotation (with as applied
-     * by the display content, which currently transposes the dimensions but keeps each stack in
-     * the same physical space on the device).
+     * @return the repositioned PIP bounds given it's pre-change bounds, and the new display info.
      */
-    Rect getPostRotationBounds(Rect preRotationStackBounds, Rect postRotationStackBounds) {
-        // Keep the pinned stack in the same aspect ratio as in the old orientation, but
-        // move it into the position in the rotated space, and snap to the closest space
-        // in the new orientation.
-        final Rect movementBounds = getMovementBounds(preRotationStackBounds);
-        final int stackWidth = preRotationStackBounds.width();
-        final int stackHeight = preRotationStackBounds.height();
-        final int left = postRotationStackBounds.centerX() - (stackWidth / 2);
-        final int top = postRotationStackBounds.centerY() - (stackHeight / 2);
-        final Rect postRotBounds = new Rect(left, top, left + stackWidth, top + stackHeight);
-        return mSnapAlgorithm.findClosestSnapBounds(movementBounds, postRotBounds);
+    Rect onDisplayChanged(Rect preChangeStackBounds, DisplayInfo displayInfo) {
+        final Rect postChangeStackBounds = new Rect(preChangeStackBounds);
+        if (!mDisplayInfo.equals(displayInfo)) {
+            // Calculate the snap fraction of the current stack along the old movement bounds, and
+            // then update the stack bounds to the same fraction along the rotated movement bounds.
+            final Rect preChangeMovementBounds = getMovementBounds(preChangeStackBounds);
+            final float snapFraction = mSnapAlgorithm.getSnapFraction(preChangeStackBounds,
+                    preChangeMovementBounds);
+            mDisplayInfo.copyFrom(displayInfo);
+
+            final Rect postChangeMovementBounds = getMovementBounds(preChangeStackBounds,
+                    false /* adjustForIme */);
+            mSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
+                    snapFraction);
+        }
+        return postChangeStackBounds;
     }
 
     /**
@@ -228,7 +234,6 @@ class PinnedStackController {
         final Rect stackBounds = new Rect();
         mService.getStackBounds(PINNED_STACK_ID, stackBounds);
         final Rect prevMovementBounds = getMovementBounds(stackBounds);
-        final boolean wasAdjustedForIme = mIsImeShowing;
         mIsImeShowing = adjustedForIme;
         mImeHeight = imeHeight;
         if (mInInteractiveMode) {
@@ -238,31 +243,17 @@ class PinnedStackController {
         } else {
             // Otherwise, we can move the PIP to a sane location to ensure that it does not block
             // the user from interacting with the IME
-            Rect toBounds;
-            if (!wasAdjustedForIme && adjustedForIme) {
-                // If we are showing the IME, then store the previous bounds
-                mPreImeShowingBounds.set(stackBounds);
-                toBounds = adjustBoundsInMovementBounds(stackBounds);
-            } else if (wasAdjustedForIme && !adjustedForIme) {
-                if (!mPreImeShowingBounds.isEmpty()) {
-                    // If we are hiding the IME and the user is not interacting with the PIP, restore
-                    // the previous bounds
-                    toBounds = mPreImeShowingBounds;
-                } else {
-                    if (stackBounds.top == prevMovementBounds.bottom) {
-                        // If the PIP is resting on top of the IME, then adjust it with the hiding
-                        // of the IME
-                        final Rect movementBounds = getMovementBounds(stackBounds);
-                        toBounds = new Rect(stackBounds);
-                        toBounds.offsetTo(toBounds.left, movementBounds.bottom);
-                    } else {
-                        // Otherwise, leave the PIP in place
-                        toBounds = stackBounds;
-                    }
-                }
+            final Rect movementBounds = getMovementBounds(stackBounds);
+            final Rect toBounds = new Rect(stackBounds);
+            if (adjustedForIme) {
+                // IME visible
+                toBounds.offset(0, Math.min(0, movementBounds.bottom - stackBounds.top));
             } else {
-                // Otherwise, the IME bounds have changed so we need to adjust the PIP bounds also
-                toBounds = adjustBoundsInMovementBounds(stackBounds);
+                // IME hidden
+                if (stackBounds.top == prevMovementBounds.bottom) {
+                    // If the PIP is resting on top of the IME, then adjust it with the hiding IME
+                    toBounds.offsetTo(toBounds.left, movementBounds.bottom);
+                }
             }
             if (!toBounds.equals(stackBounds)) {
                 if (mBoundsAnimator != null) {
@@ -272,16 +263,6 @@ class PinnedStackController {
                 mBoundsAnimator.start();
             }
         }
-    }
-
-    /**
-     * @return the adjusted {@param stackBounds} such that they are in the movement bounds.
-     */
-    private Rect adjustBoundsInMovementBounds(Rect stackBounds) {
-        final Rect movementBounds = getMovementBounds(stackBounds);
-        final Rect adjustedBounds = new Rect(stackBounds);
-        adjustedBounds.offset(0, Math.min(0, movementBounds.bottom - stackBounds.top));
-        return adjustedBounds;
     }
 
     /**
@@ -300,10 +281,12 @@ class PinnedStackController {
     /**
      * @return the bounds on the screen that the PIP can be visible in.
      */
-    private void getInsetBounds(Point displaySize, Rect insets, Rect outRect) {
-        outRect.set(insets.left + mScreenEdgeInsets.x, insets.top + mScreenEdgeInsets.y,
-                displaySize.x - insets.right - mScreenEdgeInsets.x,
-                displaySize.y - insets.bottom - mScreenEdgeInsets.y);
+    private void getInsetBounds(Rect outRect) {
+        mService.mPolicy.getStableInsetsLw(mDisplayInfo.rotation, mDisplayInfo.logicalWidth,
+                mDisplayInfo.logicalHeight, mTmpInsets);
+        outRect.set(mTmpInsets.left + mScreenEdgeInsets.x, mTmpInsets.top + mScreenEdgeInsets.y,
+                mDisplayInfo.logicalWidth - mTmpInsets.right - mScreenEdgeInsets.x,
+                mDisplayInfo.logicalHeight - mTmpInsets.bottom - mScreenEdgeInsets.y);
     }
 
     /**

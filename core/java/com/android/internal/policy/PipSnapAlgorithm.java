@@ -53,7 +53,14 @@ public class PipSnapAlgorithm {
 
     public PipSnapAlgorithm(Context context) {
         mContext = context;
-        mOrientation = context.getResources().getConfiguration().orientation;
+        onConfigurationChanged();
+    }
+
+    /**
+     * Updates the snap algorithm when the configuration changes.
+     */
+    public void onConfigurationChanged() {
+        mOrientation = mContext.getResources().getConfiguration().orientation;
         calculateSnapTargets();
     }
 
@@ -90,19 +97,7 @@ public class PipSnapAlgorithm {
         final Rect newBounds = new Rect(stackBounds);
         if (mSnapMode == SNAP_MODE_EDGE) {
             // Find the closest edge to the given stack bounds and snap to it
-            final int fromLeft = stackBounds.left - movementBounds.left;
-            final int fromTop = stackBounds.top - movementBounds.top;
-            final int fromRight = movementBounds.right - stackBounds.left;
-            final int fromBottom = movementBounds.bottom - stackBounds.top;
-            if (fromLeft <= fromTop && fromLeft <= fromRight && fromLeft <= fromBottom) {
-                newBounds.offset(-fromLeft, 0);
-            } else if (fromTop <= fromLeft && fromTop <= fromRight && fromTop <= fromBottom) {
-                newBounds.offset(0, -fromTop);
-            } else if (fromRight < fromLeft && fromRight < fromTop && fromRight < fromBottom) {
-                newBounds.offset(fromRight, 0);
-            } else {
-                newBounds.offset(0, fromBottom);
-            }
+            snapRectToClosestEdge(stackBounds, movementBounds, newBounds);
         } else {
             // Find the closest snap point
             final Rect tmpBounds = new Rect();
@@ -119,6 +114,68 @@ public class PipSnapAlgorithm {
     }
 
     /**
+     * @return returns a fraction that describes where along the {@param movementBounds} the
+     *         {@param stackBounds} are. If the {@param stackBounds} are not currently on the
+     *         {@param movementBounds} exactly, then they will be snapped to the movement bounds.
+     *
+     *         The fraction is defined in a clockwise fashion against the {@param movementBounds}:
+     *
+     *            0   1
+     *          4 +---+ 1
+     *            |   |
+     *          3 +---+ 2
+     *            3   2
+     */
+    public float getSnapFraction(Rect stackBounds, Rect movementBounds) {
+        final Rect tmpBounds = new Rect();
+        snapRectToClosestEdge(stackBounds, movementBounds, tmpBounds);
+        final float widthFraction = (float) (tmpBounds.left - movementBounds.left) /
+                movementBounds.width();
+        final float heightFraction = (float) (tmpBounds.top - movementBounds.top) /
+                movementBounds.height();
+        if (tmpBounds.top == movementBounds.top) {
+            return widthFraction;
+        } else if (tmpBounds.left == movementBounds.right) {
+            return 1f + heightFraction;
+        } else if (tmpBounds.top == movementBounds.bottom) {
+            return 2f + (1f - widthFraction);
+        } else {
+            return 3f + (1f - heightFraction);
+        }
+    }
+
+    /**
+     * Moves the {@param stackBounds} along the {@param movementBounds} to the given snap fraction.
+     * See {@link #getSnapFraction(Rect, Rect)}.
+     *
+     * The fraction is define in a clockwise fashion against the {@param movementBounds}:
+     *
+     *    0   1
+     *  4 +---+ 1
+     *    |   |
+     *  3 +---+ 2
+     *    3   2
+     */
+    public void applySnapFraction(Rect stackBounds, Rect movementBounds, float snapFraction) {
+        if (snapFraction < 1f) {
+            int offset = movementBounds.left + (int) (snapFraction * movementBounds.width());
+            stackBounds.offsetTo(offset, movementBounds.top);
+        } else if (snapFraction < 2f) {
+            snapFraction -= 1f;
+            int offset = movementBounds.top + (int) (snapFraction * movementBounds.height());
+            stackBounds.offsetTo(movementBounds.right, offset);
+        } else if (snapFraction < 3f) {
+            snapFraction -= 2f;
+            int offset = movementBounds.left + (int) ((1f - snapFraction) * movementBounds.width());
+            stackBounds.offsetTo(offset, movementBounds.bottom);
+        } else {
+            snapFraction -= 3f;
+            int offset = movementBounds.top + (int) ((1f - snapFraction) * movementBounds.height());
+            stackBounds.offsetTo(movementBounds.left, offset);
+        }
+    }
+
+    /**
      * @return the closest point in {@param points} to the given {@param x} and {@param y}.
      */
     private Point findClosestPoint(int x, int y, Point[] points) {
@@ -132,6 +189,27 @@ public class PipSnapAlgorithm {
             }
         }
         return closestPoint;
+    }
+
+    /**
+     * Snaps the {@param stackBounds} to the closest edge of the {@param movementBounds} and writes
+     * the new bounds out to {@param boundsOut}.
+     */
+    private void snapRectToClosestEdge(Rect stackBounds, Rect movementBounds, Rect boundsOut) {
+        final int fromLeft = Math.abs(stackBounds.left - movementBounds.left);
+        final int fromTop = Math.abs(stackBounds.top - movementBounds.top);
+        final int fromRight = Math.abs(movementBounds.right - stackBounds.left);
+        final int fromBottom = Math.abs(movementBounds.bottom - stackBounds.top);
+        boundsOut.set(stackBounds);
+        if (fromLeft <= fromTop && fromLeft <= fromRight && fromLeft <= fromBottom) {
+            boundsOut.offsetTo(movementBounds.left, stackBounds.top);
+        } else if (fromTop <= fromLeft && fromTop <= fromRight && fromTop <= fromBottom) {
+            boundsOut.offsetTo(stackBounds.left, movementBounds.top);
+        } else if (fromRight < fromLeft && fromRight < fromTop && fromRight < fromBottom) {
+            boundsOut.offsetTo(movementBounds.right, stackBounds.top);
+        } else {
+            boundsOut.offsetTo(stackBounds.left, movementBounds.bottom);
+        }
     }
 
     /**

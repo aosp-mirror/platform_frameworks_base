@@ -387,8 +387,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         switch (mStackId) {
             case PINNED_STACK_ID:
-                mTmpRect2 = mDisplayContent.getPinnedStackController().getPostRotationBounds(
-                        mBounds, mTmpRect2);
+                mTmpRect2 = mDisplayContent.getPinnedStackController().onDisplayChanged(mBounds,
+                        getDisplayInfo());
                 break;
             case DOCKED_STACK_ID:
                 repositionDockedStackAfterRotation(mTmpRect2);
@@ -627,6 +627,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         mAnimationBackgroundSurface = new DimLayer(mService, this, mDisplayContent.getDisplayId(),
                 "animation background stackId=" + mStackId);
 
+        final Rect oldBounds = new Rect(mBounds);
         Rect bounds = null;
         final TaskStack dockedStack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
         if (mStackId == DOCKED_STACK_ID
@@ -650,6 +651,12 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
 
         updateDisplayInfo(bounds);
+
+        // Update the pinned stack controller after the display info is updated
+        if (mStackId == PINNED_STACK_ID) {
+            mDisplayContent.getPinnedStackController().onDisplayChanged(oldBounds,
+                    getDisplayInfo());
+        }
 
         super.onDisplayChanged(dc);
     }

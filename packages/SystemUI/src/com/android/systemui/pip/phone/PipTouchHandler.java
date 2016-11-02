@@ -76,7 +76,7 @@ public class PipTouchHandler implements TunerService.Tunable {
 
     private final PipInputEventReceiver mInputEventReceiver;
     private PipDismissViewController mDismissViewController;
-    private PipSnapAlgorithm mSnapAlgorithm;
+    private final PipSnapAlgorithm mSnapAlgorithm;
     private PipMotionHelper mMotionHelper;
 
     private boolean mEnableSwipeToDismiss = true;
@@ -163,6 +163,7 @@ public class PipTouchHandler implements TunerService.Tunable {
         if (mEnableDragToDismiss) {
             mDismissViewController = new PipDismissViewController(context);
         }
+        mSnapAlgorithm = new PipSnapAlgorithm(mContext);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 2f);
         mMotionHelper = new PipMotionHelper(BackgroundThread.getHandler());
 
@@ -187,7 +188,8 @@ public class PipTouchHandler implements TunerService.Tunable {
     }
 
     public void onConfigurationChanged() {
-        updateBoundedPinnedStackBounds();
+        mSnapAlgorithm.onConfigurationChanged();
+        updateBoundedPinnedStackBounds(false /* updatePinnedStackBounds */);
     }
 
     private void handleTouchEvent(MotionEvent ev) {
@@ -203,7 +205,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                     mPinnedStackBoundsAnimator.cancel();
                 }
 
-                updateBoundedPinnedStackBounds();
+                updateBoundedPinnedStackBounds(true /* updatePinnedStackBounds */);
                 initOrResetVelocityTracker();
                 mVelocityTracker.addMovement(ev);
                 mActivePointerId = ev.getPointerId(0);
@@ -298,6 +300,10 @@ public class PipTouchHandler implements TunerService.Tunable {
                 float velocityX = mVelocityTracker.getXVelocity();
                 float velocityY = mVelocityTracker.getYVelocity();
                 float velocity = PointF.length(velocityX, velocityY);
+
+                // Update the movement bounds again if the state has changed since the user started
+                // dragging (ie. when the IME shows)
+                updateBoundedPinnedStackBounds(false /* updatePinnedStackBounds */);
 
                 if (mIsSwipingToDismiss) {
                     if (Math.abs(velocityX) > mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
@@ -462,14 +468,15 @@ public class PipTouchHandler implements TunerService.Tunable {
     /**
      * Updates the movement bounds of the pinned stack.
      */
-    private void updateBoundedPinnedStackBounds() {
+    private void updateBoundedPinnedStackBounds(boolean updatePinnedStackBounds) {
         try {
             StackInfo info = mActivityManager.getStackInfo(PINNED_STACK_ID);
             if (info != null) {
-                mPinnedStackBounds.set(info.bounds);
+                if (updatePinnedStackBounds) {
+                    mPinnedStackBounds.set(info.bounds);
+                }
                 mBoundedPinnedStackBounds.set(mWindowManager.getPictureInPictureMovementBounds(
                         info.displayId));
-                mSnapAlgorithm = new PipSnapAlgorithm(mContext);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Could not fetch PIP movement bounds.", e);
