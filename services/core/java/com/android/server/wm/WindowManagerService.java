@@ -1033,7 +1033,10 @@ public class WindowManagerService extends IWindowManager.Stub
         mWindowAnimationScaleSetting = Settings.Global.getFloat(context.getContentResolver(),
                 Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScaleSetting);
         mTransitionAnimationScaleSetting = Settings.Global.getFloat(context.getContentResolver(),
-                Settings.Global.TRANSITION_ANIMATION_SCALE, mTransitionAnimationScaleSetting);
+                Settings.Global.TRANSITION_ANIMATION_SCALE,
+                context.getResources().getFloat(
+                        R.dimen.config_appTransitionAnimationDurationScaleDefault));
+
         setAnimatorDurationScale(Settings.Global.getFloat(context.getContentResolver(),
                 Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScaleSetting));
 
