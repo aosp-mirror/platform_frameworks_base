@@ -61,6 +61,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
+import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
@@ -151,6 +152,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             return 2;
         }
         switch (type) {
+            case TYPE_PRESENTATION:
             case TYPE_PRIVATE_PRESENTATION:
                 return 2;
             case TYPE_WALLPAPER:

@@ -81,6 +81,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
+import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
@@ -2278,6 +2279,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_DREAM:
             case TYPE_INPUT_METHOD:
             case TYPE_WALLPAPER:
+            case TYPE_PRESENTATION:
             case TYPE_PRIVATE_PRESENTATION:
             case TYPE_VOICE_INTERACTION:
             case TYPE_ACCESSIBILITY_OVERLAY:
@@ -2382,6 +2384,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_STATUS_BAR_SUB_PANEL:
             case TYPE_SYSTEM_DIALOG:
             case TYPE_VOLUME_OVERLAY:
+            case TYPE_PRESENTATION:
             case TYPE_PRIVATE_PRESENTATION:
             case TYPE_DOCK_DIVIDER:
                 break;
@@ -2546,6 +2549,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 2;
         }
         switch (type) {
+        case TYPE_PRESENTATION:
         case TYPE_PRIVATE_PRESENTATION:
             return 2;
         case TYPE_WALLPAPER:
