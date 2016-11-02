@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2014 The Android Open Source Project
+ * Copyright (C) 2010-2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,6 +135,12 @@ public interface BluetoothProfile {
      * @hide
      */
     public static final int PBAP_CLIENT = 17;
+
+    /**
+     * MAP Messaging Client Equipment (MCE)
+     * @hide
+     */
+    public static final int MAP_CLIENT = 18;
 
     /**
      * Max profile ID. This value should be updated whenever a new profile is added to match

@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHeadsetClient;
 import android.bluetooth.BluetoothMap;
+import android.bluetooth.BluetoothMapClient;
 import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothPbapClient;
@@ -81,12 +82,14 @@ public final class LocalBluetoothProfileManager {
     private HeadsetProfile mHeadsetProfile;
     private HfpClientProfile mHfpClientProfile;
     private MapProfile mMapProfile;
+    private MapClientProfile mMapClientProfile;
     private final HidProfile mHidProfile;
     private OppProfile mOppProfile;
     private final PanProfile mPanProfile;
     private PbapClientProfile mPbapClientProfile;
     private final PbapServerProfile mPbapProfile;
     private final boolean mUsePbapPce;
+    private final boolean mUseMapClient;
 
     /**
      * Mapping from profile name, e.g. "HEADSET" to profile object.
@@ -104,6 +107,8 @@ public final class LocalBluetoothProfileManager {
         mDeviceManager = deviceManager;
         mEventManager = eventManager;
         mUsePbapPce = mContext.getResources().getBoolean(R.bool.enable_pbap_pce_profile);
+        // MAP Client is typically used in the same situations as PBAP Client
+        mUseMapClient = mContext.getResources().getBoolean(R.bool.enable_pbap_pce_profile);
         // pass this reference to adapter and event manager (circular dependency)
         mLocalAdapter.setProfileManager(this);
         mEventManager.setProfileManager(this);
@@ -125,10 +130,15 @@ public final class LocalBluetoothProfileManager {
                 BluetoothPan.ACTION_CONNECTION_STATE_CHANGED);
 
         if(DEBUG) Log.d(TAG, "Adding local MAP profile");
-        mMapProfile = new MapProfile(mContext, mLocalAdapter,
-                mDeviceManager, this);
-        addProfile(mMapProfile, MapProfile.NAME,
-                BluetoothMap.ACTION_CONNECTION_STATE_CHANGED);
+        if (mUseMapClient) {
+            mMapClientProfile = new MapClientProfile(mContext, mLocalAdapter, mDeviceManager, this);
+            addProfile(mMapClientProfile, MapClientProfile.NAME,
+                BluetoothMapClient.ACTION_CONNECTION_STATE_CHANGED);
+        } else {
+            mMapProfile = new MapProfile(mContext, mLocalAdapter, mDeviceManager, this);
+            addProfile(mMapProfile, MapProfile.NAME,
+                    BluetoothMap.ACTION_CONNECTION_STATE_CHANGED);
+        }
 
        //Create PBAP server profile, but do not add it to list of profiles
        // as we do not need to monitor the profile as part of profile list
@@ -197,6 +207,22 @@ public final class LocalBluetoothProfileManager {
                 "Warning: Hfp Client profile was previously added but the UUID is now missing.");
         } else {
             Log.d(TAG, "Handsfree Uuid not found.");
+        }
+
+        // Message Access Profile Client
+        if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.MNS)) {
+            if (mMapClientProfile == null) {
+                if(DEBUG) Log.d(TAG, "Adding local Map Client profile");
+                mMapClientProfile =
+                        new MapClientProfile(mContext, mLocalAdapter, mDeviceManager, this);
+                addProfile(mMapClientProfile, MapClientProfile.NAME,
+                        BluetoothMapClient.ACTION_CONNECTION_STATE_CHANGED);
+            }
+        } else if (mMapClientProfile != null) {
+            Log.w(TAG,
+                    "Warning: MAP Client profile was previously added but the UUID is now missing.");
+        } else {
+            Log.d(TAG, "MAP Client Uuid not found.");
         }
 
         // OPP
@@ -383,6 +409,10 @@ public final class LocalBluetoothProfileManager {
         return mMapProfile;
     }
 
+    public MapClientProfile getMapClientProfile() {
+        return mMapClientProfile;
+    }
+
     /**
      * Fill in a list of LocalBluetoothProfile objects that are supported by
      * the local device and the remote device.
@@ -463,6 +493,11 @@ public final class LocalBluetoothProfileManager {
             profiles.add(mMapProfile);
             removedProfiles.remove(mMapProfile);
             mMapProfile.setPreferred(device, true);
+        }
+
+        if (mMapClientProfile != null) {
+            profiles.add(mMapClientProfile);
+            removedProfiles.remove(mMapClientProfile);
         }
 
         if (mUsePbapPce) {
