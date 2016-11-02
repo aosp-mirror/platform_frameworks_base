@@ -63,7 +63,7 @@ public final class PinnerService extends SystemService {
 
     private BinderService mBinderService;
 
-    private final long MAX_CAMERA_PIN_SIZE = 50 * (1 << 20); //50MB max
+    private final long MAX_CAMERA_PIN_SIZE = 80 * (1 << 20); //80MB max
 
     private PinnerHandler mPinnerHandler = null;
 
@@ -192,6 +192,9 @@ public final class PinnerService extends SystemService {
 
         if (isResolverActivity(cameraResolveInfo.activityInfo))
         {
+            if (DEBUG) {
+              Slog.v(TAG, "cameraIntent returned resolverActivity");
+            }
             return null;
         }
 
