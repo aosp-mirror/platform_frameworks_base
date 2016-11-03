@@ -61,8 +61,8 @@ def main():
 
     print 'Running tests...'
     if len(sys.argv) != 1:
-        run('adb shell am instrument -w "%s" %s' %
-            (INSTRUMENTED_PACKAGE_RUNNER, ' '.join(sys.argv[1:])))
+        run('adb shell am instrument -w %s "%s"' %
+            (' '.join(sys.argv[1:]), INSTRUMENTED_PACKAGE_RUNNER))
         return 0
 
     # It would be nice if the activity manager accepted a list of packages, but
