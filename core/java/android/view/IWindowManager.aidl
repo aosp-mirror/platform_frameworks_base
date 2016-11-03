@@ -20,6 +20,7 @@ import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 
 import android.content.res.CompatibilityInfo;
@@ -210,8 +211,7 @@ interface IWindowManager
     boolean isKeyguardLocked();
     boolean isKeyguardSecure();
     boolean inKeyguardRestrictedInputMode();
-    void dismissKeyguard();
-    void keyguardGoingAway(int flags);
+    void dismissKeyguard(IKeyguardDismissCallback callback);
 
     // Requires INTERACT_ACROSS_USERS_FULL permission
     void setSwitchingUser(boolean switching);

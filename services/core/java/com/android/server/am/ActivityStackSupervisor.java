@@ -4075,7 +4075,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
                                     Settings.Secure.LOCK_TO_APP_EXIT_LOCKED) != 0;
                             if (mLockTaskModeState == LOCK_TASK_MODE_PINNED && shouldLockKeyguard) {
                                 mWindowManager.lockNow(null);
-                                mWindowManager.dismissKeyguard();
+                                mWindowManager.dismissKeyguard(null /* callback */);
                                 new LockPatternUtils(mService.mContext)
                                         .requireCredentialEntry(UserHandle.USER_ALL);
                             }

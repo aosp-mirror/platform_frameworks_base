@@ -37,6 +37,7 @@ import com.android.keyguard.R;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.keyguard.DismissCallbackRegistry;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
@@ -48,17 +49,17 @@ public class KeyguardBouncer {
 
     final static private String TAG = "KeyguardBouncer";
 
-    protected Context mContext;
-    protected ViewMediatorCallback mCallback;
-    protected LockPatternUtils mLockPatternUtils;
-    protected ViewGroup mContainer;
-    private StatusBarWindowManager mWindowManager;
+    protected final Context mContext;
+    protected final ViewMediatorCallback mCallback;
+    protected final LockPatternUtils mLockPatternUtils;
+    protected final ViewGroup mContainer;
+    private final FalsingManager mFalsingManager;
+    private final DismissCallbackRegistry mDismissCallbackRegistry;
     protected KeyguardHostView mKeyguardView;
     protected ViewGroup mRoot;
     private boolean mShowingSoon;
     private int mBouncerPromptReason;
-    private FalsingManager mFalsingManager;
-    private KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
+    private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
                 public void onStrongAuthStateChanged(int userId) {
@@ -67,15 +68,15 @@ public class KeyguardBouncer {
             };
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
-            LockPatternUtils lockPatternUtils, StatusBarWindowManager windowManager,
-            ViewGroup container) {
+            LockPatternUtils lockPatternUtils, ViewGroup container,
+            DismissCallbackRegistry dismissCallbackRegistry) {
         mContext = context;
         mCallback = callback;
         mLockPatternUtils = lockPatternUtils;
         mContainer = container;
-        mWindowManager = windowManager;
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
         mFalsingManager = FalsingManager.getInstance(mContext);
+        mDismissCallbackRegistry = dismissCallbackRegistry;
     }
 
     public void show(boolean resetSecuritySelection) {
@@ -169,6 +170,9 @@ public class KeyguardBouncer {
     }
 
     public void hide(boolean destroyView) {
+        if (isShowing()) {
+            mDismissCallbackRegistry.notifyDismissCancelled();
+        }
         mFalsingManager.onBouncerHidden();
         cancelShowRunnable();
         if (mKeyguardView != null) {

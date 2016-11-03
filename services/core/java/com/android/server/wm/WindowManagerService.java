@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -128,6 +129,7 @@ import android.view.inputmethod.InputMethodManagerInternal;
 import com.android.internal.R;
 import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.view.IInputContext;
@@ -3940,18 +3942,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void dismissKeyguard() {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires DISABLE_KEYGUARD permission");
-        }
+    public void dismissKeyguard(IKeyguardDismissCallback callback) {
+        checkCallingPermission(permission.CONTROL_KEYGUARD, "dismissKeyguard");
         synchronized(mWindowMap) {
-            mPolicy.dismissKeyguardLw();
+            mPolicy.dismissKeyguardLw(callback);
         }
-    }
-
-    @Override
-    public void keyguardGoingAway(int flags) {
     }
 
     public void onKeyguardOccludedChanged(boolean occluded) {

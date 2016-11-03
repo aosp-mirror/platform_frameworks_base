@@ -20,6 +20,8 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
 import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
 import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
@@ -29,6 +31,11 @@ import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_OCCLUDE;
 import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Slog;
+
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.PrintWriter;
@@ -41,6 +48,8 @@ import java.util.ArrayList;
  * Note that everything in this class should only be accessed with the AM lock being held.
  */
 class KeyguardController {
+
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "KeyguardController" : TAG_AM;
 
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
@@ -108,7 +117,6 @@ class KeyguardController {
                 mWindowManager.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
                         false /* alwaysKeepCurrent */, convertTransitFlags(flags),
                         false /* forceOverride */);
-                mWindowManager.keyguardGoingAway(flags);
                 mService.updateSleepIfNeededLocked();
 
                 // Some stack visibility might change (e.g. docked stack)
@@ -119,6 +127,23 @@ class KeyguardController {
             } finally {
                 mWindowManager.continueSurfaceLayout();
             }
+        }
+    }
+
+    void dismissKeyguard(IBinder token, IKeyguardDismissCallback callback) {
+        final ActivityRecord activityRecord = ActivityRecord.forTokenLocked(token);
+        if (activityRecord == null || !activityRecord.visibleIgnoringKeyguard) {
+            failCallback(callback);
+            return;
+        }
+        mWindowManager.dismissKeyguard(callback);
+    }
+
+    private void failCallback(IKeyguardDismissCallback callback) {
+        try {
+            callback.onDismissError();
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to call callback", e);
         }
     }
 
@@ -215,7 +240,7 @@ class KeyguardController {
      */
     private void handleDismissKeyguard() {
         if (mDismissingKeyguardActivity != null) {
-            mWindowManager.dismissKeyguard();
+            mWindowManager.dismissKeyguard(null /* callback */);
 
             // If we are about to unocclude the Keyguard, but we can dismiss it without security,
             // we immediately dismiss the Keyguard so the activity gets shown without a flicker.

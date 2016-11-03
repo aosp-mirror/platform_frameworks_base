@@ -274,7 +274,7 @@ public class Wm extends BaseCommand {
     }
 
     private void runDismissKeyguard() throws Exception {
-        mWm.dismissKeyguard();
+        mWm.dismissKeyguard(null /* callback */);
     }
 
     private int parseDimension(String s) throws NumberFormatException {

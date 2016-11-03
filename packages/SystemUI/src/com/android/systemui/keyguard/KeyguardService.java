@@ -26,6 +26,7 @@ import android.os.Process;
 import android.os.Trace;
 import android.util.Log;
 
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
@@ -89,9 +90,9 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void dismiss(boolean allowWhileOccluded) {
+        public void dismiss(IKeyguardDismissCallback callback) {
             checkPermission();
-            mKeyguardViewMediator.dismiss(allowWhileOccluded);
+            mKeyguardViewMediator.dismiss(callback);
         }
 
         @Override // Binder interface

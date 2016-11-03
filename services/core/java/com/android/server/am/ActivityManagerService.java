@@ -23,6 +23,8 @@ import android.app.IActivityManager;
 import android.app.WaitResult;
 import android.graphics.PointF;
 import android.os.IDeviceIdentifiersPolicyService;
+
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.telephony.TelephonyIntents;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
@@ -22528,6 +22530,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         // For direct boot aware activities, they can be shown without triggering a work challenge
         // before the profile user is unlocked.
         return rInfo != null && rInfo.activityInfo != null;
+    }
+
+    @Override
+    public void dismissKeyguard(IBinder token, IKeyguardDismissCallback callback)
+            throws RemoteException {
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            mKeyguardController.dismissKeyguard(token, callback);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
     }
 
     /**

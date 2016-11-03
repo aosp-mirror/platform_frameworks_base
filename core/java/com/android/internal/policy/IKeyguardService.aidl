@@ -16,6 +16,7 @@
 package com.android.internal.policy;
 
 import com.android.internal.policy.IKeyguardDrawnCallback;
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 
@@ -34,7 +35,7 @@ oneway interface IKeyguardService {
 
     void addStateMonitorCallback(IKeyguardStateCallback callback);
     void verifyUnlock(IKeyguardExitCallback callback);
-    void dismiss(boolean allowWhileOccluded);
+    void dismiss(IKeyguardDismissCallback callback);
     void onDreamingStarted();
     void onDreamingStopped();
 

@@ -16,9 +16,11 @@
 
 package com.android.server.wm;
 
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.server.input.InputManagerService;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -528,8 +530,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void dismissKeyguardLw() {
-
+    public void dismissKeyguardLw(@Nullable IKeyguardDismissCallback callback) {
     }
 
     @Override

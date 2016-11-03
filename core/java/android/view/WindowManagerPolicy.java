@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.ActivityManager.StackId;
 import android.content.Context;
@@ -31,6 +32,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.view.animation.Animation;
 
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 
 import java.io.PrintWriter;
@@ -1162,8 +1164,10 @@ public interface WindowManagerPolicy {
 
     /**
      * Ask the policy to dismiss the keyguard, if it is currently shown.
+     *
+     * @param callback Callback to be informed about the result.
      */
-    public void dismissKeyguardLw();
+    public void dismissKeyguardLw(@Nullable IKeyguardDismissCallback callback);
 
     /**
      * Ask the policy whether the Keyguard has drawn. If the Keyguard is disabled, this method
