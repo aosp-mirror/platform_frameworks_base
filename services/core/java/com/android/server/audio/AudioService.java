@@ -4035,21 +4035,23 @@ public class AudioService extends IAudioService.Stub {
                 mIndexMap.put(device, index);
 
                 changed = oldIndex != index;
-                if (changed) {
-                    // Apply change to all streams using this one as alias
-                    // if changing volume of current device, also change volume of current
-                    // device on aliased stream
-                    boolean currentDevice = (device == getDeviceForStream(mStreamType));
-                    int numStreamTypes = AudioSystem.getNumStreamTypes();
-                    for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-                        if (streamType != mStreamType &&
-                                mStreamVolumeAlias[streamType] == mStreamType) {
-                            int scaledIndex = rescaleIndex(index, mStreamType, streamType);
-                            mStreamStates[streamType].setIndex(scaledIndex, device, caller);
-                            if (currentDevice) {
-                                mStreamStates[streamType].setIndex(scaledIndex,
-                                        getDeviceForStream(streamType), caller);
-                            }
+                // Apply change to all streams using this one as alias if:
+                // - the index actually changed OR
+                // - there is no volume index stored for this device on alias stream.
+                // If changing volume of current device, also change volume of current
+                // device on aliased stream
+                final boolean currentDevice = (device == getDeviceForStream(mStreamType));
+                final int numStreamTypes = AudioSystem.getNumStreamTypes();
+                for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
+                    final VolumeStreamState aliasStreamState = mStreamStates[streamType];
+                    if (streamType != mStreamType &&
+                            mStreamVolumeAlias[streamType] == mStreamType &&
+                            (changed || !aliasStreamState.hasIndexForDevice(device))) {
+                        final int scaledIndex = rescaleIndex(index, mStreamType, streamType);
+                        aliasStreamState.setIndex(scaledIndex, device, caller);
+                        if (currentDevice) {
+                            aliasStreamState.setIndex(scaledIndex,
+                                    getDeviceForStream(streamType), caller);
                         }
                     }
                 }
@@ -4083,6 +4085,12 @@ public class AudioService extends IAudioService.Stub {
                     index = mIndexMap.get(AudioSystem.DEVICE_OUT_DEFAULT);
                 }
                 return index;
+            }
+        }
+
+        public boolean hasIndexForDevice(int device) {
+            synchronized (VolumeStreamState.class) {
+                return (mIndexMap.get(device, -1) != -1);
             }
         }
 
