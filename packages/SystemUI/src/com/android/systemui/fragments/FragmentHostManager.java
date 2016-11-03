@@ -32,6 +32,7 @@ import android.view.View;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.SystemUIApplication;
+import com.android.systemui.plugins.PluginManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -51,7 +52,7 @@ public class FragmentHostManager {
     private FragmentLifecycleCallbacks mLifecycleCallbacks;
 
     FragmentHostManager(Context context, FragmentService manager, View rootView) {
-        mContext = context;
+        mContext = PluginManager.getInstance(context).getAllPluginContext(context);
         mManager = manager;
         mRootView = rootView;
         mConfigChanges.applyNewConfig(context.getResources());

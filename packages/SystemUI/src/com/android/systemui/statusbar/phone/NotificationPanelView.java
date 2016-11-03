@@ -1621,6 +1621,7 @@ public class NotificationPanelView extends PanelView implements
         }
         // Since there are QS tiles in the header now, we need to make sure we start listening
         // immediately so they can be up to date.
+        if (mQs == null) return;
         mQs.setHeaderListening(true);
     }
 
@@ -1749,7 +1750,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void onQsHeightChanged() {
-        mQsMaxExpansionHeight = mQs.getDesiredHeight();
+        mQsMaxExpansionHeight = mQs != null ? mQs.getDesiredHeight() : 0;
         if (mQsExpanded && mQsFullyExpanded) {
             mQsExpansionHeight = mQsMaxExpansionHeight;
             requestScrollerTopPaddingUpdate(false /* animate */);

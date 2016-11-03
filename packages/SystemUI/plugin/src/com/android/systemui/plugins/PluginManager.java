@@ -18,6 +18,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Build;
 import android.os.HandlerThread;
@@ -26,6 +28,7 @@ import android.os.SystemProperties;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.plugins.PluginInstanceManager.PluginContextWrapper;
 
 import dalvik.system.PathClassLoader;
 
@@ -163,11 +166,43 @@ public class PluginManager extends BroadcastReceiver {
         return mParentClassLoader;
     }
 
+    public Context getAllPluginContext(Context context) {
+        return new PluginContextWrapper(context,
+                new AllPluginClassLoader(context.getClassLoader()));
+    }
+
+    public Context getContext(ApplicationInfo info, String pkg) throws NameNotFoundException {
+        ClassLoader classLoader = getClassLoader(info.sourceDir, pkg);
+        return new PluginContextWrapper(mContext.createApplicationContext(info, 0), classLoader);
+    }
+
     public static PluginManager getInstance(Context context) {
         if (sInstance == null) {
             sInstance = new PluginManager(context.getApplicationContext());
         }
         return sInstance;
+    }
+
+    private class AllPluginClassLoader extends ClassLoader {
+        public AllPluginClassLoader(ClassLoader classLoader) {
+            super(classLoader);
+        }
+
+        @Override
+        public Class<?> loadClass(String s) throws ClassNotFoundException {
+            try {
+                return super.loadClass(s);
+            } catch (ClassNotFoundException e) {
+                for (ClassLoader classLoader : mClassLoaders.values()) {
+                    try {
+                        return classLoader.loadClass(s);
+                    } catch (ClassNotFoundException e1) {
+                        // Will re-throw e if all fail.
+                    }
+                }
+                throw e;
+            }
+        }
     }
 
     @VisibleForTesting
@@ -179,7 +214,6 @@ public class PluginManager extends BroadcastReceiver {
                     version, manager);
         }
     }
-
 
     // This allows plugins to include any libraries or copied code they want by only including
     // classes from the plugin library.

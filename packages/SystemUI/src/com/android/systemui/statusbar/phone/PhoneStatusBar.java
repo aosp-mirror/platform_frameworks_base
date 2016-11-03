@@ -90,7 +90,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
@@ -126,8 +125,6 @@ import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.AutoReinflateContainer;
-import com.android.systemui.AutoReinflateContainer.InflateListener;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogConstants;
@@ -142,11 +139,11 @@ import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.fragments.PluginFragmentListener;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QS.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.BaseStatusBarHeader;
-import com.android.systemui.qs.QSContainerImpl;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
@@ -928,9 +925,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         View container = mStatusBarWindow.findViewById(R.id.qs_frame);
         if (container != null) {
             FragmentHostManager fragmentHostManager = FragmentHostManager.get(container);
-            fragmentHostManager.getFragmentManager().beginTransaction()
-                    .replace(R.id.qs_frame, new QSFragment(), QS.TAG)
-                    .commit();
+            new PluginFragmentListener(container, QS.TAG, R.id.qs_frame, QSFragment.class, QS.class)
+                    .startListening(QS.ACTION, QS.VERSION);
             final QSTileHost qsh = SystemUIFactory.getInstance().createQSTileHost(mContext, this,
                     mBluetoothController, mLocationController, mRotationLockController,
                     mNetworkController, mZenModeController, mHotspotController,
