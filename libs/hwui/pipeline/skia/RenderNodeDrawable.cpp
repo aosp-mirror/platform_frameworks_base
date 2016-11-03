@@ -49,8 +49,9 @@ const RenderProperties& RenderNodeDrawable::getNodeProperties() const {
 }
 
 void RenderNodeDrawable::onDraw(SkCanvas* canvas) {
-    //negative and positive Z order are drawn out of order
-    if (MathUtils::isZero(mRenderNode->properties().getZ())) {
+    //negative and positive Z order are drawn out of order, if this render node drawable is in
+    //a reordering section
+    if ((!mInReorderingSection) || MathUtils::isZero(mRenderNode->properties().getZ())) {
         this->forceDraw(canvas);
     }
 }
