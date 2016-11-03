@@ -35,15 +35,15 @@ import android.view.IWindow;
  */
 interface IAccessibilityManager {
 
-    int addClient(IAccessibilityManagerClient client, int userId);
+    oneway void interrupt(int userId);
 
-    void sendAccessibilityEvent(in AccessibilityEvent uiEvent, int userId);
+    oneway void sendAccessibilityEvent(in AccessibilityEvent uiEvent, int userId);
+
+    int addClient(IAccessibilityManagerClient client, int userId);
 
     List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId);
 
     List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType, int userId);
-
-    void interrupt(int userId);
 
     int addAccessibilityInteractionConnection(IWindow windowToken,
         in IAccessibilityInteractionConnection connection, int userId);
