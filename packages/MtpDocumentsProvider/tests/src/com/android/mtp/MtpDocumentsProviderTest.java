@@ -773,12 +773,12 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals(0x400000000L, cursor.getLong(0));
     }
 
-    public void testFindPath_singleStorage_toRoot() throws Exception {
+    public void testFindDocumentPath_singleStorage_toRoot() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
         setupHierarchyDocuments("1");
 
-        final Path path = mProvider.findPath("15", null);
+        final Path path = mProvider.findDocumentPath("15", null);
         assertEquals("1", path.getRootId());
         assertEquals(4, path.getPath().size());
         assertEquals("1", path.getPath().get(0));
@@ -787,12 +787,12 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals("15", path.getPath().get(3));
     }
 
-    public void testFindPath_singleStorage_toDoc() throws Exception {
+    public void testFindDocumentPath_singleStorage_toDoc() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
         setupHierarchyDocuments("1");
 
-        final Path path = mProvider.findPath("18", "3");
+        final Path path = mProvider.findDocumentPath("18", "3");
         assertNull(path.getRootId());
         assertEquals(3, path.getPath().size());
         assertEquals("3", path.getPath().get(0));
@@ -800,14 +800,14 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals("18", path.getPath().get(2));
     }
 
-    public void testFindPath_multiStorage_toRoot() throws Exception {
+    public void testFindDocumentPath_multiStorage_toRoot() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         setupRoots(0, new MtpRoot[] {
                 new MtpRoot(0, 0, "Storage A", 1000, 1000, ""),
                 new MtpRoot(0, 1, "Storage B", 1000, 1000, "") });
         setupHierarchyDocuments("2");
 
-        final Path path = mProvider.findPath("16", null);
+        final Path path = mProvider.findDocumentPath("16", null);
         assertEquals("2", path.getRootId());
         assertEquals(4, path.getPath().size());
         assertEquals("2", path.getPath().get(0));
@@ -816,14 +816,14 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals("16", path.getPath().get(3));
     }
 
-    public void testFindPath_multiStorage_toDoc() throws Exception {
+    public void testFindDocumentPath_multiStorage_toDoc() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         setupRoots(0, new MtpRoot[] {
                 new MtpRoot(0, 0, "Storage A", 1000, 1000, ""),
                 new MtpRoot(0, 1, "Storage B", 1000, 1000, "") });
         setupHierarchyDocuments("2");
 
-        final Path path = mProvider.findPath("19", "4");
+        final Path path = mProvider.findDocumentPath("19", "4");
         assertNull(path.getRootId());
         assertEquals(3, path.getPath().size());
         assertEquals("4", path.getPath().get(0));
