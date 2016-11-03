@@ -105,9 +105,7 @@ public class DozeScrimController {
         // be invoked when we're done so that the caller can drop the pulse wakelock.
         mPulseCallback = callback;
         mPulseReason = reason;
-        if (mDozeParameters.getAlwaysOn()) {
-            mHandler.post(mPulseIn);
-        }
+        mHandler.post(mPulseIn);
     }
 
     /**
