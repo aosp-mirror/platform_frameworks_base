@@ -539,7 +539,7 @@ public class UserManagerService extends IUserManager.Stub {
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
                 UserInfo ui = mUsers.valueAt(i).info;
-                if (ui.partial) {
+                if (ui.partial || ui.guestToRemove) {
                     continue;
                 }
                 if (!excludeDying || !mRemovingUserIds.get(ui.id)) {
