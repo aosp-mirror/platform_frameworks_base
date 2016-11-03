@@ -66,6 +66,8 @@ public class WindowFrameTests {
 
     class TaskWithBounds extends Task {
         final Rect mBounds;
+        final Rect mInsetBounds = new Rect();
+        boolean mFullscreenForTest = true;
         TaskWithBounds(Rect bounds) {
             super(0, mStubStack, 0, sWm, null, null, false);
             mBounds = bounds;
@@ -76,11 +78,11 @@ public class WindowFrameTests {
         }
         @Override
         void getTempInsetBounds(Rect outBounds) {
-            outBounds.setEmpty();
+            outBounds.set(mInsetBounds);
         }
         @Override
         boolean isFullscreen() {
-            return true;
+            return mFullscreenForTest;
         }
     }
 
@@ -235,6 +237,41 @@ public class WindowFrameTests {
         w.mAttrs.y = 100;
         w.computeFrameLw(pf, pf, pf, pf, pf, pf, pf, pf);
         assertRect(w.mFrame, 600, 600, 900, 900);
+    }
+
+    @Test
+    public void testLayoutNonfullscreenTask() {
+        final Rect taskBounds = new Rect(300, 300, 700, 700);
+        TaskWithBounds task = new TaskWithBounds(taskBounds);
+        task.mFullscreenForTest = false;
+        WindowState w = createWindow(task, FILL_PARENT, FILL_PARENT);
+        w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
+
+        final Rect pf = new Rect(0, 0, 1000, 1000);
+        w.computeFrameLw(pf, pf, pf, pf, pf, pf, pf, null);
+        // For non fullscreen tasks the containing frame is based off the
+        // task bounds not the parent frame.
+        assertRect(w.mFrame, 300, 300, 700, 700);
+        assertRect(w.getContentFrameLw(), 300, 300, 700, 700);
+        assertRect(w.mContentInsets, 0, 0, 0, 0);
+
+        pf.set(0, 0, 1000, 1000);
+        // We still produce insets against the containing frame the same way.
+        final Rect cf = new Rect(0, 0, 500, 500);
+        w.computeFrameLw(pf, pf, pf, cf, cf, pf, cf, null);
+        assertRect(w.mFrame, 300, 300, 700, 700);
+        assertRect(w.getContentFrameLw(), 300, 300, 500, 500);
+        assertRect(w.mContentInsets, 0, 0, 200, 200);
+
+        pf.set(0, 0, 1000, 1000);
+        // However if we set temp inset bounds, the insets will be computed
+        // as if our window was laid out there,  but it will be laid out according to
+        // the task bounds.
+        task.mInsetBounds.set(200, 200, 600, 600);
+        w.computeFrameLw(pf, pf, pf, cf, cf, pf, cf, null);
+        assertRect(w.mFrame, 300, 300, 700, 700);
+        assertRect(w.getContentFrameLw(), 300, 300, 600, 600);
+        assertRect(w.mContentInsets, 0, 0, 100, 100);
     }
 
     private WindowState createWindow(Task task, int width, int height) {
