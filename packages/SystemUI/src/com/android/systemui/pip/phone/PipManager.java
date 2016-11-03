@@ -34,6 +34,7 @@ public class PipManager {
     private IActivityManager mActivityManager;
     private IWindowManager mWindowManager;
 
+    private PipMenuActivityController mMenuController;
     private PipTouchHandler mTouchHandler;
 
     private PipManager() {}
@@ -46,7 +47,9 @@ public class PipManager {
         mActivityManager = ActivityManagerNative.getDefault();
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
 
-        mTouchHandler = new PipTouchHandler(context, mActivityManager, mWindowManager);
+        mMenuController = new PipMenuActivityController(context, mActivityManager, mWindowManager);
+        mTouchHandler = new PipTouchHandler(context, mMenuController, mActivityManager,
+                mWindowManager);
     }
 
     /**

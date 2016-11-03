@@ -415,6 +415,18 @@
             android:launchMode="singleTop"
             android:excludeFromRecents="true" />
 
+        <activity
+            android:name=".pip.phone.PipMenuActivity"
+            android:theme="@style/PipPhoneOverlayControlTheme"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
+            android:stateNotNeeded="true"
+            android:taskAffinity=""
+            androidprv:alwaysFocusable="true" />
+
         <!-- platform logo easter egg activity -->
         <activity
             android:name=".DessertCase"

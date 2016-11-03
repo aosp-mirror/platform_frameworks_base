@@ -137,6 +137,18 @@
           android:summary="@string/pip_drag_to_dismiss_summary"
           sysui:defValue="true" />
 
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="pip_tap_through"
+            android:title="@string/pip_tap_through_title"
+            android:summary="@string/pip_tap_through_summary"
+            sysui:defValue="false" />
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="pip_snap_mode_edge"
+            android:title="@string/pip_snap_mode_edge_title"
+            android:summary="@string/pip_snap_mode_edge_summary"
+            sysui:defValue="false" />
+
     </PreferenceScreen>
 
     <PreferenceScreen

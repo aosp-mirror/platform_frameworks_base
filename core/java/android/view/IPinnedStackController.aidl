@@ -30,4 +30,9 @@ interface IPinnedStackController {
      * Notifies the controller that the user is currently interacting with the PIP.
      */
     oneway void setInInteractiveMode(boolean inInteractiveMode);
+
+    /**
+     * Notifies the controller that the desired snap mode is to the closest edge.
+     */
+    oneway void setSnapToEdge(boolean snapToEdge);
 }
