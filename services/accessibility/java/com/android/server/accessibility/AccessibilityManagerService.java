@@ -2928,8 +2928,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HOME);
                     } return true;
                     case AccessibilityService.GLOBAL_ACTION_RECENTS: {
-                        openRecents();
-                    } return true;
+                        return openRecents();
+                    }
                     case AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS: {
                         expandNotifications();
                     } return true;
@@ -3422,14 +3422,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             Binder.restoreCallingIdentity(token);
         }
 
-        private void openRecents() {
+        private boolean openRecents() {
             final long token = Binder.clearCallingIdentity();
-
-            StatusBarManagerInternal statusBarService = LocalServices.getService(
-                    StatusBarManagerInternal.class);
-            statusBarService.toggleRecentApps();
-
-            Binder.restoreCallingIdentity(token);
+            try {
+                StatusBarManagerInternal statusBarService = LocalServices.getService(
+                        StatusBarManagerInternal.class);
+                if (statusBarService == null) {
+                    return false;
+                }
+                statusBarService.toggleRecentApps();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            return true;
         }
 
         private void showGlobalActions() {
