@@ -31,11 +31,38 @@ public class RenderNodePerfTest {
 
     @Test
     public void testMeasureRenderNodeJniOverhead() {
-        RenderNode node = RenderNode.create("benchmark", null);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final RenderNode node = RenderNode.create("benchmark", null);
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
 
         while (state.keepRunning()) {
             node.setTranslationX(1.0f);
+        }
+    }
+
+    @Test
+    public void testCreateRenderNodeNoName() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            RenderNode node = RenderNode.create(null, null);
+            node.destroy();
+        }
+    }
+
+    @Test
+    public void testCreateRenderNode() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            RenderNode node = RenderNode.create("LinearLayout", null);
+            node.destroy();
+        }
+    }
+
+    @Test
+    public void testIsValid() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        RenderNode node = RenderNode.create("LinearLayout", null);
+        while (state.keepRunning()) {
+            node.isValid();
         }
     }
 }

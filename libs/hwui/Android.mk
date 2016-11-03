@@ -356,6 +356,7 @@ LOCAL_SRC_FILES += \
     tests/microbench/FrameBuilderBench.cpp \
     tests/microbench/LinearAllocatorBench.cpp \
     tests/microbench/PathParserBench.cpp \
+    tests/microbench/RenderNodeBench.cpp \
     tests/microbench/ShadowBench.cpp \
     tests/microbench/TaskManagerBench.cpp
 
