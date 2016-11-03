@@ -40,6 +40,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
@@ -50,18 +51,106 @@ import com.android.server.SystemService;
 import java.util.HashSet;
 import java.util.List;
 
+import java.lang.Thread;
+import java.lang.Runnable;
+import java.lang.InterruptedException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
+// The following class is Android Emulator specific. It is used to read and
+// write contents of the host system's clipboard.
+class HostClipboardMonitor implements Runnable {
+    public interface HostClipboardCallback {
+        void onHostClipboardUpdated(String contents);
+    }
+
+    private RandomAccessFile mPipe = null;
+    private HostClipboardCallback mHostClipboardCallback;
+    private static final String PIPE_NAME = "pipe:clipboard";
+    private static final String PIPE_DEVICE = "/dev/qemu_pipe";
+
+    private void openPipe() {
+        try {
+            // String.getBytes doesn't include the null terminator,
+            // but the QEMU pipe device requires the pipe service name
+            // to be null-terminated.
+            byte[] b = new byte[PIPE_NAME.length() + 1];
+            b[PIPE_NAME.length()] = 0;
+            System.arraycopy(
+                PIPE_NAME.getBytes(),
+                0,
+                b,
+                0,
+                PIPE_NAME.length());
+            mPipe = new RandomAccessFile(PIPE_DEVICE, "rw");
+            mPipe.write(b);
+        } catch (IOException e) {
+            try {
+                if (mPipe != null) mPipe.close();
+            } catch (IOException ee) {}
+            mPipe = null;
+        }
+    }
+
+    public HostClipboardMonitor(HostClipboardCallback cb) {
+        mHostClipboardCallback = cb;
+    }
+
+    @Override
+    public void run() {
+        while(!Thread.interrupted()) {
+            try {
+                // There's no guarantee that QEMU pipes will be ready at the moment
+                // this method is invoked. We simply try to get the pipe open and
+                // retry on failure indefinitely.
+                while (mPipe == null) {
+                    openPipe();
+                    Thread.sleep(100);
+                }
+                int size = mPipe.readInt();
+                size = Integer.reverseBytes(size);
+                byte[] receivedData = new byte[size];
+                mPipe.readFully(receivedData);
+                mHostClipboardCallback.onHostClipboardUpdated(
+                    new String(receivedData));
+            } catch (IOException e) {
+                try {
+                    mPipe.close();
+                } catch (IOException ee) {}
+                mPipe = null;
+            } catch (InterruptedException e) {}
+        }
+    }
+
+    public void setHostClipboard(String content) {
+        try {
+            if (mPipe != null) {
+                mPipe.writeInt(Integer.reverseBytes(content.getBytes().length));
+                mPipe.write(content.getBytes());
+            }
+        } catch(IOException e) {
+            Slog.e("HostClipboardMonitor",
+                   "Failed to set host clipboard " + e.getMessage());
+        }
+    }
+}
+
 /**
  * Implementation of the clipboard for copy and paste.
  */
 public class ClipboardService extends SystemService {
 
     private static final String TAG = "ClipboardService";
+    private static final boolean IS_EMULATOR =
+        SystemProperties.getBoolean("ro.kernel.qemu", false);
 
     private final IActivityManager mAm;
     private final IUserManager mUm;
     private final PackageManager mPm;
     private final AppOpsManager mAppOps;
     private final IBinder mPermissionOwner;
+    private HostClipboardMonitor mHostClipboardMonitor = null;
+    private Thread mHostMonitorThread = null;
 
     private final SparseArray<PerUserClipboard> mClipboards = new SparseArray<>();
 
@@ -82,6 +171,23 @@ public class ClipboardService extends SystemService {
             Slog.w("clipboard", "AM dead", e);
         }
         mPermissionOwner = permOwner;
+        if (IS_EMULATOR) {
+            mHostClipboardMonitor = new HostClipboardMonitor(
+                new HostClipboardMonitor.HostClipboardCallback() {
+                    @Override
+                    public void onHostClipboardUpdated(String contents){
+                        ClipData clip =
+                            new ClipData("host clipboard",
+                                         new String[]{"text/plain"},
+                                         new ClipData.Item(contents));
+                        synchronized(mClipboards) {
+                            setPrimaryClipInternal(getClipboard(0), clip);
+                        }
+                    }
+                });
+            mHostMonitorThread = new Thread(mHostClipboardMonitor);
+            mHostMonitorThread.start();
+        }
     }
 
     @Override
@@ -141,6 +247,11 @@ public class ClipboardService extends SystemService {
             synchronized (this) {
                 if (clip != null && clip.getItemCount() <= 0) {
                     throw new IllegalArgumentException("No items");
+                }
+                if (clip.getItemAt(0).getText() != null &&
+                    mHostClipboardMonitor != null) {
+                    mHostClipboardMonitor.setHostClipboard(
+                        clip.getItemAt(0).getText().toString());
                 }
                 final int callingUid = Binder.getCallingUid();
                 if (mAppOps.noteOp(AppOpsManager.OP_WRITE_CLIPBOARD, callingUid,
