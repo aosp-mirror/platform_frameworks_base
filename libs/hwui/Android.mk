@@ -23,7 +23,10 @@ hwui_src_files := \
     pipeline/skia/RenderNodeDrawable.cpp \
     pipeline/skia/ReorderBarrierDrawables.cpp \
     pipeline/skia/SkiaDisplayList.cpp \
+    pipeline/skia/SkiaOpenGLPipeline.cpp \
+    pipeline/skia/SkiaPipeline.cpp \
     pipeline/skia/SkiaRecordingCanvas.cpp \
+    pipeline/skia/SkiaVulkanPipeline.cpp \
     renderstate/Blend.cpp \
     renderstate/MeshState.cpp \
     renderstate/OffscreenBufferPool.cpp \
@@ -296,6 +299,7 @@ LOCAL_SRC_FILES += \
     tests/unit/RenderPropertiesTests.cpp \
     tests/unit/SkiaBehaviorTests.cpp \
     tests/unit/SkiaDisplayListTests.cpp \
+    tests/unit/SkiaPipelineTests.cpp \
     tests/unit/SkiaCanvasTests.cpp \
     tests/unit/SnapshotTests.cpp \
     tests/unit/StringUtilsTests.cpp \

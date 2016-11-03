@@ -31,6 +31,11 @@ class EglManager;
 
 class Frame {
 public:
+    Frame(EGLint width, EGLint height, EGLint bufferAge)
+            : mWidth(width)
+            , mHeight(height)
+            , mBufferAge(bufferAge) { }
+
     EGLint width() const { return mWidth; }
     EGLint height() const { return mHeight; }
 
@@ -39,6 +44,7 @@ public:
     EGLint bufferAge() const { return mBufferAge; }
 
 private:
+    Frame() {}
     friend class EglManager;
 
     EGLSurface mSurface;

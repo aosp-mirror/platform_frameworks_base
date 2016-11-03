@@ -33,6 +33,7 @@
 #include "Matrix.h"
 #include "RenderProperties.h"
 #include "pipeline/skia/SkiaDisplayList.h"
+#include "pipeline/skia/SkiaLayer.h"
 
 #include <vector>
 
@@ -58,10 +59,6 @@ class TreeObserver;
 
 namespace proto {
 class RenderNode;
-}
-
-namespace skiapipeline {
-    class SkiaDisplayList;
 }
 
 /**
@@ -312,14 +309,23 @@ public:
      * Returns true if an offscreen layer from any renderPipeline is attached
      * to this node.
      */
-    bool hasLayer() const { return mLayer || mLayerSurface.get(); }
+    bool hasLayer() const { return mLayer || mSkiaLayer.get(); }
 
     /**
      * Used by the RenderPipeline to attach an offscreen surface to the RenderNode.
      * The surface is then will be used to store the contents of a layer.
      */
-    void setLayerSurface(sk_sp<SkSurface> layer) { mLayerSurface = layer; }
-
+    void setLayerSurface(sk_sp<SkSurface> layer) {
+        if (layer.get()) {
+            if (!mSkiaLayer.get()) {
+                mSkiaLayer = std::make_unique<skiapipeline::SkiaLayer>();
+            }
+            mSkiaLayer->layerSurface = std::move(layer);
+            mSkiaLayer->inverseTransformInWindow.loadIdentity();
+        } else {
+            mSkiaLayer.reset();
+        }
+    }
 
     /**
      * If the RenderNode is of type LayerType::RenderLayer then this method will
@@ -330,7 +336,13 @@ public:
      * NOTE: this function is only guaranteed to return accurate results after
      *       prepareTree has been run for this RenderNode
      */
-    SkSurface* getLayerSurface() const { return mLayerSurface.get(); }
+    SkSurface* getLayerSurface() const {
+        return mSkiaLayer.get() ? mSkiaLayer->layerSurface.get() : nullptr;
+    }
+
+    skiapipeline::SkiaLayer* getSkiaLayer() const {
+        return mSkiaLayer.get();
+    }
 
 private:
     /**
@@ -346,7 +358,7 @@ private:
      * An offscreen rendering target used to contain the contents this RenderNode
      * when it has been set to draw as a LayerType::RenderLayer.
      */
-    sk_sp<SkSurface> mLayerSurface;
+    std::unique_ptr<skiapipeline::SkiaLayer> mSkiaLayer;
 }; // class RenderNode
 
 } /* namespace uirenderer */

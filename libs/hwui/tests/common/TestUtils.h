@@ -22,6 +22,7 @@
 #include <Rect.h>
 #include <RenderNode.h>
 #include <hwui/Bitmap.h>
+#include <pipeline/skia/SkiaRecordingCanvas.h>
 #include <renderstate/RenderState.h>
 #include <renderthread/RenderThread.h>
 #include <Snapshot.h>
@@ -194,6 +195,35 @@ public:
             node.stagingProperties().getWidth(), node.stagingProperties().getHeight()));
        contentCallback(*canvas.get());
        node.setStagingDisplayList(canvas->finishRecording(), nullptr);
+    }
+
+    static sp<RenderNode> createSkiaNode(int left, int top, int right, int bottom,
+            std::function<void(RenderProperties& props, skiapipeline::SkiaRecordingCanvas& canvas)> setup,
+            const char* name = nullptr, skiapipeline::SkiaDisplayList* displayList = nullptr) {
+    #if HWUI_NULL_GPU
+        // if RenderNodes are being sync'd/used, device info will be needed, since
+        // DeviceInfo::maxTextureSize() affects layer property
+        DeviceInfo::initialize();
+    #endif
+        sp<RenderNode> node = new RenderNode();
+        if (name) {
+            node->setName(name);
+        }
+        RenderProperties& props = node->mutateStagingProperties();
+        props.setLeftTopRightBottom(left, top, right, bottom);
+        if (displayList) {
+            node->setStagingDisplayList(displayList, nullptr);
+        }
+        if (setup) {
+            std::unique_ptr<skiapipeline::SkiaRecordingCanvas> canvas(
+                new skiapipeline::SkiaRecordingCanvas(nullptr,
+                props.getWidth(), props.getHeight()));
+            setup(props, *canvas.get());
+            node->setStagingDisplayList(canvas->finishRecording(), nullptr);
+        }
+        node->setPropertyFieldsDirty(0xFFFFFFFF);
+        TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+        return node;
     }
 
     /**

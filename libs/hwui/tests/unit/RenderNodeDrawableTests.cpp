@@ -34,34 +34,6 @@ using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
 using namespace android::uirenderer::skiapipeline;
 
-static sp<RenderNode> createSkiaNode(int left, int top, int right, int bottom,
-        std::function<void(RenderProperties& props, SkiaRecordingCanvas& canvas)> setup,
-        const char* name = nullptr, SkiaDisplayList* displayList = nullptr) {
-#if HWUI_NULL_GPU
-    // if RenderNodes are being sync'd/used, device info will be needed, since
-    // DeviceInfo::maxTextureSize() affects layer property
-    DeviceInfo::initialize();
-#endif
-    sp<RenderNode> node = new RenderNode();
-    if (name) {
-        node->setName(name);
-    }
-    RenderProperties& props = node->mutateStagingProperties();
-    props.setLeftTopRightBottom(left, top, right, bottom);
-    if (displayList) {
-        node->setStagingDisplayList(displayList, nullptr);
-    }
-    if (setup) {
-        std::unique_ptr<SkiaRecordingCanvas> canvas(new SkiaRecordingCanvas(nullptr,
-            props.getWidth(), props.getHeight()));
-        setup(props, *canvas.get());
-        node->setStagingDisplayList(canvas->finishRecording(), nullptr);
-    }
-    node->setPropertyFieldsDirty(0xFFFFFFFF);
-    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
-    return node;
-}
-
 TEST(RenderNodeDrawable, create) {
     auto rootNode = TestUtils::createNode(0, 0, 200, 400,
             [](RenderProperties& props, Canvas& canvas) {
@@ -86,7 +58,7 @@ TEST(RenderNodeDrawable, drawContent) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
 
     //create a RenderNodeDrawable backed by a RenderNode backed by a SkLiteRecorder
-    auto rootNode = createSkiaNode(0, 0, 1, 1,
+    auto rootNode = TestUtils::createSkiaNode(0, 0, 1, 1,
         [](RenderProperties& props, SkiaRecordingCanvas& recorder) {
             recorder.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
         });
@@ -118,14 +90,14 @@ TEST(RenderNodeDrawable, drawAndReorder) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
 
     //-z draws to all 4 pixels (RED)
-    auto redNode = createSkiaNode(0, 0, 4, 4,
+    auto redNode = TestUtils::createSkiaNode(0, 0, 4, 4,
         [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
             redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
             props.setElevation(-10.0f);
         }, "redNode");
 
     //0z draws to bottom 2 pixels (GREEN)
-    auto bottomHalfGreenNode = createSkiaNode(0, 0, 4, 4,
+    auto bottomHalfGreenNode = TestUtils::createSkiaNode(0, 0, 4, 4,
             [](RenderProperties& props, SkiaRecordingCanvas& bottomHalfGreenCanvas) {
                 SkPaint greenPaint;
                 greenPaint.setColor(SK_ColorGREEN);
@@ -135,7 +107,7 @@ TEST(RenderNodeDrawable, drawAndReorder) {
             }, "bottomHalfGreenNode");
 
     //+z draws to right 2 pixels (BLUE)
-    auto rightHalfBlueNode = createSkiaNode(0, 0, 4, 4,
+    auto rightHalfBlueNode = TestUtils::createSkiaNode(0, 0, 4, 4,
         [](RenderProperties& props, SkiaRecordingCanvas& rightHalfBlueCanvas) {
             SkPaint bluePaint;
             bluePaint.setColor(SK_ColorBLUE);
@@ -144,7 +116,7 @@ TEST(RenderNodeDrawable, drawAndReorder) {
             props.setElevation(10.0f);
         }, "rightHalfBlueNode");
 
-    auto rootNode = createSkiaNode(0, 0, 4, 4,
+    auto rootNode = TestUtils::createSkiaNode(0, 0, 4, 4,
             [&](RenderProperties& props, SkiaRecordingCanvas& rootRecorder) {
                 rootRecorder.insertReorderBarrier(true);
                 //draw in reverse Z order, so Z alters draw order
@@ -167,7 +139,7 @@ TEST(RenderNodeDrawable, composeOnLayer)
     canvas.drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
 
-    auto rootNode = createSkiaNode(0, 0, 1, 1,
+    auto rootNode = TestUtils::createSkiaNode(0, 0, 1, 1,
         [](RenderProperties& props, SkiaRecordingCanvas& recorder) {
             recorder.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
         });
@@ -176,7 +148,7 @@ TEST(RenderNodeDrawable, composeOnLayer)
     auto surfaceLayer = SkSurface::MakeRasterN32Premul(1, 1);
     auto canvas2 = surfaceLayer->getCanvas();
     canvas2->drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
-    rootNode->setLayerSurface( surfaceLayer  );
+    rootNode->setLayerSurface(surfaceLayer);
 
     RenderNodeDrawable drawable1(rootNode.get(), &canvas, false);
     canvas.drawDrawable(&drawable1);
@@ -190,7 +162,7 @@ TEST(RenderNodeDrawable, composeOnLayer)
     canvas.drawDrawable(&drawable3);
     ASSERT_EQ(SK_ColorRED, TestUtils::getColor(surface, 0, 0));
 
-    rootNode->setLayerSurface( sk_sp<SkSurface>()  );
+    rootNode->setLayerSurface(sk_sp<SkSurface>());
 }
 
 //TODO: refactor to cover test cases from FrameBuilderTests_projectionReorder
@@ -203,18 +175,18 @@ TEST(RenderNodeDrawable, projectDraw) {
     canvas.drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
 
-    auto redNode = createSkiaNode(0, 0, 1, 1,
+    auto redNode = TestUtils::createSkiaNode(0, 0, 1, 1,
         [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
             redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
         }, "redNode");
 
-    auto greenNodeWithRedChild = createSkiaNode(0, 0, 1, 1,
+    auto greenNodeWithRedChild = TestUtils::createSkiaNode(0, 0, 1, 1,
         [&](RenderProperties& props, SkiaRecordingCanvas& greenCanvasWithRedChild) {
             greenCanvasWithRedChild.drawRenderNode(redNode.get());
             greenCanvasWithRedChild.drawColor(SK_ColorGREEN, SkBlendMode::kSrcOver);
         }, "greenNodeWithRedChild");
 
-    auto rootNode = createSkiaNode(0, 0, 1, 1,
+    auto rootNode = TestUtils::createSkiaNode(0, 0, 1, 1,
         [&](RenderProperties& props, SkiaRecordingCanvas& rootCanvas) {
             rootCanvas.drawRenderNode(greenNodeWithRedChild.get());
         }, "rootNode");
