@@ -27,6 +27,7 @@
 #include <SkRRect.h>
 #include <SkRSXform.h>
 #include <SkSurface.h>
+#include <SkTextBlobRunIterator.h>
 
 #include <memory>
 
@@ -371,7 +372,42 @@ void SkiaCanvasProxy::onDrawTextRSXform(const void* text, size_t byteLength,
 
 void SkiaCanvasProxy::onDrawTextBlob(const SkTextBlob* blob, SkScalar x, SkScalar y,
         const SkPaint& paint) {
-    SkDEBUGFAIL("SkiaCanvasProxy::onDrawTextBlob is not supported");
+    SkPaint runPaint = paint;
+
+     SkTextBlobRunIterator it(blob);
+     for (;!it.done(); it.next()) {
+         size_t textLen = it.glyphCount() * sizeof(uint16_t);
+         const SkPoint& offset = it.offset();
+         // applyFontToPaint() always overwrites the exact same attributes,
+         // so it is safe to not re-seed the paint for this reason.
+         it.applyFontToPaint(&runPaint);
+
+         switch (it.positioning()) {
+         case SkTextBlob::kDefault_Positioning:
+             this->drawText(it.glyphs(), textLen, x + offset.x(), y + offset.y(), runPaint);
+             break;
+         case SkTextBlob::kHorizontal_Positioning: {
+             std::unique_ptr<SkPoint[]> pts(new SkPoint[it.glyphCount()]);
+             for (size_t i = 0; i < it.glyphCount(); i++) {
+                 pts[i].set(x + offset.x() + it.pos()[i], y + offset.y());
+             }
+             this->drawPosText(it.glyphs(), textLen, pts.get(), runPaint);
+             break;
+         }
+         case SkTextBlob::kFull_Positioning: {
+             std::unique_ptr<SkPoint[]> pts(new SkPoint[it.glyphCount()]);
+             for (size_t i = 0; i < it.glyphCount(); i++) {
+                 const size_t xIndex = i*2;
+                 const size_t yIndex = xIndex + 1;
+                 pts[i].set(x + offset.x() + it.pos()[xIndex], y + offset.y() + it.pos()[yIndex]);
+             }
+             this->drawPosText(it.glyphs(), textLen, pts.get(), runPaint);
+             break;
+         }
+         default:
+             SkFAIL("unhandled positioning mode");
+         }
+     }
 }
 
 void SkiaCanvasProxy::onDrawPatch(const SkPoint cubics[12], const SkColor colors[4],
