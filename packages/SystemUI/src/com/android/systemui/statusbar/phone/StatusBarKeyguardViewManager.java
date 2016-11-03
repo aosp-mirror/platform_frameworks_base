@@ -155,8 +155,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (!afterKeyguardGone) {
                 mBouncer.showWithDismissAction(r, cancelAction);
             } else {
-                mBouncer.show(false /* resetSecuritySelection */);
                 mAfterKeyguardGoneAction = r;
+                mBouncer.show(false /* resetSecuritySelection */);
             }
         }
         updateStates();
@@ -233,10 +233,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public void notifyDeviceWakeUpRequested() {
         mDeviceWillWakeUp = !mDeviceInteractive;
-    }
-
-    public void verifyUnlock() {
-        dismiss();
     }
 
     public void setNeedsInput(boolean needsInput) {
@@ -333,6 +329,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 }
             });
         } else {
+            executeAfterKeyguardGoneAction();
             if (mFingerprintUnlockController.getMode() == MODE_WAKE_AND_UNLOCK_PULSING) {
                 mFingerprintUnlockController.startKeyguardFadingAway();
                 mPhoneStatusBar.setKeyguardFadingAway(startTime, 0, 240);
@@ -372,7 +369,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mStatusBarWindowManager.setKeyguardShowing(false);
             mBouncer.hide(true /* destroyView */);
             mViewMediatorCallback.keyguardGone();
-            executeAfterKeyguardGoneAction();
             updateStates();
         }
     }
@@ -423,6 +419,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     /**
      * Dismisses the keyguard by going to the next screen or making it gone.
      */
+    public void dismissAndCollapse() {
+        mPhoneStatusBar.executeRunnableDismissingKeyguard(null, null, true, false, true);
+    }
+
     public void dismiss() {
         showBouncer();
     }

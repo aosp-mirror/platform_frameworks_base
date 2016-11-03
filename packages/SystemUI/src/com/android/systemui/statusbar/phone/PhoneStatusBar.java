@@ -3552,8 +3552,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 AsyncTask.execute(runnable);
             }
             if (dismissShade) {
-                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */,
-                        true /* delayed*/);
+                if (mExpandedVisible) {
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */,
+                            true /* delayed*/);
+                } else {
+
+                    // Do it after DismissAction has been processed to conserve the needed ordering.
+                    mHandler.post(this::runPostCollapseRunnables);
+                }
             }
             return deferred;
         }, cancelAction, afterKeyguardGone);
@@ -3631,12 +3637,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         dismissKeyguardThenExecute(action, null /* cancelRunnable */, afterKeyguardGone);
     }
 
-    public void dismissKeyguard() {
-        mStatusBarKeyguardViewManager.dismiss();
-    }
-
     private void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
             boolean afterKeyguardGone) {
+        afterKeyguardGone |= mStatusBarKeyguardViewManager.isShowing()
+                && mStatusBarKeyguardViewManager.isOccluded();
         if (mStatusBarKeyguardViewManager.isShowing()) {
             mStatusBarKeyguardViewManager.dismissWithAction(action, cancelAction,
                     afterKeyguardGone);
@@ -4249,7 +4253,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     }
                 }, delay + StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE);
             }
-        } else {
+        } else if (!mNotificationPanel.isCollapsing()) {
             instantCollapseNotificationPanel();
         }
         updateKeyguardState(staying, false /* fromShadeLocked */);
