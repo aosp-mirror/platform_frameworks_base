@@ -20,7 +20,8 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
-    libskia
+    libskia \
+    libandroidfw
 
 LOCAL_C_INCLUDES += \
     frameworks/base/native/include \
