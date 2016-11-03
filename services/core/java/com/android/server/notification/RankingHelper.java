@@ -151,8 +151,6 @@ public class RankingHelper implements RankingConfig {
                 if (TAG_PACKAGE.equals(tag)) {
                     int uid = safeInt(parser, ATT_UID, Record.UNKNOWN_UID);
                     String name = parser.getAttributeValue(null, ATT_NAME);
-                    int importance = safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
-
                     if (!TextUtils.isEmpty(name)) {
                         if (forRestore) {
                             try {
@@ -232,8 +230,8 @@ public class RankingHelper implements RankingConfig {
             } else {
                 mRecords.put(key, r);
             }
+            clampDefaultChannel(r);
         }
-        clampDefaultChannel(r);
         return r;
     }
 
@@ -733,7 +731,15 @@ public class RankingHelper implements RankingConfig {
                     // noop
                 }
             }
+            try {
+                Record fullRecord = getRecord(pkg,
+                        mPm.getPackageUidAsUser(pkg, UserHandle.USER_SYSTEM));
+                if (fullRecord != null) {
+                    clampDefaultChannel(fullRecord);
+                }
+            } catch (NameNotFoundException e) {}
         }
+
         if (updated) {
             updateConfig();
         }
