@@ -12245,9 +12245,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void registerUidObserver(IUidObserver observer, int which) {
-        enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
-                "registerUidObserver()");
+    public void registerUidObserver(IUidObserver observer, int which, String callingPackage) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "registerUidObserver");
+        }
         synchronized (this) {
             mUidObservers.register(observer, which);
         }

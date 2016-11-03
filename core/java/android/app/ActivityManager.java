@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -61,6 +62,7 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
 import android.util.Size;
@@ -86,6 +88,49 @@ public class ActivityManager {
 
     private final Context mContext;
     private final Handler mHandler;
+
+    static final class UidObserver extends IUidObserver.Stub {
+        final OnUidImportanceListener mListener;
+        final int mImportanceCutpoint;
+        int mLastImportance;
+
+        UidObserver(OnUidImportanceListener listener, int importanceCutpoint) {
+            mListener = listener;
+            mImportanceCutpoint = importanceCutpoint;
+        }
+
+        @Override
+        public void onUidStateChanged(int uid, int procState) {
+            final boolean lastAboveCut = mLastImportance <= mImportanceCutpoint;
+            final int importance = RunningAppProcessInfo.procStateToImportance(procState);
+            final boolean newAboveCut = importance <= mImportanceCutpoint;
+            /*
+            Log.d(TAG, "Uid " + uid + " state change from " + mLastImportance + " to "
+                    + importance + " @ cut " + mImportanceCutpoint
+                    + ": lastAbove=" + lastAboveCut + " newAbove=" + newAboveCut);
+            */
+            mLastImportance = importance;
+            if (lastAboveCut != newAboveCut) {
+                mListener.onUidImportance(uid, importance);
+            }
+        }
+
+        @Override
+        public void onUidGone(int uid) {
+            mLastImportance = RunningAppProcessInfo.IMPORTANCE_GONE;
+            mListener.onUidImportance(uid, RunningAppProcessInfo.IMPORTANCE_GONE);
+        }
+
+        @Override
+        public void onUidActive(int uid) {
+        }
+
+        @Override
+        public void onUidIdle(int uid) {
+        }
+    }
+
+    final ArrayMap<OnUidImportanceListener, UidObserver> mImportanceListeners = new ArrayMap<>();
 
     /**
      * Defines acceptable types of bugreports.
@@ -3045,15 +3090,92 @@ public class ActivityManager {
      * running its code, {@link RunningAppProcessInfo#IMPORTANCE_GONE} is returned.
      * @hide
      */
-    @SystemApi
+    @SystemApi @TestApi
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     public int getPackageImportance(String packageName) {
         try {
-            int procState = ActivityManagerNative.getDefault().getPackageProcessState(packageName,
+            int procState = getService().getPackageProcessState(packageName,
                     mContext.getOpPackageName());
             return RunningAppProcessInfo.procStateToImportance(procState);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Callback to get reports about changes to the importance of a uid.  Use with
+     * {@link #addOnUidImportanceListener}.
+     * @hide
+     */
+    @SystemApi @TestApi
+    public interface OnUidImportanceListener {
+        /**
+         * The importance if a given uid has changed.  Will be one of the importance
+         * values in {@link RunningAppProcessInfo};
+         * {@link RunningAppProcessInfo#IMPORTANCE_GONE IMPORTANCE_GONE} will be reported
+         * when the uid is no longer running at all.  This callback will happen on a thread
+         * from a thread pool, not the main UI thread.
+         * @param uid The uid whose importance has changed.
+         * @param importance The new importance value as per {@link RunningAppProcessInfo}.
+         */
+        void onUidImportance(int uid, int importance);
+    }
+
+    /**
+     * Start monitoring changes to the imoportance of uids running in the system.
+     * @param listener The listener callback that will receive change reports.
+     * @param importanceCutpoint The level of importance in which the caller is interested
+     * in differences.  For example, if {@link RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE}
+     * is used here, you will receive a call each time a uids importance transitions between
+     * being <= {@link RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE} and
+     * > {@link RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE}.
+     *
+     * <p>The caller must hold the {@link android.Manifest.permission#PACKAGE_USAGE_STATS}
+     * permission to use this feature.</p>
+     *
+     * @throws IllegalArgumentException If the listener is already registered.
+     * @throws SecurityException If the caller does not hold
+     * {@link android.Manifest.permission#PACKAGE_USAGE_STATS}.
+     * @hide
+     */
+    @SystemApi @TestApi
+    public void addOnUidImportanceListener(OnUidImportanceListener listener,
+            int importanceCutpoint) {
+        synchronized (this) {
+            if (mImportanceListeners.containsKey(listener)) {
+                throw new IllegalArgumentException("Listener already registered: " + listener);
+            }
+            // TODO: implement the cut point in the system process to avoid IPCs.
+            UidObserver observer = new UidObserver(listener, importanceCutpoint);
+            try {
+                getService().registerUidObserver(observer,
+                        UID_OBSERVER_PROCSTATE | UID_OBSERVER_GONE, mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mImportanceListeners.put(listener, observer);
+        }
+    }
+
+    /**
+     * Remove an importance listener that was previously registered with
+     * {@link #addOnUidImportanceListener}.
+     *
+     * @throws IllegalArgumentException If the listener is not registered.
+     * @hide
+     */
+    @SystemApi @TestApi
+    public void removeOnUidImportanceListener(OnUidImportanceListener listener) {
+        synchronized (this) {
+            UidObserver observer = mImportanceListeners.remove(listener);
+            if (observer == null) {
+                throw new IllegalArgumentException("Listener not registered: " + listener);
+            }
+            try {
+                getService().unregisterUidObserver(observer);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 

@@ -431,7 +431,7 @@ interface IActivityManager {
      *              etc.
      */
     void keyguardGoingAway(int flags) = 296;
-    void registerUidObserver(in IUidObserver observer, int which) = 297;
+    void registerUidObserver(in IUidObserver observer, int which, String callingPackage) = 297;
     void unregisterUidObserver(in IUidObserver observer) = 298;
     boolean isAssistDataAllowedOnCurrentActivity() = 299;
     boolean showAssistFromActivity(in IBinder token, in Bundle args) = 300;
