@@ -5089,12 +5089,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
-        if (attrs.type == TYPE_INPUT_METHOD && win.isVisibleOrBehindKeyguardLw()
-                && win.isDisplayedLw() && !win.getGivenInsetsPendingLw()) {
+        if (attrs.type == TYPE_INPUT_METHOD && win.isVisibleLw()
+                && !win.getGivenInsetsPendingLw()) {
             setLastInputMethodWindowLw(null, null);
             offsetInputMethodWindowLw(win);
         }
-        if (attrs.type == TYPE_VOICE_INTERACTION && win.isVisibleOrBehindKeyguardLw()
+        if (attrs.type == TYPE_VOICE_INTERACTION && win.isVisibleLw()
                 && !win.getGivenInsetsPendingLw()) {
             offsetVoiceInputWindowLw(win);
         }
@@ -5168,12 +5168,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void applyPostLayoutPolicyLw(WindowState win, WindowManager.LayoutParams attrs,
             WindowState attached, WindowState imeTarget) {
-        if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": isVisibleOrBehindKeyguardLw="
-                + win.isVisibleOrBehindKeyguardLw());
+        final boolean visible = win.isVisibleLw();
+        if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": isVisible=" + visible);
         applyKeyguardPolicyLw(win, imeTarget);
         final int fl = PolicyControl.getWindowFlags(win, attrs);
-        if (mTopFullscreenOpaqueWindowState == null
-                && win.isVisibleLw() && attrs.type == TYPE_INPUT_METHOD) {
+        if (mTopFullscreenOpaqueWindowState == null && visible && attrs.type == TYPE_INPUT_METHOD) {
             mForcingShowNavBar = true;
             mForcingShowNavBarLayer = win.getSurfaceLayer();
         }
@@ -5189,8 +5188,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
                 && attrs.type < FIRST_SYSTEM_WINDOW;
         final int stackId = win.getStackId();
-        if (mTopFullscreenOpaqueWindowState == null &&
-                win.isVisibleOrBehindKeyguardLw() && !win.isGoneForLayoutLw()) {
+        if (mTopFullscreenOpaqueWindowState == null && visible) {
             if ((fl & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
                 mForceStatusBar = true;
             }
@@ -5221,10 +5219,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        final boolean reallyVisible = win.isVisibleOrBehindKeyguardLw() && !win.isGoneForLayoutLw();
-
         // Voice interaction overrides both top fullscreen and top docked.
-        if (reallyVisible && win.getAttrs().type == TYPE_VOICE_INTERACTION) {
+        if (visible && win.getAttrs().type == TYPE_VOICE_INTERACTION) {
             if (mTopFullscreenOpaqueWindowState == null) {
                 mTopFullscreenOpaqueWindowState = win;
                 if (mTopFullscreenOpaqueOrDimmingWindowState == null) {
@@ -5240,7 +5236,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Keep track of the window if it's dimming but not necessarily fullscreen.
-        if (mTopFullscreenOpaqueOrDimmingWindowState == null && reallyVisible
+        if (mTopFullscreenOpaqueOrDimmingWindowState == null && visible
                 && win.isDimming() && StackId.normallyFullscreenWindows(stackId)) {
             mTopFullscreenOpaqueOrDimmingWindowState = win;
         }
@@ -5248,7 +5244,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // We need to keep track of the top "fullscreen" opaque window for the docked stack
         // separately, because both the "real fullscreen" opaque window and the one for the docked
         // stack can control View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.
-        if (mTopDockedOpaqueWindowState == null && reallyVisible && appWindow && attached == null
+        if (mTopDockedOpaqueWindowState == null && visible && appWindow && attached == null
                 && isFullscreen(attrs) && stackId == DOCKED_STACK_ID) {
             mTopDockedOpaqueWindowState = win;
             if (mTopDockedOpaqueOrDimmingWindowState == null) {
@@ -5258,7 +5254,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Also keep track of any windows that are dimming but not necessarily fullscreen in the
         // docked stack.
-        if (mTopDockedOpaqueOrDimmingWindowState == null && reallyVisible && win.isDimming()
+        if (mTopDockedOpaqueOrDimmingWindowState == null && visible && win.isDimming()
                 && stackId == DOCKED_STACK_ID) {
             mTopDockedOpaqueOrDimmingWindowState = win;
         }
