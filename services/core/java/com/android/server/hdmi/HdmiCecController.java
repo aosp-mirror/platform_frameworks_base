@@ -17,23 +17,23 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiPortInfo;
+import android.hardware.tv.cec.V1_0.Result;
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Slog;
 import android.util.SparseArray;
-
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Predicate;
 import com.android.server.hdmi.HdmiAnnotations.IoThreadOnly;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
-
-import libcore.util.EmptyArray;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import libcore.util.EmptyArray;
+import sun.util.locale.LanguageTag;
 
 /**
  * Manages HDMI-CEC command and behaviors. It converts user's command into CEC command
@@ -256,7 +256,7 @@ final class HdmiCecController {
         if (HdmiUtils.isValidAddress(newLogicalAddress)) {
             return nativeAddLogicalAddress(mNativePtr, newLogicalAddress);
         } else {
-            return -1;
+            return Result.FAILURE_INVALID_ARGS;
         }
     }
 
@@ -320,13 +320,27 @@ final class HdmiCecController {
      * Set an option to CEC HAL.
      *
      * @param flag key of option
-     * @param value value of option
+     * @param enabled whether to enable/disable the given option.
      */
     @ServiceThreadOnly
-    void setOption(int flag, int value) {
+    void setOption(int flag, boolean enabled) {
         assertRunOnServiceThread();
-        HdmiLogger.debug("setOption: [flag:%d, value:%d]", flag, value);
-        nativeSetOption(mNativePtr, flag, value);
+        HdmiLogger.debug("setOption: [flag:%d, enabled:%b]", flag, enabled);
+        nativeSetOption(mNativePtr, flag, enabled);
+    }
+
+    /**
+     * Informs CEC HAL about the current system language.
+     *
+     * @param language Three-letter code defined in ISO/FDIS 639-2. Must be lowercase letters.
+     */
+    @ServiceThreadOnly
+    void setLanguage(String language) {
+        assertRunOnServiceThread();
+        if (!LanguageTag.isLanguage(language)) {
+            return;
+        }
+        nativeSetLanguage(mNativePtr, language);
     }
 
     /**
@@ -336,9 +350,9 @@ final class HdmiCecController {
      * @param enabled whether to enable/disable ARC
      */
     @ServiceThreadOnly
-    void setAudioReturnChannel(int port, boolean enabled) {
+    void enableAudioReturnChannel(int port, boolean enabled) {
         assertRunOnServiceThread();
-        nativeSetAudioReturnChannel(mNativePtr, port, enabled);
+        nativeEnableAudioReturnChannel(mNativePtr, port, enabled);
     }
 
     /**
@@ -472,9 +486,9 @@ final class HdmiCecController {
             // <Polling Message> is a message which has empty body.
             int ret =
                     nativeSendCecCommand(mNativePtr, sourceAddress, destinationAddress, EMPTY_BODY);
-            if (ret == Constants.SEND_RESULT_SUCCESS) {
+            if (ret == SendMessageResult.SUCCESS) {
                 return true;
-            } else if (ret != Constants.SEND_RESULT_NAK) {
+            } else if (ret != SendMessageResult.NACK) {
                 // Unusual failure
                 HdmiLogger.warning("Failed to send a polling message(%d->%d) with return code %d",
                         sourceAddress, destinationAddress, ret);
@@ -572,17 +586,17 @@ final class HdmiCecController {
                 HdmiLogger.debug("[S]:" + cecMessage);
                 byte[] body = buildBody(cecMessage.getOpcode(), cecMessage.getParams());
                 int i = 0;
-                int errorCode = Constants.SEND_RESULT_SUCCESS;
+                int errorCode = SendMessageResult.SUCCESS;
                 do {
                     errorCode = nativeSendCecCommand(mNativePtr, cecMessage.getSource(),
                             cecMessage.getDestination(), body);
-                    if (errorCode == Constants.SEND_RESULT_SUCCESS) {
+                    if (errorCode == SendMessageResult.SUCCESS) {
                         break;
                     }
                 } while (i++ < HdmiConfig.RETRANSMISSION_COUNT);
 
                 final int finalError = errorCode;
-                if (finalError != Constants.SEND_RESULT_SUCCESS) {
+                if (finalError != SendMessageResult.SUCCESS) {
                     Slog.w(TAG, "Failed to send " + cecMessage);
                 }
                 if (callback != null) {
@@ -636,7 +650,8 @@ final class HdmiCecController {
     private static native int nativeGetVersion(long controllerPtr);
     private static native int nativeGetVendorId(long controllerPtr);
     private static native HdmiPortInfo[] nativeGetPortInfos(long controllerPtr);
-    private static native void nativeSetOption(long controllerPtr, int flag, int value);
-    private static native void nativeSetAudioReturnChannel(long controllerPtr, int port, boolean flag);
+    private static native void nativeSetOption(long controllerPtr, int flag, boolean enabled);
+    private static native void nativeSetLanguage(long controllerPtr, String language);
+    private static native void nativeEnableAudioReturnChannel(long controllerPtr, int port, boolean flag);
     private static native boolean nativeIsConnected(long controllerPtr, int port);
 }

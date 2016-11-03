@@ -36,6 +36,7 @@ import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.HdmiRecordSources;
 import android.hardware.hdmi.HdmiTimerRecordSources;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.tv.TvInputInfo;
@@ -46,7 +47,6 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
@@ -57,9 +57,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.HashMap;
 
 /**
  * Represent a logical device of type TV residing in Android system.
@@ -910,7 +910,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         HdmiLogger.debug("Set Arc Status[old:%b new:%b]", mArcEstablished, enabled);
         boolean oldStatus = mArcEstablished;
         // 1. Enable/disable ARC circuit.
-        setAudioReturnChannel(enabled);
+        enableAudioReturnChannel(enabled);
         // 2. Notify arc status to audio service.
         notifyArcStatusToAudioService(enabled);
         // 3. Update arc status;
@@ -922,11 +922,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * Switch hardware ARC circuit in the system.
      */
     @ServiceThreadOnly
-    void setAudioReturnChannel(boolean enabled) {
+    void enableAudioReturnChannel(boolean enabled) {
         assertRunOnServiceThread();
         HdmiDeviceInfo avr = getAvrDeviceInfo();
         if (avr != null) {
-            mService.setAudioReturnChannel(avr.getPortId(), enabled);
+            mService.enableAudioReturnChannel(avr.getPortId(), enabled);
         }
     }
 
@@ -1870,7 +1870,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mService.sendCecCommand(message, new SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error != Constants.SEND_RESULT_SUCCESS) {
+                if (error != SendMessageResult.SUCCESS) {
                     announceClearTimerRecordingResult(recorderAddress,
                             CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE);
                 }
