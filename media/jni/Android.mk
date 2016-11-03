@@ -41,7 +41,8 @@ LOCAL_SHARED_LIBRARIES := \
     libcamera_client \
     libmtp \
     libexif \
-    libpiex
+    libpiex \
+    libandroidfw
 
 LOCAL_STATIC_LIBRARIES := \
 

@@ -50,6 +50,8 @@ LOCAL_CFLAGS += -DSTATIC_ANDROIDFW_FOR_TOOLS
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 LOCAL_SRC_FILES:= $(hostSources)
 LOCAL_C_INCLUDES := external/zlib
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 
@@ -72,6 +74,8 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libz
 
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
 include $(BUILD_SHARED_LIBRARY)
