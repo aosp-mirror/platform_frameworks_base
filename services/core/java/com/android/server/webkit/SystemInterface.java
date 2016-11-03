@@ -19,6 +19,7 @@ package com.android.server.webkit;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.ContentObserver;
 import android.webkit.WebViewProviderInfo;
 
 /**
@@ -49,5 +50,6 @@ public interface SystemInterface {
     public PackageInfo getPackageInfoForProvider(WebViewProviderInfo configInfo)
             throws NameNotFoundException;
 
-    public void setMultiprocessEnabled(boolean enabled);
+    public void setMultiProcessEnabledFromContext(Context context);
+    public void registerContentObserver(Context context, ContentObserver contentObserver);
 }
