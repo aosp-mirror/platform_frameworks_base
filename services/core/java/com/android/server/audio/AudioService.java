@@ -3100,14 +3100,28 @@ public class AudioService extends IAudioService.Stub {
         boolean success =
             handleDeviceConnection(connected, outDevice, address, btDeviceName) &&
             handleDeviceConnection(connected, inDevice, address, btDeviceName);
-        if (success) {
-            synchronized (mScoClients) {
-                if (connected) {
-                    mBluetoothHeadsetDevice = btDevice;
-                } else {
-                    mBluetoothHeadsetDevice = null;
-                    resetBluetoothSco();
-                }
+
+        if (!success) {
+          return;
+        }
+
+        /* When one BT headset is disconnected while another BT headset
+         * is connected, don't mess with the headset device.
+         */
+        if ((state == BluetoothProfile.STATE_DISCONNECTED ||
+            state == BluetoothProfile.STATE_DISCONNECTING) &&
+            mBluetoothHeadset != null &&
+            mBluetoothHeadset.getAudioState(btDevice) == BluetoothHeadset.STATE_AUDIO_CONNECTED) {
+            Log.w(TAG, "SCO connected through another device, returning");
+            return;
+        }
+
+        synchronized (mScoClients) {
+            if (connected) {
+                mBluetoothHeadsetDevice = btDevice;
+            } else {
+                mBluetoothHeadsetDevice = null;
+                resetBluetoothSco();
             }
         }
     }
@@ -5253,7 +5267,6 @@ public class AudioService extends IAudioService.Stub {
                 state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
                                                BluetoothProfile.STATE_DISCONNECTED);
                 BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
                 setBtScoDeviceConnectionState(btDevice, state);
             } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
                 boolean broadcast = false;
