@@ -17,6 +17,21 @@
 package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
+import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
+import static android.app.admin.DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE;
+import static android.app.admin.DevicePolicyManager.CODE_DEVICE_ADMIN_NOT_SUPPORTED;
+import static android.app.admin.DevicePolicyManager.CODE_HAS_DEVICE_OWNER;
+import static android.app.admin.DevicePolicyManager.CODE_HAS_PAIRED;
+import static android.app.admin.DevicePolicyManager.CODE_MANAGED_USERS_NOT_SUPPORTED;
+import static android.app.admin.DevicePolicyManager.CODE_NONSYSTEM_USER_EXISTS;
+import static android.app.admin.DevicePolicyManager.CODE_NOT_SYSTEM_USER;
+import static android.app.admin.DevicePolicyManager.CODE_NOT_SYSTEM_USER_SPLIT;
+import static android.app.admin.DevicePolicyManager.CODE_OK;
+import static android.app.admin.DevicePolicyManager.CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER;
+import static android.app.admin.DevicePolicyManager.CODE_SYSTEM_USER;
+import static android.app.admin.DevicePolicyManager.CODE_USER_HAS_PROFILE_OWNER;
+import static android.app.admin.DevicePolicyManager.CODE_USER_NOT_RUNNING;
+import static android.app.admin.DevicePolicyManager.CODE_USER_SETUP_COMPLETED;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
@@ -309,21 +324,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     /** Keyguard features that are allowed to be set on a managed profile */
     private static final int PROFILE_KEYGUARD_FEATURES =
             PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER | PROFILE_KEYGUARD_FEATURES_PROFILE_ONLY;
-
-    private static final int CODE_OK = 0;
-    private static final int CODE_HAS_DEVICE_OWNER = 1;
-    private static final int CODE_USER_HAS_PROFILE_OWNER = 2;
-    private static final int CODE_USER_NOT_RUNNING = 3;
-    private static final int CODE_USER_SETUP_COMPLETED = 4;
-    private static final int CODE_NONSYSTEM_USER_EXISTS = 5;
-    private static final int CODE_ACCOUNTS_NOT_EMPTY = 6;
-    private static final int CODE_NOT_SYSTEM_USER = 7;
-    private static final int CODE_HAS_PAIRED = 8;
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ CODE_OK, CODE_HAS_DEVICE_OWNER, CODE_USER_HAS_PROFILE_OWNER, CODE_USER_NOT_RUNNING,
-            CODE_USER_SETUP_COMPLETED, CODE_NOT_SYSTEM_USER })
-    private @interface DeviceOwnerPreConditionCode {}
 
     private static final int DEVICE_ADMIN_DEACTIVATE_TIMEOUT = 10000;
 
@@ -6520,7 +6520,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             enforceCanManageProfileAndDeviceOwners();
         }
 
-        final int code = checkSetDeviceOwnerPreConditionLocked(owner, userId, isAdb());
+        final int code = checkDeviceOwnerProvisioningPreConditionLocked(owner, userId, isAdb());
         switch (code) {
             case CODE_OK:
                 return;
@@ -6547,7 +6547,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new IllegalStateException("Not allowed to set the device owner because this "
                         + "device has already paired");
             default:
-                throw new IllegalStateException("Unknown @DeviceOwnerPreConditionCode " + code);
+                throw new IllegalStateException("Unexpected @ProvisioningPreCondition " + code);
         }
     }
 
@@ -8754,79 +8754,42 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean isProvisioningAllowed(String action) {
+        return checkProvisioningPreConditionSkipPermission(action) == CODE_OK;
+    }
+
+    @Override
+    public int checkProvisioningPreCondition(String action) {
+        enforceCanManageProfileAndDeviceOwners();
+        return checkProvisioningPreConditionSkipPermission(action);
+    }
+
+    private int checkProvisioningPreConditionSkipPermission(String action) {
         if (!mHasFeature) {
-            return false;
+            return CODE_DEVICE_ADMIN_NOT_SUPPORTED;
         }
 
         final int callingUserId = mInjector.userHandleGetCallingUserId();
-        if (DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE.equals(action)) {
-            if (!hasFeatureManagedUsers()) {
-                return false;
+        if (action != null) {
+            switch (action) {
+                case DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE:
+                    return checkManagedProfileProvisioningPreCondition(callingUserId);
+                case DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE:
+                    return checkDeviceOwnerProvisioningPreCondition(callingUserId);
+                case DevicePolicyManager.ACTION_PROVISION_MANAGED_USER:
+                    return checkManagedUserProvisioningPreCondition(callingUserId);
+                case DevicePolicyManager.ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE:
+                    return checkManagedShareableDeviceProvisioningPreCondition(callingUserId);
             }
-            synchronized (this) {
-                if (mOwners.hasDeviceOwner()) {
-                    // STOPSHIP Only allow creating a managed profile if allowed by the device
-                    // owner. http://b/31952368
-                    if (mInjector.userManagerIsSplitSystemUser()) {
-                        if (callingUserId == UserHandle.USER_SYSTEM) {
-                            // Managed-profiles cannot be setup on the system user.
-                            return false;
-                        }
-                    }
-                }
-            }
-            if (getProfileOwner(callingUserId) != null) {
-                // Managed user cannot have a managed profile.
-                return false;
-            }
-            boolean canRemoveProfile
-                    = !mUserManager.hasUserRestriction(UserManager.DISALLOW_REMOVE_USER);
-            final long ident = mInjector.binderClearCallingIdentity();
-            try {
-                if (!mUserManager.canAddMoreManagedProfiles(callingUserId, canRemoveProfile)) {
-                    return false;
-                }
-            } finally {
-                mInjector.binderRestoreCallingIdentity(ident);
-            }
-            return true;
-        } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE.equals(action)) {
-            return isDeviceOwnerProvisioningAllowed(callingUserId);
-        } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_USER.equals(action)) {
-            if (!hasFeatureManagedUsers()) {
-                return false;
-            }
-            if (!mInjector.userManagerIsSplitSystemUser()) {
-                // ACTION_PROVISION_MANAGED_USER only supported on split-user systems.
-                return false;
-            }
-            if (callingUserId == UserHandle.USER_SYSTEM) {
-                // System user cannot be a managed user.
-                return false;
-            }
-            if (hasUserSetupCompleted(callingUserId)) {
-                return false;
-            }
-            if (mIsWatch && hasPaired(UserHandle.USER_SYSTEM)) {
-                return false;
-            }
-            return true;
-        } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE.equals(action)) {
-            if (!mInjector.userManagerIsSplitSystemUser()) {
-                // ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE only supported on split-user systems.
-                return false;
-            }
-            return isDeviceOwnerProvisioningAllowed(callingUserId);
         }
         throw new IllegalArgumentException("Unknown provisioning action " + action);
     }
 
-    /*
+    /**
      * The device owner can only be set before the setup phase of the primary user has completed,
      * except for adb command if no accounts or additional users are present on the device.
      */
-    private synchronized @DeviceOwnerPreConditionCode int checkSetDeviceOwnerPreConditionLocked(
-            @Nullable ComponentName owner, int deviceOwnerUserId, boolean isAdb) {
+    private int checkDeviceOwnerProvisioningPreConditionLocked(@Nullable ComponentName owner,
+            int deviceOwnerUserId, boolean isAdb) {
         if (mOwners.hasDeviceOwner()) {
             return CODE_HAS_DEVICE_OWNER;
         }
@@ -8871,11 +8834,73 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private boolean isDeviceOwnerProvisioningAllowed(int deviceOwnerUserId) {
+    private int checkDeviceOwnerProvisioningPreCondition(int deviceOwnerUserId) {
         synchronized (this) {
-            return CODE_OK == checkSetDeviceOwnerPreConditionLocked(
-                    /* owner unknown */ null, deviceOwnerUserId, /* isAdb */ false);
+            return checkDeviceOwnerProvisioningPreConditionLocked(/* owner unknown */ null,
+                    deviceOwnerUserId, /* isAdb= */ false);
         }
+    }
+
+    private int checkManagedProfileProvisioningPreCondition(int callingUserId) {
+        if (!hasFeatureManagedUsers()) {
+            return CODE_MANAGED_USERS_NOT_SUPPORTED;
+        }
+        synchronized (this) {
+            if (mOwners.hasDeviceOwner()) {
+                // STOPSHIP Only allow creating a managed profile if allowed by the device
+                // owner. http://b/31952368
+                if (mInjector.userManagerIsSplitSystemUser()) {
+                    if (callingUserId == UserHandle.USER_SYSTEM) {
+                        // Managed-profiles cannot be setup on the system user.
+                        return CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER;
+                    }
+                }
+            }
+        }
+        if (getProfileOwner(callingUserId) != null) {
+            // Managed user cannot have a managed profile.
+            return CODE_USER_HAS_PROFILE_OWNER;
+        }
+        boolean canRemoveProfile =
+                !mUserManager.hasUserRestriction(UserManager.DISALLOW_REMOVE_USER);
+        final long ident = mInjector.binderClearCallingIdentity();
+        try {
+            if (!mUserManager.canAddMoreManagedProfiles(callingUserId, canRemoveProfile)) {
+                return CODE_CANNOT_ADD_MANAGED_PROFILE;
+            }
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
+        return CODE_OK;
+    }
+
+    private int checkManagedUserProvisioningPreCondition(int callingUserId) {
+        if (!hasFeatureManagedUsers()) {
+            return CODE_MANAGED_USERS_NOT_SUPPORTED;
+        }
+        if (!mInjector.userManagerIsSplitSystemUser()) {
+            // ACTION_PROVISION_MANAGED_USER only supported on split-user systems.
+            return CODE_NOT_SYSTEM_USER_SPLIT;
+        }
+        if (callingUserId == UserHandle.USER_SYSTEM) {
+            // System user cannot be a managed user.
+            return CODE_SYSTEM_USER;
+        }
+        if (hasUserSetupCompleted(callingUserId)) {
+            return CODE_USER_SETUP_COMPLETED;
+        }
+        if (mIsWatch && hasPaired(UserHandle.USER_SYSTEM)) {
+            return CODE_HAS_PAIRED;
+        }
+        return CODE_OK;
+    }
+
+    private int checkManagedShareableDeviceProvisioningPreCondition(int callingUserId) {
+        if (!mInjector.userManagerIsSplitSystemUser()) {
+            // ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE only supported on split-user systems.
+            return CODE_NOT_SYSTEM_USER_SPLIT;
+        }
+        return checkDeviceOwnerProvisioningPreCondition(callingUserId);
     }
 
     private boolean hasFeatureManagedUsers() {
