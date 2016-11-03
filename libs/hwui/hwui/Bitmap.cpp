@@ -307,7 +307,7 @@ void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTab
     }
     mRowBytes = rowBytes;
     if (mColorTable.get() != ctable) {
-        mColorTable.reset(ctable);
+        mColorTable.reset(SkSafeRef(ctable));
     }
 
     // Need to validate the alpha type to filter against the color type
