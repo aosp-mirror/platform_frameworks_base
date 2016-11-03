@@ -437,7 +437,7 @@ android::Bitmap* GraphicsJNI::mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
 
 sk_sp<SkColorSpace> GraphicsJNI::defaultColorSpace() {
 #ifdef ANDROID_ENABLE_LINEAR_BLENDING
-    return SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
+    return SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named);
 #else
     return nullptr;
 #endif

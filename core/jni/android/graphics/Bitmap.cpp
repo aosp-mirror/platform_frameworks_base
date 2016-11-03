@@ -806,7 +806,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     std::unique_ptr<SkBitmap> bitmap(new SkBitmap);
 
     if (!bitmap->setInfo(SkImageInfo::Make(width, height, colorType, alphaType,
-            isSRGB ? SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named) : nullptr), rowBytes)) {
+            isSRGB ? SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named) : nullptr), rowBytes)) {
         return NULL;
     }
 
@@ -921,7 +921,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     auto bitmapWrapper = reinterpret_cast<BitmapWrapper*>(bitmapHandle);
     bitmapWrapper->getSkBitmap(&bitmap);
 
-    sk_sp<SkColorSpace> sRGB = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
+    sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named);
     bool isSRGB = bitmap.colorSpace() == sRGB.get();
 
     p->writeInt32(isMutable);

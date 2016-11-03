@@ -217,7 +217,7 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThr
         return nullptr;
     }
 
-    sk_sp<SkColorSpace> sRGB = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
+    sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named);
     bool needSRGB = skBitmap.info().colorSpace() == sRGB.get();
     bool hasSRGB = caches.extensions().hasSRGB();
     GLint format, type, internalFormat;
