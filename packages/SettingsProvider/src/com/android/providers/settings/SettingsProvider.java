@@ -2175,7 +2175,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 134;
+            private static final int SETTINGS_VERSION = 135;
 
             private final int mUserId;
 
@@ -2543,6 +2543,14 @@ public class SettingsProvider extends ContentProvider {
                                 defaultEndButtonBehavior, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 134;
+                }
+
+                if (currentVersion == 134) {
+                    // Remove setting that specifies if magnification values should be preserved.
+                    // This setting defaulted to true and never has a UI.
+                    getSecureSettingsLocked(userId).deleteSettingLocked(
+                            Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE);
+                    currentVersion = 135;
                 }
 
                 if (currentVersion != newVersion) {

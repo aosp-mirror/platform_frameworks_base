@@ -381,7 +381,7 @@ class MagnificationGestureHandler implements EventStreamTransformation {
                 Slog.i(LOG_TAG, "Panned content by scrollX: " + distanceX
                         + " scrollY: " + distanceY);
             }
-            mMagnificationController.offsetMagnifiedRegionCenter(distanceX, distanceY,
+            mMagnificationController.offsetMagnifiedRegion(distanceX, distanceY,
                     AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
             return true;
         }

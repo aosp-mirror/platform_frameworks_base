@@ -829,9 +829,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * @param centerX the new screen-relative center X coordinate
      * @param centerY the new screen-relative center Y coordinate
      */
-    void notifyMagnificationChanged(@NonNull Region region,
+    public void notifyMagnificationChanged(@NonNull Region region,
             float scale, float centerX, float centerY) {
         synchronized (mLock) {
+            notifyClearAccessibilityCacheLocked();
             notifyMagnificationChangedLocked(region, scale, centerX, centerY);
         }
     }
@@ -899,10 +900,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     void onTouchInteractionEnd() {
         mSecurityPolicy.onTouchInteractionEnd();
-    }
-
-    void onMagnificationStateChanged() {
-        notifyClearAccessibilityCacheLocked();
     }
 
     private void switchUser(int userId) {

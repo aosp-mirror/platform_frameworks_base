@@ -5161,18 +5161,10 @@ public final class Settings {
                 "accessibility_display_magnification_scale";
 
         /**
-         * Setting that specifies whether the display magnification should be
-         * automatically updated. If this fearture is enabled the system will
-         * exit magnification mode or pan the viewport when a context change
-         * occurs. For example, on staring a new activity or rotating the screen,
-         * the system may zoom out so the user can see the new context he is in.
-         * Another example is on showing a window that is not visible in the
-         * magnified viewport the system may pan the viewport to make the window
-         * the has popped up so the user knows that the context has changed.
-         * Whether a screen magnification is performed is controlled by
-         * {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED}
+         * Unused mangnification setting
          *
          * @hide
+         * @deprecated
          */
         public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE =
                 "accessibility_display_magnification_auto_update";
@@ -6491,7 +6483,6 @@ public final class Settings {
             ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
-            ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
             ACCESSIBILITY_SCRIPT_INJECTION,
             ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS,
             ENABLED_ACCESSIBILITY_SERVICES,
