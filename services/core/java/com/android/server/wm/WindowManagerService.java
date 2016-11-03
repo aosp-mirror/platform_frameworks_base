@@ -8088,7 +8088,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("    a[animator]: animator state");
                 pw.println("    s[essions]: active sessions");
                 pw.println("    surfaces: active surfaces (debugging enabled only)");
-                pw.println("    pip: PIP state");
                 pw.println("    d[isplays]: active display contents");
                 pw.println("    t[okens]: token list");
                 pw.println("    w[indows]: window list");
@@ -8159,18 +8158,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     StringBuilder output = new StringBuilder();
                     mRoot.dumpChildrenNames(output, " ");
                     pw.println(output.toString());
-                }
-                return;
-            } else if ("pip".equals(cmd)) {
-                synchronized(mWindowMap) {
-                    pw.print("defaultBounds=");
-                    getPictureInPictureDefaultBounds(DEFAULT_DISPLAY).printShortString(pw);
-                    pw.println();
-                    pw.print("movementBounds=");
-                    getPictureInPictureMovementBounds(DEFAULT_DISPLAY).printShortString(pw);
-                    pw.println();
-                    getDefaultDisplayContentLocked().getPinnedStackController().dump("", pw);
-                    pw.println();
                 }
                 return;
             } else {

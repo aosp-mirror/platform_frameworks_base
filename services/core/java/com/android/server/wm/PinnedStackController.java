@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -81,6 +82,7 @@ class PinnedStackController {
     // Temp vars for calculation
     private final DisplayMetrics mTmpMetrics = new DisplayMetrics();
     private final Rect mTmpInsets = new Rect();
+    private final Rect mTmpRect = new Rect();
 
     /**
      * The callback object passed to listeners for them to notify the controller of state changes.
@@ -298,6 +300,11 @@ class PinnedStackController {
 
     void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "PinnedStackController");
+        pw.print(prefix + "  defaultBounds="); getDefaultBounds().printShortString(pw);
+        pw.println();
+        mService.getStackBounds(PINNED_STACK_ID, mTmpRect);
+        pw.print(prefix + "  movementBounds="); getMovementBounds(mTmpRect).printShortString(pw);
+        pw.println();
         pw.println(prefix + "  mIsImeShowing=" + mIsImeShowing);
         pw.println(prefix + "  mInInteractiveMode=" + mInInteractiveMode);
     }
