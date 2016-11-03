@@ -2653,6 +2653,12 @@ message MetricsEvent {
     // OS: O
     ENTERPRISE_PRIVACY_SETTINGS = 628;
 
+    // ACTION: Longpress on a TextView.
+    //  SUBTYPE: 1 is for START_SELECTION, 2 is for START_DRAG_AND_DROP, 0 is for OTHER.
+    // CATEGORY: TEXT_CONTROLS
+    // OS: O
+    TEXT_LONGPRESS = 629;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
