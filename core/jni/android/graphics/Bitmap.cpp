@@ -655,7 +655,7 @@ static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         alphaType = requestPremul ? kPremul_SkAlphaType : kUnpremul_SkAlphaType;
     }
     bitmap->bitmap().reconfigure(SkImageInfo::Make(width, height, colorType, alphaType,
-            sk_sp<SkColorSpace>(bitmap->info().colorSpace())));
+            sk_ref_sp(bitmap->info().colorSpace())));
 }
 
 // These must match the int values in Bitmap.java
