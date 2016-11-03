@@ -267,9 +267,10 @@ public final class PinnerService extends SystemService {
 
         // determine the ABI from either ApplicationInfo or Build
         String arch = "arm";
-        if (cameraInfo.primaryCpuAbi != null
-            && VMRuntime.is64BitAbi(cameraInfo.primaryCpuAbi)) {
-            arch = arch + "64";
+        if (cameraInfo.primaryCpuAbi != null) {
+            if (VMRuntime.is64BitAbi(cameraInfo.primaryCpuAbi)) {
+                arch = arch + "64";
+            }
         } else {
             if (VMRuntime.is64BitAbi(Build.SUPPORTED_ABIS[0])) {
                 arch = arch + "64";
