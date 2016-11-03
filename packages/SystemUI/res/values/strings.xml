@@ -1675,6 +1675,9 @@
         not appear on production builds ever. -->
     <string name="tuner_doze_always_on" translatable="false">Always on</string>
 
+    <!-- Making the PIP fullscreen -->
+    <string name="pip_phone_expand">Expand</string>
+
     <!-- PIP section of the tuner. Non-translatable since it should
         not appear on production builds ever. -->
     <string name="picture_in_picture" translatable="false">Picture-in-Picture</string>
@@ -1694,5 +1697,13 @@
     <!-- PIP drag to dismiss description. Non-translatable since it should
         not appear on production builds ever. -->
     <string name="pip_drag_to_dismiss_summary" translatable="false">Drag to the dismiss target at the bottom of the screen to close the PIP</string>
+
+    <!-- PIP tap once to break through to the activity. Non-translatable since it should
+        not appear on production builds ever. -->
+    <string name="pip_tap_through_title" translatable="false">Tap to interact</string>
+
+    <!-- PIP tap once to break through to the activity. Non-translatable since it should
+        not appear on production builds ever. -->
+    <string name="pip_tap_through_summary" translatable="false">Tap once to interact with the activity</string>
 
 </resources>

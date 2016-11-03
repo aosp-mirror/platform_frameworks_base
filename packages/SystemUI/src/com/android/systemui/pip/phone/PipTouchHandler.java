@@ -32,6 +32,7 @@ import android.app.IActivityManager;
 import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
@@ -61,6 +62,7 @@ public class PipTouchHandler implements TunerService.Tunable {
 
     private static final String TUNER_KEY_SWIPE_TO_DISMISS = "pip_swipe_to_dismiss";
     private static final String TUNER_KEY_DRAG_TO_DISMISS = "pip_drag_to_dismiss";
+    private static final String TUNER_KEY_TAP_THROUGH = "pip_tap_through";
 
     private static final int SNAP_STACK_DURATION = 225;
     private static final int DISMISS_STACK_DURATION = 375;
@@ -70,17 +72,19 @@ public class PipTouchHandler implements TunerService.Tunable {
     private final IActivityManager mActivityManager;
     private final IWindowManager mWindowManager;
     private final ViewConfiguration mViewConfig;
-    private final InputChannel mInputChannel = new InputChannel();
     private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
+    private final PipMenuListener mMenuListener = new PipMenuListener();
     private IPinnedStackController mPinnedStackController;
 
-    private final PipInputEventReceiver mInputEventReceiver;
+    private PipInputEventReceiver mInputEventReceiver;
+    private PipMenuActivityController mMenuController;
     private PipDismissViewController mDismissViewController;
     private final PipSnapAlgorithm mSnapAlgorithm;
     private PipMotionHelper mMotionHelper;
 
     private boolean mEnableSwipeToDismiss = true;
     private boolean mEnableDragToDismiss = true;
+    private boolean mEnableTapThrough = false;
 
     private final Rect mPinnedStackBounds = new Rect();
     private final Rect mBoundedPinnedStackBounds = new Rect();
@@ -97,6 +101,7 @@ public class PipTouchHandler implements TunerService.Tunable {
     private final PointF mLastTouch = new PointF();
     private boolean mIsDragging;
     private boolean mIsSwipingToDismiss;
+    private boolean mIsTappingThrough;
     private int mActivePointerId;
 
     private final FlingAnimationUtils mFlingAnimationUtils;
@@ -120,7 +125,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 // To be implemented for input handling over Pip windows
                 if (event instanceof MotionEvent) {
                     MotionEvent ev = (MotionEvent) event;
-                    handleTouchEvent(ev);
+                    handled = handleTouchEvent(ev);
                 }
             } finally {
                 finishInputEvent(event, handled);
@@ -144,13 +149,26 @@ public class PipTouchHandler implements TunerService.Tunable {
         }
     }
 
-    public PipTouchHandler(Context context, IActivityManager activityManager,
-            IWindowManager windowManager) {
+    /**
+     * A listener for the PIP menu activity.
+     */
+    private class PipMenuListener implements PipMenuActivityController.Listener {
+        @Override
+        public void onPipMenuVisibilityChanged(boolean visible) {
+            if (!visible) {
+                mIsTappingThrough = false;
+                registerInputConsumer();
+            } else {
+                unregisterInputConsumer();
+            }
+        }
+    }
+
+    public PipTouchHandler(Context context, PipMenuActivityController menuController,
+            IActivityManager activityManager, IWindowManager windowManager) {
 
         // Initialize the Pip input consumer
         try {
-            windowManager.destroyInputConsumer(INPUT_CONSUMER_PIP);
-            windowManager.createInputConsumer(INPUT_CONSUMER_PIP, mInputChannel);
             windowManager.registerPinnedStackListener(DEFAULT_DISPLAY, mPinnedStackListener);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to create PIP input consumer", e);
@@ -159,22 +177,27 @@ public class PipTouchHandler implements TunerService.Tunable {
         mActivityManager = activityManager;
         mWindowManager = windowManager;
         mViewConfig = ViewConfiguration.get(context);
-        mInputEventReceiver = new PipInputEventReceiver(mInputChannel, Looper.myLooper());
-        if (mEnableDragToDismiss) {
-            mDismissViewController = new PipDismissViewController(context);
-        }
+        mMenuController = menuController;
+        mMenuController.addListener(mMenuListener);
+        mDismissViewController = new PipDismissViewController(context);
         mSnapAlgorithm = new PipSnapAlgorithm(mContext);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 2f);
         mMotionHelper = new PipMotionHelper(BackgroundThread.getHandler());
+        registerInputConsumer();
 
         // Register any tuner settings changes
         TunerService.get(context).addTunable(this, TUNER_KEY_SWIPE_TO_DISMISS,
-            TUNER_KEY_DRAG_TO_DISMISS);
+            TUNER_KEY_DRAG_TO_DISMISS, TUNER_KEY_TAP_THROUGH);
     }
 
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (newValue == null) {
+            // Reset back to default
+            mEnableSwipeToDismiss = true;
+            mEnableDragToDismiss = true;
+            mEnableTapThrough = false;
+            mIsTappingThrough = false;
             return;
         }
         switch (key) {
@@ -184,6 +207,10 @@ public class PipTouchHandler implements TunerService.Tunable {
             case TUNER_KEY_DRAG_TO_DISMISS:
                 mEnableDragToDismiss = Integer.parseInt(newValue) != 0;
                 break;
+            case TUNER_KEY_TAP_THROUGH:
+                mEnableTapThrough = Integer.parseInt(newValue) != 0;
+                mIsTappingThrough = false;
+                break;
         }
     }
 
@@ -192,10 +219,10 @@ public class PipTouchHandler implements TunerService.Tunable {
         updateBoundedPinnedStackBounds(false /* updatePinnedStackBounds */);
     }
 
-    private void handleTouchEvent(MotionEvent ev) {
+    private boolean handleTouchEvent(MotionEvent ev) {
         // Skip touch handling until we are bound to the controller
         if (mPinnedStackController == null) {
-            return;
+            return true;
         }
 
         switch (ev.getAction()) {
@@ -239,6 +266,8 @@ public class PipTouchHandler implements TunerService.Tunable {
                     float movement = PointF.length(mDownTouch.x - x, mDownTouch.y - y);
                     if (movement > mViewConfig.getScaledTouchSlop()) {
                         mIsDragging = true;
+                        mIsTappingThrough = false;
+                        mMenuController.hideMenu();
                         if (mEnableSwipeToDismiss) {
                             // TODO: this check can have some buffer so that we only start swiping
                             //       after a significant move out of bounds
@@ -328,7 +357,14 @@ public class PipTouchHandler implements TunerService.Tunable {
                         }
                     }
                 } else {
-                    expandPinnedStackToFullscreen();
+                    if (mEnableTapThrough) {
+                        if (!mIsTappingThrough) {
+                            mMenuController.showMenu();
+                            mIsTappingThrough = true;
+                        }
+                    } else {
+                        expandPinnedStackToFullscreen();
+                    }
                 }
                 if (mEnableDragToDismiss) {
                     mDismissViewController.destroyDismissTarget();
@@ -348,6 +384,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 break;
             }
         }
+        return !mIsTappingThrough;
     }
 
     private void initOrResetVelocityTracker() {
@@ -363,6 +400,32 @@ public class PipTouchHandler implements TunerService.Tunable {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
+    }
+
+    /**
+     * Registers the input consumer.
+     */
+    private void registerInputConsumer() {
+        final InputChannel inputChannel = new InputChannel();
+        try {
+            mWindowManager.destroyInputConsumer(INPUT_CONSUMER_PIP);
+            mWindowManager.createInputConsumer(INPUT_CONSUMER_PIP, inputChannel);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to create PIP input consumer", e);
+        }
+        mInputEventReceiver = new PipInputEventReceiver(inputChannel, Looper.myLooper());
+    }
+
+    /**
+     * Unregisters the input consumer.
+     */
+    private void unregisterInputConsumer() {
+        try {
+            mWindowManager.destroyInputConsumer(INPUT_CONSUMER_PIP);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to destroy PIP input consumer", e);
+        }
+        mInputEventReceiver.dispose();
     }
 
     /**
