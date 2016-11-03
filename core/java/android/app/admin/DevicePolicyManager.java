@@ -6649,8 +6649,6 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param enabled whether network logging should be enabled or not.
      * @throws {@link SecurityException} if {@code admin} is not a device owner.
-     * @throws {@link RemoteException} if network logging could not be enabled or disabled due to
-     *         the logging service not being available
      * @see #retrieveNetworkLogs
      *
      * @hide
@@ -6683,7 +6681,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to retrieve a new batch of network logging events.
+     * Called by device owner to retrieve the most recent batch of network logging events.
+     * A device owner has to provide a batchToken provided as part of
+     * {@link DeviceAdminReceiver#onNetworkLogsAvailable} callback. If the token doesn't match the
+     * token of the most recent available batch of logs, {@code null} will be returned.
      *
      * <p> {@link NetworkEvent} can be one of {@link DnsEvent} or {@link ConnectEvent}.
      *
@@ -6694,16 +6695,20 @@ public class DevicePolicyManager {
      * {@link DeviceAdminReceiver#onNetworkLogsAvailable}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param batchToken A token of the batch to retrieve
      * @return A new batch of network logs which is a list of {@link NetworkEvent}. Returns
-     * {@code null} if there's no batch currently awaiting for retrieval or if logging is disabled.
+     *        {@code null} if the batch represented by batchToken is no longer available or if
+     *        logging is disabled.
      * @throws {@link SecurityException} if {@code admin} is not a device owner.
+     * @see DeviceAdminReceiver#onNetworkLogsAvailable
      *
      * @hide
      */
-    public List<NetworkEvent> retrieveNetworkLogs(@NonNull ComponentName admin) {
+    public @Nullable List<NetworkEvent> retrieveNetworkLogs(@NonNull ComponentName admin,
+            long batchToken) {
         throwIfParentInstance("retrieveNetworkLogs");
         try {
-            return mService.retrieveNetworkLogs(admin);
+            return mService.retrieveNetworkLogs(admin, batchToken);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
