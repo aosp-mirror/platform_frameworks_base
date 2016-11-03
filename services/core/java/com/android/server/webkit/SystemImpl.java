@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.XmlResourceParser;
+import android.database.ContentObserver;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -270,8 +271,21 @@ public class SystemImpl implements SystemInterface {
     }
 
     @Override
-    public void setMultiprocessEnabled(boolean enabled) {
-        WebViewZygote.setMultiprocessEnabled(enabled);
+    public void setMultiProcessEnabledFromContext(Context context) {
+        boolean enableMultiProcess = false;
+        try {
+            enableMultiProcess = Settings.Global.getInt(context.getContentResolver(),
+                    Settings.Global.WEBVIEW_MULTIPROCESS) == 1;
+        } catch (Settings.SettingNotFoundException ex) {
+        }
+        WebViewZygote.setMultiprocessEnabled(enableMultiProcess);
+    }
+
+    @Override
+    public void registerContentObserver(Context context, ContentObserver contentObserver) {
+        context.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.WEBVIEW_MULTIPROCESS),
+                false, contentObserver);
     }
 
     // flags declaring we want extra info from the package manager for webview providers

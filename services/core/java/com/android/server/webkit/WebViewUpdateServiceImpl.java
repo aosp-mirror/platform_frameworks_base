@@ -20,12 +20,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
-import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Base64;
 import android.util.Slog;
 import android.webkit.WebViewFactory;
@@ -48,7 +46,7 @@ public class WebViewUpdateServiceImpl {
     private SystemInterface mSystemInterface;
     private WebViewUpdater mWebViewUpdater;
     private SettingsObserver mSettingsObserver;
-    private Context mContext;
+    final private Context mContext;
 
     public WebViewUpdateServiceImpl(Context context, SystemInterface systemInterface) {
         mContext = context;
@@ -683,15 +681,10 @@ public class WebViewUpdateServiceImpl {
      * appropriately.
      */
     private class SettingsObserver extends ContentObserver {
-        private final ContentResolver mResolver;
-
         SettingsObserver() {
             super(new Handler());
 
-            mResolver = mContext.getContentResolver();
-            mResolver.registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.WEBVIEW_MULTIPROCESS),
-                    false, this);
+            mSystemInterface.registerContentObserver(mContext, this);
 
             // Push the current value of the setting immediately.
             notifyZygote();
@@ -703,15 +696,7 @@ public class WebViewUpdateServiceImpl {
         }
 
         private void notifyZygote() {
-            boolean enableMultiprocess = false;
-
-            try {
-                enableMultiprocess = Settings.Global.getInt(mResolver,
-                        Settings.Global.WEBVIEW_MULTIPROCESS) == 1;
-            } catch (Settings.SettingNotFoundException ex) {
-            }
-
-            mSystemInterface.setMultiprocessEnabled(enableMultiprocess);
+            mSystemInterface.setMultiProcessEnabledFromContext(mContext);
         }
     }
 }
