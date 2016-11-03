@@ -93,7 +93,7 @@ TEST(SkiaBehavior, porterDuffCreateIsCached) {
 }
 
 TEST(SkiaBehavior, srgbColorSpaceIsSingleton) {
-    sk_sp<SkColorSpace> sRGB1 = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
-    sk_sp<SkColorSpace> sRGB2 = SkColorSpace::NewNamed(SkColorSpace::kSRGB_Named);
+    sk_sp<SkColorSpace> sRGB1 = SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named);
+    sk_sp<SkColorSpace> sRGB2 = SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named);
     ASSERT_EQ(sRGB1.get(), sRGB2.get());
 }
