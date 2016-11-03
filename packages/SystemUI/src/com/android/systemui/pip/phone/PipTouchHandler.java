@@ -63,6 +63,7 @@ public class PipTouchHandler implements TunerService.Tunable {
     private static final String TUNER_KEY_SWIPE_TO_DISMISS = "pip_swipe_to_dismiss";
     private static final String TUNER_KEY_DRAG_TO_DISMISS = "pip_drag_to_dismiss";
     private static final String TUNER_KEY_TAP_THROUGH = "pip_tap_through";
+    private static final String TUNER_KEY_SNAP_MODE_EDGE = "pip_snap_mode_edge";
 
     private static final int SNAP_STACK_DURATION = 225;
     private static final int DISMISS_STACK_DURATION = 375;
@@ -85,6 +86,7 @@ public class PipTouchHandler implements TunerService.Tunable {
     private boolean mEnableSwipeToDismiss = true;
     private boolean mEnableDragToDismiss = true;
     private boolean mEnableTapThrough = false;
+    private boolean mEnableSnapToEdge = false;
 
     private final Rect mPinnedStackBounds = new Rect();
     private final Rect mBoundedPinnedStackBounds = new Rect();
@@ -187,7 +189,7 @@ public class PipTouchHandler implements TunerService.Tunable {
 
         // Register any tuner settings changes
         TunerService.get(context).addTunable(this, TUNER_KEY_SWIPE_TO_DISMISS,
-            TUNER_KEY_DRAG_TO_DISMISS, TUNER_KEY_TAP_THROUGH);
+            TUNER_KEY_DRAG_TO_DISMISS, TUNER_KEY_TAP_THROUGH, TUNER_KEY_SNAP_MODE_EDGE);
     }
 
     @Override
@@ -198,6 +200,8 @@ public class PipTouchHandler implements TunerService.Tunable {
             mEnableDragToDismiss = true;
             mEnableTapThrough = false;
             mIsTappingThrough = false;
+            mEnableSnapToEdge = false;
+            setSnapToEdge(false);
             return;
         }
         switch (key) {
@@ -210,6 +214,10 @@ public class PipTouchHandler implements TunerService.Tunable {
             case TUNER_KEY_TAP_THROUGH:
                 mEnableTapThrough = Integer.parseInt(newValue) != 0;
                 mIsTappingThrough = false;
+                break;
+            case TUNER_KEY_SNAP_MODE_EDGE:
+                mEnableSnapToEdge = Integer.parseInt(newValue) != 0;
+                setSnapToEdge(mEnableSnapToEdge);
                 break;
         }
     }
@@ -426,6 +434,18 @@ public class PipTouchHandler implements TunerService.Tunable {
             Log.e(TAG, "Failed to destroy PIP input consumer", e);
         }
         mInputEventReceiver.dispose();
+    }
+
+    /**
+     * Sets the snap-to-edge state.
+     */
+    private void setSnapToEdge(boolean snapToEdge) {
+        mSnapAlgorithm.setSnapToEdge(snapToEdge);
+        try {
+            mPinnedStackController.setSnapToEdge(snapToEdge);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not set snap mode to edge", e);
+        }
     }
 
     /**

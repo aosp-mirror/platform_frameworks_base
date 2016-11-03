@@ -1706,4 +1706,12 @@
         not appear on production builds ever. -->
     <string name="pip_tap_through_summary" translatable="false">Tap once to interact with the activity</string>
 
+    <!-- PIP snap to closest edge. Non-translatable since it should
+        not appear on production builds ever. -->
+    <string name="pip_snap_mode_edge_title" translatable="false">Snap to closest edge</string>
+
+    <!-- PIP snap to closest edge. Non-translatable since it should
+        not appear on production builds ever. -->
+    <string name="pip_snap_mode_edge_summary" translatable="false">Snap to the closest edge</string>
+
 </resources>

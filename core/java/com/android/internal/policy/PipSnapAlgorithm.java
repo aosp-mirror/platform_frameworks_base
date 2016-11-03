@@ -46,7 +46,8 @@ public class PipSnapAlgorithm {
     private final Context mContext;
 
     private final ArrayList<Integer> mSnapGravities = new ArrayList<>();
-    private final int mSnapMode = SNAP_MODE_CORNERS_ONLY;
+    private final int mDefaultSnapMode = SNAP_MODE_CORNERS_ONLY;
+    private int mSnapMode = mDefaultSnapMode;
 
     private Scroller mScroller;
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
@@ -62,6 +63,13 @@ public class PipSnapAlgorithm {
     public void onConfigurationChanged() {
         mOrientation = mContext.getResources().getConfiguration().orientation;
         calculateSnapTargets();
+    }
+
+    /**
+     * Enables snapping to the closest edge.
+     */
+    public void setSnapToEdge(boolean snapToEdge) {
+        mSnapMode = snapToEdge ? SNAP_MODE_EDGE : mDefaultSnapMode;
     }
 
     /**

@@ -99,6 +99,13 @@ class PinnedStackController {
                 mInInteractiveMode = inInteractiveMode;
             });
         }
+
+        @Override
+        public void setSnapToEdge(final boolean snapToEdge) {
+            mHandler.post(() -> {
+                mSnapAlgorithm.setSnapToEdge(snapToEdge);
+            });
+        }
     }
 
     /**
