@@ -737,6 +737,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         // Start the service.
         initService();
         setCaller(CALLING_PACKAGE_1);
+
+        if (ENABLE_DUMP) {
+            Log.d(TAG, "setUp done");
+        }
     }
 
     private static boolean b(Boolean value) {

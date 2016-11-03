@@ -2667,8 +2667,7 @@ public class ShortcutService extends IShortcutService.Stub {
                     }
                 }
 
-                rescanUpdatedPackagesLocked(ownerUserId, user.getLastAppScanTime(),
-                        /* forceRescan=*/ false);
+                rescanUpdatedPackagesLocked(ownerUserId, user.getLastAppScanTime());
             }
         } finally {
             logDurationStat(Stats.CHECK_PACKAGE_CHANGES, start);
@@ -2676,8 +2675,7 @@ public class ShortcutService extends IShortcutService.Stub {
         verifyStates();
     }
 
-    private void rescanUpdatedPackagesLocked(@UserIdInt int userId, long lastScanTime,
-            boolean forceRescan) {
+    private void rescanUpdatedPackagesLocked(@UserIdInt int userId, long lastScanTime) {
         final ShortcutUser user = getUserShortcutsLocked(userId);
 
         // Note after each OTA, we'll need to rescan all system apps, as their lastUpdateTime
@@ -2689,7 +2687,8 @@ public class ShortcutService extends IShortcutService.Stub {
         // Then for each installed app, publish manifest shortcuts when needed.
         forUpdatedPackages(userId, lastScanTime, afterOta, ai -> {
             user.attemptToRestoreIfNeededAndSave(this, ai.packageName, userId);
-            user.rescanPackageIfNeeded(ai.packageName, forceRescan);
+
+            user.rescanPackageIfNeeded(ai.packageName, /* forceRescan= */ true);
         });
 
         // Write the time just before the scan, because there may be apps that have just
@@ -2937,30 +2936,24 @@ public class ShortcutService extends IShortcutService.Stub {
     private void forUpdatedPackages(@UserIdInt int userId, long lastScanTime, boolean afterOta,
             Consumer<ApplicationInfo> callback) {
         if (DEBUG) {
-            Slog.d(TAG, "forUpdatedPackages for user " + userId + ", lastScanTime=" + lastScanTime);
+            Slog.d(TAG, "forUpdatedPackages for user " + userId + ", lastScanTime=" + lastScanTime
+                    + " afterOta=" + afterOta);
         }
         final List<PackageInfo> list = getInstalledPackages(userId);
         for (int i = list.size() - 1; i >= 0; i--) {
             final PackageInfo pi = list.get(i);
 
             // If the package has been updated since the last scan time, then scan it.
-            // Also if it's a system app with no update, lastUpdateTime is not reliable, so
-            // just scan it.
-            if (pi.lastUpdateTime >= lastScanTime
-                    || (afterOta && isPureSystemApp(pi.applicationInfo))) {
+            // Also if it's right after an OTA, always re-scan all apps anyway, since the
+            // shortcut parser might have changed.
+            if (afterOta || (pi.lastUpdateTime >= lastScanTime)) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Found updated package " + pi.packageName);
+                    Slog.d(TAG, "Found updated package " + pi.packageName
+                            + " updateTime=" + pi.lastUpdateTime);
                 }
                 callback.accept(pi.applicationInfo);
             }
         }
-    }
-
-    /**
-     * @return true if it's a system app with no updates.
-     */
-    private boolean isPureSystemApp(ApplicationInfo ai) {
-        return ai.isSystemApp() && !ai.isUpdatedSystemApp();
     }
 
     private boolean isApplicationFlagSet(@NonNull String packageName, int userId, int flags) {
@@ -3213,8 +3206,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
             // Rescan all packages to re-publish manifest shortcuts and do other checks.
             rescanUpdatedPackagesLocked(userId,
-                    0, // lastScanTime = 0; rescan all packages.
-                    /* forceRescan= */ true);
+                    0 // lastScanTime = 0; rescan all packages.
+                    );
 
             saveUserLocked(userId);
         }
