@@ -2549,11 +2549,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 2;
         }
         switch (type) {
-        case TYPE_PRESENTATION:
-        case TYPE_PRIVATE_PRESENTATION:
-            return 2;
         case TYPE_WALLPAPER:
             // wallpaper is at the bottom, though the window manager may move it.
+            return 1;
+        case TYPE_PRESENTATION:
+        case TYPE_PRIVATE_PRESENTATION:
             return 2;
         case TYPE_DOCK_DIVIDER:
             return 2;
