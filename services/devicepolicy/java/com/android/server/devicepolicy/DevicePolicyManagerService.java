@@ -9107,20 +9107,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private synchronized void disableDeviceOwnerManagedSingleUserFeaturesIfNeeded() {
+        if (!mOwners.hasDeviceOwner()) {
+            return;
+        }
         if (!isDeviceOwnerManagedSingleUserDevice()) {
             mInjector.securityLogSetLoggingEnabledProperty(false);
-            Slog.w(LOG_TAG, "Security logging turned off as it's no longer a single user device.");
 
             getDeviceOwnerAdminLocked().isNetworkLoggingEnabled = false;
             saveSettingsLocked(mInjector.userHandleGetCallingUserId());
             setNetworkLoggingActiveInternal(false);
-            Slog.w(LOG_TAG, "Network logging turned off as it's no longer a single user"
-                    + " device.");
 
-            if (mOwners.hasDeviceOwner()) {
-                setBackupServiceEnabledInternal(false);
-                Slog.w(LOG_TAG, "Backup is off as it's a managed device that has more that one user.");
-            }
+            setBackupServiceEnabledInternal(false);
+            Slog.w(LOG_TAG, "Security logging, network logging and backup service turned off as"
+                    + " it's not a single user device.");
         }
     }
 
