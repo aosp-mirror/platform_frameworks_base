@@ -75,36 +75,35 @@ public class Binder implements IBinder {
     /**
      * Control whether dump() calls are allowed.
      */
-    private static String sDumpDisabled = null;
+    private static volatile String sDumpDisabled = null;
 
     /**
      * Global transaction tracker instance for this process.
      */
-    private static TransactionTracker sTransactionTracker = null;
+    private static volatile TransactionTracker sTransactionTracker = null;
 
     // Transaction tracking code.
 
     /**
      * Flag indicating whether we should be tracing transact calls.
-     *
      */
-    private static boolean sTracingEnabled = false;
+    private static volatile boolean sTracingEnabled = false;
 
     /**
      * Enable Binder IPC tracing.
      *
      * @hide
      */
-    public static void  enableTracing() {
+    public static void enableTracing() {
         sTracingEnabled = true;
-    };
+    }
 
     /**
      * Disable Binder IPC tracing.
      *
      * @hide
      */
-    public static void  disableTracing() {
+    public static void disableTracing() {
         sTracingEnabled = false;
     }
 
@@ -126,6 +125,59 @@ public class Binder implements IBinder {
         if (sTransactionTracker == null)
             sTransactionTracker = new TransactionTracker();
         return sTransactionTracker;
+    }
+
+    /** {@hide} */
+    static volatile boolean sWarnOnBlocking = false;
+
+    /**
+     * Warn if any blocking binder transactions are made out from this process.
+     * This is typically only useful for the system process, to prevent it from
+     * blocking on calls to external untrusted code. Instead, all outgoing calls
+     * that require a result must be sent as {@link IBinder#FLAG_ONEWAY} calls
+     * which deliver results through a callback interface.
+     *
+     * @hide
+     */
+    public static void setWarnOnBlocking(boolean warnOnBlocking) {
+        sWarnOnBlocking = warnOnBlocking;
+    }
+
+    /**
+     * Allow blocking calls on the given interface, overriding the requested
+     * value of {@link #setWarnOnBlocking(boolean)}.
+     * <p>
+     * This should only be rarely called when you are <em>absolutely sure</em>
+     * the remote interface is a built-in system component that can never be
+     * upgraded. In particular, this <em>must never</em> be called for
+     * interfaces hosted by package that could be upgraded or replaced,
+     * otherwise you risk system instability if that remote interface wedges.
+     *
+     * @hide
+     */
+    public static IBinder allowBlocking(IBinder binder) {
+        try {
+            if (binder instanceof BinderProxy) {
+                ((BinderProxy) binder).mWarnOnBlocking = false;
+            } else if (binder != null
+                    && binder.queryLocalInterface(binder.getInterfaceDescriptor()) == null) {
+                Log.w(TAG, "Unable to allow blocking on interface " + binder);
+            }
+        } catch (RemoteException ignored) {
+        }
+        return binder;
+    }
+
+    /**
+     * Inherit the current {@link #allowBlocking(IBinder)} value from one given
+     * interface to another.
+     *
+     * @hide
+     */
+    public static void copyAllowBlocking(IBinder fromBinder, IBinder toBinder) {
+        if (fromBinder instanceof BinderProxy && toBinder instanceof BinderProxy) {
+            ((BinderProxy) toBinder).mWarnOnBlocking = ((BinderProxy) fromBinder).mWarnOnBlocking;
+        }
     }
 
     /* mObject is used by native code, do not remove or rename */
@@ -322,9 +374,7 @@ public class Binder implements IBinder {
      * re-enabled.
      */
     public static void setDumpDisabled(String msg) {
-        synchronized (Binder.class) {
-            sDumpDisabled = msg;
-        }
+        sDumpDisabled = msg;
     }
 
     /**
@@ -400,10 +450,7 @@ public class Binder implements IBinder {
     }
 
     void doDump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        final String disabled;
-        synchronized (Binder.class) {
-            disabled = sDumpDisabled;
-        }
+        final String disabled = sDumpDisabled;
         if (disabled == null) {
             try {
                 dump(fd, pw, args);
@@ -612,6 +659,9 @@ public class Binder implements IBinder {
 }
 
 final class BinderProxy implements IBinder {
+    // Assume the process-wide default value when created
+    volatile boolean mWarnOnBlocking = Binder.sWarnOnBlocking;
+
     public native boolean pingBinder();
     public native boolean isBinderAlive();
 
@@ -621,6 +671,15 @@ final class BinderProxy implements IBinder {
 
     public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
         Binder.checkParcel(this, code, data, "Unreasonably large binder buffer");
+
+        if (mWarnOnBlocking && ((flags & FLAG_ONEWAY) == 0)) {
+            // For now, avoid spamming the log by disabling after we've logged
+            // about this interface at least once
+            mWarnOnBlocking = false;
+            Log.w(Binder.TAG, "Outgoing transactions from this process must be FLAG_ONEWAY",
+                    new Throwable());
+        }
+
         final boolean tracingEnabled = Binder.isTracingEnabled();
         if (tracingEnabled) {
             final Throwable tr = new Throwable();

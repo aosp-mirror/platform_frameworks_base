@@ -371,7 +371,7 @@ public final class BluetoothMap implements BluetoothProfile {
     private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) log("Proxy object connected");
-            mService = IBluetoothMap.Stub.asInterface(service);
+            mService = IBluetoothMap.Stub.asInterface(Binder.allowBlocking(service));
             if (mServiceListener != null) {
                 mServiceListener.onServiceConnected(BluetoothProfile.MAP, BluetoothMap.this);
             }

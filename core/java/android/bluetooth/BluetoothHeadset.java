@@ -20,6 +20,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -1037,7 +1038,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
-            mService = IBluetoothHeadset.Stub.asInterface(service);
+            mService = IBluetoothHeadset.Stub.asInterface(Binder.allowBlocking(service));
             mHandler.sendMessage(mHandler.obtainMessage(
                     MESSAGE_HEADSET_SERVICE_CONNECTED));
         }

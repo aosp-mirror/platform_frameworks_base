@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.MediaMetadata;
 import android.media.session.PlaybackState;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -284,7 +285,7 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
     private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
-            mService = IBluetoothAvrcpController.Stub.asInterface(service);
+            mService = IBluetoothAvrcpController.Stub.asInterface(Binder.allowBlocking(service));
 
             if (mServiceListener != null) {
                 mServiceListener.onServiceConnected(BluetoothProfile.AVRCP_CONTROLLER,

@@ -80,6 +80,11 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
+import android.provider.BlockedNumberContract;
+import android.provider.CalendarContract;
+import android.provider.CallLog;
+import android.provider.ContactsContract;
+import android.provider.Downloads;
 import android.provider.Settings;
 import android.security.NetworkSecurityPolicy;
 import android.security.net.config.NetworkSecurityConfigProvider;
@@ -5823,6 +5828,22 @@ public final class ActivityThread {
         final String auths[] = holder.info.authority.split(";");
         final int userId = UserHandle.getUserId(holder.info.applicationInfo.uid);
 
+        if (provider != null) {
+            // If this provider is hosted by the core OS and cannot be upgraded,
+            // then I guess we're okay doing blocking calls to it.
+            for (String auth : auths) {
+                switch (auth) {
+                    case ContactsContract.AUTHORITY:
+                    case CallLog.AUTHORITY:
+                    case CallLog.SHADOW_AUTHORITY:
+                    case BlockedNumberContract.AUTHORITY:
+                    case CalendarContract.AUTHORITY:
+                    case Downloads.Impl.AUTHORITY:
+                        Binder.allowBlocking(provider.asBinder());
+                }
+            }
+        }
+
         final ProviderClientRecord pcr = new ProviderClientRecord(
                 auths, provider, localProvider, holder);
         for (String auth : auths) {
@@ -5971,7 +5992,6 @@ public final class ActivityThread {
                 retHolder = prc.holder;
             }
         }
-
         return retHolder;
     }
 

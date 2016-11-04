@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.RemoteException;
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -288,7 +289,7 @@ public final class BluetoothPbapClient implements BluetoothProfile {
             if (DBG) {
                 log("Proxy object connected");
             }
-            mService = IBluetoothPbapClient.Stub.asInterface(service);
+            mService = IBluetoothPbapClient.Stub.asInterface(Binder.allowBlocking(service));
             if (mServiceListener != null) {
                 mServiceListener.onServiceConnected(BluetoothProfile.PBAP_CLIENT, BluetoothPbapClient.this);
             }

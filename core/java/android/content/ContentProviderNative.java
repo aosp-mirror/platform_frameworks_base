@@ -422,6 +422,7 @@ final class ContentProviderProxy implements IContentProvider
 
             if (reply.readInt() != 0) {
                 BulkCursorDescriptor d = BulkCursorDescriptor.CREATOR.createFromParcel(reply);
+                Binder.copyAllowBlocking(mRemote, (d.cursor != null) ? d.cursor.asBinder() : null);
                 adaptor.initialize(d);
             } else {
                 adaptor.close();

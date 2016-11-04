@@ -1079,8 +1079,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     class DefaultContainerConnection implements ServiceConnection {
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG_SD_INSTALL) Log.i(TAG, "onServiceConnected");
-            IMediaContainerService imcs =
-                IMediaContainerService.Stub.asInterface(service);
+            final IMediaContainerService imcs = IMediaContainerService.Stub
+                    .asInterface(Binder.allowBlocking(service));
             mHandler.sendMessage(mHandler.obtainMessage(MCS_BOUND, imcs));
         }
 
@@ -16615,7 +16615,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             synchronized (this) {
-                mContainerService = IMediaContainerService.Stub.asInterface(service);
+                mContainerService = IMediaContainerService.Stub
+                        .asInterface(Binder.allowBlocking(service));
                 notifyAll();
             }
         }

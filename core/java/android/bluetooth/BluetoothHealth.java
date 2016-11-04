@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -522,7 +523,7 @@ public final class BluetoothHealth implements BluetoothProfile {
     private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
-            mService = IBluetoothHealth.Stub.asInterface(service);
+            mService = IBluetoothHealth.Stub.asInterface(Binder.allowBlocking(service));
 
             if (mServiceListener != null) {
                 mServiceListener.onServiceConnected(BluetoothProfile.HEALTH, BluetoothHealth.this);
