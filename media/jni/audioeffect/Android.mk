@@ -11,7 +11,8 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libandroid_runtime \
     libnativehelper \
-    libmedia
+    libmedia \
+    libaudioclient \
 
 LOCAL_MODULE:= libaudioeffect_jni
 
