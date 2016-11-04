@@ -1296,12 +1296,12 @@ public class AudioService extends IAudioService.Stub {
             // Always toggle between max safe volume and 0 for fixed volume devices where safe
             // volume is enforced, and max and 0 for the others.
             // This is simulated by stepping by the full allowed volume range
-            if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE &&
-                    (device & mSafeMediaVolumeDevices) != 0) {
-                step = mSafeMediaVolumeIndex;
-            } else {
+            // if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE &&
+            //        (device & mSafeMediaVolumeDevices) != 0) {
+            //    step = mSafeMediaVolumeIndex;
+            //} else {
                 step = streamState.getMaxIndex();
-            }
+            //}
             if (aliasIndex != 0) {
                 aliasIndex = step;
             }
@@ -1615,12 +1615,12 @@ public class AudioService extends IAudioService.Stub {
 
                 // volume is either 0 or max allowed for fixed volume devices
                 if (index != 0) {
-                    if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE &&
-                            (device & mSafeMediaVolumeDevices) != 0) {
-                        index = mSafeMediaVolumeIndex;
-                    } else {
+                //    if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE &&
+                //            (device & mSafeMediaVolumeDevices) != 0) {
+                //        index = mSafeMediaVolumeIndex;
+                //    } else {
                         index = streamState.getMaxIndex();
-                    }
+                //    }
                 }
             }
 
