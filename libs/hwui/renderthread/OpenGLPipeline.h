@@ -55,6 +55,9 @@ public:
     TaskManager* getTaskManager() override;
     bool createOrUpdateLayer(RenderNode* node,
             const DamageAccumulator& damageAccumulator) override;
+    bool pinImages(std::vector<SkImage*>& mutableImages) override { return false; }
+    bool pinImages(LsaVector<sk_sp<Bitmap>>& images) override;
+    void unpinImages() override;
     static void destroyLayer(RenderNode* node);
     static void prepareToDraw(const RenderThread& thread, Bitmap* bitmap);
     static void invokeFunctor(const RenderThread& thread, Functor* functor);

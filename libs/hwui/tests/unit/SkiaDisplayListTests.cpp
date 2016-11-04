@@ -58,7 +58,7 @@ TEST(SkiaDisplayList, reset) {
     ASSERT_TRUE(skiaDL.mIsProjectionReceiver);
 
     bounds = SkRect::MakeWH(100, 100);
-    skiaDL.reset(nullptr, bounds);
+    skiaDL.reset(bounds);
 
     ASSERT_EQ(skiaDL.mDrawable->getBounds(), bounds);
     ASSERT_TRUE(skiaDL.mChildNodes.empty());
