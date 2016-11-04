@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "com_android_tools_aapt2_Aapt2.h"
+#include "com_android_tools_aapt2_Aapt2Jni.h"
 
 #include <algorithm>
 #include <memory>
@@ -76,7 +76,7 @@ static std::vector<aapt::StringPiece> extract_pieces(
   return pieces;
 }
 
-JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2_nativeCompile(
+JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeCompile(
     JNIEnv *env, jclass aapt_obj, jobject arguments_obj) {
   std::vector<ScopedUtfChars> compile_args_jni =
       list_to_utfchars(env, arguments_obj);
@@ -85,7 +85,7 @@ JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2_nativeCompile(
   aapt::Compile(compile_args);
 }
 
-JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2_nativeLink(
+JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeLink(
     JNIEnv *env, jclass aapt_obj, jobject arguments_obj) {
   std::vector<ScopedUtfChars> link_args_jni =
       list_to_utfchars(env, arguments_obj);
@@ -93,7 +93,7 @@ JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2_nativeLink(
   aapt::Link(link_args);
 }
 
-JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2_ping(
+JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2Jni_ping(
         JNIEnv *env, jclass aapt_obj) {
   // This is just a dummy method to see if the library has been loaded.
 }
