@@ -489,14 +489,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_DIRECT_BOOT_AWARE = 1 << 6;
 
     /**
-     * Value for {@link #privateFlags}: set to {@code true} if the application
-     * is AutoPlay.
-     *
-     * {@hide}
-     */
-    public static final int PRIVATE_FLAG_AUTOPLAY = 1 << 7;
-
-    /**
      * When set, at least one component inside this application is direct boot
      * aware.
      *
@@ -1192,13 +1184,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public boolean isPartiallyDirectBootAware() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE) != 0;
-    }
-
-    /**
-     * @hide
-     */
-    public boolean isAutoPlayApp() {
-        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_AUTOPLAY) != 0;
     }
 
     /**
