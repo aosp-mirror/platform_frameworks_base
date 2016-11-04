@@ -48,7 +48,7 @@ public:
 
     static int32_t getGlobalCount();
     static String8 getAssetAllocations();
-    
+
     /* used when opening an asset */
     typedef enum AccessMode {
         ACCESS_UNKNOWN = 0,
@@ -210,7 +210,7 @@ private:
 
     AccessMode  mAccessMode;        // how the asset was opened
     String8    mAssetSource;       // debug string
-    
+
     Asset*		mNext;				// linked list.
     Asset*		mPrev;
 };
@@ -273,7 +273,7 @@ private:
 
     FileMap*    mMap;           // for memory map
     unsigned char* mBuf;        // for read
-    
+
     const void* ensureAlignment(FileMap* map);
 };
 
@@ -310,7 +310,7 @@ public:
     virtual const void* getBuffer(bool wordAligned);
     virtual off64_t getLength(void) const { return mUncompressedLen; }
     virtual off64_t getRemainingLength(void) const { return mUncompressedLen-mOffset; }
-    virtual int openFileDescriptor(off64_t* outStart, off64_t* outLength) const { return -1; }
+    virtual int openFileDescriptor(off64_t* /* outStart */, off64_t* /* outLength */) const { return -1; }
     virtual bool isAllocated(void) const { return mBuf != NULL; }
 
 private:
