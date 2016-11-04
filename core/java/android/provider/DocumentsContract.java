@@ -1310,8 +1310,6 @@ public final class DocumentsContract {
      * @return a list of documents ID starting from the top of the tree to the
      *      requested document, or {@code null} if failed.
      * @see DocumentsProvider#findDocumentPath(String, String)
-     *
-     * {@hide}
      */
     public static List<String> findDocumentPath(ContentResolver resolver, Uri treeUri) {
         checkArgument(isTreeUri(treeUri), treeUri + " is not a tree uri.");
@@ -1343,7 +1341,9 @@ public final class DocumentsContract {
      *
      * {@hide}
      */
-    public static Path findDocumentPath(ContentProviderClient client, Uri uri) throws RemoteException {
+    public static Path findDocumentPath(ContentProviderClient client, Uri uri)
+            throws RemoteException {
+
         final Bundle in = new Bundle();
         in.putParcelable(DocumentsContract.EXTRA_URI, uri);
 
@@ -1393,9 +1393,8 @@ public final class DocumentsContract {
     }
 
     /**
-     * Holds a path from a root to a particular document under it.
-     *
-     * @hide
+     * Holds a path from a document to a particular document under it. It
+     * may also contains the root ID where the path resides.
      */
     public static final class Path implements Parcelable {
 
@@ -1406,7 +1405,7 @@ public final class DocumentsContract {
          * Creates a Path.
          *
          * @param rootId the ID of the root. May be null.
-         * @param path the list of document ids from the parent document at
+         * @param path the list of document ID from the parent document at
          *          position 0 to the child document.
          */
         public Path(@Nullable String rootId, List<String> path) {

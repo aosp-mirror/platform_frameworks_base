@@ -355,8 +355,6 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @return the path of the requested document. If parentDocumentId is null
      *     returned root ID must not be null. If parentDocumentId is not null
      *     returned root ID must be null.
-     *
-     * @hide
      */
     public Path findDocumentPath(String childDocumentId, @Nullable String parentDocumentId)
             throws FileNotFoundException {
@@ -467,9 +465,6 @@ public abstract class DocumentsProvider extends ContentProvider {
      * implementation detail left to each provider, but it's suggested that at
      * least {@link Document#COLUMN_DISPLAY_NAME} be matched in a
      * case-insensitive fashion.
-     * <p>
-     * Only documents may be returned; directories are not supported in search
-     * results.
      * <p>
      * If your provider is cloud-based, and you have some data cached or pinned
      * locally, you may return the local data immediately, setting
