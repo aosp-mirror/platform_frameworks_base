@@ -24,6 +24,7 @@ import android.net.netlink.NetlinkConstants;
 import android.net.netlink.NetlinkErrorMessage;
 import android.net.netlink.NetlinkMessage;
 import android.net.netlink.StructNlMsgErr;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -53,6 +54,7 @@ public class NetlinkErrorMessageTest extends TestCase {
     public static final byte[] NLM_ERROR_OK =
             HexEncoding.decode(NLM_ERROR_OK_HEX.toCharArray(), false);
 
+    @SmallTest
     public void testParseNlmErrorOk() {
         final ByteBuffer byteBuffer = ByteBuffer.wrap(NLM_ERROR_OK);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);  // For testing.
