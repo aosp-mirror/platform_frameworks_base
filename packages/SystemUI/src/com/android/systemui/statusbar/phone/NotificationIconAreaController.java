@@ -8,7 +8,6 @@ import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.android.internal.util.NotificationColorUtil;
@@ -36,7 +35,6 @@ public class NotificationIconAreaController {
 
     private PhoneStatusBar mPhoneStatusBar;
     protected View mNotificationIconArea;
-    private NotificationShelf mNotificationIconAreaScroller;
     private NotificationIconContainer mNotificationIcons;
     private NotificationIconContainer mNotificationIconsScroller;
     private final Rect mTintArea = new Rect();
@@ -66,8 +64,9 @@ public class NotificationIconAreaController {
         mNotificationIcons = (NotificationIconContainer) mNotificationIconArea.findViewById(
                 R.id.notificationIcons);
 
-        mNotificationIconAreaScroller = mPhoneStatusBar.getNotificationShelf();
-        mNotificationIconsScroller = mNotificationIconAreaScroller.getNotificationIconContainer();
+        NotificationShelf shelf = mPhoneStatusBar.getNotificationShelf();
+        mNotificationIconsScroller = shelf.getShelfIcons();
+        shelf.setCollapsedIcons(mNotificationIcons);
 
         mNotificationScrollLayout = mPhoneStatusBar.getNotificationScrollLayout();
     }
@@ -115,12 +114,10 @@ public class NotificationIconAreaController {
     }
 
     /**
-     * Sets the color that should be used to tint any icons in the notification area. If this
-     * method is not called, the default tint is {@link Color#WHITE}.
+     * Sets the color that should be used to tint any icons in the notification area.
      */
     public void setIconTint(int iconTint) {
         mIconTint = iconTint;
-        mNotificationIcons.setIconTint(mIconTint);
         applyNotificationIconsTint();
     }
 
@@ -178,7 +175,7 @@ public class NotificationIconAreaController {
      */
     private void updateIconsForLayout(NotificationData notificationData,
             Function<NotificationData.Entry, StatusBarIconView> function,
-            ViewGroup hostLayout) {
+            NotificationIconContainer hostLayout) {
         ArrayList<StatusBarIconView> toShow = new ArrayList<>(
                 mNotificationScrollLayout.getChildCount());
 
@@ -192,6 +189,7 @@ public class NotificationIconAreaController {
                 }
             }
         }
+
 
         ArrayList<View> toRemove = new ArrayList<>();
         for (int i = 0; i < hostLayout.getChildCount(); i++) {
@@ -239,6 +237,7 @@ public class NotificationIconAreaController {
                 v.setImageTintList(ColorStateList.valueOf(
                         StatusBarIconController.getTint(mTintArea, v, mIconTint)));
             }
+            v.setIconTint(mIconTint);
         }
     }
 }

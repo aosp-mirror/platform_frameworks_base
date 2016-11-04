@@ -48,7 +48,7 @@ public class NotificationShelf extends ActivatableNotificationView {
 
     private ViewInvertHelper mViewInvertHelper;
     private boolean mDark;
-    private NotificationIconContainer mNotificationIconContainer;
+    private NotificationIconContainer mShelfIcons;
     private ArrayList<StatusBarIconView> mIcons = new ArrayList<>();
     private ShelfState mShelfState;
     private int[] mTmp = new int[2];
@@ -62,6 +62,7 @@ public class NotificationShelf extends ActivatableNotificationView {
     private int mPaddingBetweenElements;
     private int mNotGoneIndex;
     private boolean mHasItemsInStableShelf;
+    private NotificationIconContainer mCollapsedIcons;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -70,14 +71,15 @@ public class NotificationShelf extends ActivatableNotificationView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mNotificationIconContainer = (NotificationIconContainer) findViewById(R.id.content);
-        mNotificationIconContainer.setClipChildren(false);
-        mNotificationIconContainer.setClipToPadding(false);
+        mShelfIcons = (NotificationIconContainer) findViewById(R.id.content);
+        mShelfIcons.setClipChildren(false);
+        mShelfIcons.setClipToPadding(false);
+
         setClipToActualHeight(false);
         setClipChildren(false);
         setClipToPadding(false);
-        mNotificationIconContainer.setShowAllIcons(false);
-        mViewInvertHelper = new ViewInvertHelper(mNotificationIconContainer,
+        mShelfIcons.setShowAllIcons(false);
+        mViewInvertHelper = new ViewInvertHelper(mShelfIcons,
                 NotificationPanelView.DOZE_ANIMATION_DURATION);
         mShelfState = new ShelfState();
         initDimens();
@@ -118,11 +120,11 @@ public class NotificationShelf extends ActivatableNotificationView {
 
     @Override
     protected View getContentView() {
-        return mNotificationIconContainer;
+        return mShelfIcons;
     }
 
-    public NotificationIconContainer getNotificationIconContainer() {
-        return mNotificationIconContainer;
+    public NotificationIconContainer getShelfIcons() {
+        return mShelfIcons;
     }
 
     @Override
@@ -142,13 +144,13 @@ public class NotificationShelf extends ActivatableNotificationView {
             float viewEnd = lastViewState.yTranslation + lastViewState.height;
             mShelfState.copyFrom(lastViewState);
             mShelfState.height = getIntrinsicHeight();
-            mShelfState.yTranslation = Math.min(viewEnd, maxShelfEnd) - mShelfState.height;
+            mShelfState.yTranslation = Math.max(Math.min(viewEnd, maxShelfEnd) - mShelfState.height,
+                    getFullyClosedTranslation());
             mShelfState.zTranslation = ambientState.getBaseZHeight();
             float openedAmount = (mShelfState.yTranslation - getFullyClosedTranslation())
                     / (getIntrinsicHeight() * 2);
             openedAmount = Math.min(1.0f, openedAmount);
-            mShelfState.iconContainerTranslation = (1.0f - openedAmount)
-                    * (mStatusBarPaddingStart - mNotificationIconContainer.getLeft());
+            mShelfState.openedAmount = openedAmount;
             mShelfState.clipTopAmount = 0;
             mShelfState.alpha = 1.0f;
             mShelfState.belowShelf = false;
@@ -172,10 +174,16 @@ public class NotificationShelf extends ActivatableNotificationView {
      */
     public void updateAppearance() {
         WeakHashMap<View, IconState> iconStates =
-                mNotificationIconContainer.resetViewStates();
+                mShelfIcons.resetViewStates();
         float numIconsInShelf = 0.0f;
         int shelfIndex = mAmbientState.getShelfIndex();
         mNotGoneIndex = -1;
+        float interpolationStart = mMaxLayoutHeight - getIntrinsicHeight() * 2;
+        float expandAmount = 0.0f;
+        if (getTranslationY() >= interpolationStart) {
+            expandAmount = (getTranslationY() - interpolationStart) / getIntrinsicHeight();
+            expandAmount = Math.min(1.0f, expandAmount);
+        }
         //  find the first view that doesn't overlap with the shelf
         int notificationIndex = 0;
         int notGoneNotifications = 0;
@@ -205,7 +213,7 @@ public class NotificationShelf extends ActivatableNotificationView {
                 }
             }
             updateNotificationClipHeight(row, notificationClipEnd);
-            updateIconAppearance(row, iconState, icon);
+            updateIconAppearance(row, iconState, icon, expandAmount);
             numIconsInShelf += iconState.iconAppearAmount;
             if (row.getTranslationY() >= getTranslationY() && mNotGoneIndex == -1) {
                 mNotGoneIndex = notGoneNotifications;
@@ -228,8 +236,8 @@ public class NotificationShelf extends ActivatableNotificationView {
             }
             notificationIndex++;
         }
-        mNotificationIconContainer.calculateIconTranslations();
-        mNotificationIconContainer.applyIconStates();
+        mShelfIcons.calculateIconTranslations();
+        mShelfIcons.applyIconStates();
         setVisibility(numIconsInShelf == 0.0f || !mAmbientState.isShadeExpanded() ? INVISIBLE
                 : VISIBLE);
         setHideBackground(numIconsInShelf < 1.0f);
@@ -247,8 +255,8 @@ public class NotificationShelf extends ActivatableNotificationView {
         }
     }
 
-    private void updateIconAppearance(ExpandableNotificationRow row,
-            IconState iconState, StatusBarIconView icon) {
+    private void updateIconAppearance(ExpandableNotificationRow row, IconState iconState,
+            StatusBarIconView icon, float expandAmount) {
         // Let calculate how much the view is in the shelf
         float viewStart = row.getTranslationY();
         int transformHeight = row.getActualHeight() + mPaddingBetweenElements;
@@ -259,12 +267,6 @@ public class NotificationShelf extends ActivatableNotificationView {
                 float linearAmount = (getTranslationY() - viewStart) / transformHeight;
                 float interpolatedAmount =  Interpolators.ACCELERATE_DECELERATE.getInterpolation(
                         linearAmount);
-                float interpolationStart = mMaxLayoutHeight - getIntrinsicHeight() * 2;
-                float expandAmount = 0.0f;
-                if (getTranslationY() >= interpolationStart) {
-                    expandAmount = (getTranslationY() - interpolationStart) / getIntrinsicHeight();
-                    expandAmount = Math.min(1.0f, expandAmount);
-                }
                 interpolatedAmount = NotificationUtils.interpolate(
                         interpolatedAmount, linearAmount, expandAmount);
                 iconState.iconAppearAmount = 1.0f - interpolatedAmount;
@@ -318,7 +320,7 @@ public class NotificationShelf extends ActivatableNotificationView {
         // The notification size is different from the size in the shelf / statusbar
         float newSize = NotificationUtils.interpolate(notificationIconSize, shelfIconSize,
                 transitionAmount);
-        iconState.scaleX = newSize / icon.getHeight();
+        iconState.scaleX = newSize / icon.getHeight() / icon.getIconScale();
         iconState.scaleY = iconState.scaleX;
         iconState.hidden = transitionAmount == 0.0f;
         row.setIconTransformationAmount(transitionAmount);
@@ -326,8 +328,8 @@ public class NotificationShelf extends ActivatableNotificationView {
         if (row.isInShelf() && !row.isTransformingIntoShelf()) {
             iconState.iconAppearAmount = 1.0f;
             iconState.alpha = 1.0f;
-            iconState.scaleX = shelfIconSize / icon.getHeight();
-            iconState.scaleY = iconState.scaleX;
+            iconState.scaleX = 1.0f;
+            iconState.scaleY = 1.0f;
             iconState.hidden = false;
         }
     }
@@ -378,8 +380,23 @@ public class NotificationShelf extends ActivatableNotificationView {
         return super.shouldHideBackground() || mHideBackground;
     }
 
-    private void setIconContainerTranslation(float iconContainerTranslation) {
-        mNotificationIconContainer.setTranslationX(iconContainerTranslation);
+    private void setOpenedAmount(float openedAmount) {
+        mCollapsedIcons.getLocationOnScreen(mTmp);
+        int start = mTmp[0];
+        if (isLayoutRtl()) {
+            start = getWidth() - start - mCollapsedIcons.getWidth();
+        }
+        int width = (int) NotificationUtils.interpolate(start + mCollapsedIcons.getWidth(),
+                mShelfIcons.getWidth(),
+                openedAmount);
+        mShelfIcons.setActualLayoutWidth(width);
+        float padding = NotificationUtils.interpolate(mCollapsedIcons.getPaddingEnd(),
+                mShelfIcons.getPaddingEnd(),
+                openedAmount);
+        mShelfIcons.setActualPaddingEnd(padding);
+        float paddingStart = NotificationUtils.interpolate(start,
+                mShelfIcons.getPaddingStart(), openedAmount);
+        mShelfIcons.setActualPaddingStart(paddingStart);
     }
 
     public void setMaxLayoutHeight(int maxLayoutHeight) {
@@ -405,23 +422,27 @@ public class NotificationShelf extends ActivatableNotificationView {
         return mHasItemsInStableShelf;
     }
 
+    public void setCollapsedIcons(NotificationIconContainer collapsedIcons) {
+        mCollapsedIcons = collapsedIcons;
+    }
+
     private class ShelfState extends ExpandableViewState {
-        private float iconContainerTranslation;
+        private float openedAmount;
         private boolean hasItemsInStableShelf;
 
         @Override
         public void applyToView(View view) {
             super.applyToView(view);
             updateAppearance();
-            setIconContainerTranslation(iconContainerTranslation);
+            setOpenedAmount(openedAmount);
             setHasItemsInStableShelf(hasItemsInStableShelf);
         }
 
         @Override
         public void animateTo(View child, AnimationProperties properties) {
             super.animateTo(child, properties);
+            setOpenedAmount(openedAmount);
             updateAppearance();
-            setIconContainerTranslation(iconContainerTranslation);
             setHasItemsInStableShelf(hasItemsInStableShelf);
         }
     }

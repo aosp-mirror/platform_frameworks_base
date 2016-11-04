@@ -35,8 +35,8 @@
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="13dp"
-        android:layout_marginEnd="13dp"
+        android:paddingStart="13dp"
+        android:paddingEnd="13dp"
         android:gravity="center_vertical" />
 
     <com.android.systemui.statusbar.notification.FakeShadowView
