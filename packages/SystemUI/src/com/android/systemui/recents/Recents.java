@@ -61,6 +61,8 @@ import com.android.systemui.recents.tv.RecentsTvImpl;
 import com.android.systemui.stackdivider.Divider;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -76,6 +78,12 @@ public class Recents extends SystemUI
     public final static int EVENT_BUS_PRIORITY = 1;
     public final static int BIND_TO_SYSTEM_USER_RETRY_DELAY = 5000;
     public final static int RECENTS_GROW_TARGET_INVALID = -1;
+
+    public final static Set<String> RECENTS_ACTIVITIES = new HashSet<>();
+    static {
+        RECENTS_ACTIVITIES.add(RecentsImpl.RECENTS_ACTIVITY);
+        RECENTS_ACTIVITIES.add(RecentsTvImpl.RECENTS_TV_ACTIVITY);
+    }
 
     // Purely for experimentation
     private final static String RECENTS_OVERRIDE_SYSPROP_KEY = "persist.recents_override_pkg";
