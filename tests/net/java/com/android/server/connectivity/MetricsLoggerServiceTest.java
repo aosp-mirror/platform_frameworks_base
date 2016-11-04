@@ -20,6 +20,7 @@ import android.content.Context;
 import android.net.ConnectivityMetricsEvent;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.test.suitebuilder.annotation.SmallTest;
 import static android.net.ConnectivityMetricsEvent.Reference;
 
 import junit.framework.TestCase;
@@ -67,12 +68,14 @@ public class MetricsLoggerServiceTest extends TestCase {
         mService.onStart();
     }
 
+    @SmallTest
     public void testGetNoEvents() throws Exception {
         Reference r = new Reference(0);
         assertArrayEquals(NO_EVENTS, mService.mBinder.getEvents(r));
         assertEquals(0, r.getValue());
     }
 
+    @SmallTest
     public void testLogAndGetEvents() throws Exception {
         mService.mBinder.logEvents(EVENTS);
 
@@ -85,6 +88,7 @@ public class MetricsLoggerServiceTest extends TestCase {
         assertEquals(N_EVENTS, r.getValue());
     }
 
+    @SmallTest
     public void testLogOneByOne() throws Exception {
         for (ConnectivityMetricsEvent ev : EVENTS) {
             mService.mBinder.logEvent(ev);
@@ -99,6 +103,7 @@ public class MetricsLoggerServiceTest extends TestCase {
         assertEquals(N_EVENTS, r.getValue());
     }
 
+    @SmallTest
     public void testInterleavedLogAndGet() throws Exception {
         mService.mBinder.logEvents(Arrays.copyOfRange(EVENTS, 0, 3));
 
@@ -117,6 +122,7 @@ public class MetricsLoggerServiceTest extends TestCase {
         assertEquals(N_EVENTS, r.getValue());
     }
 
+    @SmallTest
     public void testMultipleGetAll() throws Exception {
         mService.mBinder.logEvents(Arrays.copyOf(EVENTS, 3));
 
@@ -131,6 +137,7 @@ public class MetricsLoggerServiceTest extends TestCase {
         assertEquals(N_EVENTS, r2.getValue());
     }
 
+    @SmallTest
     public void testLogAndDumpConcurrently() throws Exception {
         for (int i = 0; i < 50; i++) {
             mContext = null;
