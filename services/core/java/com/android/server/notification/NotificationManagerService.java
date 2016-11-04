@@ -760,7 +760,7 @@ public class NotificationManagerService extends SystemService {
                 mListeners.onPackagesChanged(removingPackage, pkgList);
                 mRankerServices.onPackagesChanged(removingPackage, pkgList);
                 mConditionProviders.onPackagesChanged(removingPackage, pkgList);
-                mRankingHelper.onPackagesChanged(removingPackage, pkgList);
+                mRankingHelper.onPackagesChanged(removingPackage, changeUserId, pkgList);
             }
         }
     };
