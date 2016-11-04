@@ -2765,23 +2765,28 @@ public class ExifInterface {
                         tag != null ? tag.name : null, dataFormat, numberOfComponents));
             }
 
-            if (tag == null || dataFormat <= 0 ||
-                    dataFormat >= IFD_FORMAT_BYTES_PER_FORMAT.length) {
-                // Skip if the parsed tag number is not defined or invalid data format.
-                if (DEBUG) {
-                    if (tag == null) {
-                        Log.w(TAG, "Skip tag entry since tag number is not defined: " + tagNumber);
-                    } else {
-                        Log.w(TAG, "Skip tag entry since data format is invalid: " + dataFormat);
-                    }
+            long byteCount = 0;
+            boolean valid = false;
+            if (tag == null) {
+                Log.w(TAG, "Skip the tag entry since tag number is not defined: " + tagNumber);
+            } else if (dataFormat <= 0 || dataFormat >= IFD_FORMAT_BYTES_PER_FORMAT.length) {
+                Log.w(TAG, "Skip the tag entry since data format is invalid: " + dataFormat);
+            } else {
+                byteCount = (long) numberOfComponents * IFD_FORMAT_BYTES_PER_FORMAT[dataFormat];
+                if (byteCount < 0 || byteCount > Integer.MAX_VALUE) {
+                    Log.w(TAG, "Skip the tag entry since the number of components is invalid: "
+                            + numberOfComponents);
+                } else {
+                    valid = true;
                 }
+            }
+            if (!valid) {
                 dataInputStream.seek(nextEntryOffset);
                 continue;
             }
 
             // Read a value from data field or seek to the value offset which is stored in data
             // field if the size of the entry value is bigger than 4.
-            int byteCount = numberOfComponents * IFD_FORMAT_BYTES_PER_FORMAT[dataFormat];
             if (byteCount > 4) {
                 int offset = dataInputStream.readInt();
                 if (DEBUG) {
@@ -2871,7 +2876,7 @@ public class ExifInterface {
                 continue;
             }
 
-            byte[] bytes = new byte[byteCount];
+            byte[] bytes = new byte[(int) byteCount];
             dataInputStream.readFully(bytes);
             ExifAttribute attribute = new ExifAttribute(dataFormat, numberOfComponents, bytes);
             mAttributes[ifdType].put(tag.name, attribute);
