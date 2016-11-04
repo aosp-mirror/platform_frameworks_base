@@ -17,7 +17,6 @@
 
 package com.android.server.power;
 
-import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.IActivityManager;
@@ -415,7 +414,7 @@ public final class ShutdownThread extends Thread {
         Log.i(TAG, "Shutting down activity manager...");
 
         final IActivityManager am =
-            ActivityManagerNative.asInterface(ServiceManager.checkService("activity"));
+                IActivityManager.Stub.asInterface(ServiceManager.checkService("activity"));
         if (am != null) {
             try {
                 am.shutdown(MAX_BROADCAST_TIME);

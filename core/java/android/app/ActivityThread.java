@@ -421,11 +421,10 @@ public final class ActivityThread {
         final String[] mNames;
         final IContentProvider mProvider;
         final ContentProvider mLocalProvider;
-        final IActivityManager.ContentProviderHolder mHolder;
+        final ContentProviderHolder mHolder;
 
         ProviderClientRecord(String[] names, IContentProvider provider,
-                ContentProvider localProvider,
-                IActivityManager.ContentProviderHolder holder) {
+                ContentProvider localProvider, ContentProviderHolder holder) {
             mNames = names;
             mProvider = provider;
             mLocalProvider = localProvider;
@@ -3825,7 +3824,7 @@ public final class ActivityThread {
     }
 
     private static final class ProviderRefCount {
-        public final IActivityManager.ContentProviderHolder holder;
+        public final ContentProviderHolder holder;
         public final ProviderClientRecord client;
         public int stableCount;
         public int unstableCount;
@@ -3837,7 +3836,7 @@ public final class ActivityThread {
         // here.
         public boolean removePending;
 
-        ProviderRefCount(IActivityManager.ContentProviderHolder inHolder,
+        ProviderRefCount(ContentProviderHolder inHolder,
                 ProviderClientRecord inClient, int sCount, int uCount) {
             holder = inHolder;
             client = inClient;
@@ -5480,8 +5479,7 @@ public final class ActivityThread {
 
     private void installContentProviders(
             Context context, List<ProviderInfo> providers) {
-        final ArrayList<IActivityManager.ContentProviderHolder> results =
-            new ArrayList<IActivityManager.ContentProviderHolder>();
+        final ArrayList<ContentProviderHolder> results = new ArrayList<>();
 
         for (ProviderInfo cpi : providers) {
             if (DEBUG_PROVIDER) {
@@ -5492,7 +5490,7 @@ public final class ActivityThread {
                 buf.append(cpi.name);
                 Log.i(TAG, buf.toString());
             }
-            IActivityManager.ContentProviderHolder cph = installProvider(context, null, cpi,
+            ContentProviderHolder cph = installProvider(context, null, cpi,
                     false /*noisy*/, true /*noReleaseNeeded*/, true /*stable*/);
             if (cph != null) {
                 cph.noReleaseNeeded = true;
@@ -5521,7 +5519,7 @@ public final class ActivityThread {
         // Note that we cannot hold the lock while acquiring and installing the
         // provider since it might take a long time to run and it could also potentially
         // be re-entrant in the case where the provider is in the same process.
-        IActivityManager.ContentProviderHolder holder = null;
+        ContentProviderHolder holder = null;
         try {
             holder = ActivityManagerNative.getDefault().getContentProvider(
                     getApplicationThread(), auth, userId, stable);
@@ -5821,7 +5819,7 @@ public final class ActivityThread {
     }
 
     private ProviderClientRecord installProviderAuthoritiesLocked(IContentProvider provider,
-            ContentProvider localProvider, IActivityManager.ContentProviderHolder holder) {
+            ContentProvider localProvider, ContentProviderHolder holder) {
         final String auths[] = holder.info.authority.split(";");
         final int userId = UserHandle.getUserId(holder.info.applicationInfo.uid);
 
@@ -5854,8 +5852,8 @@ public final class ActivityThread {
      * and returns the existing provider.  This can happen due to concurrent
      * attempts to acquire the same provider.
      */
-    private IActivityManager.ContentProviderHolder installProvider(Context context,
-            IActivityManager.ContentProviderHolder holder, ProviderInfo info,
+    private ContentProviderHolder installProvider(Context context,
+            ContentProviderHolder holder, ProviderInfo info,
             boolean noisy, boolean noReleaseNeeded, boolean stable) {
         ContentProvider localProvider = null;
         IContentProvider provider;
@@ -5915,7 +5913,7 @@ public final class ActivityThread {
                     + info.name);
         }
 
-        IActivityManager.ContentProviderHolder retHolder;
+        ContentProviderHolder retHolder;
 
         synchronized (mProviderMap) {
             if (DEBUG_PROVIDER) Slog.v(TAG, "Checking to add " + provider
@@ -5931,7 +5929,7 @@ public final class ActivityThread {
                     }
                     provider = pr.mProvider;
                 } else {
-                    holder = new IActivityManager.ContentProviderHolder(info);
+                    holder = new ContentProviderHolder(info);
                     holder.provider = provider;
                     holder.noReleaseNeeded = true;
                     pr = installProviderAuthoritiesLocked(provider, localProvider, holder);

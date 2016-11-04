@@ -27,6 +27,7 @@ import android.app.IStopUserCallback;
 import android.app.Instrumentation;
 import android.app.ProfilerInfo;
 import android.app.UiAutomationConnection;
+import android.app.WaitResult;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageStatsManager;
@@ -349,7 +350,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.flush();
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-            IActivityManager.WaitResult result = null;
+            WaitResult result = null;
             int res;
             final long startTime = SystemClock.uptimeMillis();
             ActivityOptions options = null;
@@ -438,7 +439,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             out.flush();
             if (mWaitOption && launched) {
                 if (result == null) {
-                    result = new IActivityManager.WaitResult();
+                    result = new WaitResult();
                     result.who = intent.getComponent();
                 }
                 pw.println("Status: " + (result.timeout ? "timeout" : "ok"));
@@ -1987,7 +1988,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             mInterface.stopLockTaskMode();
         } else {
             int taskId = Integer.parseInt(taskIdStr);
-            mInterface.startLockTaskMode(taskId);
+            mInterface.startLockTaskModeById(taskId);
         }
         pw.println("Activity manager is " + (mInterface.isInLockTaskMode() ? "" : "not ") +
                 "in lockTaskMode");

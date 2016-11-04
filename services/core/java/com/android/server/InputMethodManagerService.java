@@ -48,6 +48,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
@@ -2055,7 +2056,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // setSelectedInputMethodAndSubtypeLocked().
             mCurMethodId = id;
 
-            if (ActivityManagerNative.isSystemReady()) {
+            if (LocalServices.getService(ActivityManagerInternal.class).isSystemReady()) {
                 Intent intent = new Intent(Intent.ACTION_INPUT_METHOD_CHANGED);
                 intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
                 intent.putExtra("input_method_id", id);

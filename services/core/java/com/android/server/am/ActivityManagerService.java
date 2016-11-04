@@ -16,8 +16,11 @@
 
 package com.android.server.am;
 
-import android.app.ApplicationThreadConstants;
 import android.annotation.Nullable;
+import android.app.ApplicationThreadConstants;
+import android.app.ContentProviderHolder;
+import android.app.IActivityManager;
+import android.app.WaitResult;
 import android.os.IDeviceIdentifiersPolicyService;
 import android.util.Size;
 import android.util.TypedValue;
@@ -81,7 +84,6 @@ import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
-import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
@@ -381,7 +383,7 @@ import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
-public class ActivityManagerService extends ActivityManagerNative
+public class ActivityManagerService extends IActivityManager.Stub
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityManagerService" : TAG_AM;
@@ -8867,12 +8869,12 @@ public class ActivityManagerService extends ActivityManagerNative
     // =========================================================
 
     @Override
-    public List<IAppTask> getAppTasks(String callingPackage) {
+    public List<IBinder> getAppTasks(String callingPackage) {
         int callingUid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
 
         synchronized(this) {
-            ArrayList<IAppTask> list = new ArrayList<IAppTask>();
+            ArrayList<IBinder> list = new ArrayList<IBinder>();
             try {
                 if (DEBUG_ALL) Slog.v(TAG, "getAppTasks");
 
@@ -8893,7 +8895,7 @@ public class ActivityManagerService extends ActivityManagerNative
                     ActivityManager.RecentTaskInfo taskInfo =
                             createRecentTaskInfoFromTaskRecord(tr);
                     AppTaskImpl taskImpl = new AppTaskImpl(taskInfo.persistentId, callingUid);
-                    list.add(taskImpl);
+                    list.add(taskImpl.asBinder());
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -9345,16 +9347,17 @@ public class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void startInPlaceAnimationOnFrontMostApplication(ActivityOptions opts)
+    public void startInPlaceAnimationOnFrontMostApplication(Bundle opts)
             throws RemoteException {
-        if (opts.getAnimationType() != ActivityOptions.ANIM_CUSTOM_IN_PLACE ||
-                opts.getCustomInPlaceResId() == 0) {
+        final ActivityOptions activityOptions = ActivityOptions.fromBundle(opts);
+        if (activityOptions.getAnimationType() != ActivityOptions.ANIM_CUSTOM_IN_PLACE ||
+                activityOptions.getCustomInPlaceResId() == 0) {
             throw new IllegalArgumentException("Expected in-place ActivityOption " +
                     "with valid animation");
         }
         mWindowManager.prepareAppTransition(TRANSIT_TASK_IN_PLACE, false);
-        mWindowManager.overridePendingAppTransitionInPlace(opts.getPackageName(),
-                opts.getCustomInPlaceResId());
+        mWindowManager.overridePendingAppTransitionInPlace(activityOptions.getPackageName(),
+                activityOptions.getCustomInPlaceResId());
         mWindowManager.executeAppTransition();
     }
 
@@ -10058,7 +10061,7 @@ public class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void startLockTaskMode(int taskId) {
+    public void startLockTaskModeById(int taskId) {
         synchronized (this) {
             final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
             if (task != null) {
@@ -10068,7 +10071,7 @@ public class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void startLockTaskMode(IBinder token) {
+    public void startLockTaskModeByToken(IBinder token) {
         synchronized (this) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
             if (r == null) {
@@ -10088,7 +10091,7 @@ public class ActivityManagerService extends ActivityManagerNative
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                startLockTaskMode(taskId);
+                startLockTaskModeById(taskId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -11408,9 +11411,10 @@ public class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public ParcelFileDescriptor openContentUri(Uri uri) throws RemoteException {
+    public ParcelFileDescriptor openContentUri(String uriString) throws RemoteException {
         enforceNotIsolatedCaller("openContentUri");
         final int userId = UserHandle.getCallingUserId();
+        final Uri uri = Uri.parse(uriString);
         String name = uri.getAuthority();
         ContentProviderHolder cph = getContentProviderExternalUnchecked(name, null, userId);
         ParcelFileDescriptor pfd = null;
@@ -12279,7 +12283,7 @@ public class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean convertToTranslucent(IBinder token, ActivityOptions options) {
+    public boolean convertToTranslucent(IBinder token, Bundle options) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -12290,7 +12294,7 @@ public class ActivityManagerService extends ActivityManagerNative
                 int index = r.task.mActivities.lastIndexOf(r);
                 if (index > 0) {
                     ActivityRecord under = r.task.mActivities.get(index - 1);
-                    under.returningOptions = options;
+                    under.returningOptions = ActivityOptions.fromBundle(options);
                 }
                 final boolean translucentChanged = r.changeWindowTranslucency(false);
                 if (translucentChanged) {
@@ -12338,7 +12342,7 @@ public class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public ActivityOptions getActivityOptions(IBinder token) {
+    public Bundle getActivityOptions(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -12346,7 +12350,7 @@ public class ActivityManagerService extends ActivityManagerNative
                 if (r != null) {
                     final ActivityOptions activityOptions = r.pendingOptions;
                     r.pendingOptions = null;
-                    return activityOptions;
+                    return activityOptions == null ? null : activityOptions.toBundle();
                 }
                 return null;
             }
@@ -13002,11 +13006,6 @@ public class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public boolean testIsSystemReady() {
-        // no need to synchronize(this) just to read & return the value
-        return mSystemReady;
-    }
-
     public void systemReady(final Runnable goingCallback) {
         synchronized(this) {
             if (mSystemReady) {
@@ -13200,7 +13199,8 @@ public class ActivityManagerService extends ActivityManagerNative
      * @param app object of the crashing app, null for the system server
      * @param crashInfo describing the exception
      */
-    public void handleApplicationCrash(IBinder app, ApplicationErrorReport.CrashInfo crashInfo) {
+    public void handleApplicationCrash(IBinder app,
+            ApplicationErrorReport.ParcelableCrashInfo crashInfo) {
         ProcessRecord r = findAppProcess(app, "Crash");
         final String processName = app == null ? "system_server"
                 : (r == null ? "unknown" : r.processName);
@@ -13412,7 +13412,7 @@ public class ActivityManagerService extends ActivityManagerNative
      * @return true if the process should exit immediately (WTF is fatal)
      */
     public boolean handleApplicationWtf(final IBinder app, final String tag, boolean system,
-            final ApplicationErrorReport.CrashInfo crashInfo) {
+            final ApplicationErrorReport.ParcelableCrashInfo crashInfo) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
 
@@ -22068,6 +22068,12 @@ public class ActivityManagerService extends ActivityManagerNative
             if (callback != null) {
                 callback.run();
             }
+        }
+
+        @Override
+        public boolean isSystemReady() {
+            // no need to synchronize(this) just to read & return the value
+            return mSystemReady;
         }
     }
 

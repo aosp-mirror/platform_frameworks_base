@@ -245,6 +245,8 @@ android.app.BackStackRecord$TransitionState
 android.app.BackStackState
 android.app.BackStackState$1
 android.app.BroadcastOptions
+android.app.ContentProviderHolder
+android.app.ContentProviderHolder$1
 android.app.ContextImpl
 android.app.ContextImpl$1
 android.app.ContextImpl$ApplicationContentResolver
@@ -298,9 +300,8 @@ android.app.IActivityContainer$Stub
 android.app.IActivityContainerCallback
 android.app.IActivityController
 android.app.IActivityManager
-android.app.IActivityManager$ContentProviderHolder
-android.app.IActivityManager$ContentProviderHolder$1
-android.app.IActivityManager$WaitResult
+android.app.IActivityManager$Stub
+android.app.IActivityManager$Stub$Proxy
 android.app.IAlarmCompleteListener
 android.app.IAlarmCompleteListener$Stub
 android.app.IAlarmListener
@@ -521,6 +522,7 @@ android.app.TaskStackBuilder
 android.app.TimePickerDialog
 android.app.TimePickerDialog$OnTimeSetListener
 android.app.UiModeManager
+android.app.WaitResult;
 android.app.WallpaperInfo
 android.app.WallpaperManager
 android.app.WallpaperManager$Globals

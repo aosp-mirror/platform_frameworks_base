@@ -114,7 +114,7 @@ public class RuntimeInit {
 
                 // Bring up crash dialog, wait for it to be dismissed
                 ActivityManagerNative.getDefault().handleApplicationCrash(
-                        mApplicationObject, new ApplicationErrorReport.CrashInfo(e));
+                        mApplicationObject, new ApplicationErrorReport.ParcelableCrashInfo(e));
             } catch (Throwable t2) {
                 if (t2 instanceof DeadObjectException) {
                     // System process is dead; ignore
@@ -380,7 +380,8 @@ public class RuntimeInit {
     public static void wtf(String tag, Throwable t, boolean system) {
         try {
             if (ActivityManagerNative.getDefault().handleApplicationWtf(
-                    mApplicationObject, tag, system, new ApplicationErrorReport.CrashInfo(t))) {
+                    mApplicationObject, tag, system,
+                    new ApplicationErrorReport.ParcelableCrashInfo(t))) {
                 // The Activity Manager has already written us off -- now exit.
                 Process.killProcess(Process.myPid());
                 System.exit(10);

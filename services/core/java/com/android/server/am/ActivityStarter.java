@@ -81,11 +81,11 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityContainer;
-import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
+import android.app.WaitResult;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentSender;
@@ -707,7 +707,7 @@ class ActivityStarter {
             String callingPackage, Intent intent, String resolvedType,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             IBinder resultTo, String resultWho, int requestCode, int startFlags,
-            ProfilerInfo profilerInfo, IActivityManager.WaitResult outResult,
+            ProfilerInfo profilerInfo, WaitResult outResult,
             Configuration globalConfig, Bundle bOptions, boolean ignoreTargetSecurity, int userId,
             IActivityContainer iContainer, TaskRecord inTask) {
         // Refuse possible leaked file descriptors

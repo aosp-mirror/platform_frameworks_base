@@ -32,7 +32,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.app.UiAutomation;
 import android.app.IActivityManager;
-import android.app.IActivityManager.WaitResult;
 import android.support.test.rule.logging.AtraceLogger;
 import android.test.InstrumentationTestCase;
 import android.test.InstrumentationTestRunner;

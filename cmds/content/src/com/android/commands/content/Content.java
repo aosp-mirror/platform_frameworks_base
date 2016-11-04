@@ -17,8 +17,8 @@
 package com.android.commands.content;
 
 import android.app.ActivityManagerNative;
+import android.app.ContentProviderHolder;
 import android.app.IActivityManager;
-import android.app.IActivityManager.ContentProviderHolder;
 import android.content.ContentValues;
 import android.content.IContentProvider;
 import android.database.Cursor;

@@ -451,6 +451,47 @@ public class ApplicationErrorReport implements Parcelable {
     }
 
     /**
+     * Parcelable version of {@link CrashInfo}
+     *
+     * @hide
+     */
+    public static class ParcelableCrashInfo extends CrashInfo implements Parcelable {
+        /**
+         * Create an uninitialized instance of CrashInfo.
+         */
+        public ParcelableCrashInfo() {
+        }
+
+        /**
+         * Create an instance of CrashInfo initialized from an exception.
+         */
+        public ParcelableCrashInfo(Throwable tr) {
+            super(tr);
+        }
+
+        public ParcelableCrashInfo(Parcel in) {
+            super(in);
+        }
+
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Parcelable.Creator<ParcelableCrashInfo> CREATOR =
+                new Parcelable.Creator<ParcelableCrashInfo>() {
+                    @Override
+                    public ParcelableCrashInfo createFromParcel(Parcel in) {
+                        return new ParcelableCrashInfo(in);
+                    }
+
+                    @Override
+                    public ParcelableCrashInfo[] newArray(int size) {
+                        return new ParcelableCrashInfo[size];
+                    }
+                };
+    }
+
+    /**
      * Describes an application not responding error.
      */
     public static class AnrInfo {

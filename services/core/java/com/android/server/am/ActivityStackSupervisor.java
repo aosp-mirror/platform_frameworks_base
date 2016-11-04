@@ -100,11 +100,10 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IActivityContainerCallback;
-import android.app.IActivityManager;
-import android.app.IActivityManager.WaitResult;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.StatusBarManager;
+import android.app.WaitResult;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -317,10 +316,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer
     final ArrayList<ActivityRecord> mWaitingVisibleActivities = new ArrayList<>();
 
     /** List of processes waiting to find out about the next visible activity. */
-    final ArrayList<IActivityManager.WaitResult> mWaitingActivityVisible = new ArrayList<>();
+    final ArrayList<WaitResult> mWaitingActivityVisible = new ArrayList<>();
 
     /** List of processes waiting to find out about the next launched activity. */
-    final ArrayList<IActivityManager.WaitResult> mWaitingActivityLaunched = new ArrayList<>();
+    final ArrayList<WaitResult> mWaitingActivityLaunched = new ArrayList<>();
 
     /** List of activities that are ready to be stopped, but waiting for the next activity to
      * settle down before doing so. */

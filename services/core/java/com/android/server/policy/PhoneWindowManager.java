@@ -6209,7 +6209,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void dispatchMediaKeyWithWakeLockToAudioService(KeyEvent event) {
-        if (ActivityManagerNative.isSystemReady()) {
+        if (mActivityManagerInternal.isSystemReady()) {
             MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(event, true);
         }
     }

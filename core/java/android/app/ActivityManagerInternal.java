@@ -189,4 +189,9 @@ public abstract class ActivityManagerInternal {
      *                 guaranteed that all apps have their visibility updated accordingly.
      */
     public abstract void notifyKeyguardFlagsChanged(@Nullable Runnable callback);
+
+    /**
+     * @return {@code true} if system is ready, {@code false} otherwise.
+     */
+    public abstract boolean isSystemReady();
 }

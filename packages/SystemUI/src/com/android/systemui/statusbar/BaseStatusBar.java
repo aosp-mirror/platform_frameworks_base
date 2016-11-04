@@ -1320,11 +1320,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void sendCloseSystemWindows(String reason) {
-        if (ActivityManagerNative.isSystemReady()) {
-            try {
-                ActivityManagerNative.getDefault().closeSystemDialogs(reason);
-            } catch (RemoteException e) {
-            }
+        try {
+            ActivityManagerNative.getDefault().closeSystemDialogs(reason);
+        } catch (RemoteException e) {
         }
     }
 
