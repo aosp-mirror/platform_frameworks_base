@@ -1199,6 +1199,14 @@ class ActivityStarter {
                 // since the app transition will not be triggered through the resume channel.
                 mWindowManager.executeAppTransition();
             } else {
+                // If the target stack was not previously focusable (previous top running activity
+                // on that stack was not visible) then any prior calls to move the stack to the
+                // will not update the focused stack.  If starting the new activity now allows the
+                // task stack to be focusable, then ensure that we now update the focused stack
+                // accordingly.
+                if (mTargetStack.isFocusable() && !mSupervisor.isFocusedStack(mTargetStack)) {
+                    mTargetStack.moveToFront("startActivityUnchecked");
+                }
                 mSupervisor.resumeFocusedStackTopActivityLocked(mTargetStack, mStartActivity,
                         mOptions);
             }
