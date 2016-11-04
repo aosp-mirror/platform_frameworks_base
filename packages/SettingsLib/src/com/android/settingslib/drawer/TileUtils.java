@@ -65,6 +65,13 @@ public class TileUtils {
             "com.android.settings.action.EXTRA_SETTINGS";
 
     /**
+     * @See {@link #EXTRA_SETTINGS_ACTION}.
+     */
+    private static final String IA_SETTINGS_ACTION =
+            "com.android.settings.action.IA_SETTINGS";
+
+
+    /**
      * Same as #EXTRA_SETTINGS_ACTION but used for the platform Settings activities.
      */
     private static final String SETTINGS_ACTION =
@@ -148,6 +155,7 @@ public class TileUtils {
             }
             if (setup) {
                 getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
+                getTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false);
             }
         }
 
