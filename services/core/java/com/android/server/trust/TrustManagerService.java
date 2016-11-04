@@ -1014,6 +1014,9 @@ public class TrustManagerService extends SystemService {
                     synchronized (mDeviceLockedForUser) {
                         mDeviceLockedForUser.delete(userId);
                     }
+                    synchronized (mTrustUsuallyManagedForUser) {
+                        mTrustUsuallyManagedForUser.delete(userId);
+                    }
                     refreshAgentList(userId);
                     refreshDeviceLockedForUser(userId);
                 }
