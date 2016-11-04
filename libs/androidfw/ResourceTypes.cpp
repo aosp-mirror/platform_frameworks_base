@@ -3539,7 +3539,7 @@ ssize_t ResTable::Theme::getAttribute(uint32_t resID, Res_value* outValue,
             }
             if (pi != NULL) {
                 if (kDebugTableTheme) {
-                    ALOGI("Desired type index is %zd in avail %zu", t, Res_MAXTYPE + 1);
+                    ALOGI("Desired type index is %u in avail %zu", t, Res_MAXTYPE + 1);
                 }
                 if (t <= Res_MAXTYPE) {
                     const type_info& ti = pi->types[t];
