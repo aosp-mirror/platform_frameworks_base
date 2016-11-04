@@ -448,13 +448,6 @@ public class ActivityView extends ViewGroup {
             mGuard.open("release");
         }
 
-        void attachToDisplay(int displayId) {
-            try {
-                mIActivityContainer.attachToDisplay(displayId);
-            } catch (RemoteException e) {
-            }
-        }
-
         void setSurface(Surface surface, int width, int height, int density)
                 throws RemoteException {
             mIActivityContainer.setSurface(surface, width, height, density);

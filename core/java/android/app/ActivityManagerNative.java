@@ -752,6 +752,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case MOVE_STACK_TO_DISPLAY_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int stackId = data.readInt();
+            int displayId = data.readInt();
+            moveStackToDisplay(stackId, displayId);
+            reply.writeNoException();
+            return true;
+        }
+
         case MOVE_TASK_TO_FRONT_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int task = data.readInt();
@@ -3885,6 +3894,19 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return list;
     }
+    public void moveStackToDisplay(int stackId, int displayId) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(stackId);
+        data.writeInt(displayId);
+        mRemote.transact(MOVE_STACK_TO_DISPLAY_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    @Override
     public void moveTaskToFront(int task, int flags, Bundle options) throws RemoteException
     {
         Parcel data = Parcel.obtain();

@@ -215,49 +215,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         return dc;
     }
 
-    /** Adds the input stack id to the input display id and returns the bounds of the added stack.*/
-    Rect addStackToDisplay(int stackId, int displayId, boolean onTop) {
-        final DisplayContent dc = getDisplayContent(displayId);
-        if (dc == null) {
-            Slog.w(TAG_WM, "addStackToDisplay: Trying to add stackId=" + stackId
-                    + " to unknown displayId=" + displayId + " callers=" + Debug.getCallers(6));
-            return null;
-        }
-
-        boolean attachedToDisplay = false;
-        TaskStack stack = mService.mStackIdToStack.get(stackId);
-        if (stack == null) {
-            if (DEBUG_STACK) Slog.d(TAG_WM, "attachStack: stackId=" + stackId);
-
-            stack = dc.getStackById(stackId);
-            if (stack != null) {
-                // It's already attached to the display...clear mDeferRemoval and move stack to
-                // appropriate z-order on display as needed.
-                stack.mDeferRemoval = false;
-                dc.moveStack(stack, onTop);
-                attachedToDisplay = true;
-            } else {
-                stack = new TaskStack(mService, stackId);
-            }
-
-            mService.mStackIdToStack.put(stackId, stack);
-            if (stackId == DOCKED_STACK_ID) {
-                dc.mDividerControllerLocked.notifyDockedStackExistsChanged(true);
-            }
-        }
-
-        if (!attachedToDisplay) {
-            dc.attachStack(stack, onTop);
-        }
-
-        if (stack.getRawFullscreen()) {
-            return null;
-        }
-        final Rect bounds = new Rect();
-        stack.getRawBounds(bounds);
-        return bounds;
-    }
-
     boolean isLayoutNeeded() {
         final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {

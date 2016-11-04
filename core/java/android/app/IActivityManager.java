@@ -143,6 +143,7 @@ public interface IActivityManager extends IInterface {
     public List<RunningServiceInfo> getServices(int maxNum, int flags) throws RemoteException;
     public List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState()
             throws RemoteException;
+    public void moveStackToDisplay(int stackId, int displayId) throws RemoteException;
     public void moveTaskToFront(int task, int flags, Bundle options) throws RemoteException;
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) throws RemoteException;
     public void moveTaskBackwards(int task) throws RemoteException;
@@ -1100,4 +1101,5 @@ public interface IActivityManager extends IInterface {
     int REQUEST_ACTIVITY_RELAUNCH = IBinder.FIRST_CALL_TRANSACTION+400;
     int UPDATE_DISPLAY_OVERRIDE_CONFIGURATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 401;
     int UNREGISTER_TASK_STACK_LISTENER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+402;
+    int MOVE_STACK_TO_DISPLAY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 403;
 }

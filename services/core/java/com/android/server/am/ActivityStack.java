@@ -449,10 +449,23 @@ final class ActivityStack extends ConfigurationContainer {
                 ? new LaunchingTaskPositioner() : null;
     }
 
-    void attachDisplay(ActivityStackSupervisor.ActivityDisplay activityDisplay, boolean onTop) {
+    /** Adds the stack to specified display and calls WindowManager to do the same. */
+    void addToDisplay(ActivityStackSupervisor.ActivityDisplay activityDisplay, boolean onTop) {
+        final Rect bounds = mWindowManager.addStackToDisplay(mStackId, activityDisplay.mDisplayId,
+                onTop);
+        postAddToDisplay(activityDisplay, bounds);
+    }
+
+    /**
+     * Updates internal state after adding to new display.
+     * @param activityDisplay New display to which this stack was attached.
+     * @param bounds Updated bounds.
+     */
+    private void postAddToDisplay(ActivityStackSupervisor.ActivityDisplay activityDisplay,
+            Rect bounds) {
         mDisplayId = activityDisplay.mDisplayId;
         mStacks = activityDisplay.mStacks;
-        mBounds = mWindowManager.attachStack(mStackId, activityDisplay.mDisplayId, onTop);
+        mBounds = bounds;
         mFullscreen = mBounds == null;
         if (mTaskPositioner != null) {
             mTaskPositioner.setDisplay(activityDisplay.mDisplay);
@@ -468,7 +481,21 @@ final class ActivityStack extends ConfigurationContainer {
         }
     }
 
-    void remove() {
+    /**
+     * Moves the stack to specified display.
+     * @param activityDisplay Target display to move the stack to.
+     */
+    void moveToDisplay(ActivityStackSupervisor.ActivityDisplay activityDisplay) {
+        removeFromDisplay();
+        final Rect bounds = mWindowManager.moveStackToDisplay(mStackId, activityDisplay.mDisplayId);
+        postAddToDisplay(activityDisplay, bounds);
+    }
+
+    /**
+     * Updates the inner state of the stack to remove it from its current parent, so it can be
+     * either destroyed completely or re-parented.
+     */
+    private void removeFromDisplay() {
         mDisplayId = Display.INVALID_DISPLAY;
         mStacks = null;
         if (mTaskPositioner != null) {
@@ -480,6 +507,11 @@ final class ActivityStack extends ConfigurationContainer {
             mStackSupervisor.resizeDockedStackLocked(
                     null, null, null, null, null, PRESERVE_WINDOWS);
         }
+    }
+
+    /** Removes the stack completely. Also calls WindowManager to do the same on its side. */
+    void remove() {
+        removeFromDisplay();
         mStackSupervisor.deleteActivityContainerRecord(mStackId);
         mWindowManager.removeStack(mStackId);
         onParentChanged();
@@ -696,11 +728,7 @@ final class ActivityStack extends ConfigurationContainer {
         }
 
         mStacks.add(addIndex, this);
-
-        // TODO(multi-display): Needs to also work if focus is moving to the non-home display.
-        if (isOnHomeDisplay()) {
-            mStackSupervisor.setFocusStackUnchecked(reason, this);
-        }
+        mStackSupervisor.setFocusStackUnchecked(reason, this);
         if (task != null) {
             insertTaskAtTop(task, null);
             return;

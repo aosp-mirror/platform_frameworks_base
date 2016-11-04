@@ -9513,6 +9513,22 @@ public class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void moveStackToDisplay(int stackId, int displayId) {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveStackToDisplay()");
+
+        synchronized (this) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                if (DEBUG_STACK) Slog.d(TAG_STACK, "moveStackToDisplay: moving stackId=" + stackId
+                        + " to displayId=" + displayId);
+                mStackSupervisor.moveStackToDisplayLocked(stackId, displayId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @Override
     public boolean removeTask(int taskId) {
         enforceCallingPermission(android.Manifest.permission.REMOVE_TASKS, "removeTask()");
         synchronized (this) {

@@ -2300,7 +2300,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
 
         ActivityContainer activityContainer = new ActivityContainer(stackId);
         mActivityContainers.put(stackId, activityContainer);
-        activityContainer.attachToDisplayLocked(activityDisplay, onTop);
+        activityContainer.addToDisplayLocked(activityDisplay, onTop);
         return activityContainer.mStack;
     }
 
@@ -2361,6 +2361,40 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             stack.addConfigOverride(activities.get(activityNdx), task);
         }
         return true;
+    }
+
+    /**
+     * Move stack with all its existing content to specified display.
+     * @param stackId Id of stack to move.
+     * @param displayId Id of display to move stack to.
+     */
+    void moveStackToDisplayLocked(int stackId, int displayId) {
+        final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+        if (activityDisplay == null) {
+            throw new IllegalArgumentException("moveStackToDisplayLocked: Unknown displayId="
+                    + displayId);
+        }
+        final ActivityContainer activityContainer = mActivityContainers.get(stackId);
+        if (activityContainer != null) {
+            if (activityContainer.isAttachedLocked()) {
+                if (activityContainer.getDisplayId() == displayId) {
+                    throw new IllegalArgumentException("Trying to move stackId=" + stackId
+                            + " to its current displayId=" + displayId);
+                }
+
+                activityContainer.moveToDisplayLocked(activityDisplay);
+            } else {
+                throw new IllegalStateException("moveStackToDisplayLocked: Stack with stackId="
+                        + stackId + " is not attached to any display.");
+            }
+        } else {
+            throw new IllegalArgumentException("moveStackToDisplayLocked: Unknown stackId="
+                    + stackId);
+        }
+
+        ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
+                !PRESERVE_WINDOWS);
+        // TODO(multi-display): resize stacks properly if moved from split-screen.
     }
 
     /**
@@ -4032,22 +4066,33 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             }
         }
 
-        void attachToDisplayLocked(ActivityDisplay activityDisplay, boolean onTop) {
-            if (DEBUG_STACK) Slog.d(TAG_STACK, "attachToDisplayLocked: " + this
+        /**
+         * Adds the stack to specified display. Also calls WindowManager to do the same from
+         * {@link ActivityStack#addToDisplay(ActivityDisplay, boolean)}.
+         * @param activityDisplay The display to add the stack to.
+         * @param onTop If true the stack will be place at the top of the display, else at the
+         *              bottom.
+         */
+        void addToDisplayLocked(ActivityDisplay activityDisplay, boolean onTop) {
+            if (DEBUG_STACK) Slog.d(TAG_STACK, "addToDisplayLocked: " + this
                     + " to display=" + activityDisplay + " onTop=" + onTop);
+            if (mActivityDisplay != null) {
+                throw new IllegalStateException("ActivityContainer is already attached, " +
+                        "displayId=" + mActivityDisplay.mDisplayId);
+            }
             mActivityDisplay = activityDisplay;
-            mStack.attachDisplay(activityDisplay, onTop);
+            mStack.addToDisplay(activityDisplay, onTop);
             activityDisplay.attachActivities(mStack, onTop);
         }
 
         @Override
-        public void attachToDisplay(int displayId) {
+        public void addToDisplay(int displayId) {
             synchronized (mService) {
                 ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
                 if (activityDisplay == null) {
                     return;
                 }
-                attachToDisplayLocked(activityDisplay, true);
+                addToDisplayLocked(activityDisplay, true);
             }
         }
 
@@ -4103,14 +4148,42 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             }
         }
 
+        /** Remove the stack completely. */
         void removeLocked() {
             if (DEBUG_STACK) Slog.d(TAG_STACK, "removeLocked: " + this + " from display="
                     + mActivityDisplay + " Callers=" + Debug.getCallers(2));
             if (mActivityDisplay != null) {
-                mActivityDisplay.detachActivitiesLocked(mStack);
-                mActivityDisplay = null;
+                removeFromDisplayLocked();
             }
             mStack.remove();
+        }
+
+        /**
+         * Remove the stack from its current {@link ActivityDisplay}, so it can be either destroyed
+         * completely or re-parented.
+         */
+        private void removeFromDisplayLocked() {
+            if (DEBUG_STACK) Slog.d(TAG_STACK, "removeFromDisplayLocked: " + this
+                    + " current displayId=" + mActivityDisplay.mDisplayId);
+
+            mActivityDisplay.detachActivitiesLocked(mStack);
+            mActivityDisplay = null;
+        }
+
+        /**
+         * Move the stack to specified display.
+         * @param activityDisplay Target display to move the stack to.
+         */
+        void moveToDisplayLocked(ActivityDisplay activityDisplay) {
+            if (DEBUG_STACK) Slog.d(TAG_STACK, "moveToDisplayLocked: " + this + " from display="
+                    + mActivityDisplay + " to display=" + activityDisplay
+                    + " Callers=" + Debug.getCallers(2));
+
+            removeFromDisplayLocked();
+
+            mActivityDisplay = activityDisplay;
+            mStack.moveToDisplay(activityDisplay);
+            activityDisplay.attachActivities(mStack, ON_TOP);
         }
 
         @Override
@@ -4232,7 +4305,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
                         new VirtualActivityDisplay(width, height, density);
                 mActivityDisplay = virtualActivityDisplay;
                 mActivityDisplays.put(virtualActivityDisplay.mDisplayId, virtualActivityDisplay);
-                attachToDisplayLocked(virtualActivityDisplay, true);
+                addToDisplayLocked(virtualActivityDisplay, true);
             }
 
             if (mSurface != null) {
