@@ -141,8 +141,8 @@ public class RankingHelperTest {
         final ApplicationInfo upgrade = new ApplicationInfo();
         upgrade.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
         try {
-            when(mPm.getApplicationInfo(eq(pkg), anyInt())).thenReturn(legacy);
-            when(mPm.getApplicationInfo(eq(pkg2), anyInt())).thenReturn(upgrade);
+            when(mPm.getApplicationInfoAsUser(eq(pkg), anyInt(), anyInt())).thenReturn(legacy);
+            when(mPm.getApplicationInfoAsUser(eq(pkg2), anyInt(), anyInt())).thenReturn(upgrade);
         } catch (PackageManager.NameNotFoundException e) {}
     }
 
@@ -277,15 +277,15 @@ public class RankingHelperTest {
     }
 
     @Test
-    public void testChannelXml_defaultChannelUpdatedApp() throws Exception {
-        final ApplicationInfo updated = new ApplicationInfo();
-        updated.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
-        when(mPm.getApplicationInfo(anyString(), anyInt())).thenReturn(updated);
-
-        NotificationChannel channel1 =
+    public void testChannelXml_defaultChannelUpdatedApp_userSettings() throws Exception {
+         NotificationChannel channel1 =
                 new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_MIN);
-
         mHelper.createNotificationChannel(pkg, uid, channel1);
+
+        final NotificationChannel defaultChannel =
+                mHelper.getNotificationChannel(pkg, uid, NotificationChannel.DEFAULT_CHANNEL_ID);
+        defaultChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
+        mHelper.updateNotificationChannel(pkg, uid, defaultChannel);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(pkg, uid, channel1.getId(),
                 NotificationChannel.DEFAULT_CHANNEL_ID);

@@ -239,14 +239,18 @@ public class RankingHelper implements RankingConfig {
     // unless the user has already changed the importance.
     private void clampDefaultChannel(Record r) {
         try {
-            final ApplicationInfo applicationInfo = mPm.getApplicationInfo(r.pkg, 0);
-            if (applicationInfo.targetSdkVersion > Build.VERSION_CODES.N_MR1) {
-                final NotificationChannel defaultChannel =
-                        r.channels.get(NotificationChannel.DEFAULT_CHANNEL_ID);
-                if ((defaultChannel.getUserLockedFields()
-                        & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0) {
-                    defaultChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
-                    updateConfig();
+            if (r.uid != Record.UNKNOWN_UID) {
+                int userId = UserHandle.getUserId(r.uid);
+                final ApplicationInfo applicationInfo =
+                        mPm.getApplicationInfoAsUser(r.pkg, 0, userId);
+                if (applicationInfo.targetSdkVersion > Build.VERSION_CODES.N_MR1) {
+                    final NotificationChannel defaultChannel =
+                            r.channels.get(NotificationChannel.DEFAULT_CHANNEL_ID);
+                    if ((defaultChannel.getUserLockedFields()
+                            & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0) {
+                        defaultChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
+                        updateConfig();
+                    }
                 }
             }
         } catch (NameNotFoundException e) {
