@@ -26,12 +26,10 @@ final class LuxLevels {
 
     private static final boolean DEBUG = true;
 
-    private final boolean mUseNewSensorSamplesForDoze;
-
     private final float[] mBrightLevels;
     private final float[] mDarkLevels;
     private final float[] mLuxHysteresisLevels;
-    private final float[] mDozeBacklightLevels;
+    private final float[] mDozeBrightnessBacklightValues;
     private final float[] mDozeSensorLuxLevels;
 
   /**
@@ -41,31 +39,29 @@ final class LuxLevels {
    * {@code luxLevels} has length n+1.
    *
    * {@code dozeSensorLuxLevels} has length r.
-   * {@code dozeBacklightLevels} has length r+1.
+   * {@code dozeBrightnessBacklightValues} has length r+1.
    *
    * @param brightLevels an array of brightening hysteresis constraint constants
    * @param darkLevels an array of darkening hysteresis constraint constants
    * @param luxHysteresisLevels a monotonically increasing array of illuminance thresholds in lux
    * @param dozeSensorLuxLevels a monotonically increasing array of ALS thresholds in lux
-   * @param dozeBacklightLevels an array of screen brightness values for doze mode in lux
+   * @param dozeBrightnessBacklightValues an array of screen brightness values for doze mode in lux
    */
     public LuxLevels(int[] brightLevels, int[] darkLevels, int[] luxHysteresisLevels,
-            boolean useNewSensorSamplesForDoze, int[] dozeSensorLuxLevels,
-            int[] dozeBacklightLevels) {
+            int[] dozeSensorLuxLevels, int[] dozeBrightnessBacklightValues) {
         if (brightLevels.length != darkLevels.length ||
             darkLevels.length !=luxHysteresisLevels.length + 1) {
             throw new IllegalArgumentException("Mismatch between hysteresis array lengths.");
         }
-        if (dozeBacklightLevels.length > 0 && dozeSensorLuxLevels.length > 0
-            && dozeBacklightLevels.length != dozeSensorLuxLevels.length + 1) {
+        if (dozeBrightnessBacklightValues.length > 0 && dozeSensorLuxLevels.length > 0
+            && dozeBrightnessBacklightValues.length != dozeSensorLuxLevels.length + 1) {
             throw new IllegalArgumentException("Mismatch between doze lux array lengths.");
         }
         mBrightLevels = setArrayFormat(brightLevels, 1000.0f);
         mDarkLevels = setArrayFormat(darkLevels, 1000.0f);
         mLuxHysteresisLevels = setArrayFormat(luxHysteresisLevels, 1.0f);
-        mUseNewSensorSamplesForDoze = useNewSensorSamplesForDoze;
         mDozeSensorLuxLevels = setArrayFormat(dozeSensorLuxLevels, 1.0f);
-        mDozeBacklightLevels = setArrayFormat(dozeBacklightLevels, 1.0f);
+        mDozeBrightnessBacklightValues = setArrayFormat(dozeBrightnessBacklightValues, 1.0f);
     }
 
     /**
@@ -98,7 +94,7 @@ final class LuxLevels {
      * Return the doze backlight brightness level for the given ambient sensor lux level.
      */
     public int getDozeBrightness(float lux) {
-        int dozeBrightness = (int) getReferenceLevel(lux, mDozeBacklightLevels,
+        int dozeBrightness = (int) getReferenceLevel(lux, mDozeBrightnessBacklightValues,
             mDozeSensorLuxLevels);
         if (DEBUG) {
             Slog.d(TAG, "doze brightness: " + dozeBrightness + ", lux=" + lux);
@@ -123,13 +119,6 @@ final class LuxLevels {
      */
     public boolean hasDynamicDozeBrightness() {
         return mDozeSensorLuxLevels.length > 0;
-    }
-
-    /**
-     * Return if new ALS samples should be used for determining screen brightness while dozing.
-     */
-    public boolean useNewSensorSamplesForDoze() {
-        return mUseNewSensorSamplesForDoze;
     }
 
     /**
