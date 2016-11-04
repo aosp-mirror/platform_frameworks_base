@@ -20,6 +20,8 @@
 #include "renderthread/EglManager.h" // needed for Frame
 #include "Readback.h"
 #include "renderstate/RenderState.h"
+#include "SkiaPipeline.h"
+#include "SkiaProfileRenderer.h"
 
 #include <SkTypes.h>
 #include <WindowContextFactory_android.h>
@@ -69,6 +71,16 @@ bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty,
     }
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, mBackbuffer);
     layerUpdateQueue->clear();
+
+    // Draw visual debugging features
+    if (CC_UNLIKELY(Properties::showDirtyRegions
+            || ProfileType::None == Properties::getProfileType())) {
+        SkCanvas* profileCanvas = mBackbuffer->getCanvas();
+        SkiaProfileRenderer profileRenderer(profileCanvas);
+        profiler->draw(profileRenderer);
+        profileCanvas->flush();
+    }
+
     return true;
 }
 
