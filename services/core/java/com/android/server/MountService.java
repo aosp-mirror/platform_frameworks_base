@@ -201,6 +201,15 @@ class MountService extends IMountService.Stub
     // Disable this since it messes up long-running cryptfs operations.
     private static final boolean WATCHDOG_ENABLE = false;
 
+    /**
+     * Our goal is for all Android devices to be usable as development devices,
+     * which includes the new Direct Boot mode added in N. For devices that
+     * don't have native FBE support, we offer an emulation mode for developer
+     * testing purposes, but if it's prohibitively difficult to support this
+     * mode, it can be disabled for specific products using this flag.
+     */
+    private static final boolean EMULATE_FBE_SUPPORTED = true;
+
     private static final String TAG = "MountService";
 
     private static final String TAG_STORAGE_BENCHMARK = "storage_benchmark";
@@ -1978,9 +1987,13 @@ class MountService extends IMountService.Stub
         waitForReady();
 
         if ((mask & StorageManager.DEBUG_EMULATE_FBE) != 0) {
+            if (!EMULATE_FBE_SUPPORTED) {
+                throw new IllegalStateException(
+                        "Emulation not supported on this device");
+            }
             if (StorageManager.isFileEncryptedNativeOnly()) {
                 throw new IllegalStateException(
-                        "Emulation not available on device with native FBE");
+                        "Emulation not supported on device with native FBE");
             }
             if (mLockPatternUtils.isCredentialRequiredToDecrypt(false)) {
                 throw new IllegalStateException(
