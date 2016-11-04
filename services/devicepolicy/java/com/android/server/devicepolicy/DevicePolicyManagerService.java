@@ -6162,6 +6162,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return hasUserSetupCompleted(UserHandle.getCallingUserId());
     }
 
+    // This checks only if the Setup Wizard has run.  Since Wear devices pair before
+    // completing Setup Wizard, and pairing involves transferring user data, calling
+    // logic may want to check mIsWatch or mPaired in addition to hasUserSetupCompleted().
     private boolean hasUserSetupCompleted(int userHandle) {
         if (!mHasFeature) {
             return true;
@@ -6410,7 +6413,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + "already has a device owner.");
         }
         if (isAdb()) {
-            if (hasUserSetupCompleted(userHandle)
+            if ((mIsWatch || hasUserSetupCompleted(userHandle))
                     && hasIncompatibleAccountsLocked(userHandle, owner)) {
                 throw new IllegalStateException("Not allowed to set the profile owner because "
                         + "there are already some accounts on the profile");
@@ -6418,7 +6421,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         enforceCanManageProfileAndDeviceOwners();
-        if (hasUserSetupCompleted(userHandle) && !isCallerWithSystemUid()) {
+        if ((mIsWatch || hasUserSetupCompleted(userHandle)) && !isCallerWithSystemUid()) {
             throw new IllegalStateException("Cannot set the profile owner on a user which is "
                     + "already set-up");
         }
@@ -8709,6 +8712,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (hasUserSetupCompleted(callingUserId)) {
                 return false;
             }
+            if (mIsWatch && hasPaired(UserHandle.USER_SYSTEM)) {
+                return false;
+            }
             return true;
         } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE.equals(action)) {
             if (!mInjector.userManagerIsSplitSystemUser()) {
@@ -8740,7 +8746,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         if (isAdb) {
             // if shell command runs after user setup completed check device status. Otherwise, OK.
-            if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
+            if (mIsWatch || hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
                 if (!mInjector.userManagerIsSplitSystemUser()) {
                     if (mUserManager.getUserCount() > 1) {
                         return CODE_NONSYSTEM_USER_EXISTS;
