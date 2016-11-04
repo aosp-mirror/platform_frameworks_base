@@ -196,9 +196,8 @@ class WindowToken extends WindowContainer<WindowState> {
      */
     protected boolean isFirstChildWindowGreaterThanSecond(WindowState newWindow,
             WindowState existingWindow) {
-        // By default the first window isn't greater than the second to preserve existing logic of
-        // how new windows are added to the token
-        return false;
+        // New window is considered greater if it has a higher or equal base layer.
+        return newWindow.mBaseLayer >= existingWindow.mBaseLayer;
     }
 
     void addWindow(final WindowState win) {

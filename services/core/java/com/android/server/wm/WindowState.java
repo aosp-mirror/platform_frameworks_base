@@ -59,6 +59,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.function.Consumer;
 
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
@@ -3874,6 +3875,78 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             index++;
         }
         return index;
+    }
+
+    @Override
+    void forAllWindows(Consumer<WindowState> callback, boolean traverseTopToBottom) {
+        if (mChildren.isEmpty()) {
+            // The window has no children so we just return it.
+            callback.accept(this);
+            return;
+        }
+
+        if (traverseTopToBottom) {
+            forAllWindowTopToBottom(callback);
+        } else {
+            forAllWindowBottomToTop(callback);
+        }
+    }
+
+    private void forAllWindowBottomToTop(Consumer<WindowState> callback) {
+        // We want to consumer the negative sublayer children first because they need to appear
+        // below the parent, then this window (the parent), and then the positive sublayer children
+        // because they need to appear above the parent.
+        int i = 0;
+        final int count = mChildren.size();
+        WindowState child = mChildren.get(i);
+
+        while (i < count && child.mSubLayer < 0) {
+            callback.accept(child);
+            i++;
+            if (i >= count) {
+                break;
+            }
+            child = mChildren.get(i);
+        }
+
+        callback.accept(this);
+
+        while (i < count) {
+            callback.accept(child);
+            i++;
+            if (i >= count) {
+                break;
+            }
+            child = mChildren.get(i);
+        }
+    }
+
+    private void forAllWindowTopToBottom(Consumer<WindowState> callback) {
+        // We want to consumer the positive sublayer children first because they need to appear
+        // above the parent, then this window (the parent), and then the negative sublayer children
+        // because they need to appear above the parent.
+        int i = mChildren.size() - 1;
+        WindowState child = mChildren.get(i);
+
+        while (i >= 0 && child.mSubLayer >= 0) {
+            callback.accept(child);
+            --i;
+            if (i < 0) {
+                break;
+            }
+            child = mChildren.get(i);
+        }
+
+        callback.accept(this);
+
+        while (i >= 0) {
+            callback.accept(child);
+            --i;
+            if (i < 0) {
+                break;
+            }
+            child = mChildren.get(i);
+        }
     }
 
     boolean isWindowAnimationSet() {

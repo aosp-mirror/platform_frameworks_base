@@ -39,7 +39,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
- * Tests for the {@link WindowState} class.
+ * Tests for the {@link WindowToken} class.
  *
  * Build/Install/Run:
  *  bit FrameworksServicesTests:com.android.server.wm.WindowTokenTests
