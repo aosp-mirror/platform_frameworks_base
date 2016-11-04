@@ -40,7 +40,9 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Build;
@@ -55,6 +57,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
+import android.util.DisplayMetrics;
 import android.view.IWindowManager;
 
 import com.android.internal.util.HexDump;
@@ -225,6 +228,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runWrite(pw);
                 case "attach-agent":
                     return runAttachAgent(pw);
+                case "supports-multiwindow":
+                    return runSupportsMultiwindow(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -2284,6 +2289,23 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int runSupportsMultiwindow(PrintWriter pw) throws RemoteException {
+        // system resources does not contain all the device configuration, construct it manually.
+        Configuration config = mInterface.getConfiguration();
+        if (config == null) {
+            pw.println("Error: Activity manager has no configuration");
+            return -1;
+        }
+
+        final DisplayMetrics metrics = new DisplayMetrics();
+        metrics.setToDefaults();
+
+        Resources res = new Resources(AssetManager.getSystem(), metrics, config);
+
+        pw.println(res.getBoolean(com.android.internal.R.bool.config_supportsMultiWindow));
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -2463,6 +2485,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    Attach an agent to the specified <PROCESS>, which may be either a process name or a PID.");
             pw.println("  get-config");
             pw.println("      Rtrieve the configuration and any recent configurations of the device.");
+            pw.println("  supports-multiwindow");
+            pw.println("      Returns true if the device supports multiwindow.");
             pw.println("  suppress-resize-config-changes <true|false>");
             pw.println("      Suppresses configuration changes due to user resizing an activity/task.");
             pw.println("  set-inactive [--user <USER_ID>] <PACKAGE> true|false");
