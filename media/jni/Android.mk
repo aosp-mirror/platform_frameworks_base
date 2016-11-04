@@ -46,7 +46,8 @@ LOCAL_SHARED_LIBRARIES := \
     libusbhost \
     libexif \
     libpiex \
-    libstagefright_amrnb_common
+    libstagefright_amrnb_common \
+    libandroidfw
 
 LOCAL_STATIC_LIBRARIES := \
     libstagefright_amrnbenc
