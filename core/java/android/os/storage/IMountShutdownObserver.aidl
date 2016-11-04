@@ -30,7 +30,7 @@ interface IMountShutdownObserver {
      *
      * @param statusCode indicates success or failure of the shutdown.
      */
-    void onShutDownComplete(int statusCode) = 1;
+    void onShutDownComplete(int statusCode) = 0;
 
     /**
      * Don't change the existing transaction Ids as they could be used in the native code.

@@ -33,7 +33,7 @@ oneway interface IObbActionListener {
      * @param nonce identifier that is meaningful to the receiver
      * @param status status code as defined in {@link OnObbStateChangeListener}
      */
-    void onObbResult(in String filename, int nonce, int status) = 1;
+    void onObbResult(in String filename, int nonce, int status) = 0;
 
     /**
      * Don't change the existing transaction Ids as they could be used in the native code.
