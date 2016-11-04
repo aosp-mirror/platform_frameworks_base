@@ -30,6 +30,7 @@ struct TypeVariant {
         iterator& operator=(const iterator& rhs) {
             mTypeVariant = rhs.mTypeVariant;
             mIndex = rhs.mIndex;
+            return *this;
         }
 
         bool operator==(const iterator& rhs) const {

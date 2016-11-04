@@ -124,19 +124,12 @@ private:
     /* Flags for this OBB type. */
     int32_t mFlags;
 
-    /* Whether the file is salted. */
-    bool mSalted;
-
     /* The encryption salt. */
     unsigned char mSalt[8];
 
     const char* mFileName;
 
-    size_t mFileSize;
-
     size_t mFooterStart;
-
-    unsigned char* mReadBuf;
 
     bool parseObbFile(int fd);
 };
