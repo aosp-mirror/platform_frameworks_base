@@ -22,9 +22,9 @@ import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
 
-public interface ZenModeController {
-    void addCallback(Callback callback);
-    void removeCallback(Callback callback);
+import com.android.systemui.statusbar.policy.ZenModeController.Callback;
+
+public interface ZenModeController extends CallbackController<Callback> {
     void setZen(int zen, Uri conditionId, String reason);
     int getZen();
     ZenRule getManualRule();

@@ -27,6 +27,8 @@ import android.os.Process;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.systemui.statusbar.policy.FlashlightController.FlashlightListener;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -35,7 +37,7 @@ import java.util.ArrayList;
 /**
  * Manages the flashlight.
  */
-public class FlashlightController {
+public class FlashlightController implements CallbackController<FlashlightListener> {
 
     private static final String TAG = "FlashlightController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -112,7 +114,7 @@ public class FlashlightController {
         return mTorchAvailable;
     }
 
-    public void addListener(FlashlightListener l) {
+    public void addCallback(FlashlightListener l) {
         synchronized (mListeners) {
             if (mCameraId == null) {
                 tryInitCamera();
@@ -122,7 +124,7 @@ public class FlashlightController {
         }
     }
 
-    public void removeListener(FlashlightListener l) {
+    public void removeCallback(FlashlightListener l) {
         synchronized (mListeners) {
             cleanUpListenersLocked(l);
         }

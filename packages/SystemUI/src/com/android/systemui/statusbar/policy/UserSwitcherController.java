@@ -49,6 +49,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.GuestResumeSessionReceiver;
@@ -640,28 +641,43 @@ public class UserSwitcherController {
         refreshUsers(UserHandle.USER_ALL);
     }
 
+    @VisibleForTesting
+    public void addAdapter(WeakReference<BaseUserAdapter> adapter) {
+        mAdapters.add(adapter);
+    }
+
+    @VisibleForTesting
+    public KeyguardMonitor getKeyguardMonitor() {
+        return mKeyguardMonitor;
+    }
+
+    @VisibleForTesting
+    public ArrayList<UserRecord> getUsers() {
+        return mUsers;
+    }
+
     public static abstract class BaseUserAdapter extends BaseAdapter {
 
         final UserSwitcherController mController;
 
         protected BaseUserAdapter(UserSwitcherController controller) {
             mController = controller;
-            controller.mAdapters.add(new WeakReference<>(this));
+            controller.addAdapter(new WeakReference<>(this));
         }
 
         @Override
         public int getCount() {
-            boolean secureKeyguardShowing = mController.mKeyguardMonitor.isShowing()
-                    && mController.mKeyguardMonitor.isSecure()
-                    && !mController.mKeyguardMonitor.canSkipBouncer();
+            boolean secureKeyguardShowing = mController.getKeyguardMonitor().isShowing()
+                    && mController.getKeyguardMonitor().isSecure()
+                    && !mController.getKeyguardMonitor().canSkipBouncer();
             if (!secureKeyguardShowing) {
-                return mController.mUsers.size();
+                return mController.getUsers().size();
             }
             // The lock screen is secure and showing. Filter out restricted records.
-            final int N = mController.mUsers.size();
+            final int N = mController.getUsers().size();
             int count = 0;
             for (int i = 0; i < N; i++) {
-                if (mController.mUsers.get(i).isRestricted) {
+                if (mController.getUsers().get(i).isRestricted) {
                     break;
                 } else {
                     count++;
@@ -672,7 +688,7 @@ public class UserSwitcherController {
 
         @Override
         public UserRecord getItem(int position) {
-            return mController.mUsers.get(position);
+            return mController.getUsers().get(position);
         }
 
         @Override

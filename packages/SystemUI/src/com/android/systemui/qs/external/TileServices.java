@@ -306,6 +306,11 @@ public class TileServices extends IQSService.Stub {
         }
     }
 
+    public void destroy() {
+        mServices.values().forEach(service -> service.handleDestroy());
+        mContext.unregisterReceiver(mRequestListeningReceiver);
+    }
+
     private final BroadcastReceiver mRequestListeningReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {

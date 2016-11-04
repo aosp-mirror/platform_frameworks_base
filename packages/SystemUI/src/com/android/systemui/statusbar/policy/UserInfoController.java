@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -38,10 +37,11 @@ import android.util.Log;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 
 import java.util.ArrayList;
 
-public final class UserInfoController {
+public class UserInfoController implements CallbackController<OnUserInfoChangedListener> {
 
     private static final String TAG = "UserInfoController";
 
@@ -67,12 +67,12 @@ public final class UserInfoController {
                 null, null);
     }
 
-    public void addListener(OnUserInfoChangedListener callback) {
+    public void addCallback(OnUserInfoChangedListener callback) {
         mCallbacks.add(callback);
         callback.onUserInfoChanged(mUserName, mUserDrawable, mUserAccount);
     }
 
-    public void remListener(OnUserInfoChangedListener callback) {
+    public void removeCallback(OnUserInfoChangedListener callback) {
         mCallbacks.remove(callback);
     }
 

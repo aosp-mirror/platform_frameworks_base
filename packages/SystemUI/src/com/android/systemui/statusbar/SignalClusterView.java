@@ -151,8 +151,8 @@ public class SignalClusterView
             mBlockEthernet = blockEthernet;
             mBlockWifi = blockWifi;
             // Re-register to get new callbacks.
-            mNC.removeSignalCallback(this);
-            mNC.addSignalCallback(this);
+            mNC.removeCallback(this);
+            mNC.addCallback(this);
         }
     }
 
@@ -224,7 +224,7 @@ public class SignalClusterView
 
         apply();
         applyIconTint();
-        mNC.addSignalCallback(this);
+        mNC.addCallback(this);
     }
 
     @Override
@@ -232,7 +232,7 @@ public class SignalClusterView
         mMobileSignalGroup.removeAllViews();
         TunerService.get(mContext).removeTunable(this);
         mSC.removeCallback(this);
-        mNC.removeSignalCallback(this);
+        mNC.removeCallback(this);
 
         super.onDetachedFromWindow();
     }

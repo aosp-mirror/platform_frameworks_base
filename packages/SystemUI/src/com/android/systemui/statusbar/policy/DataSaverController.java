@@ -21,9 +21,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 
+import com.android.systemui.statusbar.policy.DataSaverController.Listener;
+
 import java.util.ArrayList;
 
-public class DataSaverController {
+public class DataSaverController implements CallbackController<Listener> {
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final ArrayList<Listener> mListeners = new ArrayList<>();
@@ -41,7 +43,7 @@ public class DataSaverController {
         }
     }
 
-    public void addListener(Listener listener) {
+    public void addCallback(Listener listener) {
         synchronized (mListeners) {
             mListeners.add(listener);
             if (mListeners.size() == 1) {
@@ -51,7 +53,7 @@ public class DataSaverController {
         listener.onDataSaverChanged(isDataSaverEnabled());
     }
 
-    public void remListener(Listener listener) {
+    public void removeCallback(Listener listener) {
         synchronized (mListeners) {
             mListeners.remove(listener);
             if (mListeners.size() == 0) {

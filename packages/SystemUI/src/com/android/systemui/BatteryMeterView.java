@@ -17,7 +17,6 @@ package com.android.systemui;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Handler;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.View;
@@ -73,7 +72,7 @@ public class BatteryMeterView extends ImageView implements
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mBatteryController.addStateChangedCallback(this);
+        mBatteryController.addCallback(this);
         mDrawable.startListening();
         TunerService.get(getContext()).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
     }
@@ -81,7 +80,7 @@ public class BatteryMeterView extends ImageView implements
     @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mBatteryController.removeStateChangedCallback(this);
+        mBatteryController.removeCallback(this);
         mDrawable.stopListening();
         TunerService.get(getContext()).removeTunable(this);
     }

@@ -190,9 +190,9 @@ public class KeyguardStatusBarView extends RelativeLayout
         }
         mBatteryListening = listening;
         if (mBatteryListening) {
-            mBatteryController.addStateChangedCallback(this);
+            mBatteryController.addCallback(this);
         } else {
-            mBatteryController.removeStateChangedCallback(this);
+            mBatteryController.removeCallback(this);
         }
     }
 
@@ -214,7 +214,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
-        userInfoController.addListener(new UserInfoController.OnUserInfoChangedListener() {
+        userInfoController.addCallback(new UserInfoController.OnUserInfoChangedListener() {
             @Override
             public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
                 mMultiUserAvatar.setImageDrawable(picture);

@@ -238,7 +238,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     @Override
     protected void onDetachedFromWindow() {
         setListening(false);
-        mHost.getUserInfoController().remListener(this);
+        mHost.getUserInfoController().removeCallback(this);
         mHost.getNetworkController().removeEmergencyListener(this);
         super.onDetachedFromWindow();
     }
@@ -290,9 +290,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     private void updateListeners() {
         if (mListening) {
-            mNextAlarmController.addStateChangedCallback(this);
+            mNextAlarmController.addCallback(this);
         } else {
-            mNextAlarmController.removeStateChangedCallback(this);
+            mNextAlarmController.removeCallback(this);
         }
     }
 
@@ -368,7 +368,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
-        userInfoController.addListener(this);
+        userInfoController.addCallback(this);
     }
 
     @Override

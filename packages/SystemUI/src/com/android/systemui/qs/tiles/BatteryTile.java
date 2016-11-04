@@ -78,9 +78,9 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
     @Override
     public void setListening(boolean listening) {
         if (listening) {
-            mBatteryController.addStateChangedCallback(this);
+            mBatteryController.addCallback(this);
         } else {
-            mBatteryController.removeStateChangedCallback(this);
+            mBatteryController.removeCallback(this);
         }
     }
 

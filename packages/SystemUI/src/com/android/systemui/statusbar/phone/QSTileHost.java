@@ -113,6 +113,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
     private final AutoTileManager mAutoTiles;
     private final ManagedProfileController mProfileController;
     private final NextAlarmController mNextAlarmController;
+    private final HandlerThread mHandlerThread;
     private View mHeader;
     private int mCurrentUser;
 
@@ -144,10 +145,10 @@ public class QSTileHost implements QSTile.Host, Tunable {
         mNextAlarmController = nextAlarmController;
         mProfileController = new ManagedProfileController(this);
 
-        final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName(),
+        mHandlerThread = new HandlerThread(QSTileHost.class.getSimpleName(),
                 Process.THREAD_PRIORITY_BACKGROUND);
-        ht.start();
-        mLooper = ht.getLooper();
+        mHandlerThread.start();
+        mLooper = mHandlerThread.getLooper();
 
         mServices = new TileServices(this, mLooper);
 
@@ -169,8 +170,11 @@ public class QSTileHost implements QSTile.Host, Tunable {
     }
 
     public void destroy() {
+        mHandlerThread.quitSafely();
+        mTiles.values().forEach(tile -> tile.destroy());
         mAutoTiles.destroy();
         TunerService.get(mContext).removeTunable(this);
+        mServices.destroy();
     }
 
     @Override
@@ -321,12 +325,11 @@ public class QSTileHost implements QSTile.Host, Tunable {
         final List<String> tileSpecs = loadTileSpecs(mContext, newValue);
         int currentUser = ActivityManager.getCurrentUser();
         if (tileSpecs.equals(mTileSpecs) && currentUser == mCurrentUser) return;
-        for (Map.Entry<String, QSTile<?>> tile : mTiles.entrySet()) {
-            if (!tileSpecs.contains(tile.getKey())) {
-                if (DEBUG) Log.d(TAG, "Destroying tile: " + tile.getKey());
-                tile.getValue().destroy();
-            }
-        }
+        mTiles.entrySet().stream().filter(tile -> !tileSpecs.contains(tile.getKey())).forEach(
+                tile -> {
+                    if (DEBUG) Log.d(TAG, "Destroying tile: " + tile.getKey());
+                    tile.getValue().destroy();
+                });
         final LinkedHashMap<String, QSTile<?>> newTiles = new LinkedHashMap<>();
         for (String tileSpec : tileSpecs) {
             QSTile<?> tile = mTiles.get(tileSpec);
@@ -342,9 +345,13 @@ public class QSTileHost implements QSTile.Host, Tunable {
                 if (DEBUG) Log.d(TAG, "Creating tile: " + tileSpec);
                 try {
                     tile = createTile(tileSpec);
-                    if (tile != null && tile.isAvailable()) {
-                        tile.setTileSpec(tileSpec);
-                        newTiles.put(tileSpec, tile);
+                    if (tile != null) {
+                        if (tile.isAvailable()) {
+                            tile.setTileSpec(tileSpec);
+                            newTiles.put(tileSpec, tile);
+                        } else {
+                            tile.destroy();
+                        }
                     }
                 } catch (Throwable t) {
                     Log.w(TAG, "Error creating tile for spec: " + tileSpec, t);

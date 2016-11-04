@@ -35,7 +35,7 @@ import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionDefaults;
 import com.android.systemui.SysuiTestCase;
-import org.junit.After;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
@@ -118,7 +118,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
         // Trigger blank callbacks to always get the current state (some tests don't trigger
         // changes from default state).
-        mNetworkController.addSignalCallback(mock(SignalCallback.class));
+        mNetworkController.addCallback(mock(SignalCallback.class));
         mNetworkController.addEmergencyListener(null);
     }
 

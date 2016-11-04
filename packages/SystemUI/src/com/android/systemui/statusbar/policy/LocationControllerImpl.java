@@ -82,12 +82,12 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     /**
      * Add a callback to listen for changes in location settings.
      */
-    public void addSettingsChangedCallback(LocationSettingsChangeCallback cb) {
+    public void addCallback(LocationSettingsChangeCallback cb) {
         mSettingsChangeCallbacks.add(cb);
         mHandler.sendEmptyMessage(H.MSG_LOCATION_SETTINGS_CHANGED);
     }
 
-    public void removeSettingsChangedCallback(LocationSettingsChangeCallback cb) {
+    public void removeCallback(LocationSettingsChangeCallback cb) {
         mSettingsChangeCallbacks.remove(cb);
     }
 

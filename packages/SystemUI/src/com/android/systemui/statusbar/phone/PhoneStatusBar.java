@@ -874,7 +874,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mLocationController = new LocationControllerImpl(mContext,
                 mHandlerThread.getLooper()); // will post a notification
         mBatteryController = createBatteryController();
-        mBatteryController.addStateChangedCallback(new BatteryStateChangeCallback() {
+        mBatteryController.addCallback(new BatteryStateChangeCallback() {
             @Override
             public void onPowerSaveChanged(boolean isPowerSave) {
                 mHandler.post(mCheckBarModes);
@@ -1034,7 +1034,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (emergencyViewStub != null) {
                 ((ViewStub) emergencyViewStub).inflate();
             }
-            mNetworkController.addSignalCallback(new NetworkController.SignalCallback() {
+            mNetworkController.addCallback(new NetworkController.SignalCallback() {
                 @Override
                 public void setIsAirplaneMode(NetworkController.IconState icon) {
                     recomputeDisableFlags(true /* animate */);
@@ -3982,9 +3982,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 (SignalClusterView) mKeyguardStatusBar.findViewById(R.id.signal_cluster);
         final SignalClusterView signalClusterQs =
                 (SignalClusterView) mHeader.findViewById(R.id.signal_cluster);
-        mNetworkController.removeSignalCallback(signalCluster);
-        mNetworkController.removeSignalCallback(signalClusterKeyguard);
-        mNetworkController.removeSignalCallback(signalClusterQs);
+        mNetworkController.removeCallback(signalCluster);
+        mNetworkController.removeCallback(signalClusterKeyguard);
+        mNetworkController.removeCallback(signalClusterQs);
         if (mQSPanel != null && mQSPanel.getHost() != null) {
             mQSPanel.getHost().destroy();
         }

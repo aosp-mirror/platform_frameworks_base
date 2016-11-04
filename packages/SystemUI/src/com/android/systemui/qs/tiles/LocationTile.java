@@ -58,10 +58,10 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     @Override
     public void setListening(boolean listening) {
         if (listening) {
-            mController.addSettingsChangedCallback(mCallback);
+            mController.addCallback(mCallback);
             mKeyguard.addCallback(mCallback);
         } else {
-            mController.removeSettingsChangedCallback(mCallback);
+            mController.removeCallback(mCallback);
             mKeyguard.removeCallback(mCallback);
         }
     }

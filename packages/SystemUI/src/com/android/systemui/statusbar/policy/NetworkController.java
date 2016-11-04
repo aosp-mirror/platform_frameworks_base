@@ -21,14 +21,15 @@ import android.content.Intent;
 import android.telephony.SubscriptionInfo;
 import com.android.settingslib.net.DataUsageController;
 import com.android.settingslib.wifi.AccessPoint;
+import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.util.List;
 
-public interface NetworkController {
+public interface NetworkController extends CallbackController<SignalCallback> {
 
     boolean hasMobileDataFeature();
-    void addSignalCallback(SignalCallback cb);
-    void removeSignalCallback(SignalCallback cb);
+    void addCallback(SignalCallback cb);
+    void removeCallback(SignalCallback cb);
     void setWifiEnabled(boolean enabled);
     void onUserSwitched(int newUserId);
     AccessPointController getAccessPointController();

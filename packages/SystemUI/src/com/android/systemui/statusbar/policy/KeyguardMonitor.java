@@ -24,10 +24,12 @@ import android.view.WindowManagerGlobal;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.statusbar.policy.KeyguardMonitor.Callback;
 
 import java.util.ArrayList;
 
-public final class KeyguardMonitor extends KeyguardUpdateMonitorCallback {
+public class KeyguardMonitor extends KeyguardUpdateMonitorCallback
+        implements CallbackController<Callback> {
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
 

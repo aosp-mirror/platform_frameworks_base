@@ -15,7 +15,9 @@
  */
 package com.android.systemui.statusbar.policy;
 
-public interface SecurityController {
+import com.android.systemui.statusbar.policy.SecurityController.SecurityControllerCallback;
+
+public interface SecurityController extends CallbackController<SecurityControllerCallback> {
     /** Whether the device has device owner, even if not on this user. */
     boolean isDeviceManaged();
     boolean hasProfileOwner();
@@ -28,9 +30,6 @@ public interface SecurityController {
     String getPrimaryVpnName();
     String getProfileVpnName();
     void onUserSwitched(int newUserId);
-
-    void addCallback(SecurityControllerCallback callback);
-    void removeCallback(SecurityControllerCallback callback);
 
     public interface SecurityControllerCallback {
         void onStateChanged();
