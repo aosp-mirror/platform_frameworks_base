@@ -1670,8 +1670,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             final String packageName = res.pkg.applicationInfo.packageName;
-            Bundle extras = new Bundle(1);
-            extras.putInt(Intent.EXTRA_UID, res.uid);
 
             // Determine the set of users who are adding this package for
             // the first time vs. those who are seeing an update.
@@ -1701,11 +1699,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mProcessLoggingHandler.invalidateProcessLoggingBaseApkHash(res.pkg.baseCodePath);
 
                 // Send added for users that see the package for the first time
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
-                        extras, 0 /*flags*/, null /*targetPackage*/,
-                        null /*finishedReceiver*/, firstUsers);
+                // sendPackageAddedForNewUsers also deals with system apps
+                int appId = UserHandle.getAppId(res.uid);
+                boolean isSystem = res.pkg.applicationInfo.isSystemApp();
+                sendPackageAddedForNewUsers(packageName, isSystem, appId, firstUsers);
 
                 // Send added for users that don't see the package for the first time
+                Bundle extras = new Bundle(1);
+                extras.putInt(Intent.EXTRA_UID, res.uid);
                 if (update) {
                     extras.putBoolean(Intent.EXTRA_REPLACING, true);
                 }
@@ -11787,31 +11788,57 @@ public class PackageManagerService extends IPackageManager.Stub {
     private void sendPackageAddedForUser(String packageName, PackageSetting pkgSetting,
             int userId) {
         final boolean isSystem = isSystemApp(pkgSetting) || isUpdatedSystemApp(pkgSetting);
-        sendPackageAddedForUser(packageName, isSystem, pkgSetting.appId, userId);
+        sendPackageAddedForNewUsers(packageName, isSystem, pkgSetting.appId, userId);
     }
 
-    private void sendPackageAddedForUser(String packageName, boolean isSystem,
-            int appId, int userId) {
+    private void sendPackageAddedForNewUsers(String packageName, boolean isSystem,
+            int appId, int... userIds) {
+        if (ArrayUtils.isEmpty(userIds)) {
+            return;
+        }
         Bundle extras = new Bundle(1);
-        extras.putInt(Intent.EXTRA_UID, UserHandle.getUid(userId, appId));
+        // Set to UID of the first user, EXTRA_UID is automatically updated in sendPackageBroadcast
+        extras.putInt(Intent.EXTRA_UID, UserHandle.getUid(userIds[0], appId));
 
         sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                packageName, extras, 0, null, null, new int[] {userId});
+                packageName, extras, 0, null, null, userIds);
+        if (isSystem) {
+            mHandler.post(() -> {
+                        for (int userId : userIds) {
+                            sendBootCompletedBroadcastToSystemApp(packageName, userId);
+                        }
+                    }
+            );
+        }
+    }
+
+    /**
+     * The just-installed/enabled app is bundled on the system, so presumed to be able to run
+     * automatically without needing an explicit launch.
+     * Send it a LOCKED_BOOT_COMPLETED/BOOT_COMPLETED if it would ordinarily have gotten ones.
+     */
+    private void sendBootCompletedBroadcastToSystemApp(String packageName, int userId) {
+        // If user is not running, the app didn't miss any broadcast
+        if (!mUserManagerInternal.isUserRunning(userId)) {
+            return;
+        }
+        final IActivityManager am = ActivityManagerNative.getDefault();
         try {
-            IActivityManager am = ActivityManagerNative.getDefault();
-            if (isSystem && am.isUserRunning(userId, 0)) {
-                // The just-installed/enabled app is bundled on the system, so presumed
-                // to be able to run automatically without needing an explicit launch.
-                // Send it a BOOT_COMPLETED if it would ordinarily have gotten one.
-                Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED)
-                        .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                        .setPackage(packageName);
-                am.broadcastIntent(null, bcIntent, null, null, 0, null, null, null,
+            // Deliver LOCKED_BOOT_COMPLETED first
+            Intent lockedBcIntent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED)
+                    .setPackage(packageName);
+            final String[] requiredPermissions = {Manifest.permission.RECEIVE_BOOT_COMPLETED};
+            am.broadcastIntent(null, lockedBcIntent, null, null, 0, null, null, requiredPermissions,
+                    android.app.AppOpsManager.OP_NONE, null, false, false, userId);
+
+            // Deliver BOOT_COMPLETED only if user is unlocked
+            if (mUserManagerInternal.isUserUnlockingOrUnlocked(userId)) {
+                Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED).setPackage(packageName);
+                am.broadcastIntent(null, bcIntent, null, null, 0, null, null, requiredPermissions,
                         android.app.AppOpsManager.OP_NONE, null, false, false, userId);
             }
         } catch (RemoteException e) {
-            // shouldn't happen
-            Slog.w(TAG, "Unable to bootstrap installed package", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -15941,10 +15968,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     ? appearedChildPackages.size() : 0;
             for (int i = 0; i < packageCount; i++) {
                 PackageInstalledInfo installedInfo = appearedChildPackages.valueAt(i);
-                for (int userId : installedInfo.newUsers) {
-                    sendPackageAddedForUser(installedInfo.name, true,
-                            UserHandle.getAppId(installedInfo.uid), userId);
-                }
+                sendPackageAddedForNewUsers(installedInfo.name, true,
+                        UserHandle.getAppId(installedInfo.uid), installedInfo.newUsers);
             }
         }
 
