@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi veza je otkazala"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problem sa potvrdom autentičnosti"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Nije u opsegu"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Pristup internetu nije otkriven, automatsko povezivanje nije moguće."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Pristup internetu nije otkriven, automatsko povezivanje nije moguće."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Nema pristupa internetu."</string>
     <string name="saved_network" msgid="4352716707126620811">"Sačuvao/la je <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Povezano preko Wi‑Fi pomoćnika"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Veza je uspostavljena preko pristupne tačke %1$s"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Prikaži granice klipa, margine itd."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Nametni smer rasporeda zdesna nalevo"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Nametni smer rasporeda ekrana zdesna nalevo za sve lokalitete"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Prik. upotrebu procesora"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Postav. element sa trenutnom upotrebom procesora"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Prinudni prikaz pom. GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Prinudno koristi GPU za 2D crtanje"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Nametni 4x MSAA"</string>
@@ -282,7 +281,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Pokrećite WebView prikazivače zasebno"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Primena WebView-a"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Podesite primenu WebView-a"</string>
-    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ovaj izbor više nije važeći. Pokušajte ponovo."</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ovaj izbor više nije važeći. Probajte ponovo."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Konvertuj u šifrovanje datoteka"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Konvertuj..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Već se koristi šifrovanje datoteka"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Najveći"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Prilagođeni (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Pomoć i povratne informacije"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Meni"</string>
 </resources>
