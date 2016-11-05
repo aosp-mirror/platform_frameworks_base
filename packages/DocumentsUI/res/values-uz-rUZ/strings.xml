@@ -115,7 +115,7 @@
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> ilovasiga <xliff:g id="STORAGE"><i>^2</i></xliff:g> xotirasidagi ma’lumotlardan, jumladan, rasmlar va videolardan foydalanishiga ruxsat berilsinmi?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Boshqa so‘ralmasin"</string>
     <string name="allow" msgid="7225948811296386551">"Ruxsat berish"</string>
-    <string name="deny" msgid="2081879885755434506">"Rad qilish"</string>
+    <string name="deny" msgid="2081879885755434506">"Rad etish"</string>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta belgilandi</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta belgilandi</item>
