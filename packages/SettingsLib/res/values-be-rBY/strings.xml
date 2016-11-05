@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Збой падлучэння Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Праблема аўтэнтыфікацыі"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Не ў зоне дасягальнасці"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Доступ да інтэрнэту не выяўлены, аўтаматычнае перападлучэнне не адбудзецца."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Доступ да інтэрнэту не выяўлены, аўтаматычнае перападключэнне не адбудзецца."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Няма доступу да інтэрнэту."</string>
     <string name="saved_network" msgid="4352716707126620811">"Хто захаваў: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Падлучана праз памочніка Wi‑Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Падлучана праз %1$s"</string>
@@ -233,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Паказаць межы кліпу, палі і г. д."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Прымусовая раскладка справа налева"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Прымусовая раскладка экрана справа налева для ўсіх рэгіянальных налад"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Паказаць выкарыстанне ЦП"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Наклад на экран з бягучым выкарыстаннем працэсара"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Прымусовае адлюстраванне GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Прымусовае выкарыстанне GPU для 2-мерных чарцяжоў"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Прымусовае выкананне 4x MSAA"</string>
@@ -341,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Найвялікшы"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Карыстальніцкі (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Даведка і водгукі"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Меню"</string>
 </resources>
