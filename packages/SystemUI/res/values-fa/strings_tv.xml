@@ -25,7 +25,7 @@
     <string name="pip_pause" msgid="8412075640017218862">"مکث"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"‏کنترل PIP ‏با نگه‌داشتن "<b>"HOME"</b></string>
     <string name="pip_onboarding_title" msgid="7850436557670253991">"تصویر در تصویر"</string>
-    <string name="pip_onboarding_description" msgid="4028124563309465267">"تا زمانی که ویدیوی دیگری را پخش کنید، این صفحه حالت ویدیو در ویدیوی شما را حفظ می‌کند. برای کنترل آن، دکمه "<b>"صفحه اصلی"</b>" را فشار دهید و نگه دارید."</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"تا زمانی که ویدئوی دیگری را پخش کنید، این صفحه حالت ویدئو در ویدئوی شما را حفظ می‌کند. برای کنترل آن، دکمه "<b>"صفحه اصلی"</b>" را فشار دهید و نگه دارید."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"متوجه شدم"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"رد کردن"</string>
   <string-array name="recents_tv_blacklist_array">
