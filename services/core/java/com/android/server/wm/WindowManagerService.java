@@ -2409,9 +2409,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " displayId=" + displayId);
                 return;
             }
-            token = new WindowToken(this, binder, type, true, dc);
             if (type == TYPE_WALLPAPER) {
-                dc.mWallpaperController.addWallpaperToken(token);
+                new WallpaperWindowToken(this, binder, true, dc);
+            } else {
+                new WindowToken(this, binder, type, true, dc);
             }
         }
     }
@@ -2440,9 +2441,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 token.setExiting();
-                if (token.windowType == TYPE_WALLPAPER) {
-                    dc.mWallpaperController.removeWallpaperToken(token);
-                }
 
                 mInputMonitor.updateInputWindowsLw(true /*force*/);
             }

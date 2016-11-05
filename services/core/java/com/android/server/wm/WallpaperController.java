@@ -55,7 +55,7 @@ class WallpaperController {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WallpaperController" : TAG_WM;
     final private WindowManagerService mService;
 
-    private final ArrayList<WindowToken> mWallpaperTokens = new ArrayList<>();
+    private final ArrayList<WallpaperWindowToken> mWallpaperTokens = new ArrayList<>();
 
     // If non-null, this is the currently visible window that is associated
     // with the wallpaper.
@@ -135,7 +135,7 @@ class WallpaperController {
      */
     void startWallpaperAnimation(Animation a) {
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-            final WindowToken token = mWallpaperTokens.get(curTokenNdx);
+            final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
             token.startAnimation(a);
         }
     }
@@ -163,7 +163,7 @@ class WallpaperController {
         final boolean visible = isWallpaperVisible(mWallpaperTarget);
 
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-            final WindowToken token = mWallpaperTokens.get(curTokenNdx);
+            final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
             token.updateWallpaperVisibility(visible);
         }
     }
@@ -189,7 +189,7 @@ class WallpaperController {
 
         final boolean wasDeferred = (mDeferredHideWallpaper == winGoingAway);
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
-            final WindowToken token = mWallpaperTokens.get(i);
+            final WallpaperWindowToken token = mWallpaperTokens.get(i);
             token.hideWallpaperToken(wasDeferred, "hideWallpapers");
             if (DEBUG_WALLPAPER_LIGHT && !token.hidden) Slog.d(TAG, "Hiding wallpaper " + token
                     + " from " + winGoingAway + " target=" + mWallpaperTarget + " lower="
@@ -304,7 +304,7 @@ class WallpaperController {
                 || window == mUpperWallpaperTarget) {
             boolean doWait = sync;
             for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-                final WindowToken token = mWallpaperTokens.get(curTokenNdx);
+                final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
                 token.sendWindowWallpaperCommand(action, x, y, z, extras, sync);
             }
 
@@ -652,7 +652,7 @@ class WallpaperController {
         // Start stepping backwards from here, ensuring that our wallpaper windows are correctly placed.
         boolean changed = false;
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-            final WindowToken token = mWallpaperTokens.get(curTokenNdx);
+            final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
             changed |= token.updateWallpaperWindowsPlacement(windows, wallpaperTarget,
                     wallpaperTargetIndex, visible, dw, dh, mWallpaperAnimLayerAdjustment);
         }
@@ -725,7 +725,7 @@ class WallpaperController {
         boolean wallpaperReady = true;
         for (int curTokenIndex = mWallpaperTokens.size() - 1;
                 curTokenIndex >= 0 && wallpaperReady; curTokenIndex--) {
-            final WindowToken token = mWallpaperTokens.get(curTokenIndex);
+            final WallpaperWindowToken token = mWallpaperTokens.get(curTokenIndex);
             if (token.hasVisibleNotDrawnWallpaper()) {
                 // We've told this wallpaper to be visible, but it is not drawn yet
                 wallpaperReady = false;
@@ -777,11 +777,11 @@ class WallpaperController {
         }
     }
 
-    void addWallpaperToken(WindowToken token) {
+    void addWallpaperToken(WallpaperWindowToken token) {
         mWallpaperTokens.add(token);
     }
 
-    void removeWallpaperToken(WindowToken token) {
+    void removeWallpaperToken(WallpaperWindowToken token) {
         mWallpaperTokens.remove(token);
     }
 
