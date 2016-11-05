@@ -43,7 +43,7 @@
     <string name="button_select" msgid="527196987259139214">"Välj"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopiera"</string>
     <string name="button_move" msgid="2202666023104202232">"Flytta"</string>
-    <string name="button_dismiss" msgid="3714065566893946085">"Ta bort permanent"</string>
+    <string name="button_dismiss" msgid="3714065566893946085">"Avvisa"</string>
     <string name="button_retry" msgid="4392027584153752797">"Försök igen"</string>
     <string name="sort_name" msgid="9183560467917256779">"Efter namn"</string>
     <string name="sort_date" msgid="586080032956151448">"Efter ändringsdatum"</string>
