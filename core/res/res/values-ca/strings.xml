@@ -67,8 +67,8 @@
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"ID de l\'emissor (trucada entrant)"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"ID de l\'emissor (trucada de sortida)"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"Identificador de trucada (trucada entrant)"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"Identificador de trucada (trucada de sortida)"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Identificador de la línia connectada"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Restricció de l\'identificador de la línia connectada"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Desviació de trucades"</string>
@@ -82,12 +82,12 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Rebuig de trucades molestes no desitjades"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Lliurament de número que truca"</string>
     <string name="DndMmi" msgid="1265478932418334331">"No molesteu"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"El valor predeterminat de l\'identificador de l\'emissor és restringit. Següent trucada: restringit"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"El valor predeterminat de l\'identificador de l\'emissor és restringit. Següent trucada: no restringit"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"El valor predeterminat de l\'identificador de l\'emissor és no restringit. Següent trucada: restringit"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"El valor predeterminat de l\'identificador de l\'emissor és no restringit. Següent trucada: no restringit"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"El valor predeterminat de l\'identificador de trucada és restringit. Trucada següent: restringit"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"El valor predeterminat de l\'identificador de trucada és restringit. Trucada següent: no restringit"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"El valor predeterminat de l\'identificador de trucada és no restringit. Trucada següent: restringit"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"El valor predeterminat de l\'identificador de trucada és no restringit. Trucada següent: no restringit"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"No s\'ha proveït el servei."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"No pots canviar la configuració de l\'identificador de l\'emissor."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"No pots canviar la configuració de l\'identificador de trucada."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"El servei de dades està bloquejat."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"El servei d\'emergència està bloquejat."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"El servei de veu està bloquejat."</string>
