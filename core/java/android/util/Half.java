@@ -27,20 +27,64 @@ package android.util;
  * <ul>
  * <li>Sign bit: 1 bit</li>
  * <li>Exponent width: 5 bits</li>
- * <li>Mantissa: 10 bits</li>
+ * <li>Significand: 10 bits</li>
  * </ul>
  *
- * <p>The format is laid out thusly:</p>
+ * <p>The format is laid out as follows:</p>
  * <pre>
  * 1   11111   1111111111
  * ^   --^--   -----^----
- * sign  |          |_______ mantissa
+ * sign  |          |_______ significand
  *       |
  *       -- exponent
  * </pre>
  *
- * @hide
+ * <p>Half-precision floating points can be useful to save memory and/or
+ * bandwidth at the expense of range and precision when compared to single-precision
+ * floating points (fp32).</p>
+ * <p>To help you decide whether fp16 is the right storage type for you need, please
+ * refer to the table below that shows the available precision throughout the range of
+ * possible values. The <em>precision</em> column indicates the step size between two
+ * consecutive numbers in a specific part of the range.</p>
+ *
+ * <table summary="Precision of fp16 across the range">
+ *     <tr><th>Range start</th><th>Precision</th></tr>
+ *     <tr><td>0</td><td>1 &frasl; 16,777,216</td></tr>
+ *     <tr><td>1 &frasl; 16,384</td><td>1 &frasl; 16,777,216</td></tr>
+ *     <tr><td>1 &frasl; 8,192</td><td>1 &frasl; 8,388,608</td></tr>
+ *     <tr><td>1 &frasl; 4,096</td><td>1 &frasl; 4,194,304</td></tr>
+ *     <tr><td>1 &frasl; 2,048</td><td>1 &frasl; 2,097,152</td></tr>
+ *     <tr><td>1 &frasl; 1,024</td><td>1 &frasl; 1,048,576</td></tr>
+ *     <tr><td>1 &frasl; 512</td><td>1 &frasl; 524,288</td></tr>
+ *     <tr><td>1 &frasl; 256</td><td>1 &frasl; 262,144</td></tr>
+ *     <tr><td>1 &frasl; 128</td><td>1 &frasl; 131,072</td></tr>
+ *     <tr><td>1 &frasl; 64</td><td>1 &frasl; 65,536</td></tr>
+ *     <tr><td>1 &frasl; 32</td><td>1 &frasl; 32,768</td></tr>
+ *     <tr><td>1 &frasl; 16</td><td>1 &frasl; 16,384</td></tr>
+ *     <tr><td>1 &frasl; 8</td><td>1 &frasl; 8,192</td></tr>
+ *     <tr><td>1 &frasl; 4</td><td>1 &frasl; 4,096</td></tr>
+ *     <tr><td>1 &frasl; 2</td><td>1 &frasl; 2,048</td></tr>
+ *     <tr><td>1</td><td>1 &frasl; 1,024</td></tr>
+ *     <tr><td>2</td><td>1 &frasl; 512</td></tr>
+ *     <tr><td>4</td><td>1 &frasl; 256</td></tr>
+ *     <tr><td>8</td><td>1 &frasl; 128</td></tr>
+ *     <tr><td>16</td><td>1 &frasl; 64</td></tr>
+ *     <tr><td>32</td><td>1 &frasl; 32</td></tr>
+ *     <tr><td>64</td><td>1 &frasl; 16</td></tr>
+ *     <tr><td>128</td><td>1 &frasl; 8</td></tr>
+ *     <tr><td>256</td><td>1 &frasl; 4</td></tr>
+ *     <tr><td>512</td><td>1 &frasl; 2</td></tr>
+ *     <tr><td>1,024</td><td>1</td></tr>
+ *     <tr><td>2,048</td><td>2</td></tr>
+ *     <tr><td>4,096</td><td>4</td></tr>
+ *     <tr><td>8,192</td><td>8</td></tr>
+ *     <tr><td>16,384</td><td>16</td></tr>
+ *     <tr><td>32,768</td><td>32</td></tr>
+ * </table>
+ *
+ * <p>This table shows that numbers higher than 1024 lose all fractional precision.</p>
  */
+@SuppressWarnings("SimplifiableIfStatement")
 public final class Half {
     /**
      * The number of bits used to represent a half-precision float value.
@@ -59,7 +103,7 @@ public final class Half {
     /**
      * Maximum exponent a finite half-precision float may have.
      */
-    public static final short MAX_EXPONENT       = 15;
+    public static final int MAX_EXPONENT         = 15;
     /**
      * Maximum positive finite value a half-precision float may have.
      */
@@ -67,7 +111,7 @@ public final class Half {
     /**
      * Minimum exponent a normalized half-precision float may have.
      */
-    public static final short MIN_EXPONENT       = -14;
+    public static final int MIN_EXPONENT         = -14;
     /**
      * Smallest positive normal value a half-precision float may have.
      */
@@ -97,23 +141,327 @@ public final class Half {
      */
     public static final short POSITIVE_ZERO      = (short) 0x0000;
 
-    private static final int FP16_SIGN_SHIFT     = 15;
-    private static final int FP16_EXPONENT_SHIFT = 10;
-    private static final int FP16_EXPONENT_MASK  = 0x1f;
-    private static final int FP16_MANTISSA_MASK  = 0x3ff;
-    private static final int FP16_EXPONENT_BIAS  = 15;
+    private static final int FP16_SIGN_SHIFT        = 15;
+    private static final int FP16_SIGN_MASK         = 0x8000;
+    private static final int FP16_EXPONENT_SHIFT    = 10;
+    private static final int FP16_EXPONENT_MASK     = 0x1f;
+    private static final int FP16_SIGNIFICAND_MASK  = 0x3ff;
+    private static final int FP16_EXPONENT_BIAS     = 15;
+    private static final int FP16_COMBINED          = 0x7fff;
+    private static final int FP16_EXPONENT_MAX      = 0x7c00;
 
-    private static final int FP32_SIGN_SHIFT     = 31;
-    private static final int FP32_EXPONENT_SHIFT = 23;
-    private static final int FP32_EXPONENT_MASK  = 0xff;
-    private static final int FP32_MANTISSA_MASK  = 0x7fffff;
-    private static final int FP32_EXPONENT_BIAS  = 127;
+    private static final int FP32_SIGN_SHIFT        = 31;
+    private static final int FP32_EXPONENT_SHIFT    = 23;
+    private static final int FP32_EXPONENT_MASK     = 0xff;
+    private static final int FP32_SIGNIFICAND_MASK  = 0x7fffff;
+    private static final int FP32_EXPONENT_BIAS     = 127;
 
-    private static final int   FP32_DENORMAL_MAGIC = 126 << 23;
-    private static final float FP32_DENORMAL_FLOAT =
-            Float.intBitsToFloat(FP32_DENORMAL_MAGIC);
+    private static final int FP32_DENORMAL_MAGIC = 126 << 23;
+    private static final float FP32_DENORMAL_FLOAT = Float.intBitsToFloat(FP32_DENORMAL_MAGIC);
 
     private Half() {
+    }
+
+    /**
+     * Returns the first parameter with the sign of the second parameter.
+     * This method treats NaNs as having a sign.
+     *
+     * @param magnitude A half-precision float value providing the magnitude of the result
+     * @param sign  A half-precision float value providing the sign of the result
+     * @return A value with the magnitude of the first parameter and the sign
+     *         of the second parameter
+     */
+    public static short copySign(short magnitude, short sign) {
+        return (short) ((sign & FP16_SIGN_MASK) | (magnitude & FP16_COMBINED));
+    }
+
+    /**
+     * Returns the absolute value of the specified half-precision float.
+     * Special values are handled in the following ways:
+     * <ul>
+     * <li>If the specified half-precision float is NaN, the result is NaN</li>
+     * <li>If the specified half-precision float is zero (negative or positive),
+     * the result is positive zero (see {@link #POSITIVE_ZERO})</li>
+     * <li>If the specified half-precision float is infinity (negative or positive),
+     * the result is positive infinity (see {@link #POSITIVE_INFINITY})</li>
+     * </ul>
+     *
+     * @param h A half-precision float value
+     * @return The absolute value of the specified half-precision float
+     */
+    public static short abs(short h) {
+        return (short) (h & FP16_COMBINED);
+    }
+
+    /**
+     * Returns the closest integral half-precision float value to the specified
+     * half-precision float value. Special values are handled in the
+     * following ways:
+     * <ul>
+     * <li>If the specified half-precision float is NaN, the result is NaN</li>
+     * <li>If the specified half-precision float is infinity (negative or positive),
+     * the result is infinity (with the same sign)</li>
+     * <li>If the specified half-precision float is zero (negative or positive),
+     * the result is zero (with the same sign)</li>
+     * </ul>
+     *
+     * @param h A half-precision float value
+     * @return The value of the specified half-precision float rounded to the nearest
+     *         half-precision float value
+     */
+    public static short round(short h) {
+        int bits = h & 0xffff;
+        int e = bits & 0x7fff;
+        int result = bits;
+
+        if (e < 0x3c00) {
+            result &= FP16_SIGN_MASK;
+            result |= (0x3c00 & (e >= 0x3800 ? 0xffff : 0x0));
+        } else if (e < 0x6400) {
+            e = 25 - (e >> 10);
+            int mask = (1 << e) - 1;
+            result += (1 << (e - 1));
+            result &= ~mask;
+        }
+
+        return (short) result;
+    }
+
+    /**
+     * Returns the smallest half-precision float value toward negative infinity
+     * greater than or equal to the specified half-precision float value.
+     * Special values are handled in the following ways:
+     * <ul>
+     * <li>If the specified half-precision float is NaN, the result is NaN</li>
+     * <li>If the specified half-precision float is infinity (negative or positive),
+     * the result is infinity (with the same sign)</li>
+     * <li>If the specified half-precision float is zero (negative or positive),
+     * the result is zero (with the same sign)</li>
+     * </ul>
+     *
+     * @param h A half-precision float value
+     * @return The smallest half-precision float value toward negative infinity
+     *         greater than or equal to the specified half-precision float value
+     */
+    public static short ceil(short h) {
+        int bits = h & 0xffff;
+        int e = bits & 0x7fff;
+        int result = bits;
+
+        if (e < 0x3c00) {
+            result &= FP16_SIGN_MASK;
+            result |= 0x3c00 & -(~(bits >> 15) & (e != 0 ? 1 : 0));
+        } else if (e < 0x6400) {
+            e = 25 - (e >> 10);
+            int mask = (1 << e) - 1;
+            result += mask & ((bits >> 15) - 1);
+            result &= ~mask;
+        }
+
+        return (short) result;
+    }
+
+    /**
+     * Returns the largest half-precision float value toward positive infinity
+     * less than or equal to the specified half-precision float value.
+     * Special values are handled in the following ways:
+     * <ul>
+     * <li>If the specified half-precision float is NaN, the result is NaN</li>
+     * <li>If the specified half-precision float is infinity (negative or positive),
+     * the result is infinity (with the same sign)</li>
+     * <li>If the specified half-precision float is zero (negative or positive),
+     * the result is zero (with the same sign)</li>
+     * </ul>
+     *
+     * @param h A half-precision float value
+     * @return The largest half-precision float value toward positive infinity
+     *         less than or equal to the specified half-precision float value
+     */
+    public static short floor(short h) {
+        int bits = h & 0xffff;
+        int e = bits & 0x7fff;
+        int result = bits;
+
+        if (e < 0x3c00) {
+            result &= FP16_SIGN_MASK;
+            result |= 0x3c00 & (bits > 0x8000 ? 0xffff : 0x0);
+        } else if (e < 0x6400) {
+            e = 25 - (e >> 10);
+            int mask = (1 << e) - 1;
+            result += mask & -(bits >> 15);
+            result &= ~mask;
+        }
+
+        return (short) result;
+    }
+
+    /**
+     * Returns the truncated half-precision float value of the specified
+     * half-precision float value. Special values are handled in the following ways:
+     * <ul>
+     * <li>If the specified half-precision float is NaN, the result is NaN</li>
+     * <li>If the specified half-precision float is infinity (negative or positive),
+     * the result is infinity (with the same sign)</li>
+     * <li>If the specified half-precision float is zero (negative or positive),
+     * the result is zero (with the same sign)</li>
+     * </ul>
+     *
+     * @param h A half-precision float value
+     * @return The truncated half-precision float value of the specified
+     *         half-precision float value
+     */
+    public static short trunc(short h) {
+        int bits = h & 0xffff;
+        int e = bits & 0x7fff;
+        int result = bits;
+
+        if (e < 0x3c00) {
+            result &= FP16_SIGN_MASK;
+        } else if (e < 0x6400) {
+            e = 25 - (e >> 10);
+            int mask = (1 << e) - 1;
+            result &= ~mask;
+        }
+
+        return (short) result;
+    }
+
+    /**
+     * Returns the smaller of two half-precision float values (the value closest
+     * to negative infinity). Special values are handled in the following ways:
+     * <ul>
+     * <li>If either value is NaN, the result is NaN</li>
+     * <li>{@link #NEGATIVE_ZERO} is smaller than {@link #POSITIVE_ZERO}</li>
+     * </ul>
+     *
+     * @param x The first half-precision value
+     * @param y The second half-precision value
+     * @return The smaller of the two specified half-precision values
+     */
+    public static short min(short x, short y) {
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return NaN;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return NaN;
+
+        if ((x & FP16_COMBINED) == 0 && (y & FP16_COMBINED) == 0) {
+            return (x & FP16_SIGN_MASK) != 0 ? x : y;
+        }
+
+        return ((x & FP16_SIGN_MASK) != 0 ? 0x8000 - (x & 0xffff) : x & 0xffff) <
+               ((y & FP16_SIGN_MASK) != 0 ? 0x8000 - (y & 0xffff) : y & 0xffff) ? x : y;
+    }
+
+    /**
+     * Returns the larger of two half-precision float values (the value closest
+     * to positive infinity). Special values are handled in the following ways:
+     * <ul>
+     * <li>If either value is NaN, the result is NaN</li>
+     * <li>{@link #POSITIVE_ZERO} is greater than {@link #NEGATIVE_ZERO}</li>
+     * </ul>
+     *
+     * @param x The first half-precision value
+     * @param y The second half-precision value
+     *
+     * @return The larger of the two specified half-precision values
+     */
+    public static short max(short x, short y) {
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return NaN;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return NaN;
+
+        if ((x & FP16_COMBINED) == 0 && (y & FP16_COMBINED) == 0) {
+            return (x & FP16_SIGN_MASK) != 0 ? y : x;
+        }
+
+        return ((x & FP16_SIGN_MASK) != 0 ? 0x8000 - (x & 0xffff) : x & 0xffff) >
+               ((y & FP16_SIGN_MASK) != 0 ? 0x8000 - (y & 0xffff) : y & 0xffff) ? x : y;
+    }
+
+    /**
+     * Returns true if the first half-precision float value is less (smaller
+     * toward negative infinity) than the second half-precision float value.
+     * If either of the values is NaN, the result is false.
+     *
+     * @param x The first half-precision value
+     * @param y The second half-precision value
+     *
+     * @return True if x is less than y, false otherwise
+     */
+    public static boolean less(short x, short y) {
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+
+        return ((x & FP16_SIGN_MASK) != 0 ? 0x8000 - (x & 0xffff) : x & 0xffff) <
+               ((y & FP16_SIGN_MASK) != 0 ? 0x8000 - (y & 0xffff) : y & 0xffff);
+    }
+
+    /**
+     * Returns true if the first half-precision float value is less (smaller
+     * toward negative infinity) than or equal to the second half-precision
+     * float value. If either of the values is NaN, the result is false.
+     *
+     * @param x The first half-precision value
+     * @param y The second half-precision value
+     *
+     * @return True if x is less than or equal to y, false otherwise
+     */
+    public static boolean lessEquals(short x, short y) {
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+
+        return ((x & FP16_SIGN_MASK) != 0 ? 0x8000 - (x & 0xffff) : x & 0xffff) <=
+               ((y & FP16_SIGN_MASK) != 0 ? 0x8000 - (y & 0xffff) : y & 0xffff);
+    }
+
+    /**
+     * Returns true if the first half-precision float value is greater (larger
+     * toward positive infinity) than the second half-precision float value.
+     * If either of the values is NaN, the result is false.
+     *
+     * @param x The first half-precision value
+     * @param y The second half-precision value
+     *
+     * @return True if x is greater than y, false otherwise
+     */
+    public static boolean greater(short x, short y) {
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+
+        return ((x & FP16_SIGN_MASK) != 0 ? 0x8000 - (x & 0xffff) : x & 0xffff) >
+               ((y & FP16_SIGN_MASK) != 0 ? 0x8000 - (y & 0xffff) : y & 0xffff);
+    }
+
+    /**
+     * Returns true if the first half-precision float value is greater (larger
+     * toward positive infinity) than or equal to the second half-precision float
+     * value. If either of the values is NaN, the result is false.
+     *
+     * @param x The first half-precision value
+     * @param y The second half-precision value
+     *
+     * @return True if x is greater than y, false otherwise
+     */
+    public static boolean greaterEquals(short x, short y) {
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+
+        return ((x & FP16_SIGN_MASK) != 0 ? 0x8000 - (x & 0xffff) : x & 0xffff) >=
+               ((y & FP16_SIGN_MASK) != 0 ? 0x8000 - (y & 0xffff) : y & 0xffff);
+    }
+
+    /**
+     * Returns true if the two half-precision float values are equal.
+     * If either of the values is NaN, the result is false. {@link #POSITIVE_ZERO}
+     * and {@link #NEGATIVE_ZERO} are considered equal.
+     *
+     * @param x The first half-precision value
+     * @param y The second half-precision value
+     *
+     * @return True if x is equal to y, false otherwise
+     */
+    public static boolean equals(short x, short y) {
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+
+        return x == y || ((x | y) & FP16_COMBINED) == 0;
     }
 
     /**
@@ -123,15 +471,15 @@ public final class Half {
      * @return 1 if the value is positive, -1 if the value is negative
      */
     public static int getSign(short h) {
-        return (h >>> FP16_SIGN_SHIFT) == 0 ? 1 : -1;
+        return (h & FP16_SIGN_MASK) == 0 ? 1 : -1;
     }
 
     /**
      * Returns the unbiased exponent used in the representation of
      * the specified  half-precision float value. if the value is NaN
      * or infinite, this* method returns {@link #MAX_EXPONENT} + 1.
-     * If the argument is* 0 or denormal, this method returns
-     * {@link #MIN_EXPONENT} - 1.
+     * If the argument is 0 or a subnormal representation, this method
+     * returns {@link #MIN_EXPONENT} - 1.
      *
      * @param h A half-precision float value
      * @return The unbiased exponent of the specified value
@@ -141,14 +489,14 @@ public final class Half {
     }
 
     /**
-     * Returns the mantissa, or significand, used in the representation
+     * Returns the significand, or mantissa, used in the representation
      * of the specified half-precision float value.
      *
      * @param h A half-precision float value
-     * @return The mantissa, or significand, of the specified vlaue
+     * @return The significand, or significand, of the specified vlaue
      */
-    public static int getMantissa(short h) {
-        return h & FP16_MANTISSA_MASK;
+    public static int getSignificand(short h) {
+        return h & FP16_SIGNIFICAND_MASK;
     }
 
     /**
@@ -160,9 +508,7 @@ public final class Half {
      *         false otherwise
      */
     public static boolean isInfinite(short h) {
-        int e = (h >>> FP16_EXPONENT_SHIFT) & FP16_EXPONENT_MASK;
-        int m = (h                        ) & FP16_MANTISSA_MASK;
-        return e == 0x1f && m == 0;
+        return (h & FP16_COMBINED) == FP16_EXPONENT_MAX;
     }
 
     /**
@@ -173,9 +519,21 @@ public final class Half {
      * @return true if the value is a NaN, false otherwise
      */
     public static boolean isNaN(short h) {
-        int e = (h >>> FP16_EXPONENT_SHIFT) & FP16_EXPONENT_MASK;
-        int m = (h                        ) & FP16_MANTISSA_MASK;
-        return e == 0x1f && m != 0;
+        return (h & FP16_COMBINED) > FP16_EXPONENT_MAX;
+    }
+
+    /**
+     * Returns true if the specified half-precision float value is normalized
+     * (does not have a subnormal representation). If the specified value is
+     * {@link #POSITIVE_INFINITY}, {@link #NEGATIVE_INFINITY},
+     * {@link #POSITIVE_ZERO}, {@link #NEGATIVE_ZERO}, NaN or any subnormal
+     * number, this method returns false.
+     *
+     * @param h A half-precision float value
+     * @return true if the value is normalized, false otherwise
+     */
+    public static boolean isNormalized(short h) {
+        return (h & FP16_EXPONENT_MAX) != 0 && (h & FP16_EXPONENT_MAX) != FP16_EXPONENT_MAX;
     }
 
     /**
@@ -195,9 +553,9 @@ public final class Half {
      */
     public static float toFloat(short h) {
         int bits = h & 0xffff;
-        int s = (bits >>> FP16_SIGN_SHIFT    );
+        int s = bits & FP16_SIGN_MASK;
         int e = (bits >>> FP16_EXPONENT_SHIFT) & FP16_EXPONENT_MASK;
-        int m = (bits                        ) & FP16_MANTISSA_MASK;
+        int m = (bits                        ) & FP16_SIGNIFICAND_MASK;
 
         int outE = 0;
         int outM = 0;
@@ -218,7 +576,7 @@ public final class Half {
             }
         }
 
-        int out = (s << FP32_SIGN_SHIFT) | (outE << FP32_EXPONENT_SHIFT) | outM;
+        int out = (s << 16) | (outE << FP32_EXPONENT_SHIFT) | outM;
         return Float.intBitsToFloat(out);
     }
 
@@ -249,7 +607,7 @@ public final class Half {
         int bits = Float.floatToRawIntBits(f);
         int s = (bits >>> FP32_SIGN_SHIFT    );
         int e = (bits >>> FP32_EXPONENT_SHIFT) & FP32_EXPONENT_MASK;
-        int m = (bits                        ) & FP32_MANTISSA_MASK;
+        int m = (bits                        ) & FP32_SIGNIFICAND_MASK;
 
         int outE = 0;
         int outM = 0;
@@ -278,14 +636,12 @@ public final class Half {
                     // Round to nearest "0.5" up
                     int out = (outE << FP16_EXPONENT_SHIFT) | outM;
                     out++;
-                    out |= (s << FP16_SIGN_SHIFT);
-                    return (short) out;
+                    return (short) (out | (s << FP16_SIGN_SHIFT));
                 }
             }
         }
 
-        int out = (s << FP16_SIGN_SHIFT) | (outE << FP16_EXPONENT_SHIFT) | outM;
-        return (short) out;
+        return (short) ((s << FP16_SIGN_SHIFT) | (outE << FP16_EXPONENT_SHIFT) | outM);
     }
 
     /**
@@ -311,16 +667,16 @@ public final class Half {
      * <li>If the value is inifinity, the string is <code>"Infinity"</code></li>
      * <li>If the value is 0, the string is <code>"0x0.0p0"</code></li>
      * <li>If the value has a normalized representation, the exponent and
-     * mantissa are represented in the string in two fields. The mantissa starts
-     * with <code>"0x1."</code> followed by its lowercase hexadecimal
+     * significand are represented in the string in two fields. The significand
+     * starts with <code>"0x1."</code> followed by its lowercase hexadecimal
      * representation. Trailing zeroes are removed unless all digits are 0, then
-     * a single zero is used. The mantissa representation is followed by the
+     * a single zero is used. The significand representation is followed by the
      * exponent, represented by <code>"p"</code>, itself followed by a decimal
      * string of the unbiased exponent</li>
-     * <li>If the value has a denormal representation, the mantissa starts
+     * <li>If the value has a subnormal representation, the significand starts
      * with <code>"0x0."</code> followed by its lowercase hexadecimal
      * representation. Trailing zeroes are removed unless all digits are 0, then
-     * a single zero is used. The mantissa representation is followed by the
+     * a single zero is used. The significand representation is followed by the
      * exponent, represented by <code>"p-14"</code></li>
      * </ul>
      *
@@ -333,11 +689,11 @@ public final class Half {
         int bits = h & 0xffff;
         int s = (bits >>> FP16_SIGN_SHIFT    );
         int e = (bits >>> FP16_EXPONENT_SHIFT) & FP16_EXPONENT_MASK;
-        int m = (bits                        ) & FP16_MANTISSA_MASK;
+        int m = (bits                        ) & FP16_SIGNIFICAND_MASK;
 
         if (e == 0x1f) { // Infinite or NaN
             if (m == 0) {
-                if (s == 1) o.append('-');
+                if (s != 0) o.append('-');
                 o.append("Infinity");
             } else {
                 o.append("NaN");
@@ -349,14 +705,14 @@ public final class Half {
                     o.append("0x0.0p0");
                 } else {
                     o.append("0x0.");
-                    String mantissa = Integer.toHexString(m);
-                    o.append(mantissa.replaceFirst("0{2,}$", ""));
+                    String significand = Integer.toHexString(m);
+                    o.append(significand.replaceFirst("0{2,}$", ""));
                     o.append("p-14");
                 }
             } else {
                 o.append("0x1.");
-                String mantissa = Integer.toHexString(m);
-                o.append(mantissa.replaceFirst("0{2,}$", ""));
+                String significand = Integer.toHexString(m);
+                o.append(significand.replaceFirst("0{2,}$", ""));
                 o.append('p');
                 o.append(Integer.toString(e - FP16_EXPONENT_BIAS));
             }
