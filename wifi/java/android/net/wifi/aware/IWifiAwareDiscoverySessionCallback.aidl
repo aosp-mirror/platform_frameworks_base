@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
-
-import android.net.wifi.nan.ConfigRequest;
-import android.net.wifi.RttManager;
+package android.net.wifi.aware;
 
 /**
- * Callback interface that WifiNanManager implements
+ * Callback interface that WifiAwareManager implements
  *
  * {@hide}
  */
-oneway interface IWifiNanEventCallback
+oneway interface IWifiAwareDiscoverySessionCallback
 {
-    void onConnectSuccess(int clientId);
-    void onConnectFail(int reason);
-    void onIdentityChanged(in byte[] mac);
+    void onSessionStarted(int discoverySessionId);
+    void onSessionConfigSuccess();
+    void onSessionConfigFail(int reason);
+    void onSessionTerminated(int reason);
 
-    void onRangingSuccess(int rangingId, in RttManager.ParcelableRttResults results);
-    void onRangingFailure(int rangingId, int reason, in String description);
-    void onRangingAborted(int rangingId);
+    void onMatch(int peerId, in byte[] serviceSpecificInfo, in byte[] matchFilter);
+
+    void onMessageSendSuccess(int messageId);
+    void onMessageSendFail(int messageId, int reason);
+    void onMessageReceived(int peerId, in byte[] message);
 }

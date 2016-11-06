@@ -84,8 +84,8 @@ import android.net.wifi.IWifiScanner;
 import android.net.wifi.RttManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiScanner;
-import android.net.wifi.nan.IWifiNanManager;
-import android.net.wifi.nan.WifiNanManager;
+import android.net.wifi.aware.IWifiAwareManager;
+import android.net.wifi.aware.WifiAwareManager;
 import android.net.wifi.p2p.IWifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.nfc.NfcManager;
@@ -514,16 +514,16 @@ final class SystemServiceRegistry {
                 return new WifiP2pManager(service);
             }});
 
-        registerService(Context.WIFI_NAN_SERVICE, WifiNanManager.class,
-                new CachedServiceFetcher<WifiNanManager>() {
+        registerService(Context.WIFI_AWARE_SERVICE, WifiAwareManager.class,
+                new CachedServiceFetcher<WifiAwareManager>() {
             @Override
-            public WifiNanManager createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(Context.WIFI_NAN_SERVICE);
-                IWifiNanManager service = IWifiNanManager.Stub.asInterface(b);
+            public WifiAwareManager createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(Context.WIFI_AWARE_SERVICE);
+                IWifiAwareManager service = IWifiAwareManager.Stub.asInterface(b);
                 if (service == null) {
                     return null;
                 }
-                return new WifiNanManager(ctx.getOuterContext(), service);
+                return new WifiAwareManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.WIFI_SCANNING_SERVICE, WifiScanner.class,

@@ -14,23 +14,6 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
-/**
- * Callback interface that WifiNanManager implements
- *
- * {@hide}
- */
-oneway interface IWifiNanDiscoverySessionCallback
-{
-    void onSessionStarted(int discoverySessionId);
-    void onSessionConfigSuccess();
-    void onSessionConfigFail(int reason);
-    void onSessionTerminated(int reason);
-
-    void onMatch(int peerId, in byte[] serviceSpecificInfo, in byte[] matchFilter);
-
-    void onMessageSendSuccess(int messageId);
-    void onMessageSendFail(int messageId, int reason);
-    void onMessageReceived(int peerId, in byte[] message);
-}
+parcelable SubscribeConfig;

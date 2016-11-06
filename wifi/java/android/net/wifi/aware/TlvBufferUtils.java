@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 import android.annotation.Nullable;
 
@@ -32,7 +32,7 @@ import java.util.NoSuchElementException;
  * the Type field and the Length field. A Type field size of 0 is allowed -
  * allowing usage for LV (no T) array formats.
  *
- * @hide PROPOSED_NAN_API
+ * @hide PROPOSED_AWARE_API
  */
 public class TlvBufferUtils {
     private TlvBufferUtils() {
