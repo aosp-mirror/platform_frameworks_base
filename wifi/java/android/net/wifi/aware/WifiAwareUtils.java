@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 /**
- * Provides utilities for the Wifi NAN manager/service.
+ * Provides utilities for the Wifi Aware manager/service.
  *
  * @hide
  */
-public class WifiNanUtils {
+public class WifiAwareUtils {
     /**
      * Per spec: The Service Name is a UTF-8 encoded string from 1 to 255 bytes in length. The
      * only acceptable single-byte UTF-8 symbols for a Service Name are alphanumeric values (A-Z,

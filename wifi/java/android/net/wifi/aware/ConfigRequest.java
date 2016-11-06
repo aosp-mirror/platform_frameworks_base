@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Defines a request object to configure a Wi-Fi NAN network. Built using
+ * Defines a request object to configure a Wi-Fi Aware network. Built using
  * {@link ConfigRequest.Builder}. Configuration is requested using
- * {@link WifiNanManager#attach(android.os.Handler, WifiNanAttachCallback)}.
+ * {@link WifiAwareManager#attach(android.os.Handler, WifiAwareAttachCallback)}.
  * Note that the actual achieved configuration may be different from the
  * requested configuration - since different applications may request different
  * configurations.
@@ -221,7 +221,7 @@ public final class ConfigRequest implements Parcelable {
         }
 
         /**
-         * The Cluster ID is generated randomly for new NAN networks. Specify
+         * The Cluster ID is generated randomly for new Aware networks. Specify
          * the lower range of the cluster ID. The upper range is specified using
          * the {@link ConfigRequest.Builder#setClusterHigh(int)}. The permitted
          * range is 0 (the default) to the value specified by
@@ -246,7 +246,7 @@ public final class ConfigRequest implements Parcelable {
         }
 
         /**
-         * The Cluster ID is generated randomly for new NAN networks. Specify
+         * The Cluster ID is generated randomly for new Aware networks. Specify
          * the lower upper of the cluster ID. The lower range is specified using
          * the {@link ConfigRequest.Builder#setClusterLow(int)}. The permitted
          * range is the value specified by
