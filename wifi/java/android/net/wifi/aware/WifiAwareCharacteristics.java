@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * The characteristics of the Wi-Fi NAN implementation.
+ * The characteristics of the Wi-Fi Aware implementation.
  *
- * @hide PROPOSED_NAN_API
+ * @hide PROPOSED_AWARE_API
  */
-public class WifiNanCharacteristics implements Parcelable {
+public class WifiAwareCharacteristics implements Parcelable {
     /** @hide */
     public static final String KEY_MAX_SERVICE_NAME_LENGTH = "key_max_service_name_length";
     /** @hide */
@@ -37,41 +37,41 @@ public class WifiNanCharacteristics implements Parcelable {
     private Bundle mCharacteristics = new Bundle();
 
     /** @hide : should not be created by apps */
-    public WifiNanCharacteristics(Bundle characteristics) {
+    public WifiAwareCharacteristics(Bundle characteristics) {
         mCharacteristics = characteristics;
     }
 
     /**
-     * Returns the maximum string length that can be used to specify a NAN service name. Restricts
+     * Returns the maximum string length that can be used to specify a Aware service name. Restricts
      * the parameters of the {@link PublishConfig.Builder#setServiceName(String)} and
      * {@link SubscribeConfig.Builder#setServiceName(String)}.
      *
-     * @return A positive integer, maximum string length of NAN service name.
+     * @return A positive integer, maximum string length of Aware service name.
      */
     public int getMaxServiceNameLength() {
         return mCharacteristics.getInt(KEY_MAX_SERVICE_NAME_LENGTH);
     }
 
     /**
-     * Returns the maximum length of byte array that can be used to specify a NAN service specific
-     * information field: the arbitrary load used in discovery or the message length of NAN
+     * Returns the maximum length of byte array that can be used to specify a Aware service specific
+     * information field: the arbitrary load used in discovery or the message length of Aware
      * message exchange. Restricts the parameters of the
      * {@link PublishConfig.Builder#setServiceSpecificInfo(byte[])},
      * {@link SubscribeConfig.Builder#setServiceSpecificInfo(byte[])}, and
-     * {@link WifiNanDiscoveryBaseSession#sendMessage(Object, int, byte[])} variants.
+     * {@link WifiAwareDiscoveryBaseSession#sendMessage(Object, int, byte[])} variants.
      *
-     * @return A positive integer, maximum length of byte array for NAN messaging.
+     * @return A positive integer, maximum length of byte array for Aware messaging.
      */
     public int getMaxServiceSpecificInfoLength() {
         return mCharacteristics.getInt(KEY_MAX_SERVICE_SPECIFIC_INFO_LENGTH);
     }
 
     /**
-     * Returns the maximum length of byte array that can be used to specify a NAN match filter.
+     * Returns the maximum length of byte array that can be used to specify a Aware match filter.
      * Restricts the parameters of the {@link PublishConfig.Builder#setMatchFilter(byte[])} and
      * {@link SubscribeConfig.Builder#setMatchFilter(byte[])}.
      *
-     * @return A positive integer, maximum legngth of byte array for NAN discovery match filter.
+     * @return A positive integer, maximum legngth of byte array for Aware discovery match filter.
      */
     public int getMaxMatchFilterLength() {
         return mCharacteristics.getInt(KEY_MAX_MATCH_FILTER_LENGTH);
@@ -87,17 +87,17 @@ public class WifiNanCharacteristics implements Parcelable {
         return 0;
     }
 
-    public static final Creator<WifiNanCharacteristics> CREATOR =
-            new Creator<WifiNanCharacteristics>() {
+    public static final Creator<WifiAwareCharacteristics> CREATOR =
+            new Creator<WifiAwareCharacteristics>() {
                 @Override
-                public WifiNanCharacteristics createFromParcel(Parcel in) {
-                    WifiNanCharacteristics c = new WifiNanCharacteristics(in.readBundle());
+                public WifiAwareCharacteristics createFromParcel(Parcel in) {
+                    WifiAwareCharacteristics c = new WifiAwareCharacteristics(in.readBundle());
                     return c;
                 }
 
                 @Override
-                public WifiNanCharacteristics[] newArray(int size) {
-                    return new WifiNanCharacteristics[size];
+                public WifiAwareCharacteristics[] newArray(int size) {
+                    return new WifiAwareCharacteristics[size];
                 }
             };
 }

@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
-parcelable WifiNanCharacteristics;
+parcelable WifiAwareCharacteristics;

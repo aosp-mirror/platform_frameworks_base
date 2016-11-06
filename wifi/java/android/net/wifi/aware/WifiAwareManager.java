@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -48,80 +48,86 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
 /**
- * This class provides the primary API for managing Wi-Fi NAN operations:
+ * This class provides the primary API for managing Wi-Fi Aware operations:
  * discovery and peer-to-peer data connections. Get an instance of this class by calling
  * {@link android.content.Context#getSystemService(String)
- * Context.getSystemService(Context.WIFI_NAN_SERVICE)}.
+ * Context.getSystemService(Context.WIFI_AWARE_SERVICE)}.
  * <p>
  * The class provides access to:
  * <ul>
- * <li>Initialize a NAN cluster (peer-to-peer synchronization). Refer to
- * {@link #attach(Handler, WifiNanAttachCallback)}.
+ * <li>Initialize a Aware cluster (peer-to-peer synchronization). Refer to
+ * {@link #attach(Handler, WifiAwareAttachCallback)}.
  * <li>Create discovery sessions (publish or subscribe sessions). Refer to
- * {@link WifiNanSession#publish(Handler, PublishConfig, WifiNanDiscoverySessionCallback)} and
- * {@link WifiNanSession#subscribe(Handler, SubscribeConfig, WifiNanDiscoverySessionCallback)}.
- * <li>Create a NAN network specifier to be used with
+ * {@link WifiAwareSession#publish(Handler, PublishConfig, WifiAwareDiscoverySessionCallback)} and
+ * {@link WifiAwareSession#subscribe(Handler, SubscribeConfig, WifiAwareDiscoverySessionCallback)}.
+ * <li>Create a Aware network specifier to be used with
  * {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
- * to set-up a NAN connection with a peer. Refer to
- * {@link WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])} and
- * {@link WifiNanSession#createNetworkSpecifier(int, byte[], byte[])}.
+ * to set-up a Aware connection with a peer. Refer to
+ * {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])} and
+ * {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])}.
  * </ul>
  * <p>
- *     NAN may not be usable when Wi-Fi is disabled (and other conditions). To validate that
+ *     Aware may not be usable when Wi-Fi is disabled (and other conditions). To validate that
  *     the functionality is available use the {@link #isAvailable()} function. To track
- *     changes in NAN usability register for the {@link #ACTION_WIFI_NAN_STATE_CHANGED} broadcast.
- *     Note that this broadcast is not sticky - you should register for it and then check the
- *     above API to avoid a race condition.
+ *     changes in Aware usability register for the {@link #ACTION_WIFI_AWARE_STATE_CHANGED}
+ *     broadcast. Note that this broadcast is not sticky - you should register for it and then
+ *     check the above API to avoid a race condition.
  * <p>
- *     An application must use {@link #attach(Handler, WifiNanAttachCallback)} to initialize a NAN
- *     cluster - before making any other NAN operation. NAN cluster membership is a device-wide
- *     operation - the API guarantees that the device is in a cluster or joins a NAN cluster (or
- *     starts one if none can be found). Information about attach success (or failure) are
- *     returned in callbacks of {@link WifiNanAttachCallback}. Proceed with NAN discovery or
- *     connection setup only after receiving confirmation that NAN attach succeeded -
- *     {@link WifiNanAttachCallback#onAttached(WifiNanSession)}. When an application is
- *     finished using NAN it <b>must</b> use the {@link WifiNanSession#destroy()} API
- *     to indicate to the NAN service that the device may detach from the NAN cluster. The
- *     device will actually disable NAN once the last application detaches.
+ *     An application must use {@link #attach(Handler, WifiAwareAttachCallback)} to initialize a
+ *     Aware cluster - before making any other Aware operation. Aware cluster membership is a
+ *     device-wide operation - the API guarantees that the device is in a cluster or joins a
+ *     Aware cluster (or starts one if none can be found). Information about attach success (or
+ *     failure) are returned in callbacks of {@link WifiAwareAttachCallback}. Proceed with Aware
+ *     discovery or connection setup only after receiving confirmation that Aware attach
+ *     succeeded - {@link WifiAwareAttachCallback#onAttached(WifiAwareSession)}. When an
+ *     application is finished using Aware it <b>must</b> use the
+ *     {@link WifiAwareSession#destroy()} API to indicate to the Aware service that the device
+ *     may detach from the Aware cluster. The device will actually disable Aware once the last
+ *     application detaches.
  * <p>
- *     Once a NAN attach is confirmed use the
- *     {@link WifiNanSession#publish(Handler, PublishConfig, WifiNanDiscoverySessionCallback)} or
- *     {@link WifiNanSession#subscribe(Handler, SubscribeConfig, WifiNanDiscoverySessionCallback)}
- *     to create publish or subscribe NAN discovery sessions. Events are called on the provided
- *     callback object {@link WifiNanDiscoverySessionCallback}. Specifically, the
- *     {@link WifiNanDiscoverySessionCallback#onPublishStarted(WifiNanPublishDiscoverySession)}
+ *     Once a Aware attach is confirmed use the
+ *     {@link WifiAwareSession#publish(Handler, PublishConfig, WifiAwareDiscoverySessionCallback)}
+ *     or
+ *     {@link WifiAwareSession#subscribe(Handler, SubscribeConfig,
+ *     WifiAwareDiscoverySessionCallback)}
+ *     to create publish or subscribe Aware discovery sessions. Events are called on the provided
+ *     callback object {@link WifiAwareDiscoverySessionCallback}. Specifically, the
+ *     {@link WifiAwareDiscoverySessionCallback#onPublishStarted(WifiAwarePublishDiscoverySession)}
  *     and
- *     {@link WifiNanDiscoverySessionCallback#onSubscribeStarted(WifiNanSubscribeDiscoverySession)}
- *     return {@link WifiNanPublishDiscoverySession} and {@link WifiNanSubscribeDiscoverySession}
+ *     {@link WifiAwareDiscoverySessionCallback#onSubscribeStarted(
+ *     WifiAwareSubscribeDiscoverySession)}
+ *     return {@link WifiAwarePublishDiscoverySession} and
+ *     {@link WifiAwareSubscribeDiscoverySession}
  *     objects respectively on which additional session operations can be performed, e.g. updating
- *     the session {@link WifiNanPublishDiscoverySession#updatePublish(PublishConfig)} and
- *     {@link WifiNanSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}. Sessions can also
- *     be used to send messages using the
- *     {@link WifiNanDiscoveryBaseSession#sendMessage(Object, int, byte[])} APIs. When an
+ *     the session {@link WifiAwarePublishDiscoverySession#updatePublish(PublishConfig)} and
+ *     {@link WifiAwareSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}. Sessions can
+ *     also be used to send messages using the
+ *     {@link WifiAwareDiscoveryBaseSession#sendMessage(Object, int, byte[])} APIs. When an
  *     application is finished with a discovery session it <b>must</b> terminate it using the
- *     {@link WifiNanDiscoveryBaseSession#destroy()} API.
+ *     {@link WifiAwareDiscoveryBaseSession#destroy()} API.
  * <p>
- *    Creating connections between NAN devices is managed by the standard
- *    {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}.
+ *    Creating connections between Aware devices is managed by the standard
+ *    {@link ConnectivityManager#requestNetwork(NetworkRequest,
+ *    ConnectivityManager.NetworkCallback)}.
  *    The {@link NetworkRequest} object should be constructed with:
  *    <ul>
  *        <li>{@link NetworkRequest.Builder#addTransportType(int)} of
- *        {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_NAN}.
+ *        {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
  *        <li>{@link NetworkRequest.Builder#setNetworkSpecifier(String)} using
- *        {@link WifiNanSession#createNetworkSpecifier(int, byte[], byte[])} or
- *        {@link WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])}.
+ *        {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])} or
+ *        {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])}.
  *    </ul>
  *
- * @hide PROPOSED_NAN_API
+ * @hide PROPOSED_AWARE_API
  */
-public class WifiNanManager {
-    private static final String TAG = "WifiNanManager";
+public class WifiAwareManager {
+    private static final String TAG = "WifiAwareManager";
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
     /**
-     * Keys used to generate a Network Specifier for the NAN network request. The network specifier
-     * is formatted as a JSON string.
+     * Keys used to generate a Network Specifier for the Aware network request. The network
+     * specifier is formatted as a JSON string.
      */
 
     /**
@@ -197,44 +203,44 @@ public class WifiNanManager {
     public static final String NETWORK_SPECIFIER_KEY_TOKEN = "token";
 
     /**
-     * Broadcast intent action to indicate that the state of Wi-Fi NAN availability has changed.
+     * Broadcast intent action to indicate that the state of Wi-Fi Aware availability has changed.
      * Use the {@link #isAvailable()} to query the current status.
      * This broadcast is <b>not</b> sticky, use the {@link #isAvailable()} API after registering
-     * the broadcast to check the current state of Wi-Fi NAN.
+     * the broadcast to check the current state of Wi-Fi Aware.
      * <p>Note: The broadcast is only delivered to registered receivers - no manifest registered
      * components will be launched.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_WIFI_NAN_STATE_CHANGED =
-            "android.net.wifi.nan.action.WIFI_NAN_STATE_CHANGED";
+    public static final String ACTION_WIFI_AWARE_STATE_CHANGED =
+            "android.net.wifi.aware.action.WIFI_AWARE_STATE_CHANGED";
 
     /** @hide */
     @IntDef({
-            WIFI_NAN_DATA_PATH_ROLE_INITIATOR, WIFI_NAN_DATA_PATH_ROLE_RESPONDER})
+            WIFI_AWARE_DATA_PATH_ROLE_INITIATOR, WIFI_AWARE_DATA_PATH_ROLE_RESPONDER})
     @Retention(RetentionPolicy.SOURCE)
     public @interface DataPathRole {
     }
 
     /**
      * Connection creation role is that of INITIATOR. Used to create a network specifier string
-     * when requesting a NAN network.
+     * when requesting a Aware network.
      *
-     * @see WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])
-     * @see WifiNanSession#createNetworkSpecifier(int, byte[], byte[])
+     * @see WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])
+     * @see WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])
      */
-    public static final int WIFI_NAN_DATA_PATH_ROLE_INITIATOR = 0;
+    public static final int WIFI_AWARE_DATA_PATH_ROLE_INITIATOR = 0;
 
     /**
      * Connection creation role is that of RESPONDER. Used to create a network specifier string
-     * when requesting a NAN network.
+     * when requesting a Aware network.
      *
-     * @see WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])
-     * @see WifiNanSession#createNetworkSpecifier(int, byte[], byte[])
+     * @see WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])
+     * @see WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])
      */
-    public static final int WIFI_NAN_DATA_PATH_ROLE_RESPONDER = 1;
+    public static final int WIFI_AWARE_DATA_PATH_ROLE_RESPONDER = 1;
 
     private final Context mContext;
-    private final IWifiNanManager mService;
+    private final IWifiAwareManager mService;
 
     private final Object mLock = new Object(); // lock access to the following vars
 
@@ -242,14 +248,14 @@ public class WifiNanManager {
     private SparseArray<RttManager.RttListener> mRangingListeners = new SparseArray<>();
 
     /** @hide */
-    public WifiNanManager(Context context, IWifiNanManager service) {
+    public WifiAwareManager(Context context, IWifiAwareManager service) {
         mContext = context;
         mService = service;
     }
 
     /**
-     * Enable the usage of the NAN API. Doesn't actually turn on NAN cluster formation - that
-     * only happens when an attach is attempted. {@link #ACTION_WIFI_NAN_STATE_CHANGED} broadcast
+     * Enable the usage of the Aware API. Doesn't actually turn on Aware cluster formation - that
+     * only happens when an attach is attempted. {@link #ACTION_WIFI_AWARE_STATE_CHANGED} broadcast
      * will be triggered.
      *
      * @hide
@@ -263,9 +269,9 @@ public class WifiNanManager {
     }
 
     /**
-     * Disable the usage of the NAN API. All attempts to attach() will be rejected. All open
-     * connections and sessions will be terminated. {@link #ACTION_WIFI_NAN_STATE_CHANGED} broadcast
-     * will be triggered.
+     * Disable the usage of the Aware API. All attempts to attach() will be rejected. All open
+     * connections and sessions will be terminated. {@link #ACTION_WIFI_AWARE_STATE_CHANGED}
+     * broadcast will be triggered.
      *
      * @hide
      */
@@ -278,10 +284,11 @@ public class WifiNanManager {
     }
 
     /**
-     * Returns the current status of NAN API: whether or not NAN is available. To track changes
-     * in the state of NAN API register for the {@link #ACTION_WIFI_NAN_STATE_CHANGED} broadcast.
+     * Returns the current status of Aware API: whether or not Aware is available. To track
+     * changes in the state of Aware API register for the
+     * {@link #ACTION_WIFI_AWARE_STATE_CHANGED} broadcast.
      *
-     * @return A boolean indicating whether the app can use the NAN API at this time (true) or
+     * @return A boolean indicating whether the app can use the Aware API at this time (true) or
      * not (false).
      */
     public boolean isAvailable() {
@@ -293,12 +300,12 @@ public class WifiNanManager {
     }
 
     /**
-     * Returns the characteristics of the Wi-Fi NAN interface: a set of parameters which specify
+     * Returns the characteristics of the Wi-Fi Aware interface: a set of parameters which specify
      * limitations on configurations, e.g. the maximum service name length.
      *
-     * @return An object specifying configuration limitations of NAN.
+     * @return An object specifying configuration limitations of Aware.
      */
-    public WifiNanCharacteristics getCharacteristics() {
+    public WifiAwareCharacteristics getCharacteristics() {
         try {
             return mService.getCharacteristics();
         } catch (RemoteException e) {
@@ -307,14 +314,14 @@ public class WifiNanManager {
     }
 
     /**
-     * Attach to the Wi-Fi NAN service - enabling the application to create discovery sessions or
+     * Attach to the Wi-Fi Aware service - enabling the application to create discovery sessions or
      * create connections to peers. The device will attach to an existing cluster if it can find
-     * one or create a new cluster (if it is the first to enable NAN in its vicinity). Results
+     * one or create a new cluster (if it is the first to enable Aware in its vicinity). Results
      * (e.g. successful attach to a cluster) are provided to the {@code attachCallback} object.
-     * An application <b>must</b> call {@link WifiNanSession#destroy()} when done with the
-     * Wi-Fi NAN object.
+     * An application <b>must</b> call {@link WifiAwareSession#destroy()} when done with the
+     * Wi-Fi Aware object.
      * <p>
-     * Note: a NAN cluster is a shared resource - if the device is already attached to a cluster
+     * Note: a Aware cluster is a shared resource - if the device is already attached to a cluster
      * then this function will simply indicate success immediately using the same {@code
      * attachCallback}.
      *
@@ -322,29 +329,29 @@ public class WifiNanManager {
      * attachCallback} object. If a null is provided then the application's main thread will be
      *                used.
      * @param attachCallback A callback for attach events, extended from
-     * {@link WifiNanAttachCallback}.
+     * {@link WifiAwareAttachCallback}.
      */
-    public void attach(@Nullable Handler handler, @NonNull WifiNanAttachCallback attachCallback) {
+    public void attach(@Nullable Handler handler, @NonNull WifiAwareAttachCallback attachCallback) {
         attach(handler, null, attachCallback, null);
     }
 
     /**
-     * Attach to the Wi-Fi NAN service - enabling the application to create discovery sessions or
+     * Attach to the Wi-Fi Aware service - enabling the application to create discovery sessions or
      * create connections to peers. The device will attach to an existing cluster if it can find
-     * one or create a new cluster (if it is the first to enable NAN in its vicinity). Results
+     * one or create a new cluster (if it is the first to enable Aware in its vicinity). Results
      * (e.g. successful attach to a cluster) are provided to the {@code attachCallback} object.
-     * An application <b>must</b> call {@link WifiNanSession#destroy()} when done with the
-     * Wi-Fi NAN object.
+     * An application <b>must</b> call {@link WifiAwareSession#destroy()} when done with the
+     * Wi-Fi Aware object.
      * <p>
-     * Note: a NAN cluster is a shared resource - if the device is already attached to a cluster
+     * Note: a Aware cluster is a shared resource - if the device is already attached to a cluster
      * then this function will simply indicate success immediately using the same {@code
      * attachCallback}.
      * <p>
-     * This version of the API attaches a listener to receive the MAC address of the NAN interface
+     * This version of the API attaches a listener to receive the MAC address of the Aware interface
      * on startup and whenever it is updated (it is randomized at regular intervals for privacy).
      * The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
      * permission to execute this attach request. Otherwise, use the
-     * {@link #attach(Handler, WifiNanAttachCallback)} version. Note that aside from permission
+     * {@link #attach(Handler, WifiAwareAttachCallback)} version. Note that aside from permission
      * requirements this listener will wake up the host at regular intervals causing higher power
      * consumption, do not use it unless the information is necessary (e.g. for OOB discovery).
      *
@@ -352,19 +359,19 @@ public class WifiNanManager {
      * attachCallback} and {@code identityChangedListener} objects. If a null is provided then the
      *                application's main thread will be used.
      * @param attachCallback A callback for attach events, extended from
-     * {@link WifiNanAttachCallback}.
+     * {@link WifiAwareAttachCallback}.
      * @param identityChangedListener A listener for changed identity, extended from
-     * {@link WifiNanIdentityChangedListener}.
+     * {@link WifiAwareIdentityChangedListener}.
      */
-    public void attach(@Nullable Handler handler, @NonNull WifiNanAttachCallback attachCallback,
-            @NonNull WifiNanIdentityChangedListener identityChangedListener) {
+    public void attach(@Nullable Handler handler, @NonNull WifiAwareAttachCallback attachCallback,
+            @NonNull WifiAwareIdentityChangedListener identityChangedListener) {
         attach(handler, null, attachCallback, identityChangedListener);
     }
 
     /** @hide */
     public void attach(Handler handler, ConfigRequest configRequest,
-            WifiNanAttachCallback attachCallback,
-            WifiNanIdentityChangedListener identityChangedListener) {
+            WifiAwareAttachCallback attachCallback,
+            WifiAwareIdentityChangedListener identityChangedListener) {
         if (VDBG) {
             Log.v(TAG, "attach(): handler=" + handler + ", callback=" + attachCallback
                     + ", configRequest=" + configRequest + ", identityChangedListener="
@@ -377,7 +384,7 @@ public class WifiNanManager {
             try {
                 Binder binder = new Binder();
                 mService.connect(binder, mContext.getOpPackageName(),
-                        new WifiNanEventCallbackProxy(this, looper, binder, attachCallback,
+                        new WifiAwareEventCallbackProxy(this, looper, binder, attachCallback,
                                 identityChangedListener), configRequest,
                         identityChangedListener != null);
             } catch (RemoteException e) {
@@ -399,12 +406,12 @@ public class WifiNanManager {
 
     /** @hide */
     public void publish(int clientId, Looper looper, PublishConfig publishConfig,
-            WifiNanDiscoverySessionCallback callback) {
+            WifiAwareDiscoverySessionCallback callback) {
         if (VDBG) Log.v(TAG, "publish(): clientId=" + clientId + ", config=" + publishConfig);
 
         try {
             mService.publish(clientId, publishConfig,
-                    new WifiNanDiscoverySessionCallbackProxy(this, looper, true, callback,
+                    new WifiAwareDiscoverySessionCallbackProxy(this, looper, true, callback,
                             clientId));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -427,7 +434,7 @@ public class WifiNanManager {
 
     /** @hide */
     public void subscribe(int clientId, Looper looper, SubscribeConfig subscribeConfig,
-            WifiNanDiscoverySessionCallback callback) {
+            WifiAwareDiscoverySessionCallback callback) {
         if (VDBG) {
             if (VDBG) {
                 Log.v(TAG,
@@ -437,7 +444,7 @@ public class WifiNanManager {
 
         try {
             mService.subscribe(clientId, subscribeConfig,
-                    new WifiNanDiscoverySessionCallbackProxy(this, looper, false, callback,
+                    new WifiAwareDiscoverySessionCallbackProxy(this, looper, false, callback,
                             clientId));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -535,13 +542,13 @@ public class WifiNanManager {
             type = NETWORK_SPECIFIER_TYPE_1D;
         }
 
-        if (role != WIFI_NAN_DATA_PATH_ROLE_INITIATOR
-                && role != WIFI_NAN_DATA_PATH_ROLE_RESPONDER) {
+        if (role != WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
+                && role != WIFI_AWARE_DATA_PATH_ROLE_RESPONDER) {
             throw new IllegalArgumentException(
                     "createNetworkSpecifier: Invalid 'role' argument when creating a network "
                             + "specifier");
         }
-        if (role == WIFI_NAN_DATA_PATH_ROLE_INITIATOR) {
+        if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR) {
             if (token == null) {
                 throw new IllegalArgumentException(
                         "createNetworkSpecifier: Invalid null token - not permitted on INITIATOR");
@@ -592,13 +599,13 @@ public class WifiNanManager {
             type = NETWORK_SPECIFIER_TYPE_2D;
         }
 
-        if (role != WIFI_NAN_DATA_PATH_ROLE_INITIATOR
-                && role != WIFI_NAN_DATA_PATH_ROLE_RESPONDER) {
+        if (role != WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
+                && role != WIFI_AWARE_DATA_PATH_ROLE_RESPONDER) {
             throw new IllegalArgumentException(
                     "createNetworkSpecifier: Invalid 'role' argument when creating a network "
                             + "specifier");
         }
-        if (role == WIFI_NAN_DATA_PATH_ROLE_INITIATOR) {
+        if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR) {
             if (peer == null || peer.length != 6) {
                 throw new IllegalArgumentException(
                         "createNetworkSpecifier: Invalid peer MAC address");
@@ -634,7 +641,7 @@ public class WifiNanManager {
         return json.toString();
     }
 
-    private static class WifiNanEventCallbackProxy extends IWifiNanEventCallback.Stub {
+    private static class WifiAwareEventCallbackProxy extends IWifiAwareEventCallback.Stub {
         private static final int CALLBACK_CONNECT_SUCCESS = 0;
         private static final int CALLBACK_CONNECT_FAIL = 1;
         private static final int CALLBACK_IDENTITY_CHANGED = 2;
@@ -643,12 +650,12 @@ public class WifiNanManager {
         private static final int CALLBACK_RANGING_ABORTED = 5;
 
         private final Handler mHandler;
-        private final WeakReference<WifiNanManager> mNanManager;
+        private final WeakReference<WifiAwareManager> mAwareManager;
         private final Binder mBinder;
         private final Looper mLooper;
 
         RttManager.RttListener getAndRemoveRangingListener(int rangingId) {
-            WifiNanManager mgr = mNanManager.get();
+            WifiAwareManager mgr = mAwareManager.get();
             if (mgr == null) {
                 Log.w(TAG, "getAndRemoveRangingListener: called post GC");
                 return null;
@@ -662,39 +669,40 @@ public class WifiNanManager {
         }
 
         /**
-         * Constructs a {@link WifiNanAttachCallback} using the specified looper.
+         * Constructs a {@link WifiAwareAttachCallback} using the specified looper.
          * All callbacks will delivered on the thread of the specified looper.
          *
          * @param looper The looper on which to execute the callbacks.
          */
-        WifiNanEventCallbackProxy(WifiNanManager mgr, Looper looper, Binder binder,
-                final WifiNanAttachCallback attachCallback,
-                final WifiNanIdentityChangedListener identityChangedListener) {
-            mNanManager = new WeakReference<>(mgr);
+        WifiAwareEventCallbackProxy(WifiAwareManager mgr, Looper looper, Binder binder,
+                final WifiAwareAttachCallback attachCallback,
+                final WifiAwareIdentityChangedListener identityChangedListener) {
+            mAwareManager = new WeakReference<>(mgr);
             mLooper = looper;
             mBinder = binder;
 
-            if (VDBG) Log.v(TAG, "WifiNanEventCallbackProxy ctor: looper=" + looper);
+            if (VDBG) Log.v(TAG, "WifiAwareEventCallbackProxy ctor: looper=" + looper);
             mHandler = new Handler(looper) {
                 @Override
                 public void handleMessage(Message msg) {
                     if (DBG) {
-                        Log.d(TAG, "WifiNanEventCallbackProxy: What=" + msg.what + ", msg=" + msg);
+                        Log.d(TAG, "WifiAwareEventCallbackProxy: What=" + msg.what + ", msg="
+                                + msg);
                     }
 
-                    WifiNanManager mgr = mNanManager.get();
+                    WifiAwareManager mgr = mAwareManager.get();
                     if (mgr == null) {
-                        Log.w(TAG, "WifiNanEventCallbackProxy: handleMessage post GC");
+                        Log.w(TAG, "WifiAwareEventCallbackProxy: handleMessage post GC");
                         return;
                     }
 
                     switch (msg.what) {
                         case CALLBACK_CONNECT_SUCCESS:
                             attachCallback.onAttached(
-                                    new WifiNanSession(mgr, mBinder, msg.arg1));
+                                    new WifiAwareSession(mgr, mBinder, msg.arg1));
                             break;
                         case CALLBACK_CONNECT_FAIL:
-                            mNanManager.clear();
+                            mAwareManager.clear();
                             attachCallback.onAttachFailed();
                             break;
                         case CALLBACK_IDENTITY_CHANGED:
@@ -801,8 +809,8 @@ public class WifiNanManager {
         }
     }
 
-    private static class WifiNanDiscoverySessionCallbackProxy extends
-            IWifiNanDiscoverySessionCallback.Stub {
+    private static class WifiAwareDiscoverySessionCallbackProxy extends
+            IWifiAwareDiscoverySessionCallback.Stub {
         private static final int CALLBACK_SESSION_STARTED = 0;
         private static final int CALLBACK_SESSION_CONFIG_SUCCESS = 1;
         private static final int CALLBACK_SESSION_CONFIG_FAIL = 2;
@@ -815,23 +823,24 @@ public class WifiNanManager {
         private static final String MESSAGE_BUNDLE_KEY_MESSAGE = "message";
         private static final String MESSAGE_BUNDLE_KEY_MESSAGE2 = "message2";
 
-        private final WeakReference<WifiNanManager> mNanManager;
+        private final WeakReference<WifiAwareManager> mAwareManager;
         private final boolean mIsPublish;
-        private final WifiNanDiscoverySessionCallback mOriginalCallback;
+        private final WifiAwareDiscoverySessionCallback mOriginalCallback;
         private final int mClientId;
 
         private final Handler mHandler;
-        private WifiNanDiscoveryBaseSession mSession;
+        private WifiAwareDiscoveryBaseSession mSession;
 
-        WifiNanDiscoverySessionCallbackProxy(WifiNanManager mgr, Looper looper, boolean isPublish,
-                WifiNanDiscoverySessionCallback originalCallback, int clientId) {
-            mNanManager = new WeakReference<>(mgr);
+        WifiAwareDiscoverySessionCallbackProxy(WifiAwareManager mgr, Looper looper,
+                boolean isPublish, WifiAwareDiscoverySessionCallback originalCallback,
+                int clientId) {
+            mAwareManager = new WeakReference<>(mgr);
             mIsPublish = isPublish;
             mOriginalCallback = originalCallback;
             mClientId = clientId;
 
             if (VDBG) {
-                Log.v(TAG, "WifiNanDiscoverySessionCallbackProxy ctor: isPublish=" + isPublish);
+                Log.v(TAG, "WifiAwareDiscoverySessionCallbackProxy ctor: isPublish=" + isPublish);
             }
 
             mHandler = new Handler(looper) {
@@ -839,8 +848,8 @@ public class WifiNanManager {
                 public void handleMessage(Message msg) {
                     if (DBG) Log.d(TAG, "What=" + msg.what + ", msg=" + msg);
 
-                    if (mNanManager.get() == null) {
-                        Log.w(TAG, "WifiNanDiscoverySessionCallbackProxy: handleMessage post GC");
+                    if (mAwareManager.get() == null) {
+                        Log.w(TAG, "WifiAwareDiscoverySessionCallbackProxy: handleMessage post GC");
                         return;
                     }
 
@@ -858,7 +867,7 @@ public class WifiNanManager {
                                  * creation failed (as opposed to update
                                  * failing)
                                  */
-                                mNanManager.clear();
+                                mAwareManager.clear();
                             }
                             break;
                         case CALLBACK_SESSION_TERMINATED:
@@ -977,20 +986,20 @@ public class WifiNanManager {
                         "onSessionStarted: sessionId=" + sessionId + ": session already created!?");
             }
 
-            WifiNanManager mgr = mNanManager.get();
+            WifiAwareManager mgr = mAwareManager.get();
             if (mgr == null) {
                 Log.w(TAG, "onProxySessionStarted: mgr GC'd");
                 return;
             }
 
             if (mIsPublish) {
-                WifiNanPublishDiscoverySession session = new WifiNanPublishDiscoverySession(mgr,
+                WifiAwarePublishDiscoverySession session = new WifiAwarePublishDiscoverySession(mgr,
                         mClientId, sessionId);
                 mSession = session;
                 mOriginalCallback.onPublishStarted(session);
             } else {
-                WifiNanSubscribeDiscoverySession
-                        session = new WifiNanSubscribeDiscoverySession(mgr, mClientId, sessionId);
+                WifiAwareSubscribeDiscoverySession
+                        session = new WifiAwareSubscribeDiscoverySession(mgr, mClientId, sessionId);
                 mSession = session;
                 mOriginalCallback.onSubscribeStarted(session);
             }
@@ -1004,7 +1013,7 @@ public class WifiNanManager {
             } else {
                 Log.w(TAG, "Proxy: onSessionTerminated called but mSession is null!?");
             }
-            mNanManager.clear();
+            mAwareManager.clear();
             mOriginalCallback.onSessionTerminated(reason);
         }
     }

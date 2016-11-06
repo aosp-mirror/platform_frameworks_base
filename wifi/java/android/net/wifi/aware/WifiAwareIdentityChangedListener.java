@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 /**
- * Base class for a listener which is called with the MAC address of the NAN interface whenever
+ * Base class for a listener which is called with the MAC address of the Aware interface whenever
  * it is changed. Change may be due to device joining a cluster, starting a cluster, or discovery
  * interface change (addresses are randomized at regular intervals). The implication is that
  * peers you've been communicating with may no longer recognize you and you need to re-establish
  * your identity - e.g. by starting a discovery session. This actual MAC address of the
- * interface may also be useful if the application uses alternative (non-NAN) discovery but needs
- * to set up a NAN connection. The provided NAN discovery interface MAC address can then be used
- * in {@link WifiNanSession#createNetworkSpecifier(int, byte[], byte[])}.
+ * interface may also be useful if the application uses alternative (non-Aware) discovery but needs
+ * to set up a Aware connection. The provided Aware discovery interface MAC address can then be used
+ * in {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])}.
  *
- * @hide PROPOSED_NAN_API
+ * @hide PROPOSED_AWARE_API
  */
-public class WifiNanIdentityChangedListener {
+public class WifiAwareIdentityChangedListener {
     /**
-     * @param mac The MAC address of the NAN discovery interface. The application must have the
+     * @param mac The MAC address of the Aware discovery interface. The application must have the
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} to get the actual MAC address,
      *            otherwise all 0's will be provided.
      */

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -30,13 +30,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
- * Defines the configuration of a NAN subscribe session. Built using
+ * Defines the configuration of a Aware subscribe session. Built using
  * {@link SubscribeConfig.Builder}. Subscribe is done using
- * {@link WifiNanSession#subscribe(android.os.Handler, SubscribeConfig, WifiNanDiscoverySessionCallback)}
+ * {@link WifiAwareSession#subscribe(android.os.Handler, SubscribeConfig,
+ * WifiAwareDiscoverySessionCallback)}
  * or
- * {@link WifiNanSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}.
+ * {@link WifiAwareSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}.
  *
- * @hide PROPOSED_NAN_API
+ * @hide PROPOSED_AWARE_API
  */
 public final class SubscribeConfig implements Parcelable {
     /** @hide */
@@ -209,8 +210,9 @@ public final class SubscribeConfig implements Parcelable {
      *
      * @hide
      */
-    public void assertValid(WifiNanCharacteristics characteristics) throws IllegalArgumentException {
-        WifiNanUtils.validateServiceName(mServiceName);
+    public void assertValid(WifiAwareCharacteristics characteristics)
+            throws IllegalArgumentException {
+        WifiAwareUtils.validateServiceName(mServiceName);
 
         if (!LvBufferUtils.isValid(mMatchFilter, 1)) {
             throw new IllegalArgumentException(
@@ -352,11 +354,11 @@ public final class SubscribeConfig implements Parcelable {
          * Sets the number of times an active (
          * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe session
          * will broadcast. When the count is reached an event will be
-         * generated for {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)}
-         * with {@link WifiNanDiscoverySessionCallback#TERMINATE_REASON_DONE}.
+         * generated for {@link WifiAwareDiscoverySessionCallback#onSessionTerminated(int)}
+         * with {@link WifiAwareDiscoverySessionCallback#TERMINATE_REASON_DONE}.
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#destroy()} is
+         *     Session will be terminated when {@link WifiAwareDiscoveryBaseSession#destroy()} is
          *     called.
          *
          * @param subscribeCount Number of subscribe packets to broadcast.
@@ -377,11 +379,11 @@ public final class SubscribeConfig implements Parcelable {
          * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe session
          * will be alive - i.e. broadcasting a packet. When the TTL is reached
          * an event will be generated for
-         * {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)} with
-         * {@link WifiNanDiscoverySessionCallback#TERMINATE_REASON_DONE}.
+         * {@link WifiAwareDiscoverySessionCallback#onSessionTerminated(int)} with
+         * {@link WifiAwareDiscoverySessionCallback#TERMINATE_REASON_DONE}.
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#destroy()} is
+         *     Session will be terminated when {@link WifiAwareDiscoveryBaseSession#destroy()} is
          *     called.
          *
          * @param ttlSec Lifetime of a subscribe session in seconds.
@@ -401,7 +403,7 @@ public final class SubscribeConfig implements Parcelable {
          * Sets the match style of the subscription - how are matches from a
          * single match session (corresponding to the same publish action on the
          * peer) reported to the host (using the
-         * {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])}
+         * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])}
          * ). The options are: only report the first match and ignore the rest
          * {@link SubscribeConfig#MATCH_STYLE_FIRST_ONLY} or report every single
          * match {@link SubscribeConfig#MATCH_STYLE_ALL} (the default).
@@ -421,7 +423,7 @@ public final class SubscribeConfig implements Parcelable {
 
         /**
          * Configure whether a subscribe terminate notification
-         * {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)} is reported
+         * {@link WifiAwareDiscoverySessionCallback#onSessionTerminated(int)} is reported
          * back to the callback.
          *
          * @param enable If true the terminate callback will be called when the

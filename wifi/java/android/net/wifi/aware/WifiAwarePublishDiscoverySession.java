@@ -14,39 +14,40 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 import android.annotation.NonNull;
 import android.util.Log;
 
 /**
- * A class representing a NAN publish session. Created when
- * {@link WifiNanSession#publish(android.os.Handler, PublishConfig, WifiNanDiscoverySessionCallback)}
+ * A class representing a Aware publish session. Created when
+ * {@link WifiAwareSession#publish(android.os.Handler, PublishConfig,
+ * WifiAwareDiscoverySessionCallback)}
  * is called and a discovery session is created and returned in
- * {@link WifiNanDiscoverySessionCallback#onPublishStarted(WifiNanPublishDiscoverySession)}. See
- * baseline functionality of all discovery sessions in {@link WifiNanDiscoveryBaseSession}. This
+ * {@link WifiAwareDiscoverySessionCallback#onPublishStarted(WifiAwarePublishDiscoverySession)}. See
+ * baseline functionality of all discovery sessions in {@link WifiAwareDiscoveryBaseSession}. This
  * object allows updating an existing/running publish discovery session using
  * {@link #updatePublish(PublishConfig)}.
  *
- * @hide PROPOSED_NAN_API
+ * @hide PROPOSED_AWARE_API
  */
-public class WifiNanPublishDiscoverySession extends WifiNanDiscoveryBaseSession {
-    private static final String TAG = "WifiNanPublishDiscSsn";
+public class WifiAwarePublishDiscoverySession extends WifiAwareDiscoveryBaseSession {
+    private static final String TAG = "WifiAwarePublishDiscSsn";
 
     /** @hide */
-    public WifiNanPublishDiscoverySession(WifiNanManager manager, int clientId, int sessionId) {
+    public WifiAwarePublishDiscoverySession(WifiAwareManager manager, int clientId, int sessionId) {
         super(manager, clientId, sessionId);
     }
 
     /**
      * Re-configure the currently active publish session. The
-     * {@link WifiNanDiscoverySessionCallback} is not replaced - the same listener used
+     * {@link WifiAwareDiscoverySessionCallback} is not replaced - the same listener used
      * at creation is still used. The results of the configuration are returned using
-     * {@link WifiNanDiscoverySessionCallback}:
+     * {@link WifiAwareDiscoverySessionCallback}:
      * <ul>
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigUpdated()}: configuration
+     *     <li>{@link WifiAwareDiscoverySessionCallback#onSessionConfigUpdated()}: configuration
      *     update succeeded.
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFailed()}: configuration
+     *     <li>{@link WifiAwareDiscoverySessionCallback#onSessionConfigFailed()}: configuration
      *     update failed. The publish discovery session is still running using its previous
      *     configuration (i.e. update failure does not terminate the session).
      * </ul>
@@ -58,9 +59,9 @@ public class WifiNanPublishDiscoverySession extends WifiNanDiscoveryBaseSession 
             Log.w(TAG, "updatePublish: called on terminated session");
             return;
         } else {
-            WifiNanManager mgr = mMgr.get();
+            WifiAwareManager mgr = mMgr.get();
             if (mgr == null) {
-                Log.w(TAG, "updatePublish: called post GC on WifiNanManager");
+                Log.w(TAG, "updatePublish: called post GC on WifiAwareManager");
                 return;
             }
 
