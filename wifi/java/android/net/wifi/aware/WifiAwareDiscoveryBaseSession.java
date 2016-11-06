@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,30 +27,30 @@ import dalvik.system.CloseGuard;
 import java.lang.ref.WeakReference;
 
 /**
- * A class representing a single publish or subscribe NAN session. This object
+ * A class representing a single publish or subscribe Aware session. This object
  * will not be created directly - only its child classes are available:
- * {@link WifiNanPublishDiscoverySession} and {@link WifiNanSubscribeDiscoverySession}. This
+ * {@link WifiAwarePublishDiscoverySession} and {@link WifiAwareSubscribeDiscoverySession}. This
  * class provides functionality common to both publish and subscribe discovery sessions:
  * <ul>
  *     <li>Sending messages: {@link #sendMessage(Object, int, byte[])} or
  *     {@link #sendMessage(Object, int, byte[], int)} methods.
- *     <li>Creating a network-specifier when requesting a NAN connection:
+ *     <li>Creating a network-specifier when requesting a Aware connection:
  *     {@link #createNetworkSpecifier(int, Object, byte[])}.
  * </ul>
  * The {@link #destroy()} method must be called to destroy discovery sessions once they are
  * no longer needed.
  *
- * @hide PROPOSED_NAN_API
+ * @hide PROPOSED_AWARE_API
  */
-public class WifiNanDiscoveryBaseSession {
-    private static final String TAG = "WifiNanDiscoveryBaseSsn";
+public class WifiAwareDiscoveryBaseSession {
+    private static final String TAG = "WifiAwareDiscBaseSsn";
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
     private static final int MAX_SEND_RETRY_COUNT = 5;
 
     /** @hide */
-    protected WeakReference<WifiNanManager> mMgr;
+    protected WeakReference<WifiAwareManager> mMgr;
     /** @hide */
     protected final int mClientId;
     /** @hide */
@@ -71,7 +71,7 @@ public class WifiNanDiscoveryBaseSession {
     }
 
     /** @hide */
-    public WifiNanDiscoveryBaseSession(WifiNanManager manager, int clientId, int sessionId) {
+    public WifiAwareDiscoveryBaseSession(WifiAwareManager manager, int clientId, int sessionId) {
         if (VDBG) {
             Log.v(TAG, "New discovery session created: manager=" + manager + ", clientId="
                     + clientId + ", sessionId=" + sessionId);
@@ -93,12 +93,12 @@ public class WifiNanDiscoveryBaseSession {
      *     This operation must be done on a session which is no longer needed. Otherwise system
      *     resources will continue to be utilized until the application exits. The only
      *     exception is a session for which we received a termination callback,
-     *     {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)}.
+     *     {@link WifiAwareDiscoverySessionCallback#onSessionTerminated(int)}.
      */
     public void destroy() {
-        WifiNanManager mgr = mMgr.get();
+        WifiAwareManager mgr = mMgr.get();
         if (mgr == null) {
-            Log.w(TAG, "destroy: called post GC on WifiNanManager");
+            Log.w(TAG, "destroy: called post GC on WifiAwareManager");
             return;
         }
         mgr.terminateSession(mClientId, mSessionId);
@@ -137,26 +137,26 @@ public class WifiNanDiscoveryBaseSession {
     }
 
     /**
-     * Sends a message to the specified destination. NAN messages are transmitted in the context
+     * Sends a message to the specified destination. Aware messages are transmitted in the context
      * of a discovery session - executed subsequent to a publish/subscribe
-     * {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])} event.
+     * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])} event.
      * <p>
-     *     NAN messages are not guaranteed delivery. Callbacks on
-     *     {@link WifiNanDiscoverySessionCallback} indicate message was transmitted successfully,
-     *     {@link WifiNanDiscoverySessionCallback#onMessageSent(int)}, or transmission failed
+     *     Aware messages are not guaranteed delivery. Callbacks on
+     *     {@link WifiAwareDiscoverySessionCallback} indicate message was transmitted successfully,
+     *     {@link WifiAwareDiscoverySessionCallback#onMessageSent(int)}, or transmission failed
      *     (possibly after several retries) -
-     *     {@link WifiNanDiscoverySessionCallback#onMessageSendFailed(int)}.
+     *     {@link WifiAwareDiscoverySessionCallback#onMessageSendFailed(int)}.
      * <p>
      *     The peer will get a callback indicating a message was received using
-     *     {@link WifiNanDiscoverySessionCallback#onMessageReceived(Object, byte[])}.
+     *     {@link WifiAwareDiscoverySessionCallback#onMessageReceived(Object, byte[])}.
      *
      * @param peerHandle The peer's handle for the message. Must be a result of an
-     *        {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])}
+     *        {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])}
      *        or
-     *        {@link WifiNanDiscoverySessionCallback#onMessageReceived(Object, byte[])} events.
+     *        {@link WifiAwareDiscoverySessionCallback#onMessageReceived(Object, byte[])} events.
      * @param messageId An arbitrary integer used by the caller to identify the message. The same
      *            integer ID will be returned in the callbacks indicating message send success or
-     *            failure. The {@code messageId} is not used internally by the NAN service - it
+     *            failure. The {@code messageId} is not used internally by the Aware service - it
      *                  can be arbitrary and non-unique.
      * @param message The message to be transmitted.
      * @param retryCount An integer specifying how many additional service-level (as opposed to PHY
@@ -170,9 +170,9 @@ public class WifiNanDiscoveryBaseSession {
             Log.w(TAG, "sendMessage: called on terminated session");
             return;
         } else {
-            WifiNanManager mgr = mMgr.get();
+            WifiAwareManager mgr = mMgr.get();
             if (mgr == null) {
-                Log.w(TAG, "sendMessage: called post GC on WifiNanManager");
+                Log.w(TAG, "sendMessage: called post GC on WifiAwareManager");
                 return;
             }
 
@@ -181,28 +181,28 @@ public class WifiNanDiscoveryBaseSession {
     }
 
     /**
-     * Sends a message to the specified destination. NAN messages are transmitted in the context
+     * Sends a message to the specified destination. Aware messages are transmitted in the context
      * of a discovery session - executed subsequent to a publish/subscribe
-     * {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])} event.
+     * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])} event.
      * <p>
-     *     NAN messages are not guaranteed delivery. Callbacks on
-     *     {@link WifiNanDiscoverySessionCallback} indicate message was transmitted successfully,
-     *     {@link WifiNanDiscoverySessionCallback#onMessageSent(int)}, or transmission failed
+     *     Aware messages are not guaranteed delivery. Callbacks on
+     *     {@link WifiAwareDiscoverySessionCallback} indicate message was transmitted successfully,
+     *     {@link WifiAwareDiscoverySessionCallback#onMessageSent(int)}, or transmission failed
      *     (possibly after several retries) -
-     *     {@link WifiNanDiscoverySessionCallback#onMessageSendFailed(int)}.
+     *     {@link WifiAwareDiscoverySessionCallback#onMessageSendFailed(int)}.
      * <p>
      *     The peer will get a callback indicating a message was received using
-     *     {@link WifiNanDiscoverySessionCallback#onMessageReceived(Object, byte[])}.
+     *     {@link WifiAwareDiscoverySessionCallback#onMessageReceived(Object, byte[])}.
      * Equivalent to {@link #sendMessage(Object, int, byte[], int)} with a {@code retryCount} of
      * 0.
      *
      * @param peerHandle The peer's handle for the message. Must be a result of an
-     *        {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])}
+     *        {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])}
      *        or
-     *        {@link WifiNanDiscoverySessionCallback#onMessageReceived(Object, byte[])} events.
+     *        {@link WifiAwareDiscoverySessionCallback#onMessageReceived(Object, byte[])} events.
      * @param messageId An arbitrary integer used by the caller to identify the message. The same
      *            integer ID will be returned in the callbacks indicating message send success or
-     *            failure. The {@code messageId} is not used internally by the NAN service - it
+     *            failure. The {@code messageId} is not used internally by the Aware service - it
      *                  can be arbitrary and non-unique.
      * @param message The message to be transmitted.
      */
@@ -212,8 +212,8 @@ public class WifiNanDiscoveryBaseSession {
 
     /**
      * Start a ranging operation with the specified peers. The peer IDs are obtained from an
-     * {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])} or
-     * {@link WifiNanDiscoverySessionCallback#onMessageReceived(Object, byte[])} operation - can
+     * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])} or
+     * {@link WifiAwareDiscoverySessionCallback#onMessageReceived(Object, byte[])} operation - can
      * only range devices which are part of an ongoing discovery session.
      *
      * @param params   RTT parameters - each corresponding to a specific peer ID (the array sizes
@@ -221,16 +221,17 @@ public class WifiNanDiscoveryBaseSession {
      *                 {@link android.net.wifi.RttManager.RttParams#bssid} member must be set to
      *                 a peer ID - not to a MAC address.
      * @param listener The listener to receive the results of the ranging session.
-     * @hide PROPOSED_NAN_SYSTEM_API [TODO: b/28847998 - track RTT API & visilibity]
+     * @hide PROPOSED_AWARE_SYSTEM_API
+     * [TODO: b/28847998 - track RTT API & visilibity]
      */
     public void startRanging(RttManager.RttParams[] params, RttManager.RttListener listener) {
         if (mTerminated) {
             Log.w(TAG, "startRanging: called on terminated session");
             return;
         } else {
-            WifiNanManager mgr = mMgr.get();
+            WifiAwareManager mgr = mMgr.get();
             if (mgr == null) {
-                Log.w(TAG, "startRanging: called post GC on WifiNanManager");
+                Log.w(TAG, "startRanging: called post GC on WifiAwareManager");
                 return;
             }
 
@@ -240,23 +241,23 @@ public class WifiNanDiscoveryBaseSession {
 
     /**
      * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} for a
-     * WiFi NAN connection to the specified peer. The
+     * WiFi Aware connection to the specified peer. The
      * {@link android.net.NetworkRequest.Builder#addTransportType(int)} should be set to
-     * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_NAN}.
+     * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
      * <p>
-     * This method should be used when setting up a connection with a peer discovered through NAN
+     * This method should be used when setting up a connection with a peer discovered through Aware
      * discovery or communication (in such scenarios the MAC address of the peer is shielded by
-     * an opaque peer ID handle). If a NAN connection is needed to a peer discovered using other
+     * an opaque peer ID handle). If a Aware connection is needed to a peer discovered using other
      * OOB (out-of-band) mechanism then use the alternative
-     * {@link WifiNanSession#createNetworkSpecifier(int, byte[], byte[])} method - which uses the
+     * {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])} method - which uses the
      * peer's MAC address.
      *
      * @param role The role of this device:
-     * {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_INITIATOR} or
-     * {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_RESPONDER}
+     * {@link WifiAwareManager#WIFI_AWARE_DATA_PATH_ROLE_INITIATOR} or
+     * {@link WifiAwareManager#WIFI_AWARE_DATA_PATH_ROLE_RESPONDER}
      * @param peerHandle The peer's handle obtained through
-     * {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])} or
-     * {@link WifiNanDiscoverySessionCallback#onMessageReceived(Object, byte[])}. On a RESPONDER
+     * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])} or
+     * {@link WifiAwareDiscoverySessionCallback#onMessageReceived(Object, byte[])}. On a RESPONDER
      *               this value is used to gate the acceptance of a connection request from only
      *               that peer. A RESPONDER may specified a null - indicating that it will accept
      *               connection requests from any device.
@@ -268,18 +269,19 @@ public class WifiNanDiscoveryBaseSession {
      *
      * @return A string to be used to construct
      * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to
-     * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,android.net.ConnectivityManager.NetworkCallback)}
+     * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
+     * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
      */
-    public String createNetworkSpecifier(@WifiNanManager.DataPathRole int role,
+    public String createNetworkSpecifier(@WifiAwareManager.DataPathRole int role,
             @Nullable Object peerHandle, @Nullable byte[] token) {
         if (mTerminated) {
             Log.w(TAG, "createNetworkSpecifier: called on terminated session");
             return null;
         } else {
-            WifiNanManager mgr = mMgr.get();
+            WifiAwareManager mgr = mMgr.get();
             if (mgr == null) {
-                Log.w(TAG, "createNetworkSpecifier: called post GC on WifiNanManager");
+                Log.w(TAG, "createNetworkSpecifier: called post GC on WifiAwareManager");
                 return null;
             }
 

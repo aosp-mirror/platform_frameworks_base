@@ -2028,12 +2028,12 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device supports Wi-Fi NAN.
+     * {@link #hasSystemFeature}: The device supports Wi-Fi Aware.
      *
-     * @hide PROPOSED_NAN_API
+     * @hide PROPOSED_AWARE_API
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_WIFI_NAN = "android.hardware.wifi.nan";
+    public static final String FEATURE_WIFI_AWARE = "android.hardware.wifi.aware";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and

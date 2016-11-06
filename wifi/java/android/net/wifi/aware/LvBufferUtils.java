@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
 import android.annotation.Nullable;
 
@@ -28,7 +28,7 @@ import java.util.Iterator;
  * Length/Value format. The utilities accept a configuration of the size of
  * the Length field.
  *
- * @hide PROPOSED_NAN_API
+ * @hide PROPOSED_AWARE_API
  */
 public class LvBufferUtils {
     private LvBufferUtils() {

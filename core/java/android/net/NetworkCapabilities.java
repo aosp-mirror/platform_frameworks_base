@@ -406,14 +406,14 @@ public final class NetworkCapabilities implements Parcelable {
     public static final int TRANSPORT_VPN = 4;
 
     /**
-     * Indicates this network uses a Wi-Fi NAN transport.
+     * Indicates this network uses a Wi-Fi Aware transport.
      *
-     * @hide PROPOSED_NAN_API
+     * @hide PROPOSED_AWARE_API
      */
-    public static final int TRANSPORT_WIFI_NAN = 5;
+    public static final int TRANSPORT_WIFI_AWARE = 5;
 
     private static final int MIN_TRANSPORT = TRANSPORT_CELLULAR;
-    private static final int MAX_TRANSPORT = TRANSPORT_WIFI_NAN;
+    private static final int MAX_TRANSPORT = TRANSPORT_WIFI_AWARE;
 
     /**
      * Adds the given transport type to this {@code NetworkCapability} instance.
@@ -869,7 +869,7 @@ public final class NetworkCapabilities implements Parcelable {
                 case TRANSPORT_BLUETOOTH:   transports += "BLUETOOTH"; break;
                 case TRANSPORT_ETHERNET:    transports += "ETHERNET"; break;
                 case TRANSPORT_VPN:         transports += "VPN"; break;
-                case TRANSPORT_WIFI_NAN:    transports += "WIFI_NAN"; break;
+                case TRANSPORT_WIFI_AWARE:  transports += "WIFI_AWARE"; break;
             }
             if (++i < types.length) transports += "|";
         }

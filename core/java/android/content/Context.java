@@ -2664,7 +2664,7 @@ public abstract class Context {
             NETWORK_STATS_SERVICE,
             //@hide: NETWORK_POLICY_SERVICE,
             WIFI_SERVICE,
-            WIFI_NAN_SERVICE,
+            WIFI_AWARE_SERVICE,
             WIFI_P2P_SERVICE,
             WIFI_SCANNING_SERVICE,
             //@hide: WIFI_RTT_SERVICE,
@@ -3134,14 +3134,14 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link android.net.wifi.nan.WifiNanManager} for handling management of
-     * Wi-Fi NAN.
+     * {@link android.net.wifi.aware.WifiAwareManager} for handling management of
+     * Wi-Fi Aware.
      *
      * @see #getSystemService
-     * @see android.net.wifi.nan.WifiNanManager
-     * @hide PROPOSED_NAN_API
+     * @see android.net.wifi.aware.WifiAwareManager
+     * @hide PROPOSED_AWARE_API
      */
-    public static final String WIFI_NAN_SERVICE = "wifinan";
+    public static final String WIFI_AWARE_SERVICE = "wifiaware";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link

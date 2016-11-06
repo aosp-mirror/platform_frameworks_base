@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
-package android.net.wifi.nan;
+package android.net.wifi.aware;
 
-parcelable PublishConfig;
+import android.net.wifi.aware.ConfigRequest;
+import android.net.wifi.RttManager;
+
+/**
+ * Callback interface that WifiAwareManager implements
+ *
+ * {@hide}
+ */
+oneway interface IWifiAwareEventCallback
+{
+    void onConnectSuccess(int clientId);
+    void onConnectFail(int reason);
+    void onIdentityChanged(in byte[] mac);
+
+    void onRangingSuccess(int rangingId, in RttManager.ParcelableRttResults results);
+    void onRangingFailure(int rangingId, int reason, in String description);
+    void onRangingAborted(int rangingId);
+}
