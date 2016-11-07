@@ -55,9 +55,7 @@ public class HardwarePropertiesManager {
     public @interface TemperatureSource {}
 
     /**
-     * Device temperature types. These must match the values in
-     * frameworks/native/include/hardwareproperties/HardwarePropertiesManager.h
-     * TODO(b/32022261) Remove this comment.
+     * Device temperature types.
      */
     /** Temperature of CPUs in Celsius. */
     public static final int DEVICE_TEMPERATURE_CPU = Constants.TemperatureType.CPU;
