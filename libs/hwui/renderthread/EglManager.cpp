@@ -30,6 +30,10 @@
 #include <gl/GrGLInterface.h>
 #include <string>
 
+#ifdef HWUI_GLES_WRAP_ENABLED
+#include "debug/GlesDriver.h"
+#endif
+
 #define GLES_VERSION 2
 
 // Android-specific addition that is used to show when frames began in systrace
@@ -131,7 +135,12 @@ void EglManager::initialize() {
     mRenderThread.renderState().onGLContextCreated();
 
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+#ifdef HWUI_GLES_WRAP_ENABLED
+        debug::GlesDriver* driver = debug::GlesDriver::get();
+        sk_sp<const GrGLInterface> glInterface(driver->getSkiaInterface());
+#else
         sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
+#endif
         LOG_ALWAYS_FATAL_IF(!glInterface.get());
 
         GrContextOptions options;

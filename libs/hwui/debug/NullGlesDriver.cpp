@@ -20,6 +20,11 @@ namespace android {
 namespace uirenderer {
 namespace debug {
 
+sk_sp<const GrGLInterface> NullGlesDriver::getSkiaInterface() {
+    sk_sp<const GrGLInterface> skiaInterface(GrGLCreateNullInterface());
+    return skiaInterface;
+}
+
 struct {
     GLboolean scissorEnabled;
 } gState;

@@ -28,6 +28,7 @@
 #include <GLES3/gl31.h>
 #include <GLES3/gl32.h>
 
+#include <gl/GrGLInterface.h>
 #include <memory>
 
 namespace android {
@@ -39,6 +40,7 @@ namespace debug {
 class GlesDriver {
 public:
     virtual ~GlesDriver() {}
+    virtual sk_sp<const GrGLInterface> getSkiaInterface();
 
 #define GL_ENTRY(ret, api, ...) virtual ret api##_(__VA_ARGS__) = 0;
     #include "gles_decls.in"
