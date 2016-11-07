@@ -309,15 +309,7 @@ public class Main {
     /** Test activity.xml */
     @Test
     public void testActivity() throws ClassNotFoundException {
-        try {
-            renderAndVerify("activity.xml", "activity.png");
-        } catch (AssertionError e) {
-            // This is a KI in CalendarWidget and DatePicker rendering.
-            // Tracker bug: http://b.android.com/214370
-            if (!e.getLocalizedMessage().startsWith("Images differ (by 6.5%)")) {
-                throw e;
-            }
-        }
+        renderAndVerify("activity.xml", "activity.png");
     }
 
     @Test
