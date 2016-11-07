@@ -17,7 +17,7 @@
 package android.os.storage;
 
 /**
- * Callback class for receiving events from MountService about Opaque Binary
+ * Callback class for receiving events from StorageManagerService about Opaque Binary
  * Blobs (OBBs).
  *
  * Don't change the existing transaction Ids as they could be used in the native code.

@@ -645,7 +645,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion == 45) {
              /*
-              * New settings for MountService
+              * New settings for StorageManagerService
               */
             db.beginTransaction();
             try {

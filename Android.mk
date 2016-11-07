@@ -245,9 +245,9 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IUpdateLock.aidl \
 	core/java/android/os/IUserManager.aidl \
 	core/java/android/os/IVibratorService.aidl \
-	core/java/android/os/storage/IMountService.aidl \
-	core/java/android/os/storage/IMountServiceListener.aidl \
-	core/java/android/os/storage/IMountShutdownObserver.aidl \
+	core/java/android/os/storage/IStorageManager.aidl \
+	core/java/android/os/storage/IStorageEventListener.aidl \
+	core/java/android/os/storage/IStorageShutdownObserver.aidl \
 	core/java/android/os/storage/IObbActionListener.aidl \
 	core/java/android/security/IKeystoreService.aidl \
 	core/java/android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl \

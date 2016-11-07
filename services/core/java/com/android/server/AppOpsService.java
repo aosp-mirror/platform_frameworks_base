@@ -54,7 +54,7 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
-import android.os.storage.MountServiceInternal;
+import android.os.storage.StorageManagerInternal;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -294,10 +294,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
-        MountServiceInternal mountServiceInternal = LocalServices.getService(
-                MountServiceInternal.class);
-        mountServiceInternal.addExternalStoragePolicy(
-                new MountServiceInternal.ExternalStorageMountPolicy() {
+        StorageManagerInternal storageManagerInternal = LocalServices.getService(
+                StorageManagerInternal.class);
+        storageManagerInternal.addExternalStoragePolicy(
+                new StorageManagerInternal.ExternalStorageMountPolicy() {
                     @Override
                     public int getMountMode(int uid, String packageName) {
                         if (Process.isIsolated(uid)) {

@@ -20,7 +20,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.storage.DiskInfo;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.util.Log;
@@ -28,7 +28,7 @@ import android.util.Log;
 public final class Sm {
     private static final String TAG = "Sm";
 
-    IMountService mSm;
+    IStorageManager mSm;
 
     private String[] mArgs;
     private int mNextArg;
@@ -55,7 +55,7 @@ public final class Sm {
             throw new IllegalArgumentException();
         }
 
-        mSm = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
+        mSm = IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
         if (mSm == null) {
             throw new RemoteException("Failed to find running mount service");
         }

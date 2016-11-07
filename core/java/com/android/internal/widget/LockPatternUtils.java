@@ -36,7 +36,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -682,10 +682,10 @@ public class LockPatternUtils {
             return;
         }
 
-        IMountService mountService = IMountService.Stub.asInterface(service);
+        IStorageManager storageManager = IStorageManager.Stub.asInterface(service);
         try {
             Log.d(TAG, "Setting owner info");
-            mountService.setField(StorageManager.OWNER_INFO_KEY, ownerInfo);
+            storageManager.setField(StorageManager.OWNER_INFO_KEY, ownerInfo);
         } catch (RemoteException e) {
             Log.e(TAG, "Error changing user info", e);
         }
@@ -746,9 +746,9 @@ public class LockPatternUtils {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... dummy) {
-                IMountService mountService = IMountService.Stub.asInterface(service);
+                IStorageManager storageManager = IStorageManager.Stub.asInterface(service);
                 try {
-                    mountService.changeEncryptionPassword(type, password);
+                    storageManager.changeEncryptionPassword(type, password);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error changing encryption password", e);
                 }
@@ -1122,9 +1122,9 @@ public class LockPatternUtils {
             return;
         }
 
-        IMountService mountService = IMountService.Stub.asInterface(service);
+        IStorageManager storageManager = IStorageManager.Stub.asInterface(service);
         try {
-            mountService.setField(StorageManager.PATTERN_VISIBLE_KEY, enabled ? "1" : "0");
+            storageManager.setField(StorageManager.PATTERN_VISIBLE_KEY, enabled ? "1" : "0");
         } catch (RemoteException e) {
             Log.e(TAG, "Error changing pattern visible state", e);
         }
@@ -1145,9 +1145,9 @@ public class LockPatternUtils {
             return;
         }
 
-        IMountService mountService = IMountService.Stub.asInterface(service);
+        IStorageManager storageManager = IStorageManager.Stub.asInterface(service);
         try {
-            mountService.setField(StorageManager.PASSWORD_VISIBLE_KEY, enabled ? "1" : "0");
+            storageManager.setField(StorageManager.PASSWORD_VISIBLE_KEY, enabled ? "1" : "0");
         } catch (RemoteException e) {
             Log.e(TAG, "Error changing password visible state", e);
         }

@@ -5854,7 +5854,8 @@ public final class Settings {
                 "search_per_source_concurrent_query_limit";
 
         /**
-         * Whether or not alert sounds are played on MountService events. (0 = false, 1 = true)
+         * Whether or not alert sounds are played on StorageManagerService events.
+         * (0 = false, 1 = true)
          * @hide
          */
         public static final String MOUNT_PLAY_NOTIFICATION_SND = "mount_play_not_snd";

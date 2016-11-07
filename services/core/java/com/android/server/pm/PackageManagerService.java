@@ -192,8 +192,8 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
-import android.os.storage.IMountService;
-import android.os.storage.MountServiceInternal;
+import android.os.storage.IStorageManager;
+import android.os.storage.StorageManagerInternal;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
@@ -1470,10 +1470,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     if (reportStatus) {
                         try {
-                            if (DEBUG_SD_INSTALL) Log.i(TAG, "Invoking MountService call back");
-                            PackageHelper.getMountService().finishMediaUpdate();
+                            if (DEBUG_SD_INSTALL) Log.i(TAG,
+                                    "Invoking StorageManagerService call back");
+                            PackageHelper.getStorageManager().finishMediaUpdate();
                         } catch (RemoteException e) {
-                            Log.e(TAG, "MountService not running?");
+                            Log.e(TAG, "StorageManagerService not running?");
                         }
                     }
                 } break;
@@ -4133,9 +4134,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             final long token = Binder.clearCallingIdentity();
             try {
                 if (sUserManager.isInitialized(userId)) {
-                    MountServiceInternal mountServiceInternal = LocalServices.getService(
-                            MountServiceInternal.class);
-                    mountServiceInternal.onExternalStoragePolicyChanged(uid, packageName);
+                    StorageManagerInternal storageManagerInternal = LocalServices.getService(
+                            StorageManagerInternal.class);
+                    storageManagerInternal.onExternalStoragePolicyChanged(uid, packageName);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -7238,15 +7239,15 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Before everything else, see whether we need to fstrim.
         try {
-            IMountService ms = PackageHelper.getMountService();
-            if (ms != null) {
+            IStorageManager sm = PackageHelper.getStorageManager();
+            if (sm != null) {
                 boolean doTrim = false;
                 final long interval = android.provider.Settings.Global.getLong(
                         mContext.getContentResolver(),
                         android.provider.Settings.Global.FSTRIM_MANDATORY_INTERVAL,
                         DEFAULT_MANDATORY_FSTRIM_INTERVAL);
                 if (interval > 0) {
-                    final long timeSinceLast = System.currentTimeMillis() - ms.lastMaintenance();
+                    final long timeSinceLast = System.currentTimeMillis() - sm.lastMaintenance();
                     if (timeSinceLast > interval) {
                         doTrim = true;
                         Slog.w(TAG, "No disk maintenance in " + timeSinceLast
@@ -7266,13 +7267,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                         } catch (RemoteException e) {
                         }
                     }
-                    ms.runMaintenance();
+                    sm.runMaintenance();
                 }
             } else {
-                Slog.e(TAG, "Mount service unavailable!");
+                Slog.e(TAG, "storageManager service unavailable!");
             }
         } catch (RemoteException e) {
-            // Can't happen; MountService is local
+            // Can't happen; StorageManagerService is local
         }
     }
 
@@ -13810,7 +13811,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /**
-     * Extract the MountService "container ID" from the full code path of an
+     * Extract the StorageManagerService "container ID" from the full code path of an
      * .apk.
      */
     static String cidFromCodePath(String fullCodePath) {
@@ -18411,10 +18412,10 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         mInstallerService.systemReady();
         mPackageDexOptimizer.systemReady();
 
-        MountServiceInternal mountServiceInternal = LocalServices.getService(
-                MountServiceInternal.class);
-        mountServiceInternal.addExternalStoragePolicy(
-                new MountServiceInternal.ExternalStorageMountPolicy() {
+        StorageManagerInternal StorageManagerInternal = LocalServices.getService(
+                StorageManagerInternal.class);
+        StorageManagerInternal.addExternalStoragePolicy(
+                new StorageManagerInternal.ExternalStorageMountPolicy() {
             @Override
             public int getMountMode(int uid, String packageName) {
                 if (Process.isIsolated(uid)) {
@@ -19292,7 +19293,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     /**
-     * Called by MountService when the initial ASECs to scan are available.
+     * Called by StorageManagerService when the initial ASECs to scan are available.
      * Should block until all the ASEC containers are finished being scanned.
      */
     public void scanAvailableAsecs() {

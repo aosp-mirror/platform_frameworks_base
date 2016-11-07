@@ -21,7 +21,7 @@ import static android.net.TrafficStats.MB_IN_BYTES;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
@@ -31,14 +31,14 @@ public class PackageHelperTests extends AndroidTestCase {
     private static final boolean localLOGV = true;
     public static final String TAG = "PackageHelperTests";
     protected final String PREFIX = "android.content.pm";
-    private IMountService mMs;
+    private IStorageManager mSm;
     private String fullId;
     private String fullId2;
 
-    private IMountService getMs() {
+    private IStorageManager getSm() {
         IBinder service = ServiceManager.getService("mount");
         if (service != null) {
-            return IMountService.Stub.asInterface(service);
+            return IStorageManager.Stub.asInterface(service);
         } else {
             Log.e(TAG, "Can't get mount service");
         }
@@ -47,12 +47,12 @@ public class PackageHelperTests extends AndroidTestCase {
 
     private void cleanupContainers() throws RemoteException {
         Log.d(TAG,"cleanUp");
-        IMountService ms = getMs();
-        String[] containers = ms.getSecureContainerList();
+        IStorageManager sm = getSm();
+        String[] containers = sm.getSecureContainerList();
         for (int i = 0; i < containers.length; i++) {
             if (containers[i].startsWith(PREFIX)) {
                 Log.d(TAG,"cleaing up "+containers[i]);
-                ms.destroySecureContainer(containers[i], true);
+                sm.destroySecureContainer(containers[i], true);
             }
         }
     }

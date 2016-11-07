@@ -51,7 +51,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -1160,10 +1160,10 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void addUserKeyAuth(int userId, byte[] token, byte[] secret)
             throws RemoteException {
         final UserInfo userInfo = UserManager.get(mContext).getUserInfo(userId);
-        final IMountService mountService = getMountService();
+        final IStorageManager storageManager = getStorageManager();
         final long callingId = Binder.clearCallingIdentity();
         try {
-            mountService.addUserKeyAuth(userId, userInfo.serialNumber, token, secret);
+            storageManager.addUserKeyAuth(userId, userInfo.serialNumber, token, secret);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -1171,10 +1171,10 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void fixateNewestUserKeyAuth(int userId)
             throws RemoteException {
-        final IMountService mountService = getMountService();
+        final IStorageManager storageManager = getStorageManager();
         final long callingId = Binder.clearCallingIdentity();
         try {
-            mountService.fixateNewestUserKeyAuth(userId);
+            storageManager.fixateNewestUserKeyAuth(userId);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -1488,7 +1488,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         // we should, within the first minute of decrypting the phone if this
         // service can't connect to vold, it restarts, and then the new instance
         // does successfully connect.
-        final IMountService service = getMountService();
+        final IStorageManager service = getStorageManager();
         String password;
         long identity = Binder.clearCallingIdentity();
         try {
@@ -1651,10 +1651,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         Secure.LOCK_SCREEN_OWNER_INFO
     };
 
-    private IMountService getMountService() {
+    private IStorageManager getStorageManager() {
         final IBinder service = ServiceManager.getService("mount");
         if (service != null) {
-            return IMountService.Stub.asInterface(service);
+            return IStorageManager.Stub.asInterface(service);
         }
         return null;
     }

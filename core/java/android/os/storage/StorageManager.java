@@ -152,7 +152,7 @@ public class StorageManager {
     /** @hide Underlying data is corrupt */
     public static final int ENCRYPTION_STATE_ERROR_CORRUPT = -4;
 
-    private static volatile IMountService sMountService = null;
+    private static volatile IStorageManager sStorageManager = null;
 
     // TODO: the location of the primary storage block varies from device to device, so we need to
     // try the most likely candidates - a long-term solution would be a device-specific vold
@@ -166,13 +166,13 @@ public class StorageManager {
     private final Context mContext;
     private final ContentResolver mResolver;
 
-    private final IMountService mMountService;
+    private final IStorageManager mStorageManager;
     private final Looper mLooper;
     private final AtomicInteger mNextNonce = new AtomicInteger(0);
 
     private final ArrayList<StorageEventListenerDelegate> mDelegates = new ArrayList<>();
 
-    private static class StorageEventListenerDelegate extends IMountServiceListener.Stub implements
+    private static class StorageEventListenerDelegate extends IStorageEventListener.Stub implements
             Handler.Callback {
         private static final int MSG_STORAGE_STATE_CHANGED = 1;
         private static final int MSG_VOLUME_STATE_CHANGED = 2;
@@ -374,7 +374,7 @@ public class StorageManager {
         mContext = context;
         mResolver = context.getContentResolver();
         mLooper = looper;
-        mMountService = IMountService.Stub.asInterface(ServiceManager.getServiceOrThrow("mount"));
+        mStorageManager = IStorageManager.Stub.asInterface(ServiceManager.getServiceOrThrow("mount"));
     }
 
     /**
@@ -389,7 +389,7 @@ public class StorageManager {
             final StorageEventListenerDelegate delegate = new StorageEventListenerDelegate(listener,
                     mLooper);
             try {
-                mMountService.registerListener(delegate);
+                mStorageManager.registerListener(delegate);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -410,7 +410,7 @@ public class StorageManager {
                 final StorageEventListenerDelegate delegate = i.next();
                 if (delegate.mCallback == listener) {
                     try {
-                        mMountService.unregisterListener(delegate);
+                        mStorageManager.unregisterListener(delegate);
                     } catch (RemoteException e) {
                         throw e.rethrowFromSystemServer();
                     }
@@ -488,7 +488,7 @@ public class StorageManager {
         try {
             final String canonicalPath = new File(rawPath).getCanonicalPath();
             final int nonce = mObbActionListener.addListener(listener);
-            mMountService.mountObb(rawPath, canonicalPath, key, mObbActionListener, nonce);
+            mStorageManager.mountObb(rawPath, canonicalPath, key, mObbActionListener, nonce);
             return true;
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to resolve path: " + rawPath, e);
@@ -523,7 +523,7 @@ public class StorageManager {
 
         try {
             final int nonce = mObbActionListener.addListener(listener);
-            mMountService.unmountObb(rawPath, force, mObbActionListener, nonce);
+            mStorageManager.unmountObb(rawPath, force, mObbActionListener, nonce);
             return true;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -540,7 +540,7 @@ public class StorageManager {
         Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
 
         try {
-            return mMountService.isObbMounted(rawPath);
+            return mStorageManager.isObbMounted(rawPath);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -559,7 +559,7 @@ public class StorageManager {
         Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
 
         try {
-            return mMountService.getMountedObbPath(rawPath);
+            return mStorageManager.getMountedObbPath(rawPath);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -568,7 +568,7 @@ public class StorageManager {
     /** {@hide} */
     public @NonNull List<DiskInfo> getDisks() {
         try {
-            return Arrays.asList(mMountService.getDisks());
+            return Arrays.asList(mStorageManager.getDisks());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -654,7 +654,7 @@ public class StorageManager {
     /** {@hide} */
     public @NonNull List<VolumeInfo> getVolumes() {
         try {
-            return Arrays.asList(mMountService.getVolumes(0));
+            return Arrays.asList(mStorageManager.getVolumes(0));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -664,7 +664,7 @@ public class StorageManager {
     public @NonNull List<VolumeInfo> getWritablePrivateVolumes() {
         try {
             final ArrayList<VolumeInfo> res = new ArrayList<>();
-            for (VolumeInfo vol : mMountService.getVolumes(0)) {
+            for (VolumeInfo vol : mStorageManager.getVolumes(0)) {
                 if (vol.getType() == VolumeInfo.TYPE_PRIVATE && vol.isMountedWritable()) {
                     res.add(vol);
                 }
@@ -678,7 +678,7 @@ public class StorageManager {
     /** {@hide} */
     public @NonNull List<VolumeRecord> getVolumeRecords() {
         try {
-            return Arrays.asList(mMountService.getVolumeRecords(0));
+            return Arrays.asList(mStorageManager.getVolumeRecords(0));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -721,7 +721,7 @@ public class StorageManager {
     /** {@hide} */
     public void mount(String volId) {
         try {
-            mMountService.mount(volId);
+            mStorageManager.mount(volId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -730,7 +730,7 @@ public class StorageManager {
     /** {@hide} */
     public void unmount(String volId) {
         try {
-            mMountService.unmount(volId);
+            mStorageManager.unmount(volId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -739,7 +739,7 @@ public class StorageManager {
     /** {@hide} */
     public void format(String volId) {
         try {
-            mMountService.format(volId);
+            mStorageManager.format(volId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -748,7 +748,7 @@ public class StorageManager {
     /** {@hide} */
     public long benchmark(String volId) {
         try {
-            return mMountService.benchmark(volId);
+            return mStorageManager.benchmark(volId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -757,7 +757,7 @@ public class StorageManager {
     /** {@hide} */
     public void partitionPublic(String diskId) {
         try {
-            mMountService.partitionPublic(diskId);
+            mStorageManager.partitionPublic(diskId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -766,7 +766,7 @@ public class StorageManager {
     /** {@hide} */
     public void partitionPrivate(String diskId) {
         try {
-            mMountService.partitionPrivate(diskId);
+            mStorageManager.partitionPrivate(diskId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -775,7 +775,7 @@ public class StorageManager {
     /** {@hide} */
     public void partitionMixed(String diskId, int ratio) {
         try {
-            mMountService.partitionMixed(diskId, ratio);
+            mStorageManager.partitionMixed(diskId, ratio);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -795,7 +795,7 @@ public class StorageManager {
                 try {
                     // TODO: switch to explicit wipe command when we have it,
                     // for now rely on the fact that vfat format does a wipe
-                    mMountService.partitionPublic(diskId);
+                    mStorageManager.partitionPublic(diskId);
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to wipe " + diskId + ", but soldiering onward", e);
                 }
@@ -808,7 +808,7 @@ public class StorageManager {
     /** {@hide} */
     public void setVolumeNickname(String fsUuid, String nickname) {
         try {
-            mMountService.setVolumeNickname(fsUuid, nickname);
+            mStorageManager.setVolumeNickname(fsUuid, nickname);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -817,7 +817,7 @@ public class StorageManager {
     /** {@hide} */
     public void setVolumeInited(String fsUuid, boolean inited) {
         try {
-            mMountService.setVolumeUserFlags(fsUuid, inited ? VolumeRecord.USER_FLAG_INITED : 0,
+            mStorageManager.setVolumeUserFlags(fsUuid, inited ? VolumeRecord.USER_FLAG_INITED : 0,
                     VolumeRecord.USER_FLAG_INITED);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -827,7 +827,7 @@ public class StorageManager {
     /** {@hide} */
     public void setVolumeSnoozed(String fsUuid, boolean snoozed) {
         try {
-            mMountService.setVolumeUserFlags(fsUuid, snoozed ? VolumeRecord.USER_FLAG_SNOOZED : 0,
+            mStorageManager.setVolumeUserFlags(fsUuid, snoozed ? VolumeRecord.USER_FLAG_SNOOZED : 0,
                     VolumeRecord.USER_FLAG_SNOOZED);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -837,7 +837,7 @@ public class StorageManager {
     /** {@hide} */
     public void forgetVolume(String fsUuid) {
         try {
-            mMountService.forgetVolume(fsUuid);
+            mStorageManager.forgetVolume(fsUuid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -851,7 +851,7 @@ public class StorageManager {
      */
     public String getPrimaryStorageUuid() {
         try {
-            return mMountService.getPrimaryStorageUuid();
+            return mStorageManager.getPrimaryStorageUuid();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -865,7 +865,7 @@ public class StorageManager {
      */
     public void setPrimaryStorageUuid(String volumeUuid, IPackageMoveObserver callback) {
         try {
-            mMountService.setPrimaryStorageUuid(volumeUuid, callback);
+            mStorageManager.setPrimaryStorageUuid(volumeUuid, callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -982,7 +982,7 @@ public class StorageManager {
 
     /** {@hide} */
     public static @NonNull StorageVolume[] getVolumeList(int userId, int flags) {
-        final IMountService mountService = IMountService.Stub.asInterface(
+        final IStorageManager storageManager = IStorageManager.Stub.asInterface(
                 ServiceManager.getService("mount"));
         try {
             String packageName = ActivityThread.currentOpPackageName();
@@ -1003,7 +1003,7 @@ public class StorageManager {
             if (uid <= 0) {
                 return new StorageVolume[0];
             }
-            return mountService.getVolumeList(uid, packageName, flags);
+            return storageManager.getVolumeList(uid, packageName, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1085,7 +1085,7 @@ public class StorageManager {
     /** {@hide} */
     public void createUserKey(int userId, int serialNumber, boolean ephemeral) {
         try {
-            mMountService.createUserKey(userId, serialNumber, ephemeral);
+            mStorageManager.createUserKey(userId, serialNumber, ephemeral);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1094,7 +1094,7 @@ public class StorageManager {
     /** {@hide} */
     public void destroyUserKey(int userId) {
         try {
-            mMountService.destroyUserKey(userId);
+            mStorageManager.destroyUserKey(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1103,7 +1103,7 @@ public class StorageManager {
     /** {@hide} */
     public void unlockUserKey(int userId, int serialNumber, byte[] token, byte[] secret) {
         try {
-            mMountService.unlockUserKey(userId, serialNumber, token, secret);
+            mStorageManager.unlockUserKey(userId, serialNumber, token, secret);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1112,7 +1112,7 @@ public class StorageManager {
     /** {@hide} */
     public void lockUserKey(int userId) {
         try {
-            mMountService.lockUserKey(userId);
+            mStorageManager.lockUserKey(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1121,7 +1121,7 @@ public class StorageManager {
     /** {@hide} */
     public void prepareUserStorage(String volumeUuid, int userId, int serialNumber, int flags) {
         try {
-            mMountService.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
+            mStorageManager.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1130,7 +1130,7 @@ public class StorageManager {
     /** {@hide} */
     public void destroyUserStorage(String volumeUuid, int userId, int flags) {
         try {
-            mMountService.destroyUserStorage(volumeUuid, userId, flags);
+            mStorageManager.destroyUserStorage(volumeUuid, userId, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1138,17 +1138,17 @@ public class StorageManager {
 
     /** {@hide} */
     public static boolean isUserKeyUnlocked(int userId) {
-        if (sMountService == null) {
-            sMountService = IMountService.Stub
+        if (sStorageManager == null) {
+            sStorageManager = IStorageManager.Stub
                     .asInterface(ServiceManager.getService("mount"));
         }
-        if (sMountService == null) {
+        if (sStorageManager == null) {
             Slog.w(TAG, "Early during boot, assuming locked");
             return false;
         }
         final long token = Binder.clearCallingIdentity();
         try {
-            return sMountService.isUserKeyUnlocked(userId);
+            return sStorageManager.isUserKeyUnlocked(userId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         } finally {
@@ -1224,9 +1224,9 @@ public class StorageManager {
         }
 
         try {
-            IMountService mountService = IMountService.Stub.asInterface(
+            IStorageManager storageManager = IStorageManager.Stub.asInterface(
                     ServiceManager.getService("mount"));
-            return mountService.getPasswordType() != CRYPT_TYPE_DEFAULT;
+            return storageManager.getPasswordType() != CRYPT_TYPE_DEFAULT;
         } catch (RemoteException e) {
             Log.e(TAG, "Error getting encryption type");
             return false;
@@ -1280,10 +1280,10 @@ public class StorageManager {
 
     /** {@hide} */
     public static File maybeTranslateEmulatedPathToInternal(File path) {
-        final IMountService mountService = IMountService.Stub.asInterface(
+        final IStorageManager storageManager = IStorageManager.Stub.asInterface(
                 ServiceManager.getService("mount"));
         try {
-            final VolumeInfo[] vols = mountService.getVolumes(0);
+            final VolumeInfo[] vols = storageManager.getVolumes(0);
             for (VolumeInfo vol : vols) {
                 if ((vol.getType() == VolumeInfo.TYPE_EMULATED
                         || vol.getType() == VolumeInfo.TYPE_PUBLIC) && vol.isMountedReadable()) {
@@ -1303,7 +1303,7 @@ public class StorageManager {
     /** {@hide} */
     public ParcelFileDescriptor mountAppFuse(String name) {
         try {
-            return mMountService.mountAppFuse(name);
+            return mStorageManager.mountAppFuse(name);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1319,7 +1319,7 @@ public class StorageManager {
     /** @hide */
     public static final int CRYPT_TYPE_PIN = 3;
 
-    // Constants for the data available via MountService.getField.
+    // Constants for the data available via StorageManagerService.getField.
     /** @hide */
     public static final String SYSTEM_LOCALE_KEY = "SystemLocale";
     /** @hide */

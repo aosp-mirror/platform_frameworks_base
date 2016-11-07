@@ -19,8 +19,8 @@ package android.os.storage;
 import android.content.pm.IPackageMoveObserver;
 import android.os.ParcelFileDescriptor;
 import android.os.storage.DiskInfo;
-import android.os.storage.IMountServiceListener;
-import android.os.storage.IMountShutdownObserver;
+import android.os.storage.IStorageEventListener;
+import android.os.storage.IStorageShutdownObserver;
 import android.os.storage.IObbActionListener;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
@@ -34,15 +34,15 @@ import android.os.storage.VolumeRecord;
  * @hide - Applications should use android.os.storage.StorageManager to access
  *       storage functions.
  */
-interface IMountService {
+interface IStorageManager {
     /**
-     * Registers an IMountServiceListener for receiving async notifications.
+     * Registers an IStorageEventListener for receiving async notifications.
      */
-    void registerListener(IMountServiceListener listener) = 0;
+    void registerListener(IStorageEventListener listener) = 0;
     /**
-     * Unregisters an IMountServiceListener
+     * Unregisters an IStorageEventListener
      */
-    void unregisterListener(IMountServiceListener listener) = 1;
+    void unregisterListener(IStorageEventListener listener) = 1;
     /**
      * Returns true if a USB mass storage host is connected
      */
@@ -58,7 +58,7 @@ interface IMountService {
     boolean isUsbMassStorageEnabled() = 4;
     /**
      * Mount external storage at given mount point. Returns an int consistent
-     * with MountServiceResultCode
+     * with StorageResultCode
      */
     int mountVolume(in String mountPoint) = 5;
     /**
@@ -74,7 +74,7 @@ interface IMountService {
     void unmountVolume(in String mountPoint, boolean force, boolean removeEncryption) = 6;
     /**
      * Format external storage given a mount point. Returns an int consistent
-     * with MountServiceResultCode
+     * with StorageResultCode
      */
     int formatVolume(in String mountPoint) = 7;
     /**
@@ -87,30 +87,30 @@ interface IMountService {
     String getVolumeState(in String mountPoint) = 9;
     /*
      * Creates a secure container with the specified parameters. Returns an int
-     * consistent with MountServiceResultCode
+     * consistent with StorageResultCode
      */
     int createSecureContainer(in String id, int sizeMb, in String fstype, in String key,
             int ownerUid, boolean external) = 10;
     /*
      * Finalize a container which has just been created and populated. After
      * finalization, the container is immutable. Returns an int consistent with
-     * MountServiceResultCode
+     * StorageResultCode
      */
     int finalizeSecureContainer(in String id) = 11;
     /*
      * Destroy a secure container, and free up all resources associated with it.
      * NOTE: Ensure all references are released prior to deleting. Returns an
-     * int consistent with MountServiceResultCode
+     * int consistent with StorageResultCode
      */
     int destroySecureContainer(in String id, boolean force) = 12;
     /*
      * Mount a secure container with the specified key and owner UID. Returns an
-     * int consistent with MountServiceResultCode
+     * int consistent with StorageResultCode
      */
     int mountSecureContainer(in String id, in String key, int ownerUid, boolean readOnly) = 13;
     /*
      * Unount a secure container. Returns an int consistent with
-     * MountServiceResultCode
+     * StorageResultCode
      */
     int unmountSecureContainer(in String id, boolean force) = 14;
     /*
@@ -119,7 +119,7 @@ interface IMountService {
     boolean isSecureContainerMounted(in String id) = 15;
     /*
      * Rename an unmounted secure container. Returns an int consistent with
-     * MountServiceResultCode
+     * StorageResultCode
      */
     int renameSecureContainer(in String oldId, in String newId) = 16;
     /*
@@ -131,19 +131,19 @@ interface IMountService {
      */
     String[] getSecureContainerList() = 18;
     /**
-     * Shuts down the MountService and gracefully unmounts all external media.
+     * Shuts down the StorageManagerService and gracefully unmounts all external media.
      * Invokes call back once the shutdown is complete.
      */
-    void shutdown(IMountShutdownObserver observer) = 19;
+    void shutdown(IStorageShutdownObserver observer) = 19;
     /**
-     * Call into MountService by PackageManager to notify that its done
+     * Call into StorageManagerService by PackageManager to notify that its done
      * processing the media status update request.
      */
     void finishMediaUpdate() = 20;
     /**
      * Mounts an Opaque Binary Blob (OBB) with the specified decryption key and
      * only allows the calling process's UID access to the contents.
-     * MountService will call back to the supplied IObbActionListener to inform
+     * StorageManagerService will call back to the supplied IObbActionListener to inform
      * it of the terminal state of the call.
      */
     void mountObb(in String rawPath, in String canonicalPath, in String key,
@@ -151,7 +151,7 @@ interface IMountService {
     /**
      * Unmounts an Opaque Binary Blob (OBB). When the force flag is specified,
      * any program using it will be forcibly killed to unmount the image.
-     * MountService will call back to the supplied IObbActionListener to inform
+     * StorageManagerService will call back to the supplied IObbActionListener to inform
      * it of the terminal state of the call.
      */
     void unmountObb(in String rawPath, boolean force, IObbActionListener token, int nonce) = 22;
@@ -209,7 +209,7 @@ interface IMountService {
     int verifyEncryptionPassword(in String password) = 32;
     /*
      * Fix permissions in a container which has just been created and populated.
-     * Returns an int consistent with MountServiceResultCode
+     * Returns an int consistent with StorageResultCode
      */
     int fixPermissionsSecureContainer(in String id, int gid, in String filename) = 33;
     /**

@@ -248,7 +248,7 @@ option java_package com.android.server
 51501 idle_maintenance_window_finish (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
 
 # ---------------------------
-# MountService.java
+# StorageManagerService.java
 # ---------------------------
 2755 fstrim_start (time|2|3)
 2756 fstrim_finish (time|2|3)

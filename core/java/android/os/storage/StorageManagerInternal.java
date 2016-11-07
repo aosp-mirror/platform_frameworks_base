@@ -21,7 +21,7 @@ package android.os.storage;
  *
  * @hide Only for use within the system server.
  */
-public abstract class MountServiceInternal {
+public abstract class StorageManagerInternal {
 
     /**
      * Policy that influences how external storage is mounted and reported.

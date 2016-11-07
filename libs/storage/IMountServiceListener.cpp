@@ -34,7 +34,7 @@ public:
             const String16& /* oldState */, const String16& /* newState */) { }
 };
 
-IMPLEMENT_META_INTERFACE(MountServiceListener, "android.os.storage.IMountServiceListener")
+IMPLEMENT_META_INTERFACE(MountServiceListener, "android.os.storage.IStorageEventListener")
 
 // ----------------------------------------------------------------------
 

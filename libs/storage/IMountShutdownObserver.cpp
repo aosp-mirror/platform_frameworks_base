@@ -31,7 +31,7 @@ public:
     virtual void onShutDownComplete(const int32_t /* statusCode */) {}
 };
 
-IMPLEMENT_META_INTERFACE(MountShutdownObserver, "android.os.storage.IMountShutdownObserver")
+IMPLEMENT_META_INTERFACE(MountShutdownObserver, "android.os.storage.IStorageShutdownObserver")
 
 status_t BnMountShutdownObserver::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)

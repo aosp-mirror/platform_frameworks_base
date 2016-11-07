@@ -196,8 +196,8 @@ import android.os.UpdateLock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
-import android.os.storage.IMountService;
-import android.os.storage.MountServiceInternal;
+import android.os.storage.IStorageManager;
+import android.os.storage.StorageManagerInternal;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
@@ -2097,9 +2097,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 try {
                     Locale l = (Locale) msg.obj;
                     IBinder service = ServiceManager.getService("mount");
-                    IMountService mountService = IMountService.Stub.asInterface(service);
+                    IStorageManager storageManager = IStorageManager.Stub.asInterface(service);
                     Log.d(TAG, "Storing locale " + l.toLanguageTag() + " for decryption UI");
-                    mountService.setField(StorageManager.SYSTEM_LOCALE_KEY, l.toLanguageTag());
+                    storageManager.setField(StorageManager.SYSTEM_LOCALE_KEY, l.toLanguageTag());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error storing locale for decryption UI", e);
                 }
@@ -3599,9 +3599,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final IPackageManager pm = AppGlobals.getPackageManager();
                     permGids = pm.getPackageGids(app.info.packageName,
                             MATCH_DEBUG_TRIAGED_MISSING, app.userId);
-                    MountServiceInternal mountServiceInternal = LocalServices.getService(
-                            MountServiceInternal.class);
-                    mountExternal = mountServiceInternal.getExternalStorageMountMode(uid,
+                    StorageManagerInternal storageManagerInternal = LocalServices.getService(
+                            StorageManagerInternal.class);
+                    mountExternal = storageManagerInternal.getExternalStorageMountMode(uid,
                             app.info.packageName);
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();

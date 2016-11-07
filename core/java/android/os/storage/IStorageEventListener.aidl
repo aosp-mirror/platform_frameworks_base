@@ -21,15 +21,15 @@ import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 
 /**
- * Callback class for receiving events from MountService.
+ * Callback class for receiving events from StorageManagerService.
  *
  * Don't change the existing transaction Ids as they could be used in the native code.
  * When adding a new method, assign the next available transaction id.
  *
- * @hide - Applications should use IStorageEventListener for storage event
- *       callbacks.
+ * @hide - Applications should use {@link android.os.storage.StorageEventListener} class for
+ *         storage event callbacks.
  */
-oneway interface IMountServiceListener {
+oneway interface IStorageEventListener {
     /**
      * Detection state of USB Mass Storage has changed
      *

@@ -46,7 +46,7 @@ import android.os.ServiceManager;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.UserManager;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageListener;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
@@ -1149,12 +1149,12 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    IMountService getMs() {
+    IStorageManager getSm() {
         IBinder service = ServiceManager.getService("mount");
         if (service != null) {
-            return IMountService.Stub.asInterface(service);
+            return IStorageManager.Stub.asInterface(service);
         } else {
-            Log.e(TAG, "Can't get mount service");
+            Log.e(TAG, "Can't get storagemanager service");
         }
         return null;
     }
@@ -1185,7 +1185,7 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
             // Wait on observer
             synchronized (observer) {
-                int ret = getMs().mountVolume(path);
+                int ret = getSm().mountVolume(path);
                 if (ret != StorageResultCode.OperationSucceeded) {
                     throw new Exception("Could not mount the media");
                 }
@@ -1224,7 +1224,7 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
             // Wait on observer
             synchronized (observer) {
-                getMs().unmountVolume(path, true, false);
+                getSm().unmountVolume(path, true, false);
                 long waitTime = 0;
                 while ((!observer.isDone()) && (waitTime < MAX_WAIT_TIME)) {
                     observer.wait(WAIT_TIME_INCR);
@@ -2754,7 +2754,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    /* This test creates a stale container via MountService and then installs
+    /* This test creates a stale container via StorageManagerService and then installs
      * a package and verifies that the stale container is cleaned up and install
      * is successful.
      * Please note that this test is very closely tied to the framework's
