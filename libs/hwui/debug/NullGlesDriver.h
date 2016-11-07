@@ -24,6 +24,8 @@ namespace debug {
 
 class NullGlesDriver : public FatalBaseDriver {
 public:
+    virtual sk_sp<const GrGLInterface> getSkiaInterface() override;
+
     virtual void glGenBuffers_(GLsizei n, GLuint *buffers) override;
     virtual void glGenFramebuffers_(GLsizei n, GLuint *framebuffers) override;
     virtual void glGenRenderbuffers_(GLsizei n, GLuint *renderbuffers) override;

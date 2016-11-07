@@ -36,6 +36,11 @@ std::unique_ptr<GlesDriver> GlesDriver::replace(std::unique_ptr<GlesDriver>&& dr
     return ret;
 }
 
+sk_sp<const GrGLInterface> GlesDriver::getSkiaInterface() {
+    sk_sp<const GrGLInterface> skiaInterface(GrGLCreateNativeInterface());
+    return skiaInterface;
+}
+
 } // namespace debug
 } // namespace uirenderer
 } // namespace android
