@@ -658,6 +658,14 @@ public class DockedStackDividerController implements DimLayerUser {
                 mDelayedImeWin = imeWin;
                 imeWin.mWinAnimator.startDelayingAnimationStart();
             }
+
+            // If we are already waiting for something to be drawn, clear out the old one so it
+            // still gets executed.
+            // TODO: Have a real system where we can wait on different windows to be drawn with
+            // different callbacks.
+            if (mService.mWaitingForDrawnCallback != null) {
+                mService.mWaitingForDrawnCallback.run();
+            }
             mService.mWaitingForDrawnCallback = () -> {
                 mAnimationStartDelayed = false;
                 if (mDelayedImeWin != null) {
