@@ -15,7 +15,8 @@ LOCAL_SHARED_LIBRARIES :=  \
     libutils \
     libbinder \
     libhardware_legacy \
-    libmedia
+    libmedia \
+    libaudioclient \
 
 LOCAL_MODULE_TAGS := tests
 

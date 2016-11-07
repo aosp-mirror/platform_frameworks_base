@@ -12,7 +12,7 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libandroid_runtime \
     libnativehelper \
-    libmedia \
+    libaudioclient \
     libmediandk \
     libbinder
 
