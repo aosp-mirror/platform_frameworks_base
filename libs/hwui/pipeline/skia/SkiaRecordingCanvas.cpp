@@ -41,7 +41,7 @@ void SkiaRecordingCanvas::initDisplayList(uirenderer::RenderNode* renderNode, in
     }
     SkRect bounds = SkRect::MakeWH(width, height);
     if (mDisplayList) {
-        mDisplayList->reset(nullptr, bounds);
+        mDisplayList->reset(bounds);
     } else {
         mDisplayList.reset(new SkiaDisplayList(bounds));
     }

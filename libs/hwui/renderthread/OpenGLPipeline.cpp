@@ -31,7 +31,8 @@ namespace uirenderer {
 namespace renderthread {
 
 OpenGLPipeline::OpenGLPipeline(RenderThread& thread)
-        :  mEglManager(thread.eglManager()), mRenderThread(thread) {
+        :  mEglManager(thread.eglManager())
+        , mRenderThread(thread) {
 }
 
 MakeCurrentResult OpenGLPipeline::makeCurrent() {
@@ -220,6 +221,19 @@ bool OpenGLPipeline::createOrUpdateLayer(RenderNode* node,
     }
 
     return transformUpdateNeeded;
+}
+
+bool OpenGLPipeline::pinImages(LsaVector<sk_sp<Bitmap>>& images) {
+    TextureCache& cache = Caches::getInstance().textureCache;
+    bool prefetchSucceeded = true;
+    for (auto& bitmapResource : images) {
+        prefetchSucceeded &= cache.prefetchAndMarkInUse(this, bitmapResource.get());
+    }
+    return prefetchSucceeded;
+}
+
+void OpenGLPipeline::unpinImages() {
+    Caches::getInstance().textureCache.resetMarkInUse(this);
 }
 
 void OpenGLPipeline::destroyLayer(RenderNode* node) {

@@ -34,6 +34,10 @@ public:
 
     void onDestroyHardwareResources() override;
 
+    bool pinImages(std::vector<SkImage*>& mutableImages) override;
+    bool pinImages(LsaVector<sk_sp<Bitmap>>& images) override { return false; }
+    void unpinImages() override;
+
     void renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
             LayerUpdateQueue* layerUpdateQueue, bool opaque,
             const BakedOpRenderer::LightInfo& lightInfo) override;
@@ -101,6 +105,7 @@ protected:
 
 private:
     TaskManager mTaskManager;
+    std::vector<sk_sp<SkImage>> mPinnedImages;
     static float mLightRadius;
     static uint8_t mAmbientShadowAlpha;
     static uint8_t mSpotShadowAlpha;

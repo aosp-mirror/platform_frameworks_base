@@ -51,7 +51,7 @@ public:
      * constructed with the provided bounds.  The reuse avoids any overhead
      * associated with destroying the SkLiteDL as well as the deques and vectors.
      */
-    void reset(GrContext* context, SkRect bounds);
+    void reset(SkRect bounds);
 
     /**
      * Use the linear allocator to create any SkDrawables needed by the display
@@ -119,21 +119,6 @@ public:
     void updateChildren(std::function<void(RenderNode*)> updateFn) override;
 
     /**
-     * Pin/Unpin any mutable images to the GPU cache. A pinned images is
-     * guaranteed to be remain in the cache until it has been unpinned which
-     * we leverage to avoid making a CPU copy of the pixels.
-     */
-    void pinImages(GrContext* context);
-    void unpinImages(GrContext* context);
-
-    /**
-     * If a SkiaDisplayList is deleted on the UI thread we cache a list of any
-     * images that need unpinned from the GPU cache and call this function on
-     * a subsequent frame to perform that cleanup.
-     */
-    static void cleanupImages(GrContext* context);
-
-    /**
      * We use std::deque here because (1) we need to iterate through these
      * elements and (2) mDrawable holds pointers to the elements, so they cannot
      * relocate.
@@ -145,9 +130,6 @@ public:
     sk_sp<SkLiteDL> mDrawable;
 
     bool mIsProjectionReceiver = false;
-
-private:
-    bool mPinnedImages = false;
 };
 
 }; // namespace skiapipeline

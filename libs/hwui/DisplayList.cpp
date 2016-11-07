@@ -25,6 +25,7 @@
 #include "RecordedOp.h"
 #include "RenderNode.h"
 #include "VectorDrawable.h"
+#include "renderthread/CanvasContext.h"
 
 namespace android {
 namespace uirenderer {
@@ -105,11 +106,8 @@ void DisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) {
 
 bool DisplayList::prepareListAndChildren(TreeInfo& info, bool functorsNeedLayer,
         std::function<void(RenderNode*, TreeInfo&, bool)> childFn) {
-    TextureCache& cache = Caches::getInstance().textureCache;
-    for (auto& bitmapResource : bitmapResources) {
-        void* ownerToken = &info.canvasContext;
-        info.prepareTextures = cache.prefetchAndMarkInUse(ownerToken, bitmapResource.get());
-    }
+    info.prepareTextures = info.canvasContext.pinImages(bitmapResources);
+
     for (auto&& op : children) {
         RenderNode* childNode = op->renderNode;
         info.damageAccumulator->pushTransform(&op->localMatrix);

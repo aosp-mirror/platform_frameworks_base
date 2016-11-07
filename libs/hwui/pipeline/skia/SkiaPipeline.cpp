@@ -46,6 +46,22 @@ void SkiaPipeline::onDestroyHardwareResources() {
     // which will flush temporary resources over time.
 }
 
+bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {
+    for (SkImage* image : mutableImages) {
+        mPinnedImages.emplace_back(sk_ref_sp(image));
+        // TODO: return false if texture creation fails (see b/32691999)
+        SkImage_pinAsTexture(image, mRenderThread.getGrContext());
+    }
+    return true;
+}
+
+void SkiaPipeline::unpinImages() {
+    for (auto& image : mPinnedImages) {
+        SkImage_unpinAsTexture(image.get(), mRenderThread.getGrContext());
+    }
+    mPinnedImages.clear();
+}
+
 void SkiaPipeline::renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
         LayerUpdateQueue* layerUpdateQueue, bool opaque,
         const BakedOpRenderer::LightInfo& lightInfo) {
@@ -153,9 +169,6 @@ public:
 void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
         const std::vector<sp<RenderNode>>& nodes, bool opaque, const Rect &contentDrawBounds,
         sk_sp<SkSurface> surface) {
-
-    // unpin all mutable images that were attached to nodes deleted while on the UI thread
-    SkiaDisplayList::cleanupImages(surface->getCanvas()->getGrContext());
 
     // draw all layers up front
     renderLayersImpl(layers, opaque);

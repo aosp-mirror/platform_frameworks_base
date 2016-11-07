@@ -20,7 +20,7 @@
 #include "VectorDrawable.h"
 
 #include <SkImagePriv.h>
-#include <SkMutex.h>
+
 
 namespace android {
 namespace uirenderer {
@@ -40,7 +40,7 @@ void SkiaDisplayList::syncContents() {
 }
 
 bool SkiaDisplayList::reuseDisplayList(RenderNode* node, renderthread::CanvasContext* context) {
-    reset(context ? context->getGrContext() : nullptr, SkRect::MakeEmpty());
+    reset(SkRect::MakeEmpty());
     node->attachAvailableList(this);
     return true;
 }
@@ -53,9 +53,12 @@ void SkiaDisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) 
 
 bool SkiaDisplayList::prepareListAndChildren(TreeInfo& info, bool functorsNeedLayer,
         std::function<void(RenderNode*, TreeInfo&, bool)> childFn) {
-    // force all mutable images to be pinned in the GPU cache for the duration
-    // of this frame
-    pinImages(info.canvasContext.getGrContext());
+    // If the prepare tree is triggered by the UI thread then we must force all
+    // mutable images to be pinned in the GPU cache until the next UI thread
+    // draw
+    if (info.mode == TreeInfo::MODE_FULL) {
+        info.prepareTextures = info.canvasContext.pinImages(mMutableImages);
+    }
 
     for (auto& child : mChildNodes) {
         RenderNode* childNode = child.getRenderNode();
@@ -78,45 +81,7 @@ bool SkiaDisplayList::prepareListAndChildren(TreeInfo& info, bool functorsNeedLa
     return isDirty;
 }
 
-static std::vector<sk_sp<SkImage>> gPinnedImages;
-static SkBaseMutex gLock;
-
-void SkiaDisplayList::pinImages(GrContext* context) {
-    if (mPinnedImages) return;
-    for (SkImage* image : mMutableImages) {
-        SkImage_pinAsTexture(image, context);
-    }
-    mPinnedImages = true;
-}
-
-void SkiaDisplayList::unpinImages(GrContext* context) {
-    if (!mPinnedImages) return;
-    if (context) {
-        for (SkImage* image : mMutableImages) {
-            SkImage_unpinAsTexture(image, context);
-        }
-    } else {
-        gLock.acquire();
-        for (SkImage* image : mMutableImages) {
-            gPinnedImages.emplace_back(sk_ref_sp(image));
-        }
-        gLock.release();
-    }
-    mPinnedImages = false;
-}
-
-void SkiaDisplayList::cleanupImages(GrContext* context) {
-    gLock.acquire();
-    for (auto& image : gPinnedImages) {
-        SkImage_unpinAsTexture(image.get(), context);
-    }
-    gPinnedImages.clear();
-    gLock.release();
-}
-
-void SkiaDisplayList::reset(GrContext* context, SkRect bounds) {
-    unpinImages(context);
-    SkASSERT(!mPinnedImages);
+void SkiaDisplayList::reset(SkRect bounds) {
     mIsProjectionReceiver = false;
 
     mDrawable->reset(bounds);

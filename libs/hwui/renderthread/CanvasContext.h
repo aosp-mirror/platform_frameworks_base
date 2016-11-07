@@ -80,6 +80,26 @@ public:
     }
 
     /**
+     * Pin any mutable images to the GPU cache. A pinned images is guaranteed to
+     * remain in the cache until it has been unpinned. We leverage this feature
+     * to avoid making a CPU copy of the pixels.
+     *
+     * @return true if the images have been successfully pinned to the GPU cache
+     *         and false otherwise (e.g. cache limits have been exceeded).
+     */
+    bool pinImages(std::vector<SkImage*>& mutableImages) {
+        return mRenderPipeline->pinImages(mutableImages);
+    }
+    bool pinImages(LsaVector<sk_sp<Bitmap>>& images) {
+        return mRenderPipeline->pinImages(images);
+    }
+
+    /**
+     * Unpin any image that had be previously pinned to the GPU cache
+     */
+    void unpinImages() { mRenderPipeline->unpinImages(); }
+
+    /**
      * Destroy any layers that have been attached to the provided RenderNode removing
      * any state that may have been set during createOrUpdateLayer().
      */
