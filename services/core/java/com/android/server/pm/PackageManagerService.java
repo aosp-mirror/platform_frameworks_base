@@ -80,7 +80,6 @@ import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
-
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
@@ -5965,7 +5964,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     int status = (int)(packedStatus >> 32);
                     int linkGeneration = (int)(packedStatus & 0xFFFFFFFF);
                     if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
-                        if (DEBUG_DOMAIN_VERIFICATION) {
+                        if (DEBUG_DOMAIN_VERIFICATION || debug) {
                             Slog.i(TAG, "  + always: " + info.activityInfo.packageName
                                     + " : linkgen=" + linkGeneration);
                         }
@@ -5974,18 +5973,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                         info.preferredOrder = linkGeneration;
                         alwaysList.add(info);
                     } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
-                        if (DEBUG_DOMAIN_VERIFICATION) {
+                        if (DEBUG_DOMAIN_VERIFICATION || debug) {
                             Slog.i(TAG, "  + never: " + info.activityInfo.packageName);
                         }
                         neverList.add(info);
                     } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
-                        if (DEBUG_DOMAIN_VERIFICATION) {
+                        if (DEBUG_DOMAIN_VERIFICATION || debug) {
                             Slog.i(TAG, "  + always-ask: " + info.activityInfo.packageName);
                         }
                         alwaysAskList.add(info);
                     } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED ||
                             status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK) {
-                        if (DEBUG_DOMAIN_VERIFICATION) {
+                        if (DEBUG_DOMAIN_VERIFICATION || debug) {
                             Slog.i(TAG, "  + ask: " + info.activityInfo.packageName);
                         }
                         undefinedList.add(info);
@@ -12143,7 +12142,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         IActivityManager am = ActivityManager.getService();
         if (am != null) {
             try {
-                am.startService(null, intent, null, mContext.getOpPackageName(),
+                am.startService(null, intent, null, -1, null, mContext.getOpPackageName(),
                         UserHandle.USER_SYSTEM);
             } catch (RemoteException e) {
             }
@@ -16627,7 +16626,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         extras, 0, null, null, removedUsers);
                 if (dataRemoved && !isRemovedPackageSystemUpdate) {
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_REMOVED,
-                            removedPackage, extras, 0, null, null, removedUsers);
+                            removedPackage, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
+                            null, null, removedUsers);
                 }
             }
             if (removedAppId >= 0) {
@@ -19581,7 +19581,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                             count = 0;
                             for (PackageSetting ps : allPackageSettings) {
                                 final long status = ps.getDomainVerificationStatusForUser(userId);
-                                if (status >> 32 == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
+                                if (status >> 32 == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED
+                                        && !DEBUG_DOMAIN_VERIFICATION) {
                                     continue;
                                 }
                                 pw.println(prefix + "Package: " + ps.name);
