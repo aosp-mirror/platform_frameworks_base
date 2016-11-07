@@ -304,6 +304,7 @@ public class WifiAwareManager {
      * limitations on configurations, e.g. the maximum service name length.
      *
      * @return An object specifying configuration limitations of Aware.
+     * @hide PROPOSED_AWARE_API
      */
     public WifiAwareCharacteristics getCharacteristics() {
         try {
