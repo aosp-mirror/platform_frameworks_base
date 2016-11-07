@@ -3535,7 +3535,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // If this is a live region, we should send a subtree change event
         // from this view. Otherwise, we can let it propagate up.
         if (getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE) {
-            notifyViewAccessibilityStateChangedIfNeeded(changeType);
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
         } else if (mParent != null) {
             try {
                 mParent.notifySubtreeAccessibilityStateChanged(this, source, changeType);
