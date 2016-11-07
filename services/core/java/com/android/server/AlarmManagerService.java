@@ -938,7 +938,7 @@ class AlarmManagerService extends SystemService {
 
         try {
             ActivityManagerNative.getDefault().registerUidObserver(new UidObserver(),
-                    ActivityManager.UID_OBSERVER_IDLE);
+                    ActivityManager.UID_OBSERVER_IDLE, null);
         } catch (RemoteException e) {
             // ignored; both services live in system_server
         }

@@ -246,7 +246,7 @@ public class NetworkPolicyManagerServiceTest {
                 Log.d(TAG, "set mUidObserver to " + mUidObserver);
                 return null;
             }
-        }).when(mActivityManager).registerUidObserver(any(), anyInt());
+        }).when(mActivityManager).registerUidObserver(any(), anyInt(), null);
 
         mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager, mStatsService,
                 mNetworkManager, mIpm, mTime, mPolicyDir, true);

@@ -3677,7 +3677,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     void injectRegisterUidObserver(IUidObserver observer, int which) {
         try {
-            ActivityManagerNative.getDefault().registerUidObserver(observer, which);
+            ActivityManagerNative.getDefault().registerUidObserver(observer, which, null);
         } catch (RemoteException shouldntHappen) {
         }
     }
