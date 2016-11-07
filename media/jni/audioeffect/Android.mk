@@ -11,7 +11,8 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libandroid_runtime \
     libnativehelper \
-    libmedia
+    libmedia \
+    libaudioclient \
 
 LOCAL_C_INCLUDES := \
     $(call include-path-for, audio-effects)
