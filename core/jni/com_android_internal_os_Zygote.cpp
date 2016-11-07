@@ -454,6 +454,20 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   SetForkLoad(true);
 #endif
 
+  sigset_t sigchld;
+  sigemptyset(&sigchld);
+  sigaddset(&sigchld, SIGCHLD);
+
+  // Temporarily block SIGCHLD during forks. The SIGCHLD handler might
+  // log, which would result in the logging FDs we close being reopened.
+  // This would cause failures because the FDs are not whitelisted.
+  //
+  // Note that the zygote process is single threaded at this point.
+  if (sigprocmask(SIG_BLOCK, &sigchld, nullptr) == -1) {
+    ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
+    RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_BLOCK, { SIGCHLD }) failed.");
+  }
+
   // Close any logging related FDs before we start evaluating the list of
   // file descriptors.
   __android_log_close();
@@ -483,6 +497,11 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     // with the zygote across a fork.
     if (!gOpenFdTable->ReopenOrDetach()) {
       RuntimeAbort(env, __LINE__, "Unable to reopen whitelisted descriptors.");
+    }
+
+    if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
+      ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
+      RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_UNBLOCK, { SIGCHLD }) failed.");
     }
 
     // Keep capabilities across UID change, unless we're staying root.
@@ -618,6 +637,11 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     SetForkLoad(false);
 #endif
 
+    // We blocked SIGCHLD prior to a fork, we unblock it here.
+    if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
+      ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
+      RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_UNBLOCK, { SIGCHLD }) failed.");
+    }
   }
   return pid;
 }
