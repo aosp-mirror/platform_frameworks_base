@@ -16,7 +16,13 @@
 
 package com.android.systemui.doze;
 
+import android.app.AlarmManager;
 import android.content.Context;
+import android.os.Handler;
+import android.os.SystemClock;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * The policy controlling doze.
@@ -24,16 +30,25 @@ import android.content.Context;
 public class DozeUi implements DozeMachine.Part {
 
     private final Context mContext;
+    private final AlarmManager mAlarmManager;
     private final DozeHost mHost;
-    private DozeFactory.WakeLock mWakeLock;
-    private DozeMachine mMachine;
+    private final Handler mHandler;
+    private final DozeFactory.WakeLock mWakeLock;
+    private final DozeMachine mMachine;
+    private final AlarmManager.OnAlarmListener mTimeTick;
 
-    public DozeUi(Context context, DozeMachine machine, DozeFactory.WakeLock wakeLock,
-            DozeHost host) {
+    private boolean mTimeTickScheduled = false;
+
+    public DozeUi(Context context, AlarmManager alarmManager, DozeMachine machine,
+            DozeFactory.WakeLock wakeLock, DozeHost host, Handler handler) {
         mContext = context;
+        mAlarmManager = alarmManager;
         mMachine = machine;
         mWakeLock = wakeLock;
         mHost = host;
+        mHandler = handler;
+
+        mTimeTick = this::onTimeTick;
     }
 
     private void pulseWhileDozing(int reason) {
@@ -54,6 +69,12 @@ public class DozeUi implements DozeMachine.Part {
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         switch (newState) {
+            case DOZE_AOD:
+                scheduleTimeTick();
+                break;
+            case DOZE:
+                unscheduleTimeTick();
+                break;
             case DOZE_REQUEST_PULSE:
                 pulseWhileDozing(DozeLog.PULSE_REASON_NOTIFICATION /* TODO */);
                 break;
@@ -62,7 +83,52 @@ public class DozeUi implements DozeMachine.Part {
                 break;
             case FINISH:
                 mHost.stopDozing();
+                unscheduleTimeTick();
                 break;
         }
+    }
+
+    private void scheduleTimeTick() {
+        if (mTimeTickScheduled) {
+            return;
+        }
+
+        long delta = roundToNextMinute(System.currentTimeMillis()) - System.currentTimeMillis();
+        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + delta, "doze_time_tick", mTimeTick, mHandler);
+
+        mTimeTickScheduled = true;
+    }
+
+    private void unscheduleTimeTick() {
+        if (!mTimeTickScheduled) {
+            return;
+        }
+        mAlarmManager.cancel(mTimeTick);
+    }
+
+    private long roundToNextMinute(long timeInMillis) {
+        Calendar calendar = GregorianCalendar.getInstance();
+        calendar.setTimeInMillis(timeInMillis);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.add(Calendar.MINUTE, 1);
+
+        return calendar.getTimeInMillis();
+    }
+
+    private void onTimeTick() {
+        if (!mTimeTickScheduled) {
+            // Alarm was canceled, but we still got the callback. Ignore.
+            return;
+        }
+
+        mHost.dozeTimeTick();
+
+        // Keep wakelock until a frame has been pushed.
+        mHandler.post(mWakeLock.wrap(() -> {}));
+
+        mTimeTickScheduled = false;
+        scheduleTimeTick();
     }
 }

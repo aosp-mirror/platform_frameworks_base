@@ -16,6 +16,7 @@
 
 package com.android.systemui.doze;
 
+import android.app.AlarmManager;
 import android.app.Application;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -25,10 +26,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
-import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIApplication;
-import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.doze.DozeProvider;
 import com.android.systemui.statusbar.phone.DozeParameters;
 
@@ -45,6 +43,7 @@ public class DozeFactory {
         Context context = dozeService;
         SensorManager sensorManager = context.getSystemService(SensorManager.class);
         PowerManager powerManager = context.getSystemService(PowerManager.class);
+        AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
 
         DozeHost host = getHost(dozeService);
         AmbientDisplayConfiguration config = new AmbientDisplayConfiguration(context);
@@ -57,7 +56,7 @@ public class DozeFactory {
         machine.setParts(new DozeMachine.Part[]{
                 createDozeTriggers(context, sensorManager, host, config, params, handler, wakeLock,
                         machine),
-                createDozeUi(context, host, wakeLock, machine),
+                createDozeUi(context, host, wakeLock, machine, handler, alarmManager),
         });
 
         return machine;
@@ -72,7 +71,7 @@ public class DozeFactory {
     }
 
     private DozeMachine.Part createDozeUi(Context context, DozeHost host, WakeLock wakeLock,
-            DozeMachine machine) {
+            DozeMachine machine, Handler handler, AlarmManager alarmManager) {
         if (mDozePlugin != null) {
             DozeProvider.DozeUi dozeUi = mDozePlugin.provideDozeUi(context,
                     pluginMachine(context, machine, host),
@@ -82,7 +81,7 @@ public class DozeFactory {
                         pluginState(newState));
             };
         } else {
-            return new DozeUi(context, machine, wakeLock, host);
+            return new DozeUi(context, alarmManager, machine, wakeLock, host, handler);
         }
     }
 
