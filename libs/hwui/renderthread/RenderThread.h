@@ -37,6 +37,7 @@ class DisplayEventReceiver;
 
 namespace uirenderer {
 
+class Readback;
 class RenderState;
 class TestUtils;
 
@@ -93,6 +94,7 @@ public:
     RenderState& renderState() const { return *mRenderState; }
     EglManager& eglManager() const { return *mEglManager; }
     JankTracker& jankTracker() { return *mJankTracker; }
+    Readback& readback();
 
     const DisplayInfo& mainDisplayInfo() { return mDisplayInfo; }
 
@@ -151,6 +153,7 @@ private:
     EglManager* mEglManager;
 
     JankTracker* mJankTracker = nullptr;
+    Readback* mReadback = nullptr;
 
     sk_sp<GrContext> mGrContext;
     VulkanManager* mVkManager;

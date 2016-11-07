@@ -17,8 +17,10 @@
 #include "RenderThread.h"
 
 #include "../renderstate/RenderState.h"
+#include "../pipeline/skia/SkiaOpenGLReadback.h"
 #include "CanvasContext.h"
 #include "EglManager.h"
+#include "OpenGLReadback.h"
 #include "RenderProxy.h"
 #include "VulkanManager.h"
 
@@ -194,6 +196,30 @@ void RenderThread::initThreadLocals() {
     mRenderState = new RenderState(*this);
     mJankTracker = new JankTracker(mDisplayInfo);
     mVkManager = new VulkanManager(*this);
+}
+
+Readback& RenderThread::readback() {
+
+    if (!mReadback) {
+        auto renderType = Properties::getRenderPipelineType();
+        switch (renderType) {
+            case RenderPipelineType::OpenGL:
+                mReadback = new OpenGLReadbackImpl(*this);
+                break;
+            case RenderPipelineType::SkiaGL:
+            case RenderPipelineType::SkiaVulkan:
+                // It works to use the OpenGL pipeline for Vulkan but this is not
+                // ideal as it causes us to create an OpenGL context in addition
+                // to the Vulkan one.
+                mReadback = new skiapipeline::SkiaOpenGLReadback(*this);
+                break;
+            default:
+                LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+                break;
+        }
+    }
+
+    return *mReadback;
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {

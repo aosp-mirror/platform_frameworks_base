@@ -17,9 +17,9 @@
 #include "SkiaOpenGLPipeline.h"
 
 #include "DeferredLayerUpdater.h"
+#include "LayerDrawable.h"
 #include "renderthread/EglManager.h"
 #include "renderstate/RenderState.h"
-#include "Readback.h"
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
 #include "utils/TraceUtils.h"
@@ -121,10 +121,16 @@ bool SkiaOpenGLPipeline::swapBuffers(const Frame& frame, bool drew,
     return *requireSwap;
 }
 
-bool SkiaOpenGLPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
-    layer->apply();
-    return Readback::copyTextureLayerInto(mRenderThread, *(layer->backingLayer()), bitmap)
-            == CopyResult::Success;
+bool SkiaOpenGLPipeline::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBitmap* bitmap) {
+    if (!mRenderThread.getGrContext()) {
+        return false;
+    }
+
+    deferredLayer->apply();
+
+    SkCanvas canvas(*bitmap);
+    Layer* layer = deferredLayer->backingLayer();
+    return LayerDrawable::DrawLayer(mRenderThread.getGrContext(), &canvas, layer);
 }
 
 DeferredLayerUpdater* SkiaOpenGLPipeline::createTextureLayer() {

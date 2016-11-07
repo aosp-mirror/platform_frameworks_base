@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "Readback.h"
+#include "OpenGLReadback.h"
 
 #include "Caches.h"
 #include "Image.h"
@@ -31,8 +31,69 @@
 namespace android {
 namespace uirenderer {
 
-static CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
-        Texture& sourceTexture, Matrix4& texTransform, const Rect& srcRect,
+CopyResult OpenGLReadback::copySurfaceInto(Surface& surface, const Rect& srcRect,
+        SkBitmap* bitmap) {
+    ATRACE_CALL();
+    mRenderThread.eglManager().initialize();
+
+    // Setup the source
+    sp<GraphicBuffer> sourceBuffer;
+    sp<Fence> sourceFence;
+    Matrix4 texTransform;
+    status_t err = surface.getLastQueuedBuffer(&sourceBuffer, &sourceFence,
+            texTransform.data);
+    texTransform.invalidateType();
+    if (err != NO_ERROR) {
+        ALOGW("Failed to get last queued buffer, error = %d", err);
+        return CopyResult::UnknownError;
+    }
+    if (!sourceBuffer.get()) {
+        ALOGW("Surface doesn't have any previously queued frames, nothing to readback from");
+        return CopyResult::SourceEmpty;
+    }
+    if (sourceBuffer->getUsage() & GRALLOC_USAGE_PROTECTED) {
+        ALOGW("Surface is protected, unable to copy from it");
+        return CopyResult::SourceInvalid;
+    }
+    err = sourceFence->wait(500 /* ms */);
+    if (err != NO_ERROR) {
+        ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
+        return CopyResult::Timeout;
+    }
+
+    // TODO: Can't use Image helper since it forces GL_TEXTURE_2D usage via
+    // GL_OES_EGL_image, which doesn't work since we need samplerExternalOES
+    // to be able to properly sample from the buffer.
+
+    // Create the EGLImage object that maps the GraphicBuffer
+    EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    EGLClientBuffer clientBuffer = (EGLClientBuffer) sourceBuffer->getNativeBuffer();
+    EGLint attrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE };
+
+    EGLImageKHR sourceImage = eglCreateImageKHR(display, EGL_NO_CONTEXT,
+            EGL_NATIVE_BUFFER_ANDROID, clientBuffer, attrs);
+
+    if (sourceImage == EGL_NO_IMAGE_KHR) {
+        ALOGW("eglCreateImageKHR failed (%#x)", eglGetError());
+        return CopyResult::UnknownError;
+    }
+
+    CopyResult copyResult = copyImageInto(sourceImage, texTransform, sourceBuffer->getWidth(),
+            sourceBuffer->getHeight(), srcRect, bitmap);
+
+    // All we're flushing & finishing is the deletion of the texture since
+    // copyImageInto already did a major flush & finish as an implicit
+    // part of glReadPixels, so this shouldn't pose any major stalls.
+    glFinish();
+    eglDestroyImageKHR(display, sourceImage);
+    return copyResult;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
+        Texture& sourceTexture, const Matrix4& texTransform, const Rect& srcRect,
         SkBitmap* bitmap) {
     int destWidth = bitmap->width();
     int destHeight = bitmap->height();
@@ -134,88 +195,40 @@ static CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
     return CopyResult::Success;
 }
 
-CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
-        Surface& surface, const Rect& srcRect, SkBitmap* bitmap) {
-    ATRACE_CALL();
-    renderThread.eglManager().initialize();
+CopyResult OpenGLReadbackImpl::copyImageInto(EGLImageKHR eglImage,
+        const Matrix4& imgTransform, int imgWidth, int imgHeight, const Rect& srcRect,
+        SkBitmap* bitmap) {
 
     Caches& caches = Caches::getInstance();
-
-    // Setup the source
-    sp<GraphicBuffer> sourceBuffer;
-    sp<Fence> sourceFence;
-    Matrix4 texTransform;
-    status_t err = surface.getLastQueuedBuffer(&sourceBuffer, &sourceFence,
-            texTransform.data);
-    texTransform.invalidateType();
-    if (err != NO_ERROR) {
-        ALOGW("Failed to get last queued buffer, error = %d", err);
-        return CopyResult::UnknownError;
-    }
-    if (!sourceBuffer.get()) {
-        ALOGW("Surface doesn't have any previously queued frames, nothing to readback from");
-        return CopyResult::SourceEmpty;
-    }
-    if (sourceBuffer->getUsage() & GRALLOC_USAGE_PROTECTED) {
-        ALOGW("Surface is protected, unable to copy from it");
-        return CopyResult::SourceInvalid;
-    }
-    err = sourceFence->wait(500 /* ms */);
-    if (err != NO_ERROR) {
-        ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
-        return CopyResult::Timeout;
-    }
-
-    // TODO: Can't use Image helper since it forces GL_TEXTURE_2D usage via
-    // GL_OES_EGL_image, which doesn't work since we need samplerExternalOES
-    // to be able to properly sample from the buffer.
-
-    // Create the EGLImage object that maps the GraphicBuffer
-    EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    EGLClientBuffer clientBuffer = (EGLClientBuffer) sourceBuffer->getNativeBuffer();
-    EGLint attrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE };
-
-    EGLImageKHR sourceImage = eglCreateImageKHR(display, EGL_NO_CONTEXT,
-            EGL_NATIVE_BUFFER_ANDROID, clientBuffer, attrs);
-
-    if (sourceImage == EGL_NO_IMAGE_KHR) {
-        ALOGW("eglCreateImageKHR failed (%#x)", eglGetError());
-        return CopyResult::UnknownError;
-    }
     GLuint sourceTexId;
     // Create a 2D texture to sample from the EGLImage
     glGenTextures(1, &sourceTexId);
     caches.textureState().bindTexture(GL_TEXTURE_EXTERNAL_OES, sourceTexId);
-    glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, sourceImage);
+    glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, eglImage);
 
     GLenum status = GL_NO_ERROR;
     while ((status = glGetError()) != GL_NO_ERROR) {
         ALOGW("glEGLImageTargetTexture2DOES failed (%#x)", status);
-        eglDestroyImageKHR(display, sourceImage);
         return CopyResult::UnknownError;
     }
 
     Texture sourceTexture(caches);
-    sourceTexture.wrap(sourceTexId, sourceBuffer->getWidth(),
-            sourceBuffer->getHeight(), 0, 0 /* total lie */, GL_TEXTURE_EXTERNAL_OES);
+    sourceTexture.wrap(sourceTexId, imgWidth, imgHeight, 0, 0 /* total lie */,
+            GL_TEXTURE_EXTERNAL_OES);
 
-    CopyResult copyResult = copyTextureInto(caches, renderThread.renderState(),
-            sourceTexture, texTransform, srcRect, bitmap);
+    CopyResult copyResult = copyTextureInto(caches, mRenderThread.renderState(),
+            sourceTexture, imgTransform, srcRect, bitmap);
     sourceTexture.deleteTexture();
-    // All we're flushing & finishing is the deletion of the texture since
-    // copyTextureInto already did a major flush & finish as an implicit
-    // part of glReadPixels, so this shouldn't pose any major stalls.
-    glFinish();
-    eglDestroyImageKHR(display, sourceImage);
     return copyResult;
 }
 
-CopyResult Readback::copyTextureLayerInto(renderthread::RenderThread& renderThread,
+bool OpenGLReadbackImpl::copyLayerInto(renderthread::RenderThread& renderThread,
         Layer& layer, SkBitmap* bitmap) {
-    ATRACE_CALL();
-    return copyTextureInto(Caches::getInstance(), renderThread.renderState(),
-            layer.getTexture(), layer.getTexTransform(), Rect(), bitmap);
+    return CopyResult::Success == copyTextureInto(Caches::getInstance(),
+            renderThread.renderState(), layer.getTexture(), layer.getTexTransform(),
+            Rect(), bitmap);
 }
+
 
 } // namespace uirenderer
 } // namespace android
