@@ -74,7 +74,7 @@ bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty,
 
     // Draw visual debugging features
     if (CC_UNLIKELY(Properties::showDirtyRegions
-            || ProfileType::None == Properties::getProfileType())) {
+            || ProfileType::None != Properties::getProfileType())) {
         SkCanvas* profileCanvas = mBackbuffer->getCanvas();
         SkiaProfileRenderer profileRenderer(profileCanvas);
         profiler->draw(profileRenderer);
