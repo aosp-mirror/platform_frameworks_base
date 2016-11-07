@@ -11,15 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.doze;
-
-import com.android.internal.hardware.AmbientDisplayConfiguration;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto;
-import com.android.systemui.statusbar.phone.DozeParameters;
 
 import android.annotation.AnyThread;
 import android.app.ActivityManager;
@@ -32,12 +27,17 @@ import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.hardware.AmbientDisplayConfiguration;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto;
+import com.android.systemui.statusbar.phone.DozeParameters;
+
+import java.io.PrintWriter;
 import java.util.List;
 
 public class DozeSensors {
@@ -53,14 +53,14 @@ public class DozeSensors {
     private final TriggerSensor mPickupSensor;
     private final DozeParameters mDozeParameters;
     private final AmbientDisplayConfiguration mConfig;
-    private final PowerManager.WakeLock mWakeLock;
+    private final DozeFactory.WakeLock mWakeLock;
     private final Callback mCallback;
 
     private final Handler mHandler = new Handler();
 
 
     public DozeSensors(Context context, SensorManager sensorManager, DozeParameters dozeParameters,
-            AmbientDisplayConfiguration config, PowerManager.WakeLock wakeLock, Callback callback) {
+            AmbientDisplayConfiguration config, DozeFactory.WakeLock wakeLock, Callback callback) {
         mContext = context;
         mSensorManager = sensorManager;
         mDozeParameters = dozeParameters;
@@ -142,6 +142,13 @@ public class DozeSensors {
 
     public void setDisableSensorsInterferingWithProximity(boolean disable) {
         mPickupSensor.setDisabled(disable);
+    }
+
+    /** Dump current state */
+    public void dump(PrintWriter pw) {
+        for (TriggerSensor s : mSensors) {
+            pw.print("Sensor: "); pw.println(s.toString());
+        }
     }
 
     private class TriggerSensor extends TriggerEventListener {

@@ -5059,7 +5059,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         private static final long PROCESSING_TIME = 500;
 
         private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
-        private final H mHandler = new H();
 
         // Keeps the last reported state by fireNotificationLight.
         private boolean mNotificationLightOn;
@@ -5105,18 +5104,39 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         @Override
-        public void startDozing(@NonNull Runnable ready) {
-            mHandler.obtainMessage(H.MSG_START_DOZING, ready).sendToTarget();
+        public void startDozing() {
+            if (!mDozingRequested) {
+                mDozingRequested = true;
+                DozeLog.traceDozing(mContext, mDozing);
+                updateDozing();
+            }
         }
 
         @Override
         public void pulseWhileDozing(@NonNull PulseCallback callback, int reason) {
-            mHandler.obtainMessage(H.MSG_PULSE_WHILE_DOZING, reason, 0, callback).sendToTarget();
+            mDozeScrimController.pulse(new PulseCallback() {
+
+                @Override
+                public void onPulseStarted() {
+                    callback.onPulseStarted();
+                    mStackScroller.setPulsing(true);
+                }
+
+                @Override
+                public void onPulseFinished() {
+                    callback.onPulseFinished();
+                    mStackScroller.setPulsing(false);
+                }
+            }, reason);
         }
 
         @Override
         public void stopDozing() {
-            mHandler.obtainMessage(H.MSG_STOP_DOZING).sendToTarget();
+            if (mDozingRequested) {
+                mDozingRequested = false;
+                DozeLog.traceDozing(mContext, mDozing);
+                updateDozing();
+            }
         }
 
         @Override
@@ -5140,59 +5160,5 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             return mNotificationLightOn;
         }
 
-        private void handleStartDozing(@NonNull Runnable ready) {
-            if (!mDozingRequested) {
-                mDozingRequested = true;
-                DozeLog.traceDozing(mContext, mDozing);
-                updateDozing();
-            }
-            ready.run();
-        }
-
-        private void handlePulseWhileDozing(@NonNull PulseCallback callback, int reason) {
-            mDozeScrimController.pulse(new PulseCallback() {
-
-                @Override
-                public void onPulseStarted() {
-                    callback.onPulseStarted();
-                    mStackScroller.setPulsing(true);
-                }
-
-                @Override
-                public void onPulseFinished() {
-                    callback.onPulseFinished();
-                    mStackScroller.setPulsing(false);
-                }
-            }, reason);
-        }
-
-        private void handleStopDozing() {
-            if (mDozingRequested) {
-                mDozingRequested = false;
-                DozeLog.traceDozing(mContext, mDozing);
-                updateDozing();
-            }
-        }
-
-        private final class H extends Handler {
-            private static final int MSG_START_DOZING = 1;
-            private static final int MSG_PULSE_WHILE_DOZING = 2;
-            private static final int MSG_STOP_DOZING = 3;
-
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case MSG_START_DOZING:
-                        handleStartDozing((Runnable) msg.obj);
-                        break;
-                    case MSG_PULSE_WHILE_DOZING:
-                        handlePulseWhileDozing((PulseCallback) msg.obj, msg.arg1);
-                        break;
-                    case MSG_STOP_DOZING:
-                        handleStopDozing();
-                        break;
-                }
-            }
-        }
     }
 }

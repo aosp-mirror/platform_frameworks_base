@@ -24,7 +24,7 @@ import android.annotation.NonNull;
 public interface DozeHost {
     void addCallback(@NonNull Callback callback);
     void removeCallback(@NonNull Callback callback);
-    void startDozing(@NonNull Runnable ready);
+    void startDozing();
     void pulseWhileDozing(@NonNull PulseCallback callback, int reason);
     void stopDozing();
     void dozeTimeTick();
