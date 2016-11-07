@@ -35,6 +35,6 @@ public class ScreenshotServiceErrorReceiver extends BroadcastReceiver {
         NotificationManager nm = (NotificationManager)
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
         GlobalScreenshot.notifyScreenshotError(context, nm,
-                R.string.screenshot_failed_to_save_unknown_text);
+                R.string.screenshot_abort_text);
     }
 }

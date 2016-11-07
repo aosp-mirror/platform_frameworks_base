@@ -856,8 +856,8 @@ class GlobalScreenshot {
 
         // Repurpose the existing notification to notify the user of the error
         Notification.Builder b = new Notification.Builder(context)
-            .setTicker(r.getString(R.string.screenshot_failed_title))
-            .setContentTitle(r.getString(R.string.screenshot_failed_title))
+            .setTicker(r.getString(R.string.screenshot_abort_title))
+            .setContentTitle(r.getString(R.string.screenshot_abort_title))
             .setContentText(errorMsg)
             .setSmallIcon(R.drawable.stat_notify_image_error)
             .setWhen(System.currentTimeMillis())
