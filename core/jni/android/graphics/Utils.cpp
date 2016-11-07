@@ -72,9 +72,6 @@ size_t AssetStreamAdaptor::read(void* buffer, size_t size) {
         amount = newOffset - oldOffset;
     } else {
         amount = fAsset->read(buffer, size);
-        if (amount <= 0) {
-            SkDebugf("---- fAsset->read(%d) returned %d\n", size, amount);
-        }
     }
 
     if (amount < 0) {
