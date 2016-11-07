@@ -46,7 +46,7 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     public static final String SERVICE_NAME = "netd_listener";
 
     private static final String TAG = NetdEventListenerService.class.getSimpleName();
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final boolean VDBG = false;
 
     // TODO: read this constant from system property
@@ -88,7 +88,7 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
             byte[] returnCodes = Arrays.copyOf(mReturnCodes, mEventCount);
             int[] latenciesMs = Arrays.copyOf(mLatenciesMs, mEventCount);
             mMetricsLog.log(new DnsEvent(mNetId, eventTypes, returnCodes, latenciesMs));
-            maybeLog(String.format("Logging %d results for netId %d", mEventCount, mNetId));
+            maybeLog("Logging %d results for netId %d", mEventCount, mNetId);
             mEventCount = 0;
         }
 
@@ -155,8 +155,7 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     public synchronized void onDnsEvent(int netId, int eventType, int returnCode, int latencyMs,
             String hostname, String[] ipAddresses, int ipAddressesCount, int uid)
             throws RemoteException {
-        maybeVerboseLog(String.format("onDnsEvent(%d, %d, %d, %d)",
-                netId, eventType, returnCode, latencyMs));
+        maybeVerboseLog("onDnsEvent(%d, %d, %d, %dms)", netId, eventType, returnCode, latencyMs);
 
         DnsEventBatch batch = mEventBatches.get(netId);
         if (batch == null) {
@@ -174,9 +173,9 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     @Override
     // Called concurrently by multiple binder threads.
     // This method must not block or perform long-running operations.
-    public synchronized void onConnectEvent(int netId, int latencyMs, String ipAddr, int port,
+    public synchronized void onConnectEvent(int netId, int error, int latencyMs, String ipAddr, int port,
             int uid) throws RemoteException {
-        maybeVerboseLog(String.format("onConnectEvent(%d, %d)", netId, latencyMs));
+        maybeVerboseLog("onConnectEvent(%d, %d, %dms)", netId, error, latencyMs);
 
         if (mNetdEventCallback != null) {
             mNetdEventCallback.onConnectEvent(ipAddr, port, System.currentTimeMillis(), uid);
@@ -193,11 +192,11 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         pw.decreaseIndent();
     }
 
-    private static void maybeLog(String s) {
-        if (DBG) Log.d(TAG, s);
+    private static void maybeLog(String s, Object... args) {
+        if (DBG) Log.d(TAG, String.format(s, args));
     }
 
-    private static void maybeVerboseLog(String s) {
-        if (VDBG) Log.d(TAG, s);
+    private static void maybeVerboseLog(String s, Object... args) {
+        if (VDBG) Log.d(TAG, String.format(s, args));
     }
 }
