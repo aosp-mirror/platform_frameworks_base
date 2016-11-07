@@ -211,6 +211,7 @@ LOCAL_C_INCLUDES += \
     external/skia/include/private \
     external/skia/src/core \
     external/skia/src/effects \
+    external/skia/src/image \
     external/skia/src/images \
     external/sqlite/dist \
     external/sqlite/android \

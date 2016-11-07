@@ -95,15 +95,13 @@ static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jobject jbitmap,
         // we'll pass an empty SkBitmap to avoid crashing/excepting for compatibility.
         GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
     }
-    sk_sp<SkShader> s = SkMakeBitmapShader(bitmap,
-                                           (SkShader::TileMode)tileModeX,
-                                           (SkShader::TileMode)tileModeY,
-                                           nullptr,
-                                           kNever_SkCopyPixelsMode,
-                                           nullptr);
 
-    ThrowIAE_IfNull(env, s.get());
-    return reinterpret_cast<jlong>(s.release());
+    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
+    sk_sp<SkShader> shader = image->makeShader((SkShader::TileMode)tileModeX,
+                                               (SkShader::TileMode)tileModeY);
+
+    ThrowIAE_IfNull(env, shader.get());
+    return reinterpret_cast<jlong>(shader.release());
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
