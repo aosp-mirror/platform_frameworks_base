@@ -86,8 +86,14 @@ class AutomaticBrightnessController {
     private final int mScreenBrightnessRangeMaximum;
     private final float mDozeScaleFactor;
 
-    // Light sensor event rate in milliseconds.
-    private final int mLightSensorRate;
+    // Initial light sensor event rate in milliseconds.
+    private final int mInitialLightSensorRate;
+
+    // Steady-state light sensor event rate in milliseconds.
+    private final int mNormalLightSensorRate;
+
+    // The current light sensor event rate in milliseconds.
+    private int mCurrentLightSensorRate;
 
     // Stability requirements in milliseconds for accepting a new brightness level.  This is used
     // for debouncing the light sensor.  Different constants are used to debounce the light sensor
@@ -185,7 +191,7 @@ class AutomaticBrightnessController {
     public AutomaticBrightnessController(Callbacks callbacks, Looper looper,
             SensorManager sensorManager, Spline autoBrightnessSpline, int lightSensorWarmUpTime,
             int brightnessMin, int brightnessMax, float dozeScaleFactor,
-            int lightSensorRate, long brighteningLightDebounceConfig,
+            int lightSensorRate, int initialLightSensorRate, long brighteningLightDebounceConfig,
             long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
             int ambientLightHorizon, float autoBrightnessAdjustmentMaxGamma,
             HysteresisLevels dynamicHysteresis) {
@@ -197,7 +203,9 @@ class AutomaticBrightnessController {
         mScreenBrightnessRangeMaximum = brightnessMax;
         mLightSensorWarmUpTimeConfig = lightSensorWarmUpTime;
         mDozeScaleFactor = dozeScaleFactor;
-        mLightSensorRate = lightSensorRate;
+        mNormalLightSensorRate = lightSensorRate;
+        mInitialLightSensorRate = initialLightSensorRate;
+        mCurrentLightSensorRate = -1;
         mBrighteningLightDebounceConfig = brighteningLightDebounceConfig;
         mDarkeningLightDebounceConfig = darkeningLightDebounceConfig;
         mResetAmbientLuxAfterWarmUpConfig = resetAmbientLuxAfterWarmUpConfig;
@@ -208,9 +216,9 @@ class AutomaticBrightnessController {
 
         mHandler = new AutomaticBrightnessHandler(looper);
         mAmbientLightRingBuffer =
-            new AmbientLightRingBuffer(mLightSensorRate, mAmbientLightHorizon);
+            new AmbientLightRingBuffer(mNormalLightSensorRate, mAmbientLightHorizon);
         mInitialHorizonAmbientLightRingBuffer =
-            new AmbientLightRingBuffer(mLightSensorRate, mAmbientLightHorizon);
+            new AmbientLightRingBuffer(mNormalLightSensorRate, mAmbientLightHorizon);
 
         if (!DEBUG_PRETEND_LIGHT_SENSOR_ABSENT) {
             mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -293,8 +301,9 @@ class AutomaticBrightnessController {
             if (!mLightSensorEnabled) {
                 mLightSensorEnabled = true;
                 mLightSensorEnableTime = SystemClock.uptimeMillis();
+                mCurrentLightSensorRate = mInitialLightSensorRate;
                 mSensorManager.registerListener(mLightSensorListener, mLightSensor,
-                        mLightSensorRate * 1000, mHandler);
+                        mCurrentLightSensorRate * 1000, mHandler);
                 return true;
             }
         } else {
@@ -304,6 +313,7 @@ class AutomaticBrightnessController {
                 mRecentLightSamples = 0;
                 mAmbientLightRingBuffer.clear();
                 mInitialHorizonAmbientLightRingBuffer.clear();
+                mCurrentLightSensorRate = -1;
                 mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
                 mSensorManager.unregisterListener(mLightSensorListener);
             }
@@ -314,6 +324,10 @@ class AutomaticBrightnessController {
     private void handleLightSensorEvent(long time, float lux) {
         mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
 
+        if (mAmbientLightRingBuffer.size() == 0) {
+            // switch to using the steady-state sample rate after grabbing the initial light sample
+            adjustLightSensorRate(mNormalLightSensorRate);
+        }
         applyLightSensorMeasurement(time, lux);
         updateAmbientLux(time);
     }
@@ -331,6 +345,20 @@ class AutomaticBrightnessController {
         // Remember this sample value.
         mLastObservedLux = lux;
         mLastObservedLuxTime = time;
+    }
+
+    private void adjustLightSensorRate(int lightSensorRate) {
+        // if the light sensor rate changed, update the sensor listener
+        if (lightSensorRate != mCurrentLightSensorRate) {
+            if (DEBUG) {
+                Slog.d(TAG, "adjustLightSensorRate: previousRate=" + mCurrentLightSensorRate
+                    + ", currentRate=" + lightSensorRate);
+            }
+            mCurrentLightSensorRate = lightSensorRate;
+            mSensorManager.unregisterListener(mLightSensorListener);
+            mSensorManager.registerListener(mLightSensorListener, mLightSensor,
+                    lightSensorRate * 1000, mHandler);
+        }
     }
 
     private boolean setScreenAutoBrightnessAdjustment(float adjustment) {
@@ -468,7 +496,7 @@ class AutomaticBrightnessController {
         // should be enough time to decide whether we should actually transition to the new
         // weighted ambient lux or not.
         nextTransitionTime =
-                nextTransitionTime > time ? nextTransitionTime : time + mLightSensorRate;
+                nextTransitionTime > time ? nextTransitionTime : time + mNormalLightSensorRate;
         if (DEBUG) {
             Slog.d(TAG, "updateAmbientLux: Scheduling ambient lux update for "
                     + nextTransitionTime + TimeUtils.formatUptime(nextTransitionTime));
