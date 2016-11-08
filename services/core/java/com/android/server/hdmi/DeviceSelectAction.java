@@ -16,13 +16,13 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiTvClient;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.RemoteException;
 import android.util.Slog;
-
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
@@ -95,7 +95,7 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
         sendCommand(mGivePowerStatus, new SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error != Constants.SEND_RESULT_SUCCESS) {
+                if (error != SendMessageResult.SUCCESS) {
                     invokeCallback(HdmiControlManager.RESULT_COMMUNICATION_FAILED);
                     finish();
                     return;

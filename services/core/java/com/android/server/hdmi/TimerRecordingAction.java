@@ -22,10 +22,9 @@ import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_ANAL
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_DIGITAL;
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_EXTERNAL;
 
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.util.Slog;
-
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
-
 import java.util.Arrays;
 
 /**
@@ -82,7 +81,7 @@ public class TimerRecordingAction extends HdmiCecFeatureAction {
         sendCommand(message, new SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error != Constants.SEND_RESULT_SUCCESS) {
+                if (error != SendMessageResult.SUCCESS) {
                     tv().announceTimerRecordingResult(mRecorderAddress,
                             TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
                     finish();

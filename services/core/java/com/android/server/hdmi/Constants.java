@@ -188,12 +188,6 @@ final class Constants {
     static final int INVALID_PHYSICAL_ADDRESS = HdmiDeviceInfo.PATH_INVALID;
     static final int PATH_INTERNAL = HdmiDeviceInfo.PATH_INTERNAL;
 
-    // Send result codes. It should be consistent with hdmi_cec.h's send_message error code.
-    static final int SEND_RESULT_SUCCESS = 0;
-    static final int SEND_RESULT_NAK = 1;
-    static final int SEND_RESULT_BUSY = 2;
-    static final int SEND_RESULT_FAILURE = 3;
-
     // Strategy for device polling.
     // Should use "OR(|) operation of POLL_STRATEGY_XXX and POLL_ITERATION_XXX.
     static final int POLL_STRATEGY_MASK = 0x3;  // first and second bit.
@@ -231,26 +225,7 @@ final class Constants {
     static final int RECORDING_TYPE_OWN_SOURCE = 4;
 
     // Definitions used for setOption(). These should be in sync with the definition
-    // in hardware/libhardware/include/hardware/{hdmi_cec.h,mhl.h}.
-
-    // TV gets turned on by incoming <Text/Image View On>. enabled by default.
-    // If set to disabled, TV won't turn on automatically.
-    static final int OPTION_CEC_AUTO_WAKEUP = 1;
-
-    // If set to disabled, all CEC commands are discarded.
-    static final int OPTION_CEC_ENABLE = 2;
-
-    // If set to disabled, system service yields control of CEC to sub-microcontroller.
-    // If enabled, it takes the control back.
-    static final int OPTION_CEC_SERVICE_CONTROL = 3;
-
-    // Put other devices to standby when TV goes to standby. enabled by default.
-    // If set to disabled, TV doesn't send <Standby> to other devices.
-    static final int OPTION_CEC_AUTO_DEVICE_OFF = 4;
-
-    // Passes the language used in the system when updated. The value to use is the 3 byte
-    // code as defined in ISO/FDIS 639-2.
-    static final int OPTION_CEC_SET_LANGUAGE = 5;
+    // in hardware/libhardware/include/hardware/mhl.h.
 
     // If set to disabled, TV does not switch ports when mobile device is connected.
     static final int OPTION_MHL_INPUT_SWITCHING = 101;
