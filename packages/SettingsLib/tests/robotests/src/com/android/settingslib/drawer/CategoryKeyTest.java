@@ -56,9 +56,11 @@ public class CategoryKeyTest {
         allKeys.add(CategoryKey.CATEGORY_SECURITY);
         allKeys.add(CategoryKey.CATEGORY_ACCOUNT);
         allKeys.add(CategoryKey.CATEGORY_SYSTEM);
+        allKeys.add(CategoryKey.CATEGORY_SYSTEM_INPUT);
+        allKeys.add(CategoryKey.CATEGORY_SYSTEM_LANGUAGE);
         // DO NOT REMOVE ANYTHING ABOVE
 
-        assertThat(allKeys.size()).isEqualTo(11);
+        assertThat(allKeys.size()).isEqualTo(13);
     }
 
 }
