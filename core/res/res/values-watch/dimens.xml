@@ -13,13 +13,9 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<!-- These resources are around just to allow their values to be customized
-     for different hardware and product builds, only for Material theme.  Do not translate.
-
-     NOTE: The naming convention is "config_camelCaseValue".  -->
-
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Gravity that should be used for dialog text styles. Equivalent to: Gravity.START | Gravity.TOP -->
-    <integer name="config_dialogTextGravity">0x00800033</integer>
+<resources>
+    <!-- Dialog title height, not used in watch due to dynamically sized button bar -->
+    <dimen name="alert_dialog_title_height">0dp</dimen>
+    <!-- Dialog button bar height, not used in watch due to dynamically sized button bar -->
+    <dimen name="alert_dialog_button_bar_height">0dp</dimen>
 </resources>
