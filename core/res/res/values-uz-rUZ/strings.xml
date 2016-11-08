@@ -192,6 +192,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefon sozlamalari"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Ekranni qulflash"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"O‘chirish"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Favqulodda chaqiruv"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Nosozlik haqida ma’lumot berish"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Xatoliklar hisobotini olish"</string>
     <string name="bugreport_message" msgid="398447048750350456">"U e-pochta xabari sifatida yuborish uchun joriy qurilmangiz holati to‘g‘risidagi ma’lumotlarni to‘playdi. Xatoliklar hisobotini to‘plash boshlanganidan uni yuborishga tayyorlaguncha biroz vaqt ketadi; iltimos, sabrli bo‘ling."</string>

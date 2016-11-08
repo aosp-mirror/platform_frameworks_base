@@ -193,6 +193,7 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Pantailaren blokeoa"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Itzali"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Programa-akatsen txostena"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Larrialdiak"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Sortu programa-akatsen txostena"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Gailuaren uneko egoerari buruzko informazioa bilduko da, mezu elektroniko gisa bidaltzeko. Minutu batzuk igaroko dira programa-akatsen txostena sortzen hasten denetik bidaltzeko prest egon arte. Itxaron, mesedez."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Isilik modua"</string>

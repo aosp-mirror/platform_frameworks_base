@@ -23,11 +23,14 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.Button;
 
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.policy.EmergencyAffordanceManager;
 
 /**
  * This class implements a smart emergency button that updates itself based
@@ -37,7 +40,10 @@ import com.android.internal.widget.LockPatternUtils;
  */
 public class EmergencyButton extends Button {
     private static final String ACTION_EMERGENCY_DIAL = "com.android.phone.EmergencyDialer.DIAL";
+    private final EmergencyAffordanceManager mEmergencyAffordanceManager;
 
+    private int mDownX;
+    private int mDownY;
     KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
@@ -50,6 +56,7 @@ public class EmergencyButton extends Button {
             updateEmergencyCallButton();
         }
     };
+    private boolean mLongPressWasDragged;
     private LockPatternUtils mLockPatternUtils;
     private PowerManager mPowerManager;
 
@@ -59,6 +66,7 @@ public class EmergencyButton extends Button {
 
     public EmergencyButton(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mEmergencyAffordanceManager = new EmergencyAffordanceManager(context);
     }
 
     @Override
@@ -84,6 +92,36 @@ public class EmergencyButton extends Button {
             }
         });
         updateEmergencyCallButton();
+        setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (!mLongPressWasDragged
+                        && mEmergencyAffordanceManager.needsEmergencyAffordance()) {
+                    mEmergencyAffordanceManager.performEmergencyCall();
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        final int x = (int) event.getX();
+        final int y = (int) event.getY();
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            mDownX = x;
+            mDownY = y;
+            mLongPressWasDragged = false;
+        } else {
+            final int xDiff = Math.abs(x - mDownX);
+            final int yDiff = Math.abs(y - mDownY);
+            int touchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
+            if (Math.abs(yDiff) > touchSlop || Math.abs(xDiff) > touchSlop) {
+                mLongPressWasDragged = true;
+            }
+        }
+        return super.onTouchEvent(event);
     }
 
     /**
