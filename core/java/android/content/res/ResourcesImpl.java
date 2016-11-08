@@ -553,6 +553,7 @@ public class ResourcesImpl {
             if (!mPreloading && useCache) {
                 final Drawable cachedDrawable = caches.getInstance(key, wrapper, theme);
                 if (cachedDrawable != null) {
+                    cachedDrawable.setChangingConfigurations(value.changingConfigurations);
                     return cachedDrawable;
                 }
             }
@@ -588,9 +589,11 @@ public class ResourcesImpl {
             // If we were able to obtain a drawable, store it in the appropriate
             // cache: preload, not themed, null theme, or theme-specific. Don't
             // pollute the cache with drawables loaded from a foreign density.
-            if (dr != null && useCache) {
+            if (dr != null) {
                 dr.setChangingConfigurations(value.changingConfigurations);
-                cacheDrawable(value, isColorDrawable, caches, theme, canApplyTheme, key, dr);
+                if (useCache) {
+                    cacheDrawable(value, isColorDrawable, caches, theme, canApplyTheme, key, dr);
+                }
             }
 
             return dr;
