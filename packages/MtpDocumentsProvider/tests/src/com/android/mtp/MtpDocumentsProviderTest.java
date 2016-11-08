@@ -854,6 +854,18 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals("19", path.getPath().get(2));
     }
 
+    public void testIsChildDocument() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
+        setupHierarchyDocuments("1");
+        assertTrue(mProvider.isChildDocument("1", "1"));
+        assertTrue(mProvider.isChildDocument("1", "14"));
+        assertTrue(mProvider.isChildDocument("2", "14"));
+        assertTrue(mProvider.isChildDocument("5", "14"));
+        assertFalse(mProvider.isChildDocument("3", "14"));
+        assertFalse(mProvider.isChildDocument("6", "14"));
+    }
+
     private void setupProvider(int flag) {
         mDatabase = new MtpDatabase(getContext(), flag);
         mProvider = new MtpDocumentsProvider();
