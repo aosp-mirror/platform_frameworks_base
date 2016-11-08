@@ -129,6 +129,7 @@
 
     <!-- Dialog padding minus control padding, used to fix alignment. -->
     <dimen name="select_dialog_padding_start_material">20dp</dimen>
+    <dimen name="select_dialog_drawable_padding_start_material">20dp</dimen>
 
     <dimen name="seekbar_track_background_height_material">2dp</dimen>
     <dimen name="seekbar_track_progress_height_material">2dp</dimen>
