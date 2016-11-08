@@ -91,33 +91,18 @@ public class ActivityManager {
 
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;
-        final int mImportanceCutpoint;
-        int mLastImportance;
 
-        UidObserver(OnUidImportanceListener listener, int importanceCutpoint) {
+        UidObserver(OnUidImportanceListener listener) {
             mListener = listener;
-            mImportanceCutpoint = importanceCutpoint;
         }
 
         @Override
         public void onUidStateChanged(int uid, int procState) {
-            final boolean lastAboveCut = mLastImportance <= mImportanceCutpoint;
-            final int importance = RunningAppProcessInfo.procStateToImportance(procState);
-            final boolean newAboveCut = importance <= mImportanceCutpoint;
-            /*
-            Log.d(TAG, "Uid " + uid + " state change from " + mLastImportance + " to "
-                    + importance + " @ cut " + mImportanceCutpoint
-                    + ": lastAbove=" + lastAboveCut + " newAbove=" + newAboveCut);
-            */
-            mLastImportance = importance;
-            if (lastAboveCut != newAboveCut) {
-                mListener.onUidImportance(uid, importance);
-            }
+            mListener.onUidImportance(uid, RunningAppProcessInfo.procStateToImportance(procState));
         }
 
         @Override
         public void onUidGone(int uid) {
-            mLastImportance = RunningAppProcessInfo.IMPORTANCE_GONE;
             mListener.onUidImportance(uid, RunningAppProcessInfo.IMPORTANCE_GONE);
         }
 
@@ -380,8 +365,8 @@ public class ActivityManager {
     /** @hide User operation call: one of related users cannot be stopped. */
     public static final int USER_OP_ERROR_RELATED_USERS_CANNOT_STOP = -4;
 
-    /** @hide Process does not exist. */
-    public static final int PROCESS_STATE_NONEXISTENT = -1;
+    /** @hide Not a real process state. */
+    public static final int PROCESS_STATE_UNKNOWN = -1;
 
     /** @hide Process is a persistent system process. */
     public static final int PROCESS_STATE_PERSISTENT = 0;
@@ -442,11 +427,14 @@ public class ActivityManager {
     /** @hide Process is being cached for later use and is empty. */
     public static final int PROCESS_STATE_CACHED_EMPTY = 16;
 
+    /** @hide Process does not exist. */
+    public static final int PROCESS_STATE_NONEXISTENT = 17;
+
     /** @hide The lowest process state number */
-    public static final int MIN_PROCESS_STATE = PROCESS_STATE_NONEXISTENT;
+    public static final int MIN_PROCESS_STATE = PROCESS_STATE_PERSISTENT;
 
     /** @hide The highest process state number */
-    public static final int MAX_PROCESS_STATE = PROCESS_STATE_CACHED_EMPTY;
+    public static final int MAX_PROCESS_STATE = PROCESS_STATE_NONEXISTENT;
 
     /** @hide Should this process state be considered a background state? */
     public static final boolean isProcStateBackground(int procState) {
@@ -2890,6 +2878,29 @@ public class ActivityManager {
             }
         }
 
+        /** @hide */
+        public static int importanceToProcState(int importance) {
+            if (importance == IMPORTANCE_GONE) {
+                return PROCESS_STATE_NONEXISTENT;
+            } else if (importance >= IMPORTANCE_BACKGROUND) {
+                return PROCESS_STATE_HOME;
+            } else if (importance >= IMPORTANCE_SERVICE) {
+                return PROCESS_STATE_SERVICE;
+            } else if (importance > IMPORTANCE_CANT_SAVE_STATE) {
+                return PROCESS_STATE_HEAVY_WEIGHT;
+            } else if (importance >= IMPORTANCE_PERCEPTIBLE) {
+                return PROCESS_STATE_IMPORTANT_BACKGROUND;
+            } else if (importance >= IMPORTANCE_VISIBLE) {
+                return PROCESS_STATE_IMPORTANT_FOREGROUND;
+            } else if (importance >= IMPORTANCE_TOP_SLEEPING) {
+                return PROCESS_STATE_TOP_SLEEPING;
+            } else if (importance >= IMPORTANCE_FOREGROUND_SERVICE) {
+                return PROCESS_STATE_FOREGROUND_SERVICE;
+            } else {
+                return PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+            }
+        }
+
         /**
          * The relative importance level that the system places on this
          * process.  May be one of {@link #IMPORTANCE_FOREGROUND},
@@ -3146,10 +3157,12 @@ public class ActivityManager {
                 throw new IllegalArgumentException("Listener already registered: " + listener);
             }
             // TODO: implement the cut point in the system process to avoid IPCs.
-            UidObserver observer = new UidObserver(listener, importanceCutpoint);
+            UidObserver observer = new UidObserver(listener);
             try {
                 getService().registerUidObserver(observer,
-                        UID_OBSERVER_PROCSTATE | UID_OBSERVER_GONE, mContext.getOpPackageName());
+                        UID_OBSERVER_PROCSTATE | UID_OBSERVER_GONE,
+                        RunningAppProcessInfo.importanceToProcState(importanceCutpoint),
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -3587,7 +3600,7 @@ public class ActivityManager {
      * allowed to run code through scheduled alarms, receiving broadcasts,
      * etc.  A started user may be either the current foreground user or a
      * background user; the result here does not distinguish between the two.
-     * @param userid the user's id. Zero indicates the default user.
+     * @param userId the user's id. Zero indicates the default user.
      * @hide
      */
     public boolean isUserRunning(int userId) {

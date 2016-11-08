@@ -22,9 +22,6 @@ import android.app.ContentProviderHolder;
 import android.app.IActivityManager;
 import android.app.WaitResult;
 import android.os.IDeviceIdentifiersPolicyService;
-import android.util.Size;
-import android.util.TypedValue;
-import android.view.DisplayInfo;
 import com.android.internal.telephony.TelephonyIntents;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
@@ -80,7 +77,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
-import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
@@ -221,6 +217,7 @@ import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 import android.view.Gravity;
@@ -1396,6 +1393,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         int pid;
         int processState;
         boolean foregroundActivities;
+    }
+
+    static final class UidObserverRegistration {
+        final int uid;
+        final String pkg;
+        final int which;
+        final int cutpoint;
+
+        final SparseIntArray lastProcStates;
+
+        UidObserverRegistration(int _uid, String _pkg, int _which, int _cutpoint) {
+            uid = _uid;
+            pkg = _pkg;
+            which = _which;
+            cutpoint = _cutpoint;
+            if (cutpoint >= ActivityManager.MIN_PROCESS_STATE) {
+                lastProcStates = new SparseIntArray();
+            } else {
+                lastProcStates = null;
+            }
+        }
     }
 
     final RemoteCallbackList<IProcessObserver> mProcessObservers = new RemoteCallbackList<>();
@@ -4105,7 +4123,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         while (i > 0) {
             i--;
             final IUidObserver observer = mUidObservers.getBroadcastItem(i);
-            final int which = (Integer)mUidObservers.getBroadcastCookie(i);
+            final UidObserverRegistration reg = (UidObserverRegistration)
+                    mUidObservers.getBroadcastCookie(i);
             if (observer != null) {
                 try {
                     for (int j=0; j<N; j++) {
@@ -4122,7 +4141,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                         if (change == UidRecord.CHANGE_IDLE
                                 || change == UidRecord.CHANGE_GONE_IDLE) {
-                            if ((which & ActivityManager.UID_OBSERVER_IDLE) != 0) {
+                            if ((reg.which & ActivityManager.UID_OBSERVER_IDLE) != 0) {
                                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                                         "UID idle uid=" + item.uid);
                                 observer.onUidIdle(item.uid);
@@ -4133,7 +4152,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 }
                             }
                         } else if (change == UidRecord.CHANGE_ACTIVE) {
-                            if ((which & ActivityManager.UID_OBSERVER_ACTIVE) != 0) {
+                            if ((reg.which & ActivityManager.UID_OBSERVER_ACTIVE) != 0) {
                                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                                         "UID active uid=" + item.uid);
                                 observer.onUidActive(item.uid);
@@ -4144,10 +4163,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                         if (change == UidRecord.CHANGE_GONE
                                 || change == UidRecord.CHANGE_GONE_IDLE) {
-                            if ((which & ActivityManager.UID_OBSERVER_GONE) != 0) {
+                            if ((reg.which & ActivityManager.UID_OBSERVER_GONE) != 0) {
                                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                                         "UID gone uid=" + item.uid);
                                 observer.onUidGone(item.uid);
+                            }
+                            if (reg.lastProcStates != null) {
+                                reg.lastProcStates.delete(item.uid);
                             }
                             if (VALIDATE_UID_STATES && i == 0) {
                                 if (validateUid != null) {
@@ -4155,11 +4177,29 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 }
                             }
                         } else {
-                            if ((which & ActivityManager.UID_OBSERVER_PROCSTATE) != 0) {
+                            if ((reg.which & ActivityManager.UID_OBSERVER_PROCSTATE) != 0) {
                                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                                         "UID CHANGED uid=" + item.uid
                                                 + ": " + item.processState);
-                                observer.onUidStateChanged(item.uid, item.processState);
+                                boolean doReport = true;
+                                if (reg.cutpoint >= ActivityManager.MIN_PROCESS_STATE) {
+                                    final int lastState = reg.lastProcStates.get(item.uid,
+                                            ActivityManager.PROCESS_STATE_UNKNOWN);
+                                    if (lastState != ActivityManager.PROCESS_STATE_UNKNOWN) {
+                                        final boolean lastAboveCut = lastState <= reg.cutpoint;
+                                        final boolean newAboveCut = item.processState <= reg.cutpoint;
+                                        doReport = lastAboveCut != newAboveCut;
+                                    } else {
+                                        doReport = item.processState
+                                                != ActivityManager.PROCESS_STATE_NONEXISTENT;
+                                    }
+                                }
+                                if (doReport) {
+                                    if (reg.lastProcStates != null) {
+                                        reg.lastProcStates.put(item.uid, item.processState);
+                                    }
+                                    observer.onUidStateChanged(item.uid, item.processState);
+                                }
                             }
                             if (VALIDATE_UID_STATES && i == 0) {
                                 validateUid.curProcState = validateUid.setProcState
@@ -12245,13 +12285,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void registerUidObserver(IUidObserver observer, int which, String callingPackage) {
+    public void registerUidObserver(IUidObserver observer, int which, int cutpoint,
+            String callingPackage) {
         if (!hasUsageStatsPermission(callingPackage)) {
             enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
                     "registerUidObserver");
         }
         synchronized (this) {
-            mUidObservers.register(observer, which);
+            mUidObservers.register(observer, new UidObserverRegistration(Binder.getCallingUid(),
+                    callingPackage, which, cutpoint));
         }
     }
 
@@ -12897,7 +12939,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                 } else if (proc.setProcState < ActivityManager.PROCESS_STATE_HOME
-                        && proc.setProcState > ActivityManager.PROCESS_STATE_NONEXISTENT) {
+                        && proc.setProcState >= ActivityManager.PROCESS_STATE_PERSISTENT) {
                     proc.notCachedSinceIdle = true;
                     proc.initialIdlePss = 0;
                     proc.nextPssTime = ProcessList.computeNextPssTime(proc.setProcState, true,
@@ -14332,7 +14374,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.print("  ");
                         for (int i=0; i<ass.mStateTimes.length; i++) {
                             long amt = ass.mStateTimes[i];
-                            if (ass.mLastState-ActivityManager.MIN_PROCESS_STATE == i) {
+                            if ((ass.mLastState-ActivityManager.MIN_PROCESS_STATE) == i) {
                                 amt += now - ass.mLastStateUptime;
                             }
                             if (amt != 0) {
@@ -14341,7 +14383,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                             i + ActivityManager.MIN_PROCESS_STATE));
                                 pw.print("=");
                                 TimeUtils.formatDuration(amt, pw);
-                                if (ass.mLastState-ActivityManager.MIN_PROCESS_STATE == i) {
+                                if ((ass.mLastState-ActivityManager.MIN_PROCESS_STATE) == i) {
                                     pw.print("*");
                                 }
                             }
@@ -14611,6 +14653,43 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     pw.print("    "); pw.print(pkg); pw.print(": ");
                             pw.print(mode); pw.println();
+                }
+            }
+            final int NI = mUidObservers.getRegisteredCallbackCount();
+            boolean printed = false;
+            for (int i=0; i<NI; i++) {
+                final UidObserverRegistration reg = (UidObserverRegistration)
+                        mUidObservers.getRegisteredCallbackCookie(i);
+                if (dumpPackage == null || dumpPackage.equals(reg.pkg)) {
+                    if (!printed) {
+                        pw.println("  mUidObservers:");
+                        printed = true;
+                    }
+                    pw.print("    "); UserHandle.formatUid(pw, reg.uid);
+                    pw.print(" "); pw.print(reg.pkg); pw.print(":");
+                    if ((reg.which&ActivityManager.UID_OBSERVER_IDLE) != 0) {
+                        pw.print(" IDLE");
+                    }
+                    if ((reg.which&ActivityManager.UID_OBSERVER_ACTIVE) != 0) {
+                        pw.print(" ACT" );
+                    }
+                    if ((reg.which&ActivityManager.UID_OBSERVER_GONE) != 0) {
+                        pw.print(" GONE");
+                    }
+                    if ((reg.which&ActivityManager.UID_OBSERVER_PROCSTATE) != 0) {
+                        pw.print(" STATE");
+                        pw.print(" (cut="); pw.print(reg.cutpoint);
+                        pw.print(")");
+                    }
+                    pw.println();
+                    if (reg.lastProcStates != null) {
+                        final int NJ = reg.lastProcStates.size();
+                        for (int j=0; j<NJ; j++) {
+                            pw.print("      Last ");
+                            UserHandle.formatUid(pw, reg.lastProcStates.keyAt(j));
+                            pw.print(": "); pw.println(reg.lastProcStates.valueAt(j));
+                        }
+                    }
                 }
             }
         }

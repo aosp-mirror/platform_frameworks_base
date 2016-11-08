@@ -2731,6 +2731,8 @@ public final class PowerManagerService extends SystemService
                     }
                 } else {
                     disabled = !wakeLock.mUidState.mActive &&
+                            wakeLock.mUidState.mProcState
+                                    != ActivityManager.PROCESS_STATE_NONEXISTENT &&
                             wakeLock.mUidState.mProcState > ActivityManager.PROCESS_STATE_RECEIVER;
                 }
             }

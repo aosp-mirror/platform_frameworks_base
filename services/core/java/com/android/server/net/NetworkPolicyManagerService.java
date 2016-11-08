@@ -612,7 +612,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             try {
                 mActivityManager.registerUidObserver(mUidObserver,
                         ActivityManager.UID_OBSERVER_PROCSTATE|ActivityManager.UID_OBSERVER_GONE,
-                        null);
+                        ActivityManager.PROCESS_STATE_UNKNOWN, null);
                 mNetworkManager.registerObserver(mAlertObserver);
             } catch (RemoteException e) {
                 // ignored; both services live in system_server
