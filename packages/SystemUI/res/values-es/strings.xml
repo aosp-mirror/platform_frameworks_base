@@ -650,4 +650,6 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Abrir ajustes de <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Cambiar el orden de los ajustes."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <!-- no translation found for pip_phone_expand (5889780005575693909) -->
+    <skip />
 </resources>
