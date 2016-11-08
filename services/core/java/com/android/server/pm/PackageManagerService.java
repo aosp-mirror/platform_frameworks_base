@@ -471,6 +471,12 @@ public class PackageManagerService extends IPackageManager.Stub {
      * VENDOR_OVERLAY_DIR.
      */
     private static final String VENDOR_OVERLAY_THEME_PROPERTY = "ro.boot.vendor.overlay.theme";
+    /**
+     * Same as VENDOR_OVERLAY_THEME_PROPERTY, except persistent. If set will override whatever
+     * is in VENDOR_OVERLAY_THEME_PROPERTY.
+     */
+    private static final String VENDOR_OVERLAY_THEME_PERSIST_PROPERTY
+            = "persist.vendor.overlay.theme";
 
     private static int DEFAULT_EPHEMERAL_HASH_PREFIX_MASK = 0xFFFFF000;
     private static int DEFAULT_EPHEMERAL_HASH_PREFIX_COUNT = 5;
@@ -2289,7 +2295,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Collect vendor overlay packages. (Do this before scanning any apps.)
             // For security and version matching reason, only consider
             // overlay packages if they reside in the right directory.
-            String overlayThemeDir = SystemProperties.get(VENDOR_OVERLAY_THEME_PROPERTY);
+            String overlayThemeDir = SystemProperties.get(VENDOR_OVERLAY_THEME_PERSIST_PROPERTY);
+            if (overlayThemeDir.isEmpty()) {
+                overlayThemeDir = SystemProperties.get(VENDOR_OVERLAY_THEME_PROPERTY);
+            }
             if (!overlayThemeDir.isEmpty()) {
                 scanDirTracedLI(new File(VENDOR_OVERLAY_DIR, overlayThemeDir), mDefParseFlags
                         | PackageParser.PARSE_IS_SYSTEM
