@@ -645,9 +645,7 @@ public class KeyguardViewMediator extends SystemUI {
 
         // Assume keyguard is showing (unless it's disabled) until we know for sure...
         setShowingLocked(!shouldWaitForProvisioning() && !mLockPatternUtils.isLockScreenDisabled(
-                KeyguardUpdateMonitor.getCurrentUser()));
-        updateInputRestrictedLocked();
-        mTrustManager.reportKeyguardShowingChanged();
+                KeyguardUpdateMonitor.getCurrentUser()), true /* forceCallbacks */);
 
         mStatusBarKeyguardViewManager =
                 SystemUIFactory.getInstance().createStatusBarKeyguardViewManager(mContext,
@@ -1980,7 +1978,11 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void setShowingLocked(boolean showing) {
-        if (showing != mShowing) {
+        setShowingLocked(showing, false /* forceCallbacks */);
+    }
+
+    private void setShowingLocked(boolean showing, boolean forceCallbacks) {
+        if (showing != mShowing || forceCallbacks) {
             mShowing = showing;
             int size = mKeyguardStateCallbacks.size();
             for (int i = size - 1; i >= 0; i--) {
