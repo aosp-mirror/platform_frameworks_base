@@ -850,6 +850,11 @@ class TextLine {
             int limit, boolean runIsRtl, Canvas c, float x, int top, int y,
             int bottom, FontMetricsInt fmi, boolean needWidth) {
 
+        if (measureLimit < start || measureLimit > limit) {
+            throw new IndexOutOfBoundsException("measureLimit (" + measureLimit + ") is out of "
+                    + "start (" + start + ") and limit (" + limit + ") bounds");
+        }
+
         // Case of an empty line, make sure we update fmi according to mPaint
         if (start == measureLimit) {
             TextPaint wp = mWorkPaint;
