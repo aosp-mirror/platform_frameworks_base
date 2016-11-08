@@ -1932,6 +1932,12 @@ public class WindowManagerService extends IWindowManager.Stub
                         || (flagChanges & FLAG_DISMISS_KEYGUARD) != 0)) {
                     win.mAppToken.checkKeyguardFlagsChanged();
                 }
+                if (((attrChanges & LayoutParams.ACCESSIBILITY_TITLE_CHANGED) != 0)
+                        && (mAccessibilityController != null)
+                        && (win.getDisplayId() == DEFAULT_DISPLAY)) {
+                    // No move or resize, but the controller checks for title changes as well
+                    mAccessibilityController.onSomeWindowResizedOrMovedLocked();
+                }
             }
 
             if (DEBUG_LAYOUT) Slog.v(TAG_WM, "Relayout " + win + ": viewVisibility=" + viewVisibility

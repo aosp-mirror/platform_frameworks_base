@@ -5611,6 +5611,13 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * Notify that the window title changed
+     */
+    public void onWindowTitleChanged() {
+        mAttachInfo.mForceReportNewAttributes = true;
+    }
+
     public void handleDispatchWindowShown() {
         mAttachInfo.mTreeObserver.dispatchOnWindowShown();
     }
