@@ -528,7 +528,7 @@
     <string name="keyboard_key_home" msgid="2243500072071305073">"হোম"</string>
     <string name="keyboard_key_back" msgid="2337450286042721351">"ফিরুন"</string>
     <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"উপরে"</string>
-    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"নীচে"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"নিচে"</string>
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"বাম"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"ডান"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"কেন্দ্র"</string>
@@ -648,4 +648,6 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> সেটিংস খুলুন৷"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ক্রম বা সেটিংস সম্পাদনা করুন৷"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g>টির মধ্যে <xliff:g id="ID_1">%1$d</xliff:g> নং পৃষ্ঠা"</string>
+    <!-- no translation found for pip_phone_expand (5889780005575693909) -->
+    <skip />
 </resources>
