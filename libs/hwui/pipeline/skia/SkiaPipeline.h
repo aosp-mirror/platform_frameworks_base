@@ -100,7 +100,10 @@ public:
         mSpotShadowAlpha = lightInfo.spotShadowAlpha;
         mLightCenter = lightGeometry.center;
     }
+
 protected:
+    void dumpResourceCacheUsage() const;
+
     renderthread::RenderThread& mRenderThread;
 
 private:

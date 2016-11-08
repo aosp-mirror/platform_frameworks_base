@@ -266,6 +266,20 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
     canvas->flush();
 }
 
+void SkiaPipeline::dumpResourceCacheUsage() const {
+    int resources, maxResources;
+    size_t bytes, maxBytes;
+    mRenderThread.getGrContext()->getResourceCacheUsage(&resources, &bytes);
+    mRenderThread.getGrContext()->getResourceCacheLimits(&maxResources, &maxBytes);
+
+    SkString log("Resource Cache Usage:\n");
+    log.appendf("%8d items out of %d maximum items\n", resources, maxResources);
+    log.appendf("%8zu bytes (%.2f MB) out of %.2f MB maximum\n",
+            bytes, bytes * (1.0f / (1024.0f * 1024.0f)), maxBytes * (1.0f / (1024.0f * 1024.0f)));
+
+    ALOGD("%s", log.c_str());
+}
+
 } /* namespace skiapipeline */
 } /* namespace uirenderer */
 } /* namespace android */

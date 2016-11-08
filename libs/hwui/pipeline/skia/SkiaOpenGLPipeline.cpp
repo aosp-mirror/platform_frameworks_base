@@ -95,6 +95,11 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty,
         profileCanvas->flush();
     }
 
+    // Log memory statistics
+    if (CC_UNLIKELY(Properties::debugLevel != kDebugDisabled)) {
+        dumpResourceCacheUsage();
+    }
+
     return true;
 }
 
