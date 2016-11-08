@@ -716,9 +716,8 @@ public class RankingHelper implements RankingConfig {
         return packageBans;
     }
 
-    public void onPackagesChanged(boolean removingPackage, String[] pkgList) {
-        if (removingPackage || pkgList == null || pkgList.length == 0
-                || mRestoredWithoutUids.isEmpty()) {
+    public void onPackagesChanged(boolean removingPackage, int changeUserId, String[] pkgList) {
+        if (removingPackage || pkgList == null || pkgList.length == 0) {
             return; // nothing to do
         }
         boolean updated = false;
@@ -726,8 +725,7 @@ public class RankingHelper implements RankingConfig {
             final Record r = mRestoredWithoutUids.get(pkg);
             if (r != null) {
                 try {
-                    //TODO: http://b/22388012
-                    r.uid = mPm.getPackageUidAsUser(r.pkg, UserHandle.USER_SYSTEM);
+                    r.uid = mPm.getPackageUidAsUser(r.pkg, changeUserId);
                     mRestoredWithoutUids.remove(pkg);
                     mRecords.put(recordKey(r.pkg, r.uid), r);
                     updated = true;
@@ -737,7 +735,7 @@ public class RankingHelper implements RankingConfig {
             }
             try {
                 Record fullRecord = getRecord(pkg,
-                        mPm.getPackageUidAsUser(pkg, UserHandle.USER_SYSTEM));
+                        mPm.getPackageUidAsUser(pkg, changeUserId));
                 if (fullRecord != null) {
                     clampDefaultChannel(fullRecord);
                 }
