@@ -78,6 +78,7 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.model.Task;
@@ -413,8 +414,7 @@ public class SystemServicesProxy {
             }
             return (homeStackVisibleNotOccluded && topActivity != null
                     && topActivity.getPackageName().equals(RecentsImpl.RECENTS_PACKAGE)
-                    && (topActivity.getClassName().equals(RecentsImpl.RECENTS_ACTIVITY)
-                        || topActivity.getClassName().equals(RecentsTvImpl.RECENTS_TV_ACTIVITY)));
+                    && Recents.RECENTS_ACTIVITIES.contains(topActivity.getClassName()));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
