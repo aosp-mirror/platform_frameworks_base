@@ -85,7 +85,6 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.tv.RecentsTvImpl;
 import com.android.systemui.recents.model.ThumbnailData;
 
 import java.io.IOException;

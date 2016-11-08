@@ -362,12 +362,12 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     }
 
     /** Enables/disables handling touch on this task view. */
-    void setTouchEnabled(boolean enabled) {
+    public void setTouchEnabled(boolean enabled) {
         setOnClickListener(enabled ? this : null);
     }
 
     /** Animates this task view if the user does not interact with the stack after a certain time. */
-    void startNoUserInteractionAnimation() {
+    public void startNoUserInteractionAnimation() {
         mHeaderView.startNoUserInteractionAnimation();
     }
 
