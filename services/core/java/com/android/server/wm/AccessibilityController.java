@@ -649,15 +649,12 @@ final class AccessibilityController {
 
             private void populateWindowsOnScreenLocked(SparseArray<WindowState> outWindows) {
                 final DisplayContent dc = mWindowManagerService.getDefaultDisplayContentLocked();
-                final ReadOnlyWindowList windowList = dc.getReadOnlyWindowList();
-                final int windowCount = windowList.size();
-                for (int i = 0; i < windowCount; i++) {
-                    final WindowState windowState = windowList.get(i);
-                    if (windowState.isOnScreen() && windowState.isVisibleLw() &&
-                            !windowState.mWinAnimator.mEnterAnimationPending) {
-                        outWindows.put(windowState.mLayer, windowState);
+                dc.forAllWindows((w) -> {
+                    if (w.isOnScreen() && w.isVisibleLw()
+                            && !w.mWinAnimator.mEnterAnimationPending) {
+                        outWindows.put(w.mLayer, w);
                     }
-                }
+                }, false /* traverseTopToBottom */ );
             }
 
             private final class ViewportWindow {
@@ -1296,14 +1293,11 @@ final class AccessibilityController {
 
         private void populateVisibleWindowsOnScreenLocked(SparseArray<WindowState> outWindows) {
             final DisplayContent dc = mWindowManagerService.getDefaultDisplayContentLocked();
-            final ReadOnlyWindowList windowList = dc.getReadOnlyWindowList();
-            final int windowCount = windowList.size();
-            for (int i = 0; i < windowCount; i++) {
-                final WindowState windowState = windowList.get(i);
-                if (windowState.isVisibleLw()) {
-                    outWindows.put(windowState.mLayer, windowState);
+            dc.forAllWindows((w) -> {
+                if (w.isVisibleLw()) {
+                    outWindows.put(w.mLayer, w);
                 }
-            }
+            }, false /* traverseTopToBottom */ );
         }
 
         private class MyHandler extends Handler {

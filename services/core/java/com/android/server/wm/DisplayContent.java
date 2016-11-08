@@ -1400,14 +1400,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** Updates the layer assignment of windows on this display. */
     void assignWindowLayers(boolean setLayoutNeeded) {
-        mLayersController.assignWindowLayers(mWindows.getReadOnly());
+        mLayersController.assignWindowLayers(this);
         if (setLayoutNeeded) {
             setLayoutNeeded();
         }
     }
 
     void adjustWallpaperWindows() {
-        if (mWallpaperController.adjustWallpaperWindows(mWindows.getReadOnly())) {
+        if (mWallpaperController.adjustWallpaperWindows(mWindows)) {
             assignWindowLayers(true /*setLayoutNeeded*/);
         }
     }
@@ -2455,14 +2455,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mService.mWaitingForDrawn.add(win);
             }
         }
-    }
-
-    ReadOnlyWindowList getReadOnlyWindowList() {
-        return mWindows.getReadOnly();
-    }
-
-    void getWindows(WindowList output) {
-        output.addAll(mWindows);
     }
 
     // TODO: Super crazy long method that should be broken down...

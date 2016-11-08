@@ -219,28 +219,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         return false;
     }
 
-    void getWindows(WindowList output) {
-        final int count = mChildren.size();
-        for (int i = 0; i < count; ++i) {
-            final DisplayContent dc = mChildren.get(i);
-            dc.getWindows(output);
-        }
-    }
-
-    void getWindows(WindowList output, boolean visibleOnly, boolean appsOnly) {
-        final int numDisplays = mChildren.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final ReadOnlyWindowList windowList = mChildren.get(displayNdx).getReadOnlyWindowList();
-            for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
-                final WindowState w = windowList.get(winNdx);
-                if ((!visibleOnly || w.mWinAnimator.getShown())
-                        && (!appsOnly || w.mAppToken != null)) {
-                    output.add(w);
-                }
-            }
-        }
-    }
-
     void getWindowsByName(WindowList output, String name) {
         int objectId = 0;
         // See if this is an object ID.
@@ -249,36 +227,20 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             name = null;
         } catch (RuntimeException e) {
         }
-        final int numDisplays = mChildren.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final ReadOnlyWindowList windowList = mChildren.get(displayNdx).getReadOnlyWindowList();
-            for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
-                final WindowState w = windowList.get(winNdx);
-                if (name != null) {
-                    if (w.mAttrs.getTitle().toString().contains(name)) {
-                        output.add(w);
-                    }
-                } else if (System.identityHashCode(w) == objectId) {
-                    output.add(w);
-                }
-            }
-        }
+
+        getWindowsByName(output, name, objectId);
     }
 
-    WindowState findWindow(int hashCode) {
-        final int numDisplays = mChildren.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final ReadOnlyWindowList windows = mChildren.get(displayNdx).getReadOnlyWindowList();
-            final int numWindows = windows.size();
-            for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
-                final WindowState w = windows.get(winNdx);
-                if (System.identityHashCode(w) == hashCode) {
-                    return w;
+    private void getWindowsByName(WindowList output, String name, int objectId) {
+        forAllWindows((w) -> {
+            if (name != null) {
+                if (w.mAttrs.getTitle().toString().contains(name)) {
+                    output.add(w);
                 }
+            } else if (System.identityHashCode(w) == objectId) {
+                output.add(w);
             }
-        }
-
-        return null;
+        }, true /* traverseTopToBottom */);
     }
 
     /**
@@ -399,81 +361,50 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     void setSecureSurfaceState(int userId, boolean disabled) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final ReadOnlyWindowList windows = mChildren.get(i).getReadOnlyWindowList();
-            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                final WindowState win = windows.get(winNdx);
-                if (win.mHasSurface && userId == UserHandle.getUserId(win.mOwnerUid)) {
-                    win.mWinAnimator.setSecureLocked(disabled);
-                }
+        forAllWindows((w) -> {
+            if (w.mHasSurface && userId == UserHandle.getUserId(w.mOwnerUid)) {
+                w.mWinAnimator.setSecureLocked(disabled);
             }
-        }
+        }, true /* traverseTopToBottom */);
     }
 
     void updateAppOpsState() {
-        final int count = mChildren.size();
-        for (int i = 0; i < count; ++i) {
-            final ReadOnlyWindowList windows = mChildren.get(i).getReadOnlyWindowList();
-            final int numWindows = windows.size();
-            for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
-                final WindowState win = windows.get(winNdx);
-                if (win.mAppOp == OP_NONE) {
-                    continue;
-                }
-                final int mode = mService.mAppOps.checkOpNoThrow(win.mAppOp, win.getOwningUid(),
-                        win.getOwningPackage());
-                win.setAppOpVisibilityLw(mode == MODE_ALLOWED || mode == MODE_DEFAULT);
+        forAllWindows((w) -> {
+            if (w.mAppOp == OP_NONE) {
+                return;
             }
-        }
+            final int mode = mService.mAppOps.checkOpNoThrow(w.mAppOp, w.getOwningUid(),
+                    w.getOwningPackage());
+            w.setAppOpVisibilityLw(mode == MODE_ALLOWED || mode == MODE_DEFAULT);
+        }, false /* traverseTopToBottom */);
     }
 
     boolean canShowStrictModeViolation(int pid) {
-        final int count = mChildren.size();
-        for (int i = 0; i < count; ++i) {
-            final ReadOnlyWindowList windows = mChildren.get(i).getReadOnlyWindowList();
-            final int numWindows = windows.size();
-            for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
-                final WindowState ws = windows.get(winNdx);
-                if (ws.mSession.mPid == pid && ws.isVisibleLw()) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        final WindowState win = getWindow((w) -> w.mSession.mPid == pid && w.isVisibleLw());
+        return win != null;
     }
 
     void closeSystemDialogs(String reason) {
-        final int count = mChildren.size();
-        for (int i = 0; i < count; ++i) {
-            final ReadOnlyWindowList windows = mChildren.get(i).getReadOnlyWindowList();
-            final int numWindows = windows.size();
-            for (int j = 0; j < numWindows; ++j) {
-                final WindowState w = windows.get(j);
-                if (w.mHasSurface) {
-                    try {
-                        w.mClient.closeSystemDialogs(reason);
-                    } catch (RemoteException e) {
-                    }
+        forAllWindows((w) -> {
+            if (w.mHasSurface) {
+                try {
+                    w.mClient.closeSystemDialogs(reason);
+                } catch (RemoteException e) {
                 }
             }
-        }
+        }, false /* traverseTopToBottom */);
     }
 
     void removeReplacedWindows() {
         if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION removeReplacedWindows");
         mService.openSurfaceTransaction();
         try {
-            for (int i = mChildren.size() - 1; i >= 0; i--) {
-                DisplayContent dc = mChildren.get(i);
-                final ReadOnlyWindowList windows = mChildren.get(i).getReadOnlyWindowList();
-                for (int j = windows.size() - 1; j >= 0; j--) {
-                    final WindowState win = windows.get(j);
-                    final AppWindowToken aToken = win.mAppToken;
-                    if (aToken != null) {
-                        aToken.removeReplacedWindowIfNeeded(win);
-                    }
+            forAllWindows((w) -> {
+                final AppWindowToken aToken = w.mAppToken;
+                if (aToken != null) {
+                    aToken.removeReplacedWindowIfNeeded(w);
                 }
-            }
+            }, true /* traverseTopToBottom */);
         } finally {
             mService.closeSurfaceTransaction();
             if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION removeReplacedWindows");
@@ -530,19 +461,15 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 Slog.w(TAG_WM, "No leaked surfaces; killing applications!");
                 final SparseIntArray pidCandidates = new SparseIntArray();
                 for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-                    final ReadOnlyWindowList windows =
-                            mChildren.get(displayNdx).getReadOnlyWindowList();
-                    final int numWindows = windows.size();
-                    for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
-                        final WindowState ws = windows.get(winNdx);
-                        if (mService.mForceRemoves.contains(ws)) {
-                            continue;
+                    mChildren.get(displayNdx).forAllWindows((w) -> {
+                        if (mService.mForceRemoves.contains(w)) {
+                            return;
                         }
-                        final WindowStateAnimator wsa = ws.mWinAnimator;
+                        final WindowStateAnimator wsa = w.mWinAnimator;
                         if (wsa.mSurfaceController != null) {
                             pidCandidates.append(wsa.mSession.mPid, wsa.mSession.mPid);
                         }
-                    }
+                    }, false /* traverseTopToBottom */);
 
                     if (pidCandidates.size() > 0) {
                         int[] pids = new int[pidCandidates.size()];
@@ -1078,17 +1005,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     void dumpWindowsNoHeader(PrintWriter pw, boolean dumpAll, ArrayList<WindowState> windows) {
-        final int numDisplays = mChildren.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final ReadOnlyWindowList windowList = mChildren.get(displayNdx).getReadOnlyWindowList();
-            for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
-                final WindowState w = windowList.get(winNdx);
-                if (windows == null || windows.contains(w)) {
-                    pw.println("  Window #" + winNdx + " " + w + ":");
-                    w.dump(pw, "    ", dumpAll || windows != null);
-                }
+        final int[] index = new int[1];
+        forAllWindows((w) -> {
+            if (windows == null || windows.contains(w)) {
+                pw.println("  Window #" + index[0] + " " + w + ":");
+                w.dump(pw, "    ", dumpAll || windows != null);
+                index[0] = index[0] + 1;
             }
-        }
+        }, true /* traverseTopToBottom */);
     }
 
     void dumpTokens(PrintWriter pw, boolean dumpAll) {

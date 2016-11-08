@@ -271,11 +271,8 @@ class DragState {
             Slog.d(TAG_WM, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
         }
 
-        final ReadOnlyWindowList windows = mDisplayContent.getReadOnlyWindowList();
-        final int N = windows.size();
-        for (int i = 0; i < N; i++) {
-            sendDragStartedLw(windows.get(i), touchX, touchY, mDataDescription);
-        }
+        mDisplayContent.forAllWindows((w) -> sendDragStartedLw(w, touchX, touchY, mDataDescription),
+                false /* traverseTopToBottom */ );
     }
 
     /* helper - send a ACTION_DRAG_STARTED event, if the
