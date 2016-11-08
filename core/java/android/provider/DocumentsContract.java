@@ -106,6 +106,22 @@ public final class DocumentsContract {
     public static final String EXTRA_TARGET_URI = "android.content.extra.TARGET_URI";
 
     /**
+     * Sets the desired initial location visible to user when file chooser is shown.
+     *
+     * <p>Applicable to {@link Intent} with actions:
+     * <ul>
+     *      <li>{@link Intent#ACTION_OPEN_DOCUMENT}</li>
+     *      <li>{@link Intent#ACTION_CREATE_DOCUMENT}</li>
+     *      <li>{@link Intent#ACTION_OPEN_DOCUMENT_TREE}</li>
+     * </ul>
+     *
+     * <p>Location should specify a document URI or a tree URI with document ID. If
+     * this URI identifies a non-directory, document navigator will attempt to use the parent
+     * of the document as the initial location.
+     */
+    public static final String EXTRA_INITIAL_URI = "android.provider.extra.INITIAL_URI";
+
+    /**
      * Set this in a DocumentsUI intent to cause a package's own roots to be
      * excluded from the roots list.
      */
