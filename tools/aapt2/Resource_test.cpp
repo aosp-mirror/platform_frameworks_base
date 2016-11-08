@@ -57,6 +57,10 @@ TEST(ResourceTypeTest, ParseResourceTypes) {
   ASSERT_NE(type, nullptr);
   EXPECT_EQ(*type, ResourceType::kDrawable);
 
+  type = ParseResourceType("font");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kFont);
+
   type = ParseResourceType("fraction");
   ASSERT_NE(type, nullptr);
   EXPECT_EQ(*type, ResourceType::kFraction);

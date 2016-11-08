@@ -2756,6 +2756,9 @@
     <eat-comment />
 
     <public-group type="attr" first-id="0x01010531">
+        <public name="fontStyle" />
+        <public name="font" />
+        <public name="fontWeight" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

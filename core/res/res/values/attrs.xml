@@ -8335,4 +8335,15 @@ i
     <declare-styleable name="ShortcutCategories">
         <attr name="name" />
     </declare-styleable>
+
+    <!-- Attributes that are read when parsing a <font> tag, which is a child of
+         <font-family>. -->
+    <declare-styleable name="FontFamilyFont">
+        <attr name="fontStyle">
+            <enum name="normal" value="0" />
+            <enum name="italic" value="1" />
+        </attr>
+        <attr name="font" format="reference" />
+        <attr name="fontWeight" format="integer" />
+    </declare-styleable>
 </resources>
