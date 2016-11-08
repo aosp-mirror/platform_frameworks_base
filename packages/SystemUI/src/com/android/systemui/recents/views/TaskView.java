@@ -668,10 +668,16 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @Override
     public boolean onLongClick(View v) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        // Since we are clipping the view to the bounds, manually do the hit test
+        boolean inBounds = false;
         Rect clipBounds = new Rect(mViewBounds.mClipBounds);
-        clipBounds.scale(getScaleX());
-        boolean inBounds = clipBounds.contains(mDownTouchPos.x, mDownTouchPos.y);
+        if (!clipBounds.isEmpty()) {
+            // If we are clipping the view to the bounds, manually do the hit test.
+            clipBounds.scale(getScaleX());
+            inBounds = clipBounds.contains(mDownTouchPos.x, mDownTouchPos.y);
+        } else {
+            // Otherwise just make sure we're within the view's bounds.
+            inBounds = mDownTouchPos.x <= getWidth() && mDownTouchPos.y <= getHeight();
+        }
         if (v == this && inBounds && !ssp.hasDockedTask()) {
             // Start listening for drag events
             setClipViewInStack(false);
