@@ -374,7 +374,9 @@ public final class BridgeContext extends Context {
             return true;
         }
 
-        return false;
+        // If the value is not a valid reference, fallback to pass the value as a string.
+        outValue.string = value.getValue();
+        return true;
     }
 
 
