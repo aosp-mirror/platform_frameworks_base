@@ -22,6 +22,7 @@ import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
 import static com.android.systemui.Interpolators.FAST_OUT_LINEAR_IN;
 import static com.android.systemui.Interpolators.FAST_OUT_SLOW_IN;
+import static com.android.systemui.Interpolators.LINEAR_OUT_SLOW_IN;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -30,9 +31,9 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityManager.StackInfo;
 import android.app.IActivityManager;
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
@@ -43,7 +44,6 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
 import com.android.internal.os.BackgroundThread;
@@ -64,10 +64,19 @@ public class PipTouchHandler implements TunerService.Tunable {
     private static final String TUNER_KEY_DRAG_TO_DISMISS = "pip_drag_to_dismiss";
     private static final String TUNER_KEY_TAP_THROUGH = "pip_tap_through";
     private static final String TUNER_KEY_SNAP_MODE_EDGE = "pip_snap_mode_edge";
+    private static final String TUNER_KEY_ALLOW_MINIMIZE = "pip_allow_minimize";
 
     private static final int SNAP_STACK_DURATION = 225;
     private static final int DISMISS_STACK_DURATION = 375;
     private static final int EXPAND_STACK_DURATION = 225;
+    private static final int MINIMIZE_STACK_MAX_DURATION = 200;
+
+    // The fraction of the stack width to show when minimized
+    private static final float MINIMIZED_VISIBLE_FRACTION = 0.25f;
+    // The fraction of the stack width that the user has to drag offscreen to minimize the PIP
+    private static final float MINIMIZE_OFFSCREEN_FRACTION = 0.15f;
+    // The fraction of the stack width that the user has to move when flinging to dismiss the PIP
+    private static final float DISMISS_FLING_DISTANCE_FRACTION = 0.3f;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -83,10 +92,16 @@ public class PipTouchHandler implements TunerService.Tunable {
     private final PipSnapAlgorithm mSnapAlgorithm;
     private PipMotionHelper mMotionHelper;
 
+    // Allow swiping offscreen to dismiss the PIP
     private boolean mEnableSwipeToDismiss = true;
+    // Allow dragging the PIP to a location to close it
     private boolean mEnableDragToDismiss = true;
+    // Allow tapping on the PIP to show additional controls
     private boolean mEnableTapThrough = false;
+    // Allow snapping the PIP to the closest edge and not the corners of the screen
     private boolean mEnableSnapToEdge = false;
+    // Allow the PIP to be "docked" slightly offscreen
+    private boolean mEnableMinimizing = false;
 
     private final Rect mPinnedStackBounds = new Rect();
     private final Rect mBoundedPinnedStackBounds = new Rect();
@@ -99,16 +114,16 @@ public class PipTouchHandler implements TunerService.Tunable {
         }
     };
 
-    private final PointF mDownTouch = new PointF();
-    private final PointF mLastTouch = new PointF();
-    private boolean mIsDragging;
-    private boolean mIsSwipingToDismiss;
+    // Behaviour states
     private boolean mIsTappingThrough;
-    private int mActivePointerId;
+    private boolean mIsMinimized;
 
+    // Touch state
+    private final PipTouchState mTouchState;
     private final FlingAnimationUtils mFlingAnimationUtils;
-    private VelocityTracker mVelocityTracker;
+    private final PipTouchGesture[] mGestures;
 
+    // Temporary vars
     private final Rect mTmpBounds = new Rect();
 
     /**
@@ -183,13 +198,19 @@ public class PipTouchHandler implements TunerService.Tunable {
         mMenuController.addListener(mMenuListener);
         mDismissViewController = new PipDismissViewController(context);
         mSnapAlgorithm = new PipSnapAlgorithm(mContext);
+        mTouchState = new PipTouchState(mViewConfig);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 2f);
+        mGestures = new PipTouchGesture[]{
+                mDragToDismissGesture, mSwipeToDismissGesture, mTapThroughGesture, mMinimizeGesture,
+                mDefaultMovementGesture
+        };
         mMotionHelper = new PipMotionHelper(BackgroundThread.getHandler());
         registerInputConsumer();
 
         // Register any tuner settings changes
         TunerService.get(context).addTunable(this, TUNER_KEY_SWIPE_TO_DISMISS,
-            TUNER_KEY_DRAG_TO_DISMISS, TUNER_KEY_TAP_THROUGH, TUNER_KEY_SNAP_MODE_EDGE);
+            TUNER_KEY_DRAG_TO_DISMISS, TUNER_KEY_TAP_THROUGH, TUNER_KEY_SNAP_MODE_EDGE,
+                TUNER_KEY_ALLOW_MINIMIZE);
     }
 
     @Override
@@ -198,6 +219,8 @@ public class PipTouchHandler implements TunerService.Tunable {
             // Reset back to default
             mEnableSwipeToDismiss = true;
             mEnableDragToDismiss = true;
+            mEnableMinimizing = false;
+            setMinimizedState(false);
             mEnableTapThrough = false;
             mIsTappingThrough = false;
             mEnableSnapToEdge = false;
@@ -210,6 +233,9 @@ public class PipTouchHandler implements TunerService.Tunable {
                 break;
             case TUNER_KEY_DRAG_TO_DISMISS:
                 mEnableDragToDismiss = Integer.parseInt(newValue) != 0;
+                break;
+            case TUNER_KEY_ALLOW_MINIMIZE:
+                mEnableMinimizing = Integer.parseInt(newValue) != 0;
                 break;
             case TUNER_KEY_TAP_THROUGH:
                 mEnableTapThrough = Integer.parseInt(newValue) != 0;
@@ -233,6 +259,9 @@ public class PipTouchHandler implements TunerService.Tunable {
             return true;
         }
 
+        // Update the touch state
+        mTouchState.onTouchEvent(ev);
+
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN: {
                 // Cancel any existing animations on the pinned stack
@@ -241,173 +270,58 @@ public class PipTouchHandler implements TunerService.Tunable {
                 }
 
                 updateBoundedPinnedStackBounds(true /* updatePinnedStackBounds */);
-                initOrResetVelocityTracker();
-                mVelocityTracker.addMovement(ev);
-                mActivePointerId = ev.getPointerId(0);
-                mLastTouch.set(ev.getX(), ev.getY());
-                mDownTouch.set(mLastTouch);
-                mIsDragging = false;
+                for (PipTouchGesture gesture : mGestures) {
+                    gesture.onDown(mTouchState);
+                }
                 try {
                     mPinnedStackController.setInInteractiveMode(true);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Could not set dragging state", e);
                 }
-                if (mEnableDragToDismiss) {
-                    // TODO: Consider setting a timer such at after X time, we show the dismiss
-                    //       target if the user hasn't already dragged some distance
-                    mDismissViewController.createDismissTarget();
-                }
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
-                // Update the velocity tracker
-                mVelocityTracker.addMovement(ev);
-
-                int activePointerIndex = ev.findPointerIndex(mActivePointerId);
-                float x = ev.getX(activePointerIndex);
-                float y = ev.getY(activePointerIndex);
-                float left = mPinnedStackBounds.left + (x - mLastTouch.x);
-                float top = mPinnedStackBounds.top + (y - mLastTouch.y);
-
-                if (!mIsDragging) {
-                    // Check if the pointer has moved far enough
-                    float movement = PointF.length(mDownTouch.x - x, mDownTouch.y - y);
-                    if (movement > mViewConfig.getScaledTouchSlop()) {
-                        mIsDragging = true;
-                        mIsTappingThrough = false;
-                        mMenuController.hideMenu();
-                        if (mEnableSwipeToDismiss) {
-                            // TODO: this check can have some buffer so that we only start swiping
-                            //       after a significant move out of bounds
-                            mIsSwipingToDismiss = !(mBoundedPinnedStackBounds.left <= left &&
-                                    left <= mBoundedPinnedStackBounds.right) &&
-                                    Math.abs(mDownTouch.x - x) > Math.abs(y - mLastTouch.y);
-                        }
-                        if (mEnableDragToDismiss) {
-                            mDismissViewController.showDismissTarget();
-                        }
+                for (PipTouchGesture gesture : mGestures) {
+                    if (gesture.onMove(mTouchState)) {
+                        break;
                     }
-                }
-
-                if (mIsSwipingToDismiss) {
-                    // Ignore the vertical movement
-                    mTmpBounds.set(mPinnedStackBounds);
-                    mTmpBounds.offsetTo((int) left, mPinnedStackBounds.top);
-                    if (!mTmpBounds.equals(mPinnedStackBounds)) {
-                        mPinnedStackBounds.set(mTmpBounds);
-                        mMotionHelper.resizeToBounds(mPinnedStackBounds);
-                    }
-                } else if (mIsDragging) {
-                    // Move the pinned stack
-                    if (!DEBUG_ALLOW_OUT_OF_BOUNDS_STACK) {
-                        left = Math.max(mBoundedPinnedStackBounds.left, Math.min(
-                                mBoundedPinnedStackBounds.right, left));
-                        top = Math.max(mBoundedPinnedStackBounds.top, Math.min(
-                                mBoundedPinnedStackBounds.bottom, top));
-                    }
-                    mTmpBounds.set(mPinnedStackBounds);
-                    mTmpBounds.offsetTo((int) left, (int) top);
-                    if (!mTmpBounds.equals(mPinnedStackBounds)) {
-                        mPinnedStackBounds.set(mTmpBounds);
-                        mMotionHelper.resizeToBounds(mPinnedStackBounds);
-                    }
-                }
-                mLastTouch.set(ev.getX(), ev.getY());
-                break;
-            }
-            case MotionEvent.ACTION_POINTER_UP: {
-                // Update the velocity tracker
-                mVelocityTracker.addMovement(ev);
-
-                int pointerIndex = ev.getActionIndex();
-                int pointerId = ev.getPointerId(pointerIndex);
-                if (pointerId == mActivePointerId) {
-                    // Select a new active pointer id and reset the movement state
-                    final int newPointerIndex = (pointerIndex == 0) ? 1 : 0;
-                    mActivePointerId = ev.getPointerId(newPointerIndex);
-                    mLastTouch.set(ev.getX(newPointerIndex), ev.getY(newPointerIndex));
                 }
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                // Update the velocity tracker
-                mVelocityTracker.addMovement(ev);
-                mVelocityTracker.computeCurrentVelocity(1000,
-                    ViewConfiguration.get(mContext).getScaledMaximumFlingVelocity());
-                float velocityX = mVelocityTracker.getXVelocity();
-                float velocityY = mVelocityTracker.getYVelocity();
-                float velocity = PointF.length(velocityX, velocityY);
-
                 // Update the movement bounds again if the state has changed since the user started
                 // dragging (ie. when the IME shows)
                 updateBoundedPinnedStackBounds(false /* updatePinnedStackBounds */);
 
-                if (mIsSwipingToDismiss) {
-                    if (Math.abs(velocityX) > mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
-                        flingToDismiss(velocityX);
-                    } else {
-                        animateToClosestSnapTarget();
+                for (PipTouchGesture gesture : mGestures) {
+                    if (gesture.onUp(mTouchState)) {
+                        break;
                     }
-                } else if (mIsDragging) {
-                    if (velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
-                        flingToSnapTarget(velocity, velocityX, velocityY);
-                    } else {
-                        int activePointerIndex = ev.findPointerIndex(mActivePointerId);
-                        int x = (int) ev.getX(activePointerIndex);
-                        int y = (int) ev.getY(activePointerIndex);
-                        Rect dismissBounds = mEnableDragToDismiss
-                                ? mDismissViewController.getDismissBounds()
-                                : null;
-                        if (dismissBounds != null && dismissBounds.contains(x, y)) {
-                            animateDismissPinnedStack(dismissBounds);
-                        } else {
-                            animateToClosestSnapTarget();
-                        }
-                    }
-                } else {
-                    if (mEnableTapThrough) {
-                        if (!mIsTappingThrough) {
-                            mMenuController.showMenu();
-                            mIsTappingThrough = true;
-                        }
-                    } else {
-                        expandPinnedStackToFullscreen();
-                    }
-                }
-                if (mEnableDragToDismiss) {
-                    mDismissViewController.destroyDismissTarget();
                 }
 
                 // Fall through to clean up
             }
             case MotionEvent.ACTION_CANCEL: {
-                mIsDragging = false;
-                mIsSwipingToDismiss = false;
                 try {
                     mPinnedStackController.setInInteractiveMode(false);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Could not set dragging state", e);
                 }
-                recycleVelocityTracker();
                 break;
             }
         }
         return !mIsTappingThrough;
     }
 
-    private void initOrResetVelocityTracker() {
-        if (mVelocityTracker == null) {
-            mVelocityTracker = VelocityTracker.obtain();
-        } else {
-            mVelocityTracker.clear();
-        }
-    }
-
-    private void recycleVelocityTracker() {
-        if (mVelocityTracker != null) {
-            mVelocityTracker.recycle();
-            mVelocityTracker = null;
-        }
+    /**
+     * @return whether the current touch state is a horizontal drag offscreen.
+     */
+    private boolean isDraggingOffscreen(PipTouchState touchState) {
+        PointF lastDelta = touchState.getLastTouchDelta();
+        PointF downDelta = touchState.getDownTouchDelta();
+        float left = mPinnedStackBounds.left + lastDelta.x;
+        return !(mBoundedPinnedStackBounds.left <= left && left <= mBoundedPinnedStackBounds.right)
+                && Math.abs(downDelta.x) > Math.abs(downDelta.y);
     }
 
     /**
@@ -449,6 +363,74 @@ public class PipTouchHandler implements TunerService.Tunable {
     }
 
     /**
+     * Sets the minimized state and notifies the controller.
+     */
+    private void setMinimizedState(boolean isMinimized) {
+        mIsMinimized = isMinimized;
+        try {
+            mPinnedStackController.setIsMinimized(isMinimized);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not set minimized state", e);
+        }
+    }
+
+    /**
+     * @return whether the given {@param pinnedStackBounds} indicates the PIP should be minimized.
+     */
+    private boolean shouldMinimizedPinnedStack() {
+        Point displaySize = new Point();
+        mContext.getDisplay().getRealSize(displaySize);
+        if (mPinnedStackBounds.left < 0) {
+            float offscreenFraction = (float) -mPinnedStackBounds.left / mPinnedStackBounds.width();
+            return offscreenFraction >= MINIMIZE_OFFSCREEN_FRACTION;
+        } else if (mPinnedStackBounds.right > displaySize.x) {
+            float offscreenFraction = (float) (mPinnedStackBounds.right - displaySize.x) /
+                    mPinnedStackBounds.width();
+            return offscreenFraction >= MINIMIZE_OFFSCREEN_FRACTION;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Flings the minimized PIP to the closest minimized snap target.
+     */
+    private void flingToMinimizedSnapTarget(float velocityY) {
+        Rect movementBounds = new Rect(mPinnedStackBounds.left, mBoundedPinnedStackBounds.top,
+                mPinnedStackBounds.left, mBoundedPinnedStackBounds.bottom);
+        Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(movementBounds, mPinnedStackBounds,
+                0 /* velocityX */, velocityY);
+        if (!mPinnedStackBounds.equals(toBounds)) {
+            mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
+                    toBounds, 0, FAST_OUT_SLOW_IN, mUpdatePinnedStackBoundsListener);
+            mFlingAnimationUtils.apply(mPinnedStackBoundsAnimator, 0,
+                    distanceBetweenRectOffsets(mPinnedStackBounds, toBounds),
+                    velocityY);
+            mPinnedStackBoundsAnimator.start();
+        }
+    }
+
+    /**
+     * Animates the PIP to the minimized state, slightly offscreen.
+     */
+    private void animateToClosestMinimizedTarget() {
+        Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mBoundedPinnedStackBounds,
+                mPinnedStackBounds);
+        Point displaySize = new Point();
+        mContext.getDisplay().getRealSize(displaySize);
+        int visibleWidth = (int) (MINIMIZED_VISIBLE_FRACTION * mPinnedStackBounds.width());
+        if (mPinnedStackBounds.left < 0) {
+            toBounds.offsetTo(-toBounds.width() + visibleWidth, toBounds.top);
+        } else if (mPinnedStackBounds.right > displaySize.x) {
+            toBounds.offsetTo(displaySize.x - visibleWidth, toBounds.top);
+        }
+        mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
+                toBounds, MINIMIZE_STACK_MAX_DURATION, LINEAR_OUT_SLOW_IN,
+                mUpdatePinnedStackBoundsListener);
+        mPinnedStackBoundsAnimator.start();
+    }
+
+    /**
      * Flings the PIP to the closest snap target.
      */
     private void flingToSnapTarget(float velocity, float velocityX, float velocityY) {
@@ -478,12 +460,26 @@ public class PipTouchHandler implements TunerService.Tunable {
     }
 
     /**
+     * @return whether the velocity is coincident with the current pinned stack bounds to be
+     *         considered a fling to dismiss.
+     */
+    private boolean isFlingToDismiss(float velocityX) {
+        Point displaySize = new Point();
+        mContext.getDisplay().getRealSize(displaySize);
+        return (mPinnedStackBounds.right > displaySize.x && velocityX > 0) ||
+                (mPinnedStackBounds.left < 0 && velocityX < 0);
+    }
+
+    /**
      * Flings the PIP to dismiss it offscreen.
      */
     private void flingToDismiss(float velocityX) {
+        Point displaySize = new Point();
+        mContext.getDisplay().getRealSize(displaySize);
         float offsetX = velocityX > 0
-            ? mBoundedPinnedStackBounds.right + 2 * mPinnedStackBounds.width()
-            : mBoundedPinnedStackBounds.left - 2 * mPinnedStackBounds.width();
+                ? displaySize.x + mPinnedStackBounds.width()
+                : -mPinnedStackBounds.width();
+
         Rect toBounds = new Rect(mPinnedStackBounds);
         toBounds.offsetTo((int) offsetX, toBounds.top);
         if (!mPinnedStackBounds.equals(toBounds)) {
@@ -495,13 +491,7 @@ public class PipTouchHandler implements TunerService.Tunable {
             mPinnedStackBoundsAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    BackgroundThread.getHandler().post(() -> {
-                        try {
-                            mActivityManager.removeStack(PINNED_STACK_ID);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Failed to remove PIP", e);
-                        }
-                    });
+                    BackgroundThread.getHandler().post(PipTouchHandler.this::dismissPinnedStack);
                 }
             });
             mPinnedStackBoundsAnimator.start();
@@ -521,13 +511,7 @@ public class PipTouchHandler implements TunerService.Tunable {
         mPinnedStackBoundsAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                BackgroundThread.getHandler().post(() -> {
-                    try {
-                        mActivityManager.removeStack(PINNED_STACK_ID);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Failed to remove PIP", e);
-                    }
-                });
+                BackgroundThread.getHandler().post(PipTouchHandler.this::dismissPinnedStack);
             }
         });
         mPinnedStackBoundsAnimator.start();
@@ -546,6 +530,27 @@ public class PipTouchHandler implements TunerService.Tunable {
                 Log.e(TAG, "Error showing PIP menu activity", e);
             }
         });
+    }
+
+    /**
+     * Tries to the move the pinned stack to the given {@param bounds}.
+     */
+    private void movePinnedStack(Rect bounds) {
+        if (!bounds.equals(mPinnedStackBounds)) {
+            mPinnedStackBounds.set(bounds);
+            mMotionHelper.resizeToBounds(mPinnedStackBounds);
+        }
+    }
+
+    /**
+     * Dismisses the pinned stack.
+     */
+    private void dismissPinnedStack() {
+        try {
+            mActivityManager.removeStack(PINNED_STACK_ID);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to remove PIP", e);
+        }
     }
 
     /**
@@ -572,4 +577,231 @@ public class PipTouchHandler implements TunerService.Tunable {
     private float distanceBetweenRectOffsets(Rect r1, Rect r2) {
         return PointF.length(r1.left - r2.left, r1.top - r2.top);
     }
+
+    /**
+     * Gesture controlling dragging over a target to dismiss the PIP.
+     */
+    private PipTouchGesture mDragToDismissGesture = new PipTouchGesture() {
+        @Override
+        public void onDown(PipTouchState touchState) {
+            if (mEnableDragToDismiss) {
+                // TODO: Consider setting a timer such at after X time, we show the dismiss
+                //       target if the user hasn't already dragged some distance
+                mDismissViewController.createDismissTarget();
+            }
+        }
+
+        @Override
+        boolean onMove(PipTouchState touchState) {
+            if (mEnableDragToDismiss && touchState.startedDragging()) {
+                mDismissViewController.showDismissTarget();
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onUp(PipTouchState touchState) {
+            if (mEnableDragToDismiss) {
+                try {
+                    if (touchState.isDragging()) {
+                        Rect dismissBounds = mDismissViewController.getDismissBounds();
+                        PointF lastTouch = touchState.getLastTouchPosition();
+                        if (dismissBounds.contains((int) lastTouch.x, (int) lastTouch.y)) {
+                            animateDismissPinnedStack(dismissBounds);
+                            return true;
+                        }
+                    }
+                } finally {
+                    mDismissViewController.destroyDismissTarget();
+                }
+            }
+            return false;
+        }
+    };
+
+    /**** Gestures ****/
+
+    /**
+     * Gesture controlling swiping offscreen to dismiss the PIP.
+     */
+    private PipTouchGesture mSwipeToDismissGesture = new PipTouchGesture() {
+        @Override
+        boolean onMove(PipTouchState touchState) {
+            if (mEnableSwipeToDismiss) {
+                boolean isDraggingOffscreen = isDraggingOffscreen(touchState);
+
+                if (touchState.startedDragging() && isDraggingOffscreen) {
+                    // Reset the minimized state once we drag horizontally
+                    setMinimizedState(false);
+                }
+
+                if (isDraggingOffscreen) {
+                    // Move the pinned stack, but ignore the vertical movement
+                    float left = mPinnedStackBounds.left + touchState.getLastTouchDelta().x;
+                    mTmpBounds.set(mPinnedStackBounds);
+                    mTmpBounds.offsetTo((int) left, mPinnedStackBounds.top);
+                    if (!mTmpBounds.equals(mPinnedStackBounds)) {
+                        mPinnedStackBounds.set(mTmpBounds);
+                        mMotionHelper.resizeToBounds(mPinnedStackBounds);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onUp(PipTouchState touchState) {
+            if (mEnableSwipeToDismiss && touchState.isDragging()) {
+                PointF vel = touchState.getVelocity();
+                PointF downDelta = touchState.getDownTouchDelta();
+                float minFlingVel = mFlingAnimationUtils.getMinVelocityPxPerSecond();
+                float flingVelScale = mEnableMinimizing ? 3f : 2f;
+                if (Math.abs(vel.x) > (flingVelScale * minFlingVel)) {
+                    // Determine if this gesture is actually a fling to dismiss
+                    if (isFlingToDismiss(vel.x) && Math.abs(downDelta.x) >=
+                            (DISMISS_FLING_DISTANCE_FRACTION * mPinnedStackBounds.width())) {
+                        flingToDismiss(vel.x);
+                    } else {
+                        flingToSnapTarget(vel.length(), vel.x, vel.y);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
+
+    /**
+     * Gesture controlling dragging the PIP slightly offscreen to minimize it.
+     */
+    private PipTouchGesture mMinimizeGesture = new PipTouchGesture() {
+        @Override
+        boolean onMove(PipTouchState touchState) {
+            if (mEnableMinimizing) {
+                boolean isDraggingOffscreen = isDraggingOffscreen(touchState);
+                if (touchState.startedDragging() && isDraggingOffscreen) {
+                    // Reset the minimized state once we drag horizontally
+                    setMinimizedState(false);
+                }
+
+                if (isDraggingOffscreen) {
+                    // Move the pinned stack, but ignore the vertical movement
+                    float left = mPinnedStackBounds.left + touchState.getLastTouchDelta().x;
+                    mTmpBounds.set(mPinnedStackBounds);
+                    mTmpBounds.offsetTo((int) left, mPinnedStackBounds.top);
+                    if (!mTmpBounds.equals(mPinnedStackBounds)) {
+                        mPinnedStackBounds.set(mTmpBounds);
+                        mMotionHelper.resizeToBounds(mPinnedStackBounds);
+                    }
+                    return true;
+                } else if (mIsMinimized && touchState.isDragging()) {
+                    // Move the pinned stack, but ignore the horizontal movement
+                    PointF lastDelta = touchState.getLastTouchDelta();
+                    float top = mPinnedStackBounds.top + lastDelta.y;
+                    top = Math.max(mBoundedPinnedStackBounds.top, Math.min(
+                            mBoundedPinnedStackBounds.bottom, top));
+                    mTmpBounds.set(mPinnedStackBounds);
+                    mTmpBounds.offsetTo(mPinnedStackBounds.left, (int) top);
+                    movePinnedStack(mTmpBounds);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onUp(PipTouchState touchState) {
+            if (mEnableMinimizing) {
+                if (touchState.isDragging()) {
+                    if (isDraggingOffscreen(touchState)) {
+                        if (shouldMinimizedPinnedStack()) {
+                            setMinimizedState(true);
+                            animateToClosestMinimizedTarget();
+                            return true;
+                        }
+                    } else if (mIsMinimized) {
+                        PointF vel = touchState.getVelocity();
+                        if (vel.length() > mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
+                            flingToMinimizedSnapTarget(vel.y);
+                        } else {
+                            animateToClosestMinimizedTarget();
+                        }
+                        return true;
+                    }
+                } else if (mIsMinimized) {
+                    setMinimizedState(false);
+                    animateToClosestSnapTarget();
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
+
+    /**
+     * Gesture controlling tapping on the PIP to show an overlay.
+     */
+    private PipTouchGesture mTapThroughGesture = new PipTouchGesture() {
+        @Override
+        boolean onMove(PipTouchState touchState) {
+            if (mEnableTapThrough && touchState.startedDragging()) {
+                mIsTappingThrough = false;
+                mMenuController.hideMenu();
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onUp(PipTouchState touchState) {
+            if (mEnableTapThrough && !touchState.isDragging() && !mIsTappingThrough) {
+                mMenuController.showMenu();
+                mIsTappingThrough = true;
+                return true;
+            }
+            return false;
+        }
+    };
+
+    /**
+     * Gesture controlling normal movement of the PIP.
+     */
+    private PipTouchGesture mDefaultMovementGesture = new PipTouchGesture() {
+        @Override
+        boolean onMove(PipTouchState touchState) {
+            if (touchState.isDragging()) {
+                // Move the pinned stack freely
+                PointF lastDelta = touchState.getLastTouchDelta();
+                float left = mPinnedStackBounds.left + lastDelta.x;
+                float top = mPinnedStackBounds.top + lastDelta.y;
+                if (!DEBUG_ALLOW_OUT_OF_BOUNDS_STACK) {
+                    left = Math.max(mBoundedPinnedStackBounds.left, Math.min(
+                            mBoundedPinnedStackBounds.right, left));
+                    top = Math.max(mBoundedPinnedStackBounds.top, Math.min(
+                            mBoundedPinnedStackBounds.bottom, top));
+                }
+                mTmpBounds.set(mPinnedStackBounds);
+                mTmpBounds.offsetTo((int) left, (int) top);
+                movePinnedStack(mTmpBounds);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onUp(PipTouchState touchState) {
+            if (touchState.isDragging()) {
+                PointF vel = mTouchState.getVelocity();
+                float velocity = PointF.length(vel.x, vel.y);
+                if (velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
+                    flingToSnapTarget(velocity, vel.x, vel.y);
+                } else {
+                    animateToClosestSnapTarget();
+                }
+            } else {
+                expandPinnedStackToFullscreen();
+            }
+            return true;
+        }
+    };
 }

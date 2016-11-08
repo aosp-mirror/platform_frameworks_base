@@ -208,15 +208,19 @@ public class PipSnapAlgorithm {
         final int fromTop = Math.abs(stackBounds.top - movementBounds.top);
         final int fromRight = Math.abs(movementBounds.right - stackBounds.left);
         final int fromBottom = Math.abs(movementBounds.bottom - stackBounds.top);
+        final int boundedLeft = Math.max(movementBounds.left, Math.min(movementBounds.right,
+                stackBounds.left));
+        final int boundedTop = Math.max(movementBounds.top, Math.min(movementBounds.bottom,
+                stackBounds.top));
         boundsOut.set(stackBounds);
         if (fromLeft <= fromTop && fromLeft <= fromRight && fromLeft <= fromBottom) {
-            boundsOut.offsetTo(movementBounds.left, stackBounds.top);
+            boundsOut.offsetTo(movementBounds.left, boundedTop);
         } else if (fromTop <= fromLeft && fromTop <= fromRight && fromTop <= fromBottom) {
-            boundsOut.offsetTo(stackBounds.left, movementBounds.top);
+            boundsOut.offsetTo(boundedLeft, movementBounds.top);
         } else if (fromRight < fromLeft && fromRight < fromTop && fromRight < fromBottom) {
-            boundsOut.offsetTo(movementBounds.right, stackBounds.top);
+            boundsOut.offsetTo(movementBounds.right, boundedTop);
         } else {
-            boundsOut.offsetTo(stackBounds.left, movementBounds.bottom);
+            boundsOut.offsetTo(boundedLeft, movementBounds.bottom);
         }
     }
 

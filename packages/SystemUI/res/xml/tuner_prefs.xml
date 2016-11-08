@@ -149,6 +149,12 @@
             android:summary="@string/pip_snap_mode_edge_summary"
             sysui:defValue="false" />
 
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="pip_allow_minimize"
+            android:title="@string/pip_allow_minimize_title"
+            android:summary="@string/pip_allow_minimize_summary"
+            sysui:defValue="false" />
+
     </PreferenceScreen>
 
     <PreferenceScreen

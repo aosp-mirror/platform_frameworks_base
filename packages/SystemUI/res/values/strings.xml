@@ -1698,20 +1698,28 @@
         not appear on production builds ever. -->
     <string name="pip_drag_to_dismiss_summary" translatable="false">Drag to the dismiss target at the bottom of the screen to close the PIP</string>
 
-    <!-- PIP tap once to break through to the activity. Non-translatable since it should
+    <!-- PIP tap once to break through to the activity title. Non-translatable since it should
         not appear on production builds ever. -->
     <string name="pip_tap_through_title" translatable="false">Tap to interact</string>
 
-    <!-- PIP tap once to break through to the activity. Non-translatable since it should
+    <!-- PIP tap once to break through to the activity description. Non-translatable since it should
         not appear on production builds ever. -->
     <string name="pip_tap_through_summary" translatable="false">Tap once to interact with the activity</string>
 
-    <!-- PIP snap to closest edge. Non-translatable since it should
+    <!-- PIP snap to closest edge title. Non-translatable since it should
         not appear on production builds ever. -->
     <string name="pip_snap_mode_edge_title" translatable="false">Snap to closest edge</string>
 
-    <!-- PIP snap to closest edge. Non-translatable since it should
+    <!-- PIP snap to closest edge description. Non-translatable since it should
         not appear on production builds ever. -->
     <string name="pip_snap_mode_edge_summary" translatable="false">Snap to the closest edge</string>
+
+    <!-- PIP allow minimize title. Non-translatable since it should
+        not appear on production builds ever. -->
+    <string name="pip_allow_minimize_title" translatable="false">Allow PIP to minimize</string>
+
+    <!-- PIP allow minimize description. Non-translatable since it should
+        not appear on production builds ever. -->
+    <string name="pip_allow_minimize_summary" translatable="false">Allow PIP to minimize slightly offscreen</string>
 
 </resources>

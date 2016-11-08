@@ -32,6 +32,11 @@ interface IPinnedStackController {
     oneway void setInInteractiveMode(boolean inInteractiveMode);
 
     /**
+     * Notifies the controller that the PIP is currently minimized.
+     */
+    oneway void setIsMinimized(boolean isMinimized);
+
+    /**
      * Notifies the controller that the desired snap mode is to the closest edge.
      */
     oneway void setSnapToEdge(boolean snapToEdge);
