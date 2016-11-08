@@ -58,6 +58,7 @@ public class DozeTriggers implements DozeMachine.Part {
     private final SensorManager mSensorManager;
     private final Handler mHandler;
     private final DozeFactory.WakeLock mWakeLock;
+    private final boolean mAllowPulseTriggers;
     private final UiModeManager mUiModeManager;
     private final TriggerReceiver mBroadcastReceiver = new TriggerReceiver();
 
@@ -68,7 +69,7 @@ public class DozeTriggers implements DozeMachine.Part {
     public DozeTriggers(Context context, DozeMachine machine, DozeHost dozeHost,
             AmbientDisplayConfiguration config,
             DozeParameters dozeParameters, SensorManager sensorManager, Handler handler,
-            DozeFactory.WakeLock wakeLock) {
+            DozeFactory.WakeLock wakeLock, boolean allowPulseTriggers) {
         mContext = context;
         mMachine = machine;
         mDozeHost = dozeHost;
@@ -77,6 +78,7 @@ public class DozeTriggers implements DozeMachine.Part {
         mSensorManager = sensorManager;
         mHandler = handler;
         mWakeLock = wakeLock;
+        mAllowPulseTriggers = allowPulseTriggers;
         mDozeSensors = new DozeSensors(context, mSensorManager, dozeParameters, config,
                 wakeLock, this::onSensor);
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
@@ -149,7 +151,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
     private void requestPulse(final int reason, boolean performedProxCheck) {
         Assert.isMainThread();
-        if (mPulsePending || !canPulse()) {
+        if (mPulsePending || !mAllowPulseTriggers || !canPulse()) {
             return;
         }
 
@@ -307,17 +309,8 @@ public class DozeTriggers implements DozeMachine.Part {
 
     private DozeHost.Callback mHostCallback = new DozeHost.Callback() {
         @Override
-        public void onNewNotifications() {
-        }
-
-        @Override
         public void onBuzzBeepBlinked() {
             onNotification();
-        }
-
-        @Override
-        public void onNotificationLight(boolean on) {
-
         }
 
         @Override

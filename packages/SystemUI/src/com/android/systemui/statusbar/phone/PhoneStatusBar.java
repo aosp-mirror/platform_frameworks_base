@@ -5167,5 +5167,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             return mNotificationLightOn;
         }
 
+        @Override
+        public void startPendingIntentDismissingKeyguard(PendingIntent intent) {
+            PhoneStatusBar.this.startPendingIntentDismissingKeyguard(intent);
+        }
+
     }
 }

@@ -268,6 +268,45 @@ public class NotificationColorUtil {
     }
 
     /**
+     * Finds a suitable color such that there's enough contrast.
+     *
+     * @param color the color to start searching from.
+     * @param other the color to ensure contrast against. Assumed to be darker than {@param color}
+     * @param findFg if true, we assume {@param color} is a foreground, otherwise a background.
+     * @param minRatio the minimum contrast ratio required.
+     * @return a color with the same hue as {@param color}, potentially darkened to meet the
+     *          contrast ratio.
+     */
+    public static int findContrastColorAgainstDark(int color, int other, boolean findFg,
+            double minRatio) {
+        int fg = findFg ? color : other;
+        int bg = findFg ? other : color;
+        if (ColorUtilsFromCompat.calculateContrast(fg, bg) >= minRatio) {
+            return color;
+        }
+
+        double[] lab = new double[3];
+        ColorUtilsFromCompat.colorToLAB(findFg ? fg : bg, lab);
+
+        double low = lab[0], high = 100;
+        final double a = lab[1], b = lab[2];
+        for (int i = 0; i < 15 && high - low > 0.00001; i++) {
+            final double l = (low + high) / 2;
+            if (findFg) {
+                fg = ColorUtilsFromCompat.LABToColor(l, a, b);
+            } else {
+                bg = ColorUtilsFromCompat.LABToColor(l, a, b);
+            }
+            if (ColorUtilsFromCompat.calculateContrast(fg, bg) > minRatio) {
+                high = l;
+            } else {
+                low = l;
+            }
+        }
+        return ColorUtilsFromCompat.LABToColor(high, a, b);
+    }
+
+    /**
      * Finds a text color with sufficient contrast over bg that has the same hue as the original
      * color, assuming it is for large text.
      */

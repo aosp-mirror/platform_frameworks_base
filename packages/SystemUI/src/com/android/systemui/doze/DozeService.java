@@ -38,7 +38,7 @@ public class DozeService extends DreamService implements DozeMachine.Service {
 
         setWindowless(true);
 
-        mDozeMachine = DozeFactory.assembleMachine(this);
+        mDozeMachine = DozeFactory.getInstance(getApplication()).assembleMachine(this);
     }
 
     @Override
