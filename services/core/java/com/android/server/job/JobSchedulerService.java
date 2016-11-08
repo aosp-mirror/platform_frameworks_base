@@ -824,7 +824,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
             try {
                 ActivityManagerNative.getDefault().registerUidObserver(mUidObserver,
                         ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_GONE
-                        | ActivityManager.UID_OBSERVER_IDLE, null);
+                        | ActivityManager.UID_OBSERVER_IDLE, ActivityManager.PROCESS_STATE_UNKNOWN,
+                        null);
             } catch (RemoteException e) {
                 // ignored; both services live in system_server
             }

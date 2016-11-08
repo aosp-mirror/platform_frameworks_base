@@ -371,9 +371,6 @@ final class ProcessList {
     public static String makeProcStateString(int curProcState) {
         String procState;
         switch (curProcState) {
-            case -1:
-                procState = "N ";
-                break;
             case ActivityManager.PROCESS_STATE_PERSISTENT:
                 procState = "P ";
                 break;
@@ -424,6 +421,9 @@ final class ProcessList {
                 break;
             case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
                 procState = "CE";
+                break;
+            case ActivityManager.PROCESS_STATE_NONEXISTENT:
+                procState = "N ";
                 break;
             default:
                 procState = "??";

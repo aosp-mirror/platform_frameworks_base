@@ -468,7 +468,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         @Override
         public void onUidGone(int uid) throws RemoteException {
-            handleOnUidStateChanged(uid, ActivityManager.MAX_PROCESS_STATE);
+            handleOnUidStateChanged(uid, ActivityManager.PROCESS_STATE_NONEXISTENT);
         }
 
         @Override
@@ -497,8 +497,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private boolean isProcessStateForeground(int processState) {
-        return (processState != ActivityManager.PROCESS_STATE_NONEXISTENT)
-                && (processState <= PROCESS_STATE_FOREGROUND_THRESHOLD);
+        return processState <= PROCESS_STATE_FOREGROUND_THRESHOLD;
     }
 
     boolean isUidForegroundLocked(int uid) {
@@ -3677,7 +3676,8 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     void injectRegisterUidObserver(IUidObserver observer, int which) {
         try {
-            ActivityManagerNative.getDefault().registerUidObserver(observer, which, null);
+            ActivityManagerNative.getDefault().registerUidObserver(observer, which,
+                    ActivityManager.PROCESS_STATE_UNKNOWN, null);
         } catch (RemoteException shouldntHappen) {
         }
     }

@@ -77,6 +77,7 @@ public class RemoteCallbackList<E extends IInterface> {
     public boolean register(E callback) {
         return register(callback, null);
     }
+
     /**
      * Add a new callback to the list.  This callback will remain in the list
      * until a corresponding call to {@link #unregister} or its hosting process
@@ -324,6 +325,29 @@ public class RemoteCallbackList<E extends IInterface> {
                 return 0;
             }
             return mCallbacks.size();
+        }
+    }
+
+    /**
+     * Return the cookies associated with a currently registered callback.  Note that this is
+     * <em>not</em> the same as {@link #getBroadcastCookie} and should not be used
+     * interchangeably with it.  This method returns the current cookied registered at the given
+     * index, not the current broadcast state.  This means that it is not itself thread-safe:
+     * any call to {@link #register} or {@link #unregister} will change these indices, so you
+     * must do your own thread safety between these to protect from such changes.
+     *
+     * @param index Index of which registration cookie to return from 0 to
+     * {@link #getRegisteredCallbackCount()}.
+     *
+     * @return Returns whatever cookie object is associated with this index, or null if
+     * {@link #kill()} has been called.
+     */
+    public Object getRegisteredCallbackCookie(int index) {
+        synchronized (mCallbacks) {
+            if (mKilled) {
+                return null;
+            }
+            return mCallbacks.valueAt(index).mCookie;
         }
     }
 }
