@@ -2165,6 +2165,9 @@
          provisioning, availability etc -->
     <bool name="config_carrier_wfc_ims_available">false</bool>
 
+    <!-- Whether to use voip audio mode for ims call -->
+    <bool name="config_use_voip_mode_for_ims">false</bool>
+
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
     <string-array translatable="false" name="config_cdma_home_system" />
