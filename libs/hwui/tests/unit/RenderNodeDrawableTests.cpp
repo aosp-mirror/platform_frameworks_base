@@ -21,11 +21,14 @@
 #include "DamageAccumulator.h"
 #include "IContextFactory.h"
 #include "pipeline/skia/SkiaDisplayList.h"
+#include "pipeline/skia/SkiaPipeline.h"
 #include "pipeline/skia/SkiaRecordingCanvas.h"
 #include "renderthread/CanvasContext.h"
 #include "tests/common/TestUtils.h"
 #include "SkiaCanvas.h"
+#include <SkSurface_Base.h>
 #include <SkLiteRecorder.h>
+#include <SkClipStack.h>
 #include <string.h>
 
 
@@ -51,6 +54,8 @@ TEST(RenderNodeDrawable, create) {
     ASSERT_EQ(drawable.getRecordedMatrix(), canvas.getTotalMatrix());
 }
 
+namespace {
+
 static void drawOrderedRect(Canvas* canvas, uint8_t expectedDrawOrder) {
     SkPaint paint;
     // order put in blue channel, transparent so overlapped content doesn't get rejected
@@ -67,18 +72,33 @@ static void drawOrderedNode(Canvas* canvas, uint8_t expectedDrawOrder, float z) 
     canvas->drawRenderNode(node.get()); // canvas takes reference/sole ownership
 }
 
-TEST(RenderNodeDrawable, zReorder) {
-    class ZReorderCanvas : public SkCanvas {
-    public:
-        ZReorderCanvas(int width, int height) : SkCanvas(width, height) {}
-        void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
-            int expectedOrder = SkColorGetB(paint.getColor()); // extract order from blue channel
-            EXPECT_EQ(expectedOrder, mIndex++) << "An op was drawn out of order";
+static void drawOrderedNode(Canvas* canvas, uint8_t expectedDrawOrder,
+        std::function<void(RenderProperties& props, SkiaRecordingCanvas& canvas)> setup) {
+    auto node = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [expectedDrawOrder, setup](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedRect(&canvas, expectedDrawOrder);
+        if (setup) {
+             setup(props, canvas);
         }
-        int getIndex() { return mIndex; }
-    protected:
-        int mIndex = 0;
-    };
+    });
+    canvas->drawRenderNode(node.get()); // canvas takes reference/sole ownership
+}
+
+class ZReorderCanvas : public SkCanvas {
+public:
+    ZReorderCanvas(int width, int height) : SkCanvas(width, height) {}
+    void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
+        int expectedOrder = SkColorGetB(paint.getColor()); // extract order from blue channel
+        EXPECT_EQ(expectedOrder, mIndex++) << "An op was drawn out of order";
+    }
+    int getIndex() { return mIndex; }
+protected:
+    int mIndex = 0;
+};
+
+} // end anonymous namespace
+
+TEST(RenderNodeDrawable, zReorder) {
 
     auto parent = TestUtils::createSkiaNode(0, 0, 100, 100,
             [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
@@ -136,42 +156,622 @@ TEST(RenderNodeDrawable, composeOnLayer)
     rootNode->setLayerSurface(sk_sp<SkSurface>());
 }
 
-//TODO: refactor to cover test cases from FrameBuilderTests_projectionReorder
-//validate with bounds and projection path mask.
-//TODO: research if we could hook in and mock/validate different aspects of the drawing,
-//instead of validating pixels
-TEST(RenderNodeDrawable, projectDraw) {
-    auto surface = SkSurface::MakeRasterN32Premul(1, 1);
-    SkCanvas& canvas = *surface->getCanvas();
-    canvas.drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
+namespace {
+class ContextFactory : public IContextFactory {
+public:
+    virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) override {
+        return new AnimationContext(clock);
+    }
+};
 
-    auto redNode = TestUtils::createSkiaNode(0, 0, 1, 1,
-        [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
-            redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
-        }, "redNode");
+inline SkRect getBounds(const SkCanvas* canvas) {
+    SkClipStack::BoundsType boundType;
+    SkRect clipBounds;
+    canvas->getClipStack()->getBounds(&clipBounds, &boundType);
+    return clipBounds;
+}
+inline SkRect getLocalBounds(const SkCanvas* canvas) {
+    SkMatrix invertedTotalMatrix;
+    EXPECT_TRUE(canvas->getTotalMatrix().invert(&invertedTotalMatrix));
+    SkRect outlineInDeviceCoord = getBounds(canvas);
+    SkRect outlineInLocalCoord;
+    invertedTotalMatrix.mapRect(&outlineInLocalCoord, outlineInDeviceCoord);
+    return outlineInLocalCoord;
+}
+} // end anonymous namespace
 
-    auto greenNodeWithRedChild = TestUtils::createSkiaNode(0, 0, 1, 1,
-        [&](RenderProperties& props, SkiaRecordingCanvas& greenCanvasWithRedChild) {
-            greenCanvasWithRedChild.drawRenderNode(redNode.get());
-            greenCanvasWithRedChild.drawColor(SK_ColorGREEN, SkBlendMode::kSrcOver);
-        }, "greenNodeWithRedChild");
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorder) {
+    static const int SCROLL_X = 5;
+    static const int SCROLL_Y = 10;
+    class ProjectionTestCanvas : public SkCanvas {
+    public:
+        ProjectionTestCanvas(int width, int height) : SkCanvas(width, height) {}
+        void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
+            const int index = mIndex++;
+            SkMatrix expectedMatrix;;
+            switch (index) {
+            case 0:  //this is node "B"
+                EXPECT_EQ(SkRect::MakeWH(100, 100), rect);
+                EXPECT_EQ(SK_ColorWHITE, paint.getColor());
+                expectedMatrix.reset();
+                EXPECT_EQ(SkRect::MakeLTRB(0, 0, 100, 100), getBounds(this));
+                break;
+            case 1:  //this is node "P"
+                EXPECT_EQ(SkRect::MakeLTRB(-10, -10, 60, 60), rect);
+                EXPECT_EQ(SK_ColorDKGRAY, paint.getColor());
+                expectedMatrix.setTranslate(50 - SCROLL_X, 50 - SCROLL_Y);
+                EXPECT_EQ(SkRect::MakeLTRB(-35, -30, 45, 50), getLocalBounds(this));
+                break;
+            case 2:  //this is node "C"
+                EXPECT_EQ(SkRect::MakeWH(100, 50), rect);
+                EXPECT_EQ(SK_ColorBLUE, paint.getColor());
+                expectedMatrix.setTranslate(-SCROLL_X, 50 - SCROLL_Y);
+                EXPECT_EQ(SkRect::MakeLTRB(0, 40, 95, 90), getBounds(this));
+                break;
+            default:
+                ADD_FAILURE();
+            }
+            EXPECT_EQ(expectedMatrix, getTotalMatrix());
+        }
 
-    auto rootNode = TestUtils::createSkiaNode(0, 0, 1, 1,
-        [&](RenderProperties& props, SkiaRecordingCanvas& rootCanvas) {
-            rootCanvas.drawRenderNode(greenNodeWithRedChild.get());
-        }, "rootNode");
-    SkiaDisplayList* rootDisplayList = static_cast<SkiaDisplayList*>(
-        (const_cast<DisplayList*>(rootNode->getDisplayList())));
+        int getIndex() { return mIndex; }
+    protected:
+        int mIndex = 0;
+    };
 
-    RenderNodeDrawable rootDrawable(rootNode.get(), &canvas, false);
-    canvas.drawDrawable(&rootDrawable);
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorGREEN);
+    /**
+     * Construct a tree of nodes, where the root (A) has a receiver background (B), and a child (C)
+     * with a projecting child (P) of its own. P would normally draw between B and C's "background"
+     * draw, but because it is projected backwards, it's drawn in between B and C.
+     *
+     * The parent is scrolled by SCROLL_X/SCROLL_Y, but this does not affect the background
+     * (which isn't affected by scroll).
+     */
+    auto receiverBackground = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+        properties.setProjectionReceiver(true);
+        // scroll doesn't apply to background, so undone via translationX/Y
+        // NOTE: translationX/Y only! no other transform properties may be set for a proj receiver!
+        properties.setTranslationX(SCROLL_X);
+        properties.setTranslationY(SCROLL_Y);
 
-    //project redNode on rootNode, which will change the test outcome,
-    //because redNode will draw after greenNodeWithRedChild
-    rootDisplayList->mIsProjectionReceiver = true;
-    redNode->animatorProperties().setProjectBackwards(true);
-    canvas.drawDrawable(&rootDrawable);
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
+        SkPaint paint;
+        paint.setColor(SK_ColorWHITE);
+        canvas.drawRect(0, 0, 100, 100, paint);
+    }, "B");
+
+    auto projectingRipple = TestUtils::createSkiaNode(50, 0, 100, 50,
+            [](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+        properties.setProjectBackwards(true);
+        properties.setClipToBounds(false);
+        SkPaint paint;
+        paint.setColor(SK_ColorDKGRAY);
+        canvas.drawRect(-10, -10, 60, 60, paint);
+    }, "P");
+    auto child = TestUtils::createSkiaNode(0, 50, 100, 100,
+            [&projectingRipple](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setColor(SK_ColorBLUE);
+        canvas.drawRect(0, 0, 100, 50, paint);
+        canvas.drawRenderNode(projectingRipple.get());
+    }, "C");
+    auto parent = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [&receiverBackground, &child](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+        // Set a rect outline for the projecting ripple to be masked against.
+        properties.mutableOutline().setRoundRect(10, 10, 90, 90, 5, 1.0f);
+
+        canvas.save(SaveFlags::MatrixClip);
+        canvas.translate(-SCROLL_X, -SCROLL_Y); // Apply scroll (note: bg undoes this internally)
+        canvas.drawRenderNode(receiverBackground.get());
+        canvas.drawRenderNode(child.get());
+        canvas.restore();
+    }, "A");
+    ContextFactory contextFactory;
+    std::unique_ptr<CanvasContext> canvasContext(CanvasContext::create(
+            renderThread, false, parent.get(), &contextFactory));
+    TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
+    DamageAccumulator damageAccumulator;
+    info.damageAccumulator = &damageAccumulator;
+    info.observer = nullptr;
+    parent->prepareTree(info);
+
+    //parent(A)             -> (receiverBackground, child)
+    //child(C)              -> (rect[0, 0, 100, 50], projectingRipple)
+    //projectingRipple(P)   -> (rect[-10, -10, 60, 60]) -> projects backwards
+    //receiverBackground(B) -> (rect[0, 0, 100, 100]) -> projection receiver
+
+    //create a canvas not backed by any device/pixels, but with dimensions to avoid quick rejection
+    ProjectionTestCanvas canvas(100, 100);
+    RenderNodeDrawable drawable(parent.get(), &canvas, true);
+    canvas.drawDrawable(&drawable);
+    EXPECT_EQ(3, canvas.getIndex());
+}
+
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
+    /* R is backward projected on B and C is a layer.
+                A
+               / \
+              B   C
+                  |
+                  R
+    */
+    static const int SCROLL_X = 5;
+    static const int SCROLL_Y = 10;
+    static const int CANVAS_WIDTH = 400;
+    static const int CANVAS_HEIGHT = 400;
+    static const int LAYER_WIDTH = 200;
+    static const int LAYER_HEIGHT = 200;
+    class ProjectionTestCanvas : public SkCanvas {
+    public:
+        ProjectionTestCanvas() : SkCanvas(CANVAS_WIDTH, CANVAS_HEIGHT) {}
+        void onDrawArc(const SkRect&, SkScalar startAngle, SkScalar sweepAngle, bool useCenter,
+                const SkPaint&) override {
+            EXPECT_EQ(0, mIndex++); //part of painting the layer
+            EXPECT_EQ(SkRect::MakeLTRB(0, 0, LAYER_WIDTH, LAYER_HEIGHT), getBounds(this));
+        }
+        void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
+            EXPECT_EQ(1, mIndex++);
+            EXPECT_EQ(SkRect::MakeLTRB(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT), getBounds(this));
+        }
+        void onDrawOval(const SkRect&, const SkPaint&) override {
+            EXPECT_EQ(2, mIndex++);
+            SkMatrix expectedMatrix;
+            expectedMatrix.setTranslate(100 - SCROLL_X, 100 - SCROLL_Y);
+            EXPECT_EQ(expectedMatrix, getTotalMatrix());
+            EXPECT_EQ(SkRect::MakeLTRB(-85, -80, 295, 300), getLocalBounds(this));
+        }
+        int mIndex = 0;
+    };
+
+    class ProjectionLayer : public SkSurface_Base {
+    public:
+        ProjectionLayer(ProjectionTestCanvas *canvas)
+            : SkSurface_Base(SkImageInfo::MakeN32Premul(LAYER_WIDTH, LAYER_HEIGHT), nullptr)
+            , mCanvas(canvas) {
+        }
+        void onDraw(SkCanvas*, SkScalar x, SkScalar y, const SkPaint*) override {
+            EXPECT_EQ(3, mCanvas->mIndex++);
+            EXPECT_EQ(SkRect::MakeLTRB(100 - SCROLL_X, 100 - SCROLL_Y, 300 - SCROLL_X,
+                   300 - SCROLL_Y), getBounds(mCanvas));
+        }
+        SkCanvas* onNewCanvas() override {
+            mCanvas->ref();
+            return mCanvas;
+        }
+        sk_sp<SkSurface> onNewSurface(const SkImageInfo&) override {
+            return sk_sp<SkSurface>();
+        }
+        sk_sp<SkImage> onNewImageSnapshot(SkBudgeted, SkCopyPixelsMode) override {
+            return sk_sp<SkImage>();
+        }
+        void onCopyOnWrite(ContentChangeMode) override {}
+        ProjectionTestCanvas* mCanvas;
+    };
+
+    auto receiverBackground = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
+            [](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+        properties.setProjectionReceiver(true);
+        // scroll doesn't apply to background, so undone via translationX/Y
+        // NOTE: translationX/Y only! no other transform properties may be set for a proj receiver!
+        properties.setTranslationX(SCROLL_X);
+        properties.setTranslationY(SCROLL_Y);
+
+        canvas.drawRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, SkPaint());
+    }, "B"); //B
+    auto projectingRipple = TestUtils::createSkiaNode(0, 0, LAYER_WIDTH, LAYER_HEIGHT,
+            [](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+        properties.setProjectBackwards(true);
+        properties.setClipToBounds(false);
+        canvas.drawOval(100, 100, 300, 300, SkPaint()); // drawn mostly out of layer bounds
+    }, "R"); //R
+    auto child = TestUtils::createSkiaNode(100, 100, 300, 300,
+            [&projectingRipple](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+        canvas.drawRenderNode(projectingRipple.get());
+        canvas.drawArc(0, 0, LAYER_WIDTH, LAYER_HEIGHT, 0.0f, 280.0f, true, SkPaint());
+    }, "C"); //C
+    auto parent = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
+            [&receiverBackground, &child](RenderProperties& properties,
+            SkiaRecordingCanvas& canvas) {
+        // Set a rect outline for the projecting ripple to be masked against.
+        properties.mutableOutline().setRoundRect(10, 10, 390, 390, 0, 1.0f);
+        canvas.translate(-SCROLL_X, -SCROLL_Y); // Apply scroll (note: bg undoes this internally)
+        canvas.drawRenderNode(receiverBackground.get());
+        canvas.drawRenderNode(child.get());
+    }, "A"); //A
+
+    //prepareTree is required to find, which receivers have backward projected nodes
+    ContextFactory contextFactory;
+    std::unique_ptr<CanvasContext> canvasContext(CanvasContext::create(
+            renderThread, false, parent.get(), &contextFactory));
+    TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
+    DamageAccumulator damageAccumulator;
+    info.damageAccumulator = &damageAccumulator;
+    info.observer = nullptr;
+    parent->prepareTree(info);
+
+    sk_sp<ProjectionTestCanvas> canvas(new ProjectionTestCanvas());
+    //set a layer after prepareTree to avoid layer logic there
+    child->animatorProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
+    sk_sp<SkSurface> surfaceLayer1(new ProjectionLayer(canvas.get()));
+    child->setLayerSurface(surfaceLayer1);
+    Matrix4 windowTransform;
+    windowTransform.loadTranslate(100, 100, 0);
+    child->getSkiaLayer()->inverseTransformInWindow.loadInverse(windowTransform);
+
+    LayerUpdateQueue layerUpdateQueue;
+    layerUpdateQueue.enqueueLayerWithDamage(child.get(),
+            android::uirenderer::Rect(LAYER_WIDTH, LAYER_HEIGHT));
+    SkiaPipeline::renderLayersImpl(layerUpdateQueue, true);
+    EXPECT_EQ(1, canvas->mIndex);  //assert index 0 is drawn on the layer
+
+    RenderNodeDrawable drawable(parent.get(), canvas.get(), true);
+    canvas->drawDrawable(&drawable);
+    EXPECT_EQ(4, canvas->mIndex);
+
+    // clean up layer pointer, so we can safely destruct RenderNode
+    child->setLayerSurface(nullptr);
+}
+
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionChildScroll) {
+    /* R is backward projected on B.
+                A
+               / \
+              B   C
+                  |
+                  R
+    */
+    static const int SCROLL_X = 500000;
+    static const int SCROLL_Y = 0;
+    static const int CANVAS_WIDTH = 400;
+    static const int CANVAS_HEIGHT = 400;
+    class ProjectionChildScrollTestCanvas : public SkCanvas {
+    public:
+        ProjectionChildScrollTestCanvas() : SkCanvas(CANVAS_WIDTH, CANVAS_HEIGHT) {}
+        void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
+            EXPECT_EQ(0, mIndex++);
+            EXPECT_TRUE(getTotalMatrix().isIdentity());
+        }
+        void onDrawOval(const SkRect&, const SkPaint&) override {
+            EXPECT_EQ(1, mIndex++);
+            EXPECT_EQ(SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT), getBounds(this));
+            EXPECT_TRUE(getTotalMatrix().isIdentity());
+        }
+        int mIndex = 0;
+    };
+
+    auto receiverBackground = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
+            [](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+        properties.setProjectionReceiver(true);
+        canvas.drawRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, SkPaint());
+    }, "B"); //B
+    auto projectingRipple = TestUtils::createSkiaNode(0, 0, 200, 200,
+            [](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+        // scroll doesn't apply to background, so undone via translationX/Y
+        // NOTE: translationX/Y only! no other transform properties may be set for a proj receiver!
+        properties.setTranslationX(SCROLL_X);
+        properties.setTranslationY(SCROLL_Y);
+        properties.setProjectBackwards(true);
+        properties.setClipToBounds(false);
+        canvas.drawOval(0, 0, 200, 200, SkPaint());
+    }, "R"); //R
+    auto child = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
+            [&projectingRipple](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+        // Record time clip will be ignored by projectee
+        canvas.clipRect(100, 100, 300, 300, SkRegion::kIntersect_Op);
+
+        canvas.translate(-SCROLL_X, -SCROLL_Y); // Apply scroll (note: bg undoes this internally)
+        canvas.drawRenderNode(projectingRipple.get());
+    }, "C"); //C
+    auto parent = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
+            [&receiverBackground, &child](RenderProperties& properties,
+            SkiaRecordingCanvas& canvas) {
+        canvas.drawRenderNode(receiverBackground.get());
+        canvas.drawRenderNode(child.get());
+    }, "A"); //A
+
+    //prepareTree is required to find, which receivers have backward projected nodes
+    ContextFactory contextFactory;
+    std::unique_ptr<CanvasContext> canvasContext(CanvasContext::create(
+            renderThread, false, parent.get(), &contextFactory));
+    TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
+    DamageAccumulator damageAccumulator;
+    info.damageAccumulator = &damageAccumulator;
+    info.observer = nullptr;
+    parent->prepareTree(info);
+
+    sk_sp<ProjectionChildScrollTestCanvas> canvas(new ProjectionChildScrollTestCanvas());
+    RenderNodeDrawable drawable(parent.get(), canvas.get(), true);
+    canvas->drawDrawable(&drawable);
+    EXPECT_EQ(2, canvas->mIndex);
+}
+
+namespace {
+static int drawNode(RenderThread& renderThread, const sp<RenderNode>& renderNode)
+{
+    ContextFactory contextFactory;
+    std::unique_ptr<CanvasContext> canvasContext(CanvasContext::create(
+            renderThread, false, renderNode.get(), &contextFactory));
+    TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
+    DamageAccumulator damageAccumulator;
+    info.damageAccumulator = &damageAccumulator;
+    info.observer = nullptr;
+    renderNode->prepareTree(info);
+
+    //create a canvas not backed by any device/pixels, but with dimensions to avoid quick rejection
+    ZReorderCanvas canvas(100, 100);
+    RenderNodeDrawable drawable(renderNode.get(), &canvas, false);
+    canvas.drawDrawable(&drawable);
+    return canvas.getIndex();
+}
+}
+
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorderProjectedInMiddle) {
+    /* R is backward projected on B
+                A
+               / \
+              B   C
+                  |
+                  R
+    */
+    auto nodeA = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+            props.setProjectionReceiver(true);
+        } ); //nodeB
+        drawOrderedNode(&canvas, 2, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+            drawOrderedNode(&canvas, 1, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeC
+    }); //nodeA
+    EXPECT_EQ(3, drawNode(renderThread, nodeA));
+}
+
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorderProjectLast) {
+    /* R is backward projected on E
+                  A
+                / | \
+               /  |  \
+              B   C   E
+                  |
+                  R
+    */
+    auto nodeA = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, nullptr); //nodeB
+        drawOrderedNode(&canvas, 1, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+            drawOrderedNode(&canvas, 3, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //drawn as 2
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeC
+        drawOrderedNode(&canvas, 2, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //drawn as 3
+            props.setProjectionReceiver(true);
+        } ); //nodeE
+    }); //nodeA
+    EXPECT_EQ(4, drawNode(renderThread, nodeA));
+}
+
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorderNoReceivable) {
+    /* R is backward projected without receiver
+                A
+               / \
+              B   C
+                  |
+                  R
+    */
+     auto nodeA = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, nullptr); //nodeB
+        drawOrderedNode(&canvas, 1, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+            drawOrderedNode(&canvas, 255, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+                //not having a projection receiver is an undefined behavior
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeC
+    }); //nodeA
+    EXPECT_EQ(2, drawNode(renderThread, nodeA));
+}
+
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorderParentReceivable) {
+    /* R is backward projected on C
+                A
+               / \
+              B   C
+                  |
+                  R
+    */
+     auto nodeA = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, nullptr); //nodeB
+        drawOrderedNode(&canvas, 1, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+            props.setProjectionReceiver(true);
+            drawOrderedNode(&canvas, 2, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeC
+    }); //nodeA
+    EXPECT_EQ(3, drawNode(renderThread, nodeA));
+}
+
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorderSameNodeReceivable) {
+    /* R is backward projected on R
+                A
+               / \
+              B   C
+                  |
+                  R
+    */
+     auto nodeA = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, nullptr); //nodeB
+        drawOrderedNode(&canvas, 1, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+            drawOrderedNode(&canvas, 255, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+                //having a node that is projected on itself is an undefined/unexpected behavior
+                props.setProjectionReceiver(true);
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeC
+    }); //nodeA
+    EXPECT_EQ(2, drawNode(renderThread, nodeA));
+}
+
+//Note: the outcome for this test is different in HWUI
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorderProjectedSibling) {
+    /* R is set to project on B, but R is not drawn because projecting on a sibling is not allowed.
+                A
+               /|\
+              / | \
+             B  C  R
+    */
+    auto nodeA = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+            props.setProjectionReceiver(true);
+        } ); //nodeB
+        drawOrderedNode(&canvas, 1, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        } ); //nodeC
+        drawOrderedNode(&canvas, 255, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+            props.setProjectBackwards(true);
+            props.setClipToBounds(false);
+        } ); //nodeR
+    }); //nodeA
+    EXPECT_EQ(2, drawNode(renderThread, nodeA));
+}
+
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorderProjectedSibling2) {
+    /* R is set to project on B, but R is not drawn because projecting on a sibling is not allowed.
+                A
+                |
+                G
+               /|\
+              / | \
+             B  C  R
+    */
+    auto nodeA = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+            drawOrderedNode(&canvas, 1, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+                props.setProjectionReceiver(true);
+            } ); //nodeB
+            drawOrderedNode(&canvas, 2, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+            } ); //nodeC
+            drawOrderedNode(&canvas, 255, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeG
+    }); //nodeA
+    EXPECT_EQ(3, drawNode(renderThread, nodeA));
+}
+
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorderGrandparentReceivable) {
+    /* R is backward projected on B
+                A
+                |
+                B
+                |
+                C
+                |
+                R
+    */
+    auto nodeA = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+            props.setProjectionReceiver(true);
+            drawOrderedNode(&canvas, 1, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+                drawOrderedNode(&canvas, 2, [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+                    props.setProjectBackwards(true);
+                    props.setClipToBounds(false);
+                } ); //nodeR
+            } ); //nodeC
+        } ); //nodeB
+    }); //nodeA
+    EXPECT_EQ(3, drawNode(renderThread, nodeA));
+}
+
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorderTwoReceivables) {
+    /* B and G are receivables, R is backward projected
+                A
+               / \
+              B   C
+                 / \
+                G   R
+    */
+    auto nodeA = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //B
+            props.setProjectionReceiver(true);
+        } ); //nodeB
+        drawOrderedNode(&canvas, 2, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //C
+            drawOrderedNode(&canvas, 3, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //G
+                props.setProjectionReceiver(true);
+            } ); //nodeG
+            drawOrderedNode(&canvas, 1, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //R
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeC
+    }); //nodeA
+    EXPECT_EQ(4, drawNode(renderThread, nodeA));
+}
+
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorderTwoReceivablesLikelyScenario) {
+    /* B and G are receivables, G is backward projected
+                A
+               / \
+              B   C
+                 / \
+                G   R
+    */
+    auto nodeA = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //B
+            props.setProjectionReceiver(true);
+        } ); //nodeB
+        drawOrderedNode(&canvas, 2, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //C
+            drawOrderedNode(&canvas, 1, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //G
+                props.setProjectionReceiver(true);
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeG
+            drawOrderedNode(&canvas, 3, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //R
+            } ); //nodeR
+        } ); //nodeC
+    }); //nodeA
+    EXPECT_EQ(4, drawNode(renderThread, nodeA));
+}
+
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorderTwoReceivablesDeeper) {
+    /* B and G are receivables, R is backward projected
+                A
+               / \
+              B   C
+                 / \
+                G   D
+                    |
+                    R
+    */
+    auto nodeA = TestUtils::createSkiaNode(0, 0, 100, 100,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //B
+            props.setProjectionReceiver(true);
+        } ); //nodeB
+        drawOrderedNode(&canvas, 1, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //C
+            drawOrderedNode(&canvas, 2, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //G
+                props.setProjectionReceiver(true);
+            } ); //nodeG
+            drawOrderedNode(&canvas, 4, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //D
+                drawOrderedNode(&canvas, 3, [](RenderProperties& props, SkiaRecordingCanvas& canvas) { //R
+                    props.setProjectBackwards(true);
+                    props.setClipToBounds(false);
+                } ); //nodeR
+            } ); //nodeD
+        } ); //nodeC
+    }); //nodeA
+    EXPECT_EQ(5, drawNode(renderThread, nodeA));
 }

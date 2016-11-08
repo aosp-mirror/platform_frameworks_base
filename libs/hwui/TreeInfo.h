@@ -116,6 +116,9 @@ public:
         bool canDrawThisFrame = true;
     } out;
 
+    // This flag helps to disable projection for receiver nodes that do not have any backward
+    // projected children.
+    bool hasBackwardProjectedNodes = false;
     // TODO: Damage calculations
 };
 

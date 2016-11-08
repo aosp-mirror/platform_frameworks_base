@@ -26,6 +26,9 @@
 
 namespace android {
 namespace uirenderer {
+
+class Outline;
+
 namespace skiapipeline {
 
 /**
@@ -119,6 +122,11 @@ public:
     void updateChildren(std::function<void(RenderNode*)> updateFn) override;
 
     /**
+     *  Returns true if there is a child render node that is a projection receiver.
+     */
+    inline bool containsProjectionReceiver() const { return mProjectionReceiver; }
+
+    /**
      * We use std::deque here because (1) we need to iterate through these
      * elements and (2) mDrawable holds pointers to the elements, so they cannot
      * relocate.
@@ -129,7 +137,22 @@ public:
     std::vector<VectorDrawableRoot*> mVectorDrawables;
     sk_sp<SkLiteDL> mDrawable;
 
-    bool mIsProjectionReceiver = false;
+    //mProjectionReceiver points to a child node (stored in mChildNodes) that is as a projection
+    //receiver. It is set at record time and used at both prepare and draw tree traversals to
+    //make sure backward projected nodes are found and drawn immediately after mProjectionReceiver.
+    RenderNodeDrawable* mProjectionReceiver = nullptr;
+
+    //mProjectedOutline is valid only when render node tree is traversed during the draw pass.
+    //Render nodes that have a child receiver node, will store a pointer to their outline in
+    //mProjectedOutline. Child receiver node will apply the clip before any backward projected
+    //node is drawn.
+    const Outline* mProjectedOutline = nullptr;
+
+    //mProjectedReceiverParentMatrix is valid when render node tree is traversed during the draw
+    //pass. Render nodes that have a child receiver node, will store their matrix in
+    //mProjectedReceiverParentMatrix. Child receiver node will set the matrix and then clip with the
+    //outline of their parent.
+    SkMatrix mProjectedReceiverParentMatrix;
 };
 
 }; // namespace skiapipeline

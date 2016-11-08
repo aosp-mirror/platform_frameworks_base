@@ -108,11 +108,12 @@ void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
 
     // record the child node
     mDisplayList->mChildNodes.emplace_back(renderNode, asSkCanvas(), true, mCurrentBarrier);
-    drawDrawable(&mDisplayList->mChildNodes.back());
+    auto& renderNodeDrawable = mDisplayList->mChildNodes.back();
+    drawDrawable(&renderNodeDrawable);
 
     // use staging property, since recording on UI thread
     if (renderNode->stagingProperties().isProjectionReceiver()) {
-        mDisplayList->mIsProjectionReceiver = true;
+        mDisplayList->mProjectionReceiver = &renderNodeDrawable;
         // set projectionReceiveIndex so that RenderNode.hasProjectionReceiver returns true
         mDisplayList->projectionReceiveIndex = mDisplayList->mChildNodes.size() - 1;
     }

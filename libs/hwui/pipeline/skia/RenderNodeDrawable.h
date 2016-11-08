@@ -29,24 +29,14 @@ class RenderProperties;
 
 namespace skiapipeline {
 
+class SkiaDisplayList;
+
 /**
  * This drawable wraps a RenderNode and enables it to be recorded into a list
  * of Skia drawing commands.
  */
 class RenderNodeDrawable : public SkDrawable {
 public:
-    /**
-     * This struct contains a pointer to a node that is to be
-     * projected into the drawing order of its closest ancestor
-     * (excluding its parent) that is marked as a projection
-     * receiver. The matrix is used to ensure that the node is
-     * drawn with same matrix as it would have prior to projection.
-     */
-    struct ProjectedChild {
-        const RenderNodeDrawable* node;
-        const SkMatrix matrix;
-    };
-
     /**
      * Creates a new RenderNodeDrawable backed by a render node.
      *
@@ -86,6 +76,14 @@ public:
      */
     const SkMatrix& getRecordedMatrix() const { return mRecordedTransform; }
 
+    /**
+     * Sets a pointer to a display list of the parent render node. The display list is used when
+     * drawing backward projected nodes, when this node is a projection receiver.
+     */
+    void setProjectedDisplayList(SkiaDisplayList* projectedDisplayList) {
+        mProjectedDisplayList = projectedDisplayList;
+    }
+
 protected:
     /*
      * Return the (conservative) bounds of what the drawable will draw.
@@ -108,6 +106,16 @@ private:
     sp<RenderNode> mRenderNode;
 
     /**
+     * Walks recursively the display list and draws the content of backward projected nodes.
+     *
+     * @param canvas used to draw the backward projected nodes
+     * @param displayList is a display list that contains a projection receiver
+     * @param nestLevel should be always 0. Used to track how far we are from the receiver.
+     */
+    void drawBackwardsProjectedNodes(SkCanvas* canvas, const SkiaDisplayList& displayList,
+            int nestLevel = 0);
+
+    /**
      * Applies the rendering properties of a view onto a SkCanvas.
      */
     static void setViewProperties(const RenderProperties& properties, SkCanvas* canvas,
@@ -126,19 +134,6 @@ private:
      */
     const bool mComposeLayer;
 
-    /**
-     * List to which we will add any projected children we encounter while walking our descendents.
-     * This pointer is valid only while the node (including its children) is actively being drawn.
-     */
-    std::vector<ProjectedChild>* mProjectedChildrenTarget = nullptr;
-
-    /**
-     * The value to which we should set our children's mProjectedChildrenTarget. We use two pointers
-     * (mProjectedChildrenTarget and mNextProjectedChildrenTarget) because we need to skip over our
-     * parent when looking for a projection receiver.
-     */
-    std::vector<ProjectedChild>* mNextProjectedChildrenTarget = nullptr;
-
     /*
      * True if the render node is in a reordering section
      */
@@ -148,6 +143,11 @@ private:
      *  Draw the content into a canvas, depending on the render node layer type and mComposeLayer.
      */
     void drawContent(SkCanvas* canvas) const;
+
+    /*
+     * display list that is searched for any render nodes with getProjectBackwards==true
+     */
+    SkiaDisplayList* mProjectedDisplayList = nullptr;
 };
 
 }; // namespace skiapipeline

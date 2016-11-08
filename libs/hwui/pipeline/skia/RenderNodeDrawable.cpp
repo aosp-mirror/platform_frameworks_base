@@ -24,8 +24,41 @@ namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
+void RenderNodeDrawable::drawBackwardsProjectedNodes(SkCanvas* canvas, const SkiaDisplayList& displayList,
+        int nestLevel) {
+    LOG_ALWAYS_FATAL_IF(0 == nestLevel && !displayList.mProjectionReceiver);
+    for (auto& child : displayList.mChildNodes) {
+        const RenderProperties& childProperties = child.getNodeProperties();
+
+        //immediate children cannot be projected on their parent
+        if (childProperties.getProjectBackwards() && nestLevel > 0) {
+            SkAutoCanvasRestore acr2(canvas, true);
+            //Apply recorded matrix, which is a total matrix saved at recording time to avoid
+            //replaying all DL commands.
+            canvas->concat(child.getRecordedMatrix());
+            child.drawContent(canvas);
+        }
+
+        //skip walking sub-nodes if current display list contains a receiver with exception of
+        //level 0, which is a known receiver
+        if (0 == nestLevel || !displayList.containsProjectionReceiver()) {
+            SkAutoCanvasRestore acr(canvas, true);
+            SkMatrix nodeMatrix;
+            mat4 hwuiMatrix(child.getRecordedMatrix());
+            auto childNode = child.getRenderNode();
+            childNode->applyViewPropertyTransforms(hwuiMatrix);
+            hwuiMatrix.copyTo(nodeMatrix);
+            canvas->concat(nodeMatrix);
+            SkiaDisplayList* childDisplayList = static_cast<SkiaDisplayList*>(
+                (const_cast<DisplayList*>(childNode->getDisplayList())));
+            if (childDisplayList) {
+                drawBackwardsProjectedNodes(canvas, *childDisplayList, nestLevel+1);
+            }
+        }
+    }
+}
+
 static void clipOutline(const Outline& outline, SkCanvas* canvas, const SkRect* pendingClip) {
-    SkASSERT(outline.willClip());
     Rect possibleRect;
     float radius;
     LOG_ALWAYS_FATAL_IF(!outline.getAsRoundRect(&possibleRect, &radius),
@@ -74,53 +107,25 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
     SkiaDisplayList* displayList = (SkiaDisplayList*)renderNode->getDisplayList();
 
     SkAutoCanvasRestore acr(canvas, true);
-
     const RenderProperties& properties = this->getNodeProperties();
-    if (displayList->mIsProjectionReceiver) {
-        // this node is a projection receiver. We will gather the projected nodes as we draw our
-        // children, and then draw them on top of this node's content.
-        std::vector<ProjectedChild> newList;
-        for (auto& child : displayList->mChildNodes) {
-            // our direct children are not supposed to project into us (nodes project to, at the
-            // nearest, their grandparents). So we "delay" the list's activation one level by
-            // passing it into mNextProjectedChildrenTarget rather than mProjectedChildrenTarget.
-            child.mProjectedChildrenTarget = mNextProjectedChildrenTarget;
-            child.mNextProjectedChildrenTarget = &newList;
+    //pass this outline to the children that may clip backward projected nodes
+    displayList->mProjectedOutline = displayList->containsProjectionReceiver()
+            ? &properties.getOutline() : nullptr;
+    if (!properties.getProjectBackwards()) {
+        drawContent(canvas);
+        if (mProjectedDisplayList) {
+            acr.restore(); //draw projected children using parent matrix
+            LOG_ALWAYS_FATAL_IF(!mProjectedDisplayList->mProjectedOutline);
+            const bool shouldClip = mProjectedDisplayList->mProjectedOutline->getPath();
+            SkAutoCanvasRestore acr2(canvas, shouldClip);
+            canvas->setMatrix(mProjectedDisplayList->mProjectedReceiverParentMatrix);
+            if (shouldClip) {
+                clipOutline(*mProjectedDisplayList->mProjectedOutline, canvas, nullptr);
+            }
+            drawBackwardsProjectedNodes(canvas, *mProjectedDisplayList);
         }
-        // draw ourselves and our children. As a side effect, this will add projected nodes to
-        // newList.
-        this->drawContent(canvas);
-        bool willClip = properties.getOutline().willClip();
-        if (willClip) {
-            canvas->save();
-            clipOutline(properties.getOutline(), canvas, nullptr);
-        }
-        // draw the collected projected nodes
-        for (auto& projectedChild : newList) {
-            canvas->setMatrix(projectedChild.matrix);
-            projectedChild.node->drawContent(canvas);
-        }
-        if (willClip) {
-            canvas->restore();
-        }
-    } else {
-        if (properties.getProjectBackwards() && mProjectedChildrenTarget) {
-            // We are supposed to project this node, so add it to the list and do not actually draw
-            // yet. It will be drawn by its projection receiver.
-            mProjectedChildrenTarget->push_back({ this, canvas->getTotalMatrix() });
-            return;
-        }
-        for (auto& child : displayList->mChildNodes) {
-            // storing these values in the nodes themselves is a bit ugly; they should "really" be
-            // function parameters, but we have to go through the preexisting draw() method and
-            // therefore cannot add additional parameters to it
-            child.mProjectedChildrenTarget = mNextProjectedChildrenTarget;
-            child.mNextProjectedChildrenTarget = mNextProjectedChildrenTarget;
-        }
-        this->drawContent(canvas);
     }
-    mProjectedChildrenTarget = nullptr;
-    mNextProjectedChildrenTarget = nullptr;
+    displayList->mProjectedOutline = nullptr;
 }
 
 static bool layerNeedsPaint(const LayerProperties& properties,
@@ -147,6 +152,10 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
     // when the layer is composited.
     if (mComposeLayer) {
         setViewProperties(properties, canvas, &alphaMultiplier);
+    }
+    SkiaDisplayList* displayList = (SkiaDisplayList*)mRenderNode->getDisplayList();
+    if (displayList->containsProjectionReceiver()) {
+        displayList->mProjectedReceiverParentMatrix = canvas->getTotalMatrix();
     }
 
     //TODO should we let the bound of the drawable do this for us?
