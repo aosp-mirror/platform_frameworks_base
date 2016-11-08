@@ -4181,7 +4181,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(START_TIME,
                 findShortcut(shortcuts.getValue(), "s4").getLastChangedTimestamp());
 
-        // Next, send unlock even on user-10.  Now we scan packages on this user and send a
+        // Next, send an unlock event on user-10.  Now we scan packages on this user and send a
         // notification to the launcher.
         mInjectedCurrentTimeMillis = START_TIME + 200;
 
@@ -4222,9 +4222,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         updatePackageVersion(CALLING_PACKAGE_2, 10);
 
         // Then send the broadcast, to only user-0.
-                mService.mPackageMonitor.onReceive(getTestContext(),
+        mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageUpdateIntent(CALLING_PACKAGE_2, USER_0));
-        mService.checkPackageChanges(USER_10);
 
         waitOnMainThread();
 
@@ -4395,7 +4394,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
 
         // Next.
-        // Update the build finger print.  All system apps will be scanned now.
+        // Update the build finger print.  All apps will be scanned now.
         mInjectedBuildFingerprint = "update1";
         mInjectedCurrentTimeMillis += 1000;
         mService.checkPackageChanges(USER_0);
@@ -4406,12 +4405,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
             assertWith(getCallerShortcuts())
-                    .isEmpty();
+                    .haveIds("ms1");
         });
 
         // Next.
         // Update manifest shortcuts.
-        mInjectedBuildFingerprint = "update2";
         addManifestShortcutResource(
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_2);
@@ -4421,35 +4419,20 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mInjectedCurrentTimeMillis += 1000;
         mService.checkPackageChanges(USER_0);
 
-        // Fingerprint hasn't changed, so CALLING_PACKAGE_1 wasn't scanned.
+        // Fingerprint hasn't changed, so there packages weren't scanned.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertWith(getCallerShortcuts())
                     .haveIds("ms1");
         });
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
             assertWith(getCallerShortcuts())
-                    .isEmpty();
+                    .haveIds("ms1");
         });
 
-        // Update the fingerprint, but CALLING_PACKAGE_1's version code hasn't changed, so
-        // still not scanned.
+        // Update the fingerprint.  CALLING_PACKAGE_1's version code hasn't changed, but we scan
+        // all apps anyway.
         mInjectedBuildFingerprint = "update2";
         mInjectedCurrentTimeMillis += 1000;
-        mService.checkPackageChanges(USER_0);
-
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertWith(getCallerShortcuts())
-                    .haveIds("ms1");
-        });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
-            assertWith(getCallerShortcuts())
-                    .isEmpty();
-        });
-
-        // Now update the version code, so CALLING_PACKAGE_1 is scanned again.
-        mInjectedBuildFingerprint = "update3";
-        mInjectedCurrentTimeMillis += 1000;
-        updatePackageVersion(CALLING_PACKAGE_1, 1);
         mService.checkPackageChanges(USER_0);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -4458,7 +4441,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
             assertWith(getCallerShortcuts())
-                    .isEmpty();
+                    .haveIds("ms1", "ms2");
         });
 
         // Make sure getLastAppScanTime / getLastAppScanOsFingerprint are persisted.
@@ -5721,6 +5704,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 R.xml.shortcut_5);
 
         // Unlock user-0.
+        mInjectedCurrentTimeMillis += 100;
         mService.handleUnlockUser(USER_0);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -5750,6 +5734,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         uninstallPackage(USER_10, CALLING_PACKAGE_1);
         uninstallPackage(USER_10, CALLING_PACKAGE_3);
 
+        mInjectedCurrentTimeMillis += 100;
         mService.handleUnlockUser(USER_10);
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
@@ -5774,6 +5759,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // hasn't changed.
         shutdownServices();
 
+        mInjectedCurrentTimeMillis += 100;
+
         addManifestShortcutResource(
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_5);
@@ -5785,7 +5772,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mService.handleUnlockUser(USER_0);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
+            assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled( // FAIL
                     mManager.getManifestShortcuts()))),
                     "ms1");
             assertEmpty(mManager.getPinnedShortcuts());
@@ -5807,6 +5794,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Do it again, but this time we change the app version, so we do detect the changes.
         shutdownServices();
+
+        mInjectedCurrentTimeMillis += 100;
 
         updatePackageVersion(CALLING_PACKAGE_1, 1);
         updatePackageLastUpdateTime(CALLING_PACKAGE_3, 1);
@@ -5869,6 +5858,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
 
         shutdownServices();
+
+        mInjectedCurrentTimeMillis += 100;
 
         addManifestShortcutResource(
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
