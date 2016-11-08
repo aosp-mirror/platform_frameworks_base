@@ -17,18 +17,21 @@
 package android.os;
 
 import android.system.ErrnoException;
+import android.system.OsConstants;
 
 /**
  * Callback that handles file system requests from ProxyFileDescriptor.
  * @hide
  */
-public interface IProxyFileDescriptorCallback {
+public abstract class ProxyFileDescriptorCallback {
     /**
      * Returns size of bytes provided by the file descriptor.
      * @return Size of bytes
      * @throws ErrnoException
      */
-    long onGetSize() throws ErrnoException;
+    public long onGetSize() throws ErrnoException {
+        throw new ErrnoException("onGetSize", OsConstants.EBADF);
+    }
 
     /**
      * Provides bytes read from file descriptor.
@@ -39,7 +42,9 @@ public interface IProxyFileDescriptorCallback {
      * @return Size of bytes returned by the function.
      * @throws ErrnoException
      */
-    int onRead(long offset, int size, byte[] data) throws ErrnoException;
+    public int onRead(long offset, int size, byte[] data) throws ErrnoException {
+        throw new ErrnoException("onRead", OsConstants.EBADF);
+    }
 
     /**
      * Handles bytes written to file descriptor.
@@ -49,11 +54,20 @@ public interface IProxyFileDescriptorCallback {
      * @return Size of bytes processed by the function.
      * @throws ErrnoException
      */
-    int onWrite(long offset, int size, byte[] data) throws ErrnoException;
+    public int onWrite(long offset, int size, byte[] data) throws ErrnoException {
+        throw new ErrnoException("onWrite", OsConstants.EBADF);
+    }
 
     /**
      * Processes fsync request.
      * @throws ErrnoException
      */
-    void onFsync() throws ErrnoException;
+    public void onFsync() throws ErrnoException {
+        throw new ErrnoException("onFsync", OsConstants.EINVAL);
+    }
+
+    /**
+     * Invoked after the file is closed.
+     */
+    abstract public void onRelease();
 }
