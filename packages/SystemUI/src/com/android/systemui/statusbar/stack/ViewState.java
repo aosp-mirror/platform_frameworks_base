@@ -36,12 +36,26 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 */
 public class ViewState {
 
+    /**
+     * Some animation properties that can be used to update running animations but not creating
+     * any new ones.
+     */
+    protected static final AnimationProperties NO_NEW_ANIMATIONS = new AnimationProperties() {
+        AnimationFilter mAnimationFilter = new AnimationFilter();
+        @Override
+        public AnimationFilter getAnimationFilter() {
+            return mAnimationFilter;
+        }
+    };
+    private static final int TAG_ANIMATOR_TRANSLATION_X = R.id.translation_x_animator_tag;
     private static final int TAG_ANIMATOR_TRANSLATION_Y = R.id.translation_y_animator_tag;
     private static final int TAG_ANIMATOR_TRANSLATION_Z = R.id.translation_z_animator_tag;
     private static final int TAG_ANIMATOR_ALPHA = R.id.alpha_animator_tag;
+    private static final int TAG_END_TRANSLATION_X = R.id.translation_x_animator_end_value_tag;
     private static final int TAG_END_TRANSLATION_Y = R.id.translation_y_animator_end_value_tag;
     private static final int TAG_END_TRANSLATION_Z = R.id.translation_z_animator_end_value_tag;
     private static final int TAG_END_ALPHA = R.id.alpha_animator_end_value_tag;
+    private static final int TAG_START_TRANSLATION_X = R.id.translation_x_animator_start_value_tag;
     private static final int TAG_START_TRANSLATION_Y = R.id.translation_y_animator_start_value_tag;
     private static final int TAG_START_TRANSLATION_Z = R.id.translation_z_animator_start_value_tag;
     private static final int TAG_START_ALPHA = R.id.alpha_animator_start_value_tag;
@@ -86,7 +100,10 @@ public class ViewState {
             return;
         }
         boolean becomesInvisible = this.alpha == 0.0f || this.hidden;
-        if (view.getAlpha() != this.alpha) {
+        boolean animatingAlpha = isAnimating(view, TAG_ANIMATOR_ALPHA);
+        if (animatingAlpha) {
+            updateAlphaAnimation(view);
+        } else if (view.getAlpha() != this.alpha) {
             // apply layer type
             boolean becomesFullyVisible = this.alpha == 1.0f;
             boolean newLayerTypeIsHardware = !becomesInvisible && !becomesFullyVisible
@@ -114,17 +131,26 @@ public class ViewState {
         }
 
         // apply xTranslation
-        if (view.getTranslationX() != this.xTranslation) {
+        boolean animatingX = isAnimating(view, TAG_ANIMATOR_TRANSLATION_X);
+        if (animatingX) {
+            updateAnimationX(view);
+        } else if (view.getTranslationX() != this.xTranslation){
             view.setTranslationX(this.xTranslation);
         }
 
         // apply yTranslation
-        if (view.getTranslationY() != this.yTranslation) {
+        boolean animatingY = isAnimating(view, TAG_ANIMATOR_TRANSLATION_Y);
+        if (animatingY) {
+            updateAnimationY(view);
+        } else if (view.getTranslationY() != this.yTranslation) {
             view.setTranslationY(this.yTranslation);
         }
 
         // apply zTranslation
-        if (view.getTranslationZ() != this.zTranslation) {
+        boolean animatingZ = isAnimating(view, TAG_ANIMATOR_TRANSLATION_Z);
+        if (animatingZ) {
+            updateAnimationZ(view);
+        } else if (view.getTranslationZ() != this.zTranslation) {
             view.setTranslationZ(this.zTranslation);
         }
 
@@ -139,6 +165,10 @@ public class ViewState {
         }
     }
 
+    private boolean isAnimating(View view, int tag) {
+        return getChildTag(view, tag) != null;
+    }
+
     /**
      * Start an animation to this viewstate
      * @param child the view to animate
@@ -151,8 +181,6 @@ public class ViewState {
                 && !this.gone && !this.hidden) {
             child.setVisibility(View.VISIBLE);
         }
-        boolean yTranslationChanging = child.getTranslationY() != this.yTranslation;
-        boolean zTranslationChanging = child.getTranslationZ() != this.zTranslation;
         float childAlpha = child.getAlpha();
         boolean alphaChanging = this.alpha != childAlpha;
         if (child instanceof ExpandableView) {
@@ -160,15 +188,22 @@ public class ViewState {
             alphaChanging &= !((ExpandableView) child).willBeGone();
         }
 
+        // start translationX animation
+        if (child.getTranslationX() != this.xTranslation) {
+            startXTranslationAnimation(child, animationProperties);
+        } else {
+            abortAnimation(child, TAG_ANIMATOR_TRANSLATION_X);
+        }
+
         // start translationY animation
-        if (yTranslationChanging) {
+        if (child.getTranslationY() != this.yTranslation) {
             startYTranslationAnimation(child, animationProperties);
         } else {
             abortAnimation(child, TAG_ANIMATOR_TRANSLATION_Y);
         }
 
         // start translationZ animation
-        if (zTranslationChanging) {
+        if (child.getTranslationZ() != this.zTranslation) {
             startZTranslationAnimation(child, animationProperties);
         } else {
             abortAnimation(child, TAG_ANIMATOR_TRANSLATION_Z);
@@ -180,6 +215,10 @@ public class ViewState {
         }  else {
             abortAnimation(child, TAG_ANIMATOR_ALPHA);
         }
+    }
+
+    private void updateAlphaAnimation(View view) {
+        startAlphaAnimation(view, NO_NEW_ANIMATIONS);
     }
 
     private void startAlphaAnimation(final View child, AnimationProperties properties) {
@@ -260,6 +299,10 @@ public class ViewState {
         child.setTag(TAG_END_ALPHA, newEndValue);
     }
 
+    private void updateAnimationZ(View view) {
+        startZTranslationAnimation(view, NO_NEW_ANIMATIONS);
+    }
+
     private void startZTranslationAnimation(final View child, AnimationProperties properties) {
         Float previousStartValue = getChildTag(child,TAG_START_TRANSLATION_Z);
         Float previousEndValue = getChildTag(child,TAG_END_TRANSLATION_Z);
@@ -314,6 +357,75 @@ public class ViewState {
         child.setTag(TAG_ANIMATOR_TRANSLATION_Z, animator);
         child.setTag(TAG_START_TRANSLATION_Z, child.getTranslationZ());
         child.setTag(TAG_END_TRANSLATION_Z, newEndValue);
+    }
+
+    private void updateAnimationX(View view) {
+        startXTranslationAnimation(view, NO_NEW_ANIMATIONS);
+    }
+
+    private void startXTranslationAnimation(final View child, AnimationProperties properties) {
+        Float previousStartValue = getChildTag(child,TAG_START_TRANSLATION_X);
+        Float previousEndValue = getChildTag(child,TAG_END_TRANSLATION_X);
+        float newEndValue = this.xTranslation;
+        if (previousEndValue != null && previousEndValue == newEndValue) {
+            return;
+        }
+        ObjectAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_TRANSLATION_X);
+        AnimationFilter filter = properties.getAnimationFilter();
+        if (!filter.animateX) {
+            // just a local update was performed
+            if (previousAnimator != null) {
+                // we need to increase all animation keyframes of the previous animator by the
+                // relative change to the end value
+                PropertyValuesHolder[] values = previousAnimator.getValues();
+                float relativeDiff = newEndValue - previousEndValue;
+                float newStartValue = previousStartValue + relativeDiff;
+                values[0].setFloatValues(newStartValue, newEndValue);
+                child.setTag(TAG_START_TRANSLATION_X, newStartValue);
+                child.setTag(TAG_END_TRANSLATION_X, newEndValue);
+                previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
+                return;
+            } else {
+                // no new animation needed, let's just apply the value
+                child.setTranslationX(newEndValue);
+                return;
+            }
+        }
+
+        ObjectAnimator animator = ObjectAnimator.ofFloat(child, View.TRANSLATION_X,
+                child.getTranslationX(), newEndValue);
+        Interpolator customInterpolator = properties.getCustomInterpolator(child,
+                View.TRANSLATION_X);
+        Interpolator interpolator =  customInterpolator != null ? customInterpolator
+                : Interpolators.FAST_OUT_SLOW_IN;
+        animator.setInterpolator(interpolator);
+        long newDuration = cancelAnimatorAndGetNewDuration(properties.duration, previousAnimator);
+        animator.setDuration(newDuration);
+        if (properties.delay > 0 && (previousAnimator == null
+                || previousAnimator.getAnimatedFraction() == 0)) {
+            animator.setStartDelay(properties.delay);
+        }
+        AnimatorListenerAdapter listener = properties.getAnimationFinishListener();
+        if (listener != null) {
+            animator.addListener(listener);
+        }
+        // remove the tag when the animation is finished
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                child.setTag(TAG_ANIMATOR_TRANSLATION_X, null);
+                child.setTag(TAG_START_TRANSLATION_X, null);
+                child.setTag(TAG_END_TRANSLATION_X, null);
+            }
+        });
+        startAnimator(animator, listener);
+        child.setTag(TAG_ANIMATOR_TRANSLATION_X, animator);
+        child.setTag(TAG_START_TRANSLATION_X, child.getTranslationX());
+        child.setTag(TAG_END_TRANSLATION_X, newEndValue);
+    }
+
+    private void updateAnimationY(View view) {
+        startYTranslationAnimation(view, NO_NEW_ANIMATIONS);
     }
 
     private void startYTranslationAnimation(final View child, AnimationProperties properties) {

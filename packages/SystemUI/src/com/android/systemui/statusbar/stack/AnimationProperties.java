@@ -32,7 +32,7 @@ public class AnimationProperties {
      * @return an animation filter for this animation.
      */
     public AnimationFilter getAnimationFilter() {
-        return null;
+        return new AnimationFilter();
     }
 
     /**
@@ -49,7 +49,17 @@ public class AnimationProperties {
     /**
      * Get a custom interpolator for a property instead of the normal one.
      */
-    public Interpolator getCustomInterpolator(View child, Property translationY) {
+    public Interpolator getCustomInterpolator(View child, Property property) {
         return null;
+    }
+
+    public AnimationProperties setDuration(long duration) {
+        this.duration = duration;
+        return this;
+    }
+
+    public AnimationProperties setDelay(long delay) {
+        this.delay = delay;
+        return this;
     }
 }
