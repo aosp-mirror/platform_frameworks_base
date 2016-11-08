@@ -22,11 +22,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Ranking updates from the Ranker.
- *
- * @hide
+ * Ranking updates from the Assistant.
  */
-@SystemApi
 public final class Adjustment implements Parcelable {
     private final String mPackage;
     private final String mKey;

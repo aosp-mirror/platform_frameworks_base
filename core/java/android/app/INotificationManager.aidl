@@ -94,8 +94,8 @@ interface INotificationManager
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
     void setInterruptionFilter(String pkg, int interruptionFilter);
 
-    void applyAdjustmentFromRankerService(in INotificationListener token, in Adjustment adjustment);
-    void applyAdjustmentsFromRankerService(in INotificationListener token, in List<Adjustment> adjustments);
+    void applyAdjustmentFromAssistantService(in INotificationListener token, in Adjustment adjustment);
+    void applyAdjustmentsFromAssistantService(in INotificationListener token, in List<Adjustment> adjustments);
 
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);
