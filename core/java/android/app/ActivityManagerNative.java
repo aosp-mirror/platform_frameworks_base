@@ -16,7 +16,10 @@
 
 package android.app;
 import android.content.Intent;
+import android.os.Debug;
 import android.os.IBinder;
+import android.util.Log;
+
 import com.android.server.LocalServices;
 
 /**
@@ -25,6 +28,8 @@ import com.android.server.LocalServices;
  */
 @Deprecated
 public abstract class ActivityManagerNative {
+    private final static String TAG = "ActivityManagerNative";
+
     /**
      * Cast a Binder object into an activity manager interface, generating
      * a proxy if needed.
@@ -51,7 +56,14 @@ public abstract class ActivityManagerNative {
      */
     static public boolean isSystemReady() {
         if (!sSystemReady) {
-            sSystemReady = LocalServices.getService(ActivityManagerInternal.class).isSystemReady();
+            if (ActivityThread.isSystem()) {
+                sSystemReady =
+                        LocalServices.getService(ActivityManagerInternal.class).isSystemReady();
+            } else {
+                // Since this is being called from outside system server, system should be
+                // ready by now.
+                sSystemReady = true;
+            }
         }
         return sSystemReady;
     }
