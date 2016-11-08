@@ -16,6 +16,7 @@
 
 package android.os;
 
+import java.util.ArrayList;
 import libcore.util.NativeAllocationRegistry;
 
 /** @hide */
@@ -39,10 +40,12 @@ public abstract class HwBinder implements IHwBinder {
             int code, HwParcel request, HwParcel reply, int flags);
 
     public native final void registerService(
-            String serviceName, int versionMajor, int versionMinor);
+            ArrayList<String> interfaceChain,
+            String serviceName);
 
     public static native final IHwBinder getService(
-            String serviceName, int versionMajor, int versionMinor);
+            String iface,
+            String serviceName);
 
     // Returns address of the "freeFunction".
     private static native final long native_init();
