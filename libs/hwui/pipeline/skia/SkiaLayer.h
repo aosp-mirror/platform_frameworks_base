@@ -30,6 +30,7 @@ struct SkiaLayer
 {
     sk_sp<SkSurface> layerSurface;
     Matrix4 inverseTransformInWindow;
+    bool hasRenderedSinceRepaint = false;
 };
 
 
