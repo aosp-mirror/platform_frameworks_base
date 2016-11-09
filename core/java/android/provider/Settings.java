@@ -8956,24 +8956,6 @@ public final class Settings {
         public static final String ENABLE_EPHEMERAL_FEATURE = "enable_ephemeral_feature";
 
         /**
-         * A mask applied to the ephemeral hash to generate the hash prefix.
-         * <p>
-         * Type: int
-         *
-         * @hide
-         */
-        public static final String EPHEMERAL_HASH_PREFIX_MASK = "ephemeral_hash_prefix_mask";
-
-        /**
-         * Number of hash prefixes to send during ephemeral resolution.
-         * <p>
-         * Type: int
-         *
-         * @hide
-         */
-        public static final String EPHEMERAL_HASH_PREFIX_COUNT = "ephemeral_hash_prefix_count";
-
-        /**
          * The duration for caching uninstalled ephemeral apps.
          * <p>
          * Type: long
