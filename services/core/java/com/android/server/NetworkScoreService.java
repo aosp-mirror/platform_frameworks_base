@@ -42,8 +42,10 @@ import android.util.Log;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.os.TransferPipe;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -418,12 +420,9 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
         for (INetworkScoreCache scoreCache : getScoreCaches()) {
             try {
-                scoreCache.asBinder().dump(fd, args);
-            } catch (RemoteException e) {
-                writer.println("Unable to dump score cache");
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Unable to dump score cache", e);
-                }
+                TransferPipe.dumpAsync(scoreCache.asBinder(), fd, args);
+            } catch (IOException | RemoteException e) {
+                writer.println("Failed to dump score cache: " + e);
             }
         }
         if (mServiceConnection != null) {
