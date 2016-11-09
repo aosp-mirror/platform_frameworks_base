@@ -21257,6 +21257,14 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
+        public boolean isPackageEphemeral(int userId, String packageName) {
+            synchronized (mPackages) {
+                PackageParser.Package p = mPackages.get(packageName);
+                return p != null ? p.applicationInfo.isEphemeralApp() : false;
+            }
+        }
+
+        @Override
         public boolean wasPackageEverLaunched(String packageName, int userId) {
             synchronized (mPackages) {
                 return mSettings.wasPackageEverLaunchedLPr(packageName, userId);

@@ -29,6 +29,7 @@ public final class UidRecord {
     int curProcState;
     int setProcState = ActivityManager.PROCESS_STATE_NONEXISTENT;
     long lastBackgroundTime;
+    boolean ephemeral;
     boolean idle;
     int numProcs;
 
@@ -43,6 +44,7 @@ public final class UidRecord {
         int uid;
         int change;
         int processState;
+        boolean ephemeral;
     }
 
     ChangeItem pendingChange;
@@ -64,6 +66,9 @@ public final class UidRecord {
         UserHandle.formatUid(sb, uid);
         sb.append(' ');
         sb.append(ProcessList.makeProcStateString(curProcState));
+        if (ephemeral) {
+            sb.append(" ephemeral");
+        }
         if (lastBackgroundTime > 0) {
             sb.append(" bg:");
             TimeUtils.formatDuration(SystemClock.elapsedRealtime()-lastBackgroundTime, sb);

@@ -26,7 +26,7 @@ oneway interface IUidObserver {
     /**
      * Report that there are no longer any processes running for a uid.
      */
-    void onUidGone(int uid);
+    void onUidGone(int uid, boolean disabled);
 
     /**
      * Report that a uid is now active (no longer idle).
@@ -37,5 +37,5 @@ oneway interface IUidObserver {
      * Report that a uid is idle -- it has either been running in the background for
      * a sufficient period of time, or all of its processes have gone away.
      */
-    void onUidIdle(int uid);
+    void onUidIdle(int uid, boolean disabled);
 }

@@ -169,6 +169,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runKill(pw);
                 case "kill-all":
                     return runKillAll(pw);
+                case "make-idle":
+                    return runMakeIdle(pw);
                 case "monitor":
                     return runMonitor(pw);
                 case "hang":
@@ -205,8 +207,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runTrackAssociations(pw);
                 case "untrack-associations":
                     return runUntrackAssociations(pw);
-                case "lenient-background-check":
-                    return runLenientBackgroundCheck(pw);
                 case "get-uid-state":
                     return getUidState(pw);
                 case "get-config":
@@ -853,6 +853,22 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int runMakeIdle(PrintWriter pw) throws RemoteException {
+        int userId = UserHandle.USER_ALL;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        mInterface.makePackageIdle(getNextArgRequired(), userId);
+        return 0;
+    }
+
     static final class MyActivityController extends IActivityController.Stub {
         final IActivityManager mInterface;
         final PrintWriter mPw;
@@ -1427,22 +1443,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 pw.println("Association tracking stopped.");
             } else {
                 pw.println("Association tracking not running.");
-            }
-        }
-        return 0;
-    }
-
-    int runLenientBackgroundCheck(PrintWriter pw) throws RemoteException {
-        String arg = getNextArg();
-        if (arg != null) {
-            boolean state = Boolean.valueOf(arg) || "1".equals(arg);
-            mInterface.setLenientBackgroundCheck(state);
-        }
-        synchronized (mInternal) {
-            if (mInternal.mLenientBackgroundCheck) {
-                pw.println("Lenient background check enabled");
-            } else {
-                pw.println("Lenient background check disabled");
             }
         }
         return 0;
@@ -2478,8 +2478,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Enable association tracking.");
             pw.println("  untrack-associations");
             pw.println("      Disable and clear association tracking.");
-            pw.println("  lenient-background-check [<true|false>]");
-            pw.println("      Optionally controls lenient background check mode, returns current mode.");
             pw.println("  get-uid-state <UID>");
             pw.println("      Gets the process state of an app given its <UID>.");
             pw.println("  attach-agent <PROCESS> <FILE>");

@@ -426,7 +426,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                                             Slog.d(TAG, "Removing jobs for package " + pkgName
                                                     + " in user " + userId);
                                         }
-                                        cancelJobsForUid(pkgUid, true);
+                                        cancelJobsForUid(pkgUid);
                                     }
                                 } catch (RemoteException|IllegalArgumentException e) {
                                     /*
@@ -455,7 +455,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     if (DEBUG) {
                         Slog.d(TAG, "Removing jobs for uid: " + uidRemoved);
                     }
-                    cancelJobsForUid(uidRemoved, true);
+                    cancelJobsForUid(uidRemoved);
                 }
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
@@ -509,15 +509,20 @@ public final class JobSchedulerService extends com.android.server.SystemService
             updateUidState(uid, procState);
         }
 
-        @Override public void onUidGone(int uid) throws RemoteException {
+        @Override public void onUidGone(int uid, boolean disabled) throws RemoteException {
             updateUidState(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+            if (disabled) {
+                cancelJobsForUid(uid);
+            }
         }
 
         @Override public void onUidActive(int uid) throws RemoteException {
         }
 
-        @Override public void onUidIdle(int uid) throws RemoteException {
-            cancelJobsForUid(uid, false);
+        @Override public void onUidIdle(int uid, boolean disabled) throws RemoteException {
+            if (disabled) {
+                cancelJobsForUid(uid);
+            }
         }
     };
 
@@ -646,26 +651,15 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * This will remove the job from the master list, and cancel the job if it was staged for
      * execution or being executed.
      * @param uid Uid to check against for removal of a job.
-     * @param forceAll If true, all jobs for the uid will be canceled; if false, only those
-     * whose apps are stopped.
+     *
      */
-    public void cancelJobsForUid(int uid, boolean forceAll) {
+    public void cancelJobsForUid(int uid) {
         List<JobStatus> jobsForUid;
         synchronized (mLock) {
             jobsForUid = mJobs.getJobsByUid(uid);
         }
         for (int i=0; i<jobsForUid.size(); i++) {
             JobStatus toRemove = jobsForUid.get(i);
-            if (!forceAll) {
-                String packageName = toRemove.getServiceComponent().getPackageName();
-                try {
-                    if (ActivityManagerNative.getDefault().getAppStartMode(uid, packageName)
-                            != ActivityManager.APP_START_MODE_DISABLED) {
-                        continue;
-                    }
-                } catch (RemoteException e) {
-                }
-            }
             cancelJobImpl(toRemove, null);
         }
     }
@@ -1698,7 +1692,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             long ident = Binder.clearCallingIdentity();
             try {
-                JobSchedulerService.this.cancelJobsForUid(uid, true);
+                JobSchedulerService.this.cancelJobsForUid(uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

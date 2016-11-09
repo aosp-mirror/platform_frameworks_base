@@ -348,7 +348,7 @@ public final class ActiveServices {
                 // Before going further -- if this app is not allowed to run in the
                 // background, then at this point we aren't going to let it period.
                 final int allowed = mAm.checkAllowBackgroundLocked(
-                        r.appInfo.uid, r.packageName, callingPid, true);
+                        r.appInfo.uid, r.packageName, callingPid, false);
                 if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
                     Slog.w(TAG, "Background start not allowed: service "
                             + service + " to " + r.name.flattenToShortString()
@@ -594,7 +594,8 @@ public final class ActiveServices {
             for (int i=services.mServicesByName.size()-1; i>=0; i--) {
                 ServiceRecord service = services.mServicesByName.valueAt(i);
                 if (service.appInfo.uid == uid && service.startRequested) {
-                    if (mAm.mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND,
+                    if (service.appInfo.isEphemeralApp() ||
+                            mAm.mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND,
                             uid, service.packageName) != AppOpsManager.MODE_ALLOWED) {
                         if (stopping == null) {
                             stopping = new ArrayList<>();

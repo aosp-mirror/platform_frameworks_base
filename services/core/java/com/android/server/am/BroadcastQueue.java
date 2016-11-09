@@ -36,7 +36,6 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -595,8 +594,12 @@ public final class BroadcastQueue {
         }
         if (!skip) {
             final int allowed = mService.checkAllowBackgroundLocked(filter.receiverList.uid,
-                    filter.packageName, -1, true);
-            if (allowed == ActivityManager.APP_START_MODE_DISABLED) {
+                    filter.packageName, -1, false);
+            if (false && allowed == ActivityManager.APP_START_MODE_DISABLED) {
+                // XXX should we really not allow this?  It means that while we are
+                // keeping an ephemeral app cached, its registered receivers will stop
+                // receiving broadcasts after it goes idle...  so if it comes back to
+                // the foreground, it won't know what the current state of those broadcasts is.
                 Slog.w(TAG, "Background execution not allowed: receiving "
                         + r.intent
                         + " to " + filter.receiverList.app
@@ -1155,7 +1158,7 @@ public final class BroadcastQueue {
             if (!skip) {
                 final int allowed = mService.checkAllowBackgroundLocked(
                         info.activityInfo.applicationInfo.uid, info.activityInfo.packageName, -1,
-                        false);
+                        true);
                 if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
                     // We won't allow this receiver to be launched if the app has been
                     // completely disabled from launches, or it was not explicitly sent

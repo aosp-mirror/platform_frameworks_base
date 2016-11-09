@@ -1940,13 +1940,9 @@ class AlarmManagerService extends SystemService {
         }
         for (int i = mPendingWhileIdleAlarms.size() - 1; i >= 0; i--) {
             final Alarm a = mPendingWhileIdleAlarms.get(i);
-            try {
-                if (a.uid == uid && ActivityManagerNative.getDefault().getAppStartMode(
-                        uid, a.packageName) == ActivityManager.APP_START_MODE_DISABLED) {
-                    // Don't set didRemove, since this doesn't impact the scheduled alarms.
-                    mPendingWhileIdleAlarms.remove(i);
-                }
-            } catch (RemoteException e) {
+            if (a.uid == uid) {
+                // Don't set didRemove, since this doesn't impact the scheduled alarms.
+                mPendingWhileIdleAlarms.remove(i);
             }
         }
 
@@ -2807,15 +2803,22 @@ class AlarmManagerService extends SystemService {
         @Override public void onUidStateChanged(int uid, int procState) throws RemoteException {
         }
 
-        @Override public void onUidGone(int uid) throws RemoteException {
+        @Override public void onUidGone(int uid, boolean disabled) throws RemoteException {
+            if (disabled) {
+                synchronized (mLock) {
+                    removeForStoppedLocked(uid);
+                }
+            }
         }
 
         @Override public void onUidActive(int uid) throws RemoteException {
         }
 
-        @Override public void onUidIdle(int uid) throws RemoteException {
-            synchronized (mLock) {
-                removeForStoppedLocked(uid);
+        @Override public void onUidIdle(int uid, boolean disabled) throws RemoteException {
+            if (disabled) {
+                synchronized (mLock) {
+                    removeForStoppedLocked(uid);
+                }
             }
         }
     };

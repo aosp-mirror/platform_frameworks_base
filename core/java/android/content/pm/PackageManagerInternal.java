@@ -162,6 +162,12 @@ public abstract class PackageManagerInternal {
     public abstract boolean isPackageDataProtected(int userId, String packageName);
 
     /**
+     * Returns {@code true} if a given package is installed as ephemeral. Otherwise, returns
+     * {@code false}.
+     */
+    public abstract boolean isPackageEphemeral(int userId, String packageName);
+
+    /**
      * Gets whether the package was ever launched.
      * @param packageName The package name.
      * @param userId The user for which to check.
