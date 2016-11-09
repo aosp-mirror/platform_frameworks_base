@@ -1649,9 +1649,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             newNotification.headsUpContentView = sbn.getNotification().headsUpContentView;
 
             StatusBarNotification newSbn = new StatusBarNotification(sbn.getPackageName(),
-                    sbn.getOpPkg(),
+                    sbn.getOpPkg(), sbn.getNotificationChannel(),
                     sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
-                    0, newNotification, sbn.getUser(), sbn.getPostTime());
+                    newNotification, sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
 
             updateNotification(newSbn, null);
             mKeysKeptForRemoteInput.add(entry.key);

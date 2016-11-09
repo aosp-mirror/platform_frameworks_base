@@ -1671,10 +1671,10 @@ public class NotificationManagerService extends SystemService {
                         final StatusBarNotification sbnOut = new StatusBarNotification(
                                 sbn.getPackageName(),
                                 sbn.getOpPkg(),
+                                sbn.getNotificationChannel(),
                                 sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
-                                0, // hide score from apps
                                 sbn.getNotification().clone(),
-                                sbn.getUser(), sbn.getPostTime());
+                                sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
                         list.add(sbnOut);
                     }
                 }
@@ -2467,15 +2467,14 @@ public class NotificationManagerService extends SystemService {
                 }
                 final StatusBarNotification summarySbn =
                         new StatusBarNotification(adjustedSbn.getPackageName(),
-                                adjustedSbn.getOpPkg(), Integer.MAX_VALUE,
+                                adjustedSbn.getOpPkg(),
+                                adjustedSbn.getNotificationChannel(),
+                                Integer.MAX_VALUE,
                                 GroupHelper.AUTOGROUP_KEY, adjustedSbn.getUid(),
                                 adjustedSbn.getInitialPid(), summaryNotification,
                                 adjustedSbn.getUser(), GroupHelper.AUTOGROUP_KEY,
                                 System.currentTimeMillis());
-                summaryRecord = new NotificationRecord(getContext(), summarySbn,
-                        mRankingHelper.getNotificationChannel(adjustedSbn.getPackageName(),
-                                adjustedSbn.getUid(),
-                                adjustedSbn.getNotification().getNotificationChannel()));
+                summaryRecord = new NotificationRecord(getContext(), summarySbn);
                 summaries.put(pkg, summarySbn.getKey());
             }
         }
@@ -2722,9 +2721,11 @@ public class NotificationManagerService extends SystemService {
             throw new IllegalArgumentException("null not allowed: pkg=" + pkg
                     + " id=" + id + " notification=" + notification);
         }
+        final NotificationChannel channel =  mRankingHelper.getNotificationChannelWithFallback(pkg,
+                callingUid, notification.getNotificationChannel());
         final StatusBarNotification n = new StatusBarNotification(
-                pkg, opPkg, id, tag, callingUid, callingPid, 0, notification,
-                user);
+                pkg, opPkg, channel, id, tag, callingUid, callingPid, notification,
+                user, null, System.currentTimeMillis());
 
         // Limit the number of notifications that any given package except the android
         // package or a registered listener can enqueue.  Prevents DOS attacks and deals with leaks.
@@ -2787,9 +2788,7 @@ public class NotificationManagerService extends SystemService {
                 Notification.PRIORITY_MAX);
 
         // setup local book-keeping
-        final NotificationRecord r = new NotificationRecord(getContext(), n,
-                mRankingHelper.getNotificationChannelWithFallback(pkg, callingUid,
-                        n.getNotification().getNotificationChannel()));
+        final NotificationRecord r = new NotificationRecord(getContext(), n);
         mHandler.post(new EnqueueNotificationRunnable(userId, r));
 
         idOut[0] = id;

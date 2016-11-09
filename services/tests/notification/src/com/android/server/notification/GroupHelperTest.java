@@ -31,6 +31,7 @@ import org.mockito.MockitoAnnotations;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.os.UserHandle;
@@ -68,7 +69,10 @@ public class GroupHelperTest {
         if (groupKey != null) {
             nb.setGroup(groupKey);
         }
-        return new StatusBarNotification(pkg, pkg, id, tag, 0, 0, 0, nb.build(), user);
+        NotificationChannel channel =
+                new NotificationChannel("test", "test", NotificationManager.IMPORTANCE_LOW);
+        return new StatusBarNotification(pkg, pkg, channel, id, tag, 0, 0, nb.build(), user, null,
+                System.currentTimeMillis());
     }
 
     private StatusBarNotification getSbn(String pkg, int id, String tag,

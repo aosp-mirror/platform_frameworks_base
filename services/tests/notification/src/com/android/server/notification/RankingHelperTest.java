@@ -98,8 +98,8 @@ public class RankingHelperTest {
                 .setWhen(1205)
                 .build();
         mRecordGroupGSortA = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, 0, mNotiGroupGSortA, user), 
-                getDefaultChannel());
+                "package", "package", getDefaultChannel(), 1, null, 0, 0, mNotiGroupGSortA, user,
+                null, System.currentTimeMillis()));
 
         mNotiGroupGSortB = new Notification.Builder(getContext())
                 .setContentTitle("B")
@@ -108,24 +108,24 @@ public class RankingHelperTest {
                 .setWhen(1200)
                 .build();
         mRecordGroupGSortB = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, 0, mNotiGroupGSortB, user), 
-                getDefaultChannel());
+                "package", "package", getDefaultChannel(), 1, null, 0, 0, mNotiGroupGSortB, user,
+                null, System.currentTimeMillis()));
 
         mNotiNoGroup = new Notification.Builder(getContext())
                 .setContentTitle("C")
                 .setWhen(1201)
                 .build();
         mRecordNoGroup = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, 0, mNotiNoGroup, user), 
-                getDefaultChannel());
+                "package", "package", getDefaultChannel(), 1, null, 0, 0, mNotiNoGroup, user,
+                null, System.currentTimeMillis()));
 
         mNotiNoGroup2 = new Notification.Builder(getContext())
                 .setContentTitle("D")
                 .setWhen(1202)
                 .build();
         mRecordNoGroup2 = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, 0, mNotiNoGroup2, user), 
-                getDefaultChannel());
+                "package", "package", getDefaultChannel(), 1, null, 0, 0, mNotiNoGroup2, user,
+                null, System.currentTimeMillis()));
 
         mNotiNoGroupSortA = new Notification.Builder(getContext())
                 .setContentTitle("E")
@@ -133,8 +133,8 @@ public class RankingHelperTest {
                 .setSortKey("A")
                 .build();
         mRecordNoGroupSortA = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, 0, mNotiNoGroupSortA, user), 
-                getDefaultChannel());
+                "package", "package", getDefaultChannel(), 1, null, 0, 0, mNotiNoGroupSortA, user,
+                null, System.currentTimeMillis()));
 
         final ApplicationInfo legacy = new ApplicationInfo();
         legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;

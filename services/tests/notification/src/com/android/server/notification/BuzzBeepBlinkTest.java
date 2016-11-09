@@ -226,11 +226,11 @@ public class BuzzBeepBlinkTest {
         if (insistent) {
             n.flags |= Notification.FLAG_INSISTENT;
         }
-        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, id, mTag, mUid, mPid,
-                mScore, n, mUser, System.currentTimeMillis());
-        NotificationRecord r = new NotificationRecord(getContext(), sbn,
-                new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID, "misc",
-                        NotificationManager.IMPORTANCE_DEFAULT));
+        NotificationChannel channel =
+                new NotificationChannel("test", "test", NotificationManager.IMPORTANCE_HIGH);
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, channel, id, mTag, mUid,
+                mPid, n, mUser, null, System.currentTimeMillis());
+        NotificationRecord r = new NotificationRecord(getContext(), sbn);
         mService.addNotification(r);
         return r;
     }
