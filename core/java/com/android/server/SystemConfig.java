@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.os.Process;
 import android.os.storage.StorageManager;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -129,6 +130,9 @@ public class SystemConfig {
     final ArrayMap<String, List<String>> mDisabledUntilUsedPreinstalledCarrierAssociatedApps =
             new ArrayMap<>();
 
+
+    final ArrayMap<String, ArraySet<String>> mPrivAppPermissions = new ArrayMap<>();
+
     public static SystemConfig getInstance() {
         synchronized (SystemConfig.class) {
             if (sInstance == null) {
@@ -192,6 +196,10 @@ public class SystemConfig {
 
     public ArrayMap<String, List<String>> getDisabledUntilUsedPreinstalledCarrierAssociatedApps() {
         return mDisabledUntilUsedPreinstalledCarrierAssociatedApps;
+    }
+
+    public ArraySet<String> getPrivAppPermissions(String packageName) {
+        return mPrivAppPermissions.get(packageName);
     }
 
     SystemConfig() {
@@ -507,6 +515,8 @@ public class SystemConfig {
                         associatedPkgs.add(pkgname);
                     }
                     XmlUtils.skipCurrentTag(parser);
+                } else if ("privapp-permissions".equals(name) && allowAppConfigs) {
+                    readPrivAppPermissions(parser);
                 } else {
                     XmlUtils.skipCurrentTag(parser);
                     continue;
@@ -583,5 +593,33 @@ public class SystemConfig {
             }
             XmlUtils.skipCurrentTag(parser);
         }
+    }
+
+    void readPrivAppPermissions(XmlPullParser parser) throws IOException, XmlPullParserException {
+        String packageName = parser.getAttributeValue(null, "package");
+        if (TextUtils.isEmpty(packageName)) {
+            Slog.w(TAG, "package is required for <privapp-permissions> in "
+                    + parser.getPositionDescription());
+            return;
+        }
+
+        ArraySet<String> permissions = mPrivAppPermissions.get(packageName);
+        if (permissions == null) {
+            permissions = new ArraySet<>();
+        }
+        int depth = parser.getDepth();
+        while (XmlUtils.nextElementWithin(parser, depth)) {
+            String name = parser.getName();
+            if ("permission".equals(name)) {
+                String permName = parser.getAttributeValue(null, "name");
+                if (TextUtils.isEmpty(permName)) {
+                    Slog.w(TAG, "name is required for <permission> in "
+                            + parser.getPositionDescription());
+                    continue;
+                }
+                permissions.add(permName);
+            }
+        }
+        mPrivAppPermissions.put(packageName, permissions);
     }
 }

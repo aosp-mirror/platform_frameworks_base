@@ -27,6 +27,8 @@ public class RoSystemProperties {
             SystemProperties.getInt("ro.debuggable", 0) == 1;
     public static final int FACTORYTEST =
             SystemProperties.getInt("ro.factorytest", 0);
+    public static final boolean CONTROL_PRIVAPP_PERMISSIONS =
+            SystemProperties.getBoolean("ro.control_privapp_permissions", false);
 
     // ------ ro.config.* -------- //
     public static final boolean CONFIG_LOW_RAM =
