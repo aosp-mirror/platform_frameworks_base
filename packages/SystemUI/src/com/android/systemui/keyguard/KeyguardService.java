@@ -136,7 +136,7 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void onScreenTurnedOn() {
-            Trace.beginSection("KeyguardService.mBinder#onScreenTurningOn");
+            Trace.beginSection("KeyguardService.mBinder#onScreenTurnedOn");
             checkPermission();
             mKeyguardViewMediator.onScreenTurnedOn();
             Trace.endSection();
