@@ -36,7 +36,8 @@ public final class ServiceManager {
         }
 
         // Find the service manager
-        sServiceManager = ServiceManagerNative.asInterface(BinderInternal.getContextObject());
+        sServiceManager = ServiceManagerNative
+                .asInterface(Binder.allowBlocking(BinderInternal.getContextObject()));
         return sServiceManager;
     }
 
@@ -52,7 +53,7 @@ public final class ServiceManager {
             if (service != null) {
                 return service;
             } else {
-                return getIServiceManager().getService(name);
+                return Binder.allowBlocking(getIServiceManager().getService(name));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "error in getService", e);
@@ -117,7 +118,7 @@ public final class ServiceManager {
             if (service != null) {
                 return service;
             } else {
-                return getIServiceManager().checkService(name);
+                return Binder.allowBlocking(getIServiceManager().checkService(name));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "error in checkService", e);

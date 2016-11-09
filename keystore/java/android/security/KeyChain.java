@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
@@ -630,7 +631,7 @@ public final class KeyChain {
                 if (!mConnectedAtLeastOnce) {
                     mConnectedAtLeastOnce = true;
                     try {
-                        q.put(IKeyChainService.Stub.asInterface(service));
+                        q.put(IKeyChainService.Stub.asInterface(Binder.allowBlocking(service)));
                     } catch (InterruptedException e) {
                         // will never happen, since the queue starts with one available slot
                     }

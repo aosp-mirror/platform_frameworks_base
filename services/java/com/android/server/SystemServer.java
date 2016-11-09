@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.os.BaseBundle;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FactoryTest;
@@ -266,6 +267,9 @@ public final class SystemServer {
                 SystemProperties.set("persist.sys.country", "");
                 SystemProperties.set("persist.sys.localevar", "");
             }
+
+            // The system server should never make non-oneway calls
+            Binder.setWarnOnBlocking(true);
 
             // Here we go!
             Slog.i(TAG, "Entered the Android system server!");

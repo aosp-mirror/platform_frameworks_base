@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -1122,7 +1123,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
-            mService = IBluetoothHeadsetClient.Stub.asInterface(service);
+            mService = IBluetoothHeadsetClient.Stub.asInterface(Binder.allowBlocking(service));
 
             if (mServiceListener != null) {
                 mServiceListener.onServiceConnected(BluetoothProfile.HEADSET_CLIENT,

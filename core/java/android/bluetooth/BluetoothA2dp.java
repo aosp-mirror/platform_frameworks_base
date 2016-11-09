@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -572,7 +573,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
             if (DBG) Log.d(TAG, "Proxy object connected");
             try {
                 mServiceLock.writeLock().lock();
-                mService = IBluetoothA2dp.Stub.asInterface(service);
+                mService = IBluetoothA2dp.Stub.asInterface(Binder.allowBlocking(service));
             } finally {
                 mServiceLock.writeLock().unlock();
             }

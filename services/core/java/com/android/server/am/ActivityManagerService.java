@@ -2732,7 +2732,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (int i=0; i<N; i++) {
                 Parcel data2 = Parcel.obtain();
                 try {
-                    procs.get(i).transact(IBinder.SYSPROPS_TRANSACTION, data2, null, 0);
+                    procs.get(i).transact(IBinder.SYSPROPS_TRANSACTION, data2, null,
+                            Binder.FLAG_ONEWAY);
                 } catch (RemoteException e) {
                 }
                 data2.recycle();
