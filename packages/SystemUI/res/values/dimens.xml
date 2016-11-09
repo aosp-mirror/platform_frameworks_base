@@ -453,6 +453,9 @@
     <!-- TrustDrawable: Thickness of the circle -->
     <dimen name="trust_circle_thickness">2dp</dimen>
 
+    <!-- How much two taps can be apart to still be recognized as a double tap on the lockscreen -->
+    <dimen name="double_tap_slop">32dp</dimen>
+
     <!-- Margin on the right side of the system icon group on Keyguard. -->
     <fraction name="battery_button_height_fraction">10.5%</fraction>
 
