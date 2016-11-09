@@ -101,6 +101,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.ResourcesManager;
 import android.app.admin.IDevicePolicyManager;
@@ -231,6 +232,7 @@ import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.IParcelFileDescriptorFactory;
 import com.android.internal.os.InstallerConnection.InstallerException;
 import com.android.internal.os.RoSystemProperties;
@@ -526,6 +528,34 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /** Special library name that skips shared libraries check during compilation. */
     private static final String SKIP_SHARED_LIBRARY_CHECK = "&";
+
+    /** All dangerous permission names in the same order as the events in MetricsEvent */
+    private static final List<String> ALL_DANGEROUS_PERMISSIONS = Arrays.asList(
+            Manifest.permission.READ_CALENDAR,
+            Manifest.permission.WRITE_CALENDAR,
+            Manifest.permission.CAMERA,
+            Manifest.permission.READ_CONTACTS,
+            Manifest.permission.WRITE_CONTACTS,
+            Manifest.permission.GET_ACCOUNTS,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.CALL_PHONE,
+            Manifest.permission.READ_CALL_LOG,
+            Manifest.permission.WRITE_CALL_LOG,
+            Manifest.permission.ADD_VOICEMAIL,
+            Manifest.permission.USE_SIP,
+            Manifest.permission.PROCESS_OUTGOING_CALLS,
+            Manifest.permission.READ_CELL_BROADCASTS,
+            Manifest.permission.BODY_SENSORS,
+            Manifest.permission.SEND_SMS,
+            Manifest.permission.RECEIVE_SMS,
+            Manifest.permission.READ_SMS,
+            Manifest.permission.RECEIVE_WAP_PUSH,
+            Manifest.permission.RECEIVE_MMS,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
     final ServiceThread mHandlerThread;
 
@@ -4132,6 +4162,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 break;
             }
 
+            if (bp.isRuntime()) {
+                logPermissionGranted(mContext, name, packageName);
+            }
+
             mOnPermissionChangeListeners.onPermissionsChanged(uid);
 
             // Not critical if that is lost - app has to request again.
@@ -4233,6 +4267,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
 
+            if (bp.isRuntime()) {
+                logPermissionRevoked(mContext, name, packageName);
+            }
+
             mOnPermissionChangeListeners.onPermissionsChanged(pkg.applicationInfo.uid);
 
             // Critical, after this call app should never have the permission.
@@ -4242,6 +4280,66 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
+    }
+
+    /**
+     * Get the first event id for the permission.
+     *
+     * <p>There are four events for each permission: <ul>
+     *     <li>Request permission: first id + 0</li>
+     *     <li>Grant permission: first id + 1</li>
+     *     <li>Request for permission denied: first id + 2</li>
+     *     <li>Revoke permission: first id + 3</li>
+     * </ul></p>
+     *
+     * @param name name of the permission
+     *
+     * @return The first event id for the permission
+     */
+    private static int getBaseEventId(@NonNull String name) {
+        int eventIdIndex = ALL_DANGEROUS_PERMISSIONS.indexOf(name);
+
+        if (eventIdIndex == -1) {
+            if (AppOpsManager.permissionToOpCode(name) == AppOpsManager.OP_NONE
+                    || "user".equals(Build.TYPE)) {
+                Log.i(TAG, "Unknown permission " + name);
+
+                return MetricsEvent.ACTION_PERMISSION_REQUEST_UNKNOWN;
+            } else {
+                // Most likely #ALL_DANGEROUS_PERMISSIONS needs to be updated.
+                //
+                // Also update
+                // - EventLogger#ALL_DANGEROUS_PERMISSIONS
+                // - metrics_constants.proto
+                throw new IllegalStateException("Unknown permission " + name);
+            }
+        }
+
+        return MetricsEvent.ACTION_PERMISSION_REQUEST_READ_CALENDAR + eventIdIndex * 4;
+    }
+
+    /**
+     * Log that a permission was revoked.
+     *
+     * @param context Context of the caller
+     * @param name name of the permission
+     * @param packageName package permission if for
+     */
+    private static void logPermissionRevoked(@NonNull Context context, @NonNull String name,
+            @NonNull String packageName) {
+        MetricsLogger.action(context, getBaseEventId(name) + 3, packageName);
+    }
+
+    /**
+     * Log that a permission request was granted.
+     *
+     * @param context Context of the caller
+     * @param name name of the permission
+     * @param packageName package permission if for
+     */
+    private static void logPermissionGranted(@NonNull Context context, @NonNull String name,
+            @NonNull String packageName) {
+        MetricsLogger.action(context, getBaseEventId(name) + 1, packageName);
     }
 
     @Override
