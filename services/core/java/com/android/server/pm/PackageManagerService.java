@@ -18100,8 +18100,10 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         synchronized (mPackages) {
-            if (uid == Process.SHELL_UID) {
+            if (uid == Process.SHELL_UID
+                    && (pkgSetting.pkgFlags & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
                 // Shell can only change whole packages between ENABLED and DISABLED_USER states
+                // unless it is a test package.
                 int oldState = pkgSetting.getEnabled(userId);
                 if (className == null
                     &&
