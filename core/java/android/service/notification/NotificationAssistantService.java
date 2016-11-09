@@ -17,18 +17,12 @@
 package android.service.notification;
 
 import android.annotation.SdkConstant;
-import android.annotation.SystemApi;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 import com.android.internal.os.SomeArgs;
@@ -36,20 +30,17 @@ import com.android.internal.os.SomeArgs;
 import java.util.List;
 
 /**
- * A service that helps the user manage notifications. This class is only used to
- * extend the framework service and may not be implemented by non-framework components.
- * @hide
+ * A service that helps the user manage notifications.
  */
-@SystemApi
-public abstract class NotificationRankerService extends NotificationListenerService {
-    private static final String TAG = "NotificationRankers";
+public abstract class NotificationAssistantService extends NotificationListenerService {
+    private static final String TAG = "NotificationAssistants";
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
      */
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE
-            = "android.service.notification.NotificationRankerService";
+            = "android.service.notification.NotificationAssistantService";
 
     /** Notification was canceled by the status bar reporting a click. */
     public static final int REASON_DELEGATE_CLICK = 1;
@@ -107,19 +98,6 @@ public abstract class NotificationRankerService extends NotificationListenerServ
 
     private Handler mHandler;
 
-    /** @hide */
-    @Override
-    public void registerAsSystemService(Context context, ComponentName componentName,
-            int currentUser)  {
-        throw new UnsupportedOperationException("the ranker lifecycle is managed by the system.");
-    }
-
-    /** @hide */
-    @Override
-    public void unregisterAsSystemService()  {
-        throw new UnsupportedOperationException("the ranker lifecycle is managed by the system.");
-    }
-
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
@@ -129,7 +107,7 @@ public abstract class NotificationRankerService extends NotificationListenerServ
     @Override
     public final IBinder onBind(Intent intent) {
         if (mWrapper == null) {
-            mWrapper = new NotificationRankingServiceWrapper();
+            mWrapper = new NotificationAssistantServiceWrapper();
         }
         return mWrapper;
     }
@@ -144,41 +122,6 @@ public abstract class NotificationRankerService extends NotificationListenerServ
      */
     abstract public Adjustment onNotificationEnqueued(StatusBarNotification sbn,
           int importance, boolean user);
-
-    /**
-     * The visibility of a notification has changed.
-     *
-     * @param key the notification key
-     * @param time milliseconds since midnight, January 1, 1970 UTC.
-     * @param visible true if the notification became visible, false if hidden.
-     */
-    public void onNotificationVisibilityChanged(String key, long time, boolean visible)
-    {
-        // Do nothing, Override this to collect visibility statistics.
-    }
-
-    /**
-     * The user clicked on a notification.
-     *
-     * @param key the notification key
-     * @param time milliseconds since midnight, January 1, 1970 UTC.
-     */
-    public void onNotificationClick(String key, long time)
-    {
-        // Do nothing, Override this to collect click statistics
-    }
-
-    /**
-     * The user clicked on a notification action.
-     *
-     * @param key the notification key
-     * @param time milliseconds since midnight, January 1, 1970 UTC.
-     * @param actionIndex the index of the action button that was pressed.
-     */
-    public void onNotificationActionClick(String key, long time, int actionIndex)
-    {
-        // Do nothing, Override this to collect action button click statistics
-    }
 
     /**
      * A notification was removed.
@@ -201,7 +144,7 @@ public abstract class NotificationRankerService extends NotificationListenerServ
     public final void adjustNotification(Adjustment adjustment) {
         if (!isBound()) return;
         try {
-            getNotificationInterface().applyAdjustmentFromRankerService(mWrapper, adjustment);
+            getNotificationInterface().applyAdjustmentFromAssistantService(mWrapper, adjustment);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
@@ -217,13 +160,13 @@ public abstract class NotificationRankerService extends NotificationListenerServ
     public final void adjustNotifications(List<Adjustment> adjustments) {
         if (!isBound()) return;
         try {
-            getNotificationInterface().applyAdjustmentsFromRankerService(mWrapper, adjustments);
+            getNotificationInterface().applyAdjustmentsFromAssistantService(mWrapper, adjustments);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
     }
 
-    private class NotificationRankingServiceWrapper extends NotificationListenerWrapper {
+    private class NotificationAssistantServiceWrapper extends NotificationListenerWrapper {
         @Override
         public void onNotificationEnqueued(IStatusBarNotificationHolder sbnHolder,
                 int importance, boolean user) {
@@ -244,35 +187,6 @@ public abstract class NotificationRankerService extends NotificationListenerServ
         }
 
         @Override
-        public void onNotificationVisibilityChanged(String key, long time, boolean visible) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = key;
-            args.arg2 = time;
-            args.argi1 = visible ? 1 : 0;
-            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_VISIBILITY_CHANGED,
-                    args).sendToTarget();
-        }
-
-        @Override
-        public void onNotificationClick(String key, long time) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = key;
-            args.arg2 = time;
-            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_CLICK,
-                    args).sendToTarget();
-        }
-
-        @Override
-        public void onNotificationActionClick(String key, long time, int actionIndex) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = key;
-            args.arg2 = time;
-            args.argi1 = actionIndex;
-            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_ACTION_CLICK,
-                    args).sendToTarget();
-        }
-
-        @Override
         public void onNotificationRemovedReason(String key, long time, int reason) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = key;
@@ -285,9 +199,6 @@ public abstract class NotificationRankerService extends NotificationListenerServ
 
     private final class MyHandler extends Handler {
         public static final int MSG_ON_NOTIFICATION_ENQUEUED = 1;
-        public static final int MSG_ON_NOTIFICATION_VISIBILITY_CHANGED = 2;
-        public static final int MSG_ON_NOTIFICATION_CLICK = 3;
-        public static final int MSG_ON_NOTIFICATION_ACTION_CLICK = 4;
         public static final int MSG_ON_NOTIFICATION_REMOVED_REASON = 5;
 
         public MyHandler(Looper looper) {
@@ -307,32 +218,6 @@ public abstract class NotificationRankerService extends NotificationListenerServ
                     if (adjustment != null) {
                         adjustNotification(adjustment);
                     }
-                } break;
-
-                case MSG_ON_NOTIFICATION_VISIBILITY_CHANGED: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    final String key = (String) args.arg1;
-                    final long time = (long) args.arg2;
-                    final boolean visible = args.argi1 == 1;
-                    args.recycle();
-                    onNotificationVisibilityChanged(key, time, visible);
-                } break;
-
-                case MSG_ON_NOTIFICATION_CLICK: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    final String key = (String) args.arg1;
-                    final long time = (long) args.arg2;
-                    args.recycle();
-                    onNotificationClick(key, time);
-                } break;
-
-                case MSG_ON_NOTIFICATION_ACTION_CLICK: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    final String key = (String) args.arg1;
-                    final long time = (long) args.arg2;
-                    final int actionIndex = args.argi1;
-                    args.recycle();
-                    onNotificationActionClick(key, time, actionIndex);
                 } break;
 
                 case MSG_ON_NOTIFICATION_REMOVED_REASON: {

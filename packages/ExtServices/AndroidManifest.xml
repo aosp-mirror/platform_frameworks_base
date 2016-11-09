@@ -26,16 +26,6 @@
         android:directBootAware="true">
 
         <library android:name="android.ext.services"/>
-
-        <service android:name=".notification.Ranker"
-                android:label="@string/notification_ranker"
-                android:permission="android.permission.BIND_NOTIFICATION_RANKER_SERVICE"
-                android:exported="true">
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationRankerService" />
-            </intent-filter>
-        </service>
-
     </application>
 
 </manifest>
