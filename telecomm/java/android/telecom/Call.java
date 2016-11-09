@@ -843,6 +843,7 @@ public final class Call {
     private String mParentId = null;
     private int mState;
     private List<String> mCannedTextResponses = null;
+    private String mCallingPackage;
     private String mRemainingPostDialSequence;
     private VideoCallImpl mVideoCallImpl;
     private Details mDetails;
@@ -1330,19 +1331,22 @@ public final class Call {
     }
 
     /** {@hide} */
-    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter) {
+    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter, String callingPackage) {
         mPhone = phone;
         mTelecomCallId = telecomCallId;
         mInCallAdapter = inCallAdapter;
         mState = STATE_NEW;
+        mCallingPackage = callingPackage;
     }
 
     /** {@hide} */
-    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter, int state) {
+    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter, int state,
+            String callingPackage) {
         mPhone = phone;
         mTelecomCallId = telecomCallId;
         mInCallAdapter = inCallAdapter;
         mState = state;
+        mCallingPackage = callingPackage;
     }
 
     /** {@hide} */
@@ -1352,6 +1356,7 @@ public final class Call {
 
     /** {@hide} */
     final void internalUpdate(ParcelableCall parcelableCall, Map<String, Call> callIdMap) {
+
         // First, we update the internal state as far as possible before firing any updates.
         Details details = Details.createFromParcelableCall(parcelableCall);
         boolean detailsChanged = !Objects.equals(mDetails, details);
@@ -1367,7 +1372,7 @@ public final class Call {
             cannedTextResponsesChanged = true;
         }
 
-        VideoCallImpl newVideoCallImpl = parcelableCall.getVideoCallImpl();
+        VideoCallImpl newVideoCallImpl = parcelableCall.getVideoCallImpl(mCallingPackage);
         boolean videoCallChanged = parcelableCall.isVideoCallProviderChanged() &&
                 !Objects.equals(mVideoCallImpl, newVideoCallImpl);
         if (videoCallChanged) {

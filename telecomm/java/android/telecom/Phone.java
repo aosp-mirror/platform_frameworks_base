@@ -125,13 +125,16 @@ public final class Phone {
 
     private boolean mCanAddCall = true;
 
-    Phone(InCallAdapter adapter) {
+    private final String mCallingPackage;
+
+    Phone(InCallAdapter adapter, String callingPackage) {
         mInCallAdapter = adapter;
+        mCallingPackage = callingPackage;
     }
 
     final void internalAddCall(ParcelableCall parcelableCall) {
         Call call = new Call(this, parcelableCall.getId(), mInCallAdapter,
-                parcelableCall.getState());
+                parcelableCall.getState(), mCallingPackage);
         mCallByTelecomCallId.put(parcelableCall.getId(), call);
         mCalls.add(call);
         checkCallTree(parcelableCall);
