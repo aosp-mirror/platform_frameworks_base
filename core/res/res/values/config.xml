@@ -1919,6 +1919,12 @@
          mirror the content of the default display. -->
     <bool name="config_localDisplaysMirrorContent">true</bool>
 
+    <!-- The default mode for the default display. One of the following values (See Display.java):
+             0 - COLOR_MODE_DEFAULT
+             7 - COLOR_MODE_SRGB
+    -->
+    <integer name="config_defaultDisplayDefaultColorMode">0</integer>
+
     <!-- When true use the linux /dev/input/event subsystem to detect the switch changes
          on the headphone/microphone jack. When false use the older uevent framework. -->
     <bool name="config_useDevInputEventForAudioJack">false</bool>
