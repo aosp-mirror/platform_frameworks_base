@@ -19,6 +19,7 @@ LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_location_FlpHardwareProvider.cpp \
     $(LOCAL_REL_DIR)/com_android_server_power_PowerManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_SerialService.cpp \
+    $(LOCAL_REL_DIR)/com_android_server_storage_AppFuseBridge.cpp \
     $(LOCAL_REL_DIR)/com_android_server_SystemServer.cpp \
     $(LOCAL_REL_DIR)/com_android_server_tv_TvUinputBridge.cpp \
     $(LOCAL_REL_DIR)/com_android_server_tv_TvInputHal.cpp \
@@ -37,6 +38,7 @@ LOCAL_C_INCLUDES += \
     frameworks/base/libs/hwui \
     frameworks/base/core/jni \
     frameworks/native/services \
+    system/core/libappfuse/include \
     system/security/keystore/include \
     $(call include-path-for, libhardware)/hardware \
     $(call include-path-for, libhardware_legacy)/hardware_legacy \
@@ -44,6 +46,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_SHARED_LIBRARIES += \
     libandroid_runtime \
     libandroidfw \
+    libappfuse \
     libbinder \
     libcutils \
     liblog \
