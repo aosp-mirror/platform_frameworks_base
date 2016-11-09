@@ -168,17 +168,31 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     }
 
     /**
-     * @hide
+     * Get reference signal received quality
      */
     public int getRsrq() {
         return mRsrq;
     }
 
     /**
-     * @hide
+     * Get reference signal signal-to-noise ratio
      */
     public int getRssnr() {
         return mRssnr;
+    }
+
+    /**
+     * Get reference signal received power
+     */
+    public int getRsrp() {
+        return mRsrp;
+    }
+
+    /**
+     * Get channel quality indicator
+     */
+    public int getCqi() {
+        return mCqi;
     }
 
     /**
