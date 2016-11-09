@@ -77,6 +77,7 @@ import java.util.List;
  * </p>
  */
 public abstract class NotificationListenerService extends Service {
+
     // TAG = "NotificationListenerService[MySubclass]"
     private final String TAG = NotificationListenerService.class.getSimpleName()
             + "[" + getClass().getSimpleName() + "]";
@@ -145,6 +146,48 @@ public abstract class NotificationListenerService extends Service {
      */
     public static final int SUPPRESSED_EFFECT_SCREEN_ON =
             NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
+
+
+    // Notification cancellation reasons
+
+    /** Notification was canceled by the status bar reporting a click. */
+    public static final int REASON_DELEGATE_CLICK = 1;
+    /** Notification was canceled by the status bar reporting a user dismissal. */
+    public static final int REASON_DELEGATE_CANCEL = 2;
+    /** Notification was canceled by the status bar reporting a user dismiss all. */
+    public static final int REASON_DELEGATE_CANCEL_ALL = 3;
+    /** Notification was canceled by the status bar reporting an inflation error. */
+    public static final int REASON_DELEGATE_ERROR = 4;
+    /** Notification was canceled by the package manager modifying the package. */
+    public static final int REASON_PACKAGE_CHANGED = 5;
+    /** Notification was canceled by the owning user context being stopped. */
+    public static final int REASON_USER_STOPPED = 6;
+    /** Notification was canceled by the user banning the package. */
+    public static final int REASON_PACKAGE_BANNED = 7;
+    /** Notification was canceled by the app canceling this specific notification. */
+    public static final int REASON_APP_CANCEL = 8;
+    /** Notification was canceled by the app cancelling all its notifications. */
+    public static final int REASON_APP_CANCEL_ALL = 9;
+    /** Notification was canceled by a listener reporting a user dismissal. */
+    public static final int REASON_LISTENER_CANCEL = 10;
+    /** Notification was canceled by a listener reporting a user dismiss all. */
+    public static final int REASON_LISTENER_CANCEL_ALL = 11;
+    /** Notification was canceled because it was a member of a canceled group. */
+    public static final int REASON_GROUP_SUMMARY_CANCELED = 12;
+    /** Notification was canceled because it was an invisible member of a group. */
+    public static final int REASON_GROUP_OPTIMIZATION = 13;
+    /** Notification was canceled by the device administrator suspending the package. */
+    public static final int REASON_PACKAGE_SUSPENDED = 14;
+    /** Notification was canceled by the owning managed profile being turned off. */
+    public static final int REASON_PROFILE_TURNED_OFF = 15;
+    /** Autobundled summary notification was canceled because its group was unbundled */
+    public static final int REASON_UNAUTOBUNDLED = 16;
+    /** Notification was canceled by the user banning the channel. */
+    public static final int REASON_CHANNEL_BANNED = 17;
+    /** Notification was snoozed. */
+    public static final int REASON_SNOOZED = 18;
+    /** Notification no longer visible because of user switch */
+    public static final int REASON_USER_SWITCH = 19;
 
     /**
      * The full trim of the StatusBarNotification including all its features.
@@ -280,6 +323,32 @@ public abstract class NotificationListenerService extends Service {
      */
     public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap) {
         onNotificationRemoved(sbn);
+    }
+
+
+    /**
+     * Implement this method to learn when notifications are removed and why.
+     * <p>
+     * This might occur because the user has dismissed the notification using system UI (or another
+     * notification listener) or because the app has withdrawn the notification.
+     * <p>
+     * NOTE: The {@link StatusBarNotification} object you receive will be "light"; that is, the
+     * result from {@link StatusBarNotification#getNotification} may be missing some heavyweight
+     * fields such as {@link android.app.Notification#contentView} and
+     * {@link android.app.Notification#largeIcon}. However, all other fields on
+     * {@link StatusBarNotification}, sufficient to match this call with a prior call to
+     * {@link #onNotificationPosted(StatusBarNotification)}, will be intact.
+     *
+     ** @param sbn A data structure encapsulating at least the original information (tag and id)
+     *            and source (package name) used to post the {@link android.app.Notification} that
+     *            was just removed.
+     * @param rankingMap The current ranking map that can be used to retrieve ranking information
+     *                   for active notifications.
+     * @param reason see {@link #REASON_LISTENER_CANCEL}, etc.
+     */
+    public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap,
+            int reason) {
+        onNotificationRemoved(sbn, rankingMap);
     }
 
     /**
@@ -927,7 +996,7 @@ public abstract class NotificationListenerService extends Service {
 
         @Override
         public void onNotificationRemoved(IStatusBarNotificationHolder sbnHolder,
-                NotificationRankingUpdate update) {
+                NotificationRankingUpdate update, int reason) {
             StatusBarNotification sbn;
             try {
                 sbn = sbnHolder.get();
@@ -941,6 +1010,7 @@ public abstract class NotificationListenerService extends Service {
                 SomeArgs args = SomeArgs.obtain();
                 args.arg1 = sbn;
                 args.arg2 = mRankingMap;
+                args.arg3 = reason;
                 mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_REMOVED,
                         args).sendToTarget();
             }
@@ -1000,12 +1070,6 @@ public abstract class NotificationListenerService extends Service {
 
         @Override
         public void onNotificationActionClick(String key, long time, int actionIndex)
-                throws RemoteException {
-            // no-op in the listener
-        }
-
-        @Override
-        public void onNotificationRemovedReason(String key, long time, int reason)
                 throws RemoteException {
             // no-op in the listener
         }
@@ -1413,8 +1477,9 @@ public abstract class NotificationListenerService extends Service {
                     SomeArgs args = (SomeArgs) msg.obj;
                     StatusBarNotification sbn = (StatusBarNotification) args.arg1;
                     RankingMap rankingMap = (RankingMap) args.arg2;
+                    int reason = (int) args.arg3;
                     args.recycle();
-                    onNotificationRemoved(sbn, rankingMap);
+                    onNotificationRemoved(sbn, rankingMap, reason);
                 } break;
 
                 case MSG_ON_LISTENER_CONNECTED: {
