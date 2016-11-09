@@ -628,6 +628,12 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     }
   } else if (pid > 0) {
     // the parent process
+
+    // We blocked SIGCHLD prior to a fork, we unblock it here.
+    if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
+      ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
+      RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_UNBLOCK, { SIGCHLD }) failed.");
+    }
   }
   return pid;
 }
