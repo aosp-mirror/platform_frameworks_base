@@ -958,9 +958,9 @@
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಚಾಲನೆಯಲ್ಲಿದೆ"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"ಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ ಅಥವಾ ಅಪ್ಲಿಕೇಶನ್ ನಿಲ್ಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="ok" msgid="5970060430562524910">"ಸರಿ"</string>
-    <string name="cancel" msgid="6442560571259935130">"ರದ್ದುಮಾಡು"</string>
+    <string name="cancel" msgid="6442560571259935130">"ರದ್ದುಮಾಡಿ"</string>
     <string name="yes" msgid="5362982303337969312">"ಸರಿ"</string>
-    <string name="no" msgid="5141531044935541497">"ರದ್ದುಮಾಡು"</string>
+    <string name="no" msgid="5141531044935541497">"ರದ್ದುಮಾಡಿ"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ಗಮನಿಸಿ"</string>
     <string name="loading" msgid="7933681260296021180">"ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ಆನ್ ಮಾಡು"</string>
@@ -1118,7 +1118,7 @@
     <string name="sms_short_code_details" msgid="5873295990846059400">"ಇದು ನಿಮ್ಮ ಮೊಬೈಲ್ ಖಾತೆಯಲ್ಲಿ "<b>"ಶುಲ್ಕಗಳನ್ನು ವಿಧಿಸುವುದಕ್ಕೆ ಕಾರಣವಾಗಬಹುದು"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"ಇದು ನಿಮ್ಮ ಮೊಬೈಲ್ ಖಾತೆಯಲ್ಲಿ ಶುಲ್ಕಗಳನ್ನು ವಿಧಿಸುವುದಕ್ಕೆ ಕಾರಣವಾಗುತ್ತದೆ."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"ಕಳುಹಿಸು"</string>
-    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"ರದ್ದುಮಾಡು"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"ರದ್ದುಮಾಡಿ"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"ನನ್ನ ಆಯ್ಕೆಯನ್ನು ನೆನಪಿಡು"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"ನೀವು ಇದನ್ನು ನಂತರದಲ್ಲಿ ಸೆಟ್ಟಿಂಗ್‍‍ಗಳು &gt; ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳಲ್ಲಿ ಬದಲಾಯಿಸಬಹುದು"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"ಯಾವಾಗಲೂ ಅನುಮತಿಸು"</string>
@@ -1303,7 +1303,7 @@
     <string name="date_picker_prev_month_button" msgid="2858244643992056505">"ಹಿಂದಿನ ತಿಂಗಳು"</string>
     <string name="date_picker_next_month_button" msgid="5559507736887605055">"ಮುಂದಿನ ತಿಂಗಳು"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ರದ್ದುಮಾಡು"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ರದ್ದುಮಾಡಿ"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ಅಳಿಸು"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"ಮುಗಿದಿದೆ"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"ಮೋಡ್ ಬದಲಾವಣೆ"</string>
@@ -1672,7 +1672,7 @@
     <string name="demo_restarting_message" msgid="952118052531642451">"ಸಾಧನ ಮರುಹೊಂದಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"ಸಾಧನವನ್ನು ಮರುಹೊಂದಿಸುವುದೇ?"</string>
     <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"ನೀವು ಯಾವುದೇ ಬದಲಾವಣೆಗಳನ್ನು ಕಳೆದುಕೊಳ್ಳುತ್ತೀರಿ ಮತ್ತು <xliff:g id="TIMEOUT">%1$s</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಡೆಮೋ ಮತ್ತೆ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ..."</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"ರದ್ದುಮಾಡು"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"ರದ್ದುಮಾಡಿ"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"ಈಗಲೇ ಮರುಹೊಂದಿಸು"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"ನಿರ್ಬಂಧಗಳು ಇಲ್ಲದೆಯೇ ಈ ಸಾಧನವನ್ನು ಬಳಸಲು ಫ್ಯಾಕ್ಟರಿ ಮರುಹೊಂದಿಸಿ"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಸ್ಪರ್ಶಿಸಿ."</string>

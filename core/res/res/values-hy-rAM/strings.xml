@@ -1137,7 +1137,7 @@
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Սահմանել ժամը"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Սահմանել ամսաթիվը"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Սահմանել"</string>
-    <string name="date_time_done" msgid="2507683751759308828">"Կատարված է"</string>
+    <string name="date_time_done" msgid="2507683751759308828">"Պատրաստ է"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"Նոր` "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Տրամադրված է <xliff:g id="APP_NAME">%1$s</xliff:g>-ի կողմից:"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Թույլտվություններ չեն պահանջվում"</string>
@@ -1214,7 +1214,7 @@
     <string name="ime_action_search" msgid="658110271822807811">"Որոնել"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Ուղարկել"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Հաջորդը"</string>
-    <string name="ime_action_done" msgid="8971516117910934605">"Կատարված է"</string>
+    <string name="ime_action_done" msgid="8971516117910934605">"Պատրաստ է"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Նախորդ"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Կատարել"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Հավաքել հեռախոսահամարը`\nօգտագործելով <xliff:g id="NUMBER">%s</xliff:g>-ը"</string>
@@ -1263,7 +1263,7 @@
       <item quantity="one"><xliff:g id="INDEX">%d</xliff:g>՝ <xliff:g id="TOTAL">%d</xliff:g>-ից</item>
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g>՝ <xliff:g id="TOTAL">%d</xliff:g>-ից</item>
     </plurals>
-    <string name="action_mode_done" msgid="7217581640461922289">"Կատարված է"</string>
+    <string name="action_mode_done" msgid="7217581640461922289">"Պատրաստ է"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Ջնջում է USB կրիչը..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Ջնջում է SD քարտը..."</string>
     <string name="share" msgid="1778686618230011964">"Կիսվել"</string>
@@ -1305,7 +1305,7 @@
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Չեղարկել"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Ջնջել"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Կատարված է"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Պատրաստ է"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Ռեժիմի փոփոխում"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Մուտք"</string>

@@ -773,7 +773,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Bu sayfada kal"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nBu sayfadan ayrılmak istediğinizden emin misiniz?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Onayla"</string>
-    <string name="double_tap_toast" msgid="4595046515400268881">"İpucu: Yakınlaştırmak ve uzaklaştırmak için iki kez hafifçe dokunun."</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"İpucu: Yakınlaştırmak ve uzaklaştırmak için iki kez dokunun."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Otomatik Doldur"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Otomatik doldurma ayarla"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
@@ -1133,7 +1133,7 @@
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"UYGULAMAYI AL"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ŞİMDİ DEĞİL"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Yeni SIM kart takıldı"</string>
-    <string name="carrier_app_notification_text" msgid="1132487343346050225">"Kurmak için hafifçe dokunun"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"Kurmak için dokunun"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Saati ayarlayın"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Tarihi ayarlayın"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Ayarla"</string>
@@ -1531,7 +1531,7 @@
     <string name="reason_unknown" msgid="6048913880184628119">"bilinmiyor"</string>
     <string name="reason_service_unavailable" msgid="7824008732243903268">"Yazdırma hizmeti etkin değil"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> hizmeti yüklendi"</string>
-    <string name="print_service_installed_message" msgid="5897362931070459152">"Etkinleştirmek için hafifçe dokunun"</string>
+    <string name="print_service_installed_message" msgid="5897362931070459152">"Etkinleştirmek için dokunun"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Yönetici PIN\'ini girin"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN\'i girin"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Yanlış"</string>
@@ -1659,9 +1659,9 @@
     <string name="user_encrypted_message" msgid="4923292604515744267">"Kilidi açmak için dokunun"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Kullanıcı verileri kilitlendi"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"İş profili kilitlendi"</string>
-    <string name="profile_encrypted_message" msgid="6964994232310195874">"İş profilinin kilidini açmak için hafifçe dokunun"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"İş profilinin kilidini açmak için dokunun"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> cihazına bağlandı"</string>
-    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Dosyaları görüntülemek için hafifçe dokunun"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Dosyaları görüntülemek için dokunun"</string>
     <string name="pin_target" msgid="3052256031352291362">"Sabitle"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Sabitlemeyi kaldır"</string>
     <string name="app_info" msgid="6856026610594615344">"Uygulama bilgileri"</string>
