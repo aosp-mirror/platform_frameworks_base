@@ -215,7 +215,7 @@ static void DrawSpotShadowGeneral(SkCanvas* canvas, const Shape& shape, float ca
 static void DrawRRectShadows(const SkRect& casterRect, SkScalar casterCornerRadius,
         SkScalar ambientAlpha, SkScalar spotAlpha, SkScalar casterAlpha, SkScalar casterZValue,
         SkScalar scaleFactor, SkCanvas* canvas) {
-    SkASSERT(cornerRadius >= 0.0f);
+    SkASSERT(casterCornerRadius >= 0.0f);
 
     // For all of these, we need to ensure we have a rrect with radius >= 0.5f in device space
     const SkScalar minRadius = 0.5f / scaleFactor;
@@ -387,7 +387,7 @@ static void DrawRRectShadows(const SkRect& casterRect, SkScalar casterCornerRadi
 static void DrawRRectShadowsWithClip(const SkRect& casterRect, SkScalar casterCornerRadius,
         SkScalar ambientAlpha, SkScalar spotAlpha, SkScalar casterZValue, SkScalar scaleFactor,
         const SkRRect& clipRR, SkCanvas* canvas) {
-    SkASSERT(cornerRadius >= 0.0f);
+    SkASSERT(casterCornerRadius >= 0.0f);
 
     const bool isOval = casterCornerRadius >= std::max(SkScalarHalf(casterRect.width()),
             SkScalarHalf(casterRect.height()));

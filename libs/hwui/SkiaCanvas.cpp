@@ -738,7 +738,7 @@ void SkiaCanvas::drawGlyphs(const uint16_t* text, const float* positions, int co
 void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
         const SkPaint& paint, const SkPath& path, size_t start, size_t end) {
     const int N = end - start;
-    SkAutoSMalloc<1024> storage(N * (sizeof(uint16_t) + sizeof(SkRSXform)));
+    SkAutoSTMalloc<1024, uint8_t> storage(N * (sizeof(uint16_t) + sizeof(SkRSXform)));
     SkRSXform* xform = (SkRSXform*)storage.get();
     uint16_t* glyphs = (uint16_t*)(xform + N);
     SkPathMeasure meas(path, false);
