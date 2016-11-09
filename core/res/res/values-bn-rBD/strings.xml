@@ -1432,7 +1432,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"সরান"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"প্রস্তাবিত স্তরের চেয়ে বেশি উঁচুতে ভলিউম বাড়াবেন?\n\nউঁচু ভলিউমে বেশি সময় ধরে কিছু শুনলে আপনার শ্রবনশক্তির ক্ষতি হতে পারে।"</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"অ্যাক্সেসযোগ্যতা সক্রিয় করতে দুইটি আঙ্গুলকে চেপে নীচে ধরে রাখুন৷"</string>
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"অ্যাক্সেসযোগ্যতা সক্রিয় করতে দুইটি আঙ্গুলকে চেপে নিচে ধরে রাখুন৷"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"অ্যাক্সেসযোগ্যতা সক্ষম করা হয়েছে৷"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"অ্যাক্সেসযোগ্যতা বাতিল করা হয়েছে৷"</string>
     <string name="user_switched" msgid="3768006783166984410">"বর্তমান ব্যবহারকারী <xliff:g id="NAME">%1$s</xliff:g>৷"</string>
