@@ -17,9 +17,9 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 
@@ -30,8 +30,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIG
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WALLPAPER_DRAW_PENDING_TIMEOUT;
-import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
-import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
 
 import android.os.Bundle;
 import android.os.Debug;
@@ -61,11 +59,8 @@ class WallpaperController {
     // with the wallpaper.
     private WindowState mWallpaperTarget = null;
     // If non-null, we are in the middle of animating from one wallpaper target
-    // to another, and this is the lower one in Z-order.
-    private WindowState mLowerWallpaperTarget = null;
-    // If non-null, we are in the middle of animating from one wallpaper target
-    // to another, and this is the higher one in Z-order.
-    private WindowState mUpperWallpaperTarget = null;
+    // to another, and this is the previous wallpaper target.
+    private WindowState mPrevWallpaperTarget = null;
 
     private int mWallpaperAnimLayerAdjustment;
 
@@ -78,7 +73,7 @@ class WallpaperController {
 
     // This is set when we are waiting for a wallpaper to tell us it is done
     // changing its scroll position.
-    WindowState mWaitingOnWallpaper;
+    private WindowState mWaitingOnWallpaper;
 
     // The last time we had a timeout when waiting for a wallpaper.
     private long mLastWallpaperTimeoutTime;
@@ -110,14 +105,6 @@ class WallpaperController {
         return mWallpaperTarget;
     }
 
-    WindowState getLowerWallpaperTarget() {
-        return mLowerWallpaperTarget;
-    }
-
-    WindowState getUpperWallpaperTarget() {
-        return mUpperWallpaperTarget;
-    }
-
     boolean isWallpaperTarget(WindowState win) {
         return win == mWallpaperTarget;
     }
@@ -145,13 +132,11 @@ class WallpaperController {
                 + (wallpaperTarget != null ? Boolean.toString(wallpaperTarget.mObscured) : "??")
                 + " anim=" + ((wallpaperTarget != null && wallpaperTarget.mAppToken != null)
                 ? wallpaperTarget.mAppToken.mAppAnimator.animation : null)
-                + " upper=" + mUpperWallpaperTarget
-                + " lower=" + mLowerWallpaperTarget);
+                + " prev=" + mPrevWallpaperTarget);
         return (wallpaperTarget != null
                 && (!wallpaperTarget.mObscured || (wallpaperTarget.mAppToken != null
                 && wallpaperTarget.mAppToken.mAppAnimator.animation != null)))
-                || mUpperWallpaperTarget != null
-                || mLowerWallpaperTarget != null;
+                || mPrevWallpaperTarget != null;
     }
 
     boolean isWallpaperTargetAnimating() {
@@ -177,7 +162,7 @@ class WallpaperController {
 
     void hideWallpapers(final WindowState winGoingAway) {
         if (mWallpaperTarget != null
-                && (mWallpaperTarget != winGoingAway || mLowerWallpaperTarget != null)) {
+                && (mWallpaperTarget != winGoingAway || mPrevWallpaperTarget != null)) {
             return;
         }
         if (mService.mAppTransition.isRunning()) {
@@ -192,8 +177,8 @@ class WallpaperController {
             final WallpaperWindowToken token = mWallpaperTokens.get(i);
             token.hideWallpaperToken(wasDeferred, "hideWallpapers");
             if (DEBUG_WALLPAPER_LIGHT && !token.hidden) Slog.d(TAG, "Hiding wallpaper " + token
-                    + " from " + winGoingAway + " target=" + mWallpaperTarget + " lower="
-                    + mLowerWallpaperTarget + "\n" + Debug.getCallers(5, "  "));
+                    + " from " + winGoingAway + " target=" + mWallpaperTarget + " prev="
+                    + mPrevWallpaperTarget + "\n" + Debug.getCallers(5, "  "));
         }
     }
 
@@ -299,9 +284,7 @@ class WallpaperController {
 
     Bundle sendWindowWallpaperCommand(
             WindowState window, String action, int x, int y, int z, Bundle extras, boolean sync) {
-        if (window == mWallpaperTarget
-                || window == mLowerWallpaperTarget
-                || window == mUpperWallpaperTarget) {
+        if (window == mWallpaperTarget || window == mPrevWallpaperTarget) {
             boolean doWait = sync;
             for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
                 final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
@@ -388,51 +371,52 @@ class WallpaperController {
         return mWallpaperAnimLayerAdjustment;
     }
 
-    private void findWallpaperTarget(WindowList windows, FindWallpaperTargetResult result) {
+    private void findWallpaperTarget(DisplayContent dc , FindWallpaperTargetResult result) {
         final WindowAnimator winAnimator = mService.mAnimator;
         result.reset();
-        WindowState w = null;
-        int windowDetachedI = -1;
-        boolean resetTopWallpaper = false;
-        boolean inFreeformSpace = false;
-        boolean replacing = false;
-        boolean keyguardGoingAwayWithWallpaper = false;
-        boolean needsShowWhenLockedWallpaper = false;
+        if (mService.isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID)) {
+            // In freeform mode we set the wallpaper as its own target, so we don't need an
+            // additional window to make it visible.
+            result.setUseTopWallpaperAsTarget(true);
+        }
 
-        for (int i = windows.size() - 1; i >= 0; i--) {
-            w = windows.get(i);
+        dc.forAllWindows(w -> {
             if ((w.mAttrs.type == TYPE_WALLPAPER)) {
-                if (result.topWallpaper == null || resetTopWallpaper) {
-                    result.setTopWallpaper(w, i);
-                    resetTopWallpaper = false;
+                if (result.topWallpaper == null || result.resetTopWallpaper) {
+                    result.setTopWallpaper(w);
+                    result.resetTopWallpaper = false;
                 }
-                continue;
+                return false;
             }
-            resetTopWallpaper = true;
+
+            result.resetTopWallpaper = true;
             if (w != winAnimator.mWindowDetachedWallpaper && w.mAppToken != null) {
                 // If this window's app token is hidden and not animating,
                 // it is of no interest to us.
                 if (w.mAppToken.hidden && w.mAppToken.mAppAnimator.animation == null) {
                     if (DEBUG_WALLPAPER) Slog.v(TAG,
                             "Skipping hidden and not animating token: " + w);
-                    continue;
+                    return false;
                 }
             }
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "Win #" + i + " " + w + ": isOnScreen="
-                    + w.isOnScreen() + " mDrawState=" + w.mWinAnimator.mDrawState);
+            if (DEBUG_WALLPAPER) Slog.v(TAG, "Win " + w + ": isOnScreen=" + w.isOnScreen()
+                    + " mDrawState=" + w.mWinAnimator.mDrawState);
 
-            if (!inFreeformSpace) {
-                TaskStack stack = w.getStack();
-                inFreeformSpace = stack != null && stack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
+            if (w.mWillReplaceWindow && mWallpaperTarget == null
+                    && !result.useTopWallpaperAsTarget) {
+                // When we are replacing a window and there was wallpaper before replacement, we
+                // want to keep the window until the new windows fully appear and can determine the
+                // visibility, to avoid flickering.
+                result.setUseTopWallpaperAsTarget(true);
             }
 
-            replacing |= w.mWillReplaceWindow;
-            keyguardGoingAwayWithWallpaper |= (w.mAppToken != null
+            final boolean keyguardGoingAwayWithWallpaper = (w.mAppToken != null
                     && AppTransition.isKeyguardGoingAwayTransit(
                             w.mAppToken.mAppAnimator.getTransit())
                     && (w.mAppToken.mAppAnimator.getTransitFlags()
                             & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
 
+            boolean needsShowWhenLockedWallpaper = false;
             if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
                     && mService.mPolicy.isKeyguardLocked()
                     && mService.mPolicy.isKeyguardOccluded()) {
@@ -442,248 +426,147 @@ class WallpaperController {
                         || (w.mAppToken != null && !w.mAppToken.fillsParent());
             }
 
+            if (keyguardGoingAwayWithWallpaper || needsShowWhenLockedWallpaper) {
+                // Keep the wallpaper during Keyguard exit but also when it's needed for a
+                // non-fullscreen show when locked activity.
+                result.setUseTopWallpaperAsTarget(true);
+            }
+
             final boolean hasWallpaper = (w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
             if (hasWallpaper && w.isOnScreen() && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
-                if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: #" + i + "=" + w);
-                result.setWallpaperTarget(w, i);
+                if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: " + w);
+                result.setWallpaperTarget(w);
                 if (w == mWallpaperTarget && w.mWinAnimator.isAnimationSet()) {
                     // The current wallpaper target is animating, so we'll look behind it for
                     // another possible target and figure out what is going on later.
                     if (DEBUG_WALLPAPER) Slog.v(TAG,
                             "Win " + w + ": token animating, looking behind.");
-                    continue;
                 }
-                break;
+                // Found a target! End search.
+                return true;
             } else if (w == winAnimator.mWindowDetachedWallpaper) {
-                windowDetachedI = i;
+                if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
+                        "Found animating detached wallpaper target win: " + w);
+                result.setUseTopWallpaperAsTarget(true);
             }
-        }
+            return false;
+        }, true /* traverseTopToBottom */);
 
-        if (result.wallpaperTarget != null) {
-            return;
-        }
-
-        if (windowDetachedI >= 0) {
-            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                    "Found animating detached wallpaper activity: #" + windowDetachedI + "=" + w);
-            result.setWallpaperTarget(w, windowDetachedI);
-        } else if (inFreeformSpace || (replacing && mWallpaperTarget != null)) {
-            // In freeform mode we set the wallpaper as its own target, so we don't need an
-            // additional window to make it visible. When we are replacing a window and there was
-            // wallpaper before replacement, we want to keep the window until the new windows fully
-            // appear and can determine the visibility, to avoid flickering.
-            result.setWallpaperTarget(result.topWallpaper, result.topWallpaperIndex);
-
-        } else if (keyguardGoingAwayWithWallpaper || needsShowWhenLockedWallpaper) {
-            // Keep the wallpaper during Keyguard exit but also when it's needed for a
-            // non-fullscreen show when locked activity.
-            result.setWallpaperTarget(result.topWallpaper, result.topWallpaperIndex);
+        if (result.wallpaperTarget == null && result.useTopWallpaperAsTarget) {
+            result.setWallpaperTarget(result.topWallpaper);
         }
     }
 
     private boolean isFullscreen(WindowManager.LayoutParams attrs) {
         return attrs.x == 0 && attrs.y == 0
-                && attrs.width == WindowManager.LayoutParams.MATCH_PARENT
-                && attrs.height == WindowManager.LayoutParams.MATCH_PARENT;
+                && attrs.width == MATCH_PARENT && attrs.height == MATCH_PARENT;
     }
 
     /** Updates the target wallpaper if needed and returns true if an update happened. */
-    private boolean updateWallpaperWindowsTarget(
-            WindowList windows, FindWallpaperTargetResult result) {
+    private void updateWallpaperWindowsTarget(DisplayContent dc,
+            FindWallpaperTargetResult result) {
 
         WindowState wallpaperTarget = result.wallpaperTarget;
-        int wallpaperTargetIndex = result.wallpaperTargetIndex;
 
         if (mWallpaperTarget == wallpaperTarget
-                || (mLowerWallpaperTarget != null && mLowerWallpaperTarget == wallpaperTarget)) {
+                || (mPrevWallpaperTarget != null && mPrevWallpaperTarget == wallpaperTarget)) {
 
-            if (mLowerWallpaperTarget != null) {
-                // Is it time to stop animating?
-                if (!mLowerWallpaperTarget.isAnimatingLw()
-                        || !mUpperWallpaperTarget.isAnimatingLw()) {
-                    if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                            "No longer animating wallpaper targets!");
-                    mLowerWallpaperTarget = null;
-                    mUpperWallpaperTarget = null;
-                    mWallpaperTarget = wallpaperTarget;
-                    return true;
-                }
+            if (mPrevWallpaperTarget == null) {
+                return;
             }
 
-            return false;
+            // Is it time to stop animating?
+            if (!mPrevWallpaperTarget.isAnimatingLw()) {
+                if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "No longer animating wallpaper targets!");
+                mPrevWallpaperTarget = null;
+                mWallpaperTarget = wallpaperTarget;
+            }
+            return;
         }
 
         if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                "New wallpaper target: " + wallpaperTarget + " oldTarget: " + mWallpaperTarget);
+                "New wallpaper target: " + wallpaperTarget + " prevTarget: " + mWallpaperTarget);
 
-        mLowerWallpaperTarget = null;
-        mUpperWallpaperTarget = null;
+        mPrevWallpaperTarget = null;
 
-        WindowState oldW = mWallpaperTarget;
+        final WindowState prevWallpaperTarget = mWallpaperTarget;
         mWallpaperTarget = wallpaperTarget;
 
-        if (wallpaperTarget == null || oldW == null) {
-            return true;
+        if (wallpaperTarget == null || prevWallpaperTarget == null) {
+            return;
         }
 
         // Now what is happening...  if the current and new targets are animating,
         // then we are in our super special mode!
-        boolean oldAnim = oldW.isAnimatingLw();
+        boolean oldAnim = prevWallpaperTarget.isAnimatingLw();
         boolean foundAnim = wallpaperTarget.isAnimatingLw();
         if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                 "New animation: " + foundAnim + " old animation: " + oldAnim);
 
         if (!foundAnim || !oldAnim) {
-            return true;
+            return;
         }
 
-        int oldI = windows.indexOf(oldW);
-        if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                "New i: " + wallpaperTargetIndex + " old i: " + oldI);
-
-        if (oldI < 0) {
-            return true;
+        if (dc.getWindow(w -> w == prevWallpaperTarget) == null) {
+            return;
         }
 
         final boolean newTargetHidden = wallpaperTarget.mAppToken != null
                 && wallpaperTarget.mAppToken.hiddenRequested;
-        final boolean oldTargetHidden = oldW.mAppToken != null
-                && oldW.mAppToken.hiddenRequested;
+        final boolean oldTargetHidden = prevWallpaperTarget.mAppToken != null
+                && prevWallpaperTarget.mAppToken.hiddenRequested;
 
-        if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Animating wallpapers:" + " old#" + oldI + "="
-                + oldW + " hidden=" + oldTargetHidden + " new#" + wallpaperTargetIndex + "="
-                + wallpaperTarget + " hidden=" + newTargetHidden);
+        if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Animating wallpapers:" + " old: "
+                + prevWallpaperTarget + " hidden=" + oldTargetHidden + " new: " + wallpaperTarget
+                + " hidden=" + newTargetHidden);
 
-        // Set the upper and lower wallpaper targets correctly,
-        // and make sure that we are positioning the wallpaper below the lower.
-        if (wallpaperTargetIndex > oldI) {
-            // The new target is on top of the old one.
-            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Found target above old target.");
-            mUpperWallpaperTarget = wallpaperTarget;
-            mLowerWallpaperTarget = oldW;
-
-            wallpaperTarget = oldW;
-            wallpaperTargetIndex = oldI;
-        } else {
-            // The new target is below the old one.
-            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Found target below old target.");
-            mUpperWallpaperTarget = oldW;
-            mLowerWallpaperTarget = wallpaperTarget;
-        }
+        mPrevWallpaperTarget = prevWallpaperTarget;
 
         if (newTargetHidden && !oldTargetHidden) {
             if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Old wallpaper still the target.");
             // Use the old target if new target is hidden but old target
             // is not. If they're both hidden, still use the new target.
-            mWallpaperTarget = oldW;
+            mWallpaperTarget = prevWallpaperTarget;
         } else if (newTargetHidden == oldTargetHidden
                 && !mService.mOpeningApps.contains(wallpaperTarget.mAppToken)
-                && (mService.mOpeningApps.contains(oldW.mAppToken)
-                || mService.mClosingApps.contains(oldW.mAppToken))) {
+                && (mService.mOpeningApps.contains(prevWallpaperTarget.mAppToken)
+                || mService.mClosingApps.contains(prevWallpaperTarget.mAppToken))) {
             // If they're both hidden (or both not hidden), prefer the one that's currently in
             // opening or closing app list, this allows transition selection logic to better
             // determine the wallpaper status of opening/closing apps.
-            mWallpaperTarget = oldW;
+            mWallpaperTarget = prevWallpaperTarget;
         }
 
-        result.setWallpaperTarget(wallpaperTarget, wallpaperTargetIndex);
-        return true;
+        result.setWallpaperTarget(wallpaperTarget);
     }
 
-    private boolean updateWallpaperWindowsTargetByLayer(WindowList windows,
-            FindWallpaperTargetResult result) {
-
-        WindowState wallpaperTarget = result.wallpaperTarget;
-        int wallpaperTargetIndex = result.wallpaperTargetIndex;
-        boolean visible = wallpaperTarget != null;
-
-        if (visible) {
-            // The window is visible to the compositor...but is it visible to the user?
-            // That is what the wallpaper cares about.
-            visible = isWallpaperVisible(wallpaperTarget);
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "Wallpaper visibility: " + visible);
-
-            // If the wallpaper target is animating, we may need to copy its layer adjustment.
-            // Only do this if we are not transferring between two wallpaper targets.
-            mWallpaperAnimLayerAdjustment =
-                    (mLowerWallpaperTarget == null && wallpaperTarget.mAppToken != null)
-                            ? wallpaperTarget.mAppToken.mAppAnimator.animLayerAdjustment : 0;
-
-            final int maxLayer = (mService.mPolicy.getMaxWallpaperLayer() * TYPE_LAYER_MULTIPLIER)
-                    + TYPE_LAYER_OFFSET;
-
-            // Now w is the window we are supposed to be behind...  but we
-            // need to be sure to also be behind any of its attached windows,
-            // AND any starting window associated with it, AND below the
-            // maximum layer the policy allows for wallpapers.
-            while (wallpaperTargetIndex > 0) {
-                final WindowState wb = windows.get(wallpaperTargetIndex - 1);
-                final WindowState wbParentWindow = wb.getParentWindow();
-                final WindowState wallpaperParentWindow = wallpaperTarget.getParentWindow();
-                if (wb.mBaseLayer < maxLayer
-                        && wbParentWindow != wallpaperTarget
-                        && (wallpaperParentWindow == null || wbParentWindow != wallpaperParentWindow)
-                        && (wb.mAttrs.type != TYPE_APPLICATION_STARTING
-                                || wallpaperTarget.mToken == null
-                                || wb.mToken != wallpaperTarget.mToken)) {
-                    // This window is not related to the previous one in any
-                    // interesting way, so stop here.
-                    break;
-                }
-                wallpaperTarget = wb;
-                wallpaperTargetIndex--;
-            }
-        } else {
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "No wallpaper target");
-        }
-
-        result.setWallpaperTarget(wallpaperTarget, wallpaperTargetIndex);
-        return visible;
-    }
-
-    private boolean updateWallpaperWindowsPlacement(WindowList windows,
-            WindowState wallpaperTarget, int wallpaperTargetIndex, boolean visible) {
-
-        // TODO(multidisplay): Wallpapers on main screen only.
-        final DisplayInfo displayInfo = mService.getDefaultDisplayContentLocked().getDisplayInfo();
-        final int dw = displayInfo.logicalWidth;
-        final int dh = displayInfo.logicalHeight;
-
-        // Start stepping backwards from here, ensuring that our wallpaper windows are correctly placed.
-        boolean changed = false;
+    private void updateWallpaperTokens(boolean visible) {
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            changed |= token.updateWallpaperWindowsPlacement(windows, wallpaperTarget,
-                    wallpaperTargetIndex, visible, dw, dh, mWallpaperAnimLayerAdjustment);
+            token.updateWallpaperWindows(visible, mWallpaperAnimLayerAdjustment);
         }
-
-        return changed;
     }
 
-    boolean adjustWallpaperWindows(WindowList windows) {
+    void adjustWallpaperWindows(DisplayContent dc) {
         mService.mRoot.mWallpaperMayChange = false;
 
         // First find top-most window that has asked to be on top of the wallpaper;
         // all wallpapers go behind it.
-        findWallpaperTarget(windows, mFindResults);
-        final boolean targetChanged = updateWallpaperWindowsTarget(windows, mFindResults);
-        final boolean visible = updateWallpaperWindowsTargetByLayer(windows, mFindResults);
-        WindowState wallpaperTarget = mFindResults.wallpaperTarget;
-        int wallpaperTargetIndex = mFindResults.wallpaperTargetIndex;
+        findWallpaperTarget(dc, mFindResults);
+        updateWallpaperWindowsTarget(dc, mFindResults);
 
-        if (wallpaperTarget == null && mFindResults.topWallpaper != null) {
-            // There is no wallpaper target, so it goes at the bottom.
-            // We will assume it is the same place as last time, if known.
-            wallpaperTarget = mFindResults.topWallpaper;
-            wallpaperTargetIndex = mFindResults.topWallpaperIndex + 1;
-        } else {
-            // Okay i is the position immediately above the wallpaper.
-            // Look at what is below it for later.
-            wallpaperTarget = wallpaperTargetIndex > 0
-                    ? windows.get(wallpaperTargetIndex - 1) : null;
-        }
+        // The window is visible to the compositor...but is it visible to the user?
+        // That is what the wallpaper cares about.
+        final boolean visible = mWallpaperTarget != null && isWallpaperVisible(mWallpaperTarget);
+        if (DEBUG_WALLPAPER) Slog.v(TAG, "Wallpaper visibility: " + visible);
 
         if (visible) {
+            // If the wallpaper target is animating, we may need to copy its layer adjustment.
+            // Only do this if we are not transferring between two wallpaper targets.
+            mWallpaperAnimLayerAdjustment =
+                    (mPrevWallpaperTarget == null && mWallpaperTarget.mAppToken != null)
+                            ? mWallpaperTarget.mAppToken.mAppAnimator.animLayerAdjustment : 0;
+
             if (mWallpaperTarget.mWallpaperX >= 0) {
                 mLastWallpaperX = mWallpaperTarget.mWallpaperX;
                 mLastWallpaperXStep = mWallpaperTarget.mWallpaperXStep;
@@ -700,14 +583,10 @@ class WallpaperController {
             }
         }
 
-        final boolean changed = updateWallpaperWindowsPlacement(
-                windows, wallpaperTarget, wallpaperTargetIndex, visible);
+        updateWallpaperTokens(visible);
 
-        if (targetChanged && DEBUG_WALLPAPER_LIGHT)  Slog.d(TAG, "New wallpaper: target="
-                + mWallpaperTarget + " lower=" + mLowerWallpaperTarget + " upper="
-                + mUpperWallpaperTarget);
-
-        return changed;
+        if (DEBUG_WALLPAPER_LIGHT)  Slog.d(TAG, "New wallpaper: target=" + mWallpaperTarget
+                + " prev=" + mPrevWallpaperTarget);
     }
 
     boolean processWallpaperDrawPendingTimeout() {
@@ -773,7 +652,7 @@ class WallpaperController {
         }
 
         if (adjust) {
-            dc.adjustWallpaperWindows();
+            adjustWallpaperWindows(dc);
         }
     }
 
@@ -787,9 +666,8 @@ class WallpaperController {
 
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mWallpaperTarget="); pw.println(mWallpaperTarget);
-        if (mLowerWallpaperTarget != null || mUpperWallpaperTarget != null) {
-            pw.print(prefix); pw.print("mLowerWallpaperTarget="); pw.println(mLowerWallpaperTarget);
-            pw.print(prefix); pw.print("mUpperWallpaperTarget="); pw.println(mUpperWallpaperTarget);
+        if (mPrevWallpaperTarget != null) {
+            pw.print(prefix); pw.print("mPrevWallpaperTarget="); pw.println(mPrevWallpaperTarget);
         }
         pw.print(prefix); pw.print("mLastWallpaperX="); pw.print(mLastWallpaperX);
         pw.print(" mLastWallpaperY="); pw.println(mLastWallpaperY);
@@ -825,26 +703,28 @@ class WallpaperController {
 
     /** Helper class for storing the results of a wallpaper target find operation. */
     final private static class FindWallpaperTargetResult {
-        int topWallpaperIndex = 0;
         WindowState topWallpaper = null;
-        int wallpaperTargetIndex = 0;
+        boolean useTopWallpaperAsTarget = false;
         WindowState wallpaperTarget = null;
+        boolean resetTopWallpaper = false;
 
-        void setTopWallpaper(WindowState win, int index) {
+        void setTopWallpaper(WindowState win) {
             topWallpaper = win;
-            topWallpaperIndex = index;
         }
 
-        void setWallpaperTarget(WindowState win, int index) {
+        void setWallpaperTarget(WindowState win) {
             wallpaperTarget = win;
-            wallpaperTargetIndex = index;
+        }
+
+        void setUseTopWallpaperAsTarget(boolean topWallpaperAsTarget) {
+            useTopWallpaperAsTarget = topWallpaperAsTarget;
         }
 
         void reset() {
-            topWallpaperIndex = 0;
             topWallpaper = null;
-            wallpaperTargetIndex = 0;
             wallpaperTarget = null;
+            useTopWallpaperAsTarget = false;
+            resetTopWallpaper = false;
         }
     }
 }

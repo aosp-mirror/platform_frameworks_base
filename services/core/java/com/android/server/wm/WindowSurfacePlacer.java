@@ -266,21 +266,9 @@ class WindowSurfacePlacer {
         mWallpaperControllerLocked.adjustWallpaperWindowsForAppTransitionIfNeeded(displayContent,
                 mService.mOpeningApps);
 
-        final WindowState lowerWallpaperTarget =
-                mWallpaperControllerLocked.getLowerWallpaperTarget();
-        final WindowState upperWallpaperTarget =
-                mWallpaperControllerLocked.getUpperWallpaperTarget();
-
+        final WindowState wallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget();
         boolean openingAppHasWallpaper = false;
         boolean closingAppHasWallpaper = false;
-        final AppWindowToken lowerWallpaperAppToken;
-        final AppWindowToken upperWallpaperAppToken;
-        if (lowerWallpaperTarget == null) {
-            lowerWallpaperAppToken = upperWallpaperAppToken = null;
-        } else {
-            lowerWallpaperAppToken = lowerWallpaperTarget.mAppToken;
-            upperWallpaperAppToken = upperWallpaperTarget.mAppToken;
-        }
 
         // Do a first pass through the tokens for two things:
         // (1) Determine if both the closing and opening app token sets are wallpaper targets, in
@@ -294,12 +282,12 @@ class WindowSurfacePlacer {
             final AppWindowToken wtoken;
             if (i < closingAppsCount) {
                 wtoken = mService.mClosingApps.valueAt(i);
-                if (wtoken == lowerWallpaperAppToken || wtoken == upperWallpaperAppToken) {
+                if (wallpaperTarget != null && wtoken.windowsCanBeWallpaperTarget()) {
                     closingAppHasWallpaper = true;
                 }
             } else {
                 wtoken = mService.mOpeningApps.valueAt(i - closingAppsCount);
-                if (wtoken == lowerWallpaperAppToken || wtoken == upperWallpaperAppToken) {
+                if (wallpaperTarget != null && wtoken.windowsCanBeWallpaperTarget()) {
                     openingAppHasWallpaper = true;
                 }
             }
@@ -307,14 +295,14 @@ class WindowSurfacePlacer {
             voiceInteraction |= wtoken.voiceInteraction;
 
             if (wtoken.fillsParent()) {
-                WindowState ws = wtoken.findMainWindow();
+                final WindowState ws = wtoken.findMainWindow();
                 if (ws != null) {
                     animLp = ws.mAttrs;
                     bestAnimLayer = ws.mLayer;
                     fullscreenAnim = true;
                 }
             } else if (!fullscreenAnim) {
-                WindowState ws = wtoken.findMainWindow();
+                final WindowState ws = wtoken.findMainWindow();
                 if (ws != null) {
                     if (ws.mLayer > bestAnimLayer) {
                         animLp = ws.mAttrs;
@@ -325,7 +313,7 @@ class WindowSurfacePlacer {
         }
 
         transit = maybeUpdateTransitToWallpaper(transit, openingAppHasWallpaper,
-                closingAppHasWallpaper, lowerWallpaperTarget, upperWallpaperTarget);
+                closingAppHasWallpaper);
 
         // If all closing windows are obscured, then there is no need to do an animation. This is
         // the case, for example, when this transition is being done behind the lock screen.
@@ -578,8 +566,7 @@ class WindowSurfacePlacer {
     }
 
     private int maybeUpdateTransitToWallpaper(int transit, boolean openingAppHasWallpaper,
-            boolean closingAppHasWallpaper, WindowState lowerWallpaperTarget,
-            WindowState upperWallpaperTarget) {
+            boolean closingAppHasWallpaper) {
         // if wallpaper is animating in or out set oldWallpaper to null else to wallpaper
         final WindowState wallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget();
         final WindowState oldWallpaper = mWallpaperControllerLocked.isWallpaperTargetAnimating()
@@ -590,8 +577,6 @@ class WindowSurfacePlacer {
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                 "New wallpaper target=" + wallpaperTarget
                         + ", oldWallpaper=" + oldWallpaper
-                        + ", lower target=" + lowerWallpaperTarget
-                        + ", upper target=" + upperWallpaperTarget
                         + ", openingApps=" + openingApps
                         + ", closingApps=" + closingApps);
         mService.mAnimateWallpaperWithTarget = false;

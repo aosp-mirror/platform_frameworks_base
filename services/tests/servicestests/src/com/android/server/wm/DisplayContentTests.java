@@ -98,7 +98,7 @@ public class DisplayContentTests {
         final ArrayList<WindowState> windows = new ArrayList();
 
         // Test forward traversal.
-        dc.forAllWindows(windows::add, false /* traverseTopToBottom */);
+        dc.forAllWindows(w -> {windows.add(w);}, false /* traverseTopToBottom */);
 
         assertEquals(wallpaperWindow, windows.get(0));
         assertEquals(exitingAppWindow, windows.get(1));
@@ -112,7 +112,7 @@ public class DisplayContentTests {
 
         // Test backward traversal.
         windows.clear();
-        dc.forAllWindows(windows::add, true /* traverseTopToBottom */);
+        dc.forAllWindows(w -> {windows.add(w);}, true /* traverseTopToBottom */);
 
         assertEquals(wallpaperWindow, windows.get(8));
         assertEquals(exitingAppWindow, windows.get(7));

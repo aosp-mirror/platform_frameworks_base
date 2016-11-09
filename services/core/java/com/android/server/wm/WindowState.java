@@ -53,6 +53,7 @@ import android.view.WindowInfo;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 
+import com.android.internal.util.ToBooleanFunction;
 import com.android.server.input.InputWindowHandle;
 
 import java.io.PrintWriter;
@@ -60,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static android.app.ActivityManager.StackId;
@@ -3833,21 +3835,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    void forAllWindows(Consumer<WindowState> callback, boolean traverseTopToBottom) {
+    boolean forAllWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
         if (mChildren.isEmpty()) {
             // The window has no children so we just return it.
-            callback.accept(this);
-            return;
+            return callback.apply(this);
         }
 
         if (traverseTopToBottom) {
-            forAllWindowTopToBottom(callback);
+            return forAllWindowTopToBottom(callback);
         } else {
-            forAllWindowBottomToTop(callback);
+            return forAllWindowBottomToTop(callback);
         }
     }
 
-    private void forAllWindowBottomToTop(Consumer<WindowState> callback) {
+    private boolean forAllWindowBottomToTop(ToBooleanFunction<WindowState> callback) {
         // We want to consumer the negative sublayer children first because they need to appear
         // below the parent, then this window (the parent), and then the positive sublayer children
         // because they need to appear above the parent.
@@ -3856,7 +3857,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         WindowState child = mChildren.get(i);
 
         while (i < count && child.mSubLayer < 0) {
-            callback.accept(child);
+            if (callback.apply(child)) {
+                return true;
+            }
             i++;
             if (i >= count) {
                 break;
@@ -3864,19 +3867,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             child = mChildren.get(i);
         }
 
-        callback.accept(this);
+        if (callback.apply(this)) {
+            return true;
+        }
 
         while (i < count) {
-            callback.accept(child);
+            if (callback.apply(child)) {
+                return true;
+            }
             i++;
             if (i >= count) {
                 break;
             }
             child = mChildren.get(i);
         }
+
+        return false;
     }
 
-    private void forAllWindowTopToBottom(Consumer<WindowState> callback) {
+    private boolean forAllWindowTopToBottom(ToBooleanFunction<WindowState> callback) {
         // We want to consumer the positive sublayer children first because they need to appear
         // above the parent, then this window (the parent), and then the negative sublayer children
         // because they need to appear above the parent.
@@ -3884,7 +3893,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         WindowState child = mChildren.get(i);
 
         while (i >= 0 && child.mSubLayer >= 0) {
-            callback.accept(child);
+            if (callback.apply(child)) {
+                return true;
+            }
             --i;
             if (i < 0) {
                 break;
@@ -3892,16 +3903,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             child = mChildren.get(i);
         }
 
-        callback.accept(this);
+        if (callback.apply(this)) {
+            return true;
+        }
 
         while (i >= 0) {
-            callback.accept(child);
+            if (callback.apply(child)) {
+                return true;
+            }
             --i;
             if (i < 0) {
                 break;
             }
             child = mChildren.get(i);
         }
+
+        return false;
     }
 
     WindowState getWindow(Predicate<WindowState> callback) {
