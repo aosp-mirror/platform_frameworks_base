@@ -112,3 +112,5 @@ option java_package com.android.server.am
 # Report changing memory conditions (Values are ProcessStats.ADJ_MEM_FACTOR* constants)
 30050 am_mem_factor (Current|1|5),(Previous|1|5)
 
+# UserState has changed
+30051 am_user_state_changed (id|1|5),(state|1|5)

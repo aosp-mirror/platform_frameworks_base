@@ -70,6 +70,7 @@ public final class UserState {
     public boolean setState(int oldState, int newState) {
         if (state == oldState) {
             setState(newState);
+            EventLogTags.writeAmUserStateChanged(mHandle.getIdentifier(), newState);
             return true;
         } else {
             Slog.w(TAG, "Expected user " + mHandle.getIdentifier() + " in state "
