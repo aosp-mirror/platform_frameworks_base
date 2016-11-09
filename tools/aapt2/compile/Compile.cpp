@@ -482,7 +482,9 @@ class BigBufferOutputStream : public io::OutputStream {
 
   void BackUp(int count) override { buffer_->BackUp(count); }
 
-  int64_t ByteCount() const override { return buffer_->size(); }
+  google::protobuf::int64 ByteCount() const override {
+    return buffer_->size();
+  }
 
   bool HadError() const override { return false; }
 

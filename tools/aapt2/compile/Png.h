@@ -62,8 +62,8 @@ class PngChunkFilter : public io::InputStream {
   void BackUp(int count) override;
   bool Skip(int count) override;
 
-  int64_t ByteCount() const override {
-    return static_cast<int64_t>(window_start_);
+  google::protobuf::int64 ByteCount() const override {
+    return static_cast<google::protobuf::int64>(window_start_);
   }
 
   bool HadError() const override { return error_; }

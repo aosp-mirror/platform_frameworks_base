@@ -70,7 +70,7 @@ import android.widget.ListView;
 import com.android.internal.R;
 import com.android.internal.app.ResolverActivity.TargetInfo;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.google.android.collect.Lists;
 
 import java.io.File;

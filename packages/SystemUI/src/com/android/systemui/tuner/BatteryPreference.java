@@ -21,7 +21,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 
 import static com.android.systemui.BatteryMeterDrawable.SHOW_PERCENT_SETTING;

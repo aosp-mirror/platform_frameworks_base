@@ -25,7 +25,7 @@ import static com.android.server.connectivity.MetricsTestUtil.anInt;
 import static com.android.server.connectivity.MetricsTestUtil.anIntArray;
 import static com.android.server.connectivity.MetricsTestUtil.b;
 import static com.android.server.connectivity.MetricsTestUtil.describeIpEvent;
-import static com.android.server.connectivity.metrics.IpConnectivityLogClass.IpConnectivityLog;
+import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
 
 import android.net.ConnectivityMetricsEvent;
 import android.net.metrics.ApfProgramEvent;

@@ -34,7 +34,7 @@ import android.net.metrics.ValidationProbeEvent;
 import android.os.Parcelable;
 import android.util.Base64;
 
-import com.android.server.connectivity.metrics.IpConnectivityLogClass;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass;
 
 import junit.framework.TestCase;
 

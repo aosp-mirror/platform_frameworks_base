@@ -232,6 +232,13 @@ PNG_COLOR_TYPE_RGB_ALPHA) {
     }
 }*/
 
+#ifdef MAX
+#undef MAX
+#endif
+#ifdef ABS
+#undef ABS
+#endif
+
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define ABS(a) ((a) < 0 ? -(a) : (a))
 
