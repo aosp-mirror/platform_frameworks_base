@@ -17,7 +17,7 @@
 package com.android.systemui;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.anyString;
@@ -28,27 +28,24 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class BatteryMeterDrawableTest {
+public class BatteryMeterDrawableTest extends SysuiTestCase {
 
-    private Context mContext;
     private Resources mResources;
     private BatteryMeterDrawable mBatteryMeter;
 
     @Before
     public void setUp() throws Exception {
-        mContext = InstrumentationRegistry.getTargetContext();
         mResources = mContext.getResources();
         mBatteryMeter = new BatteryMeterDrawable(mContext, 0);
     }

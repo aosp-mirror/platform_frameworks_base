@@ -16,26 +16,24 @@
 
 package com.android.keyguard;
 
+import static junit.framework.Assert.assertEquals;
+
+import static org.mockito.Mockito.mock;
+
+import android.os.Handler;
+import android.os.Looper;
+import android.support.test.runner.AndroidJUnit4;
+import android.test.suitebuilder.annotation.SmallTest;
+
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.SmallTest;
-
-import static junit.framework.Assert.*;
-import static org.mockito.Mockito.mock;
-
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class KeyguardMessageAreaTest extends SysuiTestCase {
-    private Context mContext = InstrumentationRegistry.getTargetContext();
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private KeyguardMessageArea mMessageArea;
 

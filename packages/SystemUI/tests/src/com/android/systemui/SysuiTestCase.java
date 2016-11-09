@@ -20,6 +20,10 @@ import android.support.test.InstrumentationRegistry;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
+
+import com.android.systemui.utils.TestableContext;
+
+import org.junit.After;
 import org.junit.Before;
 
 /**
@@ -28,11 +32,16 @@ import org.junit.Before;
 public class SysuiTestCase {
 
     private Handler mHandler;
-    protected Context mContext;
+    protected TestableContext mContext;
 
     @Before
     public void SysuiSetup() throws Exception {
-        mContext = InstrumentationRegistry.getTargetContext();
+        mContext = new TestableContext(InstrumentationRegistry.getTargetContext());
+    }
+
+    @After
+    public void cleanup() throws Exception {
+        mContext.getSettingsProvider().clearOverrides(this);
     }
 
     protected Context getContext() {

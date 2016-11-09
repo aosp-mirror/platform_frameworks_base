@@ -32,8 +32,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
+
 import com.android.systemui.statusbar.policy.BatteryController;
 
 public class BatteryMeterDrawable extends Drawable implements
