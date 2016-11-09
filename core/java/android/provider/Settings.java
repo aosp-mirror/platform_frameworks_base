@@ -4715,6 +4715,13 @@ public final class Settings {
         public static final String VOICE_INTERACTION_SERVICE = "voice_interaction_service";
 
         /**
+         * The currently selected auto-fill service flattened ComponentName.
+         * @hide
+         */
+        @TestApi
+        public static final String AUTO_FILL_SERVICE = "auto_fill_service";
+
+        /**
          * bluetooth HCI snoop log configuration
          * @hide
          */
