@@ -15,12 +15,13 @@
  */
 package com.android.systemui.recents.grid;
 
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,11 +71,12 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
 
     private TaskStack mTaskStack;
     private List<Task> mTasks = new ArrayList<>();
-    private List<View> mTaskViews = new ArrayList<>();
+    private List<TaskView> mTaskViews = new ArrayList<>();
     private FrameLayout mRecentsView;
     private TextView mEmptyView;
     private View mClearAllButton;
-    private int mDisplayOrientation = Configuration.ORIENTATION_UNDEFINED;
+    private int mLastDisplayOrientation = Configuration.ORIENTATION_UNDEFINED;
+    private int mLastDisplayDensity;
     private Rect mDisplayRect = new Rect();
     private LayoutInflater mInflater;
     private boolean mTouchExplorationEnabled;
@@ -86,8 +88,10 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         mInflater = LayoutInflater.from(this);
-        mDisplayOrientation = Utilities.getAppConfiguration(this).orientation;
+        Configuration appConfiguration = Utilities.getAppConfiguration(this);
         mDisplayRect = ssp.getDisplayRect();
+        mLastDisplayOrientation = appConfiguration.orientation;
+        mLastDisplayDensity = appConfiguration.densityDpi;
         mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
 
         mRecentsView = (FrameLayout) findViewById(R.id.recents_view);
@@ -122,14 +126,27 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
         return (TaskView) mInflater.inflate(R.layout.recents_task_view, mRecentsView, false);
     }
 
-    private void clearTaskViews() {
+    private void removeTaskViews() {
         for (View taskView : mTaskViews) {
             ViewGroup parent = (ViewGroup) taskView.getParent();
             if (parent != null) {
                 parent.removeView(taskView);
             }
         }
+    }
+
+    private void clearTaskViews() {
+        removeTaskViews();
         mTaskViews.clear();
+    }
+
+    private TaskView getChildViewForTask(Task task) {
+        for (TaskView tv : mTaskViews) {
+            if (tv.getTask() == task) {
+                return tv;
+            }
+        }
+        return null;
     }
 
     private void updateControlVisibility() {
@@ -170,7 +187,8 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
         for (int i = 0; i < mTasks.size(); i++) {
             Task task = mTasks.get(i);
             TaskView taskView = createView();
-            taskView.onTaskBound(task, mTouchExplorationEnabled, mDisplayOrientation, mDisplayRect);
+            taskView.onTaskBound(task, mTouchExplorationEnabled, mLastDisplayOrientation,
+                    mDisplayRect);
             Recents.getTaskLoader().loadTaskData(task);
             taskView.setTouchEnabled(true);
             // Show dismiss button right away.
@@ -211,6 +229,22 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
     }
 
     @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Notify of the config change.
+        Configuration newDeviceConfiguration = Utilities.getAppConfiguration(this);
+        mDisplayRect = Recents.getSystemServices().getDisplayRect();
+        mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
+        mRecentsView.requestLayout();
+        int numStackTasks = mTaskStack.getStackTaskCount();
+        EventBus.getDefault().send(new ConfigurationChangedEvent(false /* fromMultiWindow */,
+                mLastDisplayOrientation != newDeviceConfiguration.orientation,
+                mLastDisplayDensity != newDeviceConfiguration.densityDpi, numStackTasks > 0));
+        mLastDisplayOrientation = newDeviceConfiguration.orientation;
+        mLastDisplayDensity = newDeviceConfiguration.densityDpi;
+    }
+
+    @Override
     public boolean onPreDraw() {
         mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
         int width = mRecentsView.getWidth();
@@ -218,6 +252,7 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
 
         List<Rect> rects = TaskGridLayoutAlgorithm.getRectsForTaskCount(
             mTasks.size(), width, height, false /* allowLineOfThree */, 30 /* padding */);
+        removeTaskViews();
         for (int i = 0; i < rects.size(); i++) {
             Rect rect = rects.get(i);
             View taskView = mTaskViews.get(i);
@@ -235,20 +270,43 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
         startActivity(startMain);
     }
 
+    /** Launches the task that recents was launched from if possible. */
+    boolean launchPreviousTask() {
+        if (mRecentsView != null) {
+            Task task = mTaskStack.getLaunchTarget();
+            if (task != null) {
+                TaskView taskView = getChildViewForTask(task);
+                EventBus.getDefault().send(new LaunchTaskEvent(taskView, task, null,
+                        INVALID_STACK_ID, false));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Dismisses recents back to the launch target task. */
+    boolean dismissRecentsToLaunchTargetTaskOrHome() {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp.isRecentsActivityVisible()) {
+            // If we can launch the task that Recents was launched from, do that, otherwise go home.
+            if (launchPreviousTask()) return true;
+            dismissRecentsToHome();
+        }
+        return false;
+    }
+
     /**** EventBus events ****/
 
     public final void onBusEvent(HideRecentsEvent event) {
         if (event.triggeredFromAltTab) {
-            // Do nothing for now.
+            dismissRecentsToLaunchTargetTaskOrHome();
         } else if (event.triggeredFromHomeKey) {
             dismissRecentsToHome();
         }
     }
 
     public final void onBusEvent(ToggleRecentsEvent event) {
-        // Always go back home for simplicity for now. If recents is entered from another app, this
-        // code will eventually need to go back to the original app.
-        dismissRecentsToHome();
+        dismissRecentsToLaunchTargetTaskOrHome();
     }
 
     public final void onBusEvent(DismissTaskViewEvent event) {
@@ -306,7 +364,22 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
     }
 
     public final void onBusEvent(LaunchNextTaskRequestEvent event) {
-        // Always go back home for simplicity for now. Quick switch will be supported soon.
+        if (mTaskStack.getTaskCount() > 0) {
+            // The task to launch is the second most recent, which is at index 1 given our ordering.
+            // If there is only one task, launch that one instead.
+            int launchTaskIndex = (mTaskStack.getStackTaskCount() > 1) ? 1 : 0;
+            Task launchTask = mTaskStack.getStackTasks().get(launchTaskIndex);
+            TaskView launchTaskView = getChildViewForTask(launchTask);
+            if (launchTaskView != null) {
+                EventBus.getDefault().send(new LaunchTaskEvent(launchTaskView,
+                        launchTask, null, INVALID_STACK_ID, false /* screenPinningRequested */));
+                MetricsLogger.action(this, MetricsEvent.OVERVIEW_LAUNCH_PREVIOUS_TASK,
+                        launchTask.key.getComponent().toString());
+                return;
+            }
+        }
+        // We couldn't find a matching task view, or there are no tasks. Just hide recents back
+        // to home.
         EventBus.getDefault().send(new HideRecentsEvent(false, true));
     }
 
