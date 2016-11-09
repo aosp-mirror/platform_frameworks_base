@@ -20,11 +20,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.android.frameworks.coretests.R;
 
@@ -37,6 +39,10 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Tests for RemoteViews.
@@ -165,5 +171,165 @@ public class RemoteViewsTest {
         int size = parcel.dataSize();
         parcel.recycle();
         return size;
+    }
+
+    @Test
+    public void asyncApply_fail() throws Exception {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_view_test_bad_1);
+        ViewAppliedListener listener = new ViewAppliedListener();
+        views.applyAsync(mContext, mContainer, AsyncTask.THREAD_POOL_EXECUTOR, listener);
+
+        boolean exceptionThrown = false;
+        try {
+            listener.waitAndGetView();
+        } catch (Exception e) {
+            exceptionThrown = true;
+        }
+        assertTrue(exceptionThrown);
+    }
+
+    @Test
+    public void asyncApply() throws Exception {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        views.setTextViewText(R.id.text, "Dummy");
+
+        View syncView = views.apply(mContext, mContainer);
+
+        ViewAppliedListener listener = new ViewAppliedListener();
+        views.applyAsync(mContext, mContainer, AsyncTask.THREAD_POOL_EXECUTOR, listener);
+        View asyncView = listener.waitAndGetView();
+
+        verifyViewTree(syncView, asyncView, "Dummy");
+    }
+
+    @Test
+    public void asyncApply_viewStub() throws Exception {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_viewstub);
+        views.setInt(R.id.viewStub, "setLayoutResource", R.layout.remote_views_text);
+        // This will cause the view to be inflated
+        views.setViewVisibility(R.id.viewStub, View.INVISIBLE);
+        views.setTextViewText(R.id.stub_inflated, "Dummy");
+
+        View syncView = views.apply(mContext, mContainer);
+
+        ViewAppliedListener listener = new ViewAppliedListener();
+        views.applyAsync(mContext, mContainer, AsyncTask.THREAD_POOL_EXECUTOR, listener);
+        View asyncView = listener.waitAndGetView();
+
+        verifyViewTree(syncView, asyncView, "Dummy");
+    }
+
+    @Test
+    public void asyncApply_nestedViews() throws Exception {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_view_host);
+        views.removeAllViews(R.id.container);
+        views.addView(R.id.container, createViewChained(1, "row1-c1", "row1-c2", "row1-c3"));
+        views.addView(R.id.container, createViewChained(5, "row2-c1", "row2-c2"));
+        views.addView(R.id.container, createViewChained(2, "row3-c1", "row3-c2"));
+
+        View syncView = views.apply(mContext, mContainer);
+
+        ViewAppliedListener listener = new ViewAppliedListener();
+        views.applyAsync(mContext, mContainer, AsyncTask.THREAD_POOL_EXECUTOR, listener);
+        View asyncView = listener.waitAndGetView();
+
+        verifyViewTree(syncView, asyncView,
+                "row1-c1", "row1-c2", "row1-c3", "row2-c1", "row2-c2", "row3-c1", "row3-c2");
+    }
+
+    @Test
+    public void asyncApply_viewstub_nestedViews() throws Exception {
+        RemoteViews viewstub = new RemoteViews(mPackage, R.layout.remote_views_viewstub);
+        viewstub.setInt(R.id.viewStub, "setLayoutResource", R.layout.remote_view_host);
+        // This will cause the view to be inflated
+        viewstub.setViewVisibility(R.id.viewStub, View.INVISIBLE);
+        viewstub.addView(R.id.stub_inflated, createViewChained(1, "row1-c1", "row1-c2", "row1-c3"));
+
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_view_host);
+        views.removeAllViews(R.id.container);
+        views.addView(R.id.container, viewstub);
+        views.addView(R.id.container, createViewChained(5, "row2-c1", "row2-c2"));
+
+        View syncView = views.apply(mContext, mContainer);
+
+        ViewAppliedListener listener = new ViewAppliedListener();
+        views.applyAsync(mContext, mContainer, AsyncTask.THREAD_POOL_EXECUTOR, listener);
+        View asyncView = listener.waitAndGetView();
+
+        verifyViewTree(syncView, asyncView, "row1-c1", "row1-c2", "row1-c3", "row2-c1", "row2-c2");
+    }
+
+    private RemoteViews createViewChained(int depth, String... texts) {
+        RemoteViews result = new RemoteViews(mPackage, R.layout.remote_view_host);
+
+        // Create depth
+        RemoteViews parent = result;
+        while(depth > 0) {
+            depth--;
+            RemoteViews child = new RemoteViews(mPackage, R.layout.remote_view_host);
+            parent.addView(R.id.container, child);
+            parent = child;
+        }
+
+        // Add texts
+        for (String text : texts) {
+            RemoteViews child = new RemoteViews(mPackage, R.layout.remote_views_text);
+            child.setTextViewText(R.id.text, text);
+            parent.addView(R.id.container, child);
+        }
+        return result;
+    }
+
+    private void verifyViewTree(View v1, View v2, String... texts) {
+        ArrayList<String> expectedTexts = new ArrayList<>(Arrays.asList(texts));
+        verifyViewTreeRecur(v1, v2, expectedTexts);
+        // Verify that all expected texts were found
+        assertEquals(0, expectedTexts.size());
+    }
+
+    private void verifyViewTreeRecur(View v1, View v2, ArrayList<String> expectedTexts) {
+        assertEquals(v1.getClass(), v2.getClass());
+
+        if (v1 instanceof TextView) {
+            String text = ((TextView) v1).getText().toString();
+            assertEquals(text, ((TextView) v2).getText().toString());
+            // Verify that the text was one of the expected texts and remove it from the list
+            assertTrue(expectedTexts.remove(text));
+        } else if (v1 instanceof ViewGroup) {
+            ViewGroup vg1 = (ViewGroup) v1;
+            ViewGroup vg2 = (ViewGroup) v2;
+            assertEquals(vg1.getChildCount(), vg2.getChildCount());
+            for (int i = vg1.getChildCount() - 1; i >= 0; i--) {
+                verifyViewTreeRecur(vg1.getChildAt(i), vg2.getChildAt(i), expectedTexts);
+            }
+        }
+    }
+
+    private class ViewAppliedListener implements RemoteViews.OnViewAppliedListener {
+
+        private final CountDownLatch mLatch = new CountDownLatch(1);
+        private View mView;
+        private Exception mError;
+
+        @Override
+        public void onViewApplied(View v) {
+            mView = v;
+            mLatch.countDown();
+        }
+
+        @Override
+        public void onError(Exception e) {
+            mError = e;
+            mLatch.countDown();
+        }
+
+        public View waitAndGetView() throws Exception {
+            mLatch.await();
+
+            if (mError != null) {
+                throw new Exception(mError);
+            }
+            return mView;
+        }
     }
 }

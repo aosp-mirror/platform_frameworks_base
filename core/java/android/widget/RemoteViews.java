@@ -58,6 +58,7 @@ import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.android.internal.R;
@@ -1456,6 +1457,13 @@ public class RemoteViews implements Parcelable, Filter {
                     if (endAction == null) {
                         return ACTION_NOOP;
                     } else {
+                        // Special case view stub
+                        if (endAction instanceof ViewStub.ViewReplaceRunnable) {
+                            root.createTree();
+                            // Replace child tree
+                            root.findViewTreeById(viewId).replaceView(
+                                    ((ViewStub.ViewReplaceRunnable) endAction).view);
+                        }
                         return new RunnableAction(endAction);
                     }
                 }
@@ -1581,16 +1589,26 @@ public class RemoteViews implements Parcelable, Filter {
             if ((target == null) || !(target.mRoot instanceof ViewGroup)) {
                 return ACTION_NOOP;
             }
+            final ViewGroup targetVg = (ViewGroup) target.mRoot;
             if (nestedViews == null) {
                 // Clear all children when nested views omitted
                 target.mChildren = null;
-                return this;
+                return new RuntimeAction() {
+                    @Override
+                    public void apply(View root, ViewGroup rootParent, OnClickHandler handler)
+                            throws ActionException {
+                        targetVg.removeAllViews();
+                    }
+                };
             } else {
                 // Inflate nested views and perform all the async tasks for the child remoteView.
                 final Context context = root.mRoot.getContext();
                 final AsyncApplyTask task = nestedViews.getAsyncApplyTask(
-                        context, (ViewGroup) target.mRoot, null, handler);
+                        context, targetVg, null, handler);
                 final ViewTree tree = task.doInBackground();
+                if (tree == null) {
+                    throw new ActionException(task.mError);
+                }
 
                 // Update the global view tree, so that next call to findViewTreeById
                 // goes through the subtree as well.
@@ -1600,10 +1618,8 @@ public class RemoteViews implements Parcelable, Filter {
 
                     @Override
                     public void apply(View root, ViewGroup rootParent, OnClickHandler handler) throws ActionException {
-                        // This view will exist as we have already made sure
-                        final ViewGroup target = (ViewGroup) root.findViewById(viewId);
                         task.onPostExecute(tree);
-                        target.addView(task.mResult);
+                        targetVg.addView(task.mResult);
                     }
                 };
             }
@@ -3360,7 +3376,7 @@ public class RemoteViews implements Parcelable, Filter {
                     int count = mRV.mActions.size();
                     mActions = new Action[count];
                     for (int i = 0; i < count && !isCancelled(); i++) {
-                        // TODO: check if isCanclled in nested views.
+                        // TODO: check if isCancelled in nested views.
                         mActions[i] = mRV.mActions.get(i).initActionAsync(mTree, mParent, mHandler);
                     }
                 } else {
@@ -3629,7 +3645,7 @@ public class RemoteViews implements Parcelable, Filter {
      * and can be searched.
      */
     private static class ViewTree {
-        private final View mRoot;
+        private View mRoot;
 
         private ArrayList<ViewTree> mChildren;
 
@@ -3643,7 +3659,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
 
             mChildren = new ArrayList<>();
-            if (mRoot instanceof ViewGroup && mRoot.isRootNamespace()) {
+            if (mRoot instanceof ViewGroup) {
                 ViewGroup vg = (ViewGroup) mRoot;
                 int count = vg.getChildCount();
                 for (int i = 0; i < count; i++) {
@@ -3668,6 +3684,12 @@ public class RemoteViews implements Parcelable, Filter {
             return null;
         }
 
+        public void replaceView(View v) {
+            mRoot = v;
+            mChildren = null;
+            createTree();
+        }
+
         public View findViewById(int id) {
             if (mChildren == null) {
                 return mRoot.findViewById(id);
@@ -3685,6 +3707,12 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         private void addViewChild(View v) {
+            // ViewTree only contains Views which can be found using findViewById.
+            // If isRootNamespace is true, this view is skipped.
+            // @see ViewGroup#findViewTraversal(int)
+            if (v.isRootNamespace()) {
+                return;
+            }
             final ViewTree target;
 
             // If the view has a valid id, i.e., if can be found using findViewById, add it to the
@@ -3697,7 +3725,7 @@ public class RemoteViews implements Parcelable, Filter {
                 target = this;
             }
 
-            if (v instanceof ViewGroup && v.isRootNamespace()) {
+            if (v instanceof ViewGroup) {
                 if (target.mChildren == null) {
                     target.mChildren = new ArrayList<>();
                     ViewGroup vg = (ViewGroup) v;
