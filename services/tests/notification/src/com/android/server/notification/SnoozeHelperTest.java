@@ -178,9 +178,13 @@ public class SnoozeHelperTest {
                 .setWhen(1205)
                 .build();
         return new NotificationRecord(getContext(), new StatusBarNotification(
-                pkg, pkg, id, tag, 0, 0, 0, n, user),
-                new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID, "name",
-                        NotificationManager.IMPORTANCE_HIGH));
+                pkg, pkg, getDefaultChannel(), id, tag, 0, 0, n, user, null,
+                System.currentTimeMillis()));
+    }
+
+    private NotificationChannel getDefaultChannel() {
+        return new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID, "name",
+                NotificationManager.IMPORTANCE_LOW);
     }
 
 }

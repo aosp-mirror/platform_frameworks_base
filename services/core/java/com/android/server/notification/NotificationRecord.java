@@ -101,11 +101,8 @@ public final class NotificationRecord {
     private String mUserExplanation;
     private String mPeopleExplanation;
 
-    private NotificationChannel mNotificationChannel;
-
     @VisibleForTesting
-    public NotificationRecord(Context context, StatusBarNotification sbn,
-            NotificationChannel channel)
+    public NotificationRecord(Context context, StatusBarNotification sbn)
     {
         this.sbn = sbn;
         mOriginalFlags = sbn.getNotification().flags;
@@ -114,7 +111,6 @@ public final class NotificationRecord {
         mUpdateTimeMs = mCreationTimeMs;
         mContext = context;
         stats = new NotificationUsageStats.SingleNotificationStats();
-        mNotificationChannel = channel;
         mImportance = defaultImportance();
     }
 
@@ -148,8 +144,8 @@ public final class NotificationRecord {
                 || (n.defaults & Notification.DEFAULT_VIBRATE) != 0
                 || n.sound != null
                 || n.vibrate != null
-                || mNotificationChannel.shouldVibrate()
-                || mNotificationChannel.getRingtone() != null;
+                || sbn.getNotificationChannel().shouldVibrate()
+                || sbn.getNotificationChannel().getRingtone() != null;
         stats.isNoisy = isNoisy;
 
         if (!isNoisy && importance > IMPORTANCE_LOW) {
@@ -287,7 +283,7 @@ public final class NotificationRecord {
         pw.println(prefix + "  mVisibleSinceMs=" + mVisibleSinceMs);
         pw.println(prefix + "  mUpdateTimeMs=" + mUpdateTimeMs);
         pw.println(prefix + "  mSuppressedVisualEffects= " + mSuppressedVisualEffects);
-        pw.println(prefix + "  mNotificationChannel= " + mNotificationChannel);
+        pw.println(prefix + "  notificationChannel= " + notification.getNotificationChannel());
     }
 
 
@@ -535,6 +531,6 @@ public final class NotificationRecord {
     }
 
     public NotificationChannel getChannel() {
-        return mNotificationChannel;
+        return sbn.getNotificationChannel();
     }
 }
