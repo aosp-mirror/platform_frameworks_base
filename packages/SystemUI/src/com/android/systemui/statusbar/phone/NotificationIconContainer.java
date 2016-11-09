@@ -40,13 +40,23 @@ import java.util.WeakHashMap;
 public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private static final String TAG = "NotificationIconContainer";
     private static final boolean DEBUG = false;
-    private static final AnimationFilter DOT_ANIMATION_FILTER = new AnimationFilter().animateX();
     private static final AnimationProperties DOT_ANIMATION_PROPERTIES = new AnimationProperties() {
+        private AnimationFilter mAnimationFilter = new AnimationFilter().animateX();
+
         @Override
         public AnimationFilter getAnimationFilter() {
-            return DOT_ANIMATION_FILTER;
+            return mAnimationFilter;
         }
     }.setDuration(200);
+    
+    private static final AnimationProperties ADD_ICON_PROPERTIES = new AnimationProperties() {
+        private AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();
+
+        @Override
+        public AnimationFilter getAnimationFilter() {
+            return mAnimationFilter;
+        }
+    }.setDuration(200).setDelay(50);
 
     private boolean mShowAllIcons = true;
     private WeakHashMap<View, IconState> mIconStates = new WeakHashMap<>();
@@ -55,6 +65,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private int mActualLayoutWidth = -1;
     private float mActualPaddingEnd = -1;
     private float mActualPaddingStart = -1;
+    private boolean mChangingViewPositions;
+    private int mAnimationStartIndex = -1;
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -109,18 +121,60 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 childState.applyToView(child);
             }
         }
+        mAnimationStartIndex = -1;
     }
 
     @Override
     public void onViewAdded(View child) {
         super.onViewAdded(child);
-        mIconStates.put(child, new IconState());
+        if (!mChangingViewPositions) {
+            mIconStates.put(child, new IconState());
+        }
+        int childIndex = indexOfChild(child);
+        if (childIndex < getChildCount() - 1
+            && mIconStates.get(getChildAt(childIndex + 1)).iconAppearAmount > 0.0f) {
+            if (mAnimationStartIndex < 0) {
+                mAnimationStartIndex = childIndex;
+            } else {
+                mAnimationStartIndex = Math.min(mAnimationStartIndex, childIndex);
+            }
+        }
     }
 
     @Override
     public void onViewRemoved(View child) {
         super.onViewRemoved(child);
-        mIconStates.remove(child);
+        if (child instanceof StatusBarIconView) {
+            final StatusBarIconView icon = (StatusBarIconView) child;
+            if (icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
+                    && child.getVisibility() == VISIBLE) {
+                int animationStartIndex = findFirstViewIndexAfter(icon.getTranslationX());
+                if (mAnimationStartIndex < 0) {
+                    mAnimationStartIndex = animationStartIndex;
+                } else {
+                    mAnimationStartIndex = Math.min(mAnimationStartIndex, animationStartIndex);
+                }
+            }
+            if (!mChangingViewPositions) {
+                mIconStates.remove(child);
+                addTransientView(icon, 0);
+                icon.setVisibleState(StatusBarIconView.STATE_HIDDEN, true /* animate */,
+                        () -> removeTransientView(icon));
+            }
+        }
+    }
+
+    /**
+     * Finds the first view with a translation bigger then a given value
+     */
+    private int findFirstViewIndexAfter(float translationX) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View view = getChildAt(i);
+            if (view.getTranslationX() > translationX) {
+                return i;
+            }
+        }
+        return getChildCount();
     }
 
     public WeakHashMap<View, IconState> resetViewStates() {
@@ -128,6 +182,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             View view = getChildAt(i);
             ViewState iconState = mIconStates.get(view);
             iconState.initFrom(view);
+            iconState.alpha = 1.0f;
         }
         return mIconStates;
     }
@@ -246,21 +301,41 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         return mActualLayoutWidth;
     }
 
-    public static class IconState extends ViewState {
+    public void setChangingViewPositions(boolean changingViewPositions) {
+        mChangingViewPositions = changingViewPositions;
+    }
+
+    public class IconState extends ViewState {
         public float iconAppearAmount = 1.0f;
         public int visibleState;
+        public boolean justAdded = true;
 
         @Override
         public void applyToView(View view) {
             if (view instanceof StatusBarIconView) {
                 StatusBarIconView icon = (StatusBarIconView) view;
-                if (visibleState != icon.getVisibleState()) {
-                    icon.setVisibleState(visibleState);
-                    animateTo(icon, DOT_ANIMATION_PROPERTIES);
+                AnimationProperties animationProperties = DOT_ANIMATION_PROPERTIES;
+                if (justAdded) {
+                    super.applyToView(icon);
+                    icon.setAlpha(0.0f);
+                    icon.setVisibleState(StatusBarIconView.STATE_HIDDEN, false /* animate */);
+                    animationProperties = ADD_ICON_PROPERTIES;
+                }
+                boolean animate = visibleState != icon.getVisibleState() || justAdded;
+                if (!animate && mAnimationStartIndex >= 0
+                        && (icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
+                            || visibleState != StatusBarIconView.STATE_HIDDEN)) {
+                    int viewIndex = indexOfChild(view);
+                    animate = viewIndex >= mAnimationStartIndex;
+                }
+                icon.setVisibleState(visibleState);
+                if (animate) {
+                    animateTo(icon, animationProperties);
                 } else {
                     super.applyToView(view);
                 }
             }
+            justAdded = false;
         }
     }
 }

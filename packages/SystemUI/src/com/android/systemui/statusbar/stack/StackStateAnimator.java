@@ -372,7 +372,7 @@ public class StackStateAnimator {
 
             } else if (event.animationType ==
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE) {
-                if (changingView.getVisibility() == View.GONE) {
+                if (changingView.getVisibility() != View.VISIBLE) {
                     removeFromOverlay(changingView);
                     continue;
                 }

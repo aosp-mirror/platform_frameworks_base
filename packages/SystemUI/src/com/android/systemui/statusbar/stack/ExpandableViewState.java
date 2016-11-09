@@ -221,7 +221,7 @@ public class ExpandableViewState extends ViewState {
         // start dark animation
         expandableView.setDark(this.dark, animationFilter.animateDark, properties.delay);
 
-        if (properties.wasAdded(child)) {
+        if (properties.wasAdded(child) && !hidden) {
             expandableView.performAddAnimation(properties.delay, properties.duration);
         }
 

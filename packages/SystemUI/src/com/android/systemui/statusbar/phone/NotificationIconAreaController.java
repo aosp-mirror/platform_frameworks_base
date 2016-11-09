@@ -36,7 +36,7 @@ public class NotificationIconAreaController {
     private PhoneStatusBar mPhoneStatusBar;
     protected View mNotificationIconArea;
     private NotificationIconContainer mNotificationIcons;
-    private NotificationIconContainer mNotificationIconsScroller;
+    private NotificationIconContainer mShelfIcons;
     private final Rect mTintArea = new Rect();
     private NotificationStackScrollLayout mNotificationScrollLayout;
     private Context mContext;
@@ -65,7 +65,7 @@ public class NotificationIconAreaController {
                 R.id.notificationIcons);
 
         NotificationShelf shelf = mPhoneStatusBar.getNotificationShelf();
-        mNotificationIconsScroller = shelf.getShelfIcons();
+        mShelfIcons = shelf.getShelfIcons();
         shelf.setCollapsedIcons(mNotificationIcons);
 
         mNotificationScrollLayout = mPhoneStatusBar.getNotificationScrollLayout();
@@ -147,8 +147,7 @@ public class NotificationIconAreaController {
     public void updateNotificationIcons(NotificationData notificationData) {
 
         updateIconsForLayout(notificationData, entry -> entry.icon, mNotificationIcons);
-        updateIconsForLayout(notificationData, entry -> entry.expandedIcon,
-                mNotificationIconsScroller);
+        updateIconsForLayout(notificationData, entry -> entry.expandedIcon, mShelfIcons);
 
         applyNotificationIconsTint();
         ArrayList<NotificationData.Entry> activeNotifications
@@ -207,11 +206,14 @@ public class NotificationIconAreaController {
         final LinearLayout.LayoutParams params = generateIconLayoutParams();
         for (int i = 0; i < toShow.size(); i++) {
             View v = toShow.get(i);
+            // The view might still be transiently added if it was just removed and added again
+            hostLayout.removeTransientView(v);
             if (v.getParent() == null) {
                 hostLayout.addView(v, i, params);
             }
         }
 
+        hostLayout.setChangingViewPositions(true);
         // Re-sort notification icons
         final int childCount = hostLayout.getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -223,6 +225,7 @@ public class NotificationIconAreaController {
             hostLayout.removeView(expected);
             hostLayout.addView(expected, i);
         }
+        hostLayout.setChangingViewPositions(false);
     }
 
     /**

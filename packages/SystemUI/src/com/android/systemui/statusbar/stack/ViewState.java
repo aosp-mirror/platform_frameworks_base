@@ -210,7 +210,7 @@ public class ViewState {
         }
 
         // start alpha animation
-        if (alphaChanging && child.getTranslationX() == 0) {
+        if (alphaChanging) {
             startAlphaAnimation(child, animationProperties);
         }  else {
             abortAnimation(child, TAG_ANIMATOR_ALPHA);

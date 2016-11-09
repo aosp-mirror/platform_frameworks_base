@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -68,7 +67,7 @@ public class StatusBarIconView extends AnimatedImageView {
             return object.getIconAppearAmount();
         }
     };
-    private static final Property<StatusBarIconView, Float> DOT_APPEAR_AMOUNG
+    private static final Property<StatusBarIconView, Float> DOT_APPEAR_AMOUNT
             = new FloatProperty<StatusBarIconView>("dot_appear_amount") {
 
         @Override
@@ -440,54 +439,75 @@ public class StatusBarIconView extends AnimatedImageView {
         mDotPaint.setColor(iconTint);
     }
 
-    public void setVisibleState(int visibleState) {
+    public void setVisibleState(int state) {
+        setVisibleState(state, true /* animate */, null /* endRunnable */);
+    }
+
+    public void setVisibleState(int state, boolean animate) {
+        setVisibleState(state, animate, null);
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
+    public void setVisibleState(int visibleState, boolean animate, Runnable endRunnable) {
         if (visibleState != mVisibleState) {
             mVisibleState = visibleState;
-            if (mIconAppearAnimator != null) {
-                mIconAppearAnimator.cancel();
-            }
-            float targetAmount = 0.0f;
-            Interpolator interpolator = Interpolators.FAST_OUT_LINEAR_IN;
-            if (visibleState == STATE_ICON) {
-                targetAmount = 1.0f;
-                interpolator = Interpolators.LINEAR_OUT_SLOW_IN;
-            }
-            mIconAppearAnimator = ObjectAnimator.ofFloat(this, ICON_APPEAR_AMOUNT,
-                    targetAmount);
-            mIconAppearAnimator.setInterpolator(interpolator);
-            mIconAppearAnimator.setDuration(100);
-            mIconAppearAnimator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mIconAppearAnimator = null;
+            if (animate) {
+                if (mIconAppearAnimator != null) {
+                    mIconAppearAnimator.cancel();
                 }
-            });
-            mIconAppearAnimator.start();
+                float targetAmount = 0.0f;
+                Interpolator interpolator = Interpolators.FAST_OUT_LINEAR_IN;
+                if (visibleState == STATE_ICON) {
+                    targetAmount = 1.0f;
+                    interpolator = Interpolators.LINEAR_OUT_SLOW_IN;
+                }
+                mIconAppearAnimator = ObjectAnimator.ofFloat(this, ICON_APPEAR_AMOUNT,
+                        targetAmount);
+                mIconAppearAnimator.setInterpolator(interpolator);
+                mIconAppearAnimator.setDuration(100);
+                mIconAppearAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mIconAppearAnimator = null;
+                        if (endRunnable != null) {
+                            endRunnable.run();
+                        }
+                    }
+                });
+                mIconAppearAnimator.start();
 
-            if (mDotAnimator != null) {
-                mDotAnimator.cancel();
-            }
-            targetAmount = visibleState == STATE_ICON ? 2.0f : 0.0f;
-            interpolator = Interpolators.FAST_OUT_LINEAR_IN;
-            if (visibleState == STATE_DOT) {
-                targetAmount = 1.0f;
-                interpolator = Interpolators.LINEAR_OUT_SLOW_IN;
-            }
-            mDotAnimator = ObjectAnimator.ofFloat(this, DOT_APPEAR_AMOUNG,
-                    targetAmount);
-            mDotAnimator.setInterpolator(interpolator);
-            mDotAnimator.setDuration(100);
-            mDotAnimator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mDotAnimator = null;
+                if (mDotAnimator != null) {
+                    mDotAnimator.cancel();
                 }
-            });
-            mDotAnimator.start();
+                targetAmount = visibleState == STATE_ICON ? 2.0f : 0.0f;
+                interpolator = Interpolators.FAST_OUT_LINEAR_IN;
+                if (visibleState == STATE_DOT) {
+                    targetAmount = 1.0f;
+                    interpolator = Interpolators.LINEAR_OUT_SLOW_IN;
+                }
+                mDotAnimator = ObjectAnimator.ofFloat(this, DOT_APPEAR_AMOUNT,
+                        targetAmount);
+                mDotAnimator.setInterpolator(interpolator);
+                mDotAnimator.setDuration(100);
+                mDotAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mDotAnimator = null;
+                    }
+                });
+                mDotAnimator.start();
+            } else {
+                setIconAppearAmount(visibleState == STATE_ICON ? 1.0f : 0.0f);
+                setDotAppearAmount(visibleState == STATE_DOT ? 1.0f : 0.0f);
+            }
         }
     }
 
-    public void setIconAppearAmount(Float iconAppearAmount) {
+    public void setIconAppearAmount(float iconAppearAmount) {
         mIconAppearAmount = iconAppearAmount;
         invalidate();
     }

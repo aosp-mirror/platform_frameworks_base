@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static com.android.systemui.statusbar.phone.NotificationIconContainer.IconState;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
@@ -157,6 +155,7 @@ public class NotificationShelf extends ActivatableNotificationView {
             mShelfState.shadowAlpha = 1.0f;
             mShelfState.isBottomClipped = false;
             mShelfState.hideSensitive = false;
+            mShelfState.xTranslation = getTranslationX();
             if (mNotGoneIndex != -1) {
                 mShelfState.notGoneIndex = Math.min(mShelfState.notGoneIndex, mNotGoneIndex);
             }
@@ -173,7 +172,7 @@ public class NotificationShelf extends ActivatableNotificationView {
      * the icons from the notification area into the shelf.
      */
     public void updateAppearance() {
-        WeakHashMap<View, IconState> iconStates =
+        WeakHashMap<View, NotificationIconContainer.IconState> iconStates =
                 mShelfIcons.resetViewStates();
         float numIconsInShelf = 0.0f;
         int shelfIndex = mAmbientState.getShelfIndex();
@@ -196,7 +195,7 @@ public class NotificationShelf extends ActivatableNotificationView {
             }
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             StatusBarIconView icon = row.getEntry().expandedIcon;
-            IconState iconState = iconStates.get(icon);
+            NotificationIconContainer.IconState iconState = iconStates.get(icon);
             float notificationClipEnd;
             float shelfStart = getTranslationY();
             boolean aboveShelf = row.getTranslationZ() > mAmbientState.getBaseZHeight();
@@ -255,8 +254,9 @@ public class NotificationShelf extends ActivatableNotificationView {
         }
     }
 
-    private void updateIconAppearance(ExpandableNotificationRow row, IconState iconState,
-            StatusBarIconView icon, float expandAmount) {
+    private void updateIconAppearance(ExpandableNotificationRow row,
+            NotificationIconContainer.IconState iconState, StatusBarIconView icon,
+            float expandAmount) {
         // Let calculate how much the view is in the shelf
         float viewStart = row.getTranslationY();
         int transformHeight = row.getActualHeight() + mPaddingBetweenElements;
