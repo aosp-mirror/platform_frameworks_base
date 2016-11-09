@@ -2496,6 +2496,14 @@
          Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->
     <integer name="config_defaultPictureInPictureGravity">0x55</integer>
 
+    <!-- The minimum aspect ratio (width/height) that is supported for picture-in-picture.  Any
+         ratio smaller than this is considered too tall and thin to be usable. -->
+    <item name="config_pictureInPictureMinAspectRatio" format="float" type="dimen">0.5</item>
+
+    <!-- The minimum aspect ratio (width/height) that is supported for picture-in-picture. Any
+         ratio larger than this is considered to wide and short to be usable. -->
+    <item name="config_pictureInPictureMaxAspectRatio" format="float" type="dimen">2.35</item>
+
     <!-- Controls the snap mode for the docked stack divider
              0 - 3 snap targets: left/top has 16:9 ratio, 1:1, and right/bottom has 16:9 ratio
              1 - 3 snap targets: fixed ratio, 1:1, (1 - fixed ratio)

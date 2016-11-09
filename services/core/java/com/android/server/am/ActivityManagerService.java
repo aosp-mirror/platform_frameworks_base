@@ -21,6 +21,7 @@ import android.app.ApplicationThreadConstants;
 import android.app.ContentProviderHolder;
 import android.app.IActivityManager;
 import android.app.WaitResult;
+import android.graphics.PointF;
 import android.os.IDeviceIdentifiersPolicyService;
 import com.android.internal.telephony.TelephonyIntents;
 import com.google.android.collect.Lists;
@@ -293,7 +294,6 @@ import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
 import static android.provider.Settings.Global.LENIENT_BACKGROUND_CHECK;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.provider.Settings.System.FONT_SCALE;
-import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
@@ -1574,6 +1574,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     int mThumbnailWidth;
     int mThumbnailHeight;
     float mFullscreenThumbnailScale;
+
+    /** The aspect ratio bounds of the PIP. */
+    float mMinPipAspectRatio;
+    float mMaxPipAspectRatio;
 
     final ServiceThread mHandlerThread;
     final MainHandler mHandler;
@@ -7469,6 +7473,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void enterPictureInPictureMode(IBinder token) {
+        enterPictureInPictureMode(token, DEFAULT_DISPLAY, null /* aspectRatio */);
+    }
+
+    @Override
+    public void enterPictureInPictureModeWithAspectRatio(IBinder token, float aspectRatio) {
+        enterPictureInPictureMode(token, DEFAULT_DISPLAY, aspectRatio);
+    }
+
+    public void enterPictureInPictureMode(IBinder token, int displayId, Float aspectRatio) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(this) {
@@ -7478,7 +7491,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
 
                 final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-
                 if (r == null) {
                     throw new IllegalStateException("enterPictureInPictureMode: "
                             + "Can't find activity for token=" + token);
@@ -7489,19 +7501,53 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + "Picture-In-Picture not supported for r=" + r);
                 }
 
-                // Use the default launch bounds for pinned stack if it doesn't exist yet or use the
-                // current bounds.
-                final ActivityStack pinnedStack = mStackSupervisor.getStack(PINNED_STACK_ID);
-                final Rect bounds = (pinnedStack != null)
-                        ? pinnedStack.mBounds
-                        : mWindowManager.getPictureInPictureDefaultBounds(DEFAULT_DISPLAY);
+                if (aspectRatio != null && !isValidPictureInPictureAspectRatio(aspectRatio)) {
+                    throw new IllegalArgumentException(String.format("enterPictureInPictureMode: "
+                            + "Aspect ratio is too extreme (must be between %f and %f).",
+                                    mMinPipAspectRatio, mMaxPipAspectRatio));
+                }
 
-                mStackSupervisor.moveActivityToPinnedStackLocked(
-                        r, "enterPictureInPictureMode", bounds);
+                final Rect bounds = isValidPictureInPictureAspectRatio(aspectRatio)
+                        ? mWindowManager.getPictureInPictureBounds(displayId, aspectRatio)
+                        : mWindowManager.getPictureInPictureDefaultBounds(displayId);
+                mStackSupervisor.moveActivityToPinnedStackLocked(r, "enterPictureInPictureMode",
+                        bounds);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    @Override
+    public void setPictureInPictureAspectRatio(IBinder token, float aspectRatio) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized(this) {
+                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+                if (r == null || r.getStack().mStackId != PINNED_STACK_ID) {
+                    throw new IllegalStateException("setPictureInPictureAspectRatio: "
+                            + "Requesting activity must be in picture-in-picture mode.");
+                }
+
+                if (!isValidPictureInPictureAspectRatio(aspectRatio)) {
+                    throw new IllegalArgumentException(String.format(
+                            "setPictureInPictureAspectRatio: Aspect ratio is too extreme (must be "
+                                    + "between %f and %f).", mMinPipAspectRatio,
+                            mMaxPipAspectRatio));
+                }
+
+                mWindowManager.setPictureInPictureAspectRatio(aspectRatio);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    private boolean isValidPictureInPictureAspectRatio(Float aspectRatio) {
+        if (aspectRatio == null) {
+            return false;
+        }
+        return mMinPipAspectRatio <= aspectRatio && aspectRatio <= mMaxPipAspectRatio;
     }
 
     // =========================================================
@@ -13035,6 +13081,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     com.android.internal.R.dimen.thumbnail_width);
             mThumbnailHeight = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.thumbnail_height);
+            mMinPipAspectRatio = res.getFloat(
+                    com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
+            mMaxPipAspectRatio = res.getFloat(
+                    com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
             mAppErrors.loadAppsNotReportingCrashesFromConfigLocked(res.getString(
                     com.android.internal.R.string.config_appsNotReportingCrashes));
             mUserController.mUserSwitchUiEnabled = !res.getBoolean(

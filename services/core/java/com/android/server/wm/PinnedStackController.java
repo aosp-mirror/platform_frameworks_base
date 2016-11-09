@@ -26,6 +26,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.animation.ValueAnimator;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
@@ -164,6 +165,25 @@ class PinnedStackController {
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
+    }
+
+    /**
+     * Returns the current bounds (or the default bounds if there are no current bounds) with the
+     * specified aspect ratio.
+     */
+    Rect getAspectRatioBounds(Rect stackBounds, float aspectRatio) {
+        // Save the snap fraction, calculate the aspect ratio based on the current bounds
+        final float snapFraction = mSnapAlgorithm.getSnapFraction(stackBounds,
+                getMovementBounds(stackBounds));
+        final float radius = PointF.length(stackBounds.width(), stackBounds.height());
+        final int height = (int) Math.round(Math.sqrt((radius * radius) /
+                (aspectRatio * aspectRatio + 1)));
+        final int width = Math.round(height * aspectRatio);
+        final int left = (int) (stackBounds.centerX() - width / 2f);
+        final int top = (int) (stackBounds.centerY() - height / 2f);
+        stackBounds.set(left, top, left + width, top + height);
+        mSnapAlgorithm.applySnapFraction(stackBounds, getMovementBounds(stackBounds), snapFraction);
+        return stackBounds;
     }
 
     /**

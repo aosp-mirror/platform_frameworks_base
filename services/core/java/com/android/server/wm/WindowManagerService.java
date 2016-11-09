@@ -172,7 +172,6 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -3404,7 +3403,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public Rect getPictureInPictureDefaultBounds(int displayId) {
         synchronized (mWindowMap) {
             if (!mSupportsPictureInPicture) {
-                return new Rect();
+                return null;
             }
 
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
@@ -3416,7 +3415,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public Rect getPictureInPictureMovementBounds(int displayId) {
         synchronized (mWindowMap) {
             if (!mSupportsPictureInPicture) {
-                return new Rect();
+                return null;
             }
 
             final Rect stackBounds = new Rect();
@@ -3427,6 +3426,47 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
             return displayContent.getPinnedStackController().getMovementBounds(stackBounds);
+        }
+    }
+
+    public void setPictureInPictureAspectRatio(float aspectRatio) {
+        synchronized (mWindowMap) {
+            if (!mSupportsPictureInPicture) {
+                return;
+            }
+
+            final TaskStack stack = mStackIdToStack.get(PINNED_STACK_ID);
+            if (stack == null) {
+                return;
+            }
+
+            animateResizePinnedStack(getPictureInPictureBounds(
+                    stack.getDisplayContent().getDisplayId(), aspectRatio), -1);
+        }
+    }
+
+    public Rect getPictureInPictureBounds(int displayId, float aspectRatio) {
+        synchronized (mWindowMap) {
+            if (!mSupportsPictureInPicture) {
+                return null;
+            }
+
+            final Rect stackBounds;
+            final DisplayContent displayContent;
+            final TaskStack stack = mStackIdToStack.get(PINNED_STACK_ID);
+            if (stack != null) {
+                // If the stack exists, then use its final bounds to calculate the new aspect ratio
+                // bounds.
+                displayContent = stack.getDisplayContent();
+                stackBounds = new Rect();
+                stack.getAnimatingBounds(stackBounds);
+            } else {
+                // Otherwise, just calculate the aspect ratio bounds from the default bounds
+                displayContent = mRoot.getDisplayContent(displayId);
+                stackBounds = displayContent.getPinnedStackController().getDefaultBounds();
+            }
+            return displayContent.getPinnedStackController().getAspectRatioBounds(stackBounds,
+                    aspectRatio);
         }
     }
 
@@ -8456,6 +8496,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             final Rect originalBounds = new Rect();
             stack.getBounds(originalBounds);
+            stack.setAnimatingBounds(bounds);
             UiThread.getHandler().post(new Runnable() {
                 @Override
                 public void run() {

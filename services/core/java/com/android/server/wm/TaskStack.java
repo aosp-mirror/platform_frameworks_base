@@ -132,6 +132,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     // perfectly fit the region it would have been cropped to. We may also avoid certain logic we
     // would otherwise apply while resizing, while resizing in the bounds animating mode.
     private boolean mBoundsAnimating = false;
+    private Rect mBoundsAnimationTarget = new Rect();
 
     // Temporary storage for the new bounds that should be used after the configuration change.
     // Will be cleared once the client retrieves the new bounds via getBoundsForNewConfiguration().
@@ -327,6 +328,30 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
         // system.
         mDisplayContent.getLogicalDisplayRect(out);
+    }
+
+    /**
+     * Sets the bounds animation target bounds.  This can't currently be done in onAnimationStart()
+     * since that is started on the UiThread.
+     */
+    void setAnimatingBounds(Rect bounds) {
+        if (bounds != null) {
+            mBoundsAnimationTarget.set(bounds);
+        } else {
+            mBoundsAnimationTarget.setEmpty();
+        }
+    }
+
+    /**
+     * @return the bounds that the task stack is currently being animated towards, or the current
+     *         stack bounds if there is no animation in progress.
+     */
+    void getAnimatingBounds(Rect outBounds) {
+        if (!mBoundsAnimationTarget.isEmpty()) {
+            outBounds.set(mBoundsAnimationTarget);
+            return;
+        }
+        getBounds(outBounds);
     }
 
     /** Bounds of the stack with other system factors taken into consideration. */
@@ -1391,6 +1416,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     public void onAnimationEnd() {
         synchronized (mService.mWindowMap) {
             mBoundsAnimating = false;
+            mBoundsAnimationTarget.setEmpty();
             mService.requestTraversal();
         }
         if (mStackId == PINNED_STACK_ID) {

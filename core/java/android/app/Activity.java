@@ -1929,6 +1929,32 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Puts the activity in picture-in-picture mode with a given aspect ratio.
+     * @see android.R.attr#supportsPictureInPicture
+     *
+     * @param aspectRatio the new aspect ratio of the picture-in-picture.
+     */
+    public void enterPictureInPictureMode(float aspectRatio) {
+        try {
+            ActivityManagerNative.getDefault().enterPictureInPictureModeWithAspectRatio(mToken,
+                    aspectRatio);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Updates the aspect ratio of the current picture-in-picture activity.
+     *
+     * @param aspectRatio the new aspect ratio of the picture-in-picture.
+     */
+    public void setPictureInPictureAspectRatio(float aspectRatio) {
+        try {
+            ActivityManagerNative.getDefault().setPictureInPictureAspectRatio(mToken, aspectRatio);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Called by the system when the device configuration changes while your
      * activity is running.  Note that this will <em>only</em> be called if
      * you have selected configurations you would like to handle with the
