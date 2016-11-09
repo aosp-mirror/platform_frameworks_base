@@ -32,6 +32,7 @@ import android.util.Log;
 import com.android.systemui.keyboard.KeyboardUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.media.RingtonePlayer;
+import com.android.systemui.pip.PipUI;
 import com.android.systemui.plugins.OverlayPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
@@ -42,7 +43,6 @@ import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.SystemBars;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.pip.PipUI;
 import com.android.systemui.usb.StorageNotification;
 import com.android.systemui.volume.VolumeUI;
 

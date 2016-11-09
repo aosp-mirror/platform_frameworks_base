@@ -39,19 +39,24 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.Sandman;
 import android.util.Slog;
+import android.view.WindowManagerInternal;
+import android.view.WindowManagerPolicy;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import com.android.internal.R;
 import com.android.internal.app.DisableCarModeActivity;
+import com.android.server.power.ShutdownThread;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
+import com.android.server.wm.WindowManagerService;
 
 final class UiModeManagerService extends SystemService {
     private static final String TAG = UiModeManager.class.getSimpleName();
@@ -294,6 +299,30 @@ final class UiModeManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        @Override
+        public void setTheme(String theme) {
+            if (getContext().checkCallingOrSelfPermission(
+                    android.Manifest.permission.MODIFY_THEME_OVERLAY)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Slog.e(TAG, "setTheme requires MODIFY_THEME_OVERLAY permission");
+                return;
+            }
+            SystemProperties.set("persist.vendor.overlay.theme", theme);
+            mHandler.post(() -> ShutdownThread.reboot(getContext(),
+                    PowerManager.SHUTDOWN_USER_REQUESTED, false));
+        }
+
+        @Override
+        public String getTheme() {
+            if (getContext().checkCallingOrSelfPermission(
+                    android.Manifest.permission.MODIFY_THEME_OVERLAY)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Slog.e(TAG, "setTheme requires MODIFY_THEME_OVERLAY permission");
+                return null;
+            }
+            return SystemProperties.get("persist.vendor.overlay.theme");
         }
 
         @Override

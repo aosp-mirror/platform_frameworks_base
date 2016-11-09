@@ -171,6 +171,8 @@
     <!-- shortcut manager -->
     <uses-permission android:name="android.permission.RESET_SHORTCUT_MANAGER_THROTTLING" />
 
+    <uses-permission android:name="android.permission.MODIFY_THEME_OVERLAY" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"

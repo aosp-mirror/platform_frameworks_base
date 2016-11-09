@@ -1722,4 +1722,11 @@
         not appear on production builds ever. -->
     <string name="pip_allow_minimize_summary" translatable="false">Allow PIP to minimize slightly offscreen</string>
 
+    <!-- Tuner string -->
+    <string name="change_theme_reboot" translatable="false">Changing the theme requires a restart.</string>
+    <!-- Tuner string -->
+    <string name="theme" translatable="false">Theme</string>
+    <!-- Tuner string -->
+    <string name="default_theme" translatable="false">Default</string>
+
 </resources>
