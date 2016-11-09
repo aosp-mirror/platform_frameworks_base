@@ -171,6 +171,8 @@ class ZygoteConnection {
                 return handleAbiListQuery();
             }
 
+            ZygoteInit.maybePreload();
+
             if (parsedArgs.preloadPackage != null) {
                 return handlePreloadPackage(parsedArgs.preloadPackage,
                         parsedArgs.preloadPackageLibs);
