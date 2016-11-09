@@ -46,6 +46,7 @@ class CanvasContext;
 class DispatchFrameCallbacks;
 class EglManager;
 class RenderProxy;
+class VulkanManager;
 
 class TaskQueue {
 public:
@@ -97,6 +98,8 @@ public:
 
     GrContext* getGrContext() const { return mGrContext.get(); }
     void setGrContext(GrContext* cxt) { mGrContext.reset(cxt); }
+
+    VulkanManager& vulkanManager() { return *mVkManager; }
 
 protected:
     virtual bool threadLoop() override;
@@ -150,6 +153,7 @@ private:
     JankTracker* mJankTracker = nullptr;
 
     sk_sp<GrContext> mGrContext;
+    VulkanManager* mVkManager;
 };
 
 } /* namespace renderthread */

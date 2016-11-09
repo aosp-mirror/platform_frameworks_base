@@ -17,11 +17,7 @@
 #pragma once
 
 #include "SkiaPipeline.h"
-#include <SkSurface.h>
-
-namespace sk_app {
-class WindowContext;
-}
+#include "renderthread/VulkanManager.h"
 
 namespace android {
 namespace uirenderer {
@@ -29,7 +25,7 @@ namespace skiapipeline {
 
 class SkiaVulkanPipeline : public SkiaPipeline {
 public:
-    SkiaVulkanPipeline(renderthread::RenderThread& thread) : SkiaPipeline(thread) {}
+    SkiaVulkanPipeline(renderthread::RenderThread& thread);
     virtual ~SkiaVulkanPipeline() {}
 
     renderthread::MakeCurrentResult makeCurrent() override;
@@ -53,8 +49,8 @@ public:
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
 
 private:
-    sk_app::WindowContext* mWindowContext = nullptr;
-    sk_sp<SkSurface> mBackbuffer;
+    renderthread::VulkanManager& mVkManager;
+    renderthread::VulkanSurface* mVkSurface = nullptr;
 };
 
 } /* namespace skiapipeline */
