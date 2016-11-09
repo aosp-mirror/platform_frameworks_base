@@ -78,10 +78,10 @@ public class DozeLog {
         log("pulseFinish");
     }
 
-    public static void traceNotificationPulse(Context context, long instance) {
+    public static void traceNotificationPulse(Context context) {
         if (!ENABLED) return;
         init(context);
-        log("notificationPulse instance=" + instance);
+        log("notificationPulse");
         sNotificationPulseStats.append();
     }
 

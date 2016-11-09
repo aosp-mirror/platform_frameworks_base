@@ -87,6 +87,7 @@ public class DozeTriggers implements DozeMachine.Part {
         mNotificationPulseTime = SystemClock.elapsedRealtime();
         if (!mConfig.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) return;
         requestPulse(DozeLog.PULSE_REASON_NOTIFICATION, false /* performedProxCheck */);
+        DozeLog.traceNotificationPulse(mContext);
     }
 
     private void onWhisper() {
