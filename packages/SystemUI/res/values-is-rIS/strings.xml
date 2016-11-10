@@ -648,6 +648,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Opna <xliff:g id="ID_1">%s</xliff:g> stillingar."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Breyta röð stillinga."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Blaðsíða <xliff:g id="ID_1">%1$d</xliff:g> af <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <!-- no translation found for pip_phone_expand (5889780005575693909) -->
-    <skip />
+    <string name="pip_phone_expand" msgid="5889780005575693909">"Stækka"</string>
 </resources>
