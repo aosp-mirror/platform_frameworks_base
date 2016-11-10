@@ -42,6 +42,7 @@ import android.os.ICancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -458,6 +459,23 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             final String original = setCallingPackage(callingPkg);
             try {
                 return maybeAddUserId(ContentProvider.this.uncanonicalize(uri), userId);
+            } finally {
+                setCallingPackage(original);
+            }
+        }
+
+        @Override
+        public boolean refresh(String callingPkg, Uri uri, Bundle args,
+                ICancellationSignal cancellationSignal) throws RemoteException {
+            validateIncomingUri(uri);
+            uri = getUriWithoutUserId(uri);
+            if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
+                return false;
+            }
+            final String original = setCallingPackage(callingPkg);
+            try {
+                return ContentProvider.this.refresh(uri, args,
+                        CancellationSignal.fromTransport(cancellationSignal));
             } finally {
                 setCallingPackage(original);
             }
@@ -1090,6 +1108,34 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      */
     public @Nullable Uri uncanonicalize(@NonNull Uri url) {
         return url;
+    }
+
+    /**
+     * Implement this to support refresh of content identified by {@code uri}. By default, this
+     * method returns false; providers who wish to implement this should return true to signal the
+     * client that the provider has tried refreshing with its own implementation.
+     * <p>
+     * This allows clients to request an explicit refresh of content identified by {@code uri}.
+     * <p>
+     * Client code should only invoke this method when there is a strong indication (such as a user
+     * initiated pull to refresh gesture) that the content is stale.
+     * <p>
+     * Remember to send {@link ContentResolver#notifyChange(Uri, android.database.ContentObserver)}
+     * notifications when content changes.
+     *
+     * @param uri The Uri identifying the data to refresh.
+     * @param args Additional options from the client. The definitions of these are specific to the
+     *            content provider being called.
+     * @param cancellationSignal A signal to cancel the operation in progress, or {@code null} if
+     *            none. For example, if you called refresh on a particular uri, you should call
+     *            {@link CancellationSignal#throwIfCanceled()} to check whether the client has
+     *            canceled the refresh request.
+     * @return true if the provider actually tried refreshing.
+     * @hide
+     */
+    public boolean refresh(Uri uri, @Nullable Bundle args,
+            @Nullable CancellationSignal cancellationSignal) {
+        return false;
     }
 
     /**

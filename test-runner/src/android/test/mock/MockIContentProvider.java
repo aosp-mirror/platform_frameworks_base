@@ -125,4 +125,10 @@ public class MockIContentProvider implements IContentProvider {
     public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
+
+    @Override
+    public boolean refresh(String callingPkg, Uri url, Bundle args,
+            ICancellationSignal cancellationSignal) throws RemoteException {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
 }

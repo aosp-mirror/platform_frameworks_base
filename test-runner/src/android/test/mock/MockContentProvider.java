@@ -147,6 +147,12 @@ public class MockContentProvider extends ContentProvider {
         public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException {
             return MockContentProvider.this.uncanonicalize(uri);
         }
+
+        @Override
+        public boolean refresh(String callingPkg, Uri url, Bundle args,
+                ICancellationSignal cancellationSignal) throws RemoteException {
+            return MockContentProvider.this.refresh(url, args);
+        }
     }
     private final InversionIContentProvider mIContentProvider = new InversionIContentProvider();
 
@@ -247,6 +253,13 @@ public class MockContentProvider extends ContentProvider {
     }
 
     public AssetFileDescriptor openTypedAssetFile(Uri url, String mimeType, Bundle opts) {
+        throw new UnsupportedOperationException("unimplemented mock method call");
+    }
+
+    /**
+     * @hide
+     */
+    public boolean refresh(Uri url, Bundle args) {
         throw new UnsupportedOperationException("unimplemented mock method call");
     }
 

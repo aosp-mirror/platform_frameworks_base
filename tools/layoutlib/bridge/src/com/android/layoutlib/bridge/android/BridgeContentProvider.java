@@ -145,4 +145,10 @@ public final class BridgeContentProvider implements IContentProvider {
     public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException {
         return null;
     }
+
+    @Override
+    public boolean refresh(String callingPkg, Uri url, Bundle args,
+                    ICancellationSignal cancellationSignal) throws RemoteException {
+        return false;
+    }
 }
