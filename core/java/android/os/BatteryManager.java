@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.hardware.health.V1_0.Constants;
 import com.android.internal.app.IBatteryStats;
 
 /**
@@ -118,20 +119,20 @@ public class BatteryManager {
      public static final String EXTRA_CHARGE_COUNTER = "charge_counter";
 
     // values for "status" field in the ACTION_BATTERY_CHANGED Intent
-    public static final int BATTERY_STATUS_UNKNOWN = 1;
-    public static final int BATTERY_STATUS_CHARGING = 2;
-    public static final int BATTERY_STATUS_DISCHARGING = 3;
-    public static final int BATTERY_STATUS_NOT_CHARGING = 4;
-    public static final int BATTERY_STATUS_FULL = 5;
+    public static final int BATTERY_STATUS_UNKNOWN = Constants.BATTERY_STATUS_UNKNOWN;
+    public static final int BATTERY_STATUS_CHARGING = Constants.BATTERY_STATUS_CHARGING;
+    public static final int BATTERY_STATUS_DISCHARGING = Constants.BATTERY_STATUS_DISCHARGING;
+    public static final int BATTERY_STATUS_NOT_CHARGING = Constants.BATTERY_STATUS_NOT_CHARGING;
+    public static final int BATTERY_STATUS_FULL = Constants.BATTERY_STATUS_FULL;
 
     // values for "health" field in the ACTION_BATTERY_CHANGED Intent
-    public static final int BATTERY_HEALTH_UNKNOWN = 1;
-    public static final int BATTERY_HEALTH_GOOD = 2;
-    public static final int BATTERY_HEALTH_OVERHEAT = 3;
-    public static final int BATTERY_HEALTH_DEAD = 4;
-    public static final int BATTERY_HEALTH_OVER_VOLTAGE = 5;
-    public static final int BATTERY_HEALTH_UNSPECIFIED_FAILURE = 6;
-    public static final int BATTERY_HEALTH_COLD = 7;
+    public static final int BATTERY_HEALTH_UNKNOWN = Constants.BATTERY_HEALTH_UNKNOWN;
+    public static final int BATTERY_HEALTH_GOOD = Constants.BATTERY_HEALTH_GOOD;
+    public static final int BATTERY_HEALTH_OVERHEAT = Constants.BATTERY_HEALTH_OVERHEAT;
+    public static final int BATTERY_HEALTH_DEAD = Constants.BATTERY_HEALTH_DEAD;
+    public static final int BATTERY_HEALTH_OVER_VOLTAGE = Constants.BATTERY_HEALTH_OVER_VOLTAGE;
+    public static final int BATTERY_HEALTH_UNSPECIFIED_FAILURE = Constants.BATTERY_HEALTH_UNSPECIFIED_FAILURE;
+    public static final int BATTERY_HEALTH_COLD = Constants.BATTERY_HEALTH_COLD;
 
     // values of the "plugged" field in the ACTION_BATTERY_CHANGED intent.
     // These must be powers of 2.
