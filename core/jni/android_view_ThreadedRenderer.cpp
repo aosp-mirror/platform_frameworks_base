@@ -262,11 +262,11 @@ static void android_view_ThreadedRenderer_setName(JNIEnv* env, jobject clazz,
     env->ReleaseStringUTFChars(jname, name);
 }
 
-static void android_view_ThreadedRenderer_initialize(JNIEnv* env, jobject clazz,
+static jboolean android_view_ThreadedRenderer_initialize(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jsurface) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     sp<ANativeWindow> window = android_view_Surface_getNativeWindow(env, jsurface);
-    proxy->initialize(window);
+    return proxy->initialize(window);
 }
 
 static void android_view_ThreadedRenderer_updateSurface(JNIEnv* env, jobject clazz,
@@ -461,7 +461,7 @@ static JNINativeMethod gMethods[] = {
     { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
     { "nLoadSystemProperties", "(J)Z", (void*) android_view_ThreadedRenderer_loadSystemProperties },
     { "nSetName", "(JLjava/lang/String;)V", (void*) android_view_ThreadedRenderer_setName },
-    { "nInitialize", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_initialize },
+    { "nInitialize", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_initialize },
     { "nUpdateSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_updateSurface },
     { "nPauseSurface", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_pauseSurface },
     { "nSetup", "(JIIFII)V", (void*) android_view_ThreadedRenderer_setup },
