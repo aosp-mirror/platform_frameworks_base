@@ -168,13 +168,6 @@ class WindowToken extends WindowContainer<WindowState> {
         return highestAnimLayer;
     }
 
-    WindowState getTopWindow() {
-        if (mChildren.isEmpty()) {
-            return null;
-        }
-        return (WindowState) mChildren.get(mChildren.size() - 1).getTop();
-    }
-
     /**
      * Returns true if the new window is considered greater than the existing window in terms of
      * z-order.
@@ -189,51 +182,16 @@ class WindowToken extends WindowContainer<WindowState> {
         if (DEBUG_FOCUS) Slog.d(TAG_WM,
                 "addWindow: win=" + win + " Callers=" + Debug.getCallers(5));
 
-        if (!win.isChildWindow()) {
-            if (asAppWindowToken() != null) {
-                mDisplayContent.addAppWindowToWindowList(win);
-            } else {
-                mDisplayContent.addNonAppWindowToWindowList(win);
-            }
-
-            if (!mChildren.contains(win)) {
-                if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + this);
-                addChild(win, mWindowComparator);
-            }
-        } else {
-            mDisplayContent.addChildWindowToWindowList(win);
-        }
-    }
-
-    void addImeWindow(WindowState win) {
-        int pos = mDisplayContent.findDesiredInputMethodWindowIndex(true);
-
-        if (pos < 0) {
-            addWindow(win);
-            mDisplayContent.moveInputMethodDialogs(pos);
+        if (win.isChildWindow()) {
+            // Child windows are added to their parent windows.
             return;
         }
-
-        if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                "Adding input method window " + win + " at " + pos);
-        mDisplayContent.addToWindowList(win, pos);
         if (!mChildren.contains(win)) {
-            addChild(win, null);
+            if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + this);
+            addChild(win, mWindowComparator);
+            mService.mWindowsChanged = true;
+            // TODO: Should we also be setting layout needed here and other places?
         }
-        mDisplayContent.moveInputMethodDialogs(pos + 1);
-    }
-
-    /** Return the first window in the token window list that isn't a starting window or null. */
-    WindowState getFirstNonStartingWindow() {
-        final int count = mChildren.size();
-        // We only care about parent windows so no need to loop through child windows.
-        for (int i = 0; i < count; i++) {
-            final WindowState w = mChildren.get(i);
-            if (w.mAttrs.type != TYPE_APPLICATION_STARTING) {
-                return w;
-            }
-        }
-        return null;
     }
 
     /** Returns true if the token windows list is empty. */
