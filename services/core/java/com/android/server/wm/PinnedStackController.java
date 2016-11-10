@@ -43,6 +43,7 @@ import android.view.IPinnedStackListener;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.policy.PipMotionHelper;
 import com.android.internal.policy.PipSnapAlgorithm;
+import com.android.server.UiThread;
 
 import java.io.PrintWriter;
 
@@ -55,7 +56,7 @@ class PinnedStackController {
 
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = UiThread.getHandler();
 
     private IPinnedStackListener mPinnedStackListener;
     private final PinnedStackListenerDeathHandler mPinnedStackListenerDeathHandler =

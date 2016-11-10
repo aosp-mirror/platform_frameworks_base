@@ -66,6 +66,7 @@ import android.view.animation.Animation;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 class AppTokenList extends ArrayList<AppWindowToken> {
 }
@@ -1266,6 +1267,22 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             return addIndex;
         }
         return rebuildWindowListUnchecked(addIndex);
+    }
+
+    @Override
+    void forAllWindows(Consumer<WindowState> callback, boolean traverseTopToBottom) {
+        // For legacy reasons we process the TaskStack.mExitingAppTokens first in DisplayContent
+        // before the non-exiting app tokens. So, we skip the exiting app tokens here.
+        // TODO: Investigate if we need to continue to do this or if we can just process them
+        // in-order.
+        if (mIsExiting && !waitingForReplacement()) {
+            return;
+        }
+        forAllWindowsUnchecked(callback, traverseTopToBottom);
+    }
+
+    void forAllWindowsUnchecked(Consumer<WindowState> callback, boolean traverseTopToBottom) {
+        super.forAllWindows(callback, traverseTopToBottom);
     }
 
     @Override

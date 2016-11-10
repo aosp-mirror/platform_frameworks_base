@@ -33,12 +33,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Tests for the {@link WindowState} class.
+ * Tests for the {@link AppWindowToken} class.
  *
  * Build/Install/Run:
  *  bit FrameworksServicesTests:com.android.server.wm.AppWindowTokenTests

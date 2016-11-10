@@ -22,6 +22,7 @@ import android.view.animation.Animation;
 
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.function.Consumer;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -494,6 +495,19 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         return addIndex;
     }
 
+    void forAllWindows(Consumer<WindowState> callback, boolean traverseTopToBottom) {
+        if (traverseTopToBottom) {
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                mChildren.get(i).forAllWindows(callback, traverseTopToBottom);
+            }
+        } else {
+            final int count = mChildren.size();
+            for (int i = 0; i < count; i++) {
+                mChildren.get(i).forAllWindows(callback, traverseTopToBottom);
+            }
+        }
+    }
+
     /**
      * Returns 1, 0, or -1 depending on if this container is greater than, equal to, or lesser than
      * the input container in terms of z-order.
@@ -562,8 +576,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
     void dumpChildrenNames(StringBuilder out, String prefix) {
         final String childPrefix = prefix + " ";
         out.append(getName() + "\n");
-        final int count = mChildren.size();
-        for (int i = 0; i < count; i++) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             out.append(childPrefix + "#" + i + " ");
             wc.dumpChildrenNames(out, childPrefix);

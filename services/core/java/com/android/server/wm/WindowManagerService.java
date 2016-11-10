@@ -8212,6 +8212,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     StringBuilder output = new StringBuilder();
                     mRoot.dumpChildrenNames(output, " ");
                     pw.println(output.toString());
+                    pw.println(" ");
+                    mRoot.forAllWindows(pw::println, true /* traverseTopToBottom */);
                 }
                 return;
             } else {

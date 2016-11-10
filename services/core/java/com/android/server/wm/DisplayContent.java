@@ -140,6 +140,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Utility class for keeping track of the WindowStates and other pertinent contents of a
@@ -3240,6 +3241,42 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
             addChild(stack, addIndex);
             setLayoutNeeded();
+        }
+
+        @Override
+        void forAllWindows(Consumer<WindowState> callback, boolean traverseTopToBottom) {
+            if (traverseTopToBottom) {
+                super.forAllWindows(callback, traverseTopToBottom);
+                forAllExitingAppTokenWindows(callback, traverseTopToBottom);
+            } else {
+                forAllExitingAppTokenWindows(callback, traverseTopToBottom);
+                super.forAllWindows(callback, traverseTopToBottom);
+            }
+        }
+
+        private void forAllExitingAppTokenWindows(Consumer<WindowState> callback,
+                boolean traverseTopToBottom) {
+            // For legacy reasons we process the TaskStack.mExitingAppTokens first here before the
+            // app tokens.
+            // TODO: Investigate if we need to continue to do this or if we can just process them
+            // in-order.
+            if (traverseTopToBottom) {
+                for (int i = mChildren.size() - 1; i >= 0; --i) {
+                    final AppTokenList appTokens = mChildren.get(i).mExitingAppTokens;
+                    for (int j = appTokens.size() - 1; j >= 0; --j) {
+                        appTokens.get(j).forAllWindowsUnchecked(callback, traverseTopToBottom);
+                    }
+                }
+            } else {
+                final int count = mChildren.size();
+                for (int i = 0; i < count; ++i) {
+                    final AppTokenList appTokens = mChildren.get(i).mExitingAppTokens;
+                    final int appTokensCount = appTokens.size();
+                    for (int j = 0; j < appTokensCount; j++) {
+                        appTokens.get(j).forAllWindowsUnchecked(callback, traverseTopToBottom);
+                    }
+                }
+            }
         }
 
         @Override
