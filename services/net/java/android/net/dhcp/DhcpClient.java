@@ -43,6 +43,7 @@ import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.PacketSocketAddress;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.TimeUtils;
 
@@ -372,6 +373,14 @@ public class DhcpClient extends BaseDhcpStateMachine {
                     if (PACKET_DBG) {
                         Log.d(TAG, HexDump.dumpHexString(mPacket, 0, length));
                     }
+                } catch (Exception e) {
+                    // SafetyNet logging for b/31850211
+                    int snetTagId = 0x534e4554;
+                    String bugId = "31850211";
+                    int uid = -1;
+                    String data = e.getClass().getName();
+                    EventLog.writeEvent(snetTagId, bugId, uid, data);
+                    Log.e(TAG, "Failed to parse DHCP packet", e);
                 }
             }
             maybeLog("Receive thread stopped");
