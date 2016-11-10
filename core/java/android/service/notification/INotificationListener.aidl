@@ -28,7 +28,7 @@ oneway interface INotificationListener
     void onNotificationPosted(in IStatusBarNotificationHolder notificationHolder,
             in NotificationRankingUpdate update);
     void onNotificationRemoved(in IStatusBarNotificationHolder notificationHolder,
-            in NotificationRankingUpdate update);
+            in NotificationRankingUpdate update, int reason);
     void onNotificationRankingUpdate(in NotificationRankingUpdate update);
     void onListenerHintsChanged(int hints);
     void onInterruptionFilterChanged(int interruptionFilter);
@@ -38,5 +38,4 @@ oneway interface INotificationListener
     void onNotificationVisibilityChanged(String key, long time, boolean visible);
     void onNotificationClick(String key, long time);
     void onNotificationActionClick(String key, long time, int actionIndex);
-    void onNotificationRemovedReason(String key, long time, int reason);
 }

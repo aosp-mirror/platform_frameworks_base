@@ -42,60 +42,6 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     public static final String SERVICE_INTERFACE
             = "android.service.notification.NotificationAssistantService";
 
-    /** Notification was canceled by the status bar reporting a click. */
-    public static final int REASON_DELEGATE_CLICK = 1;
-
-    /** Notification was canceled by the status bar reporting a user dismissal. */
-    public static final int REASON_DELEGATE_CANCEL = 2;
-
-    /** Notification was canceled by the status bar reporting a user dismiss all. */
-    public static final int REASON_DELEGATE_CANCEL_ALL = 3;
-
-    /** Notification was canceled by the status bar reporting an inflation error. */
-    public static final int REASON_DELEGATE_ERROR = 4;
-
-    /** Notification was canceled by the package manager modifying the package. */
-    public static final int REASON_PACKAGE_CHANGED = 5;
-
-    /** Notification was canceled by the owning user context being stopped. */
-    public static final int REASON_USER_STOPPED = 6;
-
-    /** Notification was canceled by the user banning the package. */
-    public static final int REASON_PACKAGE_BANNED = 7;
-
-    /** Notification was canceled by the app canceling this specific notification. */
-    public static final int REASON_APP_CANCEL = 8;
-
-    /** Notification was canceled by the app cancelling all its notifications. */
-    public static final int REASON_APP_CANCEL_ALL = 9;
-
-    /** Notification was canceled by a listener reporting a user dismissal. */
-    public static final int REASON_LISTENER_CANCEL = 10;
-
-    /** Notification was canceled by a listener reporting a user dismiss all. */
-    public static final int REASON_LISTENER_CANCEL_ALL = 11;
-
-    /** Notification was canceled because it was a member of a canceled group. */
-    public static final int REASON_GROUP_SUMMARY_CANCELED = 12;
-
-    /** Notification was canceled because it was an invisible member of a group. */
-    public static final int REASON_GROUP_OPTIMIZATION = 13;
-
-    /** Notification was canceled by the device administrator suspending the package. */
-    public static final int REASON_PACKAGE_SUSPENDED = 14;
-
-    /** Notification was canceled by the owning managed profile being turned off. */
-    public static final int REASON_PROFILE_TURNED_OFF = 15;
-
-    /** Autobundled summary notification was canceled because its group was unbundled */
-    public static final int REASON_UNAUTOBUNDLED = 16;
-
-    /** Notification was canceled by the user banning the channel. */
-    public static final int REASON_CHANNEL_BANNED = 17;
-
-    /** Notification was snoozed. */
-    public static final int REASON_SNOOZED = 18;
-
     private Handler mHandler;
 
     @Override
@@ -122,17 +68,6 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      */
     abstract public Adjustment onNotificationEnqueued(StatusBarNotification sbn,
           int importance, boolean user);
-
-    /**
-     * A notification was removed.
-
-     * @param key the notification key
-     * @param time milliseconds since midnight, January 1, 1970 UTC.
-     * @param reason see {@link #REASON_LISTENER_CANCEL}, etc.
-     */
-    public void onNotificationRemoved(String key, long time, int reason) {
-        // Do nothing, Override this to collect dismissal statistics
-    }
 
     /**
      * Updates a notification.  N.B. this won’t cause
@@ -185,21 +120,10 @@ public abstract class NotificationAssistantService extends NotificationListenerS
             mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_ENQUEUED,
                     args).sendToTarget();
         }
-
-        @Override
-        public void onNotificationRemovedReason(String key, long time, int reason) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = key;
-            args.arg2 = time;
-            args.argi1 = reason;
-            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_REMOVED_REASON,
-                    args).sendToTarget();
-        }
     }
 
     private final class MyHandler extends Handler {
         public static final int MSG_ON_NOTIFICATION_ENQUEUED = 1;
-        public static final int MSG_ON_NOTIFICATION_REMOVED_REASON = 5;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -218,15 +142,6 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                     if (adjustment != null) {
                         adjustNotification(adjustment);
                     }
-                } break;
-
-                case MSG_ON_NOTIFICATION_REMOVED_REASON: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    final String key = (String) args.arg1;
-                    final long time = (long) args.arg2;
-                    final int reason = args.argi1;
-                    args.recycle();
-                    onNotificationRemoved(key, time, reason);
                 } break;
             }
         }

@@ -17,23 +17,23 @@
 package com.android.server.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_NONE;
-import static android.service.notification.NotificationAssistantService.REASON_APP_CANCEL;
-import static android.service.notification.NotificationAssistantService.REASON_APP_CANCEL_ALL;
-import static android.service.notification.NotificationAssistantService.REASON_CHANNEL_BANNED;
-import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CANCEL;
-import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CANCEL_ALL;
-import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CLICK;
-import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_ERROR;
-import static android.service.notification.NotificationAssistantService.REASON_GROUP_SUMMARY_CANCELED;
-import static android.service.notification.NotificationAssistantService.REASON_LISTENER_CANCEL;
-import static android.service.notification.NotificationAssistantService.REASON_LISTENER_CANCEL_ALL;
-import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_BANNED;
-import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_CHANGED;
-import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_SUSPENDED;
-import static android.service.notification.NotificationAssistantService.REASON_PROFILE_TURNED_OFF;
-import static android.service.notification.NotificationAssistantService.REASON_SNOOZED;
-import static android.service.notification.NotificationAssistantService.REASON_UNAUTOBUNDLED;
-import static android.service.notification.NotificationAssistantService.REASON_USER_STOPPED;
+import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
+import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
+import static android.service.notification.NotificationListenerService.REASON_CHANNEL_BANNED;
+import static android.service.notification.NotificationListenerService.REASON_DELEGATE_CANCEL;
+import static android.service.notification.NotificationListenerService.REASON_DELEGATE_CANCEL_ALL;
+import static android.service.notification.NotificationListenerService.REASON_DELEGATE_CLICK;
+import static android.service.notification.NotificationListenerService.REASON_DELEGATE_ERROR;
+import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
+import static android.service.notification.NotificationListenerService.REASON_LISTENER_CANCEL;
+import static android.service.notification.NotificationListenerService.REASON_LISTENER_CANCEL_ALL;
+import static android.service.notification.NotificationListenerService.REASON_PACKAGE_BANNED;
+import static android.service.notification.NotificationListenerService.REASON_PACKAGE_CHANGED;
+import static android.service.notification.NotificationListenerService.REASON_PACKAGE_SUSPENDED;
+import static android.service.notification.NotificationListenerService.REASON_PROFILE_TURNED_OFF;
+import static android.service.notification.NotificationListenerService.REASON_SNOOZED;
+import static android.service.notification.NotificationListenerService.REASON_UNAUTOBUNDLED;
+import static android.service.notification.NotificationListenerService.REASON_USER_STOPPED;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_NOTIFICATION_EFFECTS;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_CALL_EFFECTS;
@@ -2917,7 +2917,8 @@ public class NotificationManagerService extends SystemService {
                 } else {
                     Slog.e(TAG, "Not posting notification without small icon: " + notification);
                     if (old != null && !old.isCanceled) {
-                        mListeners.notifyRemovedLocked(n);
+                        mListeners.notifyRemovedLocked(n,
+                                NotificationListenerService.REASON_DELEGATE_ERROR);
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -3529,7 +3530,7 @@ public class NotificationManagerService extends SystemService {
         // status bar
         if (r.getNotification().getSmallIcon() != null) {
             r.isCanceled = true;
-            mListeners.notifyRemovedLocked(r.sbn);
+            mListeners.notifyRemovedLocked(r.sbn, reason);
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -4232,7 +4233,7 @@ public class NotificationManagerService extends SystemService {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            notifyRemoved(info, oldSbnLightClone, update);
+                            notifyRemoved(info, oldSbnLightClone, update, REASON_USER_STOPPED);
                         }
                     });
                     continue;
@@ -4251,7 +4252,7 @@ public class NotificationManagerService extends SystemService {
         /**
          * asynchronously notify all listeners about a removed notification
          */
-        public void notifyRemovedLocked(StatusBarNotification sbn) {
+        public void notifyRemovedLocked(StatusBarNotification sbn, int reason) {
             // make a copy in case changes are made to the underlying Notification object
             // NOTE: this copy is lightweight: it doesn't include heavyweight parts of the
             // notification
@@ -4264,7 +4265,7 @@ public class NotificationManagerService extends SystemService {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyRemoved(info, sbnLight, update);
+                        notifyRemoved(info, sbnLight, update, reason);
                     }
                 });
             }
@@ -4328,14 +4329,14 @@ public class NotificationManagerService extends SystemService {
         }
 
         private void notifyRemoved(ManagedServiceInfo info, StatusBarNotification sbn,
-                NotificationRankingUpdate rankingUpdate) {
+                NotificationRankingUpdate rankingUpdate, int reason) {
             if (!info.enabledAndUserMatches(sbn.getUserId())) {
                 return;
             }
             final INotificationListener listener = (INotificationListener) info.service;
             StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
             try {
-                listener.onNotificationRemoved(sbnHolder, rankingUpdate);
+                listener.onNotificationRemoved(sbnHolder, rankingUpdate, reason);
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify listener (removed): " + listener, ex);
             }
