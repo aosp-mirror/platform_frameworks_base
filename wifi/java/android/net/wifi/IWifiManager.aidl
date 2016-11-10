@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.ScanSettings;
@@ -62,6 +63,12 @@ interface IWifiManager
 
     int modifyPasspointManagementObject(String fqdn,
                                         in List<PasspointManagementObjectDefinition> mos);
+
+    boolean addPasspointConfiguration(in PasspointConfiguration config);
+
+    boolean removePasspointConfiguration(in String fqdn);
+
+    List<PasspointConfiguration> getPasspointConfigurations();
 
     void queryPasspointIcon(long bssid, String fileName);
 
