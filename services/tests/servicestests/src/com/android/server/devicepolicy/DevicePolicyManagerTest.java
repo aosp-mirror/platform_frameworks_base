@@ -2178,6 +2178,26 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
     }
 
+    public void testIsProvisioningAllowed_provisionManagedProfileCantRemoveUser_primaryUser()
+            throws Exception {
+        setDeviceOwner();
+
+        when(mContext.ipackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0))
+                .thenReturn(true);
+        when(mContext.userManagerForMock.isSplitSystemUser()).thenReturn(true);
+        when(mContext.userManager.hasUserRestriction(UserManager.DISALLOW_REMOVE_USER))
+                .thenReturn(true);
+        when(mContext.userManager.canAddMoreManagedProfiles(DpmMockContext.CALLER_USER_HANDLE,
+                false /* we can't remove a managed profile*/)).thenReturn(false);
+        when(mContext.userManager.canAddMoreManagedProfiles(DpmMockContext.CALLER_USER_HANDLE,
+                true)).thenReturn(true);
+        setUserSetupCompleteForUser(false, DpmMockContext.CALLER_USER_HANDLE);
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
+    }
+
     public void testForceUpdateUserSetupComplete_permission() {
         // GIVEN the permission MANAGE_PROFILE_AND_DEVICE_OWNERS is not granted
         try {
