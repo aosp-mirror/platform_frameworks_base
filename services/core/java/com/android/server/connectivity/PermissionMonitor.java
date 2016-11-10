@@ -18,6 +18,7 @@ package com.android.server.connectivity;
 
 import static android.Manifest.permission.CHANGE_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
+import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
 import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
 import static android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
@@ -65,10 +66,10 @@ public class PermissionMonitor {
     private final BroadcastReceiver mIntentReceiver;
 
     // Values are User IDs.
-    private final Set<Integer> mUsers = new HashSet<Integer>();
+    private final Set<Integer> mUsers = new HashSet<>();
 
     // Keys are App IDs. Values are true for SYSTEM permission and false for NETWORK permission.
-    private final Map<Integer, Boolean> mApps = new HashMap<Integer, Boolean>();
+    private final Map<Integer, Boolean> mApps = new HashMap<>();
 
     public PermissionMonitor(Context context, INetworkManagementService netd) {
         mContext = context;
@@ -126,14 +127,14 @@ public class PermissionMonitor {
             }
 
             boolean isNetwork = hasNetworkPermission(app);
-            boolean isSystem = hasSystemPermission(app);
+            boolean hasRestrictedPermission = hasRestrictedNetworkPermission(app);
 
-            if (isNetwork || isSystem) {
+            if (isNetwork || hasRestrictedPermission) {
                 Boolean permission = mApps.get(uid);
                 // If multiple packages share a UID (cf: android:sharedUserId) and ask for different
                 // permissions, don't downgrade (i.e., if it's already SYSTEM, leave it as is).
                 if (permission == null || permission == NETWORK) {
-                    mApps.put(uid, isSystem);
+                    mApps.put(uid, hasRestrictedPermission);
                 }
             }
         }
@@ -164,12 +165,13 @@ public class PermissionMonitor {
         return hasPermission(app, CHANGE_NETWORK_STATE);
     }
 
-    private boolean hasSystemPermission(PackageInfo app) {
+    private boolean hasRestrictedNetworkPermission(PackageInfo app) {
         int flags = app.applicationInfo != null ? app.applicationInfo.flags : 0;
         if ((flags & FLAG_SYSTEM) != 0 || (flags & FLAG_UPDATED_SYSTEM_APP) != 0) {
             return true;
         }
-        return hasPermission(app, CONNECTIVITY_INTERNAL);
+        return hasPermission(app, CONNECTIVITY_INTERNAL)
+                || hasPermission(app, CONNECTIVITY_USE_RESTRICTED_NETWORKS);
     }
 
     private int[] toIntArray(List<Integer> list) {
@@ -181,8 +183,8 @@ public class PermissionMonitor {
     }
 
     private void update(Set<Integer> users, Map<Integer, Boolean> apps, boolean add) {
-        List<Integer> network = new ArrayList<Integer>();
-        List<Integer> system = new ArrayList<Integer>();
+        List<Integer> network = new ArrayList<>();
+        List<Integer> system = new ArrayList<>();
         for (Entry<Integer, Boolean> app : apps.entrySet()) {
             List<Integer> list = app.getValue() ? system : network;
             for (int user : users) {
@@ -209,7 +211,7 @@ public class PermissionMonitor {
         }
         mUsers.add(user);
 
-        Set<Integer> users = new HashSet<Integer>();
+        Set<Integer> users = new HashSet<>();
         users.add(user);
         update(users, mApps, true);
     }
@@ -221,7 +223,7 @@ public class PermissionMonitor {
         }
         mUsers.remove(user);
 
-        Set<Integer> users = new HashSet<Integer>();
+        Set<Integer> users = new HashSet<>();
         users.add(user);
         update(users, mApps, false);
     }
@@ -235,16 +237,16 @@ public class PermissionMonitor {
         try {
             PackageInfo app = mPackageManager.getPackageInfo(appName, GET_PERMISSIONS);
             boolean isNetwork = hasNetworkPermission(app);
-            boolean isSystem = hasSystemPermission(app);
-            if (isNetwork || isSystem) {
+            boolean hasRestrictedPermission = hasRestrictedNetworkPermission(app);
+            if (isNetwork || hasRestrictedPermission) {
                 Boolean permission = mApps.get(appUid);
                 // If multiple packages share a UID (cf: android:sharedUserId) and ask for different
                 // permissions, don't downgrade (i.e., if it's already SYSTEM, leave it as is).
                 if (permission == null || permission == NETWORK) {
-                    mApps.put(appUid, isSystem);
+                    mApps.put(appUid, hasRestrictedPermission);
 
-                    Map<Integer, Boolean> apps = new HashMap<Integer, Boolean>();
-                    apps.put(appUid, isSystem);
+                    Map<Integer, Boolean> apps = new HashMap<>();
+                    apps.put(appUid, hasRestrictedPermission);
                     update(mUsers, apps, true);
                 }
             }
@@ -260,7 +262,7 @@ public class PermissionMonitor {
         }
         mApps.remove(appUid);
 
-        Map<Integer, Boolean> apps = new HashMap<Integer, Boolean>();
+        Map<Integer, Boolean> apps = new HashMap<>();
         apps.put(appUid, NETWORK);  // doesn't matter which permission we pick here
         update(mUsers, apps, false);
     }
