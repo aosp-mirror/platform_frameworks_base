@@ -37,14 +37,17 @@ import java.security.InvalidParameterException;
 public final class InputContentInfo implements Parcelable {
 
     /**
-     * The content URI that never has a user ID embedded by
-     * {@link ContentProvider#maybeAddUserId(Uri, int)}.
+     * The content URI that may or may not have a user ID embedded by
+     * {@link ContentProvider#maybeAddUserId(Uri, int)}.  This always preserves the exact value
+     * specified to a constructor.  In other words, if it had user ID embedded when it was passed
+     * to the constructor, it still has the same user ID no matter if it is valid or not.
      */
     @NonNull
     private final Uri mContentUri;
     /**
-     * The user ID to which {@link #mContentUri} belongs to.  This is always determined based on
-     * the process ID when the constructor is called.
+     * The user ID to which {@link #mContentUri} belongs to.  If {@link #mContentUri} already
+     * embedded the user ID when it was specified then this fields has the same user ID.  Otherwise
+     * the user ID is determined based on the process ID when the constructor is called.
      *
      * <p>CAUTION: If you received {@link InputContentInfo} from a different process, there is no
      * guarantee that this value is correct and valid.  Never use this for any security purpose</p>
@@ -89,7 +92,8 @@ public final class InputContentInfo implements Parcelable {
             @Nullable Uri linkUri) {
         validateInternal(contentUri, description, linkUri, true /* throwException */);
         mContentUri = contentUri;
-        mContentUriOwnerUserId = UserHandle.myUserId();
+        mContentUriOwnerUserId =
+                ContentProvider.getUserIdFromUri(mContentUri, UserHandle.myUserId());
         mDescription = description;
         mLinkUri = linkUri;
     }
@@ -135,13 +139,6 @@ public final class InputContentInfo implements Parcelable {
         if (!"content".equals(contentUriScheme)) {
             if (throwException) {
                 throw new InvalidParameterException("contentUri must have content scheme");
-            }
-            return false;
-        }
-        if (ContentProvider.uriHasUserId(contentUri)) {
-            if (throwException) {
-                throw new InvalidParameterException(
-                        "contentUri with a user ID is not currently supported");
             }
             return false;
         }
