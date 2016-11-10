@@ -18,14 +18,14 @@ package android.net;
 
 import android.net.IpPrefix;
 import android.os.Parcel;
-import static android.test.MoreAsserts.assertNotEqual;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import static org.junit.Assert.assertArrayEquals;
 import java.net.InetAddress;
 import java.util.Random;
 import junit.framework.TestCase;
 
+import static android.test.MoreAsserts.assertNotEqual;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class IpPrefixTest extends TestCase {
 
@@ -242,25 +242,42 @@ public class IpPrefixTest extends TestCase {
 
     @SmallTest
     public void testHashCode() {
-        IpPrefix p;
-        int oldCode = -1;
+        IpPrefix p = new IpPrefix(new byte[4], 0);
         Random random = new Random();
         for (int i = 0; i < 100; i++) {
+            final IpPrefix oldP = p;
             if (random.nextBoolean()) {
                 // IPv4.
                 byte[] b = new byte[4];
                 random.nextBytes(b);
                 p = new IpPrefix(b, random.nextInt(33));
-                assertNotEqual(oldCode, p.hashCode());
-                oldCode = p.hashCode();
             } else {
                 // IPv6.
                 byte[] b = new byte[16];
                 random.nextBytes(b);
                 p = new IpPrefix(b, random.nextInt(129));
-                assertNotEqual(oldCode, p.hashCode());
-                oldCode = p.hashCode();
             }
+            if (p.equals(oldP)) {
+              assertEquals(p.hashCode(), oldP.hashCode());
+            }
+            if (p.hashCode() != oldP.hashCode()) {
+              assertNotEqual(p, oldP);
+            }
+        }
+    }
+
+    @SmallTest
+    public void testHashCodeIsNotConstant() {
+        IpPrefix[] prefixes = {
+            new IpPrefix("2001:db8:f00::ace:d00d/127"),
+            new IpPrefix("192.0.2.0/23"),
+            new IpPrefix("::/0"),
+            new IpPrefix("0.0.0.0/0"),
+        };
+        for (int i = 0; i < prefixes.length; i++) {
+          for (int j = i + 1; j < prefixes.length; j++) {
+            assertNotEqual(prefixes[i].hashCode(), prefixes[j].hashCode());
+          }
         }
     }
 
