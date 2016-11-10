@@ -270,6 +270,7 @@ import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
@@ -359,7 +360,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILIT
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBLE_BEHIND;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStackSupervisor.ActivityContainer.FORCE_NEW_TASK_FLAGS;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
@@ -9169,10 +9169,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                     final ActivityStack stack = tr.getStack();
-                    if ((flags & ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS) != 0) {
-                        if (stack != null && stack.isHomeStack()) {
+                    if ((flags & ActivityManager.RECENT_IGNORE_HOME_AND_RECENTS_STACK_TASKS) != 0) {
+                        if (stack != null && stack.isHomeOrRecentsStack()) {
                             if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
-                                    "Skipping, home stack task: " + tr);
+                                    "Skipping, home or recents stack task: " + tr);
                             continue;
                         }
                     }
@@ -9594,8 +9594,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void removeStack(int stackId) {
         enforceCallingPermission(Manifest.permission.MANAGE_ACTIVITY_STACKS, "removeStack()");
-        if (stackId == HOME_STACK_ID) {
-            throw new IllegalArgumentException("Removing home stack is not allowed.");
+        if (StackId.isHomeOrRecentsStack(stackId)) {
+            throw new IllegalArgumentException("Removing home or recents stack is not allowed.");
         }
 
         synchronized (this) {
@@ -9823,9 +9823,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToStack()");
-        if (stackId == HOME_STACK_ID) {
+        if (StackId.isHomeOrRecentsStack(stackId)) {
             throw new IllegalArgumentException(
-                    "moveTaskToStack: Attempt to move task " + taskId + " to home stack");
+                    "moveTaskToStack: Attempt to move task " + taskId + " to stack " + stackId);
         }
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
@@ -9840,8 +9840,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         !FORCE_FOCUS, "moveTaskToStack", ANIMATE);
                 if (result && stackId == DOCKED_STACK_ID) {
                     // If task moved to docked stack - show recents if needed.
-                    mStackSupervisor.moveHomeStackTaskToTop(RECENTS_ACTIVITY_TYPE,
-                            "moveTaskToDockedStack");
+                    mWindowManager.showRecentApps(false /* fromHome */);
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -10025,10 +10024,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void positionTaskInStack(int taskId, int stackId, int position) {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "positionTaskInStack()");
-        if (stackId == HOME_STACK_ID) {
+        if (StackId.isHomeOrRecentsStack(stackId)) {
             throw new IllegalArgumentException(
                     "positionTaskInStack: Attempt to change the position of task "
-                    + taskId + " in/to home stack");
+                    + taskId + " in/to home/recents stack");
         }
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
@@ -10063,22 +10062,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             synchronized (this) {
                 return mStackSupervisor.getStackInfoLocked(stackId);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    @Override
-    public boolean isInHomeStack(int taskId) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
-        long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(
-                        taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
-                final ActivityStack stack = tr != null ? tr.getStack() : null;
-                return stack != null && stack.isHomeStack();
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -18822,8 +18805,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void moveTasksToFullscreenStack(int fromStackId, boolean onTop) {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTasksToFullscreenStack()");
-        if (fromStackId == HOME_STACK_ID) {
-            throw new IllegalArgumentException("You can't move tasks from the home stack.");
+        if (StackId.isHomeOrRecentsStack(fromStackId)) {
+            throw new IllegalArgumentException("You can't move tasks from the home/recents stack.");
         }
         synchronized (this) {
             final long origId = Binder.clearCallingIdentity();

@@ -368,7 +368,6 @@ interface IActivityManager {
     // Start of L transactions
     String getTagForIntentSender(in IIntentSender sender, in String prefix);
     boolean startUserInBackground(int userid);
-    boolean isInHomeStack(int taskId);
     void startLockTaskModeById(int taskId);
     void startLockTaskModeByToken(in IBinder token);
     void stopLockTaskMode();

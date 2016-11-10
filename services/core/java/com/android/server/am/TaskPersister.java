@@ -643,7 +643,7 @@ public class TaskPersister {
                                     " persistable=" + task.isPersistable);
                             final ActivityStack stack = task.getStack();
                             if ((task.isPersistable || task.inRecents)
-                                    && (stack == null || !stack.isHomeStack())) {
+                                    && (stack == null || !stack.isHomeOrRecentsStack())) {
                                 if (DEBUG) Slog.d(TAG, "adding to persistentTaskIds task=" + task);
                                 persistentTaskIds.add(task.taskId);
                             } else {

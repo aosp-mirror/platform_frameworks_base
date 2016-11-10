@@ -438,9 +438,9 @@ public class Recents extends SystemUI
         SystemServicesProxy ssp = Recents.getSystemServices();
         ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
         boolean screenPinningActive = ssp.isScreenPinningActive();
-        boolean isRunningTaskInHomeStack = runningTask != null &&
-                SystemServicesProxy.isHomeStack(runningTask.stackId);
-        if (runningTask != null && !isRunningTaskInHomeStack && !screenPinningActive) {
+        boolean isRunningTaskInHomeOrRecentsStack = runningTask != null &&
+                ActivityManager.StackId.isHomeOrRecentsStack(runningTask.stackId);
+        if (runningTask != null && !isRunningTaskInHomeOrRecentsStack && !screenPinningActive) {
             logDockAttempt(mContext, runningTask.topActivity, runningTask.resizeMode);
             if (runningTask.isDockable) {
                 if (metricsDockAction != -1) {

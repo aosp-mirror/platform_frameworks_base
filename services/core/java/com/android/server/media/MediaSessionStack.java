@@ -74,7 +74,7 @@ class MediaSessionStack {
         try {
             List<ActivityManager.RecentTaskInfo> tasks =
                     ActivityManager.getService().getRecentTasks(1,
-                            ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
+                            ActivityManager.RECENT_IGNORE_HOME_AND_RECENTS_STACK_TASKS |
                             ActivityManager.RECENT_IGNORE_UNAVAILABLE |
                             ActivityManager.RECENT_INCLUDE_PROFILES |
                             ActivityManager.RECENT_WITH_EXCLUDED, record.getUserId()).getList();

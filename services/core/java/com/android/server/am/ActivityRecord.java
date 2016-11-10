@@ -19,7 +19,9 @@ package com.android.server.am;
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
@@ -1195,10 +1197,11 @@ final class ActivityRecord {
         }
 
         final ActivityStack stack = getStack();
-        if (stack.isHomeStack()) {
+        if (stack.isHomeOrRecentsStack()) {
             // This is an optimization -- since we never show Home or Recents within Recents itself,
             // we can just go ahead and skip taking the screenshot if this is the home stack.
-            if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "\tHome stack");
+            if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, stack.getStackId() == HOME_STACK_ID ?
+                        "\tHome stack" : "\tRecents stack");
             return null;
         }
 

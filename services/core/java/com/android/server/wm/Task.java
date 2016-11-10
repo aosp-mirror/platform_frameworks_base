@@ -19,7 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -524,10 +524,6 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     boolean showForAllUsers() {
         final int tokensCount = mChildren.size();
         return (tokensCount != 0) && mChildren.get(tokensCount - 1).showForAllUsers;
-    }
-
-    boolean inHomeStack() {
-        return mStack != null && mStack.mStackId == HOME_STACK_ID;
     }
 
     boolean inFreeformWorkspace() {

@@ -33,6 +33,7 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.LAST_STATIC_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -72,7 +73,6 @@ import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
@@ -661,13 +661,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer
     }
 
     /** Returns true if the focus activity was adjusted to the home stack top activity. */
-    boolean moveHomeStackTaskToTop(int homeStackTaskType, String reason) {
-        if (homeStackTaskType == RECENTS_ACTIVITY_TYPE) {
-            mWindowManager.showRecentApps(false /* fromHome */);
-            return false;
-        }
-
-        mHomeStack.moveHomeStackTaskToTop(homeStackTaskType);
+    boolean moveHomeStackTaskToTop(String reason) {
+        mHomeStack.moveHomeStackTaskToTop();
 
         final ActivityRecord top = getHomeActivity();
         if (top == null) {
@@ -677,14 +672,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer
         return true;
     }
 
-    boolean resumeHomeStackTask(int homeStackTaskType, ActivityRecord prev, String reason) {
+    boolean resumeHomeStackTask(ActivityRecord prev, String reason) {
         if (!mService.mBooting && !mService.mBooted) {
             // Not ready yet!
-            return false;
-        }
-
-        if (homeStackTaskType == RECENTS_ACTIVITY_TYPE) {
-            mWindowManager.showRecentApps(false /* fromHome */);
             return false;
         }
 
@@ -692,7 +682,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             prev.task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
         }
 
-        mHomeStack.moveHomeStackTaskToTop(homeStackTaskType);
+        mHomeStack.moveHomeStackTaskToTop();
         ActivityRecord r = getHomeActivity();
         final String myReason = reason + " resumeHomeStackTask";
 
@@ -2754,7 +2744,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
-                if (!r.isApplicationActivity() && !stack.isHomeStack()) {
+                if (!r.isApplicationActivity() && !stack.isHomeOrRecentsStack()) {
                     if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping stack: (home activity) " + stack);
                     continue;
                 }
@@ -3178,7 +3168,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             stack.moveToFront("switchUserOnHomeDisplay");
         } else {
             // Stack was moved to another display while user was swapped out.
-            resumeHomeStackTask(HOME_ACTIVITY_TYPE, null, "switchUserOnOtherDisplay");
+            resumeHomeStackTask(null, "switchUserOnOtherDisplay");
         }
         return homeInFront;
     }
@@ -4591,9 +4581,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer
                 ? new ActivityOptions(bOptions) : null;
         final int launchStackId = (activityOptions != null)
                 ? activityOptions.getLaunchStackId() : INVALID_STACK_ID;
-        if (launchStackId == HOME_STACK_ID) {
+        if (StackId.isHomeOrRecentsStack(launchStackId)) {
             throw new IllegalArgumentException("startActivityFromRecentsInner: Task "
-                    + taskId + " can't be launch in the home stack.");
+                    + taskId + " can't be launch in the home/recents stack.");
         }
 
         if (launchStackId == DOCKED_STACK_ID) {
@@ -4603,13 +4593,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             // Defer updating the stack in which recents is until the app transition is done, to
             // not run into issues where we still need to draw the task in recents but the
             // docked stack is already created.
-            deferUpdateBounds(HOME_STACK_ID);
+            deferUpdateBounds(RECENTS_STACK_ID);
             mWindowManager.prepareAppTransition(TRANSIT_DOCK_TASK_FROM_RECENTS, false);
         }
 
         task = anyTaskForIdLocked(taskId, RESTORE_FROM_RECENTS, launchStackId);
         if (task == null) {
-            continueUpdateBounds(HOME_STACK_ID);
+            continueUpdateBounds(RECENTS_STACK_ID);
             mWindowManager.executeAppTransition();
             throw new IllegalArgumentException(
                     "startActivityFromRecentsInner: Task " + taskId + " not found.");

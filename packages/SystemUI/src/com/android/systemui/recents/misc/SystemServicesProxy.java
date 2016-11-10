@@ -321,7 +321,7 @@ public class SystemServicesProxy {
         // Remove home/recents/excluded tasks
         int minNumTasksToQuery = 10;
         int numTasksToQuery = Math.max(minNumTasksToQuery, numLatestTasks);
-        int flags = ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
+        int flags = ActivityManager.RECENT_IGNORE_HOME_AND_RECENTS_STACK_TASKS |
                 ActivityManager.RECENT_INGORE_DOCKED_STACK_TOP_TASK |
                 ActivityManager.RECENT_INGORE_PINNED_STACK_TASKS |
                 ActivityManager.RECENT_IGNORE_UNAVAILABLE |
@@ -399,27 +399,40 @@ public class SystemServicesProxy {
         if (mIam == null) return false;
 
         try {
-            ActivityManager.StackInfo stackInfo = mIam.getStackInfo(
+            ActivityManager.StackInfo homeStackInfo = mIam.getStackInfo(
                     ActivityManager.StackId.HOME_STACK_ID);
             ActivityManager.StackInfo fullscreenStackInfo = mIam.getStackInfo(
                     ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID);
-            ComponentName topActivity = stackInfo.topActivity;
-            boolean homeStackVisibleNotOccluded = stackInfo.visible;
-            if (fullscreenStackInfo != null) {
-                boolean isFullscreenStackOccludingHome = fullscreenStackInfo.visible &&
-                        fullscreenStackInfo.position > stackInfo.position;
-                homeStackVisibleNotOccluded &= !isFullscreenStackOccludingHome;
-            }
+            ActivityManager.StackInfo recentsStackInfo = mIam.getStackInfo(
+                    ActivityManager.StackId.RECENTS_STACK_ID);
+
+            boolean homeStackVisibleNotOccluded = isStackNotOccluded(homeStackInfo,
+                    fullscreenStackInfo);
+            boolean recentsStackVisibleNotOccluded = isStackNotOccluded(recentsStackInfo,
+                    fullscreenStackInfo);
             if (isHomeStackVisible != null) {
                 isHomeStackVisible.value = homeStackVisibleNotOccluded;
             }
-            return (homeStackVisibleNotOccluded && topActivity != null
+            ComponentName topActivity = recentsStackInfo != null ?
+                    recentsStackInfo.topActivity : null;
+            return (recentsStackVisibleNotOccluded && topActivity != null
                     && topActivity.getPackageName().equals(RecentsImpl.RECENTS_PACKAGE)
                     && Recents.RECENTS_ACTIVITIES.contains(topActivity.getClassName()));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private boolean isStackNotOccluded(ActivityManager.StackInfo stackInfo,
+            ActivityManager.StackInfo fullscreenStackInfo) {
+        boolean stackVisibleNotOccluded = stackInfo == null || stackInfo.visible;
+        if (fullscreenStackInfo != null && stackInfo != null) {
+            boolean isFullscreenStackOccludingg = fullscreenStackInfo.visible &&
+                    fullscreenStackInfo.position > stackInfo.position;
+            stackVisibleNotOccluded &= !isFullscreenStackOccludingg;
+        }
+        return stackVisibleNotOccluded;
     }
 
     /**

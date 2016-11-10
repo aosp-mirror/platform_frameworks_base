@@ -5,6 +5,8 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
+
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
@@ -78,7 +80,7 @@ class ActivityMetricsLogger {
         if (stack.mStackId == PINNED_STACK_ID) {
             stack = mSupervisor.findStackBehind(stack);
         }
-        if (stack.mStackId == HOME_STACK_ID
+        if (StackId.isHomeOrRecentsStack(stack.mStackId)
                 || stack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
             mWindowState = WINDOW_STATE_STANDARD;
         } else if (stack.mStackId == DOCKED_STACK_ID) {

@@ -561,8 +561,11 @@ public class ActivityManager {
         /** ID of stack that always on top (always visible) when it exist. */
         public static final int PINNED_STACK_ID = DOCKED_STACK_ID + 1;
 
+        /** Recents activity stack ID. */
+        public static final int RECENTS_STACK_ID = PINNED_STACK_ID + 1;
+
         /** Last static stack stack ID. */
-        public static final int LAST_STATIC_STACK_ID = PINNED_STACK_ID;
+        public static final int LAST_STATIC_STACK_ID = RECENTS_STACK_ID;
 
         /** Start of ID range used by stacks that are created dynamically. */
         public static final int FIRST_DYNAMIC_STACK_ID = LAST_STATIC_STACK_ID + 1;
@@ -735,6 +738,13 @@ public class ActivityManager {
         }
 
         /**
+         * Returns true if the input {@param stackId} is HOME_STACK_ID or RECENTS_STACK_ID
+         */
+        public static boolean isHomeOrRecentsStack(int stackId) {
+            return stackId == HOME_STACK_ID || stackId == RECENTS_STACK_ID;
+        }
+
+        /**
          * Returns true if activities contained in this stack can request visible behind by
          * calling {@link Activity#requestVisibleBehind}.
          */
@@ -760,7 +770,8 @@ public class ActivityManager {
 
         /** Returns true if the input stack and its content can affect the device orientation. */
         public static boolean canSpecifyOrientation(int stackId) {
-            return stackId == HOME_STACK_ID || stackId == FULLSCREEN_WORKSPACE_STACK_ID;
+            return stackId == HOME_STACK_ID || stackId == RECENTS_STACK_ID
+                    || stackId == FULLSCREEN_WORKSPACE_STACK_ID;
         }
     }
 
@@ -1509,7 +1520,7 @@ public class ActivityManager {
      * Ignores all tasks that are on the home stack.
      * @hide
      */
-    public static final int RECENT_IGNORE_HOME_STACK_TASKS = 0x0008;
+    public static final int RECENT_IGNORE_HOME_AND_RECENTS_STACK_TASKS = 0x0008;
 
     /**
      * Ignores the top task in the docked stack.
@@ -2047,15 +2058,6 @@ public class ActivityManager {
     public TaskThumbnail getTaskThumbnail(int id) throws SecurityException {
         try {
             return getService().getTaskThumbnail(id);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** @hide */
-    public boolean isInHomeStack(int taskId) {
-        try {
-            return getService().isInHomeStack(taskId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

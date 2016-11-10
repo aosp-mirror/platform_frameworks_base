@@ -64,6 +64,7 @@ import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
@@ -1068,7 +1069,7 @@ final class TaskRecord extends ConfigurationContainer {
     }
 
     boolean isOverHomeStack() {
-        return mTaskToReturnTo == HOME_ACTIVITY_TYPE || mTaskToReturnTo == RECENTS_ACTIVITY_TYPE;
+        return mTaskToReturnTo == HOME_ACTIVITY_TYPE;
     }
 
     boolean isResizeable() {
@@ -1685,7 +1686,10 @@ final class TaskRecord extends ConfigurationContainer {
      * The task will be moved (and stack focus changed) later if necessary.
      */
     int getLaunchStackId() {
-        if (!isApplicationTask()) {
+        if (isRecentsTask()) {
+            return RECENTS_STACK_ID;
+        }
+        if (isHomeTask()) {
             return HOME_STACK_ID;
         }
         if (mBounds != null) {
@@ -1707,6 +1711,7 @@ final class TaskRecord extends ConfigurationContainer {
 
         final int stackId = mStack.mStackId;
         if (stackId == HOME_STACK_ID
+                || stackId == RECENTS_STACK_ID
                 || stackId == FULLSCREEN_WORKSPACE_STACK_ID
                 || (stackId == DOCKED_STACK_ID && !isResizeable())) {
             return isResizeable() ? mStack.mBounds : null;
