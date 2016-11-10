@@ -288,7 +288,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             // Create a delete action for the notification
             PendingIntent deleteAction = PendingIntent.getBroadcast(context,  0,
                     new Intent(context, GlobalScreenshot.DeleteScreenshotReceiver.class)
-                            .putExtra(GlobalScreenshot.SCREENSHOT_URI_ID, uri.toString()),
+                            .putExtra(GlobalScreenshot.SCREENSHOT_URI_ID, uri != null ? uri.toString() : null),
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
             Notification.Action.Builder deleteActionBuilder = new Notification.Action.Builder(
                     R.drawable.ic_screenshot_delete,
