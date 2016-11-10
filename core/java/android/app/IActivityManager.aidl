@@ -562,6 +562,8 @@ interface IActivityManager {
     boolean updateDisplayOverrideConfiguration(in Configuration values, int displayId) = 401;
     void unregisterTaskStackListener(ITaskStackListener listener) = 402;
     void moveStackToDisplay(int stackId, int displayId) = 403;
+    void enterPictureInPictureModeWithAspectRatio(in IBinder token, float aspectRatio) = 404;
+    void setPictureInPictureAspectRatio(in IBinder token, float aspectRatio) = 405;
 
     // Please keep these transaction codes the same -- they are also
     // sent by C++ code. when a new method is added, use the next available transaction id.

@@ -96,8 +96,8 @@ public class BoundsAnimationController {
     private final class BoundsAnimator extends ValueAnimator
             implements ValueAnimator.AnimatorUpdateListener, ValueAnimator.AnimatorListener {
         private final AnimateBoundsUser mTarget;
-        private final Rect mFrom;
-        private final Rect mTo;
+        private final Rect mFrom = new Rect();
+        private final Rect mTo = new Rect();
         private final Rect mTmpRect = new Rect();
         private final Rect mTmpTaskBounds = new Rect();
         private final boolean mMoveToFullScreen;
@@ -117,8 +117,8 @@ public class BoundsAnimationController {
                 boolean moveToFullScreen, boolean replacement) {
             super();
             mTarget = target;
-            mFrom = from;
-            mTo = to;
+            mFrom.set(from);
+            mTo.set(to);
             mMoveToFullScreen = moveToFullScreen;
             mReplacement = replacement;
             addUpdateListener(this);
