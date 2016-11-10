@@ -75,7 +75,7 @@ public class StackStateAnimator {
 
     private final Interpolator mHeadsUpAppearInterpolator;
     private final int mGoToFullShadeAppearingTranslation;
-    private final StackViewState mTmpState = new StackViewState();
+    private final ExpandableViewState mTmpState = new ExpandableViewState();
     public NotificationStackScrollLayout mHostLayout;
     private ArrayList<NotificationStackScrollLayout.AnimationEvent> mNewEvents =
             new ArrayList<>();
@@ -122,7 +122,7 @@ public class StackStateAnimator {
         for (int i = 0; i < childCount; i++) {
             final ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
 
-            StackViewState viewState = finalState.getViewStateForView(child);
+            ExpandableViewState viewState = finalState.getViewStateForView(child);
             if (viewState == null || child.getVisibility() == View.GONE
                     || applyWithoutAnimation(child, viewState, finalState)) {
                 continue;
@@ -145,7 +145,7 @@ public class StackStateAnimator {
      *
      * @return true if no animation should be performed
      */
-    private boolean applyWithoutAnimation(ExpandableView child, StackViewState viewState,
+    private boolean applyWithoutAnimation(ExpandableView child, ExpandableViewState viewState,
             StackScrollState finalState) {
         if (mShadeExpanded) {
             return false;
@@ -162,7 +162,7 @@ public class StackStateAnimator {
             // This is another headsUp which might move. Let's animate!
             return false;
         }
-        finalState.applyState(child, viewState);
+        viewState.applyToView(child);
         return true;
     }
 
@@ -171,7 +171,7 @@ public class StackStateAnimator {
         for (int i = childCount - 1; i >= 0; i--) {
             final ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
 
-            StackViewState viewState = finalState.getViewStateForView(child);
+            ExpandableViewState viewState = finalState.getViewStateForView(child);
             if (viewState == null || child.getVisibility() == View.GONE) {
                 continue;
             }
@@ -184,16 +184,16 @@ public class StackStateAnimator {
 
 
     /**
-     * Start an animation to the given  {@link StackViewState}.
+     * Start an animation to the given  {@link ExpandableViewState}.
      *
      * @param child the child to start the animation on
-     * @param viewState the {@link StackViewState} of the view to animate to
+     * @param viewState the {@link ExpandableViewState} of the view to animate to
      * @param finalState the final state after the animation
      * @param i the index of the view; only relevant if the view is the speed bump and is
      *          ignored otherwise
      * @param fixedDelay a fixed delay if desired or -1 if the delay should be calculated
      */
-    public void startStackAnimations(final ExpandableView child, StackViewState viewState,
+    public void startStackAnimations(final ExpandableView child, ExpandableViewState viewState,
             StackScrollState finalState, int i, long fixedDelay) {
         boolean wasAdded = mNewAddChildren.contains(child);
         long duration = mCurrentLength;
@@ -270,7 +270,7 @@ public class StackStateAnimator {
      * Start an animation to a new {@link ViewState}.
      *
      * @param child the child to start the animation on
-     * @param viewState the  {@link StackViewState} of the view to animate to
+     * @param viewState the  {@link ExpandableViewState} of the view to animate to
      * @param delay a fixed delay
      * @param duration the duration of the animation
      */
@@ -319,7 +319,7 @@ public class StackStateAnimator {
         }
     }
 
-    private long calculateChildAnimationDelay(StackViewState viewState,
+    private long calculateChildAnimationDelay(ExpandableViewState viewState,
             StackScrollState finalState) {
         if (mAnimationFilter.hasDarkEvent) {
             return calculateDelayDark(viewState);
@@ -374,7 +374,7 @@ public class StackStateAnimator {
         return minDelay;
     }
 
-    private long calculateDelayDark(StackViewState viewState) {
+    private long calculateDelayDark(ExpandableViewState viewState) {
         int referenceIndex;
         if (mAnimationFilter.darkAnimationOriginIndex ==
                 NotificationStackScrollLayout.AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE) {
@@ -388,14 +388,14 @@ public class StackStateAnimator {
         return Math.abs(referenceIndex - viewState.notGoneIndex) * ANIMATION_DELAY_PER_ELEMENT_DARK;
     }
 
-    private long calculateDelayGoToFullShade(StackViewState viewState) {
+    private long calculateDelayGoToFullShade(ExpandableViewState viewState) {
         float index = viewState.notGoneIndex;
         index = (float) Math.pow(index, 0.7f);
         return (long) (index * ANIMATION_DELAY_PER_ELEMENT_GO_TO_FULL_SHADE);
     }
 
     private void startShadowAlphaAnimation(final ExpandableView child,
-            StackViewState viewState, long duration, long delay) {
+            ExpandableViewState viewState, long duration, long delay) {
         Float previousStartValue = getChildTag(child, TAG_START_SHADOW_ALPHA);
         Float previousEndValue = getChildTag(child, TAG_END_SHADOW_ALPHA);
         float newEndValue = viewState.shadowAlpha;
@@ -454,7 +454,7 @@ public class StackStateAnimator {
     }
 
     private void startHeightAnimation(final ExpandableView child,
-            StackViewState viewState, long duration, long delay) {
+            ExpandableViewState viewState, long duration, long delay) {
         Integer previousStartValue = getChildTag(child, TAG_START_HEIGHT);
         Integer previousEndValue = getChildTag(child, TAG_END_HEIGHT);
         int newEndValue = viewState.height;
@@ -532,7 +532,7 @@ public class StackStateAnimator {
     }
 
     private void startInsetAnimation(final ExpandableView child,
-            StackViewState viewState, long duration, long delay) {
+            ExpandableViewState viewState, long duration, long delay) {
         Integer previousStartValue = getChildTag(child, TAG_START_TOP_INSET);
         Integer previousEndValue = getChildTag(child, TAG_END_TOP_INSET);
         int newEndValue = viewState.clipTopAmount;
@@ -864,13 +864,13 @@ public class StackStateAnimator {
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_ADD) {
 
                 // This item is added, initialize it's properties.
-                StackViewState viewState = finalState
+                ExpandableViewState viewState = finalState
                         .getViewStateForView(changingView);
                 if (viewState == null) {
                     // The position for this child was never generated, let's continue.
                     continue;
                 }
-                finalState.applyState(changingView, viewState);
+                viewState.applyToView(changingView);
                 mNewAddChildren.add(changingView);
 
             } else if (event.animationType ==
@@ -882,7 +882,7 @@ public class StackStateAnimator {
 
                 // Find the amount to translate up. This is needed in order to understand the
                 // direction of the remove animation (either downwards or upwards)
-                StackViewState viewState = finalState
+                ExpandableViewState viewState = finalState
                         .getViewStateForView(event.viewAfterChangingView);
                 int actualHeight = changingView.getActualHeight();
                 // upwards by default
@@ -920,7 +920,7 @@ public class StackStateAnimator {
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR) {
                 // This item is added, initialize it's properties.
-                StackViewState viewState = finalState.getViewStateForView(changingView);
+                ExpandableViewState viewState = finalState.getViewStateForView(changingView);
                 mTmpState.copyFrom(viewState);
                 if (event.headsUpFromBottom) {
                     mTmpState.yTranslation = mHeadsUpAppearHeightBottom;
@@ -928,7 +928,7 @@ public class StackStateAnimator {
                     mTmpState.yTranslation = -mTmpState.height;
                 }
                 mHeadsUpAppearChildren.add(changingView);
-                finalState.applyState(changingView, mTmpState);
+                mTmpState.applyToView(changingView);
             } else if (event.animationType == NotificationStackScrollLayout
                             .AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR ||
                     event.animationType == NotificationStackScrollLayout

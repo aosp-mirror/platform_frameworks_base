@@ -541,15 +541,15 @@ public class NotificationStackScrollLayout extends ViewGroup
      * Returns the location the given child is currently rendered at.
      *
      * @param child the child to get the location for
-     * @return one of {@link StackViewState}'s <code>LOCATION_*</code> constants
+     * @return one of {@link ExpandableViewState}'s <code>LOCATION_*</code> constants
      */
     public int getChildLocation(View child) {
-        StackViewState childViewState = mCurrentStackScrollState.getViewStateForView(child);
+        ExpandableViewState childViewState = mCurrentStackScrollState.getViewStateForView(child);
         if (childViewState == null) {
-            return StackViewState.LOCATION_UNKNOWN;
+            return ExpandableViewState.LOCATION_UNKNOWN;
         }
         if (childViewState.gone) {
-            return StackViewState.LOCATION_GONE;
+            return ExpandableViewState.LOCATION_GONE;
         }
         return childViewState.location;
     }
@@ -1072,7 +1072,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                     row.getStatusBarNotification());
             mGroupExpandedForMeasure = false;
             row.setForceUnlocked(false);
-            StackViewState viewState = mCurrentStackScrollState.getViewStateForView(view);
+            ExpandableViewState viewState = mCurrentStackScrollState.getViewStateForView(view);
             if (viewState != null) {
                 // The view could have been removed
                 return Math.min(viewState.height, maxContentHeight);
@@ -2730,7 +2730,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                     row.setHeadsupDisappearRunning(false);
                 }
             } else {
-                StackViewState viewState = mCurrentStackScrollState.getViewStateForView(row);
+                ExpandableViewState viewState = mCurrentStackScrollState.getViewStateForView(row);
                 if (viewState == null) {
                     // A view state was never generated for this view, so we don't need to animate
                     // this. This may happen with notification children.
@@ -2755,7 +2755,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mAddedHeadsUpChildren.clear();
     }
 
-    private boolean shouldHunAppearFromBottom(StackViewState viewState) {
+    private boolean shouldHunAppearFromBottom(ExpandableViewState viewState) {
         if (viewState.yTranslation + viewState.height < mAmbientState.getMaxHeadsUpTranslation()) {
             return false;
         }

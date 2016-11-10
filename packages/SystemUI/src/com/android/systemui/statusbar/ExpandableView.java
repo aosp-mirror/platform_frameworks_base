@@ -25,6 +25,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.stack.ExpandableViewState;
+import com.android.systemui.statusbar.stack.StackScrollState;
 
 import java.util.ArrayList;
 
@@ -437,6 +439,10 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     public void setActualHeightAnimating(boolean animating) {}
+
+    public ExpandableViewState createNewViewState(StackScrollState stackScrollState) {
+        return new ExpandableViewState();
+    }
 
     /**
      * A listener notifying when {@link #getActualHeight} changes.

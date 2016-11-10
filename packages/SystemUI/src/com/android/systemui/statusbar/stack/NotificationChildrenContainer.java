@@ -412,7 +412,7 @@ public class NotificationChildrenContainer extends ViewGroup {
      * @param resultState the state to update
      * @param parentState the state of the parent
      */
-    public void getState(StackScrollState resultState, StackViewState parentState) {
+    public void getState(StackScrollState resultState, ExpandableViewState parentState) {
         int childCount = mChildren.size();
         int yPosition = mNotificationHeaderMargin;
         boolean firstChild = true;
@@ -449,7 +449,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                 firstChild = false;
             }
 
-            StackViewState childState = resultState.getViewStateForView(child);
+            ExpandableViewState childState = resultState.getViewStateForView(child);
             int intrinsicHeight = child.getIntrinsicHeight();
             if (childrenExpanded) {
                 // When a group is expanded and moving into bottom stack, the bottom visible child
@@ -530,7 +530,7 @@ public class NotificationChildrenContainer extends ViewGroup {
      * @return true if children after this one should be hidden.
      */
     private boolean updateChildStateForExpandedGroup(ExpandableNotificationRow child,
-            int parentHeight, StackViewState childState, int yPosition) {
+            int parentHeight, ExpandableViewState childState, int yPosition) {
         final int top = yPosition + child.getClipTopAmount();
         final int intrinsicHeight = child.getIntrinsicHeight();
         final int bottom = top + intrinsicHeight;
@@ -570,8 +570,8 @@ public class NotificationChildrenContainer extends ViewGroup {
                 || mNotificationParent.isGroupExpansionChanging();
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
-            StackViewState viewState = state.getViewStateForView(child);
-            state.applyState(child, viewState);
+            ExpandableViewState viewState = state.getViewStateForView(child);
+            viewState.applyToView(child);
 
             // layout the divider
             View divider = mDividers.get(i);
@@ -584,16 +584,16 @@ public class NotificationChildrenContainer extends ViewGroup {
             }
             tmpState.hidden = !dividersVisible;
             tmpState.alpha = alpha;
-            state.applyViewState(divider, tmpState);
+            tmpState.applyToView(divider);
             // There is no fake shadow to be drawn on the children
             child.setFakeShadowIntensity(0.0f, 0.0f, 0, 0);
         }
         if (mOverflowNumber != null) {
-            state.applyViewState(mOverflowNumber, mGroupOverFlowState);
+            mGroupOverFlowState.applyToView(mOverflowNumber);
             mNeverAppliedGroupState = false;
         }
         if (mNotificationHeader != null) {
-            state.applyViewState(mNotificationHeader, mHeaderViewState);
+            mHeaderViewState.applyToView(mNotificationHeader);
         }
     }
 
@@ -617,7 +617,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                 || mNotificationParent.isGroupExpansionChanging();
         for (int i = childCount - 1; i >= 0; i--) {
             ExpandableNotificationRow child = mChildren.get(i);
-            StackViewState viewState = state.getViewStateForView(child);
+            ExpandableViewState viewState = state.getViewStateForView(child);
             stateAnimator.startStackAnimations(child, viewState, state, -1, baseDelay);
 
             // layout the divider
@@ -639,7 +639,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             if (mNeverAppliedGroupState) {
                 float alpha = mGroupOverFlowState.alpha;
                 mGroupOverFlowState.alpha = 0;
-                state.applyViewState(mOverflowNumber, mGroupOverFlowState);
+                mGroupOverFlowState.applyToView(mOverflowNumber);
                 mGroupOverFlowState.alpha = alpha;
                 mNeverAppliedGroupState = false;
             }
@@ -647,7 +647,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                     baseDelay, duration);
         }
         if (mNotificationHeader != null) {
-            state.applyViewState(mNotificationHeader, mHeaderViewState);
+            mHeaderViewState.applyToView(mNotificationHeader);
         }
     }
 

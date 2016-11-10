@@ -54,7 +54,7 @@ import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackScrollState;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
-import com.android.systemui.statusbar.stack.StackViewState;
+import com.android.systemui.statusbar.stack.ExpandableViewState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -459,7 +459,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void getChildrenStates(StackScrollState resultState) {
         if (mIsSummaryWithChildren) {
-            StackViewState parentState = resultState.getViewStateForView(this);
+            ExpandableViewState parentState = resultState.getViewStateForView(this);
             mChildrenContainer.getState(resultState, parentState);
         }
     }
@@ -1678,5 +1678,31 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public interface OnExpandClickListener {
         void onExpandClicked(NotificationData.Entry clickedEntry, boolean nowExpanded);
+    }
+
+    @Override
+    public ExpandableViewState createNewViewState(StackScrollState stackScrollState) {
+        return new NotificationViewState(stackScrollState);
+    }
+
+    public static class NotificationViewState extends ExpandableViewState {
+
+        private final StackScrollState mOverallState;
+
+        private NotificationViewState(StackScrollState stackScrollState) {
+            mOverallState = stackScrollState;
+        }
+
+        @Override
+        public void applyToView(View view) {
+            super.applyToView(view);
+            if (view instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+                if (this.isBottomClipped) {
+                    row.setClipToActualHeight(true);
+                }
+                row.applyChildrenState(mOverallState);
+            }
+        }
     }
 }
