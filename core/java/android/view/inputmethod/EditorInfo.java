@@ -34,6 +34,54 @@ import java.util.Arrays;
  */
 public class EditorInfo implements InputType, Parcelable {
     /**
+     * Masks for {@link inputType}
+     *
+     * <pre>
+     * |-------|-------|-------|-------|
+     *                              1111 TYPE_MASK_CLASS
+     *                      11111111     TYPE_MASK_VARIATION
+     *          111111111111             TYPE_MASK_FLAGS
+     * |-------|-------|-------|-------|
+     *                                   TYPE_NULL
+     * |-------|-------|-------|-------|
+     *                                 1 TYPE_CLASS_TEXT
+     *                             1     TYPE_TEXT_VARIATION_URI
+     *                            1      TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+     *                            11     TYPE_TEXT_VARIATION_EMAIL_SUBJECT
+     *                           1       TYPE_TEXT_VARIATION_SHORT_MESSAGE
+     *                           1 1     TYPE_TEXT_VARIATION_LONG_MESSAGE
+     *                           11      TYPE_TEXT_VARIATION_PERSON_NAME
+     *                           111     TYPE_TEXT_VARIATION_POSTAL_ADDRESS
+     *                          1        TYPE_TEXT_VARIATION_PASSWORD
+     *                          1  1     TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+     *                          1 1      TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
+     *                          1 11     TYPE_TEXT_VARIATION_FILTER
+     *                          11       TYPE_TEXT_VARIATION_PHONETIC
+     *                          11 1     TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+     *                          111      TYPE_TEXT_VARIATION_WEB_PASSWORD
+     *                     1             TYPE_TEXT_FLAG_CAP_CHARACTERS
+     *                    1              TYPE_TEXT_FLAG_CAP_WORDS
+     *                   1               TYPE_TEXT_FLAG_CAP_SENTENCES
+     *                  1                TYPE_TEXT_FLAG_AUTO_CORRECT
+     *                 1                 TYPE_TEXT_FLAG_AUTO_COMPLETE
+     *                1                  TYPE_TEXT_FLAG_MULTI_LINE
+     *               1                   TYPE_TEXT_FLAG_IME_MULTI_LINE
+     *              1                    TYPE_TEXT_FLAG_NO_SUGGESTIONS
+     * |-------|-------|-------|-------|
+     *                                1  TYPE_CLASS_NUMBER
+     *                             1     TYPE_NUMBER_VARIATION_PASSWORD
+     *                     1             TYPE_NUMBER_FLAG_SIGNED
+     *                    1              TYPE_NUMBER_FLAG_DECIMAL
+     * |-------|-------|-------|-------|
+     *                                11 TYPE_CLASS_PHONE
+     * |-------|-------|-------|-------|
+     *                               1   TYPE_CLASS_DATETIME
+     *                             1     TYPE_DATETIME_VARIATION_DATE
+     *                            1      TYPE_DATETIME_VARIATION_TIME
+     * |-------|-------|-------|-------|</pre>
+     */
+
+    /**
      * The content type of the text box, whose bits are defined by
      * {@link InputType}.
      *
@@ -206,6 +254,31 @@ public class EditorInfo implements InputType, Parcelable {
      * Generic unspecified type for {@link #imeOptions}.
      */
     public static final int IME_NULL = 0x00000000;
+
+    /**
+     * Masks for {@link imeOptions}
+     *
+     * <pre>
+     * |-------|-------|-------|-------|
+     *                              1111 IME_MASK_ACTION
+     * |-------|-------|-------|-------|
+     *                                   IME_ACTION_UNSPECIFIED
+     *                                 1 IME_ACTION_NONE
+     *                                1  IME_ACTION_GO
+     *                                11 IME_ACTION_SEARCH
+     *                               1   IME_ACTION_SEND
+     *                               1 1 IME_ACTION_NEXT
+     *                               11  IME_ACTION_DONE
+     *                               111 IME_ACTION_PREVIOUS
+     *        1                          IME_FLAG_NO_FULLSCREEN
+     *       1                           IME_FLAG_NAVIGATE_PREVIOUS
+     *      1                            IME_FLAG_NAVIGATE_NEXT
+     *     1                             IME_FLAG_NO_EXTRACT_UI
+     *    1                              IME_FLAG_NO_ACCESSORY_ACTION
+     *   1                               IME_FLAG_NO_ENTER_ACTION
+     *  1                                IME_FLAG_FORCE_ASCII
+     * |-------|-------|-------|-------|</pre>
+     */
 
     /**
      * Extended type information for the editor, to help the IME better
