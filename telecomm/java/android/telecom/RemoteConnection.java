@@ -408,6 +408,8 @@ public final class RemoteConnection {
 
         private final IVideoProvider mVideoProviderBinder;
 
+        private final String mCallingPackage;
+
         /**
          * ConcurrentHashMap constructor params: 8 is initial table size, 0.9f is
          * load factor before resizing, 1 means we only expect a single thread to
@@ -416,8 +418,9 @@ public final class RemoteConnection {
         private final Set<Callback> mCallbacks = Collections.newSetFromMap(
                 new ConcurrentHashMap<Callback, Boolean>(8, 0.9f, 1));
 
-        VideoProvider(IVideoProvider videoProviderBinder) {
+        VideoProvider(IVideoProvider videoProviderBinder, String callingPackage) {
             mVideoProviderBinder = videoProviderBinder;
+            mCallingPackage = callingPackage;
             try {
                 mVideoProviderBinder.addVideoCallback(mVideoCallbackServant.getStub().asBinder());
             } catch (RemoteException e) {
@@ -452,7 +455,7 @@ public final class RemoteConnection {
          */
         public void setCamera(String cameraId) {
             try {
-                mVideoProviderBinder.setCamera(cameraId);
+                mVideoProviderBinder.setCamera(cameraId, mCallingPackage);
             } catch (RemoteException e) {
             }
         }
@@ -628,7 +631,7 @@ public final class RemoteConnection {
      * @hide
      */
     RemoteConnection(String callId, IConnectionService connectionService,
-            ParcelableConnection connection) {
+            ParcelableConnection connection, String callingPackage) {
         mConnectionId = callId;
         mConnectionService = connectionService;
         mConnected = true;
@@ -640,7 +643,7 @@ public final class RemoteConnection {
         mVideoState = connection.getVideoState();
         IVideoProvider videoProvider = connection.getVideoProvider();
         if (videoProvider != null) {
-            mVideoProvider = new RemoteConnection.VideoProvider(videoProvider);
+            mVideoProvider = new RemoteConnection.VideoProvider(videoProvider, callingPackage);
         } else {
             mVideoProvider = null;
         }

@@ -283,9 +283,13 @@ final class RemoteConnectionService {
         @Override
         public void setVideoProvider(String callId, IVideoProvider videoProvider,
                 Session.Info sessionInfo) {
+
+            String callingPackage = mOurConnectionServiceImpl.getApplicationContext()
+                    .getOpPackageName();
             RemoteConnection.VideoProvider remoteVideoProvider = null;
             if (videoProvider != null) {
-                remoteVideoProvider = new RemoteConnection.VideoProvider(videoProvider);
+                remoteVideoProvider = new RemoteConnection.VideoProvider(videoProvider,
+                        callingPackage);
             }
             findConnectionForAction(callId, "setVideoProvider")
                     .setVideoProvider(remoteVideoProvider);
@@ -351,8 +355,10 @@ final class RemoteConnectionService {
         @Override
         public void addExistingConnection(String callId, ParcelableConnection connection,
                 Session.Info sessionInfo) {
+            String callingPackage = mOurConnectionServiceImpl.getApplicationContext().
+                    getOpPackageName();
             RemoteConnection remoteConnection = new RemoteConnection(callId,
-                    mOutgoingConnectionServiceRpc, connection);
+                    mOutgoingConnectionServiceRpc, connection, callingPackage);
             mConnectionById.put(callId, remoteConnection);
             remoteConnection.registerCallback(new RemoteConnection.Callback() {
                 @Override
