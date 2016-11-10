@@ -4321,13 +4321,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 translateX = 0;
                 translateY = 0;
             }
+            mEdgeGlowTop.setSize(width, height);
+            mEdgeGlowBottom.setSize(width, height);
             if (!mEdgeGlowTop.isFinished()) {
                 final int restoreCount = canvas.save();
                 canvas.clipRect(translateX, translateY,
                          translateX + width ,translateY + mEdgeGlowTop.getMaxHeight());
                 final int edgeY = Math.min(0, scrollY + mFirstPositionDistanceGuess) + translateY;
                 canvas.translate(translateX, edgeY);
-                mEdgeGlowTop.setSize(width, height);
                 if (mEdgeGlowTop.draw(canvas)) {
                     invalidateTopGlow();
                 }
@@ -4342,7 +4343,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         - (clipToPadding ? mPaddingBottom : 0);
                 canvas.translate(edgeX, edgeY);
                 canvas.rotate(180, width, 0);
-                mEdgeGlowBottom.setSize(width, height);
                 if (mEdgeGlowBottom.draw(canvas)) {
                     invalidateBottomGlow();
                 }
