@@ -290,10 +290,8 @@ import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
-import static android.provider.Settings.Global.LENIENT_BACKGROUND_CHECK;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.provider.Settings.System.FONT_SCALE;
-import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
@@ -1360,7 +1358,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     String mOrigDebugApp = null;
     boolean mOrigWaitForDebugger = false;
     boolean mAlwaysFinishActivities = false;
-    boolean mLenientBackgroundCheck = false;
     boolean mForceResizableActivities;
     boolean mSupportsMultiWindow;
     boolean mSupportsFreeformWindowManagement;
@@ -4145,7 +4142,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             if ((reg.which & ActivityManager.UID_OBSERVER_IDLE) != 0) {
                                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                                         "UID idle uid=" + item.uid);
-                                observer.onUidIdle(item.uid);
+                                observer.onUidIdle(item.uid, item.ephemeral);
                             }
                             if (VALIDATE_UID_STATES && i == 0) {
                                 if (validateUid != null) {
@@ -4167,7 +4164,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             if ((reg.which & ActivityManager.UID_OBSERVER_GONE) != 0) {
                                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                                         "UID gone uid=" + item.uid);
-                                observer.onUidGone(item.uid);
+                                observer.onUidGone(item.uid, item.ephemeral);
                             }
                             if (reg.lastProcStates != null) {
                                 reg.lastProcStates.delete(item.uid);
@@ -7792,37 +7789,42 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public int getAppStartMode(int uid, String packageName) {
         synchronized (this) {
-            return checkAllowBackgroundLocked(uid, packageName, -1, true);
+            return checkAllowBackgroundLocked(uid, packageName, -1, false);
         }
     }
 
     int checkAllowBackgroundLocked(int uid, String packageName, int callingPid,
-            boolean allowWhenForeground) {
+            boolean alwaysRestrict) {
         UidRecord uidRec = mActiveUids.get(uid);
-        if (!mLenientBackgroundCheck) {
-            if (!allowWhenForeground || uidRec == null
-                    || uidRec.curProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND) {
+        if (uidRec == null || alwaysRestrict || uidRec.idle) {
+            boolean ephemeral;
+            if (uidRec == null) {
+                ephemeral = getPackageManagerInternalLocked().isPackageEphemeral(
+                        UserHandle.getUserId(uid), packageName);
+            } else {
+                ephemeral = uidRec.ephemeral;
+            }
+
+            if (ephemeral) {
+                // We are hard-core about ephemeral apps not running in the background.
+                return ActivityManager.APP_START_MODE_DISABLED;
+            } else {
+                if (callingPid >= 0) {
+                    ProcessRecord proc;
+                    synchronized (mPidsSelfLocked) {
+                        proc = mPidsSelfLocked.get(callingPid);
+                    }
+                    if (proc != null && proc.curProcState
+                            < ActivityManager.PROCESS_STATE_RECEIVER) {
+                        // Whoever is instigating this is in the foreground, so we will allow it
+                        // to go through.
+                        return ActivityManager.APP_START_MODE_NORMAL;
+                    }
+                }
                 if (mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND, uid,
                         packageName) != AppOpsManager.MODE_ALLOWED) {
                     return ActivityManager.APP_START_MODE_DELAYED;
                 }
-            }
-
-        } else if (uidRec == null || uidRec.idle) {
-            if (callingPid >= 0) {
-                ProcessRecord proc;
-                synchronized (mPidsSelfLocked) {
-                    proc = mPidsSelfLocked.get(callingPid);
-                }
-                if (proc != null && proc.curProcState < ActivityManager.PROCESS_STATE_RECEIVER) {
-                    // Whoever is instigating this is in the foreground, so we will allow it
-                    // to go through.
-                    return ActivityManager.APP_START_MODE_NORMAL;
-                }
-            }
-            if (mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND, uid, packageName)
-                    != AppOpsManager.MODE_ALLOWED) {
-                return ActivityManager.APP_START_MODE_DELAYED;
             }
         }
         return ActivityManager.APP_START_MODE_NORMAL;
@@ -11870,25 +11872,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void setLenientBackgroundCheck(boolean enabled) {
-        enforceCallingPermission(android.Manifest.permission.SET_PROCESS_LIMIT,
-                "setLenientBackgroundCheck()");
-
-        long ident = Binder.clearCallingIdentity();
-        try {
-            Settings.Global.putInt(
-                    mContext.getContentResolver(),
-                    Settings.Global.LENIENT_BACKGROUND_CHECK, enabled ? 1 : 0);
-
-            synchronized (this) {
-                mLenientBackgroundCheck = enabled;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    @Override
     public void setActivityController(IActivityController controller, boolean imAMonkey) {
         enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
                 "setActivityController()");
@@ -12987,8 +12970,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean waitForDebugger = Settings.Global.getInt(resolver, WAIT_FOR_DEBUGGER, 0) != 0;
         final boolean alwaysFinishActivities =
                 Settings.Global.getInt(resolver, ALWAYS_FINISH_ACTIVITIES, 0) != 0;
-        final boolean lenientBackgroundCheck =
-                Settings.Global.getInt(resolver, LENIENT_BACKGROUND_CHECK, 0) != 0;
         final boolean forceRtl = Settings.Global.getInt(resolver, DEVELOPMENT_FORCE_RTL, 0) != 0;
         final boolean forceResizable = Settings.Global.getInt(
                 resolver, DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
@@ -13009,7 +12990,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mDebugApp = mOrigDebugApp = debugApp;
             mWaitForDebugger = mOrigWaitForDebugger = waitForDebugger;
             mAlwaysFinishActivities = alwaysFinishActivities;
-            mLenientBackgroundCheck = lenientBackgroundCheck;
             mSupportsLeanbackOnly = supportsLeanbackOnly;
             mForceResizableActivities = forceResizable;
             if (supportsMultiWindow || forceResizable) {
@@ -14782,9 +14762,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         if (dumpPackage == null) {
-            if (mAlwaysFinishActivities || mLenientBackgroundCheck) {
-                pw.println("  mAlwaysFinishActivities=" + mAlwaysFinishActivities
-                        + " mLenientBackgroundCheck=" + mLenientBackgroundCheck);
+            if (mAlwaysFinishActivities) {
+                pw.println("  mAlwaysFinishActivities=" + mAlwaysFinishActivities);
             }
             if (mController != null) {
                 pw.println("  mController=" + mController
@@ -20709,6 +20688,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         pendingChange.change = change;
         pendingChange.processState = uidRec != null
                 ? uidRec.setProcState : ActivityManager.PROCESS_STATE_NONEXISTENT;
+        pendingChange.ephemeral = uidRec.ephemeral;
 
         // Directly update the power manager, since we sit on top of it and it is critical
         // it be kept in sync (so wake locks will be held as soon as appropriate).
@@ -21076,8 +21056,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } else {
                     // Keeping this process, update its uid.
                     final UidRecord uidRec = app.uidRecord;
-                    if (uidRec != null && uidRec.curProcState > app.curProcState) {
-                        uidRec.curProcState = app.curProcState;
+                    if (uidRec != null) {
+                        uidRec.ephemeral = app.info.isEphemeralApp();
+                        if (uidRec.curProcState > app.curProcState) {
+                            uidRec.curProcState = app.curProcState;
+                        }
                     }
                 }
 
@@ -21332,6 +21315,63 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new RuntimeException("here").fillInStackTrace());
             } else {
                 Slog.d(TAG_OOM_ADJ, "Did OOM ADJ in " + duration + "ms");
+            }
+        }
+    }
+
+    @Override
+    public void makePackageIdle(String packageName, int userId) {
+        if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: makePackageIdle() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.FORCE_STOP_PACKAGES;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        final int callingPid = Binder.getCallingPid();
+        userId = mUserController.handleIncomingUser(callingPid, Binder.getCallingUid(),
+                userId, true, ALLOW_FULL_ONLY, "makePackageIdle", null);
+        long callingId = Binder.clearCallingIdentity();
+        synchronized(this) {
+            try {
+                IPackageManager pm = AppGlobals.getPackageManager();
+                int pkgUid = -1;
+                try {
+                    pkgUid = pm.getPackageUid(packageName, MATCH_UNINSTALLED_PACKAGES
+                            | MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM);
+                } catch (RemoteException e) {
+                }
+                if (pkgUid == -1) {
+                    throw new IllegalArgumentException("Unknown package name " + packageName);
+                }
+
+                if (mLocalPowerManager != null) {
+                    mLocalPowerManager.startUidChanges();
+                }
+                final int appId = UserHandle.getAppId(pkgUid);
+                final int N = mActiveUids.size();
+                for (int i=N-1; i>=0; i--) {
+                    final UidRecord uidRec = mActiveUids.valueAt(i);
+                    final long bgTime = uidRec.lastBackgroundTime;
+                    if (bgTime > 0 && !uidRec.idle) {
+                        if (UserHandle.getAppId(uidRec.uid) == appId) {
+                            if (userId == UserHandle.USER_ALL ||
+                                    userId == UserHandle.getUserId(uidRec.uid)) {
+                                uidRec.idle = true;
+                                Slog.w(TAG, "Idling uid " + UserHandle.formatUid(uidRec.uid)
+                                        + " from package " + packageName + " user " + userId);
+                                doStopUidLocked(uidRec.uid, uidRec);
+                            }
+                        }
+                    }
+                }
+            } finally {
+                if (mLocalPowerManager != null) {
+                    mLocalPowerManager.finishUidChanges();
+                }
+                Binder.restoreCallingIdentity(callingId);
             }
         }
     }

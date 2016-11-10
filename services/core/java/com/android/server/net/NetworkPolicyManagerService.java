@@ -689,7 +689,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
 
-        @Override public void onUidGone(int uid) throws RemoteException {
+        @Override public void onUidGone(int uid, boolean disabled) throws RemoteException {
             synchronized (mUidRulesFirstLock) {
                 removeUidStateUL(uid);
             }
@@ -698,7 +698,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         @Override public void onUidActive(int uid) throws RemoteException {
         }
 
-        @Override public void onUidIdle(int uid) throws RemoteException {
+        @Override public void onUidIdle(int uid, boolean disabled) throws RemoteException {
         }
     };
 

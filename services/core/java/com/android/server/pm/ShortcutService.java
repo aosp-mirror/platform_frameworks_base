@@ -467,7 +467,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
-        public void onUidGone(int uid) throws RemoteException {
+        public void onUidGone(int uid, boolean disabled) throws RemoteException {
             handleOnUidStateChanged(uid, ActivityManager.PROCESS_STATE_NONEXISTENT);
         }
 
@@ -476,7 +476,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
-        public void onUidIdle(int uid) throws RemoteException {
+        public void onUidIdle(int uid, boolean disabled) throws RemoteException {
         }
     };
 

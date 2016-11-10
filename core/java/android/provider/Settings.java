@@ -8629,13 +8629,6 @@ public final class Settings {
         public static final String ALWAYS_FINISH_ACTIVITIES = "always_finish_activities";
 
         /**
-         * @hide
-         * If not 0, the activity manager will implement a looser version of background
-         * check that is more compatible with existing apps.
-         */
-        public static final String LENIENT_BACKGROUND_CHECK = "lenient_background_check";
-
-        /**
          * Use Dock audio output for media:
          *      0 = disabled
          *      1 = enabled

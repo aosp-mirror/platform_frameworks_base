@@ -499,7 +499,7 @@ interface IActivityManager {
     boolean supportsLocalVoiceInteraction() = 365;
     void notifyPinnedStackAnimationEnded() = 366;
     void removeStack(int stackId) = 367;
-    void setLenientBackgroundCheck(boolean enabled) = 368;
+    void makePackageIdle(String packageName, int userId) = 368;
     int getMemoryTrimLevel() = 369;
     /**
      * Resizes the pinned stack.

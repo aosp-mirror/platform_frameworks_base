@@ -102,7 +102,7 @@ public class ActivityManager {
         }
 
         @Override
-        public void onUidGone(int uid) {
+        public void onUidGone(int uid, boolean disabled) {
             mListener.onUidImportance(uid, RunningAppProcessInfo.IMPORTANCE_GONE);
         }
 
@@ -111,7 +111,7 @@ public class ActivityManager {
         }
 
         @Override
-        public void onUidIdle(int uid) {
+        public void onUidIdle(int uid, boolean disabled) {
         }
     }
 
