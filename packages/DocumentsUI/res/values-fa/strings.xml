@@ -36,8 +36,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"پنجره جدید"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"کپی"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"جای‌گذاری"</string>
-    <string name="menu_advanced_show" msgid="4693652895715631401">"نمایش فضای ذخیره‌سازی داخلی"</string>
-    <string name="menu_advanced_hide" msgid="4218809952721972589">"پنهان کردن فضای ذخیره‌سازی داخلی"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"نمایش حافظه داخلی"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"پنهان کردن حافظه داخلی"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"نمایش اندازه فایل"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"پنهان کردن اندازه فایل"</string>
     <string name="button_select" msgid="527196987259139214">"انتخاب"</string>
@@ -112,7 +112,7 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"بعضی از فایل‌ها تبدیل شدند"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"به <xliff:g id="APPNAME"><b>^1</b></xliff:g> اجازه داده شود به فهرست راهنمای <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> در <xliff:g id="STORAGE"><i>^3</i></xliff:g> دسترسی داشته باشد؟"</string>
     <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"به <xliff:g id="APPNAME"><b>^1</b></xliff:g> اجازه دسترسی به دایرکتوری <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> داده شود؟"</string>
-    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"به <xliff:g id="APPNAME"><b>^1</b></xliff:g> اجازه می‌دهید به داده‌هایتان دسترسی پیدا کند، از جمله عکس‌ها و ویدیوهایتان در <xliff:g id="STORAGE"><i>^2</i></xliff:g>؟"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"به <xliff:g id="APPNAME"><b>^1</b></xliff:g> اجازه می‌دهید به داده‌هایتان دسترسی پیدا کند، از جمله عکس‌ها و ویدئوهایتان در <xliff:g id="STORAGE"><i>^2</i></xliff:g>؟"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"دوباره سؤال نشود"</string>
     <string name="allow" msgid="7225948811296386551">"ارزیابی‌شده"</string>
     <string name="deny" msgid="2081879885755434506">"اجازه ندارد"</string>

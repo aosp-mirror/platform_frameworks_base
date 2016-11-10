@@ -96,7 +96,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> dosya silinemedi</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> dosya silinemedi</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="6268189413228855582">"Ayrıntıları görmek için hafifçe dokunun"</string>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Ayrıntıları görmek için dokunun"</string>
     <string name="close" msgid="3043722427445528732">"Kapat"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Şu dosyalar kopyalanamadı: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Şu dosyalar taşınamadı: <xliff:g id="LIST">%1$s</xliff:g>"</string>
