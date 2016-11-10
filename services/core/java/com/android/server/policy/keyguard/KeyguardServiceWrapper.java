@@ -39,9 +39,10 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     private IKeyguardService mService;
     private String TAG = "KeyguardServiceWrapper";
 
-    public KeyguardServiceWrapper(Context context, IKeyguardService service) {
+    public KeyguardServiceWrapper(Context context, IKeyguardService service,
+            KeyguardStateMonitor.StateCallback callback) {
         mService = service;
-        mKeyguardStateMonitor = new KeyguardStateMonitor(context, service);
+        mKeyguardStateMonitor = new KeyguardStateMonitor(context, service, callback);
     }
 
     @Override // Binder interface

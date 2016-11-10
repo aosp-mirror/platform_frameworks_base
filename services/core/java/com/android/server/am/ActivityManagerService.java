@@ -22157,6 +22157,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             // no need to synchronize(this) just to read & return the value
             return mSystemReady;
         }
+
+        @Override
+        public void notifyKeyguardTrustedChanged() {
+            synchronized (ActivityManagerService.this) {
+                if (mKeyguardController.isKeyguardShowing()) {
+                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                }
+            }
+        }
     }
 
     private final class SleepTokenImpl extends SleepToken {

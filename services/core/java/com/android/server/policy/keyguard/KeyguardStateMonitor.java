@@ -49,10 +49,12 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
     private int mCurrentUserId;
 
     private final LockPatternUtils mLockPatternUtils;
+    private final StateCallback mCallback;
 
-    public KeyguardStateMonitor(Context context, IKeyguardService service) {
+    public KeyguardStateMonitor(Context context, IKeyguardService service, StateCallback callback) {
         mLockPatternUtils = new LockPatternUtils(context);
         mCurrentUserId = ActivityManager.getCurrentUser();
+        mCallback = callback;
 
         try {
             service.addStateMonitorCallback(this);
@@ -107,11 +109,16 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
     @Override // Binder interface
     public void onTrustedChanged(boolean trusted) {
         mTrusted = trusted;
+        mCallback.onTrustedChanged();
     }
 
     @Override // Binder interface
     public void onHasLockscreenWallpaperChanged(boolean hasLockscreenWallpaper) {
         mHasLockscreenWallpaper = hasLockscreenWallpaper;
+    }
+
+    public interface StateCallback {
+        void onTrustedChanged();
     }
 
     public void dump(String prefix, PrintWriter pw) {

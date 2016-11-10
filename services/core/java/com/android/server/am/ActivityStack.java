@@ -1806,8 +1806,9 @@ final class ActivityStack extends ConfigurationContainer {
         final boolean keyguardShowing = mStackSupervisor.mKeyguardController.isKeyguardShowing();
         final boolean keyguardLocked = mStackSupervisor.mKeyguardController.isKeyguardLocked();
         final boolean showWhenLocked = r.hasShowWhenLockedWindows();
+        final boolean dismissKeyguard = r.hasDismissKeyguardWindows();
         if (shouldBeVisible) {
-            if (r.hasDismissKeyguardWindows() && mTopDismissingKeyguardActivity == null) {
+            if (dismissKeyguard && mTopDismissingKeyguardActivity == null) {
                 mTopDismissingKeyguardActivity = r;
             }
 
@@ -1819,8 +1820,10 @@ final class ActivityStack extends ConfigurationContainer {
         }
         if (keyguardShowing) {
 
-            // If keyguard is showing, nothing is visible.
-            return false;
+            // If keyguard is showing, nothing is visible, except if we are able to dismiss Keyguard
+            // right away.
+            return shouldBeVisible && mStackSupervisor.mKeyguardController
+                    .canShowActivityWhileKeyguardShowing(dismissKeyguard);
         } else if (keyguardLocked) {
 
             // Show when locked windows above keyguard.

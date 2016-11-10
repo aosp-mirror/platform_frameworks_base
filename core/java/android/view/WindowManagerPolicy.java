@@ -509,6 +509,11 @@ public interface WindowManagerPolicy {
          * Notifies window manager that {@link #isShowingDreamLw} has changed.
          */
         void notifyShowingDreamChanged();
+
+        /**
+         * Notifies window manager that {@link #isKeyguardTrustedLw} has changed.
+         */
+        void notifyKeyguardTrustedChanged();
     }
 
     public interface PointerEventListener {

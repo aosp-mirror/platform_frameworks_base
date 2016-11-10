@@ -3576,6 +3576,11 @@ public class WindowManagerService extends IWindowManager.Stub
         notifyKeyguardFlagsChanged(null /* callback */);
     }
 
+    @Override
+    public void notifyKeyguardTrustedChanged() {
+        mH.sendEmptyMessage(H.NOTIFY_KEYGUARD_TRUSTED_CHANGED);
+    }
+
     /**
      * Re-sizes a stack and its containing tasks.
      * @param stackId Id of stack to resize.
@@ -6114,6 +6119,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int SEAMLESS_ROTATION_TIMEOUT = 54;
         public static final int RESTORE_POINTER_ICON = 55;
         public static final int NOTIFY_KEYGUARD_FLAGS_CHANGED = 56;
+        public static final int NOTIFY_KEYGUARD_TRUSTED_CHANGED = 57;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -6752,6 +6758,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 case NOTIFY_KEYGUARD_FLAGS_CHANGED: {
                     mAmInternal.notifyKeyguardFlagsChanged((Runnable) msg.obj);
                 }
+                break;
+                case NOTIFY_KEYGUARD_TRUSTED_CHANGED: {
+                    mAmInternal.notifyKeyguardTrustedChanged();
+                }
+                break;
             }
             if (DEBUG_WINDOW_TRACE) {
                 Slog.v(TAG_WM, "handleMessage: exit");
