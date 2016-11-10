@@ -263,6 +263,22 @@ public class TelephonyManager {
       return new TelephonyManager(mContext, subId);
     }
 
+    /**
+     * Create a new TelephonyManager object pinned to the subscription ID associated with the given
+     * phone account.
+     *
+     * @return a TelephonyManager that uses the given phone account for all calls, or {@code null}
+     * if the phone account does not correspond to a valid subscription ID.
+     */
+    @Nullable
+    public TelephonyManager createForPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
+        int subId = getSubIdForPhoneAccountHandle(phoneAccountHandle);
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            return null;
+        }
+        return new TelephonyManager(mContext, subId);
+    }
+
     /** {@hide} */
     public boolean isMultiSimEnabled() {
         return (multiSimConfig.equals("dsds") || multiSimConfig.equals("dsda") ||
@@ -3019,6 +3035,12 @@ public class TelephonyManager {
         if (mContext == null) return;
         try {
             Boolean notifyNow = (getITelephony() != null);
+            // If the listener has not explicitly set the subId (for example, created with the
+            // default constructor), replace the subId so it will listen to the account the
+            // telephony manager is created with.
+            if (listener.mSubId == null) {
+                listener.mSubId = mSubId;
+            }
             sRegistry.listenForSubscriber(listener.mSubId, getOpPackageName(),
                     listener.callback, events, notifyNow);
         } catch (RemoteException ex) {
@@ -5446,6 +5468,19 @@ public class TelephonyManager {
         return retval;
     }
 
+    private int getSubIdForPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
+        int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+        try {
+            ITelecomService service = getTelecomService();
+            if (service != null) {
+                retval = getSubIdForPhoneAccount(service.getPhoneAccount(phoneAccountHandle));
+            }
+        } catch (RemoteException e) {
+        }
+
+        return retval;
+    }
+
     /**
      * Resets telephony manager settings back to factory defaults.
      *
@@ -5492,6 +5527,16 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#getModemActivityInfo", e);
         }
         result.send(0, null);
+    }
+
+    /**
+     * Returns the current {@link ServiceState} information.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     */
+    public ServiceState getServiceState() {
+        return getServiceStateForSubscriber(getSubId());
     }
 
     /**
