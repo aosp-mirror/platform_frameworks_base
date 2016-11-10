@@ -25,7 +25,6 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
@@ -157,7 +156,7 @@ public class SystemServicesProxy {
 
     /**
      * Implementation of {@link android.app.ITaskStackListener} to listen task stack changes from
-     * ActivityManagerNative.
+     * ActivityManagerService.
      * This simply passes callbacks to listeners through {@link H}.
      * */
     private android.app.TaskStackListener mTaskStackListener = new android.app.TaskStackListener() {
@@ -207,7 +206,7 @@ public class SystemServicesProxy {
     private SystemServicesProxy(Context context) {
         mAccm = AccessibilityManager.getInstance(context);
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        mIam = ActivityManagerNative.getDefault();
+        mIam = ActivityManager.getService();
         mPm = context.getPackageManager();
         mIpm = AppGlobals.getPackageManager();
         mAssistUtils = new AssistUtils(context);

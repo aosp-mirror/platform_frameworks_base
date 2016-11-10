@@ -26,7 +26,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Looper;
@@ -252,7 +252,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             try {
                 // Notify the activity manager about the timeout and let it decide whether
                 // to abort dispatching or keep waiting.
-                long timeout = ActivityManagerNative.getDefault().inputDispatchingTimedOut(
+                long timeout = ActivityManager.getService().inputDispatchingTimedOut(
                         windowState.mSession.mPid, aboveSystem, reason);
                 if (timeout >= 0) {
                     // The activity manager declined to abort dispatching.

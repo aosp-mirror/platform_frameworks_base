@@ -17,7 +17,6 @@
 package com.android.server.media;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
 import android.media.IMediaResourceMonitor;
@@ -84,7 +83,7 @@ public class MediaResourceMonitorService extends SystemService {
         private String[] getPackageNamesFromPid(int pid) {
             try {
                 for (ActivityManager.RunningAppProcessInfo proc :
-                        ActivityManagerNative.getDefault().getRunningAppProcesses()) {
+                        ActivityManager.getService().getRunningAppProcesses()) {
                     if (proc.pid == pid) {
                         return proc.pkgList;
                     }

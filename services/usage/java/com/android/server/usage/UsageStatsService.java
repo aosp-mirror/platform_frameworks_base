@@ -17,7 +17,7 @@
 package com.android.server.usage;
 
 import android.Manifest;
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
@@ -462,7 +462,7 @@ public class UsageStatsService extends SystemService implements
 
         final int[] runningUserIds;
         try {
-            runningUserIds = ActivityManagerNative.getDefault().getRunningUserIds();
+            runningUserIds = ActivityManager.getService().getRunningUserIds();
             if (checkUserId != UserHandle.USER_ALL
                     && !ArrayUtils.contains(runningUserIds, checkUserId)) {
                 return false;
@@ -1311,7 +1311,7 @@ public class UsageStatsService extends SystemService implements
         @Override
         public boolean isAppInactive(String packageName, int userId) {
             try {
-                userId = ActivityManagerNative.getDefault().handleIncomingUser(Binder.getCallingPid(),
+                userId = ActivityManager.getService().handleIncomingUser(Binder.getCallingPid(),
                         Binder.getCallingUid(), userId, false, true, "isAppInactive", null);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
@@ -1329,7 +1329,7 @@ public class UsageStatsService extends SystemService implements
         public void setAppInactive(String packageName, boolean idle, int userId) {
             final int callingUid = Binder.getCallingUid();
             try {
-                userId = ActivityManagerNative.getDefault().handleIncomingUser(
+                userId = ActivityManager.getService().handleIncomingUser(
                         Binder.getCallingPid(), callingUid, userId, false, true,
                         "setAppIdle", null);
             } catch (RemoteException re) {

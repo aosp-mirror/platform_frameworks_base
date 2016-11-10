@@ -86,7 +86,7 @@ public class AppImportanceMonitor {
         };
         ActivityManager am = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
         try {
-            ActivityManagerNative.getDefault().registerProcessObserver(mProcessObserver);
+            ActivityManager.getService().registerProcessObserver(mProcessObserver);
         } catch (RemoteException e) {
         }
         List<ActivityManager.RunningAppProcessInfo> apps = am.getRunningAppProcesses();

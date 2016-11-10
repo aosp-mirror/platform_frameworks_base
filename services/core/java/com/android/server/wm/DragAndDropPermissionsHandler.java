@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.content.ClipData;
 import android.net.Uri;
 import android.os.Binder;
@@ -61,7 +61,7 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         mActivityToken = activityToken;
 
         // Will throw if Activity is not found.
-        IBinder permissionOwner = ActivityManagerNative.getDefault().
+        IBinder permissionOwner = ActivityManager.getService().
                 getUriPermissionOwnerForActivity(mActivityToken);
 
         doTake(permissionOwner);
@@ -71,7 +71,7 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         long origId = Binder.clearCallingIdentity();
         try {
             for (int i = 0; i < mUris.size(); i++) {
-                ActivityManagerNative.getDefault().grantUriPermissionFromOwner(
+                ActivityManager.getService().grantUriPermissionFromOwner(
                         permissionOwner, mSourceUid, mTargetPackage, mUris.get(i), mMode,
                         mSourceUserId, mTargetUserId);
             }
@@ -85,7 +85,7 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         if (mActivityToken != null || mPermissionOwnerToken != null) {
             return;
         }
-        mPermissionOwnerToken = ActivityManagerNative.getDefault().newUriPermissionOwner("drop");
+        mPermissionOwnerToken = ActivityManager.getService().newUriPermissionOwner("drop");
         mTransientToken = transientToken;
         mTransientToken.linkToDeath(this, 0);
 
@@ -101,7 +101,7 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         IBinder permissionOwner = null;
         if (mActivityToken != null) {
             try {
-                permissionOwner = ActivityManagerNative.getDefault().
+                permissionOwner = ActivityManager.getService().
                         getUriPermissionOwnerForActivity(mActivityToken);
             } catch (Exception e) {
                 // Activity is destroyed, permissions already revoked.
@@ -117,7 +117,7 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         }
 
         for (int i = 0; i < mUris.size(); ++i) {
-            ActivityManagerNative.getDefault().revokeUriPermissionFromOwner(
+            ActivityManager.getService().revokeUriPermissionFromOwner(
                     permissionOwner, mUris.get(i), mMode, mSourceUserId);
         }
     }

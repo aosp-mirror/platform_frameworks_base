@@ -49,8 +49,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -907,7 +907,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mNotificationShown = false;
         int userId = 0;
         try {
-            userId = ActivityManagerNative.getDefault().getCurrentUser().id;
+            userId = ActivityManager.getService().getCurrentUser().id;
         } catch (RemoteException e) {
             Slog.w(TAG, "Couldn't get current user ID; guessing it's 0", e);
         }

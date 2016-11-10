@@ -23,7 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -397,7 +397,7 @@ public abstract class ContentResolver {
         }
 
         try {
-            String type = ActivityManagerNative.getDefault().getProviderMimeType(
+            String type = ActivityManager.getService().getProviderMimeType(
                     ContentProvider.getUriWithoutUserId(url), resolveUserId(url));
             return type;
         } catch (RemoteException e) {
@@ -1849,7 +1849,7 @@ public abstract class ContentResolver {
             @Intent.AccessUriMode int modeFlags) {
         Preconditions.checkNotNull(uri, "uri");
         try {
-            ActivityManagerNative.getDefault().takePersistableUriPermission(
+            ActivityManager.getService().takePersistableUriPermission(
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
         } catch (RemoteException e) {
         }
@@ -1867,7 +1867,7 @@ public abstract class ContentResolver {
             @Intent.AccessUriMode int modeFlags) {
         Preconditions.checkNotNull(uri, "uri");
         try {
-            ActivityManagerNative.getDefault().releasePersistableUriPermission(
+            ActivityManager.getService().releasePersistableUriPermission(
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
         } catch (RemoteException e) {
         }
@@ -1885,7 +1885,7 @@ public abstract class ContentResolver {
      */
     public @NonNull List<UriPermission> getPersistedUriPermissions() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                     .getPersistedUriPermissions(mPackageName, true).getList();
         } catch (RemoteException e) {
             throw new RuntimeException("Activity manager has died", e);
@@ -1901,7 +1901,7 @@ public abstract class ContentResolver {
      */
     public @NonNull List<UriPermission> getOutgoingPersistedUriPermissions() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                     .getPersistedUriPermissions(mPackageName, false).getList();
         } catch (RemoteException e) {
             throw new RuntimeException("Activity manager has died", e);

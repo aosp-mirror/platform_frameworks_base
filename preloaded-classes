@@ -327,9 +327,6 @@ android.app.ActivityManager$RunningAppProcessInfo$1
 android.app.ActivityManager$StackId
 android.app.ActivityManager$TaskDescription
 android.app.ActivityManager$TaskDescription$1
-android.app.ActivityManagerNative
-android.app.ActivityManagerNative$1
-android.app.ActivityManagerProxy
 android.app.ActivityOptions
 android.app.ActivityThread
 android.app.ActivityThread$1

@@ -18,7 +18,6 @@ package com.android.systemui.shortcut;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -59,7 +58,7 @@ public class ShortcutKeyDispatcher extends SystemUI
 
     private ShortcutKeyServiceProxy mShortcutKeyServiceProxy = new ShortcutKeyServiceProxy(this);
     private IWindowManager mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
-    private IActivityManager mActivityManager = ActivityManagerNative.getDefault();
+    private IActivityManager mActivityManager = ActivityManager.getService();
 
     protected final long META_MASK = ((long) KeyEvent.META_META_ON) << Integer.SIZE;
     protected final long ALT_MASK = ((long) KeyEvent.META_ALT_ON) << Integer.SIZE;

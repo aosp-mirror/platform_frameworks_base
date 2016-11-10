@@ -19,7 +19,7 @@ package android.hardware.fingerprint;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Binder;
 import android.os.CancellationSignal;
@@ -892,7 +892,7 @@ public class FingerprintManager {
 
     private int getCurrentUserId() {
         try {
-            return ActivityManagerNative.getDefault().getCurrentUser().id;
+            return ActivityManager.getService().getCurrentUser().id;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

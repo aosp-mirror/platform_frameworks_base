@@ -17,7 +17,6 @@
 package com.android.imftest.samples;
 
 import android.app.Activity;
-import android.app.ActivityManagerNative;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.provider.MediaStore;

@@ -18,7 +18,7 @@ package com.android.server;
 
 import java.util.Calendar;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
@@ -59,7 +59,7 @@ public class MountServiceIdler extends JobService {
         // is really more than just mount, some day it should be renamed to be system
         // idleer).
         try {
-            ActivityManagerNative.getDefault().performIdleMaintenance();
+            ActivityManager.getService().performIdleMaintenance();
         } catch (RemoteException e) {
         }
         // The mount service will run an fstrim operation asynchronously

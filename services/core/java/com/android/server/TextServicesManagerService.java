@@ -30,7 +30,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -159,7 +159,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         int userId = UserHandle.USER_SYSTEM;
         try {
-            userId = ActivityManagerNative.getDefault().getCurrentUser().id;
+            userId = ActivityManager.getService().getCurrentUser().id;
         } catch (RemoteException e) {
             Slog.w(TAG, "Couldn't get current user ID; guessing it's 0", e);
         }

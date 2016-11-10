@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
 import android.app.SynchronousUserSwitchObserver;
@@ -146,7 +145,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
 
         // listen for user / profile change.
         try {
-            ActivityManagerNative.getDefault().registerUserSwitchObserver(mUserSwitchListener, TAG);
+            ActivityManager.getService().registerUserSwitchObserver(mUserSwitchListener, TAG);
         } catch (RemoteException e) {
             // Ignore
         }
@@ -380,7 +379,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         UserInfo user = null;
         if (userId == UserHandle.USER_CURRENT) {
             try {
-                user = ActivityManagerNative.getDefault().getCurrentUser();
+                user = ActivityManager.getService().getCurrentUser();
             } catch (RemoteException e) {
                 // Ignore
             }

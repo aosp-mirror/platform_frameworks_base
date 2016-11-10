@@ -26,7 +26,6 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
@@ -757,11 +756,11 @@ public class UserManagerService extends IUserManager.Stub {
             long identity = Binder.clearCallingIdentity();
             try {
                 if (enableQuietMode) {
-                    ActivityManagerNative.getDefault().stopUser(userHandle, /* force */true, null);
+                    ActivityManager.getService().stopUser(userHandle, /* force */true, null);
                     LocalServices.getService(ActivityManagerInternal.class)
                             .killForegroundAppsForUser(userHandle);
                 } else {
-                    ActivityManagerNative.getDefault().startUserInBackground(userHandle);
+                    ActivityManager.getService().startUserInBackground(userHandle);
                 }
             } catch (RemoteException e) {
                 Slog.e(LOG_TAG, "fail to start/stop user for quiet mode", e);
@@ -1414,7 +1413,7 @@ public class UserManagerService extends IUserManager.Stub {
         // First, invalidate all cached values.
         mCachedEffectiveUserRestrictions.clear();
 
-        // We don't want to call into ActivityManagerNative while taking a lock, so we'll call
+        // We don't want to call into ActivityManagerService while taking a lock, so we'll call
         // it on a handler.
         final Runnable r = new Runnable() {
             @Override
@@ -1422,9 +1421,9 @@ public class UserManagerService extends IUserManager.Stub {
                 // Then get the list of running users.
                 final int[] runningUsers;
                 try {
-                    runningUsers = ActivityManagerNative.getDefault().getRunningUserIds();
+                    runningUsers = ActivityManager.getService().getRunningUserIds();
                 } catch (RemoteException e) {
-                    Log.w(LOG_TAG, "Unable to access ActivityManagerNative");
+                    Log.w(LOG_TAG, "Unable to access ActivityManagerService");
                     return;
                 }
                 // Then re-calculate the effective restrictions and apply, only for running users.
@@ -2536,7 +2535,7 @@ public class UserManagerService extends IUserManager.Stub {
             if (DBG) Slog.i(LOG_TAG, "Stopping user " + userHandle);
             int res;
             try {
-                res = ActivityManagerNative.getDefault().stopUser(userHandle, /* force= */ true,
+                res = ActivityManager.getService().stopUser(userHandle, /* force= */ true,
                 new IStopUserCallback.Stub() {
                             @Override
                             public void userStopped(int userId) {
@@ -3259,7 +3258,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private int runList(PrintWriter pw) throws RemoteException {
-        final IActivityManager am = ActivityManagerNative.getDefault();
+        final IActivityManager am = ActivityManager.getService();
         final List<UserInfo> users = getUsers(false);
         if (users == null) {
             pw.println("Error: couldn't get users");

@@ -28,7 +28,6 @@ import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_STATUS;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.UserSwitchObserver;
@@ -459,7 +458,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         try {
             final int userId;
             try {
-                userId = ActivityManagerNative.getDefault().getCurrentUser().id;
+                userId = ActivityManager.getService().getCurrentUser().id;
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to get current user id: ", e);
                 return;
@@ -1088,7 +1087,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
         mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
         try {
-            ActivityManagerNative.getDefault().registerUserSwitchObserver(
+            ActivityManager.getService().registerUserSwitchObserver(
                     new UserSwitchObserver() {
                         @Override
                         public void onUserSwitching(int newUserId, IRemoteCallback reply) {

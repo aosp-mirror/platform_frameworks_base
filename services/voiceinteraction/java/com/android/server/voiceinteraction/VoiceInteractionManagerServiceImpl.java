@@ -18,7 +18,6 @@ package com.android.server.voiceinteraction;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -117,7 +116,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mServiceStub = stub;
         mUser = userHandle;
         mComponent = service;
-        mAm = ActivityManagerNative.getDefault();
+        mAm = ActivityManager.getService();
         VoiceInteractionServiceInfo info;
         try {
             info = new VoiceInteractionServiceInfo(context.getPackageManager(), service, mUser);

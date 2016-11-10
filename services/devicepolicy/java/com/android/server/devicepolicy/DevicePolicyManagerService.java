@@ -38,7 +38,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
@@ -1460,7 +1459,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         IActivityManager getIActivityManager() {
-            return ActivityManagerNative.getDefault();
+            return ActivityManager.getService();
         }
 
         IPackageManager getIPackageManager() {
@@ -5524,7 +5523,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final long callingIdentity = mInjector.binderClearCallingIdentity();
         try {
-            ActivityManagerNative.getDefault().requestBugReport(
+            ActivityManager.getService().requestBugReport(
                     ActivityManager.BUGREPORT_OPTION_REMOTE);
 
             mRemoteBugreportServiceIsActive.set(true);

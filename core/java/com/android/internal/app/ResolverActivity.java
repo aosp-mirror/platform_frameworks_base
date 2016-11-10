@@ -35,7 +35,6 @@ import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
@@ -245,7 +244,7 @@ public class ResolverActivity extends Activity {
         setProfileSwitchMessageId(intent.getContentUserHint());
 
         try {
-            mLaunchedFromUid = ActivityManagerNative.getDefault().getLaunchedFromUid(
+            mLaunchedFromUid = ActivityManager.getService().getLaunchedFromUid(
                     getActivityToken());
         } catch (RemoteException e) {
             mLaunchedFromUid = -1;
@@ -864,7 +863,7 @@ public class ResolverActivity extends Activity {
         } catch (RuntimeException e) {
             String launchedFromPackage;
             try {
-                launchedFromPackage = ActivityManagerNative.getDefault().getLaunchedFromPackage(
+                launchedFromPackage = ActivityManager.getService().getLaunchedFromPackage(
                         getActivityToken());
             } catch (RemoteException e2) {
                 launchedFromPackage = "??";

@@ -339,7 +339,7 @@ public final class PendingIntent implements Parcelable {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(context);
             IIntentSender target =
-                ActivityManagerNative.getDefault().getIntentSender(
+                ActivityManager.getService().getIntentSender(
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null,
@@ -364,7 +364,7 @@ public final class PendingIntent implements Parcelable {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(context);
             IIntentSender target =
-                ActivityManagerNative.getDefault().getIntentSender(
+                ActivityManager.getService().getIntentSender(
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null,
@@ -481,7 +481,7 @@ public final class PendingIntent implements Parcelable {
         }
         try {
             IIntentSender target =
-                ActivityManagerNative.getDefault().getIntentSender(
+                ActivityManager.getService().getIntentSender(
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
                     null, null, requestCode, intents, resolvedTypes, flags, options,
                     UserHandle.myUserId());
@@ -507,7 +507,7 @@ public final class PendingIntent implements Parcelable {
         }
         try {
             IIntentSender target =
-                ActivityManagerNative.getDefault().getIntentSender(
+                ActivityManager.getService().getIntentSender(
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
                     null, null, requestCode, intents, resolvedTypes,
                     flags, options, user.getIdentifier());
@@ -559,7 +559,7 @@ public final class PendingIntent implements Parcelable {
         try {
             intent.prepareToLeaveProcess(context);
             IIntentSender target =
-                ActivityManagerNative.getDefault().getIntentSender(
+                ActivityManager.getService().getIntentSender(
                     ActivityManager.INTENT_SENDER_BROADCAST, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null,
@@ -602,7 +602,7 @@ public final class PendingIntent implements Parcelable {
         try {
             intent.prepareToLeaveProcess(context);
             IIntentSender target =
-                ActivityManagerNative.getDefault().getIntentSender(
+                ActivityManager.getService().getIntentSender(
                     ActivityManager.INTENT_SENDER_SERVICE, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null,
@@ -629,7 +629,7 @@ public final class PendingIntent implements Parcelable {
      */
     public void cancel() {
         try {
-            ActivityManagerNative.getDefault().cancelIntentSender(mTarget);
+            ActivityManager.getService().cancelIntentSender(mTarget);
         } catch (RemoteException e) {
         }
     }
@@ -833,7 +833,7 @@ public final class PendingIntent implements Parcelable {
             String resolvedType = intent != null ?
                     intent.resolveTypeIfNeeded(context.getContentResolver())
                     : null;
-            int res = ActivityManagerNative.getDefault().sendIntentSender(
+            int res = ActivityManager.getService().sendIntentSender(
                     mTarget, code, intent, resolvedType,
                     onFinished != null
                             ? new FinishedDispatcher(this, onFinished, handler)
@@ -853,7 +853,7 @@ public final class PendingIntent implements Parcelable {
     @Deprecated
     public String getTargetPackage() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .getPackageForIntentSender(mTarget);
         } catch (RemoteException e) {
             // Should never happen.
@@ -882,7 +882,7 @@ public final class PendingIntent implements Parcelable {
     @Nullable
     public String getCreatorPackage() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .getPackageForIntentSender(mTarget);
         } catch (RemoteException e) {
             // Should never happen.
@@ -910,7 +910,7 @@ public final class PendingIntent implements Parcelable {
      */
     public int getCreatorUid() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .getUidForIntentSender(mTarget);
         } catch (RemoteException e) {
             // Should never happen.
@@ -941,7 +941,7 @@ public final class PendingIntent implements Parcelable {
     @Nullable
     public UserHandle getCreatorUserHandle() {
         try {
-            int uid = ActivityManagerNative.getDefault()
+            int uid = ActivityManager.getService()
                 .getUidForIntentSender(mTarget);
             return uid > 0 ? new UserHandle(UserHandle.getUserId(uid)) : null;
         } catch (RemoteException e) {
@@ -956,7 +956,7 @@ public final class PendingIntent implements Parcelable {
      */
     public boolean isTargetedToPackage() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .isIntentSenderTargetedToPackage(mTarget);
         } catch (RemoteException e) {
             // Should never happen.
@@ -970,7 +970,7 @@ public final class PendingIntent implements Parcelable {
      */
     public boolean isActivity() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .isIntentSenderAnActivity(mTarget);
         } catch (RemoteException e) {
             // Should never happen.
@@ -984,7 +984,7 @@ public final class PendingIntent implements Parcelable {
      */
     public Intent getIntent() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .getIntentForIntentSender(mTarget);
         } catch (RemoteException e) {
             // Should never happen.
@@ -998,7 +998,7 @@ public final class PendingIntent implements Parcelable {
      */
     public String getTag(String prefix) {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .getTagForIntentSender(mTarget, prefix);
         } catch (RemoteException e) {
             // Should never happen.

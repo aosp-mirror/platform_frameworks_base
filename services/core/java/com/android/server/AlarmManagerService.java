@@ -18,7 +18,6 @@ package com.android.server;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
@@ -505,7 +504,7 @@ class AlarmManagerService extends SystemService {
             for (int i = alarms.size()-1; i >= 0; i--) {
                 Alarm alarm = alarms.get(i);
                 try {
-                    if (alarm.uid == uid && ActivityManagerNative.getDefault().getAppStartMode(
+                    if (alarm.uid == uid && ActivityManager.getService().getAppStartMode(
                             uid, alarm.packageName) == ActivityManager.APP_START_MODE_DISABLED) {
                         alarms.remove(i);
                         didRemove = true;
@@ -937,7 +936,7 @@ class AlarmManagerService extends SystemService {
         }
 
         try {
-            ActivityManagerNative.getDefault().registerUidObserver(new UidObserver(),
+            ActivityManager.getService().registerUidObserver(new UidObserver(),
                     ActivityManager.UID_OBSERVER_IDLE, ActivityManager.PROCESS_STATE_UNKNOWN, null);
         } catch (RemoteException e) {
             // ignored; both services live in system_server
@@ -1090,7 +1089,7 @@ class AlarmManagerService extends SystemService {
                 operation, directReceiver, listenerTag, workSource, flags, alarmClock,
                 callingUid, callingPackage);
         try {
-            if (ActivityManagerNative.getDefault().getAppStartMode(callingUid, callingPackage)
+            if (ActivityManager.getService().getAppStartMode(callingUid, callingPackage)
                     == ActivityManager.APP_START_MODE_DISABLED) {
                 Slog.w(TAG, "Not setting alarm from " + callingUid + ":" + a
                         + " -- package not allowed to start");
@@ -2414,11 +2413,11 @@ class AlarmManagerService extends SystemService {
                 if (RECORD_ALARMS_IN_HISTORY) {
                     if (alarm.workSource != null && alarm.workSource.size() > 0) {
                         for (int wi=0; wi<alarm.workSource.size(); wi++) {
-                            ActivityManagerNative.noteAlarmStart(
+                            ActivityManager.noteAlarmStart(
                                     alarm.operation, alarm.workSource.get(wi), alarm.statsTag);
                         }
                     } else {
-                        ActivityManagerNative.noteAlarmStart(
+                        ActivityManager.noteAlarmStart(
                                 alarm.operation, alarm.uid, alarm.statsTag);
                     }
                 }
@@ -2582,7 +2581,7 @@ class AlarmManagerService extends SystemService {
 
             final int uid = (knownUid >= 0)
                     ? knownUid
-                    : ActivityManagerNative.getDefault().getUidForIntentSender(pi.getTarget());
+                    : ActivityManager.getService().getUidForIntentSender(pi.getTarget());
             if (uid >= 0) {
                 mWakeLock.setWorkSource(new WorkSource(uid));
                 return;
@@ -2881,11 +2880,11 @@ class AlarmManagerService extends SystemService {
             if (RECORD_ALARMS_IN_HISTORY) {
                 if (inflight.mWorkSource != null && inflight.mWorkSource.size() > 0) {
                     for (int wi=0; wi<inflight.mWorkSource.size(); wi++) {
-                        ActivityManagerNative.noteAlarmFinish(
+                        ActivityManager.noteAlarmFinish(
                                 inflight.mPendingIntent, inflight.mWorkSource.get(wi), inflight.mTag);
                     }
                 } else {
-                    ActivityManagerNative.noteAlarmFinish(
+                    ActivityManager.noteAlarmFinish(
                             inflight.mPendingIntent, inflight.mUid, inflight.mTag);
                 }
             }
@@ -3086,13 +3085,13 @@ class AlarmManagerService extends SystemService {
                 if (alarm.workSource != null && alarm.workSource.size() > 0) {
                     for (int wi=0; wi<alarm.workSource.size(); wi++) {
                         final String wsName = alarm.workSource.getName(wi);
-                        ActivityManagerNative.noteWakeupAlarm(
+                        ActivityManager.noteWakeupAlarm(
                                 alarm.operation, alarm.workSource.get(wi),
                                 (wsName != null) ? wsName : alarm.packageName,
                                 alarm.statsTag);
                     }
                 } else {
-                    ActivityManagerNative.noteWakeupAlarm(
+                    ActivityManager.noteWakeupAlarm(
                             alarm.operation, alarm.uid, alarm.packageName, alarm.statsTag);
                 }
             }

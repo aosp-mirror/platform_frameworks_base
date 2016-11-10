@@ -16,9 +16,9 @@
 
 package com.android.systemui.pip.tv;
 
+import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
-import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -208,7 +208,7 @@ public class PipManager {
         mInitialized = true;
         mContext = context;
 
-        mActivityManager = ActivityManagerNative.getDefault();
+        mActivityManager = ActivityManager.getService();
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
         SystemServicesProxy.getInstance(context).registerTaskStackListener(mTaskStackListener);
         IntentFilter intentFilter = new IntentFilter();

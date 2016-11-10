@@ -36,6 +36,7 @@ import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
+import com.android.server.LocalServices;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -88,6 +89,8 @@ public class ActivityManager {
 
     private final Context mContext;
     private final Handler mHandler;
+
+    private static volatile boolean sSystemReady = false;
 
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;
@@ -826,7 +829,7 @@ public class ActivityManager {
     /** @hide */
     public int getFrontActivityScreenCompatMode() {
         try {
-            return ActivityManagerNative.getDefault().getFrontActivityScreenCompatMode();
+            return getService().getFrontActivityScreenCompatMode();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -835,7 +838,7 @@ public class ActivityManager {
     /** @hide */
     public void setFrontActivityScreenCompatMode(int mode) {
         try {
-            ActivityManagerNative.getDefault().setFrontActivityScreenCompatMode(mode);
+            getService().setFrontActivityScreenCompatMode(mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -844,7 +847,7 @@ public class ActivityManager {
     /** @hide */
     public int getPackageScreenCompatMode(String packageName) {
         try {
-            return ActivityManagerNative.getDefault().getPackageScreenCompatMode(packageName);
+            return getService().getPackageScreenCompatMode(packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -853,7 +856,7 @@ public class ActivityManager {
     /** @hide */
     public void setPackageScreenCompatMode(String packageName, int mode) {
         try {
-            ActivityManagerNative.getDefault().setPackageScreenCompatMode(packageName, mode);
+            getService().setPackageScreenCompatMode(packageName, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -862,7 +865,7 @@ public class ActivityManager {
     /** @hide */
     public boolean getPackageAskScreenCompat(String packageName) {
         try {
-            return ActivityManagerNative.getDefault().getPackageAskScreenCompat(packageName);
+            return getService().getPackageAskScreenCompat(packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -871,7 +874,7 @@ public class ActivityManager {
     /** @hide */
     public void setPackageAskScreenCompat(String packageName, boolean ask) {
         try {
-            ActivityManagerNative.getDefault().setPackageAskScreenCompat(packageName, ask);
+            getService().setPackageAskScreenCompat(packageName, ask);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1166,7 +1169,7 @@ public class ActivityManager {
         public static Bitmap loadTaskDescriptionIcon(String iconFilename, int userId) {
             if (iconFilename != null) {
                 try {
-                    return ActivityManagerNative.getDefault().getTaskDescriptionIcon(iconFilename,
+                    return getService().getTaskDescriptionIcon(iconFilename,
                             userId);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -1555,7 +1558,7 @@ public class ActivityManager {
     public List<RecentTaskInfo> getRecentTasks(int maxNum, int flags)
             throws SecurityException {
         try {
-            return ActivityManagerNative.getDefault().getRecentTasks(maxNum,
+            return getService().getRecentTasks(maxNum,
                     flags, UserHandle.myUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1580,7 +1583,7 @@ public class ActivityManager {
     public List<RecentTaskInfo> getRecentTasksForUser(int maxNum, int flags, int userId)
             throws SecurityException {
         try {
-            return ActivityManagerNative.getDefault().getRecentTasks(maxNum,
+            return getService().getRecentTasks(maxNum,
                     flags, userId).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1726,7 +1729,7 @@ public class ActivityManager {
         ArrayList<AppTask> tasks = new ArrayList<AppTask>();
         List<IBinder> appTasks;
         try {
-            appTasks = ActivityManagerNative.getDefault().getAppTasks(mContext.getPackageName());
+            appTasks = getService().getAppTasks(mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1751,7 +1754,7 @@ public class ActivityManager {
     private void ensureAppTaskThumbnailSizeLocked() {
         if (mAppTaskThumbnailSize == null) {
             try {
-                mAppTaskThumbnailSize = ActivityManagerNative.getDefault().getAppTaskThumbnailSize();
+                mAppTaskThumbnailSize = getService().getAppTaskThumbnailSize();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1816,7 +1819,7 @@ public class ActivityManager {
             description = new TaskDescription();
         }
         try {
-            return ActivityManagerNative.getDefault().addAppTask(activity.getActivityToken(),
+            return getService().addAppTask(activity.getActivityToken(),
                     intent, description, thumbnail);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1859,7 +1862,7 @@ public class ActivityManager {
     public List<RunningTaskInfo> getRunningTasks(int maxNum)
             throws SecurityException {
         try {
-            return ActivityManagerNative.getDefault().getTasks(maxNum, 0);
+            return getService().getTasks(maxNum, 0);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1875,7 +1878,7 @@ public class ActivityManager {
      */
     public boolean removeTask(int taskId) throws SecurityException {
         try {
-            return ActivityManagerNative.getDefault().removeTask(taskId);
+            return getService().removeTask(taskId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2043,7 +2046,7 @@ public class ActivityManager {
     /** @hide */
     public TaskThumbnail getTaskThumbnail(int id) throws SecurityException {
         try {
-            return ActivityManagerNative.getDefault().getTaskThumbnail(id);
+            return getService().getTaskThumbnail(id);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2052,7 +2055,7 @@ public class ActivityManager {
     /** @hide */
     public boolean isInHomeStack(int taskId) {
         try {
-            return ActivityManagerNative.getDefault().isInHomeStack(taskId);
+            return getService().isInHomeStack(taskId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2101,7 +2104,7 @@ public class ActivityManager {
      */
     public void moveTaskToFront(int taskId, int flags, Bundle options) {
         try {
-            ActivityManagerNative.getDefault().moveTaskToFront(taskId, flags, options);
+            getService().moveTaskToFront(taskId, flags, options);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2286,7 +2289,7 @@ public class ActivityManager {
     public List<RunningServiceInfo> getRunningServices(int maxNum)
             throws SecurityException {
         try {
-            return ActivityManagerNative.getDefault()
+            return getService()
                     .getServices(maxNum, 0);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -2301,7 +2304,7 @@ public class ActivityManager {
     public PendingIntent getRunningServiceControlPanel(ComponentName service)
             throws SecurityException {
         try {
-            return ActivityManagerNative.getDefault()
+            return getService()
                     .getRunningServiceControlPanel(service);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -2406,7 +2409,7 @@ public class ActivityManager {
      */
     public void getMemoryInfo(MemoryInfo outInfo) {
         try {
-            ActivityManagerNative.getDefault().getMemoryInfo(outInfo);
+            getService().getMemoryInfo(outInfo);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2545,7 +2548,7 @@ public class ActivityManager {
      */
     public boolean clearApplicationUserData(String packageName, IPackageDataObserver observer) {
         try {
-            return ActivityManagerNative.getDefault().clearApplicationUserData(packageName,
+            return getService().clearApplicationUserData(packageName,
                     observer, UserHandle.myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -2579,7 +2582,7 @@ public class ActivityManager {
      */
     public ParceledListSlice<UriPermission> getGrantedUriPermissions(String packageName) {
         try {
-            return ActivityManagerNative.getDefault().getGrantedUriPermissions(packageName,
+            return getService().getGrantedUriPermissions(packageName,
                     UserHandle.myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -2597,7 +2600,7 @@ public class ActivityManager {
      */
     public void clearGrantedUriPermissions(String packageName) {
         try {
-            ActivityManagerNative.getDefault().clearGrantedUriPermissions(packageName,
+            getService().clearGrantedUriPermissions(packageName,
                     UserHandle.myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -2718,7 +2721,7 @@ public class ActivityManager {
      */
     public List<ProcessErrorStateInfo> getProcessesInErrorState() {
         try {
-            return ActivityManagerNative.getDefault().getProcessesInErrorState();
+            return getService().getProcessesInErrorState();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3055,7 +3058,7 @@ public class ActivityManager {
      */
     public List<ApplicationInfo> getRunningExternalApplications() {
         try {
-            return ActivityManagerNative.getDefault().getRunningExternalApplications();
+            return getService().getRunningExternalApplications();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3071,7 +3074,7 @@ public class ActivityManager {
      */
     public boolean setProcessMemoryTrimLevel(String process, int userId, int level) {
         try {
-            return ActivityManagerNative.getDefault().setProcessMemoryTrimLevel(process, userId,
+            return getService().setProcessMemoryTrimLevel(process, userId,
                     level);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -3090,7 +3093,7 @@ public class ActivityManager {
      */
     public List<RunningAppProcessInfo> getRunningAppProcesses() {
         try {
-            return ActivityManagerNative.getDefault().getRunningAppProcesses();
+            return getService().getRunningAppProcesses();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3208,7 +3211,7 @@ public class ActivityManager {
      */
     static public void getMyMemoryState(RunningAppProcessInfo outState) {
         try {
-            ActivityManagerNative.getDefault().getMyMemoryState(outState);
+            getService().getMyMemoryState(outState);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3227,7 +3230,7 @@ public class ActivityManager {
      */
     public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids) {
         try {
-            return ActivityManagerNative.getDefault().getProcessMemoryInfo(pids);
+            return getService().getProcessMemoryInfo(pids);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3260,7 +3263,7 @@ public class ActivityManager {
      */
     public void killBackgroundProcesses(String packageName) {
         try {
-            ActivityManagerNative.getDefault().killBackgroundProcesses(packageName,
+            getService().killBackgroundProcesses(packageName,
                     UserHandle.myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -3278,7 +3281,7 @@ public class ActivityManager {
     @RequiresPermission(Manifest.permission.KILL_UID)
     public void killUid(int uid, String reason) {
         try {
-            ActivityManagerNative.getDefault().killUid(UserHandle.getAppId(uid),
+            getService().killUid(UserHandle.getAppId(uid),
                     UserHandle.getUserId(uid), reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -3306,7 +3309,7 @@ public class ActivityManager {
      */
     public void forceStopPackageAsUser(String packageName, int userId) {
         try {
-            ActivityManagerNative.getDefault().forceStopPackage(packageName, userId);
+            getService().forceStopPackage(packageName, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3325,7 +3328,7 @@ public class ActivityManager {
      */
     public ConfigurationInfo getDeviceConfigurationInfo() {
         try {
-            return ActivityManagerNative.getDefault().getDeviceConfigurationInfo();
+            return getService().getDeviceConfigurationInfo();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3415,7 +3418,7 @@ public class ActivityManager {
      */
     public static boolean isUserAMonkey() {
         try {
-            return ActivityManagerNative.getDefault().isUserAMonkey();
+            return getService().isUserAMonkey();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3537,7 +3540,7 @@ public class ActivityManager {
             return userId;
         }
         try {
-            return ActivityManagerNative.getDefault().handleIncomingUser(callingPid,
+            return getService().handleIncomingUser(callingPid,
                     callingUid, userId, allowAll, requireFull, name, callerPackage);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -3552,7 +3555,7 @@ public class ActivityManager {
     public static int getCurrentUser() {
         UserInfo ui;
         try {
-            ui = ActivityManagerNative.getDefault().getCurrentUser();
+            ui = getService().getCurrentUser();
             return ui != null ? ui.id : 0;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -3565,7 +3568,7 @@ public class ActivityManager {
      */
     public boolean switchUser(int userid) {
         try {
-            return ActivityManagerNative.getDefault().switchUser(userid);
+            return getService().switchUser(userid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3580,8 +3583,8 @@ public class ActivityManager {
         int currentUser = ActivityManager.getCurrentUser();
         if (currentUser != UserHandle.USER_SYSTEM) {
             try {
-                ActivityManagerNative.getDefault().switchUser(UserHandle.USER_SYSTEM);
-                ActivityManagerNative.getDefault().stopUser(currentUser, /* force= */ false, null);
+                getService().switchUser(UserHandle.USER_SYSTEM);
+                getService().stopUser(currentUser, /* force= */ false, null);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }
@@ -3608,7 +3611,7 @@ public class ActivityManager {
      */
     public boolean isUserRunning(int userId) {
         try {
-            return ActivityManagerNative.getDefault().isUserRunning(userId, 0);
+            return getService().isUserRunning(userId, 0);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3617,7 +3620,7 @@ public class ActivityManager {
     /** {@hide} */
     public boolean isVrModePackageEnabled(ComponentName component) {
         try {
-            return ActivityManagerNative.getDefault().isVrModePackageEnabled(component);
+            return getService().isVrModePackageEnabled(component);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3657,6 +3660,23 @@ public class ActivityManager {
         pw.println();
         dumpService(pw, fd, BatteryStats.SERVICE_NAME, new String[] { packageName });
         pw.flush();
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isSystemReady() {
+        if (!sSystemReady) {
+            if (ActivityThread.isSystem()) {
+                sSystemReady =
+                        LocalServices.getService(ActivityManagerInternal.class).isSystemReady();
+            } else {
+                // Since this is being called from outside system server, system should be
+                // ready by now.
+                sSystemReady = true;
+            }
+        }
+        return sSystemReady;
     }
 
     /**
@@ -3771,7 +3791,7 @@ public class ActivityManager {
      */
     public void setWatchHeapLimit(long pssSize) {
         try {
-            ActivityManagerNative.getDefault().setDumpHeapDebugLimit(null, 0, pssSize,
+            getService().setDumpHeapDebugLimit(null, 0, pssSize,
                     mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -3791,7 +3811,7 @@ public class ActivityManager {
      */
     public void clearWatchHeapLimit() {
         try {
-            ActivityManagerNative.getDefault().setDumpHeapDebugLimit(null, 0, 0, null);
+            getService().setDumpHeapDebugLimit(null, 0, 0, null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3802,7 +3822,7 @@ public class ActivityManager {
      */
     public void startLockTaskMode(int taskId) {
         try {
-            ActivityManagerNative.getDefault().startLockTaskModeById(taskId);
+            getService().startLockTaskModeById(taskId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3813,7 +3833,7 @@ public class ActivityManager {
      */
     public void stopLockTaskMode() {
         try {
-            ActivityManagerNative.getDefault().stopLockTaskMode();
+            getService().stopLockTaskMode();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3841,7 +3861,7 @@ public class ActivityManager {
      */
     public int getLockTaskModeState() {
         try {
-            return ActivityManagerNative.getDefault().getLockTaskModeState();
+            return getService().getLockTaskModeState();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3859,7 +3879,7 @@ public class ActivityManager {
      */
     public static void setVrThread(int tid) {
         try {
-            ActivityManagerNative.getDefault().setVrThread(tid);
+            getService().setVrThread(tid);
         } catch (RemoteException e) {
             // pass
         }

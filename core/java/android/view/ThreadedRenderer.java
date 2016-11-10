@@ -18,7 +18,7 @@ package android.view;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -921,7 +921,7 @@ public final class ThreadedRenderer {
         private static void initSched(Context context, long renderProxy) {
             try {
                 int tid = nGetRenderThreadTid(renderProxy);
-                ActivityManagerNative.getDefault().setRenderThread(tid);
+                ActivityManager.getService().setRenderThread(tid);
             } catch (Throwable t) {
                 Log.w(LOG_TAG, "Failed to set scheduler for RenderThread", t);
             }

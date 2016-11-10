@@ -23,7 +23,6 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
@@ -1619,7 +1618,7 @@ public class KeyguardViewMediator extends SystemUI {
     private void updateActivityLockScreenState() {
         Trace.beginSection("KeyguardViewMediator#updateActivityLockScreenState");
         try {
-            ActivityManagerNative.getDefault().setLockScreenShown(mShowing);
+            ActivityManager.getService().setLockScreenShown(mShowing);
         } catch (RemoteException e) {
         }
         Trace.endSection();
@@ -1681,7 +1680,7 @@ public class KeyguardViewMediator extends SystemUI {
                 // Don't actually hide the Keyguard at the moment, wait for window
                 // manager until it tells us it's safe to do so with
                 // startKeyguardExitAnimation.
-                ActivityManagerNative.getDefault().keyguardGoingAway(flags);
+                ActivityManager.getService().keyguardGoingAway(flags);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error while calling WindowManager", e);
             }

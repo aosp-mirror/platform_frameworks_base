@@ -24,7 +24,6 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 
 import android.accounts.IAccountManager;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1191,7 +1190,7 @@ public final class Pm {
 
         ClearDataObserver obs = new ClearDataObserver();
         try {
-            ActivityManagerNative.getDefault().clearApplicationUserData(pkg, obs, userId);
+            ActivityManager.getService().clearApplicationUserData(pkg, obs, userId);
             synchronized (obs) {
                 while (!obs.finished) {
                     try {

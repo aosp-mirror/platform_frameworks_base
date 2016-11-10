@@ -34,7 +34,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.app.Notification;
@@ -3516,7 +3515,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                             WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
                 }
                 try {
-                    result = ActivityManagerNative.getDefault().startActivityAsUser(
+                    result = ActivityManager.getService().startActivityAsUser(
                             null, mContext.getBasePackageName(),
                             intent,
                             intent.resolveTypeIfNeeded(mContext.getContentResolver()),
@@ -4897,7 +4896,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      */
     private boolean handleLongPressBack() {
         try {
-            IActivityManager activityManager = ActivityManagerNative.getDefault();
+            IActivityManager activityManager = ActivityManager.getService();
             if (activityManager.isInLockTaskMode()) {
                 activityManager.stopSystemLockTaskMode();
 

@@ -20,7 +20,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
 import static com.android.internal.widget.LockPatternUtils.stringToPattern;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Process;
@@ -52,7 +52,7 @@ class LockSettingsShellCommand extends ShellCommand {
     @Override
     public int onCommand(String cmd) {
         try {
-            mCurrentUserId = ActivityManagerNative.getDefault().getCurrentUser().id;
+            mCurrentUserId = ActivityManager.getService().getCurrentUser().id;
 
             parseArgs();
             if (!checkCredential()) {

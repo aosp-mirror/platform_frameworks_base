@@ -16,7 +16,7 @@
 
 package com.android.server.webkit;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -200,7 +200,7 @@ public class SystemImpl implements SystemInterface {
     @Override
     public void killPackageDependents(String packageName) {
         try {
-            ActivityManagerNative.getDefault().killPackageDependents(packageName,
+            ActivityManager.getService().killPackageDependents(packageName,
                     UserHandle.USER_ALL);
         } catch (RemoteException e) {
         }

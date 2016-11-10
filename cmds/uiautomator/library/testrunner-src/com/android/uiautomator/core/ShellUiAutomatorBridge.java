@@ -16,7 +16,7 @@
 
 package com.android.uiautomator.core;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.ContentProviderHolder;
 import android.app.IActivityManager;
 import android.app.UiAutomation;
@@ -56,7 +56,7 @@ public class ShellUiAutomatorBridge extends UiAutomatorBridge {
         try {
             IContentProvider provider = null;
             Cursor cursor = null;
-            IActivityManager activityManager = ActivityManagerNative.getDefault();
+            IActivityManager activityManager = ActivityManager.getService();
             String providerName = Settings.Secure.CONTENT_URI.getAuthority();
             IBinder token = new Binder();
             try {

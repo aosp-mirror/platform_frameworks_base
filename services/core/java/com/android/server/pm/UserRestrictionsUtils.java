@@ -23,7 +23,6 @@ import com.android.internal.util.Preconditions;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Binder;
@@ -411,7 +410,7 @@ public class UserRestrictionsUtils {
                         int currentUser = ActivityManager.getCurrentUser();
                         if (currentUser != userId && userId != UserHandle.USER_SYSTEM) {
                             try {
-                                ActivityManagerNative.getDefault().stopUser(userId, false, null);
+                                ActivityManager.getService().stopUser(userId, false, null);
                             } catch (RemoteException e) {
                                 throw e.rethrowAsRuntimeException();
                             }

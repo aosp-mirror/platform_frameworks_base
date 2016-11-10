@@ -22,8 +22,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
-import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.ITaskStackListener;
 import android.app.Instrumentation.ActivityMonitor;
@@ -63,7 +63,7 @@ public class TaskStackChangedListenerTest {
 
     @Before
     public void setUp() throws Exception {
-        mService = ActivityManagerNative.getDefault();
+        mService = ActivityManager.getService();
     }
 
     @After

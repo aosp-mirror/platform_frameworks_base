@@ -16,7 +16,7 @@
 
 package com.android.internal.os;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
 import android.os.Build;
@@ -113,7 +113,7 @@ public class RuntimeInit {
                 }
 
                 // Bring up crash dialog, wait for it to be dismissed
-                ActivityManagerNative.getDefault().handleApplicationCrash(
+                ActivityManager.getService().handleApplicationCrash(
                         mApplicationObject, new ApplicationErrorReport.ParcelableCrashInfo(e));
             } catch (Throwable t2) {
                 if (t2 instanceof DeadObjectException) {
@@ -379,7 +379,7 @@ public class RuntimeInit {
      */
     public static void wtf(String tag, Throwable t, boolean system) {
         try {
-            if (ActivityManagerNative.getDefault().handleApplicationWtf(
+            if (ActivityManager.getService().handleApplicationWtf(
                     mApplicationObject, tag, system,
                     new ApplicationErrorReport.ParcelableCrashInfo(t))) {
                 // The Activity Manager has already written us off -- now exit.

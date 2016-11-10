@@ -30,7 +30,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.job.JobInfo;
@@ -567,7 +566,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
             String tag) {
         JobStatus jobStatus = JobStatus.createFromJobInfo(job, uId, packageName, userId, tag);
         try {
-            if (ActivityManagerNative.getDefault().getAppStartMode(uId,
+            if (ActivityManager.getService().getAppStartMode(uId,
                     job.getService().getPackageName()) == ActivityManager.APP_START_MODE_DISABLED) {
                 Slog.w(TAG, "Not scheduling job " + uId + ":" + job.toString()
                         + " -- package not allowed to start");
@@ -816,7 +815,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     mBroadcastReceiver, UserHandle.ALL, userFilter, null, null);
             mPowerManager = (PowerManager)getContext().getSystemService(Context.POWER_SERVICE);
             try {
-                ActivityManagerNative.getDefault().registerUidObserver(mUidObserver,
+                ActivityManager.getService().registerUidObserver(mUidObserver,
                         ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_GONE
                         | ActivityManager.UID_OBSERVER_IDLE, ActivityManager.PROCESS_STATE_UNKNOWN,
                         null);
@@ -1202,7 +1201,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
             public void process(JobStatus job) {
                 if (isReadyToBeExecutedLocked(job)) {
                     try {
-                        if (ActivityManagerNative.getDefault().getAppStartMode(job.getUid(),
+                        if (ActivityManager.getService().getAppStartMode(job.getUid(),
                                 job.getJob().getService().getPackageName())
                                 == ActivityManager.APP_START_MODE_DISABLED) {
                             Slog.w(TAG, "Aborting job " + job.getUid() + ":"
@@ -1376,7 +1375,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
         int memLevel;
         try {
-            memLevel = ActivityManagerNative.getDefault().getMemoryTrimLevel();
+            memLevel = ActivityManager.getService().getMemoryTrimLevel();
         } catch (RemoteException e) {
             memLevel = ProcessStats.ADJ_MEM_FACTOR_NORMAL;
         }

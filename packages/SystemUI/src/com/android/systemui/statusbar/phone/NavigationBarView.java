@@ -21,7 +21,7 @@ import android.animation.LayoutTransition.TransitionListener;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -422,7 +422,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     private boolean inLockTask() {
         try {
-            return ActivityManagerNative.getDefault().isInLockTaskMode();
+            return ActivityManager.getService().isInLockTaskMode();
         } catch (RemoteException e) {
             return false;
         }

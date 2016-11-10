@@ -19,7 +19,7 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.Handler;
@@ -101,7 +101,7 @@ public class KeyguardDisableHandler extends Handler {
             if (dpm != null) {
                 try {
                     mAllowDisableKeyguard = dpm.getPasswordQuality(null,
-                            ActivityManagerNative.getDefault().getCurrentUser().id)
+                            ActivityManager.getService().getCurrentUser().id)
                             == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED ?
                                     ALLOW_DISABLE_YES : ALLOW_DISABLE_NO;
                 } catch (RemoteException re) {

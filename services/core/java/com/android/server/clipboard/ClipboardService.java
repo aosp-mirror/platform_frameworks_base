@@ -16,7 +16,7 @@
 
 package com.android.server.clipboard;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -71,7 +71,7 @@ public class ClipboardService extends SystemService {
     public ClipboardService(Context context) {
         super(context);
 
-        mAm = ActivityManagerNative.getDefault();
+        mAm = ActivityManager.getService();
         mPm = getContext().getPackageManager();
         mUm = (IUserManager) ServiceManager.getService(Context.USER_SERVICE);
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);

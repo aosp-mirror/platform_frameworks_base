@@ -18,7 +18,7 @@ package android.accounts;
 import com.google.android.collect.Sets;
 
 import android.app.Activity;
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -141,8 +141,8 @@ public class ChooseTypeAndAccountActivity extends Activity
 
         try {
             IBinder activityToken = getActivityToken();
-            mCallingUid = ActivityManagerNative.getDefault().getLaunchedFromUid(activityToken);
-            mCallingPackage = ActivityManagerNative.getDefault().getLaunchedFromPackage(
+            mCallingUid = ActivityManager.getService().getLaunchedFromUid(activityToken);
+            mCallingPackage = ActivityManager.getService().getLaunchedFromPackage(
                     activityToken);
             if (mCallingUid != 0 && mCallingPackage != null) {
                 Bundle restrictions = UserManager.get(this)

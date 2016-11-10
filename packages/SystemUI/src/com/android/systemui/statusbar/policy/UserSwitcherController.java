@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.policy;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -412,7 +411,7 @@ public class UserSwitcherController {
     protected void switchToUserId(int id) {
         try {
             pauseRefreshUsers();
-            ActivityManagerNative.getDefault().switchUser(id);
+            ActivityManager.getService().switchUser(id);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't switch user.", e);
         }

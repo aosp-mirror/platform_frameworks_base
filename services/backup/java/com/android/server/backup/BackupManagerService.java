@@ -18,7 +18,7 @@ package com.android.server.backup;
 
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.ApplicationThreadConstants;
@@ -1075,7 +1075,7 @@ public class BackupManagerService {
         mContext = context;
         mPackageManager = context.getPackageManager();
         mPackageManagerBinder = AppGlobals.getPackageManager();
-        mActivityManager = ActivityManagerNative.getDefault();
+        mActivityManager = ActivityManager.getService();
 
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);

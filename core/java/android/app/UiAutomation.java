@@ -768,7 +768,7 @@ public final class UiAutomation {
             throwIfNotConnectedLocked();
         }
         try {
-            ActivityManagerNative.getDefault().setUserIsMonkey(enable);
+            ActivityManager.getService().setUserIsMonkey(enable);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while setting run as monkey!", re);
         }

@@ -25,7 +25,6 @@ import com.android.internal.app.IBatteryStats;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 
-import android.app.ActivityManagerNative;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;

@@ -16,7 +16,7 @@
 
 package com.android.providers.settings;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
@@ -343,7 +343,7 @@ public class SettingsHelper {
         if (loc == null) return; // Couldn't find the saved locale in this version of the software
 
         try {
-            IActivityManager am = ActivityManagerNative.getDefault();
+            IActivityManager am = ActivityManager.getService();
             Configuration config = am.getConfiguration();
             config.locale = loc;
             // indicate this isn't some passing default - the user wants this remembered

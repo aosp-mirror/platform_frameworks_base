@@ -25,7 +25,6 @@ import static android.os.Process.FIRST_APPLICATION_UID;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
@@ -1706,7 +1705,7 @@ public class AudioService extends IAudioService.Stub {
     private int getCurrentUserId() {
         final long ident = Binder.clearCallingIdentity();
         try {
-            UserInfo currentUser = ActivityManagerNative.getDefault().getCurrentUser();
+            UserInfo currentUser = ActivityManager.getService().getCurrentUser();
             return currentUser.id;
         } catch (RemoteException e) {
             // Activity manager not running, nothing we can do assume user 0.
@@ -5124,7 +5123,7 @@ public class AudioService extends IAudioService.Stub {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            ActivityManagerNative.broadcastStickyIntent(intent, null, UserHandle.USER_ALL);
+            ActivityManager.broadcastStickyIntent(intent, UserHandle.USER_ALL);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -5463,7 +5462,7 @@ public class AudioService extends IAudioService.Stub {
             }
             try {
                 final int uid = pkg.applicationInfo.uid;
-                ActivityManagerNative.getDefault().killUid(UserHandle.getAppId(uid),
+                ActivityManager.getService().killUid(UserHandle.getAppId(uid),
                         UserHandle.getUserId(uid),
                         "killBackgroundUserProcessesWithAudioRecordPermission");
             } catch (RemoteException e) {

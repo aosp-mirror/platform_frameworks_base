@@ -46,7 +46,7 @@ import static com.android.server.NetworkManagementService.NetdResponseCode.Tethe
 import static com.android.server.NetworkManagementService.NetdResponseCode.TtyListResult;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 import android.annotation.NonNull;
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -958,7 +958,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 final int uid = Integer.parseInt(cooked[1]);
                 final byte[] firstPacket = HexDump.hexStringToByteArray(cooked[2]);
                 try {
-                    ActivityManagerNative.getDefault().notifyCleartextNetwork(uid, firstPacket);
+                    ActivityManager.getService().notifyCleartextNetwork(uid, firstPacket);
                 } catch (RemoteException ignored) {
                 }
                 break;

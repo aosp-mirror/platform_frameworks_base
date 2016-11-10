@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -32,7 +31,7 @@ public class ActivityManagerTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        service = ActivityManagerNative.getDefault();
+        service = ActivityManager.getService();
     }
 
     public void testTaskIdsForRunningUsers() throws RemoteException {

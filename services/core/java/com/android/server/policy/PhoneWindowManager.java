@@ -114,7 +114,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
-import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IUiModeManager;
 import android.app.ProgressDialog;
@@ -3943,7 +3942,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     public void onKeyguardExitResult(boolean success) {
                         if (success) {
                             try {
-                                ActivityManagerNative.getDefault().stopAppSwitches();
+                                ActivityManager.getService().stopAppSwitches();
                             } catch (RemoteException e) {
                             }
                             sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
@@ -3957,7 +3956,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // no keyguard stuff to worry about, just launch home!
         try {
-            ActivityManagerNative.getDefault().stopAppSwitches();
+            ActivityManager.getService().stopAppSwitches();
         } catch (RemoteException e) {
         }
         if (mRecentsVisible) {
@@ -7340,7 +7339,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (false) {
             // This code always brings home to the front.
             try {
-                ActivityManagerNative.getDefault().stopAppSwitches();
+                ActivityManager.getService().stopAppSwitches();
             } catch (RemoteException e) {
             }
             sendCloseSystemWindows();
@@ -7353,11 +7352,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     /// Roll back EndcallBehavior as the cupcake design to pass P1 lab entry.
                     Log.d(TAG, "UTS-TEST-MODE");
                 } else {
-                    ActivityManagerNative.getDefault().stopAppSwitches();
+                    ActivityManager.getService().stopAppSwitches();
                     sendCloseSystemWindows();
                     Intent dock = createHomeDockIntent();
                     if (dock != null) {
-                        int result = ActivityManagerNative.getDefault()
+                        int result = ActivityManager.getService()
                                 .startActivityAsUser(null, null, dock,
                                         dock.resolveTypeIfNeeded(mContext.getContentResolver()),
                                         null, null, 0,
@@ -7368,7 +7367,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     }
                 }
-                int result = ActivityManagerNative.getDefault()
+                int result = ActivityManager.getService()
                         .startActivityAsUser(null, null, mHomeIntent,
                                 mHomeIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
                                 null, null, 0,

@@ -16,7 +16,7 @@
 
 package com.android.commands.content;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.ContentProviderHolder;
 import android.app.IActivityManager;
 import android.content.ContentValues;
@@ -433,7 +433,7 @@ public class Content {
         public final void execute() {
             String providerName = mUri.getAuthority();
             try {
-                IActivityManager activityManager = ActivityManagerNative.getDefault();
+                IActivityManager activityManager = ActivityManager.getService();
                 IContentProvider provider = null;
                 IBinder token = new Binder();
                 try {

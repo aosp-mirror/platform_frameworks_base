@@ -452,7 +452,7 @@ public final class LoadedApk {
 
         if (mRegisterPackage) {
             try {
-                ActivityManagerNative.getDefault().addPackageDependency(mPackageName);
+                ActivityManager.getService().addPackageDependency(mPackageName);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -891,7 +891,7 @@ public final class LoadedApk {
                         StrictMode.onIntentReceiverLeaked(leak);
                     }
                     try {
-                        ActivityManagerNative.getDefault().unregisterReceiver(
+                        ActivityManager.getService().unregisterReceiver(
                                 rd.getIIntentReceiver());
                     } catch (RemoteException e) {
                         throw e.rethrowFromSystemServer();
@@ -917,7 +917,7 @@ public final class LoadedApk {
                         StrictMode.onServiceConnectionLeaked(leak);
                     }
                     try {
-                        ActivityManagerNative.getDefault().unbindService(
+                        ActivityManager.getService().unbindService(
                                 sd.getIServiceConnection());
                     } catch (RemoteException e) {
                         throw e.rethrowFromSystemServer();
@@ -1046,7 +1046,7 @@ public final class LoadedApk {
                     // behalf so that the system's broadcast sequence can continue.
                     if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
                             "Finishing broadcast to unregistered receiver");
-                    IActivityManager mgr = ActivityManagerNative.getDefault();
+                    IActivityManager mgr = ActivityManager.getService();
                     try {
                         if (extras != null) {
                             extras.setAllowFds(false);
@@ -1095,7 +1095,7 @@ public final class LoadedApk {
                             + " mOrderedHint=" + ordered);
                 }
                 
-                final IActivityManager mgr = ActivityManagerNative.getDefault();
+                final IActivityManager mgr = ActivityManager.getService();
                 final Intent intent = mCurIntent;
                 if (intent == null) {
                     Log.wtf(TAG, "Null intent being dispatched, mDispatched=" + mDispatched);
@@ -1209,7 +1209,7 @@ public final class LoadedApk {
             }
             if (intent == null || !mActivityThread.post(args)) {
                 if (mRegistered && ordered) {
-                    IActivityManager mgr = ActivityManagerNative.getDefault();
+                    IActivityManager mgr = ActivityManager.getService();
                     if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
                             "Finishing sync broadcast to " + mReceiver);
                     args.sendFinished(mgr);

@@ -1,6 +1,6 @@
 package com.android.server.policy.keyguard;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -194,7 +194,7 @@ public class KeyguardServiceDelegate {
             mKeyguardState.reset();
             mHandler.post(() -> {
                 try {
-                    ActivityManagerNative.getDefault().setLockScreenShown(true);
+                    ActivityManager.getService().setLockScreenShown(true);
                 } catch (RemoteException e) {
                     // Local call.
                 }
