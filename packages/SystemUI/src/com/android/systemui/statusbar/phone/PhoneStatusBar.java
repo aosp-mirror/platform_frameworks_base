@@ -1054,7 +1054,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void inflateShelf() {
         mNotificationShelf =
                 (NotificationShelf) LayoutInflater.from(mContext).inflate(
-                        R.layout.status_bar_notification_icon_container, mStackScroller, false);
+                        R.layout.status_bar_notification_shelf, mStackScroller, false);
         mNotificationShelf.setOnActivatedListener(this);
         mNotificationShelf.setOnClickListener(mShelfClickListener);
         mStackScroller.setShelf(mNotificationShelf);
@@ -2005,10 +2005,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             currentIndex++;
         }
+        boolean noAmbient = false;
         if (shelfIndex == -1) {
             shelfIndex = currentIndex;
+            noAmbient = true;
         }
-        mStackScroller.updateShelfIndex(shelfIndex);
+        mStackScroller.updateShelfIndex(shelfIndex, noAmbient);
     }
 
     public static boolean isTopLevelChild(Entry entry) {
@@ -2380,8 +2382,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     protected int adjustDisableFlags(int state) {
-        if (!mLaunchTransitionFadingAway && !mKeyguardFadingAway
-                && (mExpandedVisible || mBouncerShowing || mWaitingForKeyguardExit)) {
+        if (!mLaunchTransitionFadingAway && !mKeyguardFadingAway && shouldHideNotificationIcons()) {
             state |= StatusBarManager.DISABLE_NOTIFICATION_ICONS;
             state |= StatusBarManager.DISABLE_SYSTEM_INFO;
         }
@@ -2394,6 +2395,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
         return state;
+    }
+
+    private boolean shouldHideNotificationIcons() {
+        return mExpandedVisible && mNotificationPanel.shouldHideNotificationIcons();
     }
 
     /**
@@ -2502,7 +2507,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      *
      * This needs to be called if state used by {@link #adjustDisableFlags} changes.
      */
-    private void recomputeDisableFlags(boolean animate) {
+    public void recomputeDisableFlags(boolean animate) {
         disable(mDisabledUnmodified1, mDisabledUnmodified2, animate);
     }
 
@@ -2948,13 +2953,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         runPostCollapseRunnables();
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
         showBouncer();
-        recomputeDisableFlags(true /* animate */);
+        recomputeDisableFlags(shouldAnimatIconHiding() /* animate */);
 
         // Trimming will happen later if Keyguard is showing - doing it here might cause a jank in
         // the bouncer appear animation.
         if (!mStatusBarKeyguardViewManager.isShowing()) {
             WindowManagerGlobal.getInstance().trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
         }
+    }
+
+    private boolean shouldAnimatIconHiding() {
+        return mNotificationPanel.shouldAnimateIconHiding();
     }
 
     public boolean interceptTouchEvent(MotionEvent event) {
@@ -4166,7 +4175,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mScrimController.forceHideScrims(true /* hide */);
                 updateMediaMetaData(false, true);
                 mNotificationPanel.setAlpha(1);
-                mStackScroller.setParentFadingOut(true);
+                mStackScroller.setParentNotFullyVisible(true);
                 mNotificationPanel.animate()
                         .alpha(0)
                         .setStartDelay(FADE_KEYGUARD_START_DELAY)

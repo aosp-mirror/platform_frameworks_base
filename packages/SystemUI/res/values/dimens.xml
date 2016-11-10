@@ -109,6 +109,9 @@
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">0dp</dimen>
 
+    <!-- the padding on the start of the statusbar -->
+    <dimen name="status_bar_padding_start">6dp</dimen>
+
     <!-- The padding on the global screenshot background image -->
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
 

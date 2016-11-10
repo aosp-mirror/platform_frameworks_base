@@ -50,6 +50,8 @@ public class NotificationShelf extends ActivatableNotificationView {
     private int[] mTmp = new int[2];
     private boolean mHideBackground;
     private int mIconAppearTopPadding;
+    private int mStatusBarHeight;
+    private int mStatusBarPaddingStart;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -75,6 +77,9 @@ public class NotificationShelf extends ActivatableNotificationView {
     private void initDimens() {
         mIconAppearTopPadding = getResources().getDimensionPixelSize(
                 R.dimen.notification_icon_appear_padding);
+        mStatusBarHeight = getResources().getDimensionPixelOffset(R.dimen.status_bar_height);
+        mStatusBarPaddingStart = getResources().getDimensionPixelOffset(
+                R.dimen.status_bar_padding_start);
     }
 
     @Override
@@ -124,6 +129,11 @@ public class NotificationShelf extends ActivatableNotificationView {
             mShelfState.yTranslation = Math.min(viewEnd, maxShelfEnd) - mShelfState.height;
             mShelfState.zTranslation = Math.max(mShelfState.zTranslation,
                     ambientState.getBaseZHeight());
+            float openedAmount = (mShelfState.yTranslation - getFullyClosedTranslation())
+                    / (getIntrinsicHeight() * 2);
+            openedAmount = Math.min(1.0f, openedAmount);
+            mShelfState.iconContainerTranslation = (1.0f - openedAmount)
+                    * (mStatusBarPaddingStart - mNotificationIconContainer.getLeft());
             mShelfState.clipTopAmount = 0;
             mShelfState.alpha = 1.0f;
             mShelfState.belowShelf = false;
@@ -171,6 +181,10 @@ public class NotificationShelf extends ActivatableNotificationView {
             mShelfState.hidden = true;
             mShelfState.location = ExpandableViewState.LOCATION_GONE;
         }
+    }
+
+    private float getFullyClosedTranslation() {
+        return - (getIntrinsicHeight() - mStatusBarHeight) / 2;
     }
 
     private void updateIconAppearance(NotificationData.Entry entry,
@@ -254,15 +268,21 @@ public class NotificationShelf extends ActivatableNotificationView {
         return super.shouldHideBackground() || mHideBackground;
     }
 
+    private void setIconContainerTranslation(float iconContainerTranslation) {
+        mNotificationIconContainer.setTranslationX(iconContainerTranslation);
+    }
+
     private class ShelfState extends ExpandableViewState {
         private WeakHashMap<View, ViewState> iconStates = new WeakHashMap<>();
         private boolean hideBackground;
+        private float iconContainerTranslation;
 
         @Override
         public void applyToView(View view) {
             super.applyToView(view);
             mNotificationIconContainer.applyIconStates(iconStates);
             setHideBackground(hideBackground);
+            setIconContainerTranslation(iconContainerTranslation);
         }
 
         public void resetIcons() {

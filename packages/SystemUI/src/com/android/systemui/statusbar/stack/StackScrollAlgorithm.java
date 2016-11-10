@@ -379,12 +379,6 @@ public class StackScrollAlgorithm {
             }
         }
 
-        if (i == 0 && ambientState.getScrollY() <= 0) {
-            // The first card can get into the bottom stack if it's the only one
-            // on the lockscreen which pushes it up. Let's make sure that doesn't happen and
-            // it stays at the top
-            childViewState.yTranslation = Math.max(0, childViewState.yTranslation);
-        }
         currentYPosition = childViewState.yTranslation + childHeight + paddingAfterChild;
         if (currentYPosition <= 0) {
             childViewState.location = ExpandableViewState.LOCATION_HIDDEN_TOP;

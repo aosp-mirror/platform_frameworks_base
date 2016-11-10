@@ -333,7 +333,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mPulsing;
     private boolean mDrawBackgroundAsSrc;
     private boolean mFadingOut;
-    private boolean mParentFadingOut;
+    private boolean mParentNotFullyVisible;
     private boolean mGroupExpandedForMeasure;
     private boolean mScrollable;
     private View mForcedScroll;
@@ -355,6 +355,10 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mBackwardScrollable;
     private NotificationShelf mShelf;
     private int mMaxDisplayedNotifications = -1;
+    private int mStatusBarHeight;
+    private boolean mNoAmbient;
+    private final Rect mClipRect = new Rect();
+    private boolean mIsClipped;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -472,6 +476,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mBottomStackSlowDownHeight = mStackScrollAlgorithm.getBottomStackSlowDownLength();
         mMinTopOverScrollToEscape = getResources().getDimensionPixelSize(
                 R.dimen.min_top_overscroll_to_qs);
+        mStatusBarHeight = getResources().getDimensionPixelOffset(R.dimen.status_bar_height);
     }
 
     public void setDrawBackgroundAsSrc(boolean asSrc) {
@@ -480,7 +485,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateSrcDrawing() {
-        mBackgroundPaint.setXfermode(mDrawBackgroundAsSrc && (!mFadingOut && !mParentFadingOut)
+        mBackgroundPaint.setXfermode(mDrawBackgroundAsSrc && !mFadingOut && !mParentNotFullyVisible
                 ? mSrcMode : null);
         invalidate();
     }
@@ -532,9 +537,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    public void updateShelfIndex(int newIndex) {
+    public void updateShelfIndex(int newIndex, boolean noAmbient) {
         mAmbientState.setShelfIndex(newIndex);
         changeViewPosition(mShelf, newIndex);
+        mNoAmbient = noAmbient;
     }
 
     public void setChildLocationsChangedListener(OnChildLocationsChangedListener listener) {
@@ -668,6 +674,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    @Override
+    public void setClipBounds(Rect clipBounds) {
+        super.setClipBounds(clipBounds);
+        boolean clipped = clipBounds != null;
+        if (clipped != mIsClipped) {
+            mIsClipped = clipped;
+            updateFadingState();
+        }
+    }
+
     /**
      * Update the height of the panel.
      *
@@ -675,7 +691,18 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public void setExpandedHeight(float height) {
         mExpandedHeight = height;
-        setIsExpanded(height > 0.0f);
+        int minExpansionHeight = getMinExpansionHeight();
+        if (height < minExpansionHeight) {
+            mClipRect.left = 0;
+            mClipRect.right = getWidth();
+            mClipRect.top = 0;
+            mClipRect.bottom = (int) height;
+            height = minExpansionHeight;
+            setClipBounds(mClipRect);
+        } else {
+            setClipBounds(null);
+        }
+        setIsExpanded(height > getMinExpansionHeight());
         int stackHeight;
         float translationY;
         float appearEndPosition = getAppearEndPosition();
@@ -708,13 +735,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      *         Measured relative to the resting position.
      */
     private float getExpandTranslationStart() {
-        int startPosition = 0;
-        if (!mTrackingHeadsUp && !mHeadsUpManager.hasPinnedHeadsUp()) {
-            startPosition = - Math.min(getFirstChildIntrinsicHeight(),
-                    mMaxLayoutHeight - mIntrinsicPadding - mBottomStackSlowDownHeight
-                            - mBottomStackPeekSize);
-        }
-        return startPosition - mTopPadding;
+        return - mTopPadding;
     }
 
     /**
@@ -722,9 +743,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      *         Measured in absolute height.
      */
     private float getAppearStartPosition() {
-        return mTrackingHeadsUp
-                ? mHeadsUpManager.getTopHeadsUpPinnedHeight()
-                : 0;
+        return getMinExpansionHeight();
     }
 
     /**
@@ -735,7 +754,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         int firstItemHeight = mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()
                 ? mHeadsUpManager.getTopHeadsUpPinnedHeight() + mBottomStackPeekSize
                         + mBottomStackSlowDownHeight
-                : getLayoutMinHeight();
+                : getFirstItemMinHeight() + mShelf.getIntrinsicHeight();
         return firstItemHeight + (onKeyguard() ? mTopPadding : mIntrinsicPadding);
     }
 
@@ -2052,7 +2071,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void applyCurrentBackgroundBounds() {
         mScrimController.setExcludedBackgroundArea(
-                mFadingOut || mParentFadingOut || mAmbientState.isDark() ? null
+                mFadingOut || mParentNotFullyVisible || mAmbientState.isDark() || mIsClipped ? null
                         : mCurrentBounds);
         invalidate();
     }
@@ -2131,8 +2150,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
             View child = getChildAt(i);
-            if (child.getVisibility() != View.GONE
-                    && child instanceof ActivatableNotificationView) {
+            if (child.getVisibility() != View.GONE && child instanceof ActivatableNotificationView
+                    && child != mShelf) {
                 return (ActivatableNotificationView) child;
             }
         }
@@ -2143,8 +2162,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() != View.GONE
-                    && child instanceof ActivatableNotificationView) {
+            if (child.getVisibility() != View.GONE && child instanceof ActivatableNotificationView
+                    && child != mShelf) {
                 return (ActivatableNotificationView) child;
             }
         }
@@ -2227,9 +2246,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getLayoutMinHeight() {
-        int firstChildMinHeight = getFirstChildIntrinsicHeight();
-        return Math.min(firstChildMinHeight + mBottomStackPeekSize + mBottomStackSlowDownHeight,
-                mMaxLayoutHeight - mIntrinsicPadding);
+        return mShelf.getIntrinsicHeight();
     }
 
     public int getFirstChildIntrinsicHeight() {
@@ -3095,6 +3112,11 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public int getEmptyBottomMargin() {
         int emptyMargin = mMaxLayoutHeight - mContentHeight;
+        if (!mNoAmbient || mEmptyShadeView.getVisibility() == VISIBLE) {
+            // If we have ambient notifications or a clear all button, we need to make sure that the
+            // notifications are a bit taller, otherwise they will be pushed under the other cards
+            emptyMargin -= (mBottomStackPeekSize + mBottomStackSlowDownHeight);
+        }
         return Math.max(emptyMargin, 0);
     }
 
@@ -3876,9 +3898,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    public void setParentFadingOut(boolean fadingOut) {
-        if (fadingOut != mParentFadingOut) {
-            mParentFadingOut = fadingOut;
+    public void setParentNotFullyVisible(boolean parentNotFullyVisible) {
+        if (mScrimController == null) {
+            // we're not set up yet.
+            return;
+        }
+        if (parentNotFullyVisible != mParentNotFullyVisible) {
+            mParentNotFullyVisible = parentNotFullyVisible;
             updateFadingState();
         }
     }
@@ -3936,6 +3962,13 @@ public class NotificationStackScrollLayout extends ViewGroup
             updateContentHeight();
             notifyHeightChangeListener(mShelf);
         }
+    }
+
+    public int getMinExpansionHeight() {
+        return mTrackingHeadsUp
+                ? mHeadsUpManager.getTopHeadsUpPinnedHeight()
+                : mShelf.getIntrinsicHeight()
+                        - (mShelf.getIntrinsicHeight() - mStatusBarHeight) / 2;
     }
 
     /**

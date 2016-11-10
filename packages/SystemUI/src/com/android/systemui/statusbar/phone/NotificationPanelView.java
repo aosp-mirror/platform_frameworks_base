@@ -207,6 +207,7 @@ public class NotificationPanelView extends PanelView implements
         }
     };
     private NotificationGroupManager mGroupManager;
+    private boolean mOpening;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -557,9 +558,7 @@ public class NotificationPanelView extends PanelView implements
     protected void flingToHeight(float vel, boolean expand, float target,
             float collapseSpeedUpFactor, boolean expandBecauseOfFalsing) {
         mHeadsUpTouchHelper.notifyFling(!expand);
-        setClosingWithAlphaFadeout(!expand
-                && mNotificationStackScroller.getFirstChildIntrinsicHeight() <= mMaxFadeoutHeight
-                && getFadeoutAlpha() == 1.0f);
+        setClosingWithAlphaFadeout(!expand && getFadeoutAlpha() == 1.0f);
         super.flingToHeight(vel, expand, target, collapseSpeedUpFactor, expandBecauseOfFalsing);
     }
 
@@ -731,6 +730,11 @@ public class NotificationPanelView extends PanelView implements
     private float getQsExpansionFraction() {
         return Math.min(1f, (mQsExpansionHeight - mQsMinExpansionHeight)
                 / (getTempQsMaxExpansion() - mQsMinExpansionHeight));
+    }
+
+    @Override
+    protected float getOpeningHeight() {
+        return mNotificationStackScroller.getMinExpansionHeight();
     }
 
     @Override
@@ -1426,7 +1430,7 @@ public class NotificationPanelView extends PanelView implements
             if (mKeyguardShowing) {
 
                 // On Keyguard, interpolate the QS expansion linearly to the panel expansion
-                t = expandedHeight / getMaxPanelHeight();
+                t = expandedHeight / (getMaxPanelHeight());
             } else {
 
                 // In Shade, interpolate linearly such that QS is closed whenever panel height is
@@ -2276,6 +2280,14 @@ public class NotificationPanelView extends PanelView implements
     protected void updateExpandedHeight(float expandedHeight) {
         mNotificationStackScroller.setExpandedHeight(expandedHeight);
         updateKeyguardBottomAreaAlpha();
+        setOpening(expandedHeight <= getOpeningHeight());
+    }
+
+    private void setOpening(boolean opening) {
+        if (opening != mOpening) {
+            mOpening = opening;
+            mStatusBar.recomputeDisableFlags(false);
+        }
     }
 
     public void setPanelScrimMinFraction(float minFraction) {
@@ -2327,7 +2339,18 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public void setAlpha(float alpha) {
         super.setAlpha(alpha);
-        mNotificationStackScroller.setParentFadingOut(alpha != 1.0f);
+        updateFullyVisibleState();
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        updateFullyVisibleState();
+    }
+
+    private void updateFullyVisibleState() {
+        mNotificationStackScroller.setParentNotFullyVisible(getAlpha() != 1.0f
+                || getVisibility() != VISIBLE);
     }
 
     /**
@@ -2367,6 +2390,15 @@ public class NotificationPanelView extends PanelView implements
 
     public void setGroupManager(NotificationGroupManager groupManager) {
         mGroupManager = groupManager;
+    }
+
+    public boolean shouldHideNotificationIcons() {
+        return !mOpening && !isFullyCollapsed();
+    }
+
+    public boolean shouldAnimateIconHiding() {
+        // TODO: handle this correctly, not completely working yet
+        return mNotificationStackScroller.getTranslationX() != 0;
     }
 
     private final FragmentListener mFragmentListener = new FragmentListener() {
