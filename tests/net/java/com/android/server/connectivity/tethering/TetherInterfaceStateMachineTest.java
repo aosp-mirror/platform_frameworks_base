@@ -59,13 +59,14 @@ public class TetherInterfaceStateMachineTest {
     @Mock private INetworkStatsService mStatsService;
     @Mock private IControlsTethering mTetherHelper;
     @Mock private InterfaceConfiguration mInterfaceConfiguration;
+    @Mock private IPv6TetheringInterfaceServices mIPv6TetheringInterfaceServices;
 
     private final TestLooper mLooper = new TestLooper();
     private TetherInterfaceStateMachine mTestedSm;
 
     private void initStateMachine(int interfaceType) throws Exception {
         mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(), interfaceType,
-                mNMService, mStatsService, mTetherHelper);
+                mNMService, mStatsService, mTetherHelper, mIPv6TetheringInterfaceServices);
         mTestedSm.start();
         // Starting the state machine always puts us in a consistent state and notifies
         // the test of the world that we've changed from an unknown to available state.
@@ -91,7 +92,8 @@ public class TetherInterfaceStateMachineTest {
     @Test
     public void startsOutAvailable() {
         mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(),
-                ConnectivityManager.TETHERING_BLUETOOTH, mNMService, mStatsService, mTetherHelper);
+                ConnectivityManager.TETHERING_BLUETOOTH, mNMService, mStatsService, mTetherHelper,
+                mIPv6TetheringInterfaceServices);
         mTestedSm.start();
         mLooper.dispatchAll();
         verify(mTetherHelper).notifyInterfaceStateChange(
