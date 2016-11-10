@@ -113,6 +113,15 @@ import static com.android.layoutlib.bridge.android.RenderParamsFlags.FLAG_KEY_AP
 public final class BridgeContext extends Context {
     private static final String PREFIX_THEME_APPCOMPAT = "Theme.AppCompat";
 
+    private static final Map<String, ResourceValue> FRAMEWORK_PATCHED_VALUES = new HashMap<>(2);
+
+    static {
+        FRAMEWORK_PATCHED_VALUES.put("animateFirstView", new ResourceValue(
+                ResourceType.BOOL, "animateFirstView", "false", false));
+        FRAMEWORK_PATCHED_VALUES.put("animateLayoutChanges", new ResourceValue(
+                ResourceType.BOOL, "animateFirstView", "false", false));
+    };
+
     /** The map adds cookies to each view so that IDE can link xml tags to views. */
     private final HashMap<View, Object> mViewKeyMap = new HashMap<>();
     /**
@@ -909,6 +918,16 @@ public final class BridgeContext extends Context {
                 // if there's no direct value for this attribute in the XML, we look for default
                 // values in the widget defStyle, and then in the theme.
                 if (value == null) {
+                    if (frameworkAttr) {
+                        // For some framework values, layoutlib patches the actual value in the
+                        // theme when it helps to improve the final preview. In most cases
+                        // we just disable animations.
+                        ResourceValue patchedValue = FRAMEWORK_PATCHED_VALUES.get(attrName);
+                        if (patchedValue != null) {
+                            defaultValue = patchedValue;
+                        }
+                    }
+
                     // if we found a value, we make sure this doesn't reference another value.
                     // So we resolve it.
                     if (defaultValue != null) {
