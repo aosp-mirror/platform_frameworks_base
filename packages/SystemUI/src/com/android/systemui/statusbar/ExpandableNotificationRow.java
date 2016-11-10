@@ -51,11 +51,11 @@ import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.stack.AnimationProperties;
+import com.android.systemui.statusbar.stack.ExpandableViewState;
 import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackScrollState;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
-import com.android.systemui.statusbar.stack.ExpandableViewState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -485,11 +485,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
-    public void startChildAnimation(StackScrollState finalState,
-            StackStateAnimator stateAnimator, long delay, long duration) {
+    public void startChildAnimation(StackScrollState finalState, AnimationProperties properties) {
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.startAnimationToState(finalState, stateAnimator, delay,
-                    duration);
+            mChildrenContainer.startAnimationToState(finalState, properties);
         }
     }
 
@@ -1762,7 +1760,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return new NotificationViewState(stackScrollState);
     }
 
-    public static class NotificationViewState extends ExpandableViewState {
+    public class NotificationViewState extends ExpandableViewState {
 
         private final StackScrollState mOverallState;
 
@@ -1780,6 +1778,23 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                     row.setClipToActualHeight(true);
                 }
                 row.applyChildrenState(mOverallState);
+            }
+        }
+
+        @Override
+        protected void onYTranslationAnimationFinished() {
+            super.onYTranslationAnimationFinished();
+            if (mHeadsupDisappearRunning) {
+                setHeadsupDisappearRunning(false);
+            }
+        }
+
+        @Override
+        public void animateTo(View child, AnimationProperties properties) {
+            super.animateTo(child, properties);
+            if (child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                row.startChildAnimation(mOverallState, properties);
             }
         }
     }

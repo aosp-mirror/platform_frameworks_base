@@ -69,9 +69,9 @@ import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationGuts;
-import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationSettingsIconRow;
 import com.android.systemui.statusbar.NotificationSettingsIconRow.SettingsIconRowListener;
+import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.FakeShadowView;
@@ -2095,7 +2095,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         ActivatableNotificationView firstView = mFirstVisibleBackgroundChild;
         int top = 0;
         if (firstView != null) {
-            int finalTranslationY = (int) StackStateAnimator.getFinalTranslationY(firstView);
+            int finalTranslationY = (int) ViewState.getFinalTranslationY(firstView);
             if (mAnimateNextBackgroundTop
                     || mTopAnimator == null && mCurrentBounds.top == finalTranslationY
                     || mTopAnimator != null && mEndAnimationRect.top == finalTranslationY) {
@@ -2108,8 +2108,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         ActivatableNotificationView lastView = mLastVisibleBackgroundChild;
         int bottom = 0;
         if (lastView != null) {
-            int finalTranslationY = (int) StackStateAnimator.getFinalTranslationY(lastView);
-            int finalHeight = StackStateAnimator.getFinalActualHeight(lastView);
+            int finalTranslationY = (int) ViewState.getFinalTranslationY(lastView);
+            int finalHeight = ExpandableViewState.getFinalActualHeight(lastView);
             int finalBottom = finalTranslationY + finalHeight;
             finalBottom = Math.min(finalBottom, getHeight());
             if (mAnimateNextBackgroundBottom

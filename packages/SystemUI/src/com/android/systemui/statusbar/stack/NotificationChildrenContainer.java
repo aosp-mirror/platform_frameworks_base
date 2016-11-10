@@ -594,11 +594,11 @@ public class NotificationChildrenContainer extends ViewGroup {
             // There is no fake shadow to be drawn on the children
             child.setFakeShadowIntensity(0.0f, 0.0f, 0, 0);
         }
-        if (mOverflowNumber != null) {
+        if (mGroupOverFlowState != null) {
             mGroupOverFlowState.applyToView(mOverflowNumber);
             mNeverAppliedGroupState = false;
         }
-        if (mNotificationHeader != null) {
+        if (mHeaderViewState != null) {
             mHeaderViewState.applyToView(mNotificationHeader);
         }
     }
@@ -614,8 +614,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         return;
     }
 
-    public void startAnimationToState(StackScrollState state, StackStateAnimator stateAnimator,
-            long baseDelay, long duration) {
+    public void startAnimationToState(StackScrollState state, AnimationProperties properties) {
         int childCount = mChildren.size();
         ViewState tmpState = new ViewState();
         float expandFraction = getGroupExpandFraction();
@@ -624,7 +623,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         for (int i = childCount - 1; i >= 0; i--) {
             ExpandableNotificationRow child = mChildren.get(i);
             ExpandableViewState viewState = state.getViewStateForView(child);
-            stateAnimator.startStackAnimations(child, viewState, state, -1, baseDelay);
+            viewState.animateTo(child, properties);
 
             // layout the divider
             View divider = mDividers.get(i);
@@ -637,7 +636,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             }
             tmpState.hidden = !dividersVisible;
             tmpState.alpha = alpha;
-            stateAnimator.startViewAnimations(divider, tmpState, baseDelay, duration);
+            tmpState.animateTo(divider, properties);
             // There is no fake shadow to be drawn on the children
             child.setFakeShadowIntensity(0.0f, 0.0f, 0, 0);
         }
@@ -649,8 +648,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                 mGroupOverFlowState.alpha = alpha;
                 mNeverAppliedGroupState = false;
             }
-            stateAnimator.startViewAnimations(mOverflowNumber, mGroupOverFlowState,
-                    baseDelay, duration);
+            mGroupOverFlowState.animateTo(mOverflowNumber, properties);
         }
         if (mNotificationHeader != null) {
             mHeaderViewState.applyToView(mNotificationHeader);

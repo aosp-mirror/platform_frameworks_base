@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.stack.AmbientState;
+import com.android.systemui.statusbar.stack.AnimationProperties;
 import com.android.systemui.statusbar.stack.ExpandableViewState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackScrollAlgorithm;
@@ -297,6 +298,13 @@ public class NotificationShelf extends ActivatableNotificationView {
         @Override
         public void applyToView(View view) {
             super.applyToView(view);
+            updateAppearance();
+            setIconContainerTranslation(iconContainerTranslation);
+        }
+
+        @Override
+        public void animateTo(View child, AnimationProperties properties) {
+            super.animateTo(child, properties);
             updateAppearance();
             setIconContainerTranslation(iconContainerTranslation);
         }

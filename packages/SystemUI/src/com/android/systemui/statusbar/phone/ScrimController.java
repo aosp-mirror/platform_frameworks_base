@@ -21,7 +21,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.support.v4.graphics.ColorUtils;
 import android.view.View;
@@ -37,7 +36,7 @@ import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
+import com.android.systemui.statusbar.stack.ViewState;
 
 /**
  * Controls both the scrim behind the notifications and in front of the notifications (when a
@@ -478,14 +477,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             return;
         }
 
-        ValueAnimator previousAnimator = StackStateAnimator.getChildTag(scrim,
+        ValueAnimator previousAnimator = ViewState.getChildTag(scrim,
                 TAG_KEY_ANIM);
         float animEndValue = -1;
         if (previousAnimator != null) {
             if (animate || alpha == currentAlpha) {
                 previousAnimator.cancel();
             } else {
-                animEndValue = StackStateAnimator.getChildTag(scrim, TAG_END_ALPHA);
+                animEndValue = ViewState.getChildTag(scrim, TAG_END_ALPHA);
             }
         }
         if (alpha != currentAlpha && alpha != animEndValue) {
@@ -495,10 +494,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                 scrim.setTag(TAG_END_ALPHA, alpha);
             } else {
                 if (previousAnimator != null) {
-                    float previousStartValue = StackStateAnimator.getChildTag(scrim,
-                            TAG_START_ALPHA);
-                    float previousEndValue = StackStateAnimator.getChildTag(scrim,
-                            TAG_END_ALPHA);
+                    float previousStartValue = ViewState.getChildTag(scrim, TAG_START_ALPHA);
+                    float previousEndValue = ViewState.getChildTag(scrim, TAG_END_ALPHA);
                     // we need to increase all animation keyframes of the previous animator by the
                     // relative change to the end value
                     PropertyValuesHolder[] values = previousAnimator.getValues();
