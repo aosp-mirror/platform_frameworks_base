@@ -16,13 +16,10 @@
 
 package com.android.systemui.qs.tiles;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.media.AudioManager;
-import android.widget.Toast;
 
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -83,9 +80,10 @@ public class AndroidAutoTile extends QSTile<QSTile.BooleanState> {
                 return true;
             }
         } catch (Exception e) {
-            //catch PackageManager exception -it should not happen because we check it in isPackageInstalled- 
-            //and if parseInt gives any exception, assume we have the new Auto version thus try the related intent,
-            //if the intent doesn't work, the system just does nothing so we are safe anyway
+            //catch PackageManager exception -it should not happen because we check it in
+            //isPackageInstalled- and if parseInt gives any exception, assume we have the new
+            //Auto version thus try the related intent, if the intent doesn't work, the system
+            //just does nothing so we are safe anyway.
             return true;
         }
     }
