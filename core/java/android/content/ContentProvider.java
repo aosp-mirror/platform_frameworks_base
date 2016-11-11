@@ -1131,7 +1131,6 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *            {@link CancellationSignal#throwIfCanceled()} to check whether the client has
      *            canceled the refresh request.
      * @return true if the provider actually tried refreshing.
-     * @hide
      */
     public boolean refresh(Uri uri, @Nullable Bundle args,
             @Nullable CancellationSignal cancellationSignal) {
