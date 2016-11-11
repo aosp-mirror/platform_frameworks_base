@@ -302,6 +302,9 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
             dismissRecentsToLaunchTargetTaskOrHome();
         } else if (event.triggeredFromHomeKey) {
             dismissRecentsToHome();
+        } else {
+            // Fall through tap on the background view but not on any of the tasks.
+            dismissRecentsToHome();
         }
     }
 
