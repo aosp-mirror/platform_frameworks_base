@@ -584,6 +584,10 @@ public final class AudioAttributes implements Parcelable {
          * @return the same Builder instance.
          */
         public Builder setLegacyStreamType(int streamType) {
+            if (streamType == AudioManager.STREAM_ACCESSIBILITY) {
+                throw new IllegalArgumentException("STREAM_ACCESSIBILITY is not a legacy stream "
+                        + "type that was used for audio playback");
+            }
             return setInternalLegacyStreamType(streamType);
         }
 
@@ -624,12 +628,15 @@ public final class AudioAttributes implements Parcelable {
                     mContentType = CONTENT_TYPE_SONIFICATION;
                     break;
                 case AudioSystem.STREAM_TTS:
+                    mContentType = CONTENT_TYPE_SONIFICATION;
+                    break;
+                case AudioSystem.STREAM_ACCESSIBILITY:
                     mContentType = CONTENT_TYPE_SPEECH;
                     break;
                 default:
                     Log.e(TAG, "Invalid stream type " + streamType + " for AudioAttributes");
             }
-            mUsage = usageForLegacyStreamType(streamType);
+            mUsage = usageForStreamType(streamType);
             return this;
         }
 
@@ -842,8 +849,7 @@ public final class AudioAttributes implements Parcelable {
         }
     }
 
-    /** @hide */
-    public static int usageForLegacyStreamType(int streamType) {
+    private static int usageForStreamType(int streamType) {
         switch(streamType) {
             case AudioSystem.STREAM_VOICE_CALL:
                 return USAGE_VOICE_COMMUNICATION;
@@ -862,8 +868,9 @@ public final class AudioAttributes implements Parcelable {
                 return USAGE_VOICE_COMMUNICATION;
             case AudioSystem.STREAM_DTMF:
                 return USAGE_VOICE_COMMUNICATION_SIGNALLING;
-            case AudioSystem.STREAM_TTS:
+            case AudioSystem.STREAM_ACCESSIBILITY:
                 return USAGE_ASSISTANCE_ACCESSIBILITY;
+            case AudioSystem.STREAM_TTS:
             default:
                 return USAGE_UNKNOWN;
         }
@@ -915,7 +922,6 @@ public final class AudioAttributes implements Parcelable {
         switch (aa.getUsage()) {
             case USAGE_MEDIA:
             case USAGE_GAME:
-            case USAGE_ASSISTANCE_ACCESSIBILITY:
             case USAGE_ASSISTANCE_NAVIGATION_GUIDANCE:
                 return AudioSystem.STREAM_MUSIC;
             case USAGE_ASSISTANCE_SONIFICATION:
@@ -935,6 +941,8 @@ public final class AudioAttributes implements Parcelable {
             case USAGE_NOTIFICATION_COMMUNICATION_DELAYED:
             case USAGE_NOTIFICATION_EVENT:
                 return AudioSystem.STREAM_NOTIFICATION;
+            case USAGE_ASSISTANCE_ACCESSIBILITY:
+                return AudioSystem.STREAM_ACCESSIBILITY;
             case USAGE_UNKNOWN:
                 return fromGetVolumeControlStream ?
                         AudioManager.USE_DEFAULT_STREAM_TYPE : AudioSystem.STREAM_MUSIC;

@@ -335,6 +335,9 @@ public class AudioManager {
     /** @hide Used to identify the volume of audio streams exclusively transmitted through the
      *        speaker (TTS) of the device */
     public static final int STREAM_TTS = AudioSystem.STREAM_TTS;
+    /** Used to identify the volume of audio streams for accessibility prompts */
+    public static final int STREAM_ACCESSIBILITY = AudioSystem.STREAM_ACCESSIBILITY;
+
     /** Number of audio streams */
     /**
      * @deprecated Do not iterate on volume stream type values.

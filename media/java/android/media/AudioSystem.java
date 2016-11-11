@@ -63,13 +63,15 @@ public class AudioSystem
     /** Used to identify the volume of audio streams exclusively transmitted through the
      *  speaker (TTS) of the device */
     public static final int STREAM_TTS = 9;
+    /** Used to identify the volume of audio streams for accessibility prompts */
+    public static final int STREAM_ACCESSIBILITY = 10;
     /**
      * @deprecated Use {@link #numStreamTypes() instead}
      */
     public static final int NUM_STREAMS = 5;
 
     // Expose only the getter method publicly so we can change it in the future
-    private static final int NUM_STREAM_TYPES = 10;
+    private static final int NUM_STREAM_TYPES = 11;
     public static final int getNumStreamTypes() { return NUM_STREAM_TYPES; }
 
     public static final String[] STREAM_NAMES = new String[] {
@@ -82,7 +84,8 @@ public class AudioSystem
         "STREAM_BLUETOOTH_SCO",
         "STREAM_SYSTEM_ENFORCED",
         "STREAM_DTMF",
-        "STREAM_TTS"
+        "STREAM_TTS",
+        "STREAM_ACCESSIBILITY"
     };
 
     /*
@@ -773,7 +776,8 @@ public class AudioSystem
         7,  // STREAM_BLUETOOTH_SCO
         7,  // STREAM_SYSTEM_ENFORCED
         11, // STREAM_DTMF
-        11  // STREAM_TTS
+        11, // STREAM_TTS
+        11, // STREAM_ACCESSIBILITY
     };
 
     public static String streamToString(int stream) {
