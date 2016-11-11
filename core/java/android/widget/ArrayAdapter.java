@@ -312,10 +312,10 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
     }
 
     /**
-     * Control whether methods that change the list ({@link #add},
-     * {@link #insert}, {@link #remove}, {@link #clear}) automatically call
-     * {@link #notifyDataSetChanged}.  If set to false, caller must
-     * manually call notifyDataSetChanged() to have the changes
+     * Control whether methods that change the list ({@link #add}, {@link #addAll(Collection)},
+     * {@link #addAll(Object[])}, {@link #insert}, {@link #remove}, {@link #clear},
+     * {@link #sort(Comparator)}) automatically call {@link #notifyDataSetChanged}.  If set to
+     * false, caller must manually call notifyDataSetChanged() to have the changes
      * reflected in the attached view.
      *
      * The default is true, and calling notifyDataSetChanged()
