@@ -19,7 +19,7 @@
     <attr name="attr2" format="integer" />
 
     <style name="Theme">
-        <item name="com.android.test.basic:attr1">700</item>
-        <item name="com.android.test.basic:attr2">?com.android.test.basic:attr1</item>
+        <item name="com.android.lib:attr1">700</item>
+        <item name="com.android.lib:attr2">?com.android.lib:attr1</item>
     </style>
 </resources>

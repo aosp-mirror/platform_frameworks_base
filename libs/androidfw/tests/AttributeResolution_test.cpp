@@ -30,12 +30,11 @@ namespace android {
 class AttributeResolutionTest : public ::testing::Test {
  public:
   virtual void SetUp() override {
-    std::string test_source_dir = GetTestDataPath();
     std::string contents;
-    CHECK(base::ReadFileToString(test_source_dir + "/styles/resources.arsc",
-                                 &contents));
-    CHECK(table_.add(contents.data(), contents.size(), 1 /*cookie*/,
-                     true /*copyData*/) == NO_ERROR);
+    ASSERT_TRUE(ReadFileFromZipToString(
+        GetTestDataPath() + "/styles/styles.apk", "resources.arsc", &contents));
+    ASSERT_EQ(NO_ERROR, table_.add(contents.data(), contents.size(),
+                                   1 /*cookie*/, true /*copyData*/));
   }
 
  protected:
@@ -46,12 +45,14 @@ class AttributeResolutionXmlTest : public AttributeResolutionTest {
  public:
   virtual void SetUp() override {
     AttributeResolutionTest::SetUp();
-    std::string test_source_dir = GetTestDataPath();
+
     std::string contents;
-    CHECK(base::ReadFileToString(test_source_dir + "/styles/layout.xml",
-                                 &contents));
-    CHECK(xml_parser_.setTo(contents.data(), contents.size(),
-                            true /*copyData*/) == NO_ERROR);
+    ASSERT_TRUE(
+        ReadFileFromZipToString(GetTestDataPath() + "/styles/styles.apk",
+                                "res/layout/layout.xml", &contents));
+
+    ASSERT_EQ(NO_ERROR, xml_parser_.setTo(contents.data(), contents.size(),
+                                          true /*copyData*/));
 
     // Skip to the first tag.
     while (xml_parser_.next() != ResXMLParser::START_TAG) {

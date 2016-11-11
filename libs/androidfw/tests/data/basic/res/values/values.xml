@@ -25,12 +25,12 @@
     <integer name="number2">@array/integerArray1</integer>
 
     <style name="Theme1">
-        <item name="com.android.test.basic:attr1">100</item>
-        <item name="com.android.test.basic:attr2">@integer/number1</item>
+        <item name="com.android.basic:attr1">100</item>
+        <item name="com.android.basic:attr2">@integer/number1</item>
     </style>
 
-    <style name="Theme2" parent="@com.android.test.basic:style/Theme1">
-        <item name="com.android.test.basic:attr1">300</item>
+    <style name="Theme2" parent="@com.android.basic:style/Theme1">
+        <item name="com.android.basic:attr1">300</item>
     </style>
 
     <integer-array name="integerArray1">

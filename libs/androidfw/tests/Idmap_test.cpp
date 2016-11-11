@@ -14,102 +14,102 @@
  * limitations under the License.
  */
 
-#include <androidfw/ResourceTypes.h>
+#include "androidfw/ResourceTypes.h"
 
-#include <utils/String8.h>
-#include <utils/String16.h>
+#include "utils/String16.h"
+#include "utils/String8.h"
+
 #include "TestHelpers.h"
 #include "data/basic/R.h"
 
-#include <gtest/gtest.h>
+using com::android::basic::R;
 
-using namespace android;
-
-namespace {
-
-/**
- * Include a binary resource table.
- *
- * Package: com.android.test.basic
- */
-#include "data/basic/basic_arsc.h"
-
-/**
- * Include a binary resource table.
- * This table is an overlay.
- *
- * Package: com.android.test.basic
- */
-#include "data/overlay/overlay_arsc.h"
-
-enum { MAY_NOT_BE_BAG = false };
+namespace android {
 
 class IdmapTest : public ::testing::Test {
-protected:
-    virtual void SetUp() {
-        ASSERT_EQ(NO_ERROR, mTargetTable.add(basic_arsc, basic_arsc_len));
-        ASSERT_EQ(NO_ERROR, mOverlayTable.add(overlay_arsc, overlay_arsc_len));
-        char targetName[256] = "com.android.test.basic";
-        ASSERT_EQ(NO_ERROR, mTargetTable.createIdmap(mOverlayTable, 0, 0,
-                    targetName, targetName, &mData, &mDataSize));
-    }
+ protected:
+  void SetUp() override {
+    std::string contents;
+    ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/basic/basic.apk",
+                                        "resources.arsc", &contents));
+    ASSERT_EQ(NO_ERROR,
+              target_table_.add(contents.data(), contents.size(), 0, true));
 
-    virtual void TearDown() {
-        free(mData);
-    }
+    ASSERT_TRUE(
+        ReadFileFromZipToString(GetTestDataPath() + "/overlay/overlay.apk",
+                                "resources.arsc", &overlay_data_));
+    ResTable overlay_table;
+    ASSERT_EQ(NO_ERROR,
+              overlay_table.add(overlay_data_.data(), overlay_data_.size()));
 
-    ResTable mTargetTable;
-    ResTable mOverlayTable;
-    void* mData;
-    size_t mDataSize;
+    char target_name[256] = "com.android.basic";
+    ASSERT_EQ(NO_ERROR,
+              target_table_.createIdmap(overlay_table, 0, 0, target_name,
+                                        target_name, &data_, &data_size_));
+  }
+
+  void TearDown() override { ::free(data_); }
+
+  ResTable target_table_;
+  std::string overlay_data_;
+  void* data_ = nullptr;
+  size_t data_size_ = 0;
 };
 
 TEST_F(IdmapTest, canLoadIdmap) {
-    ASSERT_EQ(NO_ERROR, mTargetTable.add(overlay_arsc, overlay_arsc_len, mData, mDataSize));
+  ASSERT_EQ(NO_ERROR,
+            target_table_.add(overlay_data_.data(), overlay_data_.size(), data_,
+                              data_size_));
 }
 
 TEST_F(IdmapTest, overlayOverridesResourceValue) {
-    Res_value val;
-    ssize_t block = mTargetTable.getResource(base::R::string::test2, &val, false);
-    ASSERT_GE(block, 0);
-    ASSERT_EQ(Res_value::TYPE_STRING, val.dataType);
-    const ResStringPool* pool = mTargetTable.getTableStringBlock(block);
-    ASSERT_TRUE(pool != NULL);
-    ASSERT_LT(val.data, pool->size());
+  Res_value val;
+  ssize_t block = target_table_.getResource(R::string::test2, &val, false);
+  ASSERT_GE(block, 0);
+  ASSERT_EQ(Res_value::TYPE_STRING, val.dataType);
+  const ResStringPool* pool = target_table_.getTableStringBlock(block);
+  ASSERT_TRUE(pool != NULL);
+  ASSERT_LT(val.data, pool->size());
 
-    size_t strLen;
-    const char16_t* targetStr16 = pool->stringAt(val.data, &strLen);
-    ASSERT_TRUE(targetStr16 != NULL);
-    ASSERT_EQ(String16("test2"), String16(targetStr16, strLen));
+  size_t strLen;
+  const char16_t* targetStr16 = pool->stringAt(val.data, &strLen);
+  ASSERT_TRUE(targetStr16 != NULL);
+  ASSERT_EQ(String16("test2"), String16(targetStr16, strLen));
 
-    ASSERT_EQ(NO_ERROR, mTargetTable.add(overlay_arsc, overlay_arsc_len, mData, mDataSize));
+  ASSERT_EQ(NO_ERROR,
+            target_table_.add(overlay_data_.data(), overlay_data_.size(), data_,
+                              data_size_));
 
-    ssize_t newBlock = mTargetTable.getResource(base::R::string::test2, &val, false);
-    ASSERT_GE(newBlock, 0);
-    ASSERT_NE(block, newBlock);
-    ASSERT_EQ(Res_value::TYPE_STRING, val.dataType);
-    pool = mTargetTable.getTableStringBlock(newBlock);
-    ASSERT_TRUE(pool != NULL);
-    ASSERT_LT(val.data, pool->size());
+  ssize_t newBlock = target_table_.getResource(R::string::test2, &val, false);
+  ASSERT_GE(newBlock, 0);
+  ASSERT_NE(block, newBlock);
+  ASSERT_EQ(Res_value::TYPE_STRING, val.dataType);
+  pool = target_table_.getTableStringBlock(newBlock);
+  ASSERT_TRUE(pool != NULL);
+  ASSERT_LT(val.data, pool->size());
 
-    targetStr16 = pool->stringAt(val.data, &strLen);
-    ASSERT_TRUE(targetStr16 != NULL);
-    ASSERT_EQ(String16("test2-overlay"), String16(targetStr16, strLen));
+  targetStr16 = pool->stringAt(val.data, &strLen);
+  ASSERT_TRUE(targetStr16 != NULL);
+  ASSERT_EQ(String16("test2-overlay"), String16(targetStr16, strLen));
 }
 
 TEST_F(IdmapTest, overlaidResourceHasSameName) {
-    ASSERT_EQ(NO_ERROR, mTargetTable.add(overlay_arsc, overlay_arsc_len, mData, mDataSize));
+  ASSERT_EQ(NO_ERROR,
+            target_table_.add(overlay_data_.data(), overlay_data_.size(), data_,
+                              data_size_));
 
-    ResTable::resource_name resName;
-    ASSERT_TRUE(mTargetTable.getResourceName(base::R::array::integerArray1, false, &resName));
+  ResTable::resource_name resName;
+  ASSERT_TRUE(
+      target_table_.getResourceName(R::array::integerArray1, false, &resName));
 
-    ASSERT_TRUE(resName.package != NULL);
-    ASSERT_TRUE(resName.type != NULL);
-    ASSERT_TRUE(resName.name != NULL);
+  ASSERT_TRUE(resName.package != NULL);
+  ASSERT_TRUE(resName.type != NULL);
+  ASSERT_TRUE(resName.name != NULL);
 
-    EXPECT_EQ(String16("com.android.test.basic"), String16(resName.package, resName.packageLen));
-    EXPECT_EQ(String16("array"), String16(resName.type, resName.typeLen));
-    EXPECT_EQ(String16("integerArray1"), String16(resName.name, resName.nameLen));
+  EXPECT_EQ(String16("com.android.basic"),
+            String16(resName.package, resName.packageLen));
+  EXPECT_EQ(String16("array"), String16(resName.type, resName.typeLen));
+  EXPECT_EQ(String16("integerArray1"), String16(resName.name, resName.nameLen));
 }
 
-} // namespace
+}  // namespace

@@ -25,13 +25,11 @@
 #include "utils/String16.h"
 #include "utils/String8.h"
 
-static inline ::std::ostream& operator<<(::std::ostream& out,
-                                         const android::String8& str) {
+static inline ::std::ostream& operator<<(::std::ostream& out, const android::String8& str) {
   return out << str.string();
 }
 
-static inline ::std::ostream& operator<<(::std::ostream& out,
-                                         const android::String16& str) {
+static inline ::std::ostream& operator<<(::std::ostream& out, const android::String16& str) {
   return out << android::String8(str).string();
 }
 
@@ -43,18 +41,19 @@ void SetTestDataPath(const std::string& path);
 
 const std::string& GetTestDataPath();
 
-static inline bool operator==(const ResTable_config& a,
-                              const ResTable_config& b) {
+::testing::AssertionResult ReadFileFromZipToString(const std::string& zip_path,
+                                                   const std::string& file,
+                                                   std::string* out_contents);
+
+static inline bool operator==(const ResTable_config& a, const ResTable_config& b) {
   return a.compare(b) == 0;
 }
 
-static inline ::std::ostream& operator<<(::std::ostream& out,
-                                         const ResTable_config& c) {
+static inline ::std::ostream& operator<<(::std::ostream& out, const ResTable_config& c) {
   return out << c.toString().string();
 }
 
-::testing::AssertionResult IsStringEqual(const ResTable& table,
-                                         uint32_t resource_id,
+::testing::AssertionResult IsStringEqual(const ResTable& table, uint32_t resource_id,
                                          const char* expected_str);
 
 }  // namespace android
