@@ -60,6 +60,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -3969,10 +3970,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + mCurAttribute.packageName + " packageName=" + packageName);
                 return null;
             }
+            // This user ID can never bee spoofed.
             final int imeUserId = UserHandle.getUserId(uid);
+            // This user ID can never bee spoofed.
             final int appUserId = UserHandle.getUserId(mCurClient.uid);
-            return new InputContentUriTokenHandler(contentUri, uid, packageName, imeUserId,
-                    appUserId);
+            // This user ID may be invalid if "contentUri" embedded an invalid user ID.
+            final int contentUriOwnerUserId = ContentProvider.getUserIdFromUri(contentUri,
+                    imeUserId);
+            final Uri contentUriWithoutUserId = ContentProvider.getUriWithoutUserId(contentUri);
+            // Note: InputContentUriTokenHandler.take() checks whether the IME (specified by "uid")
+            // actually has the right to grant a read permission for "contentUriWithoutUserId" that
+            // is claimed to belong to "contentUriOwnerUserId".  For example, specifying random
+            // content URI and/or contentUriOwnerUserId just results in a SecurityException thrown
+            // from InputContentUriTokenHandler.take() and can never be allowed beyond what is
+            // actually allowed to "uid", which is guaranteed to be the IME's one.
+            return new InputContentUriTokenHandler(contentUriWithoutUserId, uid,
+                    packageName, contentUriOwnerUserId, appUserId);
         }
     }
 

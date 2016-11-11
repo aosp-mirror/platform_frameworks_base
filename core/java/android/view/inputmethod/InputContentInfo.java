@@ -18,11 +18,14 @@ package android.view.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ClipDescription;
+import android.content.ContentProvider;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.UserHandle;
 
 import com.android.internal.inputmethod.IInputContentUriToken;
 
@@ -33,8 +36,24 @@ import java.security.InvalidParameterException;
  */
 public final class InputContentInfo implements Parcelable {
 
+    /**
+     * The content URI that may or may not have a user ID embedded by
+     * {@link ContentProvider#maybeAddUserId(Uri, int)}.  This always preserves the exact value
+     * specified to a constructor.  In other words, if it had user ID embedded when it was passed
+     * to the constructor, it still has the same user ID no matter if it is valid or not.
+     */
     @NonNull
     private final Uri mContentUri;
+    /**
+     * The user ID to which {@link #mContentUri} belongs to.  If {@link #mContentUri} already
+     * embedded the user ID when it was specified then this fields has the same user ID.  Otherwise
+     * the user ID is determined based on the process ID when the constructor is called.
+     *
+     * <p>CAUTION: If you received {@link InputContentInfo} from a different process, there is no
+     * guarantee that this value is correct and valid.  Never use this for any security purpose</p>
+     */
+    @UserIdInt
+    private final int mContentUriOwnerUserId;
     @NonNull
     private final ClipDescription mDescription;
     @Nullable
@@ -73,6 +92,8 @@ public final class InputContentInfo implements Parcelable {
             @Nullable Uri linkUri) {
         validateInternal(contentUri, description, linkUri, true /* throwException */);
         mContentUri = contentUri;
+        mContentUriOwnerUserId =
+                ContentProvider.getUserIdFromUri(mContentUri, UserHandle.myUserId());
         mDescription = description;
         mLinkUri = linkUri;
     }
@@ -139,7 +160,14 @@ public final class InputContentInfo implements Parcelable {
      * @return Content URI with which the content can be obtained.
      */
     @NonNull
-    public Uri getContentUri() { return mContentUri; }
+    public Uri getContentUri() {
+        // Fix up the content URI when and only when the caller's user ID does not match the owner's
+        // user ID.
+        if (mContentUriOwnerUserId != UserHandle.myUserId()) {
+            return ContentProvider.maybeAddUserId(mContentUri, mContentUriOwnerUserId);
+        }
+        return mContentUri;
+    }
 
     /**
      * @return {@link ClipDescription} object that contains the metadata of {@code #getContentUri()}
@@ -203,6 +231,7 @@ public final class InputContentInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         Uri.writeToParcel(dest, mContentUri);
+        dest.writeInt(mContentUriOwnerUserId);
         mDescription.writeToParcel(dest, flags);
         Uri.writeToParcel(dest, mLinkUri);
         if (mUriToken != null) {
@@ -215,6 +244,7 @@ public final class InputContentInfo implements Parcelable {
 
     private InputContentInfo(@NonNull Parcel source) {
         mContentUri = Uri.CREATOR.createFromParcel(source);
+        mContentUriOwnerUserId = source.readInt();
         mDescription = ClipDescription.CREATOR.createFromParcel(source);
         mLinkUri = Uri.CREATOR.createFromParcel(source);
         if (source.readInt() == 1) {
