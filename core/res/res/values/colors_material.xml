@@ -36,8 +36,10 @@
     <color name="tertiary_material_settings">@color/material_blue_grey_700</color>
     <color name="quaternary_material_settings">@color/material_blue_grey_200</color>
 
+    <color name="accent_material_700">@color/material_deep_teal_700</color>
     <color name="accent_material_light">@color/material_deep_teal_500</color>
     <color name="accent_material_dark">@color/material_deep_teal_200</color>
+    <color name="accent_material_50">@color/material_deep_teal_50</color>
 
     <color name="button_material_dark">#ff5a595b</color>
     <color name="button_material_light">#ffd6d7d7</color>
