@@ -12,16 +12,29 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.utils.leaks;
 
-import com.android.systemui.statusbar.policy.DataSaverController.Listener;
+import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.HotspotController.Callback;
 
-public interface DataSaverController extends CallbackController<Listener> {
+public class FakeHotspotController extends BaseLeakChecker<Callback> implements HotspotController {
 
-    boolean isDataSaverEnabled();
-    void setDataSaverEnabled(boolean enabled);
+    public FakeHotspotController(LeakCheckedTest test) {
+        super(test, "hotspot");
+    }
 
-    public interface Listener {
-        void onDataSaverChanged(boolean isDataSaving);
+    @Override
+    public boolean isHotspotEnabled() {
+        return false;
+    }
+
+    @Override
+    public void setHotspotEnabled(boolean enabled) {
+
+    }
+
+    @Override
+    public boolean isHotspotSupported() {
+        return false;
     }
 }

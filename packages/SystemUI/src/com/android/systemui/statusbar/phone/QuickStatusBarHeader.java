@@ -236,10 +236,17 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mHost.getUserInfoController().addCallback(this);
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         setListening(false);
         mHost.getUserInfoController().removeCallback(this);
         mHost.getNetworkController().removeEmergencyListener(this);
+        mHost.getUserInfoController().removeCallback(this);
         super.onDetachedFromWindow();
     }
 
@@ -368,7 +375,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
-        userInfoController.addCallback(this);
+        // Don't care
     }
 
     @Override

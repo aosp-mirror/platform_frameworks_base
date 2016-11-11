@@ -12,21 +12,29 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.utils.leaks;
 
-import com.android.systemui.statusbar.phone.ManagedProfileController.Callback;
 import com.android.systemui.statusbar.policy.CallbackController;
 
-public interface ManagedProfileController extends CallbackController<Callback> {
+public class BaseLeakChecker<T> implements CallbackController<T> {
 
-    void setWorkModeEnabled(boolean enabled);
+    private final Tracker mTracker;
 
-    boolean hasActiveProfile();
+    public BaseLeakChecker(LeakCheckedTest test, String tag) {
+        mTracker = test.getTracker(tag);
+    }
 
-    boolean isWorkModeEnabled();
+    protected final Tracker getTracker() {
+        return mTracker;
+    }
 
-    public interface Callback {
-        void onManagedProfileChanged();
-        void onManagedProfileRemoved();
+    @Override
+    public void addCallback(T listener) {
+        mTracker.getLeakInfo(listener).addAllocation(new Throwable());
+    }
+
+    @Override
+    public void removeCallback(T listener) {
+        mTracker.getLeakInfo(listener).clearAllocations();
     }
 }

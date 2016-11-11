@@ -12,16 +12,27 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.utils.leaks;
 
-import com.android.systemui.statusbar.policy.DataSaverController.Listener;
+import android.util.ArrayMap;
 
-public interface DataSaverController extends CallbackController<Listener> {
+import com.android.systemui.utils.leaks.LeakInfo;
 
-    boolean isDataSaverEnabled();
-    void setDataSaverEnabled(boolean enabled);
+import java.util.Map;
 
-    public interface Listener {
-        void onDataSaverChanged(boolean isDataSaving);
+public class Tracker {
+    private Map<Object, LeakInfo> mObjects = new ArrayMap<>();
+
+    public LeakInfo getLeakInfo(Object object) {
+        LeakInfo leakInfo = mObjects.get(object);
+        if (leakInfo == null) {
+            leakInfo = new LeakInfo();
+            mObjects.put(object, leakInfo);
+        }
+        return leakInfo;
+    }
+
+    void verify() {
+        mObjects.values().forEach(LeakInfo::verify);
     }
 }

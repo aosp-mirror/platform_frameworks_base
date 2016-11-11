@@ -143,7 +143,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
         mBattery = battery;
         mIconController = iconController;
         mNextAlarmController = nextAlarmController;
-        mProfileController = new ManagedProfileController(this);
+        mProfileController = new ManagedProfileControllerImpl(this);
 
         mHandlerThread = new HandlerThread(QSTileHost.class.getSimpleName(),
                 Process.THREAD_PRIORITY_BACKGROUND);
