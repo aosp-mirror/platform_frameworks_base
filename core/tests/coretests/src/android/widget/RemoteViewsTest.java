@@ -179,13 +179,8 @@ public class RemoteViewsTest {
         ViewAppliedListener listener = new ViewAppliedListener();
         views.applyAsync(mContext, mContainer, AsyncTask.THREAD_POOL_EXECUTOR, listener);
 
-        boolean exceptionThrown = false;
-        try {
-            listener.waitAndGetView();
-        } catch (Exception e) {
-            exceptionThrown = true;
-        }
-        assertTrue(exceptionThrown);
+        exception.expect(Exception.class);
+        listener.waitAndGetView();
     }
 
     @Test
@@ -331,5 +326,44 @@ public class RemoteViewsTest {
             }
             return mView;
         }
+    }
+
+    @Test
+    public void nestedAddViews() {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        for (int i = 0; i < 10; i++) {
+            RemoteViews parent = new RemoteViews(mPackage, R.layout.remote_views_test);
+            parent.addView(R.id.layout, views);
+            views = parent;
+        }
+        views.clone();
+
+        views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        for (int i = 0; i < 11; i++) {
+            RemoteViews parent = new RemoteViews(mPackage, R.layout.remote_views_test);
+            parent.addView(R.id.layout, views);
+            views = parent;
+        }
+        exception.expect(IllegalArgumentException.class);
+        views.clone();
+    }
+
+    @Test
+    public void nestedLandscapeViews() {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        for (int i = 0; i < 10; i++) {
+            views = new RemoteViews(views,
+                    new RemoteViews(mPackage, R.layout.remote_views_test));
+        }
+        views.clone();
+
+        views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        for (int i = 0; i < 11; i++) {
+            RemoteViews parent = new RemoteViews(mPackage, R.layout.remote_views_test);
+            parent.addView(R.id.layout, views);
+            views = parent;
+        }
+        exception.expect(IllegalArgumentException.class);
+        views.clone();
     }
 }

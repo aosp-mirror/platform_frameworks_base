@@ -42,11 +42,13 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -90,6 +92,12 @@ public class RemoteViews implements Parcelable, Filter {
      * @hide
      */
     static final String EXTRA_REMOTEADAPTER_APPWIDGET_ID = "remoteAdapterAppWidgetId";
+
+    /**
+     * Maximum depth of nested views calls from {@link #addView(int, RemoteViews)} and
+     * {@link #RemoteViews(RemoteViews, RemoteViews)}.
+     */
+    private static final int MAX_NESTED_VIEWS = 10;
 
     /**
      * Application that hosts the remote views.
@@ -1538,11 +1546,11 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        ViewGroupAction(Parcel parcel, BitmapCache bitmapCache, ApplicationInfo info) {
+        ViewGroupAction(Parcel parcel, BitmapCache bitmapCache, ApplicationInfo info, int depth) {
             viewId = parcel.readInt();
             boolean nestedViewsNull = parcel.readInt() == 0;
             if (!nestedViewsNull) {
-                nestedViews = new RemoteViews(parcel, bitmapCache, info);
+                nestedViews = new RemoteViews(parcel, bitmapCache, info, depth);
             } else {
                 nestedViews = null;
             }
@@ -2209,10 +2217,16 @@ public class RemoteViews implements Parcelable, Filter {
      * @param parcel
      */
     public RemoteViews(Parcel parcel) {
-        this(parcel, null, null);
+        this(parcel, null, null, 0);
     }
 
-    private RemoteViews(Parcel parcel, BitmapCache bitmapCache, ApplicationInfo info) {
+    private RemoteViews(Parcel parcel, BitmapCache bitmapCache, ApplicationInfo info, int depth) {
+        if (depth > MAX_NESTED_VIEWS
+                && (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID)) {
+            throw new IllegalArgumentException("Too many nested views.");
+        }
+        depth++;
+
         int mode = parcel.readInt();
 
         // We only store a bitmap cache in the root of the RemoteViews.
@@ -2245,7 +2259,8 @@ public class RemoteViews implements Parcelable, Filter {
                             mActions.add(new ReflectionAction(parcel));
                             break;
                         case ViewGroupAction.TAG:
-                            mActions.add(new ViewGroupAction(parcel, mBitmapCache, mApplication));
+                            mActions.add(new ViewGroupAction(parcel, mBitmapCache, mApplication,
+                                    depth));
                             break;
                         case ReflectionActionWithoutParams.TAG:
                             mActions.add(new ReflectionActionWithoutParams(parcel));
@@ -2293,8 +2308,8 @@ public class RemoteViews implements Parcelable, Filter {
             }
         } else {
             // MODE_HAS_LANDSCAPE_AND_PORTRAIT
-            mLandscape = new RemoteViews(parcel, mBitmapCache, info);
-            mPortrait = new RemoteViews(parcel, mBitmapCache, mLandscape.mApplication);
+            mLandscape = new RemoteViews(parcel, mBitmapCache, info, depth);
+            mPortrait = new RemoteViews(parcel, mBitmapCache, mLandscape.mApplication, depth);
             mApplication = mPortrait.mApplication;
             mLayoutId = mPortrait.getLayoutId();
         }
@@ -2318,7 +2333,7 @@ public class RemoteViews implements Parcelable, Filter {
         p.setDataPosition(0);
         mIsRoot = true;
 
-        RemoteViews rv = new RemoteViews(p, mBitmapCache.clone(), mApplication);
+        RemoteViews rv = new RemoteViews(p, mBitmapCache.clone(), mApplication, 0);
         rv.mIsRoot = true;
 
         p.recycle();
