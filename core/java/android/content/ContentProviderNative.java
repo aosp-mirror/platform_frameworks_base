@@ -355,6 +355,20 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     Uri.writeToParcel(reply, out);
                     return true;
                 }
+
+                case REFRESH_TRANSACTION: {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    String callingPkg = data.readString();
+                    Uri url = Uri.CREATOR.createFromParcel(data);
+                    Bundle args = data.readBundle();
+                    ICancellationSignal signal = ICancellationSignal.Stub.asInterface(
+                            data.readStrongBinder());
+
+                    boolean out = refresh(callingPkg, url, args, signal);
+                    reply.writeNoException();
+                    reply.writeInt(out ? 0 : -1);
+                    return true;
+                }
             }
         } catch (Exception e) {
             DatabaseUtils.writeExceptionToParcel(reply, e);
@@ -755,6 +769,29 @@ final class ContentProviderProxy implements IContentProvider
             DatabaseUtils.readExceptionFromParcel(reply);
             Uri out = Uri.CREATOR.createFromParcel(reply);
             return out;
+        } finally {
+            data.recycle();
+            reply.recycle();
+        }
+    }
+
+    public boolean refresh(String callingPkg, Uri url, Bundle args, ICancellationSignal signal)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        try {
+            data.writeInterfaceToken(IContentProvider.descriptor);
+
+            data.writeString(callingPkg);
+            url.writeToParcel(data, 0);
+            data.writeBundle(args);
+            data.writeStrongBinder(signal != null ? signal.asBinder() : null);
+
+            mRemote.transact(IContentProvider.REFRESH_TRANSACTION, data, reply, 0);
+
+            DatabaseUtils.readExceptionFromParcel(reply);
+            int success = reply.readInt();
+            return (success == 0);
         } finally {
             data.recycle();
             reply.recycle();

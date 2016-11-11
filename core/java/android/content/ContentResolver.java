@@ -194,6 +194,15 @@ public abstract class ContentResolver {
     public static final String EXTRA_SIZE = "android.content.extra.SIZE";
 
     /**
+     * An extra boolean describing whether a particular provider supports refresh
+     * or not. If a provider supports refresh, it should include this key in its
+     * returned Cursor as part of its query call.
+     *
+     * @hide
+     */
+    public static final String EXTRA_REFRESH_SUPPORTED = "android.content.extra.REFRESH_SUPPORTED";
+
+    /**
      * This is the Android platform's base MIME type for a content: URI
      * containing a Cursor of a single item.  Applications should use this
      * as the base type along with their own sub-type of their content: URIs
@@ -658,6 +667,54 @@ public abstract class ContentResolver {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
             return null;
+        } finally {
+            releaseProvider(provider);
+        }
+    }
+
+    /**
+     * Implement this to support refresh of content identified by {@code uri}. By default, this
+     * method returns false; providers who wish to implement this should return true to signal the
+     * client that the provider has tried refreshing with its own implementation.
+     * <p>
+     * This allows clients to request an explicit refresh of content identified by {@code uri}.
+     * <p>
+     * Client code should only invoke this method when there is a strong indication (such as a user
+     * initiated pull to refresh gesture) that the content is stale.
+     * <p>
+     * Remember to send {@link ContentResolver#notifyChange(Uri, android.database.ContentObserver)}
+     * notifications when content changes.
+     *
+     * @param uri The Uri identifying the data to refresh.
+     * @param args Additional options from the client. The definitions of these are specific to the
+     *            content provider being called.
+     * @param cancellationSignal A signal to cancel the operation in progress, or {@code null} if
+     *            none. For example, if you called refresh on a particular uri, you should call
+     *            {@link CancellationSignal#throwIfCanceled()} to check whether the client has
+     *            canceled the refresh request.
+     * @return true if the provider actually tried refreshing.
+     * @hide
+     */
+    public final boolean refresh(@NonNull Uri url, @Nullable Bundle args,
+            @Nullable CancellationSignal cancellationSignal) {
+        Preconditions.checkNotNull(url, "url");
+        IContentProvider provider = acquireProvider(url);
+        if (provider == null) {
+            return false;
+        }
+
+        try {
+            ICancellationSignal remoteCancellationSignal = null;
+            if (cancellationSignal != null) {
+                cancellationSignal.throwIfCanceled();
+                remoteCancellationSignal = provider.createCancellationSignal();
+                cancellationSignal.setRemote(remoteCancellationSignal);
+            }
+            return provider.refresh(mPackageName, url, args, remoteCancellationSignal);
+        } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
+            return false;
         } finally {
             releaseProvider(provider);
         }

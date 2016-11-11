@@ -234,6 +234,30 @@ public class ContentProviderClient implements AutoCloseable {
         }
     }
 
+    /** @hide */
+    public boolean refresh(Uri url, @Nullable Bundle args,
+            @Nullable CancellationSignal cancellationSignal) throws RemoteException {
+        Preconditions.checkNotNull(url, "url");
+
+        beforeRemote();
+        try {
+            ICancellationSignal remoteCancellationSignal = null;
+            if (cancellationSignal != null) {
+                cancellationSignal.throwIfCanceled();
+                remoteCancellationSignal = mContentProvider.createCancellationSignal();
+                cancellationSignal.setRemote(remoteCancellationSignal);
+            }
+            return mContentProvider.refresh(mPackageName, url, args, remoteCancellationSignal);
+        } catch (DeadObjectException e) {
+            if (!mStable) {
+                mContentResolver.unstableProviderDied(mContentProvider);
+            }
+            throw e;
+        } finally {
+            afterRemote();
+        }
+    }
+
     /** See {@link ContentProvider#insert ContentProvider.insert} */
     public @Nullable Uri insert(@NonNull Uri url, @Nullable ContentValues initialValues)
             throws RemoteException {
