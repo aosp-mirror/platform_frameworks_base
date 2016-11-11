@@ -60,7 +60,6 @@ import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.TaskView;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -177,9 +176,7 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
         loadOpts.numVisibleTaskThumbnails = numVisibleTasks;
         loader.loadTasks(this, plan, loadOpts);
 
-        List<Task> stackTasks = mTaskStack.getStackTasks();
-        Collections.reverse(stackTasks);
-        mTasks = stackTasks;
+        mTasks = mTaskStack.getStackTasks();
 
         updateControlVisibility();
 
@@ -255,7 +252,10 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
         removeTaskViews();
         for (int i = 0; i < rects.size(); i++) {
             Rect rect = rects.get(i);
-            View taskView = mTaskViews.get(i);
+            // We keep the same ordering in the model as other Recents flavors (older tasks are
+            // first in the stack) so that the logic can be similar, but we reverse the order
+            // when placing views on the screen so that most recent tasks are displayed first.
+            View taskView = mTaskViews.get(rects.size() - 1 - i);
             taskView.setLayoutParams(new FrameLayout.LayoutParams(rect.width(), rect.height()));
             taskView.setTranslationX(rect.left);
             taskView.setTranslationY(rect.top);
@@ -368,10 +368,7 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
 
     public final void onBusEvent(LaunchNextTaskRequestEvent event) {
         if (mTaskStack.getTaskCount() > 0) {
-            // The task to launch is the second most recent, which is at index 1 given our ordering.
-            // If there is only one task, launch that one instead.
-            int launchTaskIndex = (mTaskStack.getStackTaskCount() > 1) ? 1 : 0;
-            Task launchTask = mTaskStack.getStackTasks().get(launchTaskIndex);
+            Task launchTask = mTaskStack.getNextLaunchTarget();
             TaskView launchTaskView = getChildViewForTask(launchTask);
             if (launchTaskView != null) {
                 EventBus.getDefault().send(new LaunchTaskEvent(launchTaskView,
