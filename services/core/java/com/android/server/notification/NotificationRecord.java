@@ -283,7 +283,7 @@ public final class NotificationRecord {
         pw.println(prefix + "  mVisibleSinceMs=" + mVisibleSinceMs);
         pw.println(prefix + "  mUpdateTimeMs=" + mUpdateTimeMs);
         pw.println(prefix + "  mSuppressedVisualEffects= " + mSuppressedVisualEffects);
-        pw.println(prefix + "  notificationChannel= " + notification.getNotificationChannel());
+        pw.println(prefix + "  notificationChannel= " + notification.getChannel());
     }
 
 

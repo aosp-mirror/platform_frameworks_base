@@ -2239,7 +2239,7 @@ public class Notification implements Parcelable
     /**
      * Returns the id of the channel this notification posts to.
      */
-    public String getNotificationChannel() {
+    public String getChannel() {
         return mChannelId;
     }
 
