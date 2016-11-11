@@ -24,6 +24,7 @@ services := \
     appwidget \
     autofill \
     backup \
+    coverage\
     devicepolicy \
     midi \
     net \
@@ -36,6 +37,10 @@ services := \
 
 # The convention is to name each service module 'services.$(module_name)'
 LOCAL_STATIC_JAVA_LIBRARIES := $(addprefix services.,$(services))
+
+ifeq ($(EMMA_INSTRUMENT_FRAMEWORK),true)
+LOCAL_EMMA_INSTRUMENT := true
+endif
 
 include $(BUILD_JAVA_LIBRARY)
 
