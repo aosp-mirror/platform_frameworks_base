@@ -2722,7 +2722,7 @@ public class NotificationManagerService extends SystemService {
                     + " id=" + id + " notification=" + notification);
         }
         final NotificationChannel channel =  mRankingHelper.getNotificationChannelWithFallback(pkg,
-                callingUid, notification.getNotificationChannel());
+                callingUid, notification.getChannel());
         final StatusBarNotification n = new StatusBarNotification(
                 pkg, opPkg, channel, id, tag, callingUid, callingPid, notification,
                 user, null, System.currentTimeMillis());
