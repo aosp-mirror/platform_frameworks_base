@@ -50,6 +50,7 @@ public class AmbientState {
     private NotificationShelf mShelf;
     private int mZDistanceBetweenElements;
     private int mBaseZHeight;
+    private int mMaxLayoutHeight;
 
     public AmbientState(Context context) {
         reload(context);
@@ -185,7 +186,7 @@ public class AmbientState {
     }
 
     public int getInnerHeight() {
-        return Math.max(mLayoutHeight - mTopPadding, mLayoutMinHeight);
+        return Math.max(Math.min(mLayoutHeight, mMaxLayoutHeight) - mTopPadding, mLayoutMinHeight);
     }
 
     public boolean isShadeExpanded() {
@@ -222,5 +223,9 @@ public class AmbientState {
 
     public NotificationShelf getShelf() {
         return mShelf;
+    }
+
+    public void setLayoutMaxHeight(int maxLayoutHeight) {
+        mMaxLayoutHeight = maxLayoutHeight;
     }
 }

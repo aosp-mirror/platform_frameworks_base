@@ -1926,6 +1926,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         mContentHeight = height + mTopPadding;
         updateScrollability();
+        mAmbientState.setLayoutMaxHeight(mContentHeight);
     }
 
     private void updateScrollability() {
