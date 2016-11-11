@@ -32,4 +32,11 @@ oneway interface IVolumeController {
     void setLayoutDirection(int layoutDirection);
 
     void dismiss();
+
+    /**
+     * Change the a11y mode.
+     * @param a11yMode one of {@link VolumePolicy#A11Y_MODE_MEDIA_A11Y_VOLUME},
+     *     {@link VolumePolicy#A11Y_MODE_INDEPENDENT_A11Y_VOLUME}
+     */
+    void setA11yMode(int mode);
 }
