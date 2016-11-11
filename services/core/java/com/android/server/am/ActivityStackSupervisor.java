@@ -2120,6 +2120,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             final int size = tasks.size();
             if (onTop) {
                 for (int i = 0; i < size; i++) {
+                    final TaskRecord task = tasks.get(i);
+                    if (fromStackId == PINNED_STACK_ID) {
+                        // Update the return-to to reflect where the pinned stack task was moved
+                        // from so that we retain the stack that was previously visible if the
+                        // pinned stack is recreated. See moveActivityToPinnedStackLocked().
+                        task.setTaskToReturnTo(getFocusedStack().getStackId() == HOME_STACK_ID
+                                ? HOME_ACTIVITY_TYPE : APPLICATION_ACTIVITY_TYPE);
+                    }
                     moveTaskToStackLocked(tasks.get(i).taskId,
                             FULLSCREEN_WORKSPACE_STACK_ID, onTop, onTop /*forceFocus*/,
                             "moveTasksToFullscreenStack", ANIMATE, DEFER_RESUME);
