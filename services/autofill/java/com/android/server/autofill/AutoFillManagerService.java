@@ -33,16 +33,21 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.autofill.IAutoFillManagerService;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
@@ -62,7 +67,13 @@ import java.io.PrintWriter;
 public final class AutoFillManagerService extends SystemService {
 
     private static final String TAG = "AutoFillManagerService";
-    private static final boolean DEBUG = true; // TODO: change to false once stable
+    static final boolean DEBUG = true; // TODO: change to false once stable
+
+    private static final long SERVICE_BINDING_LIFETIME_MS = 5 * DateUtils.MINUTE_IN_MILLIS;
+
+    private static final int ARG_NOT_USED = 0;
+
+    protected static final int MSG_UNBIND = 1;
 
     private final AutoFillManagerServiceStub mServiceStub;
     private final Context mContext;
@@ -70,30 +81,36 @@ public final class AutoFillManagerService extends SystemService {
 
     private final Object mLock = new Object();
 
-    @GuardedBy("mLock")
-    private boolean mSafeMode;
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_UNBIND:
+                    removeStaleServiceForUser(msg.arg1);
+                    return;
+                default:
+                    Slog.w(TAG, "Invalid message: " + msg);
+            }
+        }
+
+    };
 
     /**
-     * Map of {@link AutoFillManagerServiceImpl} per user id.
+     * Cache of {@link AutoFillManagerServiceImpl} per user id.
      * <p>
      * It has to be mapped by user id because the same current user could have simultaneous sessions
-     * associated to different user profiles (for example, in a multi-window environment).
+     * associated to different user profiles (for example, in a multi-window environment or when
+     * device has work profiles).
      * <p>
-     * This map is filled on demand in the following scenarios:
+     * Entries on this cache are added on demand and removed when:
      * <ol>
-     *   <li>On start, it sets the value for the default user.
-     *   <li>When an auto-fill service app is removed, its entries are removed.
-     *   <li>When the current user changes.
-     *   <li>When the {@link android.provider.Settings.Secure#AUTO_FILL_SERVICE} changes.
+     *   <li>An auto-fill service app is removed.
+     *   <li>The {@link android.provider.Settings.Secure#AUTO_FILL_SERVICE} for an user change.
+     *   <li>It has not been interacted with for {@link #SERVICE_BINDING_LIFETIME_MS} ms.
      * </ol>
      */
-    // TODO: make sure all cases listed above are handled
-    // TODO: should entries be removed when there is no section and have not be used for a while?
     @GuardedBy("mLock")
-    private SparseArray<AutoFillManagerServiceImpl> mImplByUser = new SparseArray<>();
-
-    // TODO: should disable it on low-memory devices? if not, this attribute should be removed...
-    private final boolean mEnableService = true;
+    private SparseArray<AutoFillManagerServiceImpl> mServicesCache = new SparseArray<>();
 
     public AutoFillManagerService(Context context) {
         super(context);
@@ -105,124 +122,121 @@ public final class AutoFillManagerService extends SystemService {
 
     @Override
     public void onStart() {
-        if (DEBUG)
-            Slog.d(TAG, "onStart(): binding as " + AUTO_FILL_MANAGER_SERVICE);
+        if (DEBUG) Slog.d(TAG, "onStart(): binding as " + AUTO_FILL_MANAGER_SERVICE);
         publishBinderService(AUTO_FILL_MANAGER_SERVICE, mServiceStub);
     }
 
-    // TODO: refactor so it's bound on demand, in which case it can use isSafeMode() from PM.
     @Override
     public void onBootPhase(int phase) {
         if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-            systemRunning(isSafeMode());
+            new SettingsObserver(BackgroundThread.getHandler());
         }
     }
 
-    // TODO: refactor so it's bound on demand, in which case it can use isSafeMode() from PM.
-    @Override
-    public void onStartUser(int userHandle) {
-        if (DEBUG) Slog.d(TAG, "onStartUser(): userHandle=" + userHandle);
-
-        updateImplementationIfNeeded(userHandle, false);
-    }
-
-    @Override
-    public void onUnlockUser(int userHandle) {
-        if (DEBUG) Slog.d(TAG, "onUnlockUser(): userHandle=" + userHandle);
-
-        updateImplementationIfNeeded(userHandle, false);
-    }
-
-    @Override
-    public void onSwitchUser(int userHandle) {
-        if (DEBUG) Slog.d(TAG, "onSwitchUser(): userHandle=" + userHandle);
-
-        updateImplementationIfNeeded(userHandle, false);
-    }
-
-    private void systemRunning(boolean safeMode) {
-        if (DEBUG) Slog.d(TAG, "systemRunning(): safeMode=" + safeMode);
-
-        // TODO: register a PackageMonitor
-        new SettingsObserver(BackgroundThread.getHandler());
-
-        synchronized (mLock) {
-            mSafeMode = safeMode;
-            updateImplementationIfNeededLocked(ActivityManager.getCurrentUser(), false);
-        }
-    }
-
-    private void updateImplementationIfNeeded(int user, boolean force) {
-        synchronized (mLock) {
-            updateImplementationIfNeededLocked(user, force);
-        }
-    }
-
-    private void updateImplementationIfNeededLocked(int user, boolean force) {
-        if (DEBUG)
-            Slog.d(TAG, "updateImplementationIfNeededLocked(" + user + ", " + force + ")");
-
-        if (mSafeMode) {
-            if (DEBUG) Slog.d(TAG, "skipping on safe mode");
-            return;
-        }
-
-        final String curService = Settings.Secure.getStringForUser(
-                mResolver, Settings.Secure.AUTO_FILL_SERVICE, user);
-        if (DEBUG)
-            Slog.d(TAG, "Current service settings for user " + user + ": " + curService);
+    private AutoFillManagerServiceImpl newServiceForUser(int userId) {
         ComponentName serviceComponent = null;
         ServiceInfo serviceInfo = null;
-        if (!TextUtils.isEmpty(curService)) {
+        final String componentName = Settings.Secure.getStringForUser(
+                mResolver, Settings.Secure.AUTO_FILL_SERVICE, userId);
+        if (!TextUtils.isEmpty(componentName)) {
             try {
-                serviceComponent = ComponentName.unflattenFromString(curService);
+                serviceComponent = ComponentName.unflattenFromString(componentName);
                 serviceInfo =
-                        AppGlobals.getPackageManager().getServiceInfo(serviceComponent, 0, user);
+                        AppGlobals.getPackageManager().getServiceInfo(serviceComponent, 0, userId);
             } catch (RuntimeException | RemoteException e) {
-                Slog.wtf(TAG, "Bad auto-fill service name " + curService, e);
-                serviceComponent = null;
-                serviceInfo = null;
+                Slog.wtf(TAG, "Bad auto-fill service name " + componentName, e);
+                return null;
             }
         }
 
-        final AutoFillManagerServiceImpl impl = mImplByUser.get(user);
-        if (DEBUG) Slog.d(TAG, "Current impl: " + impl + " component: " + serviceComponent
-                + " info: " + serviceInfo);
+        if (DEBUG) Slog.d(TAG, "getServiceComponentForUser(" + userId + "): component="
+                + serviceComponent + ", info: " + serviceInfo);
+        if (serviceInfo == null) {
+            Slog.w(TAG, "no service info for " + serviceComponent);
+            return null;
+        }
+        return new AutoFillManagerServiceImpl(this, mContext, mLock, FgThread.getHandler(), userId,
+                serviceInfo.applicationInfo.uid, serviceComponent, SERVICE_BINDING_LIFETIME_MS);
+    }
 
-        if (force || impl == null || !impl.mComponent.equals(serviceComponent)) {
-            if (impl != null) {
-                impl.shutdownLocked();
+    /**
+     * Gets the service instance for an user.
+     *
+     * <p>First it tries to return the existing instance from the cache; if it's not cached, it
+     * creates a new instance and caches it.
+     */
+    private AutoFillManagerServiceImpl getServiceForUserLocked(int userId) {
+        AutoFillManagerServiceImpl service = mServicesCache.get(userId);
+        if (service != null) {
+            if (DEBUG) Log.d(TAG, "reusing cached service for userId " + userId);
+            service.setLifeExpectancy(SERVICE_BINDING_LIFETIME_MS);
+        } else {
+            service = newServiceForUser(userId);
+            if (service == null) {
+                // Already logged
+                return null;
             }
-            if (serviceInfo != null) {
-                final AutoFillManagerServiceImpl newImpl = new AutoFillManagerServiceImpl(mContext,
-                        mLock, mServiceStub, FgThread.getHandler(), user, serviceComponent);
-                if (DEBUG) Slog.d(TAG, "Setting impl for user " + user + " as: " + newImpl);
-                mImplByUser.put(user, newImpl);
-                newImpl.startLocked();
-            } else {
-                if (DEBUG) Slog.d(TAG, "Removing impl for user " + user + ": " + impl);
-                mImplByUser.remove(user);
-            }
+            if (DEBUG) Log.d(TAG, "creating new cached service for userId " + userId);
+            service.startLocked();
+            mServicesCache.put(userId, service);
+        }
+        // Keep service connection alive for a while, in case user needs to interact with it
+        // (for example, to save the data that was inputted in)
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_UNBIND, userId, ARG_NOT_USED),
+                SERVICE_BINDING_LIFETIME_MS);
+        return service;
+    }
+
+    /**
+     * Removes a cached service, but respecting its TTL.
+     */
+    private void removeStaleServiceForUser(int userId) {
+        synchronized (mLock) {
+            removeCachedService(userId, false);
         }
     }
 
-    // TODO: might need to return null instead of throw exception
-    private AutoFillManagerServiceImpl getImplOrThrowLocked(int userId) {
-        final AutoFillManagerServiceImpl impl = mImplByUser.get(userId);
-        if (impl == null) {
-            throw new IllegalStateException("no auto-fill service for user " + userId);
+    /**
+     * Removes a cached service, even if it has TTL.
+     */
+    void removeCachedServiceForUserLocked(int userId) {
+        removeCachedService(userId, true);
+    }
+
+    private void removeCachedService(int userId, boolean force) {
+        if (DEBUG) Log.d(TAG, "removing cached service for userId " + userId);
+        final AutoFillManagerServiceImpl service = mServicesCache.get(userId);
+        if (service == null) {
+            Log.w(TAG, "removeCachedServiceForUser(): no cached service for userId " + userId);
+            return;
         }
-        return impl;
+        if (!force) {
+            // Check TTL first.
+            final long now = SystemClock.uptimeMillis();
+            if (service.mEstimateTimeOfDeath > now) {
+                if (DEBUG) {
+                    final StringBuilder msg = new StringBuilder("service has some TTL left: ");
+                    TimeUtils.formatDuration(service.mEstimateTimeOfDeath - now, msg);
+                    Log.d(TAG, msg.toString());
+                }
+                return;
+            }
+        }
+        mServicesCache.delete(userId);
+        service.stopLocked();
     }
 
     final class AutoFillManagerServiceStub extends IAutoFillManagerService.Stub {
 
         @Override
-        public boolean requestAutoFill(int userId, IBinder activityToken) {
+        public void requestAutoFill(int userId, IBinder activityToken) {
             mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
             synchronized (mLock) {
-                return getImplOrThrowLocked(userId).requestAutoFill(activityToken);
+                final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
+                if (service != null) {
+                    service.requestAutoFill(activityToken);
+                }
             }
         }
 
@@ -236,17 +250,15 @@ public final class AutoFillManagerService extends SystemService {
                 return;
             }
             synchronized (mLock) {
-                pw.print("mEnableService: "); pw.println(mEnableService);
-                pw.print("mSafeMode: "); pw.println(mSafeMode);
-                final int size = mImplByUser.size();
-                pw.print("Number of implementations: ");
+                final int size = mServicesCache.size();
+                pw.print("Cached services: ");
                 if (size == 0) {
                     pw.println("none");
                 } else {
                     pw.println(size);
                     for (int i = 0; i < size; i++) {
-                        pw.print("\nImplementation at index "); pw.println(i);
-                        final AutoFillManagerServiceImpl impl = mImplByUser.valueAt(i);
+                        pw.print("\nService at index "); pw.println(i);
+                        final AutoFillManagerServiceImpl impl = mServicesCache.valueAt(i);
                         impl.dumpLocked("  ", pw);
                     }
                 }
@@ -267,14 +279,14 @@ public final class AutoFillManagerService extends SystemService {
             super(handler);
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.AUTO_FILL_SERVICE), false, this,
-                    UserHandle.USER_ALL);
+                    Settings.Secure.AUTO_FILL_SERVICE), false, this, UserHandle.USER_ALL);
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
+            if (DEBUG) Slog.d(TAG, "settings (" + uri + " changed for " + userId);
             synchronized (mLock) {
-                updateImplementationIfNeededLocked(userId, false);
+                removeCachedServiceForUserLocked(userId);
             }
         }
     }
