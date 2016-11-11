@@ -1683,17 +1683,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             return;
         }
 
-        int launchTaskIndex = mStack.indexOfStackTask(mStack.getLaunchTarget());
-        if (launchTaskIndex != -1) {
-            launchTaskIndex = Math.max(0, launchTaskIndex - 1);
-        } else {
-            launchTaskIndex = mStack.getTaskCount() - 1;
-        }
-        if (launchTaskIndex != -1) {
+        final Task launchTask = mStack.getNextLaunchTarget();
+        if (launchTask != null) {
             // Stop all animations
             cancelAllTaskViewAnimations();
 
-            final Task launchTask = mStack.getStackTasks().get(launchTaskIndex);
             float curScroll = mStackScroller.getStackScroll();
             float targetScroll = mLayoutAlgorithm.getStackScrollForTaskAtInitialOffset(launchTask);
             float absScrollDiff = Math.abs(targetScroll - curScroll);
