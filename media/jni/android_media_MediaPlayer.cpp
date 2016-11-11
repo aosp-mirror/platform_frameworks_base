@@ -1106,7 +1106,6 @@ extern int register_android_media_MediaScanner(JNIEnv *env);
 extern int register_android_media_MediaSync(JNIEnv *env);
 extern int register_android_media_ResampleInputStream(JNIEnv *env);
 extern int register_android_media_MediaProfiles(JNIEnv *env);
-extern int register_android_media_AmrInputStream(JNIEnv *env);
 extern int register_android_mtp_MtpDatabase(JNIEnv *env);
 extern int register_android_mtp_MtpDevice(JNIEnv *env);
 extern int register_android_mtp_MtpServer(JNIEnv *env);
@@ -1149,11 +1148,6 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 
     if (register_android_media_MediaMetadataRetriever(env) < 0) {
         ALOGE("ERROR: MediaMetadataRetriever native registration failed\n");
-        goto bail;
-    }
-
-    if (register_android_media_AmrInputStream(env) < 0) {
-        ALOGE("ERROR: AmrInputStream native registration failed\n");
         goto bail;
     }
 
