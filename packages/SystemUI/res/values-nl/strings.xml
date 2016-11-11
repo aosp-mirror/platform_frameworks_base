@@ -236,7 +236,7 @@
     <string name="accessibility_brightness" msgid="8003681285547803095">"Helderheid van het scherm"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G/3G-data zijn onderbroken"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-data zijn onderbroken"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobiele gegevens zijn onderbroken"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobiele data zijn onderbroken"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Gegevens zijn onderbroken"</string>
     <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"De ingestelde datalimiet is bereikt. Je gebruikt geen mobiele data meer.\n\nAls je hervat, kunnen er kosten voor datagebruik in rekening worden gebracht."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Hervatten"</string>
@@ -311,7 +311,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Meldingen"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Zaklamp"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobiele gegevens"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobiele data"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Datagebruik"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Resterende gegevens"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Limiet overschreden"</string>
