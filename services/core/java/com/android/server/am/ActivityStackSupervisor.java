@@ -3564,7 +3564,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             if (activityDisplay != null) {
                 ArrayList<ActivityStack> stacks = activityDisplay.mStacks;
                 for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                    stacks.get(stackNdx).mActivityContainer.removeLocked();
+                    final ActivityStack stack = stacks.get(stackNdx);
+                    // TODO: Implement proper stack removal and ability to choose the behavior -
+                    // remove stack completely or move it to other display.
+                    moveStackToDisplayLocked(stack.mStackId, DEFAULT_DISPLAY);
                 }
                 mActivityDisplays.remove(displayId);
             }
@@ -4215,7 +4218,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             }
         }
 
-        /** Remove the stack completely. */
+        /**
+         * Remove the stack completely. Must be called only when there are no tasks left in it,
+         * as this method does not finish running activities.
+         */
         void removeLocked() {
             if (DEBUG_STACK) Slog.d(TAG_STACK, "removeLocked: " + this + " from display="
                     + mActivityDisplay + " Callers=" + Debug.getCallers(2));

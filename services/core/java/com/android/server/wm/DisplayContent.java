@@ -727,7 +727,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             win.getTouchableRegion(mTmpRegion);
             mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
         }
-        if (getDockedStackLocked() != null) {
+        // TODO(multi-display): Support docked stacks on secondary displays.
+        if (mDisplayId == DEFAULT_DISPLAY && getDockedStackLocked() != null) {
             mDividerControllerLocked.getTouchRegion(mTmpRect);
             mTmpRegion.set(mTmpRect);
             mTouchExcludeRegion.op(mTmpRegion, Op.UNION);

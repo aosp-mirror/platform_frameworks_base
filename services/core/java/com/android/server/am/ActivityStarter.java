@@ -257,11 +257,7 @@ class ActivityStarter {
 
         if (err == ActivityManager.START_SUCCESS) {
             Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true, true, false)
-                    + "} from uid " + callingUid
-                    + " on display " + (container == null ? (mSupervisor.mFocusedStack == null ?
-                    Display.DEFAULT_DISPLAY : mSupervisor.mFocusedStack.mDisplayId) :
-                    (container.mActivityDisplay == null ? Display.DEFAULT_DISPLAY :
-                            container.mActivityDisplay.mDisplayId)));
+                    + "} from uid " + callingUid);
         }
 
         ActivityRecord sourceRecord = null;
