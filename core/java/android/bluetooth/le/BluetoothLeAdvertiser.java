@@ -111,12 +111,6 @@ public final class BluetoothLeAdvertiser {
             if (callback == null) {
                 throw new IllegalArgumentException("callback cannot be null");
             }
-            if (!mBluetoothAdapter.isMultipleAdvertisementSupported() &&
-                    !mBluetoothAdapter.isPeripheralModeSupported()) {
-                postStartFailure(callback,
-                        AdvertiseCallback.ADVERTISE_FAILED_FEATURE_UNSUPPORTED);
-                return;
-            }
             boolean isConnectable = settings.isConnectable();
             if (totalBytes(advertiseData, isConnectable) > MAX_ADVERTISING_DATA_BYTES ||
                     totalBytes(scanResponse, false) > MAX_ADVERTISING_DATA_BYTES) {
@@ -236,9 +230,9 @@ public final class BluetoothLeAdvertiser {
         private final AdvertiseSettings mSettings;
         private final IBluetoothGatt mBluetoothGatt;
 
-        // mAdvertiserId 0: not registered
-        // -1: advertise stopped or registration timeout
-        // >0: registered and advertising started
+        // mAdvertiserId -1: not registered
+        // -2: advertise stopped or registration timeout
+        // >=0: registered and advertising started
         private int mAdvertiserId;
         private boolean mIsAdvertising = false;
 
@@ -251,12 +245,12 @@ public final class BluetoothLeAdvertiser {
             mScanResponse = scanResponse;
             mSettings = settings;
             mBluetoothGatt = bluetoothGatt;
-            mAdvertiserId = 0;
+            mAdvertiserId = -1;
         }
 
         public void startRegisteration() {
             synchronized (this) {
-                if (mAdvertiserId == -1) return;
+                if (mAdvertiserId == -2) return;
 
                 try {
                     mBluetoothGatt.registerAdvertiser(this);
@@ -264,13 +258,13 @@ public final class BluetoothLeAdvertiser {
                 } catch (InterruptedException | RemoteException e) {
                     Log.e(TAG, "Failed to start registeration", e);
                 }
-                if (mAdvertiserId > 0 && mIsAdvertising) {
+                if (mAdvertiserId >= 0 && mIsAdvertising) {
                     mLeAdvertisers.put(mAdvertiseCallback, this);
-                } else if (mAdvertiserId <= 0) {
+                } else if (mAdvertiserId < 0) {
 
                     // Registration timeout, reset mClientIf to -1 so no subsequent operations can
                     // proceed.
-                    if (mAdvertiserId == 0) mAdvertiserId = -1;
+                    if (mAdvertiserId == 0) mAdvertiserId = -2;
                     // Post internal error if registration failed.
                     postStartFailure(mAdvertiseCallback,
                             AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR);
@@ -278,7 +272,7 @@ public final class BluetoothLeAdvertiser {
                     // Unregister application if it's already registered but advertise failed.
                     try {
                         mBluetoothGatt.unregisterAdvertiser(mAdvertiserId);
-                        mAdvertiserId = -1;
+                        mAdvertiserId = -2;
                     } catch (RemoteException e) {
                         Log.e(TAG, "remote exception when unregistering", e);
                     }
@@ -312,7 +306,7 @@ public final class BluetoothLeAdvertiser {
             synchronized (this) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     try {
-                        if (mAdvertiserId == -1) {
+                        if (mAdvertiserId == -2) {
                             // Registration succeeds after timeout, unregister advertiser.
                             mBluetoothGatt.unregisterAdvertiser(advertiserId);
                         } else {
@@ -326,7 +320,7 @@ public final class BluetoothLeAdvertiser {
                     }
                 }
                 // Registration failed.
-                mAdvertiserId = -1;
+                mAdvertiserId = -2;
                 notifyAll();
             }
         }
@@ -348,7 +342,7 @@ public final class BluetoothLeAdvertiser {
                     // unregister advertiser for stop.
                     try {
                         mBluetoothGatt.unregisterAdvertiser(mAdvertiserId);
-                        mAdvertiserId = -1;
+                        mAdvertiserId = -2;
                         mIsAdvertising = false;
                         mLeAdvertisers.remove(mAdvertiseCallback);
                     } catch (RemoteException e) {
