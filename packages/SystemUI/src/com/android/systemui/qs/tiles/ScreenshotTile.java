@@ -27,6 +27,8 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.view.View;
 
 import com.android.systemui.R;
@@ -68,7 +70,7 @@ public class ScreenshotTile extends QSTile<QSTile.BooleanState> {
         } catch (InterruptedException ie) {
              // Do nothing
         }
-        takeScreenshot();
+        takeScreenshot(1);
     }
 
     @Override
@@ -81,7 +83,7 @@ public class ScreenshotTile extends QSTile<QSTile.BooleanState> {
         } catch (InterruptedException ie) {
              // Do nothing
         }
-        takeScreenshot();
+        takeScreenshot(2);
     }
 
     @Override
@@ -117,7 +119,7 @@ public class ScreenshotTile extends QSTile<QSTile.BooleanState> {
         }
     };
 
-    private void takeScreenshot() {
+    private void takeScreenshot(int type) {
         synchronized (mScreenshotLock) {
             if (mScreenshotConnection != null) {
                 return;
@@ -133,7 +135,7 @@ public class ScreenshotTile extends QSTile<QSTile.BooleanState> {
                         }
 
                         Messenger messenger = new Messenger(service);
-                        Message msg = Message.obtain(null, 1);
+                        Message msg = Message.obtain(null, type);
                         final ServiceConnection myConn = this;
                         Handler h = new Handler(mHandler.getLooper()) {
                             @Override
