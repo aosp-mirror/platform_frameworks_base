@@ -137,28 +137,6 @@ public final class EphemeralResolveInfo implements Parcelable {
         }
     };
 
-    /** @hide */
-    public static final class EphemeralResolveIntentInfo extends IntentFilter {
-        private final EphemeralResolveInfo mResolveInfo;
-        private final String mSplitName;
-
-        public EphemeralResolveIntentInfo(@NonNull IntentFilter orig,
-                @NonNull EphemeralResolveInfo resolveInfo,
-                @Nullable String splitName) {
-            super(orig);
-            mResolveInfo = resolveInfo;
-            mSplitName = splitName;
-        }
-
-        public EphemeralResolveInfo getEphemeralResolveInfo() {
-            return mResolveInfo;
-        }
-
-        public String getSplitName() {
-            return mSplitName;
-        }
-    }
-
     /**
      * Helper class to generate and store each of the digests and prefixes
      * sent to the Ephemeral Resolver.

@@ -115,6 +115,7 @@ import android.view.Display;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.ActivityStackSupervisor.PendingActivityLaunch;
+import com.android.server.pm.EphemeralResolver;
 import com.android.server.wm.WindowManagerService;
 
 import java.util.ArrayList;
@@ -131,9 +132,6 @@ class ActivityStarter {
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
-
-    // TODO b/30204367 remove when the platform fully supports ephemeral applications
-    private static final boolean USE_DEFAULT_EPHEMERAL_LAUNCHER = false;
 
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mSupervisor;
@@ -458,13 +456,21 @@ class ActivityStarter {
         // Instead, launch the ephemeral installer. Once the installer is finished, it
         // starts either the intent we resolved here [on install error] or the ephemeral
         // app [on install success].
-        if (rInfo != null && rInfo.ephemeralIntentInfo != null) {
+        if (rInfo != null && rInfo.ephemeralResponse != null) {
             final String packageName =
-                    rInfo.ephemeralIntentInfo.getEphemeralResolveInfo().getPackageName();
-            final String splitName = rInfo.ephemeralIntentInfo.getSplitName();
-            intent = buildEphemeralInstallerIntent(intent, ephemeralIntent,
-                    packageName, splitName, callingPackage, resolvedType,
-                    userId);
+                    rInfo.ephemeralResponse.resolveInfo.getPackageName();
+            final String splitName = rInfo.ephemeralResponse.splitName;
+            final boolean needsPhaseTwo = rInfo.ephemeralResponse.needsPhase2;
+            final String token = rInfo.ephemeralResponse.token;
+            if (needsPhaseTwo) {
+                // request phase two resolution
+                mService.getPackageManagerInternalLocked().requestEphemeralResolutionPhaseTwo(
+                        rInfo.ephemeralResponse, ephemeralIntent, resolvedType, intent,
+                        callingPackage, userId);
+            }
+            intent = EphemeralResolver.buildEphemeralInstallerIntent(intent, ephemeralIntent,
+                    callingPackage, resolvedType, userId, packageName, splitName, token,
+                    needsPhaseTwo);
             resolvedType = null;
             callingUid = realCallingUid;
             callingPid = realCallingPid;
@@ -521,60 +527,6 @@ class ActivityStarter {
         }
         postStartActivityUncheckedProcessing(r, err, stack.mStackId, mSourceRecord, mTargetStack);
         return err;
-    }
-
-    /**
-     * Builds and returns an intent to launch the ephemeral installer.
-     */
-    private Intent buildEphemeralInstallerIntent(Intent launchIntent, Intent origIntent,
-            String ephemeralPackageName, String ephemeralSplitName, String callingPackage,
-            String resolvedType, int userId) {
-        final Intent nonEphemeralIntent = new Intent(origIntent);
-        nonEphemeralIntent.setFlags(nonEphemeralIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
-        // Intent that is launched if the ephemeral package couldn't be installed
-        // for any reason.
-        final IIntentSender failureIntentTarget = mService.getIntentSenderLocked(
-                ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
-                Binder.getCallingUid(), userId, null /*token*/, null /*resultWho*/, 1,
-                new Intent[]{ nonEphemeralIntent }, new String[]{ resolvedType },
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
-                | PendingIntent.FLAG_IMMUTABLE, null /*bOptions*/);
-
-        final Intent ephemeralIntent;
-        if (USE_DEFAULT_EPHEMERAL_LAUNCHER) {
-            // Force the intent to be directed to the ephemeral package
-            ephemeralIntent = new Intent(origIntent);
-            ephemeralIntent.setPackage(ephemeralPackageName);
-        } else {
-            // Success intent goes back to the installer
-            ephemeralIntent = new Intent(launchIntent);
-        }
-
-        // Intent that is eventually launched if the ephemeral package was
-        // installed successfully. This will actually be launched by a platform
-        // broadcast receiver.
-        final IIntentSender successIntentTarget = mService.getIntentSenderLocked(
-                ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
-                Binder.getCallingUid(), userId, null /*token*/, null /*resultWho*/, 0,
-                new Intent[]{ ephemeralIntent }, new String[]{ resolvedType },
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
-                | PendingIntent.FLAG_IMMUTABLE, null /*bOptions*/);
-
-        // Finally build the actual intent to launch the ephemeral installer
-        int flags = launchIntent.getFlags();
-        final Intent intent = new Intent();
-        intent.setFlags(flags
-                | Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                | Intent.FLAG_ACTIVITY_NO_HISTORY
-                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, ephemeralPackageName);
-        intent.putExtra(Intent.EXTRA_SPLIT_NAME, ephemeralSplitName);
-        intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, new IntentSender(failureIntentTarget));
-        intent.putExtra(Intent.EXTRA_EPHEMERAL_SUCCESS, new IntentSender(successIntentTarget));
-        // TODO: Remove when the platform has fully implemented ephemeral apps
-        intent.setData(origIntent.getData().buildUpon().clearQuery().build());
-        return intent;
     }
 
     void postStartActivityUncheckedProcessing(

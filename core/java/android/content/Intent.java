@@ -3835,6 +3835,18 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_EPHEMERAL_FAILURE = "android.intent.extra.EPHEMERAL_FAILURE";
 
     /**
+     * The host name that triggered an ephemeral resolution.
+     * @hide
+     */
+    public static final String EXTRA_EPHEMERAL_HOSTNAME = "android.intent.extra.EPHEMERAL_HOSTNAME";
+
+    /**
+     * An opaque token to track ephemeral resolution.
+     * @hide
+     */
+    public static final String EXTRA_EPHEMERAL_TOKEN = "android.intent.extra.EPHEMERAL_TOKEN";
+
+    /**
      * A Bundle forming a mapping of potential target package names to different extras Bundles
      * to add to the default intent extras in {@link #EXTRA_INTENT} when used with
      * {@link #ACTION_CHOOSER}. Each key should be a package name. The package need not
