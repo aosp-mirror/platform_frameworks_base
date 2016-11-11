@@ -128,5 +128,5 @@
       <item quantity="one">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft adgangskoden.</item>
       <item quantity="other">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft adgangskoden.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Kan ikke genkendes"</string>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Ikke genkendt"</string>
 </resources>
