@@ -5839,6 +5839,7 @@ public final class ActivityThread {
                     case BlockedNumberContract.AUTHORITY:
                     case CalendarContract.AUTHORITY:
                     case Downloads.Impl.AUTHORITY:
+                    case "telephony":
                         Binder.allowBlocking(provider.asBinder());
                 }
             }
