@@ -849,6 +849,24 @@ public class TaskStack {
         return null;
     }
 
+    /**
+     * Returns the task in stack tasks which should be launched next if Recents are toggled
+     * again, or null if there is no task to be launched.
+     */
+    public Task getNextLaunchTarget() {
+        int taskCount = getTaskCount();
+        if (taskCount == 0) {
+            return null;
+        }
+        int launchTaskIndex = indexOfStackTask(getLaunchTarget());
+        if (launchTaskIndex != -1) {
+            launchTaskIndex = Math.max(0, launchTaskIndex - 1);
+        } else {
+            launchTaskIndex = getTaskCount() - 1;
+        }
+        return getStackTasks().get(launchTaskIndex);
+    }
+
     /** Returns the index of this task in this current task stack */
     public int indexOfStackTask(Task t) {
         return mStackTaskList.indexOf(t);
