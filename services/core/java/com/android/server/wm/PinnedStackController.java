@@ -69,6 +69,7 @@ class PinnedStackController {
 
     // States that affect how the PIP can be manipulated
     private boolean mInInteractiveMode;
+    private boolean mIsMinimized;
     private boolean mIsImeShowing;
     private int mImeHeight;
     private ValueAnimator mBoundsAnimator = null;
@@ -99,6 +100,13 @@ class PinnedStackController {
                     mBoundsAnimator.cancel();
                 }
                 mInInteractiveMode = inInteractiveMode;
+            });
+        }
+
+        @Override
+        public void setIsMinimized(final boolean isMinimized) {
+            mHandler.post(() -> {
+                mIsMinimized = isMinimized;
             });
         }
 
@@ -335,5 +343,6 @@ class PinnedStackController {
         pw.println();
         pw.println(prefix + "  mIsImeShowing=" + mIsImeShowing);
         pw.println(prefix + "  mInInteractiveMode=" + mInInteractiveMode);
+        pw.println(prefix + "  mIsMinimized=" + mIsMinimized);
     }
 }
