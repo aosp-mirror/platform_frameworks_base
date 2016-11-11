@@ -28,7 +28,6 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
 import android.util.Log;
@@ -70,17 +69,6 @@ public final class ThreadedRenderer {
      * Name of the file that holds the shaders cache.
      */
     private static final String CACHE_PATH_SHADERS = "com.android.opengl.shaders_cache";
-
-    /**
-     * System property used to enable or disable dirty regions invalidation.
-     * This property is only queried if {@link #RENDER_DIRTY_REGIONS} is true.
-     * The default value of this property is assumed to be true.
-     *
-     * Possible values:
-     * "true", to enable partial invalidates
-     * "false", to disable partial invalidates
-     */
-    static final String RENDER_DIRTY_REGIONS_PROPERTY = "debug.hwui.render_dirty_regions";
 
     /**
      * System property used to enable or disable threaded rendering profiling.
