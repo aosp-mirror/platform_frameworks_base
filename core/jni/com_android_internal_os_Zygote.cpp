@@ -319,12 +319,6 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
         bool force_mount_namespace) {
     // See storage config details at http://source.android.com/tech/storage/
 
-    // Create a second private mount namespace for our process
-    if (unshare(CLONE_NEWNS) == -1) {
-        ALOGW("Failed to unshare(): %s", strerror(errno));
-        return false;
-    }
-
     String8 storageSource;
     if (mount_mode == MOUNT_EXTERNAL_DEFAULT) {
         storageSource = "/mnt/runtime/default";
@@ -336,6 +330,13 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
         // Sane default of no storage visible
         return true;
     }
+
+    // Create a second private mount namespace for our process
+    if (unshare(CLONE_NEWNS) == -1) {
+        ALOGW("Failed to unshare(): %s", strerror(errno));
+        return false;
+    }
+
     if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage",
             NULL, MS_BIND | MS_REC | MS_SLAVE, NULL)) == -1) {
         ALOGW("Failed to mount %s to /storage: %s", storageSource.string(), strerror(errno));
