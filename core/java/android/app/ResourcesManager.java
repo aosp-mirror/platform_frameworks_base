@@ -826,7 +826,8 @@ public class ResourcesManager {
 
             for (int i = mResourceImpls.size() - 1; i >= 0; i--) {
                 ResourcesKey key = mResourceImpls.keyAt(i);
-                ResourcesImpl r = mResourceImpls.valueAt(i).get();
+                WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
+                ResourcesImpl r = weakImplRef != null ? weakImplRef.get() : null;
                 if (r != null) {
                     if (DEBUG || DEBUG_CONFIGURATION) Slog.v(TAG, "Changing resources "
                             + r + " config to: " + config);
@@ -887,8 +888,9 @@ public class ResourcesManager {
 
             final int implCount = mResourceImpls.size();
             for (int i = 0; i < implCount; i++) {
-                final ResourcesImpl impl = mResourceImpls.valueAt(i).get();
                 final ResourcesKey key = mResourceImpls.keyAt(i);
+                final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
+                final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
                 if (impl != null && key.mResDir.equals(assetPath)) {
                     if (!ArrayUtils.contains(key.mLibDirs, libAsset)) {
                         final int newLibAssetCount = 1 +
