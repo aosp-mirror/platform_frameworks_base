@@ -561,6 +561,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mLastCameraLaunchSource;
     private PowerManager.WakeLock mGestureWakeLock;
     private Vibrator mVibrator;
+    private long[] mCameraLaunchGestureVibePattern;
 
     // Fingerprint (as computed by getLoggingFingerprint() of the last logged state.
     private int mLastLoggedStateFingerprint;
@@ -996,6 +997,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mGestureWakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
                 "GestureWakeLock");
         mVibrator = mContext.getSystemService(Vibrator.class);
+        int[] pattern = mContext.getResources().getIntArray(
+                R.array.config_cameraLaunchGestureVibePattern);
+        mCameraLaunchGestureVibePattern = new long[pattern.length];
+        for (int i = 0; i < pattern.length; i++) {
+            mCameraLaunchGestureVibePattern[i] = pattern[i];
+        }
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -4880,7 +4887,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void vibrateForCameraGesture() {
         // Make sure to pass -1 for repeat so VibratorService doesn't stop us when going to sleep.
-        mVibrator.vibrate(new long[]{0, 400}, -1 /* repeat */);
+        mVibrator.vibrate(mCameraLaunchGestureVibePattern, -1 /* repeat */);
     }
 
     public void onScreenTurnedOn() {
