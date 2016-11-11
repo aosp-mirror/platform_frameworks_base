@@ -100,7 +100,6 @@ interface IBluetooth
     boolean factoryReset();
 
     boolean isMultiAdvertisementSupported();
-    boolean isPeripheralModeSupported();
     boolean isOffloadedFilteringSupported();
     boolean isOffloadedScanBatchingSupported();
     boolean isActivityAndEnergyReportingSupported();
