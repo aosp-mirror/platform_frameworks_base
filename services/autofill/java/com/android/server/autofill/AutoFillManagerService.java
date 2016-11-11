@@ -20,26 +20,32 @@ import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTO_FILL_MANAGER_SERVICE;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.IAutoFillManagerService;
 import android.text.TextUtils;
@@ -56,6 +62,7 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Entry point service for auto-fill management.
@@ -87,6 +94,9 @@ public final class AutoFillManagerService extends SystemService {
             switch (msg.what) {
                 case MSG_UNBIND:
                     removeStaleServiceForUser(msg.arg1);
+                    return;
+                case MSG_SHOW_ALL_NOTIFICATIONS:
+                    showAllNotifications();
                     return;
                 default:
                     Slog.w(TAG, "Invalid message: " + msg);
@@ -130,6 +140,14 @@ public final class AutoFillManagerService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             new SettingsObserver(BackgroundThread.getHandler());
+        }
+        if (phase == PHASE_BOOT_COMPLETED) {
+            // TODO: if sent right away, the notification is not displayed. Since the notification
+            // mechanism is a temporary approach anyways, just delay it..
+            if (DEBUG)
+                Slog.d(TAG, "Showing notifications in " + SHOW_ALL_NOTIFICATIONS_DELAY_MS + "ms");
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SHOW_ALL_NOTIFICATIONS),
+                    SHOW_ALL_NOTIFICATIONS_DELAY_MS);
         }
     }
 
@@ -224,6 +242,7 @@ public final class AutoFillManagerService extends SystemService {
         }
         mServicesCache.delete(userId);
         service.stopLocked();
+
     }
 
     final class AutoFillManagerServiceStub extends IAutoFillManagerService.Stub {
@@ -287,7 +306,136 @@ public final class AutoFillManagerService extends SystemService {
             if (DEBUG) Slog.d(TAG, "settings (" + uri + " changed for " + userId);
             synchronized (mLock) {
                 removeCachedServiceForUserLocked(userId);
+                final ComponentName serviceComponent = getProviderForUser(userId);
+                if (serviceComponent== null) {
+                    cancelNotificationLocked(userId);
+                } else {
+                    showNotification(serviceComponent, userId);
+                }
             }
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // TODO: temporary code using a notification to request auto-fill.        //
+    // Will be removed once UX decide the right way to present it to the user //
+    ////////////////////////////////////////////////////////////////////////////
+
+    // TODO: remove from frameworks/base/core/res/AndroidManifest.xml once it's not used anymore
+    private static final String NOTIFICATION_INTENT =
+            "com.android.internal.autofill.action.REQUEST_AUTOFILL";
+    private static final String EXTRA_USER_ID = "user_id";
+
+    private static final int MSG_SHOW_ALL_NOTIFICATIONS = 42;
+    private static final int SHOW_ALL_NOTIFICATIONS_DELAY_MS = 5000;
+
+    private BroadcastReceiver mNotificationReceiver;
+
+    final class NotificationReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final int userId = intent.getIntExtra(EXTRA_USER_ID, -1);
+            if (DEBUG) Slog.d(TAG, "Requesting autofill by notification for user " + userId);
+            synchronized (mLock) {
+                final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
+                if (service == null) {
+                    Slog.w(TAG, "no auto-fill service for user " + userId);
+                } else {
+                    service.requestAutoFill(null);
+                }
+            }
+        }
+    }
+
+    private ComponentName getProviderForUser(int userId) {
+        ComponentName serviceComponent = null;
+        ServiceInfo serviceInfo = null;
+        final String componentName = Settings.Secure.getStringForUser(
+                mResolver, Settings.Secure.AUTO_FILL_SERVICE, userId);
+        if (!TextUtils.isEmpty(componentName)) {
+            try {
+                serviceComponent = ComponentName.unflattenFromString(componentName);
+                serviceInfo =
+                        AppGlobals.getPackageManager().getServiceInfo(serviceComponent, 0, userId);
+            } catch (RuntimeException | RemoteException e) {
+                Slog.wtf(TAG, "Bad auto-fill service name " + componentName, e);
+                return null;
+            }
+        }
+
+        if (DEBUG) Slog.d(TAG, "getServiceComponentForUser(" + userId + "): component="
+                + serviceComponent + ", info: " + serviceInfo);
+        if (serviceInfo == null) {
+            Slog.w(TAG, "no service info for " + serviceComponent);
+            return null;
+        }
+        return serviceComponent;
+    }
+
+    private void showAllNotifications() {
+        final UserManager userManager =
+                (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+
+        final List<UserInfo> allUsers = userManager.getUsers(true);
+
+        for (UserInfo user : allUsers) {
+            final ComponentName serviceComponent = getProviderForUser(user.id);
+            if (serviceComponent != null) {
+                showNotification(serviceComponent, user.id);
+            }
+        }
+    }
+
+    private void showNotification(ComponentName serviceComponent, int userId) {
+        if (DEBUG) Log.d(TAG, "showNotification() for " + userId + ": " + serviceComponent);
+
+        synchronized (mLock) {
+            if (mNotificationReceiver == null) {
+                mNotificationReceiver = new NotificationReceiver();
+                mContext.registerReceiver(mNotificationReceiver,
+                        new IntentFilter(NOTIFICATION_INTENT));
+            }
+        }
+
+        final Intent intent = new Intent(NOTIFICATION_INTENT);
+        intent.putExtra(EXTRA_USER_ID, userId);
+        final PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        final String packageName = serviceComponent.getPackageName();
+        String providerName = null;
+        final PackageManager pm = mContext.getPackageManager();
+        try {
+            final ApplicationInfo info = pm.getApplicationInfoAsUser(packageName, 0, userId);
+            if (info != null) {
+                providerName = pm.getApplicationLabel(info).toString();
+            }
+        } catch (Exception e) {
+            providerName = packageName;
+        }
+        final String title = "AutoFill by '" + providerName + "'";
+        final String subTitle = "Tap notification to auto-fill top activity for user " + userId;
+
+        final Notification notification = new Notification.Builder(mContext)
+                .setCategory(Notification.CATEGORY_SYSTEM)
+                .setOngoing(true)
+                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                .setLocalOnly(true)
+                .setColor(mContext.getColor(
+                        com.android.internal.R.color.system_notification_accent_color))
+                .setContentTitle(title)
+                .setStyle(new Notification.BigTextStyle().bigText(subTitle))
+                .setContentIntent(pi)
+                .build();
+        NotificationManager.from(mContext).notify(userId, notification);
+    }
+
+    private void cancelNotificationLocked(int userId) {
+        if (DEBUG) Log.d(TAG, "cancelNotificationLocked(): " + userId);
+        NotificationManager.from(mContext).cancel(userId);
+    }
+
+    /////////////////////////////////////////
+    // End of temporary notification code. //
+    /////////////////////////////////////////
 }
