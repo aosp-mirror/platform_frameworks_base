@@ -17,9 +17,11 @@
 package com.android.systemui.power;
 
 import static android.test.MoreAsserts.assertNotEqual;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
@@ -29,9 +31,11 @@ import static org.mockito.Mockito.verify;
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import com.android.systemui.SysuiTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +43,7 @@ import org.mockito.ArgumentCaptor;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class PowerNotificationWarningsTest {
+public class PowerNotificationWarningsTest extends SysuiTestCase {
     private final NotificationManager mMockNotificationManager = mock(NotificationManager.class);
     private PowerNotificationWarnings mPowerNotificationWarnings;
 
@@ -47,7 +51,7 @@ public class PowerNotificationWarningsTest {
     public void setUp() throws Exception {
         // Test Instance.
         mPowerNotificationWarnings = new PowerNotificationWarnings(
-                InstrumentationRegistry.getTargetContext(), mMockNotificationManager, null);
+                mContext, mMockNotificationManager, null);
     }
 
     @Test

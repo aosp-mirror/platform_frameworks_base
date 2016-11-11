@@ -18,6 +18,7 @@ package com.android.systemui.qs;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
@@ -26,11 +27,12 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
 import com.android.systemui.R;
+import com.android.systemui.SysuiTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,13 +40,13 @@ import org.mockito.ArgumentCaptor;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class TileLayoutTest {
-    private Context mContext = InstrumentationRegistry.getTargetContext();
-    private final TileLayout mTileLayout = new TileLayout(mContext);
+public class TileLayoutTest extends SysuiTestCase {
+    private TileLayout mTileLayout;
     private int mLayoutSizeForOneTile;
 
     @Before
     public void setUp() throws Exception {
+        mTileLayout = new TileLayout(mContext);
         // Layout needs to leave space for the tile margins. Three times the margin size is
         // sufficient for any number of columns.
         mLayoutSizeForOneTile =
