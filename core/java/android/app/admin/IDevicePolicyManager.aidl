@@ -299,6 +299,7 @@ interface IDevicePolicyManager {
     void setUserProvisioningState(int state, int userHandle);
 
     void setAffiliationIds(in ComponentName admin, in List<String> ids);
+    List<String> getAffiliationIds(in ComponentName admin);
     boolean isAffiliatedUser();
 
     void setSecurityLoggingEnabled(in ComponentName admin, boolean enabled);

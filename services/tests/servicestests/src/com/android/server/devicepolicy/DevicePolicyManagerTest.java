@@ -50,6 +50,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1643,6 +1644,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     /**
      * Test for:
      * {@link DevicePolicyManager#setAffiliationIds}
+     * {@link DevicePolicyManager#getAffiliationIds}
      * {@link DevicePolicyManager#isAffiliatedUser}
      */
     public void testUserAffiliation() throws Exception {
@@ -1659,30 +1661,34 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
         assertTrue(dpm.setDeviceOwner(admin1, "owner-name"));
         assertTrue(dpm.isAffiliatedUser());
+        assertTrue(dpm.getAffiliationIds(admin1).isEmpty());
 
-        // Install a profile owner whose package name matches the device owner on a test user. Check
-        // that the test user is unaffiliated.
+        // Install a profile owner. Check that the test user is unaffiliated.
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
         setAsProfileOwner(admin2);
         assertFalse(dpm.isAffiliatedUser());
+        assertTrue(dpm.getAffiliationIds(admin2).isEmpty());
 
         // Have the profile owner specify a set of affiliation ids. Check that the test user remains
         // unaffiliated.
-        final Set<String> userAffiliationIds = new ArraySet<>();
+        final List<String> userAffiliationIds = new ArrayList<>();
         userAffiliationIds.add("red");
         userAffiliationIds.add("green");
         userAffiliationIds.add("blue");
         dpm.setAffiliationIds(admin2, userAffiliationIds);
+        MoreAsserts.assertContentsInAnyOrder(dpm.getAffiliationIds(admin2), "red", "green", "blue");
         assertFalse(dpm.isAffiliatedUser());
 
         // Have the device owner specify a set of affiliation ids that do not intersect with those
         // specified by the profile owner. Check that the test user remains unaffiliated.
-        final Set<String> deviceAffiliationIds = new ArraySet<>();
+        final List<String> deviceAffiliationIds = new ArrayList<>();
         deviceAffiliationIds.add("cyan");
         deviceAffiliationIds.add("yellow");
         deviceAffiliationIds.add("magenta");
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         dpm.setAffiliationIds(admin1, deviceAffiliationIds);
+        MoreAsserts.assertContentsInAnyOrder(
+            dpm.getAffiliationIds(admin1), "cyan", "yellow", "magenta");
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
         assertFalse(dpm.isAffiliatedUser());
 
@@ -1690,19 +1696,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // specified by the device owner. Check that the test user becomes affiliated.
         userAffiliationIds.add("yellow");
         dpm.setAffiliationIds(admin2, userAffiliationIds);
+        MoreAsserts.assertContentsInAnyOrder(
+            dpm.getAffiliationIds(admin2), "red", "green", "blue", "yellow");
         assertTrue(dpm.isAffiliatedUser());
 
-        // Change the profile owner to one whose package name does not match the device owner. Check
-        // that the test user is not affiliated anymore.
-        dpm.clearProfileOwner(admin2);
-        final ComponentName admin = new ComponentName("test", "test");
-
-        setUpPackageManagerForFakeAdmin(admin, DpmMockContext.CALLER_UID,
-                /* enabledSetting =*/ PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                /* appTargetSdk = */ null, admin2);
-
-        dpm.setActiveAdmin(admin, /* refreshing =*/ true, DpmMockContext.CALLER_USER_HANDLE);
-        assertTrue(dpm.setProfileOwner(admin, "owner-name", DpmMockContext.CALLER_USER_HANDLE));
+        // Clear affiliation ids for the profile owner. The user becomes unaffiliated.
+        dpm.setAffiliationIds(admin2, Collections.emptyList());
+        assertTrue(dpm.getAffiliationIds(admin2).isEmpty());
         assertFalse(dpm.isAffiliatedUser());
 
         // Check that the system user remains affiliated.

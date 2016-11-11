@@ -213,6 +213,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String TAG_ADMIN_BROADCAST_PENDING = "admin-broadcast-pending";
 
+    private static final String ATTR_ID = "id";
+
     private static final String ATTR_VALUE = "value";
 
     private static final String TAG_INITIALIZATION_BUNDLE = "initialization-bundle";
@@ -2367,7 +2369,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             for (String id : policy.mAffiliationIds) {
                 out.startTag(null, TAG_AFFILIATION_ID);
-                out.attribute(null, "id", id);
+                out.attribute(null, ATTR_ID, id);
                 out.endTag(null, TAG_AFFILIATION_ID);
             }
 
@@ -2547,7 +2549,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML.equals(tag)) {
                     policy.doNotAskCredentialsOnBoot = true;
                 } else if (TAG_AFFILIATION_ID.equals(tag)) {
-                    policy.mAffiliationIds.add(parser.getAttributeValue(null, "id"));
+                    policy.mAffiliationIds.add(parser.getAttributeValue(null, ATTR_ID));
                 } else if (TAG_LAST_SECURITY_LOG_RETRIEVAL.equals(tag)) {
                     policy.mLastSecurityLogRetrievalTime = Long.parseLong(
                             parser.getAttributeValue(null, ATTR_VALUE));
@@ -8041,13 +8043,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void setLockTaskPackages(ComponentName who, String[] packages)
             throws SecurityException {
         Preconditions.checkNotNull(who, "ComponentName is null");
+
         synchronized (this) {
-            ActiveAdmin deviceOwner = getActiveAdminWithPolicyForUidLocked(
-                who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER, mInjector.binderGetCallingUid());
-            ActiveAdmin profileOwner = getActiveAdminWithPolicyForUidLocked(
-                who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, mInjector.binderGetCallingUid());
-            if (deviceOwner != null || (profileOwner != null && isAffiliatedUser())) {
-                int userHandle = mInjector.userHandleGetCallingUserId();
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            final int userHandle = mInjector.userHandleGetCallingUserId();
+            if (isUserAffiliatedWithDevice(userHandle)) {
                 setLockTaskPackagesLocked(userHandle, new ArrayList<>(Arrays.asList(packages)));
             } else {
                 throw new SecurityException("Admin " + who +
@@ -9142,9 +9142,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setAffiliationIds(ComponentName admin, List<String> ids) {
-        final Set<String> affiliationIds = new ArraySet<String>(ids);
-        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        if (!mHasFeature) {
+            return;
+        }
 
+        Preconditions.checkNotNull(admin);
+        Preconditions.checkCollectionElementsNotNull(ids, "ids");
+
+        final Set<String> affiliationIds = new ArraySet<String>(ids);
+        Preconditions.checkArgument(
+                !affiliationIds.contains(""), "ids must not contain empty strings");
+
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             getUserData(callingUserId).mAffiliationIds = affiliationIds;
@@ -9159,20 +9168,44 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean isAffiliatedUser() {
-        final int callingUserId = mInjector.userHandleGetCallingUserId();
+    public List<String> getAffiliationIds(ComponentName admin) {
+        if (!mHasFeature) {
+            return Collections.emptyList();
+        }
 
+        Preconditions.checkNotNull(admin);
         synchronized (this) {
-            if (mOwners.getDeviceOwnerUserId() == callingUserId) {
-                // The user that the DO is installed on is always affiliated.
-                return true;
-            }
-            final ComponentName profileOwner = getProfileOwner(callingUserId);
-            if (profileOwner == null
-                    || !profileOwner.getPackageName().equals(mOwners.getDeviceOwnerPackageName())) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return new ArrayList<String>(
+                    getUserData(mInjector.userHandleGetCallingUserId()).mAffiliationIds);
+        }
+    }
+
+    @Override
+    public boolean isAffiliatedUser() {
+        return isUserAffiliatedWithDevice(mInjector.userHandleGetCallingUserId());
+    }
+
+    private boolean isUserAffiliatedWithDevice(int userId) {
+        synchronized (this) {
+            if (!mOwners.hasDeviceOwner()) {
                 return false;
             }
-            final Set<String> userAffiliationIds = getUserData(callingUserId).mAffiliationIds;
+            if (userId == mOwners.getDeviceOwnerUserId()) {
+                // The user that the DO is installed on is always affiliated with the device.
+                return true;
+            }
+            if (userId == UserHandle.USER_SYSTEM) {
+                // The system user is always affiliated in a DO device, even if the DO is set on a
+                // different user. This could be the case if the DO is set in the primary user
+                // of a split user device.
+                return true;
+            }
+            final ComponentName profileOwner = getProfileOwner(userId);
+            if (profileOwner == null) {
+                return false;
+            }
+            final Set<String> userAffiliationIds = getUserData(userId).mAffiliationIds;
             final Set<String> deviceAffiliationIds =
                     getUserData(UserHandle.USER_SYSTEM).mAffiliationIds;
             for (String id : userAffiliationIds) {
