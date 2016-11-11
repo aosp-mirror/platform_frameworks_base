@@ -519,6 +519,7 @@ LOCAL_JAVA_LIBRARIES := core-oj core-libart conscrypt okhttp core-junit bouncyca
 LOCAL_STATIC_JAVA_LIBRARIES :=                          \
     framework-protos                                    \
     android.hardware.thermal@1.0-java-constants         \
+    android.hardware.health@1.0-java-constants          \
 
 LOCAL_MODULE := framework
 
