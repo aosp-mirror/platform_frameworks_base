@@ -26,6 +26,6 @@ public class CustomCalendar extends CalendarView {
     }
 
     private void init() {
-        setDate(871703200000L, false, true);
+        setDate(871732800000L, false, true);
     }
 }
