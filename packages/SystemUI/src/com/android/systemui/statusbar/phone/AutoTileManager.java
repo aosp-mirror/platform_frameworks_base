@@ -42,7 +42,7 @@ public class AutoTileManager {
             host.getHotspotController().addCallback(mHotspotCallback);
         }
         if (!Prefs.getBoolean(context, Key.QS_DATA_SAVER_ADDED, false)) {
-            host.getNetworkController().getDataSaverController().addListener(mDataSaverListener);
+            host.getNetworkController().getDataSaverController().addCallback(mDataSaverListener);
         }
         if (!Prefs.getBoolean(context, Key.QS_INVERT_COLORS_ADDED, false)) {
             mColorsSetting = new SecureSetting(mContext, mHandler,
@@ -69,7 +69,10 @@ public class AutoTileManager {
     }
 
     public void destroy() {
-        // TODO: Remove any registered listeners.
+        mColorsSetting.setListening(false);
+        mHost.getHotspotController().removeCallback(mHotspotCallback);
+        mHost.getNetworkController().getDataSaverController().removeCallback(mDataSaverListener);
+        mHost.getManagedProfileController().removeCallback(mProfileCallback);
     }
 
     private final ManagedProfileController.Callback mProfileCallback =
@@ -105,7 +108,7 @@ public class AutoTileManager {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mHost.getNetworkController().getDataSaverController().remListener(
+                        mHost.getNetworkController().getDataSaverController().removeCallback(
                                 mDataSaverListener);
                     }
                 });

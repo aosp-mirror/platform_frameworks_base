@@ -105,13 +105,13 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     }
 
     @Override
-    public void addStateChangedCallback(Callback cb) {
+    public void addCallback(Callback cb) {
         mHandler.obtainMessage(H.MSG_ADD_CALLBACK, cb).sendToTarget();
         mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
     }
 
     @Override
-    public void removeStateChangedCallback(Callback cb) {
+    public void removeCallback(Callback cb) {
         mHandler.obtainMessage(H.MSG_REMOVE_CALLBACK, cb).sendToTarget();
     }
 

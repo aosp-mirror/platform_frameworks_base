@@ -37,7 +37,7 @@ import android.widget.Toolbar.OnMenuItemClickListener;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.QSContainer;
+import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
@@ -69,7 +69,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private Toolbar mToolbar;
     private boolean mCustomizing;
     private NotificationsQuickSettingsContainer mNotifQsContainer;
-    private QSContainer mQsContainer;
+    private QS mQs;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
@@ -127,8 +127,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mNotifQsContainer = notificationsQsContainer;
     }
 
-    public void setQsContainer(QSContainer qsContainer) {
-        mQsContainer = qsContainer;
+    public void setQs(QS qs) {
+        mQs = qs;
     }
 
     public void show(int x, int y) {
@@ -169,7 +169,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     private void setCustomizing(boolean customizing) {
         mCustomizing = customizing;
-        mQsContainer.notifyCustomizeChanged();
+        mQs.notifyCustomizeChanged();
     }
 
     public boolean isCustomizing() {

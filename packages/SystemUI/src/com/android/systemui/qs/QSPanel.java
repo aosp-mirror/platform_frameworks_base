@@ -30,8 +30,8 @@ import android.widget.LinearLayout;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.QSContainer;
-import com.android.systemui.plugins.qs.QSContainer.DetailAdapter;
+import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSTile.Host.Callback;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.external.CustomTile;
@@ -60,7 +60,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     protected boolean mExpanded;
     protected boolean mListening;
 
-    private QSContainer.Callback mCallback;
+    private QS.Callback mCallback;
     private BrightnessController mBrightnessController;
     protected QSTileHost mHost;
 
@@ -171,7 +171,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         return mBrightnessView;
     }
 
-    public void setCallback(QSContainer.Callback callback) {
+    public void setCallback(QS.Callback callback) {
         mCallback = callback;
     }
 

@@ -35,9 +35,9 @@ import android.widget.TextView;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.QSContainer.BaseStatusBarHeader;
-import com.android.systemui.plugins.qs.QSContainer.Callback;
-import com.android.systemui.plugins.qs.QSContainer.DetailAdapter;
+import com.android.systemui.plugins.qs.QS.BaseStatusBarHeader;
+import com.android.systemui.plugins.qs.QS.Callback;
+import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.statusbar.phone.QSTileHost;
 
 public class QSDetail extends LinearLayout {

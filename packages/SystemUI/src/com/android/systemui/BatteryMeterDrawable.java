@@ -182,13 +182,13 @@ public class BatteryMeterDrawable extends Drawable implements
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(SHOW_PERCENT_SETTING), false, mSettingObserver);
         updateShowPercent();
-        mBatteryController.addStateChangedCallback(this);
+        mBatteryController.addCallback(this);
     }
 
     public void stopListening() {
         mListening = false;
         mContext.getContentResolver().unregisterContentObserver(mSettingObserver);
-        mBatteryController.removeStateChangedCallback(this);
+        mBatteryController.removeCallback(this);
     }
 
     public void disableShowPercent() {

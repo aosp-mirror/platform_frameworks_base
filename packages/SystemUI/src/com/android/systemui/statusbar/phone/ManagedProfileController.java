@@ -24,11 +24,14 @@ import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
 
+import com.android.systemui.statusbar.phone.ManagedProfileController.Callback;
+import com.android.systemui.statusbar.policy.CallbackController;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ManagedProfileController {
+public class ManagedProfileController implements CallbackController<Callback> {
 
     private final List<Callback> mCallbacks = new ArrayList<>();
 

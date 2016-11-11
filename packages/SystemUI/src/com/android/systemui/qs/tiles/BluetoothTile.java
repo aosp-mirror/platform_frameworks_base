@@ -32,7 +32,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.QSContainer.DetailAdapter;
+import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSTile;
@@ -67,9 +67,9 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
     @Override
     public void setListening(boolean listening) {
         if (listening) {
-            mController.addStateChangedCallback(mCallback);
+            mController.addCallback(mCallback);
         } else {
-            mController.removeStateChangedCallback(mCallback);
+            mController.removeCallback(mCallback);
         }
     }
 

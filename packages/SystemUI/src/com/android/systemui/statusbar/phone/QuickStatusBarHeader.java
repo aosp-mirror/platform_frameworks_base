@@ -37,10 +37,10 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.QSContainer.ActivityStarter;
-import com.android.systemui.plugins.qs.QSContainer.BaseStatusBarHeader;
+import com.android.systemui.plugins.qs.QS.ActivityStarter;
+import com.android.systemui.plugins.qs.QS.BaseStatusBarHeader;
 import com.android.systemui.qs.QSPanel;
-import com.android.systemui.plugins.qs.QSContainer.Callback;
+import com.android.systemui.plugins.qs.QS.Callback;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.TouchAnimator;
 import com.android.systemui.qs.TouchAnimator.Builder;
@@ -238,7 +238,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     @Override
     protected void onDetachedFromWindow() {
         setListening(false);
-        mHost.getUserInfoController().remListener(this);
+        mHost.getUserInfoController().removeCallback(this);
         mHost.getNetworkController().removeEmergencyListener(this);
         super.onDetachedFromWindow();
     }
@@ -290,9 +290,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     private void updateListeners() {
         if (mListening) {
-            mNextAlarmController.addStateChangedCallback(this);
+            mNextAlarmController.addCallback(this);
         } else {
-            mNextAlarmController.removeStateChangedCallback(this);
+            mNextAlarmController.removeCallback(this);
         }
     }
 
@@ -368,7 +368,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
-        userInfoController.addListener(this);
+        userInfoController.addCallback(this);
     }
 
     @Override

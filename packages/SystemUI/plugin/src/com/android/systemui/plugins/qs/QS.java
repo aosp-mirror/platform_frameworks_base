@@ -25,17 +25,21 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-public abstract class QSContainer extends FrameLayout {
+import com.android.systemui.plugins.FragmentBase;
+
+/**
+ * Fragment that contains QS in the notification shade.  Most of the interface is for
+ * handling the expand/collapsing of the view interaction.
+ */
+public interface QS extends FragmentBase {
 
     public static final String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
     // This should be incremented any time this class or ActivityStarter or BaseStatusBarHeader
     // change in incompatible ways.
-    public static final int VERSION = 3;
+    public static final int VERSION = 4;
 
-    public QSContainer(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-    }
+    String TAG = "QS";
 
     public abstract void setPanelView(HeightListener notificationPanelView);
     public abstract BaseStatusBarHeader getHeader();

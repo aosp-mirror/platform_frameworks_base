@@ -46,7 +46,7 @@ public class LightStatusBarController implements BatteryController.BatteryStateC
             BatteryController batteryController) {
         mIconController = iconController;
         mBatteryController = batteryController;
-        batteryController.addStateChangedCallback(this);
+        batteryController.addCallback(this);
     }
 
     public void setFingerprintUnlockController(

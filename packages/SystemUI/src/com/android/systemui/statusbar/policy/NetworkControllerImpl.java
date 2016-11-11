@@ -322,7 +322,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mCallbackHandler.setEmergencyCallsOnly(mIsEmergency);
     }
 
-    public void addSignalCallback(SignalCallback cb) {
+    public void addCallback(SignalCallback cb) {
         cb.setSubs(mCurrentSubscriptions);
         cb.setIsAirplaneMode(new IconState(mAirplaneMode,
                 TelephonyIcons.FLIGHT_MODE_ICON, R.string.accessibility_airplane_mode, mContext));
@@ -336,7 +336,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     @Override
-    public void removeSignalCallback(SignalCallback cb) {
+    public void removeCallback(SignalCallback cb) {
         mCallbackHandler.setListening(cb, false);
     }
 

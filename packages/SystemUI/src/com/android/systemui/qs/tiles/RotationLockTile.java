@@ -61,9 +61,9 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
     public void setListening(boolean listening) {
         if (mController == null) return;
         if (listening) {
-            mController.addRotationLockControllerCallback(mCallback);
+            mController.addCallback(mCallback);
         } else {
-            mController.removeRotationLockControllerCallback(mCallback);
+            mController.removeCallback(mCallback);
         }
     }
 

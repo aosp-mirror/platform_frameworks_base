@@ -47,7 +47,6 @@ import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
-import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
@@ -110,7 +109,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         mCast = cast;
         mHotspot = hotspot;
         mBluetooth = bluetooth;
-        mBluetooth.addStateChangedCallback(this);
+        mBluetooth.addCallback(this);
         mNextAlarm = nextAlarm;
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mUserInfoController = userInfoController;
@@ -131,7 +130,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         mSlotHeadset = context.getString(com.android.internal.R.string.status_bar_headset);
         mSlotDataSaver = context.getString(com.android.internal.R.string.status_bar_data_saver);
 
-        mRotationLockController.addRotationLockControllerCallback(this);
+        mRotationLockController.addCallback(this);
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
@@ -162,7 +161,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         // Alarm clock
         mIconController.setIcon(mSlotAlarmClock, R.drawable.stat_sys_alarm, null);
         mIconController.setIconVisibility(mSlotAlarmClock, false);
-        mNextAlarm.addStateChangedCallback(mNextAlarmCallback);
+        mNextAlarm.addCallback(mNextAlarmCallback);
 
         // zen
         mIconController.setIcon(mSlotZen, R.drawable.stat_sys_zen_important, null);
@@ -193,7 +192,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         mIconController.setIcon(mSlotDataSaver, R.drawable.stat_sys_data_saver,
                 context.getString(R.string.accessibility_data_saver_on));
         mIconController.setIconVisibility(mSlotDataSaver, false);
-        mDataSaver.addListener(this);
+        mDataSaver.addCallback(this);
     }
 
     public void setStatusBarKeyguardViewManager(

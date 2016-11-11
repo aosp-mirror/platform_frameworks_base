@@ -94,12 +94,12 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver implement
         filter.addAction(BluetoothHeadsetClient.ACTION_AG_EVENT);
         mContext.registerReceiver(this, filter);
 
-        mController.addStateChangedCallback(this);
+        mController.addCallback(this);
     }
 
     public void stopListening() {
         mContext.unregisterReceiver(this);
-        mController.removeStateChangedCallback(this);
+        mController.removeCallback(this);
     }
 
     @Override

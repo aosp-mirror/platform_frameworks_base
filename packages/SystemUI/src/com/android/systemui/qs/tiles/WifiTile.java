@@ -31,7 +31,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.wifi.AccessPoint;
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.QSContainer.DetailAdapter;
+import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSIconView;
@@ -70,9 +70,9 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     @Override
     public void setListening(boolean listening) {
         if (listening) {
-            mController.addSignalCallback(mSignalCallback);
+            mController.addCallback(mSignalCallback);
         } else {
-            mController.removeSignalCallback(mSignalCallback);
+            mController.removeCallback(mSignalCallback);
         }
     }
 

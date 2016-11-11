@@ -89,7 +89,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     @Override
-    public void addStateChangedCallback(BatteryController.BatteryStateChangeCallback cb) {
+    public void addCallback(BatteryController.BatteryStateChangeCallback cb) {
         synchronized (mChangeCallbacks) {
             mChangeCallbacks.add(cb);
         }
@@ -99,7 +99,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     @Override
-    public void removeStateChangedCallback(BatteryController.BatteryStateChangeCallback cb) {
+    public void removeCallback(BatteryController.BatteryStateChangeCallback cb) {
         synchronized (mChangeCallbacks) {
             mChangeCallbacks.remove(cb);
         }

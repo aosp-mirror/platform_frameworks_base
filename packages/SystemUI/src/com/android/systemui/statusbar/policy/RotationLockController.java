@@ -16,13 +16,14 @@
 
 package com.android.systemui.statusbar.policy;
 
-public interface RotationLockController extends Listenable {
+import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
+
+public interface RotationLockController extends Listenable,
+        CallbackController<RotationLockControllerCallback> {
     int getRotationLockOrientation();
     boolean isRotationLockAffordanceVisible();
     boolean isRotationLocked();
     void setRotationLocked(boolean locked);
-    void addRotationLockControllerCallback(RotationLockControllerCallback callback);
-    void removeRotationLockControllerCallback(RotationLockControllerCallback callback);
 
     public interface RotationLockControllerCallback {
         void onRotationLockStateChanged(boolean rotationLocked, boolean affordanceVisible);

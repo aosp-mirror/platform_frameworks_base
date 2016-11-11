@@ -158,7 +158,11 @@ public class PluginInstanceManager<T extends Plugin> {
                 case PLUGIN_DISCONNECTED:
                     if (DEBUG) Log.d(TAG, "onPluginDisconnected");
                     mListener.onPluginDisconnected((T) msg.obj);
-                    ((T) msg.obj).onDestroy();
+                    if (!(msg.obj instanceof PluginFragment)) {
+                        // Only call onDestroy for plugins that aren't fragments, as fragments
+                        // will get the onDestroy as part of the fragment lifecycle.
+                        ((T) msg.obj).onDestroy();
+                    }
                     break;
                 default:
                     super.handleMessage(msg);
@@ -186,7 +190,11 @@ public class PluginInstanceManager<T extends Plugin> {
                     for (int i = mPlugins.size() - 1; i >= 0; i--) {
                         PluginInfo<T> plugin = mPlugins.get(i);
                         mListener.onPluginDisconnected(plugin.mPlugin);
-                        plugin.mPlugin.onDestroy();
+                        if (!(plugin.mPlugin instanceof PluginFragment)) {
+                            // Only call onDestroy for plugins that aren't fragments, as fragments
+                            // will get the onDestroy as part of the fragment lifecycle.
+                            plugin.mPlugin.onDestroy();
+                        }
                     }
                     mPlugins.clear();
                     handleQueryPlugins(null);

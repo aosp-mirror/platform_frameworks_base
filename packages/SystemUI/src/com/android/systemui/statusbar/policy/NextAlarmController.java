@@ -23,11 +23,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
 
+import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-public class NextAlarmController extends BroadcastReceiver {
+public class NextAlarmController extends BroadcastReceiver
+        implements CallbackController<NextAlarmChangeCallback> {
 
     private final ArrayList<NextAlarmChangeCallback> mChangeCallbacks = new ArrayList<>();
 
@@ -48,12 +51,12 @@ public class NextAlarmController extends BroadcastReceiver {
         pw.print("  mNextAlarm="); pw.println(mNextAlarm);
     }
 
-    public void addStateChangedCallback(NextAlarmChangeCallback cb) {
+    public void addCallback(NextAlarmChangeCallback cb) {
         mChangeCallbacks.add(cb);
         cb.onNextAlarmChanged(mNextAlarm);
     }
 
-    public void removeStateChangedCallback(NextAlarmChangeCallback cb) {
+    public void removeCallback(NextAlarmChangeCallback cb) {
         mChangeCallbacks.remove(cb);
     }
 

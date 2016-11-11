@@ -29,6 +29,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyboard.KeyboardUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.media.RingtonePlayer;
@@ -61,6 +62,7 @@ public class SystemUIApplication extends Application {
      * The classes of the stuff to start.
      */
     private final Class<?>[] SERVICES = new Class[] {
+            FragmentService.class,
             TunerService.class,
             KeyguardViewMediator.class,
             Recents.class,
