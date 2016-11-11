@@ -22,7 +22,7 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Hata raporuna ayrıntılar ekleniyor"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Lütfen bekleyin…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Hata raporu kısa süre içinde telefonda görüntülenecektir"</string>
-    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Hata raporunuzu paylaşmak için hafifçe dokunun"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Hata raporunuzu paylaşmak için dokunun"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Hata raporunu ekran görüntüsüz paylaşmak için dokunun veya bitirmek için ekran görüntüsünü bekleyin"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Hata raporunu ekran görüntüsüz paylaşmak için dokunun veya bitirmek için ekran görüntüsünü bekleyin"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Hata raporları, sistemin çeşitli günlük dosyalarından veriler içerir. Bu günlükler, hassas olarak kabul ettiğiniz verileri (uygulama kullanımı ve konum verileri gibi) içerebilir. Hata raporlarını yalnızca güvendiğiniz kişiler ve uygulamalarla paylaşın."</string>
