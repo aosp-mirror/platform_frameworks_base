@@ -71,8 +71,6 @@ public class PipTouchHandler implements TunerService.Tunable {
     private static final int EXPAND_STACK_DURATION = 225;
     private static final int MINIMIZE_STACK_MAX_DURATION = 200;
 
-    // The fraction of the stack width to show when minimized
-    private static final float MINIMIZED_VISIBLE_FRACTION = 0.25f;
     // The fraction of the stack width that the user has to drag offscreen to minimize the PIP
     private static final float MINIMIZE_OFFSCREEN_FRACTION = 0.15f;
     // The fraction of the stack width that the user has to move when flinging to dismiss the PIP
@@ -396,6 +394,8 @@ public class PipTouchHandler implements TunerService.Tunable {
      * Flings the minimized PIP to the closest minimized snap target.
      */
     private void flingToMinimizedSnapTarget(float velocityY) {
+        // We currently only allow flinging the minimized stack up and down, so just lock the
+        // movement bounds to the current stack bounds horizontally
         Rect movementBounds = new Rect(mPinnedStackBounds.left, mBoundedPinnedStackBounds.top,
                 mPinnedStackBounds.left, mBoundedPinnedStackBounds.bottom);
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(movementBounds, mPinnedStackBounds,
@@ -414,16 +414,11 @@ public class PipTouchHandler implements TunerService.Tunable {
      * Animates the PIP to the minimized state, slightly offscreen.
      */
     private void animateToClosestMinimizedTarget() {
-        Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mBoundedPinnedStackBounds,
-                mPinnedStackBounds);
         Point displaySize = new Point();
         mContext.getDisplay().getRealSize(displaySize);
-        int visibleWidth = (int) (MINIMIZED_VISIBLE_FRACTION * mPinnedStackBounds.width());
-        if (mPinnedStackBounds.left < 0) {
-            toBounds.offsetTo(-toBounds.width() + visibleWidth, toBounds.top);
-        } else if (mPinnedStackBounds.right > displaySize.x) {
-            toBounds.offsetTo(displaySize.x - visibleWidth, toBounds.top);
-        }
+        Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mBoundedPinnedStackBounds,
+                mPinnedStackBounds);
+        mSnapAlgorithm.applyMinimizedOffset(toBounds, mBoundedPinnedStackBounds, displaySize);
         mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
                 toBounds, MINIMIZE_STACK_MAX_DURATION, LINEAR_OUT_SLOW_IN,
                 mUpdatePinnedStackBoundsListener);
@@ -635,7 +630,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                     setMinimizedState(false);
                 }
 
-                if (isDraggingOffscreen) {
+                if (touchState.allowDraggingOffscreen() && isDraggingOffscreen) {
                     // Move the pinned stack, but ignore the vertical movement
                     float left = mPinnedStackBounds.left + touchState.getLastTouchDelta().x;
                     mTmpBounds.set(mPinnedStackBounds);
@@ -685,7 +680,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                     setMinimizedState(false);
                 }
 
-                if (isDraggingOffscreen) {
+                if (touchState.allowDraggingOffscreen() && isDraggingOffscreen) {
                     // Move the pinned stack, but ignore the vertical movement
                     float left = mPinnedStackBounds.left + touchState.getLastTouchDelta().x;
                     mTmpBounds.set(mPinnedStackBounds);
@@ -769,6 +764,12 @@ public class PipTouchHandler implements TunerService.Tunable {
     private PipTouchGesture mDefaultMovementGesture = new PipTouchGesture() {
         @Override
         boolean onMove(PipTouchState touchState) {
+            if (touchState.startedDragging()) {
+                // For now, once the user has started a drag that the other gestures have not
+                // intercepted, disallow those gestures from intercepting again to drag offscreen
+                touchState.setDisallowDraggingOffscreen();
+            }
+
             if (touchState.isDragging()) {
                 // Move the pinned stack freely
                 PointF lastDelta = touchState.getLastTouchDelta();
