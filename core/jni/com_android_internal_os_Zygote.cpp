@@ -307,7 +307,7 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
         storageSource = "/mnt/runtime/read";
     } else if (mount_mode == MOUNT_EXTERNAL_WRITE) {
         storageSource = "/mnt/runtime/write";
-    } else {
+    } else if (!force_mount_namespace) {
         // Sane default of no storage visible
         return true;
     }
