@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ import libcore.io.Streams;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.FastPrintWriter;
 
 import com.google.android.collect.Lists;
 
@@ -69,10 +71,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
+import android.os.IDumpstate;
+import android.os.IDumpstateListener;
+import android.os.IDumpstateToken;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.support.v4.content.FileProvider;
@@ -146,10 +154,9 @@ public class BugreportProgressService extends Service {
     static final String EXTRA_INFO = "android.intent.extra.INFO";
 
     private static final int MSG_SERVICE_COMMAND = 1;
-    private static final int MSG_POLL = 2;
-    private static final int MSG_DELAYED_SCREENSHOT = 3;
-    private static final int MSG_SCREENSHOT_REQUEST = 4;
-    private static final int MSG_SCREENSHOT_RESPONSE = 5;
+    private static final int MSG_DELAYED_SCREENSHOT = 2;
+    private static final int MSG_SCREENSHOT_REQUEST = 3;
+    private static final int MSG_SCREENSHOT_RESPONSE = 4;
 
     // Passed to Message.obtain() when msg.arg2 is not used.
     private static final int UNUSED_ARG2 = -2;
@@ -165,16 +172,9 @@ public class BugreportProgressService extends Service {
      */
     static final int SCREENSHOT_DELAY_SECONDS = 3;
 
-    /** Polling frequency, in milliseconds. */
-    static final long POLLING_FREQUENCY = 2 * DateUtils.SECOND_IN_MILLIS;
-
-    /** How long (in ms) a dumpstate process will be monitored if it didn't show progress. */
-    private static final long INACTIVITY_TIMEOUT = 10 * DateUtils.MINUTE_IN_MILLIS;
-
-    /** System properties used for monitoring progress. */
+    // TODO: will be gone once fully migrated to Binder
+    /** System properties used to communicate with dumpstate progress. */
     private static final String DUMPSTATE_PREFIX = "dumpstate.";
-    private static final String PROGRESS_SUFFIX = ".progress";
-    private static final String MAX_SUFFIX = ".max";
     private static final String NAME_SUFFIX = ".name";
 
     /** System property (and value) used to stop dumpstate. */
@@ -190,7 +190,7 @@ public class BugreportProgressService extends Service {
     private static final String SCREENSHOT_DIR = "bugreports";
 
     /** Managed dumpstate processes (keyed by id) */
-    private final SparseArray<BugreportInfo> mProcesses = new SparseArray<>();
+    private final SparseArray<DumpstateListener> mProcesses = new SparseArray<>();
 
     private Context mContext;
     private ServiceHandler mMainHandler;
@@ -267,14 +267,16 @@ public class BugreportProgressService extends Service {
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final int size = mProcesses.size();
         if (size == 0) {
-            writer.printf("No monitored processes");
+            writer.println("No monitored processes");
             return;
         }
-        writer.printf("Foreground id: %d\n\n", mForegroundId);
-        writer.printf("Monitored dumpstate processes\n");
-        writer.printf("-----------------------------\n");
+        writer.print("Foreground id: "); writer.println(mForegroundId);
+        writer.println("\n");
+        writer.println("Monitored dumpstate processes");
+        writer.println("-----------------------------");
         for (int i = 0; i < size; i++) {
-            writer.printf("%s\n", mProcesses.valueAt(i));
+            writer.print("#"); writer.println(i + 1);
+            writer.println(mProcesses.valueAt(i).info);
         }
     }
 
@@ -288,11 +290,6 @@ public class BugreportProgressService extends Service {
 
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == MSG_POLL) {
-                poll();
-                return;
-            }
-
             if (msg.what == MSG_DELAYED_SCREENSHOT) {
                 takeScreenshot(msg.arg1, msg.arg2);
                 return;
@@ -339,7 +336,6 @@ public class BugreportProgressService extends Service {
                         stopSelfWhenDone();
                         return;
                     }
-                    poll();
                     break;
                 case INTENT_BUGREPORT_FINISHED:
                     if (id == 0) {
@@ -367,15 +363,6 @@ public class BugreportProgressService extends Service {
             return;
 
         }
-
-        private void poll() {
-            if (pollProgress()) {
-                // Keep polling...
-                sendEmptyMessageDelayed(MSG_POLL, POLLING_FREQUENCY);
-            } else {
-                Log.i(TAG, "Stopped polling");
-            }
-        }
     }
 
     /**
@@ -397,11 +384,12 @@ public class BugreportProgressService extends Service {
     }
 
     private BugreportInfo getInfo(int id) {
-        final BugreportInfo info = mProcesses.get(id);
-        if (info == null) {
+        final DumpstateListener listener = mProcesses.get(id);
+        if (listener == null) {
             Log.w(TAG, "Not monitoring process with ID " + id);
+            return null;
         }
-        return info;
+        return listener.info;
     }
 
     /**
@@ -433,9 +421,15 @@ public class BugreportProgressService extends Service {
             Log.w(TAG, "ID " + id + " already watched");
             return true;
         }
-        mProcesses.put(info.id, info);
-        updateProgress(info);
-        return true;
+        final DumpstateListener listener = new DumpstateListener(info);
+        mProcesses.put(info.id, listener);
+        if (listener.connect()) {
+            updateProgress(info);
+            return true;
+        } else {
+            Log.w(TAG, "not updating progress because it could not connect to dumpstate");
+            return false;
+        }
     }
 
     /**
@@ -504,10 +498,7 @@ public class BugreportProgressService extends Service {
                 .setActions(infoAction, screenshotAction, cancelAction);
         }
 
-        if (DEBUG) {
-            Log.d(TAG, "Sending 'Progress' notification for id " + info.id + " (pid " + info.pid
-                    + "): " + percentageText);
-        }
+        Log.d(TAG, "Sending 'Progress' notification for id " + info.id + ": " + percentageText);
         sendForegroundabledNotification(info.id, builder.build());
     }
 
@@ -567,96 +558,11 @@ public class BugreportProgressService extends Service {
     }
 
     /**
-     * Poll {@link SystemProperties} to get the progress on each monitored process.
-     *
-     * @return whether it should keep polling.
-     */
-    private boolean pollProgress() {
-        final int total = mProcesses.size();
-        if (total == 0) {
-            Log.d(TAG, "No process to poll progress.");
-        }
-        int activeProcesses = 0;
-        for (int i = 0; i < total; i++) {
-            final BugreportInfo info = mProcesses.valueAt(i);
-            if (info == null) {
-                Log.wtf(TAG, "pollProgress(): null info at index " + i + "(ID = "
-                        + mProcesses.keyAt(i) + ")");
-                continue;
-            }
-
-            final int pid = info.pid;
-            final int id = info.id;
-            if (info.finished) {
-                if (DEBUG) Log.v(TAG, "Skipping finished process " + pid + " (id: " + id + ")");
-                continue;
-            }
-            activeProcesses++;
-            final String progressKey = DUMPSTATE_PREFIX + pid + PROGRESS_SUFFIX;
-            info.realProgress = SystemProperties.getInt(progressKey, 0);
-            if (info.realProgress == 0) {
-                Log.v(TAG, "System property " + progressKey + " is not set yet");
-            }
-            final String maxKey = DUMPSTATE_PREFIX + pid + MAX_SUFFIX;
-            info.realMax = SystemProperties.getInt(maxKey, info.max);
-            if (info.realMax <= 0 ) {
-                Log.w(TAG, "Property " + maxKey + " is not positive: " + info.max);
-                continue;
-            }
-            /*
-             * Checks whether the progress changed in a way that should be displayed to the user:
-             * - info.progress / info.max represents the displayed progress
-             * - info.realProgress / info.realMax represents the real progress
-             * - since the real progress can decrease, the displayed progress is only updated if it
-             *   increases
-             * - the displayed progress is capped at a maximum (like 99%)
-             */
-            final int oldPercentage = (CAPPED_MAX * info.progress) / info.max;
-            int newPercentage = (CAPPED_MAX * info.realProgress) / info.realMax;
-            int max = info.realMax;
-            int progress = info.realProgress;
-
-            if (newPercentage > CAPPED_PROGRESS) {
-                progress = newPercentage = CAPPED_PROGRESS;
-                max = CAPPED_MAX;
-            }
-
-            if (newPercentage > oldPercentage) {
-                if (DEBUG) {
-                    if (progress != info.progress) {
-                        Log.v(TAG, "Updating progress for PID " + pid + "(id: " + id + ") from "
-                                + info.progress + " to " + progress);
-                    }
-                    if (max != info.max) {
-                        Log.v(TAG, "Updating max progress for PID " + pid + "(id: " + id + ") from "
-                                + info.max + " to " + max);
-                    }
-                }
-                info.progress = progress;
-                info.max = max;
-                info.lastUpdate = System.currentTimeMillis();
-                updateProgress(info);
-            } else {
-                long inactiveTime = System.currentTimeMillis() - info.lastUpdate;
-                if (inactiveTime >= INACTIVITY_TIMEOUT) {
-                    Log.w(TAG, "No progress update for PID " + pid + " since "
-                            + info.getFormattedLastUpdate());
-                    stopProgress(info.id);
-                }
-            }
-        }
-        if (DEBUG) Log.v(TAG, "pollProgress() total=" + total + ", actives=" + activeProcesses);
-        return activeProcesses > 0;
-    }
-
-    /**
      * Fetches a {@link BugreportInfo} for a given process and launches a dialog where the user can
      * change its values.
      */
     private void launchBugreportInfoDialog(int id) {
         MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_DETAILS);
-        // Copy values so it doesn't lock mProcesses while UI is being updated
-        final String name, title, description;
         final BugreportInfo info = getInfo(id);
         if (info == null) {
             // Most likely am killed Shell before user tapped the notification. Since system might
@@ -737,7 +643,7 @@ public class BugreportProgressService extends Service {
         synchronized (BugreportProgressService.this) {
             mTakingScreenshot = flag;
             for (int i = 0; i < mProcesses.size(); i++) {
-                final BugreportInfo info = mProcesses.valueAt(i);
+                final BugreportInfo info = mProcesses.valueAt(i).info;
                 if (info.finished) {
                     Log.d(TAG, "Not updating progress for " + info.id + " while taking screenshot"
                             + " because share notification was already sent");
@@ -809,7 +715,7 @@ public class BugreportProgressService extends Service {
         final int total = mProcesses.size();
         if (total > 0) {
             for (int i = 0; i < total; i++) {
-                final BugreportInfo info = mProcesses.valueAt(i);
+                final BugreportInfo info = mProcesses.valueAt(i).info;
                 if (!info.finished) {
                     updateProgress(info);
                     break;
@@ -848,13 +754,13 @@ public class BugreportProgressService extends Service {
             Log.wtf(TAG, "Missing " + EXTRA_BUGREPORT + " on intent " + intent);
             return;
         }
-        mInfoDialog.onBugreportFinished(id);
+        mInfoDialog.onBugreportFinished();
         BugreportInfo info = getInfo(id);
         if (info == null) {
             // Happens when BUGREPORT_FINISHED was received without a BUGREPORT_STARTED first.
             Log.v(TAG, "Creating info for untracked ID " + id);
             info = new BugreportInfo(mContext, id);
-            mProcesses.put(id, info);
+            mProcesses.put(id, new DumpstateListener(info));
         }
         info.renameScreenshots(mScreenshotsDir);
         info.bugreportFile = bugreportFile;
@@ -1363,7 +1269,6 @@ public class BugreportProgressService extends Service {
         if (bitmap == null) {
             return false;
         }
-        boolean status;
         try (final FileOutputStream fos = new FileOutputStream(path)) {
             if (bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)) {
                 ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(150);
@@ -1570,7 +1475,7 @@ public class BugreportProgressService extends Service {
          * <p>Once the bugreport is finished dumpstate has already generated the final files, so
          * changing the name would have no effect.
          */
-        void onBugreportFinished(int id) {
+        void onBugreportFinished() {
             if (mInfoName != null) {
                 mInfoName.setEnabled(false);
                 mInfoName.setText(mSavedName);
@@ -1684,7 +1589,7 @@ public class BugreportProgressService extends Service {
             this.id = id;
             this.pid = pid;
             this.name = name;
-            this.max = max;
+            this.max = this.realMax = max;
         }
 
         /**
@@ -1750,14 +1655,17 @@ public class BugreportProgressService extends Service {
         public String toString() {
             final float percent = ((float) progress * 100 / max);
             final float realPercent = ((float) realProgress * 100 / realMax);
-            return "id: " + id + ", pid: " + pid + ", name: " + name + ", finished: " + finished
-                    + "\n\ttitle: " + title + "\n\tdescription: " + description
-                    + "\n\tfile: " + bugreportFile + "\n\tscreenshots: " + screenshotFiles
+            return "\tid: " + id + ", pid: " + pid + ", name: " + name + ", finished: " + finished
+                    + "\n\ttitle: " + title
+                    + "\n\tdescription: " + description
+                    + "\n\tfile: " + bugreportFile
+                    + "\n\tscreenshots: " + screenshotFiles
                     + "\n\tprogress: " + progress + "/" + max + " (" + percent + ")"
-                    + "\n\treal progress: " + realProgress + "/" + realMax + " (" + realPercent + ")"
+                    + "\n\treal progress: " + realProgress + "/" + realMax + " (" + realPercent
+                    + ")"
                     + "\n\tlast_update: " + getFormattedLastUpdate()
-                    + "\naddingDetailsToZip: " + addingDetailsToZip
-                    + " addedDetailsToZip: " + addedDetailsToZip;
+                    + "\n\taddingDetailsToZip: " + addingDetailsToZip + " addedDetailsToZip: "
+                    + addedDetailsToZip;
         }
 
         // Parcelable contract
@@ -1823,16 +1731,118 @@ public class BugreportProgressService extends Service {
             return path == null ? null : new File(path);
         }
 
+        @SuppressWarnings("unused")
         public static final Parcelable.Creator<BugreportInfo> CREATOR =
                 new Parcelable.Creator<BugreportInfo>() {
+            @Override
             public BugreportInfo createFromParcel(Parcel source) {
                 return new BugreportInfo(source);
             }
 
+            @Override
             public BugreportInfo[] newArray(int size) {
                 return new BugreportInfo[size];
             }
         };
 
+    }
+
+    private final class DumpstateListener extends IDumpstateListener.Stub
+        implements DeathRecipient {
+
+        private final BugreportInfo info;
+        private IDumpstateToken token;
+
+        DumpstateListener(BugreportInfo info) {
+            this.info = info;
+        }
+
+        /**
+         * Connects to the {@code dumpstate} binder to receive updates.
+         */
+        boolean connect() {
+            if (token != null) {
+                Log.d(TAG, "connect(): " + info.id + " already connected");
+                return true;
+            }
+            final IBinder service = ServiceManager.getService("dumpstate");
+            if (service == null) {
+                Log.d(TAG, "dumpstate service not bound yet");
+                return true;
+            }
+            final IDumpstate dumpstate = IDumpstate.Stub.asInterface(service);
+            try {
+                token = dumpstate.setListener("Shell", this);
+                if (token != null) {
+                    token.asBinder().linkToDeath(this, 0);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Could not set dumpstate listener: " + e);
+            }
+            return token != null;
+        }
+
+        @Override
+        public void binderDied() {
+            if (!info.finished) {
+                // TODO: linkToDeath() might be called BEFORE Shell received the
+                // BUGREPORT_FINISHED broadcast, in which case the statements below
+                // spam logcat (but are harmless).
+                // The right, long-term solution is to provide an onFinished() callback
+                // on IDumpstateListener and call it instead of using a broadcast.
+                Log.w(TAG, "Dumpstate process died:\n" + info);
+                stopProgress(info.id);
+            }
+            token.asBinder().unlinkToDeath(this, 0);
+        }
+
+        @Override
+        public void onProgressUpdated(int progress) throws RemoteException {
+            /*
+             * Checks whether the progress changed in a way that should be displayed to the user:
+             * - info.progress / info.max represents the displayed progress
+             * - info.realProgress / info.realMax represents the real progress
+             * - since the real progress can decrease, the displayed progress is only updated if it
+             *   increases
+             * - the displayed progress is capped at a maximum (like 99%)
+             */
+            info.realProgress = progress;
+            final int oldPercentage = (CAPPED_MAX * info.progress) / info.max;
+            int newPercentage = (CAPPED_MAX * info.realProgress) / info.realMax;
+            int max = info.realMax;
+
+            if (newPercentage > CAPPED_PROGRESS) {
+                progress = newPercentage = CAPPED_PROGRESS;
+                max = CAPPED_MAX;
+            }
+
+            if (newPercentage > oldPercentage) {
+                if (DEBUG) {
+                    if (progress != info.progress) {
+                        Log.v(TAG, "Updating progress for PID " + info.pid + "(id: " + info.id
+                                + ") from " + info.progress + " to " + progress);
+                    }
+                    if (max != info.max) {
+                        Log.v(TAG, "Updating max progress for PID " + info.pid + "(id: " + info.id
+                                + ") from " + info.max + " to " + max);
+                    }
+                }
+                info.progress = progress;
+                info.max = max;
+                info.lastUpdate = System.currentTimeMillis();
+
+                updateProgress(info);
+            }
+        }
+
+        @Override
+        public void onMaxProgressUpdated(int maxProgress) throws RemoteException {
+            Log.d(TAG, "onMaxProgressUpdated: " + maxProgress);
+            info.realMax = maxProgress;
+        }
+
+        public void dump(String prefix, PrintWriter pw) {
+            pw.print(prefix); pw.print("token: "); pw.println(token);
+        }
     }
 }
