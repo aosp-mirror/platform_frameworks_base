@@ -604,10 +604,6 @@ public final class BluetoothAdapter {
      */
     public BluetoothLeAdvertiser getBluetoothLeAdvertiser() {
         if (!getLeAccess()) return null;
-        if (!isMultipleAdvertisementSupported() && !isPeripheralModeSupported()) {
-            Log.e(TAG, "Bluetooth LE advertising not supported");
-            return null;
-        }
         synchronized(mLock) {
             if (sBluetoothLeAdvertiser == null) {
                 sBluetoothLeAdvertiser = new BluetoothLeAdvertiser(mManagerService);
@@ -1354,24 +1350,6 @@ public final class BluetoothAdapter {
             Log.e(TAG, "remote expection when calling isBleScanAlwaysAvailable", e);
             return false;
         }
-    }
-
-    /**
-     * Returns whether peripheral mode is supported.
-     *
-     * @hide
-     */
-    public boolean isPeripheralModeSupported() {
-        if (getState() != STATE_ON) return false;
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null) return mService.isPeripheralModeSupported();
-        } catch (RemoteException e) {
-            Log.e(TAG, "failed to get peripheral mode capability: ", e);
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
-        return false;
     }
 
     /**
