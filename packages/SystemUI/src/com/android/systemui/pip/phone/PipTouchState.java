@@ -40,6 +40,7 @@ public class PipTouchState {
     private final PointF mVelocity = new PointF();
     private boolean mIsDragging = false;
     private boolean mStartedDragging = false;
+    private boolean mAllowDraggingOffscreen = false;
     private int mActivePointerId;
 
     public PipTouchState(ViewConfiguration viewConfig) {
@@ -59,6 +60,7 @@ public class PipTouchState {
                 mDownTouch.set(mLastTouch);
                 mIsDragging = false;
                 mStartedDragging = false;
+                mAllowDraggingOffscreen = true;
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -157,6 +159,20 @@ public class PipTouchState {
      */
     public boolean startedDragging() {
         return mStartedDragging;
+    }
+
+    /**
+     * Disallows dragging offscreen for the duration of the current gesture.
+     */
+    public void setDisallowDraggingOffscreen() {
+        mAllowDraggingOffscreen = false;
+    }
+
+    /**
+     * @return whether dragging offscreen is allowed during this gesture.
+     */
+    public boolean allowDraggingOffscreen() {
+        return mAllowDraggingOffscreen;
     }
 
     private void initOrResetVelocityTracker() {

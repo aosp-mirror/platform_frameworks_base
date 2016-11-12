@@ -41,7 +41,11 @@ public class PipSnapAlgorithm {
     // Allows snapping to anywhere along the edge of the screen
     private static final int SNAP_MODE_EDGE = 2;
 
+    // The friction multiplier to control how slippery the PIP is when flung
     private static final float SCROLL_FRICTION_MULTIPLIER = 8f;
+
+    // The fraction of the stack width to show when minimized
+    private static final float MINIMIZED_VISIBLE_FRACTION = 0.25f;
 
     private final Context mContext;
 
@@ -119,6 +123,18 @@ public class PipSnapAlgorithm {
             newBounds.offsetTo(snapTarget.x, snapTarget.y);
         }
         return newBounds;
+    }
+
+    /**
+     * Applies the offset to the {@param stackBounds} to adjust it to a minimized state.
+     */
+    public void applyMinimizedOffset(Rect stackBounds, Rect movementBounds, Point displaySize) {
+        int visibleWidth = (int) (MINIMIZED_VISIBLE_FRACTION * stackBounds.width());
+        if (stackBounds.left <= movementBounds.centerX()) {
+            stackBounds.offsetTo(-stackBounds.width() + visibleWidth, stackBounds.top);
+        } else {
+            stackBounds.offsetTo(displaySize.x - visibleWidth, stackBounds.top);
+        }
     }
 
     /**

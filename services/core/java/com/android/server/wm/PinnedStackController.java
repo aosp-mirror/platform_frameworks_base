@@ -256,6 +256,12 @@ class PinnedStackController {
                     false /* adjustForIme */);
             mSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
                     snapFraction);
+            if (mIsMinimized) {
+                final Point displaySize = new Point(mDisplayInfo.logicalWidth,
+                        mDisplayInfo.logicalHeight);
+                mSnapAlgorithm.applyMinimizedOffset(postChangeStackBounds, postChangeMovementBounds,
+                        displaySize);
+            }
         }
         return postChangeStackBounds;
     }
@@ -285,7 +291,12 @@ class PinnedStackController {
             final Rect toBounds = new Rect(stackBounds);
             if (adjustedForIme) {
                 // IME visible
-                toBounds.offset(0, Math.min(0, movementBounds.bottom - stackBounds.top));
+                if (stackBounds.top == prevMovementBounds.bottom) {
+                    // If the PIP is resting on top of the IME, then adjust it with the hiding IME
+                    toBounds.offsetTo(toBounds.left, movementBounds.bottom);
+                } else {
+                    toBounds.offset(0, Math.min(0, movementBounds.bottom - stackBounds.top));
+                }
             } else {
                 // IME hidden
                 if (stackBounds.top == prevMovementBounds.bottom) {
