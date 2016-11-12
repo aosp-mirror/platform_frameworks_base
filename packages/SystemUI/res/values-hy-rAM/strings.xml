@@ -421,7 +421,7 @@
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Սարքը կմնա արգելափակված՝ մինչև ձեռքով չբացեք"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Ավելի արագ ստացեք ծանուցումները"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Տեսեք դրանք մինչև ապակողպելը"</string>
-    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ոչ, շնորհակալություն"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ոչ"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Կարգավորել"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Ավարտել"</string>
@@ -430,7 +430,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Էկրանն ամրացված է"</string>
     <string name="screen_pinning_description" msgid="7238941806855968768">"Էկրանը կմնա տեսադաշտում, մինչև այն ապամրացնեք: Ապամրացնելու համար հպեք և պահեք Հետ կոճակը:"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Եղավ"</string>
-    <string name="screen_pinning_negative" msgid="3741602308343880268">"Ոչ, շնորհակալություն"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"Ոչ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Թաքցնե՞լ <xliff:g id="TILE_LABEL">%1$s</xliff:g>-ը:"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Այն դարձյալ կհայտնվի, երբ նորից միացնեք կարգավորումներում:"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Թաքցնել"</string>
