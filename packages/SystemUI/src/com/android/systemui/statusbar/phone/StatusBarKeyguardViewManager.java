@@ -330,17 +330,21 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             });
         } else {
             executeAfterKeyguardGoneAction();
-            if (mFingerprintUnlockController.getMode() == MODE_WAKE_AND_UNLOCK_PULSING) {
-                mFingerprintUnlockController.startKeyguardFadingAway();
-                mPhoneStatusBar.setKeyguardFadingAway(startTime, 0, 240);
+            boolean wakeUnlockPulsing =
+                    mFingerprintUnlockController.getMode() == MODE_WAKE_AND_UNLOCK_PULSING;
+            if (wakeUnlockPulsing) {
+                delay = 0;
+                fadeoutDuration = 240;
+            }
+            mPhoneStatusBar.setKeyguardFadingAway(startTime, delay, fadeoutDuration);
+            mFingerprintUnlockController.startKeyguardFadingAway();
+            mBouncer.hide(true /* destroyView */);
+            updateStates();
+            if (wakeUnlockPulsing) {
                 mStatusBarWindowManager.setKeyguardFadingAway(true);
                 mPhoneStatusBar.fadeKeyguardWhilePulsing();
-                animateScrimControllerKeyguardFadingOut(0, 240, new Runnable() {
-                    @Override
-                    public void run() {
-                        mPhoneStatusBar.hideKeyguard();
-                    }
-                }, false /* skipFirstFrame */);
+                animateScrimControllerKeyguardFadingOut(delay, fadeoutDuration,
+                        mPhoneStatusBar::hideKeyguard, false /* skipFirstFrame */);
             } else {
                 mFingerprintUnlockController.startKeyguardFadingAway();
                 mPhoneStatusBar.setKeyguardFadingAway(startTime, delay, fadeoutDuration);
@@ -367,9 +371,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 }
             }
             mStatusBarWindowManager.setKeyguardShowing(false);
-            mBouncer.hide(true /* destroyView */);
             mViewMediatorCallback.keyguardGone();
-            updateStates();
         }
     }
 
