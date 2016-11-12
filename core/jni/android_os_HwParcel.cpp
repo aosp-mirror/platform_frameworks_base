@@ -425,8 +425,8 @@ static void JHwParcel_native_writeString(
     status_t err = parcel->writeBuffer(s, sizeof(*s), &parentHandle);
 
     if (err == OK) {
-        err = s->writeEmbeddedToParcel(
-                parcel, parentHandle, 0 /* parentOffset */);
+        err = ::android::hardware::writeEmbeddedToParcel(
+                *s, parcel, parentHandle, 0 /* parentOffset */);
     }
 
     signalExceptionForError(env, err);
@@ -453,7 +453,8 @@ static void JHwParcel_native_write ## Suffix ## Vector(                        \
     if (err == OK) {                                                           \
         size_t childHandle;                                                    \
                                                                                \
-        err = vec->writeEmbeddedToParcel(                                      \
+        err = ::android::hardware::writeEmbeddedToParcel(                      \
+                *vec,                                                          \
                 parcel,                                                        \
                 parentHandle,                                                  \
                 0 /* parentOffset */,                                          \
@@ -508,7 +509,8 @@ static void JHwParcel_native_writeBoolVector(
     if (err == OK) {
         size_t childHandle;
 
-        err = vec->writeEmbeddedToParcel(
+        err = ::android::hardware::writeEmbeddedToParcel(
+                *vec,
                 parcel,
                 parentHandle,
                 0 /* parentOffset */,
@@ -568,7 +570,8 @@ static jstring JHwParcel_native_readString(JNIEnv *env, jobject thiz) {
         return NULL;
     }
 
-    status_t err = const_cast<hidl_string *>(s)->readEmbeddedFromParcel(
+    status_t err = ::android::hardware::readEmbeddedFromParcel(
+            const_cast<hidl_string *>(s),
             *parcel, parentHandle, 0 /* parentOffset */);
 
     if (err != OK) {
@@ -597,8 +600,8 @@ static Type ## Array JHwParcel_native_read ## Suffix ## Vector(                \
                                                                                \
     size_t childHandle;                                                        \
                                                                                \
-    status_t err = const_cast<hidl_vec<Type> *>(vec)                           \
-        ->readEmbeddedFromParcel(                                              \
+    status_t err = ::android::hardware::readEmbeddedFromParcel(                \
+                const_cast<hidl_vec<Type> *>(vec),                             \
                 *parcel,                                                       \
                 parentHandle,                                                  \
                 0 /* parentOffset */,                                          \
@@ -639,8 +642,8 @@ static jbooleanArray JHwParcel_native_readBoolVector(
 
     size_t childHandle;
 
-    status_t err = const_cast<hidl_vec<bool> *>(vec)
-        ->readEmbeddedFromParcel(
+    status_t err = ::android::hardware::readEmbeddedFromParcel(
+                const_cast<hidl_vec<bool> *>(vec),
                 *parcel,
                 parentHandle,
                 0 /* parentOffset */,
@@ -701,12 +704,13 @@ static jobjectArray JHwParcel_native_readStringVector(
     }
 
     size_t childHandle;
-    status_t err = const_cast<string_vec *>(vec)->readEmbeddedFromParcel(
+    status_t err = ::android::hardware::readEmbeddedFromParcel(
+            const_cast<string_vec *>(vec),
             *parcel, parentHandle, 0 /* parentOffset */, &childHandle);
 
     for (size_t i = 0; (err == OK) && (i < vec->size()); ++i) {
-        err = const_cast<hidl_vec<hidl_string> *>(vec)
-            ->readEmbeddedFromParcel(
+        err = android::hardware::readEmbeddedFromParcel(
+                    const_cast<hidl_vec<hidl_string> *>(vec),
                     *parcel,
                     childHandle,
                     i * sizeof(hidl_string),
@@ -760,14 +764,16 @@ static void JHwParcel_native_writeStringVector(
 
     if (err == OK) {
         size_t childHandle;
-        err = vec->writeEmbeddedToParcel(
+        err = ::android::hardware::writeEmbeddedToParcel(
+                *vec,
                 parcel,
                 parentHandle,
                 0 /* parentOffset */,
                 &childHandle);
 
         for (size_t i = 0; (err == OK) && (i < vec->size()); ++i) {
-            err = (*vec)[i].writeEmbeddedToParcel(
+            err = ::android::hardware::writeEmbeddedToParcel(
+                    (*vec)[i],
                     parcel,
                     childHandle,
                     i * sizeof(hidl_string));
