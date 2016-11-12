@@ -59,6 +59,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -118,7 +119,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final int SERVICE_IBLUETOOTHGATT = 2;
 
     private final Context mContext;
-    private static int mBleAppCount = 0;
 
     // Locks are not provided for mName and mAddress.
     // They are accessed in handler or broadcast receiver, same thread context.
@@ -212,10 +212,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                     if (isAirplaneModeOn()) {
                         // Clear registered LE apps to force shut-off
-                        synchronized (this) {
-                            mBleAppCount = 0;
-                            mBleApps.clear();
-                        }
+                        clearBleApps();
                         if (st == BluetoothAdapter.STATE_BLE_ON) {
                             //if state is BLE_ON make sure you trigger disableBLE part
                             try {
@@ -460,28 +457,28 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     class ClientDeathRecipient implements IBinder.DeathRecipient {
         public void binderDied() {
             if (DBG) Slog.d(TAG, "Binder is dead - unregister Ble App");
-            if (mBleAppCount > 0) --mBleAppCount;
-
-            if (mBleAppCount == 0) {
-                if (DBG) Slog.d(TAG, "Disabling LE only mode after application crash");
-                try {
-                    mBluetoothLock.readLock().lock();
-                    if (mBluetooth != null &&
-                        mBluetooth.getState() == BluetoothAdapter.STATE_BLE_ON) {
-                        mEnable = false;
-                        mBluetooth.onBrEdrDown();
-                    }
-                } catch (RemoteException e) {
-                     Slog.e(TAG,"Unable to call onBrEdrDown", e);
-                } finally {
-                    mBluetoothLock.readLock().unlock();
+            if (isBleAppPresent()) {
+              // Nothing to do, another app is here.
+              return;
+            }
+            if (DBG) Slog.d(TAG, "Disabling LE only mode after application crash");
+            try {
+                mBluetoothLock.readLock().lock();
+                if (mBluetooth != null &&
+                    mBluetooth.getState() == BluetoothAdapter.STATE_BLE_ON) {
+                    mEnable = false;
+                    mBluetooth.onBrEdrDown();
                 }
+            } catch (RemoteException e) {
+                 Slog.e(TAG,"Unable to call onBrEdrDown", e);
+            } finally {
+                mBluetoothLock.readLock().unlock();
             }
         }
     }
 
     /** Internal death rec list */
-    Map<IBinder, ClientDeathRecipient> mBleApps = new HashMap<IBinder, ClientDeathRecipient>();
+    Map<IBinder, ClientDeathRecipient> mBleApps = new ConcurrentHashMap<IBinder, ClientDeathRecipient>();
 
     @Override
     public boolean isBleScanAlwaysAvailable() {
@@ -501,17 +498,20 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         ContentObserver contentObserver = new ContentObserver(null) {
             @Override
             public void onChange(boolean selfChange) {
-                if (!isBleScanAlwaysAvailable()) {
-                    disableBleScanMode();
-                    clearBleApps();
-                    try {
-                        mBluetoothLock.readLock().lock();
-                        if (mBluetooth != null) mBluetooth.onBrEdrDown();
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "error when disabling bluetooth", e);
-                    } finally {
-                        mBluetoothLock.readLock().unlock();
-                    }
+                if (isBleScanAlwaysAvailable()) {
+                  // Nothing to do
+                  return;
+                }
+                // BLE scan is not available.
+                disableBleScanMode();
+                clearBleApps();
+                try {
+                    mBluetoothLock.readLock().lock();
+                    if (mBluetooth != null) mBluetooth.onBrEdrDown();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error when disabling bluetooth", e);
+                } finally {
+                    mBluetoothLock.readLock().unlock();
                 }
             }
         };
@@ -547,9 +547,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     throw new IllegalArgumentException("Wake lock is already dead.");
                 }
                 mBleApps.put(token, deathRec);
-                synchronized (this) {
-                    ++mBleAppCount;
-                }
                 if (DBG) Slog.d(TAG, "Registered for death Notification");
             }
 
@@ -559,31 +556,26 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 // Unregister death recipient as the app goes away.
                 token.unlinkToDeath(r, 0);
                 mBleApps.remove(token);
-                synchronized (this) {
-                    if (mBleAppCount > 0) --mBleAppCount;
-                }
                 if (DBG) Slog.d(TAG, "Unregistered for death Notification");
             }
         }
-        if (DBG) Slog.d(TAG, "Updated BleAppCount" + mBleAppCount);
-        if (mBleAppCount == 0 && mEnable) {
+        int appCount = mBleApps.size();
+        if (DBG) Slog.d(TAG, appCount + " registered Ble Apps");
+        if (appCount == 0 && mEnable) {
             disableBleScanMode();
         }
-        return mBleAppCount;
+        return appCount;
     }
 
     // Clear all apps using BLE scan only mode.
     private void clearBleApps() {
-        synchronized (this) {
-            mBleApps.clear();
-            mBleAppCount = 0;
-        }
+        mBleApps.clear();
     }
 
     /** @hide*/
     public boolean isBleAppPresent() {
-        if (DBG) Slog.d(TAG, "isBleAppPresent() count: " + mBleAppCount);
-        return (mBleAppCount > 0);
+        if (DBG) Slog.d(TAG, "isBleAppPresent() count: " + mBleApps.size());
+        return mBleApps.size() > 0;
     }
 
     /**
@@ -1449,12 +1441,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     if ((prevState == BluetoothAdapter.STATE_BLE_TURNING_ON) &&
                             (newState == BluetoothAdapter.STATE_OFF) &&
                             (mBluetooth != null) && mEnable) {
-                        recoverBluetoothServiceFromError();
+                        recoverBluetoothServiceFromError(false);
                     }
                     if ((prevState == BluetoothAdapter.STATE_TURNING_ON) &&
                             (newState == BluetoothAdapter.STATE_BLE_ON) &&
                             (mBluetooth != null) && mEnable) {
-                        recoverBluetoothServiceFromError();
+                        recoverBluetoothServiceFromError(true);
                     }
                     // If we tried to enable BT while BT was in the process of shutting down,
                     // wait for the BT process to fully tear down and then force a restart
@@ -1870,7 +1862,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                              quietMode ? 1 : 0, 0));
     }
 
-    private void recoverBluetoothServiceFromError() {
+    private void recoverBluetoothServiceFromError(boolean clearBle) {
         Slog.e(TAG,"recoverBluetoothServiceFromError");
         try {
             mBluetoothLock.readLock().lock();
@@ -1907,6 +1899,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
         mHandler.removeMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
         mState = BluetoothAdapter.STATE_OFF;
+
+        if (clearBle) {
+          clearBleApps();
+        }
 
         mEnable = false;
 
