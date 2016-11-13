@@ -119,7 +119,7 @@ class WallpaperWindowToken extends WindowToken {
         }
     }
 
-    boolean updateWallpaperWindowsPlacement(ReadOnlyWindowList windowList,
+    boolean updateWallpaperWindowsPlacement(WindowList windowList,
             WindowState wallpaperTarget, int wallpaperTargetIndex, boolean visible, int dw, int dh,
             int wallpaperAnimLayerAdj) {
 
@@ -193,7 +193,7 @@ class WallpaperWindowToken extends WindowToken {
      * @return The index in {@param windows} of the lowest window that is currently on screen and
      *         not hidden by the policy.
      */
-    private int findLowestWindowOnScreen(ReadOnlyWindowList windowList) {
+    private int findLowestWindowOnScreen(WindowList windowList) {
         final int size = windowList.size();
         for (int index = 0; index < size; index++) {
             final WindowState win = windowList.get(index);

@@ -23,6 +23,7 @@ import android.view.animation.Animation;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -506,6 +507,17 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
                 mChildren.get(i).forAllWindows(callback, traverseTopToBottom);
             }
         }
+    }
+
+    WindowState getWindow(Predicate<WindowState> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowState w = mChildren.get(i).getWindow(callback);
+            if (w != null) {
+                return w;
+            }
+        }
+
+        return null;
     }
 
     /**

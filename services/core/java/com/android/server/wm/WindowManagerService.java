@@ -4787,37 +4787,42 @@ public class WindowManagerService extends IWindowManager.Stub
             return false;
         }
 
-        final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-        final ReadOnlyWindowList windows = displayContent.getReadOnlyWindowList();
+        final DisplayContent dc = mRoot.getDisplayContent(displayId);
 
         final int oldRotation = mRotation;
         int rotation = mPolicy.rotationForOrientationLw(mLastOrientation, mRotation);
-        boolean rotateSeamlessly = mPolicy.shouldRotateSeamlessly(oldRotation, rotation);
+        final boolean rotateSeamlessly;
 
-        if (rotateSeamlessly) {
-            for (int i = windows.size() - 1; i >= 0; i--) {
-                WindowState w = windows.get(i);
+        if (mPolicy.shouldRotateSeamlessly(oldRotation, rotation)) {
+            final WindowState seamlessRotated = dc.getWindow((w) -> w.mSeamlesslyRotated);
+            if (seamlessRotated != null) {
                 // We can't rotate (seamlessly or not) while waiting for the last seamless rotation
                 // to complete (that is, waiting for windows to redraw). It's tempting to check
-                // w.mSeamlessRotationCount but that could be incorrect in the case of window-removal.
-                if (w.mSeamlesslyRotated) {
-                    return false;
-                }
-                // In what can only be called an unfortunate workaround we require
-                // seamlessly rotated child windows to have the TRANSFORM_TO_DISPLAY_INVERSE
-                // flag. Due to limitations in the client API, there is no way for
-                // the client to set this flag in a race free fashion. If we seamlessly rotate
-                // a window which does not have this flag, but then gains it, we will get
-                // an incorrect visual result (rotated viewfinder). This means if we want to
-                // support seamlessly rotating windows which could gain this flag, we can't
-                // rotate windows without it. This limits seamless rotation in N to camera framework
-                // users, windows without children, and native code. This is unfortunate but
-                // having the camera work is our primary goal.
-                if (w.isChildWindow() & w.isVisibleNow() &&
-                        !w.mWinAnimator.mSurfaceController.getTransformToDisplayInverse()) {
-                    rotateSeamlessly = false;
-                }
+                // w.mSeamlessRotationCount but that could be incorrect in the case of
+                // window-removal.
+                return false;
             }
+
+            final WindowState cantSeamlesslyRotate = dc.getWindow((w) ->
+                    w.isChildWindow() && w.isVisibleNow()
+                            && !w.mWinAnimator.mSurfaceController.getTransformToDisplayInverse());
+            if (cantSeamlesslyRotate != null) {
+                // In what can only be called an unfortunate workaround we require seamlessly
+                // rotated child windows to have the TRANSFORM_TO_DISPLAY_INVERSE flag. Due to
+                // limitations in the client API, there is no way for the client to set this flag in
+                // a race free fashion. If we seamlessly rotate a window which does not have this
+                // flag, but then gains it, we will get an incorrect visual result
+                // (rotated viewfinder). This means if we want to support seamlessly rotating
+                // windows which could gain this flag, we can't rotate windows without it. This
+                // limits seamless rotation in N to camera framework users, windows without
+                // children, and native code. This is unfortunate but having the camera work is our
+                // primary goal.
+                rotateSeamlessly = false;
+            } else {
+                rotateSeamlessly = true;
+            }
+        } else {
+            rotateSeamlessly = false;
         }
 
         // TODO: Implement forced rotation changes.
@@ -4849,9 +4854,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
         mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT, WINDOW_FREEZE_TIMEOUT_DURATION);
         mWaitingForConfig = true;
-        displayContent.setLayoutNeeded();
+        dc.setLayoutNeeded();
         final int[] anim = new int[2];
-        if (displayContent.isDimming()) {
+        if (dc.isDimming()) {
             anim[0] = anim[1] = 0;
         } else {
             mPolicy.selectRotationAnimationLw(anim);
@@ -4860,8 +4865,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!rotateSeamlessly) {
             startFreezingDisplayLocked(inTransaction, anim[0], anim[1]);
             // startFreezingDisplayLocked can reset the ScreenRotationAnimation.
-            screenRotationAnimation =
-                mAnimator.getScreenRotationAnimationLocked(displayId);
+            screenRotationAnimation = mAnimator.getScreenRotationAnimationLocked(displayId);
         } else {
             // The screen rotation animation uses a screenshot to freeze the screen
             // while windows resize underneath.
@@ -4879,9 +4883,9 @@ public class WindowManagerService extends IWindowManager.Stub
         // the top of the method, the caller is obligated to call computeNewConfigurationLocked().
         // By updating the Display info here it will be available to
         // computeScreenConfigurationLocked later.
-        updateDisplayAndOrientationLocked(displayContent.getConfiguration().uiMode, displayId);
+        updateDisplayAndOrientationLocked(dc.getConfiguration().uiMode, displayId);
 
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
         if (!inTransaction) {
             if (SHOW_TRANSACTIONS) {
                 Slog.i(TAG_WM, ">>> OPEN TRANSACTION setRotationUnchecked");
@@ -4902,10 +4906,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (rotateSeamlessly) {
-                for (int i = windows.size() - 1; i >= 0; i--) {
-                    WindowState w = windows.get(i);
-                    w.mWinAnimator.seamlesslyRotateWindow(oldRotation, mRotation);
-                }
+                dc.forAllWindows((w) ->
+                        w.mWinAnimator.seamlesslyRotateWindow(oldRotation, mRotation),
+                        true /* traverseTopToBottom */);
             }
 
             mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
@@ -4918,8 +4921,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        for (int i = windows.size() - 1; i >= 0; i--) {
-            WindowState w = windows.get(i);
+        dc.forAllWindows((w) -> {
             // Discard surface after orientation change, these can't be reused.
             if (w.mAppToken != null) {
                 w.mAppToken.destroySavedSurfaces();
@@ -4930,7 +4932,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mRoot.mOrientationChangeComplete = false;
                 w.mLastFreezeDuration = 0;
             }
-        }
+
+        }, true /* traverseTopToBottom */);
 
         if (rotateSeamlessly) {
             mH.removeMessages(H.SEAMLESS_ROTATION_TIMEOUT);
@@ -4948,7 +4951,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // Announce rotation only if we will not animate as we already have the
         // windows in final state. Otherwise, we make this call at the rotation end.
         if (screenRotationAnimation == null && mAccessibilityController != null
-                && displayContent.getDisplayId() == DEFAULT_DISPLAY) {
+                && dc.getDisplayId() == DEFAULT_DISPLAY) {
             mAccessibilityController.onRotationChangedLocked(getDefaultDisplayContentLocked(),
                     rotation);
         }
@@ -5181,7 +5184,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final WindowList windows = new WindowList();
         synchronized (mWindowMap) {
-            mRoot.getWindows(windows);
+            mRoot.forAllWindows(windows::add, false /* traverseTopToBottom */);
         }
 
         BufferedWriter out = null;
@@ -5408,7 +5411,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mWindowMap) {
-            return mRoot.findWindow(hashCode);
+            return mRoot.getWindow((w) -> System.identityHashCode(w) == hashCode);
         }
     }
 
@@ -8091,7 +8094,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     mRoot.dumpDisplayContents(pw);
                 }
 
-                mRoot.getWindows(windows, visibleOnly, appsOnly);
+                mRoot.forAllWindows((w) -> {
+                    if ((!visibleOnly || w.mWinAnimator.getShown())
+                            && (!appsOnly || w.mAppToken != null)) {
+                        windows.add(w);
+                    }
+                }, true /* traverseTopToBottom */);
             }
         } else {
             synchronized(mWindowMap) {

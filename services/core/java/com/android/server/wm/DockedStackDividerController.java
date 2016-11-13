@@ -266,10 +266,8 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private void resetDragResizingChangeReported() {
-        final ReadOnlyWindowList windowList = mDisplayContent.getReadOnlyWindowList();
-        for (int i = windowList.size() - 1; i >= 0; i--) {
-            windowList.get(i).resetDragResizingChangeReported();
-        }
+        mDisplayContent.forAllWindows(WindowState::resetDragResizingChangeReported,
+                true /* traverseTopToBottom */ );
     }
 
     void setWindow(WindowState window) {

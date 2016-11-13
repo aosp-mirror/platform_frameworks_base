@@ -60,33 +60,32 @@ class WindowLayersController {
     private ArrayDeque<WindowState> mOnTopLauncherWindows = new ArrayDeque<>();
     private WindowState mDockDivider = null;
     private ArrayDeque<WindowState> mReplacingWindows = new ArrayDeque<>();
+    private int mCurBaseLayer;
+    private int mCurLayer;
+    private boolean mAnyLayerChanged;
 
-    final void assignWindowLayers(ReadOnlyWindowList windows) {
-        if (DEBUG_LAYERS) Slog.v(TAG_WM, "Assigning layers based on windows=" + windows,
+    final void assignWindowLayers(DisplayContent dc) {
+        if (DEBUG_LAYERS) Slog.v(TAG_WM, "Assigning layers based",
                 new RuntimeException("here").fillInStackTrace());
 
         clear();
-        int curBaseLayer = 0;
-        int curLayer = 0;
-        boolean anyLayerChanged = false;
-        for (int i = 0, windowCount = windows.size(); i < windowCount; i++) {
-            final WindowState w = windows.get(i);
+        dc.forAllWindows((w) -> {
             boolean layerChanged = false;
 
             int oldLayer = w.mLayer;
-            if (w.mBaseLayer == curBaseLayer || w.mIsImWindow || (i > 0 && w.mIsWallpaper)) {
-                curLayer += WINDOW_LAYER_MULTIPLIER;
+            if (w.mBaseLayer == mCurBaseLayer || w.mIsImWindow) {
+                mCurLayer += WINDOW_LAYER_MULTIPLIER;
             } else {
-                curBaseLayer = curLayer = w.mBaseLayer;
+                mCurBaseLayer = mCurLayer = w.mBaseLayer;
             }
-            assignAnimLayer(w, curLayer);
+            assignAnimLayer(w, mCurLayer);
 
-            // TODO: Preserved old behavior of code here but not sure comparing
-            // oldLayer to mAnimLayer and mLayer makes sense...though the
-            // worst case would be unintentional layer reassignment.
+            // TODO: Preserved old behavior of code here but not sure comparing oldLayer to
+            // mAnimLayer and mLayer makes sense...though the worst case would be unintentional
+            // layer reassignment.
             if (w.mLayer != oldLayer || w.mWinAnimator.mAnimLayer != oldLayer) {
                 layerChanged = true;
-                anyLayerChanged = true;
+                mAnyLayerChanged = true;
             }
 
             if (w.mAppToken != null) {
@@ -98,28 +97,27 @@ class WindowLayersController {
             if (layerChanged) {
                 w.scheduleAnimationIfDimming();
             }
-        }
+        }, false /* traverseTopToBottom */);
 
         adjustSpecialWindows();
 
         //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mService.mAccessibilityController != null && anyLayerChanged
-                && windows.get(windows.size() - 1).getDisplayId() == Display.DEFAULT_DISPLAY) {
+        if (mService.mAccessibilityController != null && mAnyLayerChanged
+                && dc.getDisplayId() == Display.DEFAULT_DISPLAY) {
             mService.mAccessibilityController.onWindowLayersChangedLocked();
         }
 
-        if (DEBUG_LAYERS) logDebugLayers(windows);
+        if (DEBUG_LAYERS) logDebugLayers(dc);
     }
 
-    private void logDebugLayers(ReadOnlyWindowList windows) {
-        for (int i = 0, n = windows.size(); i < n; i++) {
-            final WindowState w = windows.get(i);
+    private void logDebugLayers(DisplayContent dc) {
+        dc.forAllWindows((w) -> {
             final WindowStateAnimator winAnimator = w.mWinAnimator;
             Slog.v(TAG_WM, "Assign layer " + w + ": " + "mBase=" + w.mBaseLayer
                     + " mLayer=" + w.mLayer + (w.mAppToken == null
                     ? "" : " mAppLayer=" + w.mAppToken.mAppAnimator.animLayerAdjustment)
                     + " =mAnimLayer=" + winAnimator.mAnimLayer);
-        }
+        }, false /* traverseTopToBottom */);
     }
 
     private void clear() {
@@ -130,6 +128,10 @@ class WindowLayersController {
         mOnTopLauncherWindows.clear();
         mReplacingWindows.clear();
         mDockDivider = null;
+
+        mCurBaseLayer = 0;
+        mCurLayer = 0;
+        mAnyLayerChanged = false;
     }
 
     private void collectSpecialWindows(WindowState w) {
