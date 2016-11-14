@@ -20,6 +20,8 @@ import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.UriPermission;
+import android.content.pm.ParceledListSlice;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -63,6 +65,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class ExternalStorageProvider extends DocumentsProvider {
     private static final String TAG = "ExternalStorage";
@@ -502,6 +505,70 @@ public class ExternalStorageProvider extends DocumentsProvider {
         return getDocIdForFile(file);
     }
 
+    private Uri getDocumentUri(String path, List<UriPermission> accessUriPermissions)
+            throws FileNotFoundException {
+        File doc = new File(path);
+
+        final String docId = getDocIdForFile(doc);
+
+        UriPermission docUriPermission = null;
+        UriPermission treeUriPermission = null;
+        for (UriPermission uriPermission : accessUriPermissions) {
+            final Uri uri = uriPermission.getUri();
+            if (AUTHORITY.equals(uri.getAuthority())) {
+                boolean matchesRequestedDoc = false;
+                if (DocumentsContract.isTreeUri(uri)) {
+                    final String parentDocId = DocumentsContract.getTreeDocumentId(uri);
+                    File parentFile = getFileForDocId(parentDocId);
+                    if (FileUtils.contains(parentFile, doc)) {
+                        treeUriPermission = uriPermission;
+                        matchesRequestedDoc = true;
+                    }
+                } else {
+                    final String candidateDocId = DocumentsContract.getDocumentId(uri);
+                    final File candidateDoc = getFileForDocId(candidateDocId);
+                    if (Objects.equals(doc.getAbsolutePath(), candidateDoc.getAbsolutePath())) {
+                        docUriPermission = uriPermission;
+                        matchesRequestedDoc = true;
+                    }
+                }
+
+                if (matchesRequestedDoc && allowsBothReadAndWrite(uriPermission)) {
+                    // This URI permission provides everything an app can get, no need to
+                    // further check any other granted URI.
+                    break;
+                }
+            }
+        }
+
+        // Full permission URI first.
+        if (allowsBothReadAndWrite(treeUriPermission)) {
+            return DocumentsContract.buildDocumentUriUsingTree(treeUriPermission.getUri(), docId);
+        }
+
+        if (allowsBothReadAndWrite(docUriPermission)) {
+            return docUriPermission.getUri();
+        }
+
+        // Then partial permission URI.
+        if (treeUriPermission != null) {
+            return DocumentsContract.buildDocumentUriUsingTree(treeUriPermission.getUri(), docId);
+        }
+
+        if (docUriPermission != null) {
+            return docUriPermission.getUri();
+        }
+
+        throw new SecurityException("The app is not given any access to the document under path " +
+                path + " with permissions granted in " + accessUriPermissions);
+    }
+
+    private static boolean allowsBothReadAndWrite(UriPermission permission) {
+        return permission != null
+                && permission.isReadPermission()
+                && permission.isWritePermission();
+    }
+
     @Override
     public String renameDocument(String docId, String displayName) throws FileNotFoundException {
         // Since this provider treats renames as generating a completely new
@@ -720,6 +787,21 @@ public class ExternalStorageProvider extends DocumentsProvider {
                         return null;
                     }
                     break;
+                }
+                case "getDocumentId": {
+                    final String path = arg;
+                    final List<UriPermission> accessUriPermissions =
+                            extras.getParcelableArrayList(AUTHORITY + ".extra.uriPermissions");
+
+                    try {
+                        final Bundle out = new Bundle();
+                        final Uri uri = getDocumentUri(path, accessUriPermissions);
+                        out.putParcelable(DocumentsContract.EXTRA_URI, uri);
+                        return out;
+                    } catch (FileNotFoundException e) {
+                        throw new IllegalStateException("File in " + path + " is not found.", e);
+                    }
+
                 }
                 default:
                     Log.w(TAG, "unknown method passed to call(): " + method);

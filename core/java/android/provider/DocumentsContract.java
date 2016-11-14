@@ -156,6 +156,10 @@ public final class DocumentsContract {
     private static final int THUMBNAIL_BUFFER_SIZE = (int) (128 * KB_IN_BYTES);
 
     /** {@hide} */
+    public static final String EXTERNAL_STORAGE_PROVIDER_AUTHORITY =
+            "com.android.externalstorage.documents";
+
+    /** {@hide} */
     public static final String PACKAGE_DOCUMENTS_UI = "com.android.documentsui";
 
     /**
@@ -699,7 +703,7 @@ public final class DocumentsContract {
     public static Uri buildHomeUri() {
         // TODO: Avoid this type of interpackage copying. Added here to avoid
         // direct coupling, but not ideal.
-        return DocumentsContract.buildRootUri("com.android.externalstorage.documents", "home");
+        return DocumentsContract.buildRootUri(EXTERNAL_STORAGE_PROVIDER_AUTHORITY, "home");
     }
 
     /**
