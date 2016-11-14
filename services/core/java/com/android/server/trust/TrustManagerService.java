@@ -169,7 +169,7 @@ public class TrustManagerService extends SystemService {
         CharSequence label;
         Drawable icon;
         ComponentName component; // service that implements ITrustAgent
-        ComponentName settings; // setting to launch to modify agent.
+        SettingsAttrs settings; // setting to launch to modify agent.
         TrustAgentWrapper agent;
         int userId;
 
@@ -258,11 +258,6 @@ public class TrustManagerService extends SystemService {
                         + ": switchToByUser=false");
                 continue;
             }
-            if (!StorageManager.isUserKeyUnlocked(userInfo.id)) {
-                if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
-                        + ": FDE still locked");
-                continue;
-            }
             if (!mActivityManager.isUserRunning(userInfo.id)) {
                 if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
                         + ": user not started");
@@ -273,13 +268,7 @@ public class TrustManagerService extends SystemService {
                         + ": no secure credential");
                 continue;
             }
-            if (!mStrongAuthTracker.canAgentsRunForUser(userInfo.id)) {
-                if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
-                        + ": prevented by StrongAuthTracker = 0x"
-                        + Integer.toHexString(mStrongAuthTracker.getStrongAuthForUser(
-                        userInfo.id)));
-                continue;
-            }
+
             DevicePolicyManager dpm = lockPatternUtils.getDevicePolicyManager();
             int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, userInfo.id);
             final boolean disableTrustAgents =
@@ -312,16 +301,49 @@ public class TrustManagerService extends SystemService {
                         continue;
                     }
                 }
-
                 AgentInfo agentInfo = new AgentInfo();
                 agentInfo.component = name;
                 agentInfo.userId = userInfo.id;
                 if (!mActiveAgents.contains(agentInfo)) {
                     agentInfo.label = resolveInfo.loadLabel(pm);
                     agentInfo.icon = resolveInfo.loadIcon(pm);
-                    agentInfo.settings = getSettingsComponentName(pm, resolveInfo);
+                    agentInfo.settings = getSettingsAttrs(pm, resolveInfo);
                     agentInfo.agent = new TrustAgentWrapper(mContext, this,
                             new Intent().setComponent(name), userInfo.getUserHandle());
+                } else {
+                    int index = mActiveAgents.indexOf(agentInfo);
+                    agentInfo = mActiveAgents.valueAt(index);
+                }
+
+                boolean directUnlock = resolveInfo.serviceInfo.directBootAware
+                    && agentInfo.settings.canUnlockProfile;
+
+                if (directUnlock) {
+                    if (DEBUG) Slog.d(TAG, "refreshAgentList: trustagent " + name
+                            + "of user " + userInfo.id + "can unlock user profile.");
+                }
+
+                if (!StorageManager.isUserKeyUnlocked(userInfo.id)
+                        && !directUnlock) {
+                    if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
+                            + "'s trust agent " + name + ": FDE still locked and "
+                            + " the agent cannot unlock user profile.");
+                    continue;
+                }
+
+                if (!mStrongAuthTracker.canAgentsRunForUser(userInfo.id)) {
+                    int flag = mStrongAuthTracker.getStrongAuthForUser(userInfo.id);
+                    if (flag != StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
+                        || !directUnlock) {
+                        if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
+                            + ": prevented by StrongAuthTracker = 0x"
+                            + Integer.toHexString(mStrongAuthTracker.getStrongAuthForUser(
+                            userInfo.id)));
+                        continue;
+                    }
+                }
+
+                if (!mActiveAgents.contains(agentInfo)) {
                     mActiveAgents.add(agentInfo);
                 } else {
                     obsoleteAgents.remove(agentInfo);
@@ -468,10 +490,12 @@ public class TrustManagerService extends SystemService {
         refreshAgentList(userId);
     }
 
-    private ComponentName getSettingsComponentName(PackageManager pm, ResolveInfo resolveInfo) {
+    private SettingsAttrs getSettingsAttrs(PackageManager pm, ResolveInfo resolveInfo) {
         if (resolveInfo == null || resolveInfo.serviceInfo == null
                 || resolveInfo.serviceInfo.metaData == null) return null;
         String cn = null;
+        boolean canUnlockProfile = false;
+
         XmlResourceParser parser = null;
         Exception caughtException = null;
         try {
@@ -496,6 +520,8 @@ public class TrustManagerService extends SystemService {
             TypedArray sa = res
                     .obtainAttributes(attrs, com.android.internal.R.styleable.TrustAgent);
             cn = sa.getString(com.android.internal.R.styleable.TrustAgent_settingsActivity);
+            canUnlockProfile = sa.getBoolean(
+                    com.android.internal.R.styleable.TrustAgent_unlockProfile, false);
             sa.recycle();
         } catch (PackageManager.NameNotFoundException e) {
             caughtException = e;
@@ -516,7 +542,7 @@ public class TrustManagerService extends SystemService {
         if (cn.indexOf('/') < 0) {
             cn = resolveInfo.serviceInfo.packageName + "/" + cn;
         }
-        return ComponentName.unflattenFromString(cn);
+        return new SettingsAttrs(ComponentName.unflattenFromString(cn), canUnlockProfile);
     }
 
     private ComponentName getComponentName(ResolveInfo resolveInfo) {
@@ -554,6 +580,7 @@ public class TrustManagerService extends SystemService {
 
     private List<ResolveInfo> resolveAllowedTrustAgents(PackageManager pm, int userId) {
         List<ResolveInfo> resolveInfos = pm.queryIntentServicesAsUser(TRUST_AGENT_INTENT,
+                PackageManager.GET_META_DATA |
                 PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                 userId);
         ArrayList<ResolveInfo> allowedAgents = new ArrayList<>(resolveInfos.size());
@@ -988,6 +1015,18 @@ public class TrustManagerService extends SystemService {
         @Override
         public void onPackageDisappeared(String packageName, int reason) {
             removeAgentsOfPackage(packageName);
+        }
+    };
+
+    private static class SettingsAttrs {
+        public ComponentName componentName;
+        public boolean canUnlockProfile;
+
+        public SettingsAttrs(
+                ComponentName componentName,
+                boolean canUnlockProfile) {
+            this.componentName = componentName;
+            this.canUnlockProfile = canUnlockProfile;
         }
     };
 

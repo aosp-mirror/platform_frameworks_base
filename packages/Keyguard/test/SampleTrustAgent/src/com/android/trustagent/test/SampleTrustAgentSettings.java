@@ -33,6 +33,7 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
     private CheckBox mReportUnlockAttempts;
     private CheckBox mReportDeviceLocked;
     private CheckBox mManagingTrust;
+    private CheckBox mManagingTrustDirectBoot;
     private TextView mCheckDeviceLockedResult;
 
     private KeyguardManager mKeyguardManager;
@@ -59,6 +60,8 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
 
         mManagingTrust = (CheckBox) findViewById(R.id.managing_trust);
         mManagingTrust.setOnCheckedChangeListener(this);
+        mManagingTrustDirectBoot = (CheckBox) findViewById(R.id.managing_trust_direct_boot);
+        mManagingTrustDirectBoot.setOnCheckedChangeListener(this);
 
         mCheckDeviceLockedResult = (TextView) findViewById(R.id.check_device_locked_result);
     }
@@ -68,6 +71,8 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
         super.onResume();
         mReportUnlockAttempts.setChecked(SampleTrustAgent.getReportUnlockAttempts(this));
         mManagingTrust.setChecked(SampleTrustAgent.getIsManagingTrust(this));
+        mManagingTrustDirectBoot.setChecked(
+            SampleTrustAgent.getIsManagingTrustDirectBoot(this));
         updateTrustedState();
     }
 
@@ -94,6 +99,8 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
             SampleTrustAgent.setIsManagingTrust(this, isChecked);
         } else if (buttonView == mReportDeviceLocked) {
             SampleTrustAgent.setReportDeviceLocked(this, isChecked);
+        } else if (buttonView == mManagingTrustDirectBoot) {
+            SampleTrustAgent.setIsManagingTrustDirectBoot(this, isChecked);
         }
     }
 
