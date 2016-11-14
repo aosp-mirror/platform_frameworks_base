@@ -2813,6 +2813,148 @@ public class TelephonyManager {
     }
 
     /**
+     * Initial SIM activation state, unknown. Not set by any carrier apps.
+     * @hide
+     */
+    public static final int SIM_ACTIVATION_STATE_UNKNOWN = 0;
+
+    /**
+     * indicate SIM is under activation procedure now.
+     * intermediate state followed by another state update with activation procedure result:
+     * @see #SIM_ACTIVATION_STATE_ACTIVATED
+     * @see #SIM_ACTIVATION_STATE_DEACTIVATED
+     * @see #SIM_ACTIVATION_STATE_RESTRICTED
+     * @hide
+     */
+    public static final int SIM_ACTIVATION_STATE_ACTIVATING = 1;
+
+    /**
+     * Indicate SIM has been successfully activated with full service
+     * @hide
+     */
+    public static final int SIM_ACTIVATION_STATE_ACTIVATED = 2;
+
+    /**
+     * Indicate SIM has been deactivated by the carrier so that service is not available
+     * and requires activation service to enable services.
+     * Carrier apps could be signalled to set activation state to deactivated if detected
+     * deactivated sim state and set it back to activated after successfully run activation service.
+     * @hide
+     */
+    public static final int SIM_ACTIVATION_STATE_DEACTIVATED = 3;
+
+    /**
+     * Restricted state indicate SIM has been activated but service are restricted.
+     * note this is currently available for data activation state. For example out of byte sim.
+     * @hide
+     */
+    public static final int SIM_ACTIVATION_STATE_RESTRICTED = 4;
+
+    /**
+     * Sets the voice activation state for the given subscriber.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @param subId The subscription id.
+     * @param activationState The voice activation state of the given subscriber.
+     * @see #SIM_ACTIVATION_STATE_UNKNOWN
+     * @see #SIM_ACTIVATION_STATE_ACTIVATING
+     * @see #SIM_ACTIVATION_STATE_ACTIVATED
+     * @see #SIM_ACTIVATION_STATE_DEACTIVATED
+     * @hide
+     */
+    public void setVoiceActivationState(int subId, int activationState) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null)
+                telephony.setVoiceActivationState(subId, activationState);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+    }
+
+    /**
+     * Sets the data activation state for the given subscriber.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @param subId The subscription id.
+     * @param activationState The data activation state of the given subscriber.
+     * @see #SIM_ACTIVATION_STATE_UNKNOWN
+     * @see #SIM_ACTIVATION_STATE_ACTIVATING
+     * @see #SIM_ACTIVATION_STATE_ACTIVATED
+     * @see #SIM_ACTIVATION_STATE_DEACTIVATED
+     * @see #SIM_ACTIVATION_STATE_RESTRICTED
+     * @hide
+     */
+    public void setDataActivationState(int subId, int activationState) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null)
+                telephony.setDataActivationState(subId, activationState);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+    }
+
+    /**
+     * Returns the voice activation state for the given subscriber.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE}
+     *
+     * @param subId The subscription id.
+     *
+     * @return voiceActivationState for the given subscriber
+     * @see #SIM_ACTIVATION_STATE_UNKNOWN
+     * @see #SIM_ACTIVATION_STATE_ACTIVATING
+     * @see #SIM_ACTIVATION_STATE_ACTIVATED
+     * @see #SIM_ACTIVATION_STATE_DEACTIVATED
+     * @hide
+     */
+    public int getVoiceActivationState(int subId) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null)
+                return telephony.getVoiceActivationState(subId, getOpPackageName());
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return SIM_ACTIVATION_STATE_UNKNOWN;
+    }
+
+    /**
+     * Returns the data activation state for the given subscriber.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE}
+     *
+     * @param subId The subscription id.
+     *
+     * @return dataActivationState for the given subscriber
+     * @see #SIM_ACTIVATION_STATE_UNKNOWN
+     * @see #SIM_ACTIVATION_STATE_ACTIVATING
+     * @see #SIM_ACTIVATION_STATE_ACTIVATED
+     * @see #SIM_ACTIVATION_STATE_DEACTIVATED
+     * @see #SIM_ACTIVATION_STATE_RESTRICTED
+     * @hide
+     */
+    public int getDataActivationState(int subId) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null)
+                return telephony.getDataActivationState(subId, getOpPackageName());
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return SIM_ACTIVATION_STATE_UNKNOWN;
+    }
+
+    /**
      * Returns the voice mail count. Return 0 if unavailable, -1 if there are unread voice messages
      * but the count is unknown.
      * <p>
