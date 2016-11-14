@@ -20,6 +20,7 @@
 #include "CanvasContext.h"
 #include "EglManager.h"
 #include "RenderProxy.h"
+#include "VulkanManager.h"
 
 #include <gui/DisplayEventReceiver.h>
 #include <gui/ISurfaceComposer.h>
@@ -157,7 +158,8 @@ RenderThread::RenderThread() : Thread(true)
         , mFrameCallbackTaskPending(false)
         , mFrameCallbackTask(nullptr)
         , mRenderState(nullptr)
-        , mEglManager(nullptr) {
+        , mEglManager(nullptr)
+        , mVkManager(nullptr) {
     Properties::load();
     mFrameCallbackTask = new DispatchFrameCallbacks(this);
     mLooper = new Looper(false);
@@ -191,6 +193,7 @@ void RenderThread::initThreadLocals() {
     mEglManager = new EglManager(*this);
     mRenderState = new RenderState(*this);
     mJankTracker = new JankTracker(mDisplayInfo);
+    mVkManager = new VulkanManager(*this);
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {

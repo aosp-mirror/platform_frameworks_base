@@ -40,6 +40,7 @@ hwui_src_files := \
     renderthread/OpenGLPipeline.cpp \
     renderthread/DrawFrameTask.cpp \
     renderthread/EglManager.cpp \
+    renderthread/VulkanManager.cpp \
     renderthread/RenderProxy.cpp \
     renderthread/RenderTask.cpp \
     renderthread/RenderThread.cpp \

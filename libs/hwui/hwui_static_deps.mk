@@ -18,6 +18,7 @@ LOCAL_SHARED_LIBRARIES += \
     libutils \
     libEGL \
     libGLESv2 \
+    libvulkan \
     libskia \
     libui \
     libgui \

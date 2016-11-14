@@ -23,37 +23,43 @@
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
 
+#include <SkSurface.h>
 #include <SkTypes.h>
-#include <WindowContextFactory_android.h>
-#include <VulkanWindowContext.h>
+
+#include <GrContext.h>
+#include <GrTypes.h>
+#include <vk/GrVkTypes.h>
 
 #include <android/native_window.h>
 #include <cutils/properties.h>
 #include <strings.h>
 
 using namespace android::uirenderer::renderthread;
-using namespace sk_app;
 
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
+SkiaVulkanPipeline::SkiaVulkanPipeline(renderthread::RenderThread& thread)
+        : SkiaPipeline(thread)
+        , mVkManager(thread.vulkanManager()) {}
+
 MakeCurrentResult SkiaVulkanPipeline::makeCurrent() {
-    return (mWindowContext != nullptr) ?
-        MakeCurrentResult::AlreadyCurrent : MakeCurrentResult::Failed;
+    return MakeCurrentResult::AlreadyCurrent;
 }
 
 Frame SkiaVulkanPipeline::getFrame() {
-    LOG_ALWAYS_FATAL_IF(mWindowContext == nullptr, "Tried to draw into null vulkan context!");
-    mBackbuffer = mWindowContext->getBackbufferSurface();
-    if (mBackbuffer.get() == nullptr) {
-        // try recreating the context?
+    LOG_ALWAYS_FATAL_IF(mVkSurface == nullptr,
+                "drawRenderNode called on a context with no surface!");
+
+    SkSurface* backBuffer = mVkManager.getBackbufferSurface(mVkSurface);
+    if (backBuffer == nullptr) {
         SkDebugf("failed to get backbuffer");
         return Frame(-1, -1, 0);
     }
 
     // TODO: support buffer age if Vulkan API can do it
-    Frame frame(mBackbuffer->width(), mBackbuffer->height(), 0);
+    Frame frame(backBuffer->width(), backBuffer->height(), 0);
     return frame;
 }
 
@@ -66,16 +72,18 @@ bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty,
         const std::vector<sp<RenderNode>>& renderNodes,
         FrameInfoVisualizer* profiler) {
 
-    if (mBackbuffer.get() == nullptr) {
+    sk_sp<SkSurface> backBuffer = mVkSurface->getBackBufferSurface();
+    if (backBuffer.get() == nullptr) {
         return false;
     }
-    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, mBackbuffer);
+    SkiaPipeline::updateLighting(lightGeometry, lightInfo);
+    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, backBuffer);
     layerUpdateQueue->clear();
 
     // Draw visual debugging features
     if (CC_UNLIKELY(Properties::showDirtyRegions
             || ProfileType::None != Properties::getProfileType())) {
-        SkCanvas* profileCanvas = mBackbuffer->getCanvas();
+        SkCanvas* profileCanvas = backBuffer->getCanvas();
         SkiaProfileRenderer profileRenderer(profileCanvas);
         profiler->draw(profileRenderer);
         profileCanvas->flush();
@@ -99,10 +107,8 @@ bool SkiaVulkanPipeline::swapBuffers(const Frame& frame, bool drew,
     currentFrameInfo->markSwapBuffers();
 
     if (*requireSwap) {
-        mWindowContext->swapBuffers();
+        mVkManager.swapBuffers(mVkSurface);
     }
-
-    mBackbuffer.reset();
 
     return *requireSwap;
 }
@@ -113,6 +119,7 @@ bool SkiaVulkanPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bi
 }
 
 DeferredLayerUpdater* SkiaVulkanPipeline::createTextureLayer() {
+    mVkManager.initialize();
     Layer* layer = new Layer(mRenderThread.renderState(), 0, 0);
     return new DeferredLayerUpdater(layer);
 }
@@ -121,33 +128,24 @@ void SkiaVulkanPipeline::onStop() {
 }
 
 bool SkiaVulkanPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior) {
-
-    if (mWindowContext) {
-        delete mWindowContext;
-        mWindowContext = nullptr;
+    if (mVkSurface) {
+        mVkManager.destroySurface(mVkSurface);
+        mVkSurface = nullptr;
     }
 
     if (surface) {
-        DisplayParams displayParams;
-        mWindowContext = window_context_factory::NewVulkanForAndroid(surface, displayParams);
-        if (mWindowContext) {
-            DeviceInfo::initialize(mWindowContext->getGrContext()->caps()->maxRenderTargetSize());
-        }
+        mVkSurface = mVkManager.createSurface(surface);
     }
 
-
-    // this doesn't work for if there is more than one CanvasContext available at one time!
-    mRenderThread.setGrContext(mWindowContext ? mWindowContext->getGrContext() : nullptr);
-
-    return mWindowContext != nullptr;
+    return mVkSurface != nullptr;
 }
 
 bool SkiaVulkanPipeline::isSurfaceReady() {
-    return CC_LIKELY(mWindowContext != nullptr) && mWindowContext->isValid();
+    return CC_UNLIKELY(mVkSurface != nullptr);
 }
 
 bool SkiaVulkanPipeline::isContextReady() {
-    return CC_LIKELY(mWindowContext != nullptr);
+    return CC_LIKELY(mVkManager.hasVkContext());
 }
 
 void SkiaVulkanPipeline::invokeFunctor(const RenderThread& thread, Functor* functor) {
