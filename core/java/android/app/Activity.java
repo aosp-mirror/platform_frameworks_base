@@ -1313,7 +1313,7 @@ public class Activity extends ContextThemeWrapper
     public boolean isVoiceInteractionRoot() {
         try {
             return mVoiceInteractor != null
-                    && ActivityManagerNative.getDefault().isRootVoiceInteraction(mToken);
+                    && ActivityManager.getService().isRootVoiceInteraction(mToken);
         } catch (RemoteException e) {
         }
         return false;
@@ -1336,7 +1336,7 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean isLocalVoiceInteractionSupported() {
         try {
-            return ActivityManagerNative.getDefault().supportsLocalVoiceInteraction();
+            return ActivityManager.getService().supportsLocalVoiceInteraction();
         } catch (RemoteException re) {
         }
         return false;
@@ -1350,7 +1350,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void startLocalVoiceInteraction(Bundle privateOptions) {
         try {
-            ActivityManagerNative.getDefault().startLocalVoiceInteraction(mToken, privateOptions);
+            ActivityManager.getService().startLocalVoiceInteraction(mToken, privateOptions);
         } catch (RemoteException re) {
         }
     }
@@ -1379,7 +1379,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void stopLocalVoiceInteraction() {
         try {
-            ActivityManagerNative.getDefault().stopLocalVoiceInteraction(mToken);
+            ActivityManager.getService().stopLocalVoiceInteraction(mToken);
         } catch (RemoteException re) {
         }
     }
@@ -1798,7 +1798,7 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean showAssist(Bundle args) {
         try {
-            return ActivityManagerNative.getDefault().showAssistFromActivity(mToken, args);
+            return ActivityManager.getService().showAssistFromActivity(mToken, args);
         } catch (RemoteException e) {
         }
         return false;
@@ -1914,7 +1914,7 @@ public class Activity extends ContextThemeWrapper
         if (mDoReportFullyDrawn) {
             mDoReportFullyDrawn = false;
             try {
-                ActivityManagerNative.getDefault().reportActivityFullyDrawn(mToken);
+                ActivityManager.getService().reportActivityFullyDrawn(mToken);
             } catch (RemoteException e) {
             }
         }
@@ -1940,7 +1940,7 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean isInMultiWindowMode() {
         try {
-            return ActivityManagerNative.getDefault().isInMultiWindowMode(mToken);
+            return ActivityManager.getService().isInMultiWindowMode(mToken);
         } catch (RemoteException e) {
         }
         return false;
@@ -1965,7 +1965,7 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean isInPictureInPictureMode() {
         try {
-            return ActivityManagerNative.getDefault().isInPictureInPictureMode(mToken);
+            return ActivityManager.getService().isInPictureInPictureMode(mToken);
         } catch (RemoteException e) {
         }
         return false;
@@ -1977,7 +1977,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void enterPictureInPictureMode() {
         try {
-            ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken);
+            ActivityManager.getService().enterPictureInPictureMode(mToken);
         } catch (RemoteException e) {
         }
     }
@@ -3037,7 +3037,7 @@ public class Activity extends ContextThemeWrapper
      */
     @Override
     public void exitFreeformMode() throws RemoteException {
-        ActivityManagerNative.getDefault().exitFreeformMode(mToken);
+        ActivityManager.getService().exitFreeformMode(mToken);
     }
 
     /** Returns the current stack Id for the window.
@@ -3045,7 +3045,7 @@ public class Activity extends ContextThemeWrapper
      */
     @Override
     public int getWindowStackId() throws RemoteException {
-        return ActivityManagerNative.getDefault().getActivityStackId(mToken);
+        return ActivityManager.getService().getActivityStackId(mToken);
     }
 
     /**
@@ -4533,7 +4533,7 @@ public class Activity extends ContextThemeWrapper
                 fillInIntent.prepareToLeaveProcess(this);
                 resolvedType = fillInIntent.resolveTypeIfNeeded(getContentResolver());
             }
-            int result = ActivityManagerNative.getDefault()
+            int result = ActivityManager.getService()
                 .startActivityIntentSender(mMainThread.getApplicationThread(), intent,
                         fillInIntent, resolvedType, mToken, who,
                         requestCode, flagsMask, flagsValues, options);
@@ -4763,7 +4763,7 @@ public class Activity extends ContextThemeWrapper
                 }
                 intent.migrateExtraStreamToClipData();
                 intent.prepareToLeaveProcess(this);
-                result = ActivityManagerNative.getDefault()
+                result = ActivityManager.getService()
                     .startActivity(mMainThread.getApplicationThread(), getBasePackageName(),
                             intent, intent.resolveTypeIfNeeded(getContentResolver()), mToken,
                             mEmbeddedID, requestCode, ActivityManager.START_FLAG_ONLY_IF_NEEDED,
@@ -4834,7 +4834,7 @@ public class Activity extends ContextThemeWrapper
             try {
                 intent.migrateExtraStreamToClipData();
                 intent.prepareToLeaveProcess(this);
-                return ActivityManagerNative.getDefault()
+                return ActivityManager.getService()
                     .startNextMatchingActivity(mToken, intent, options);
             } catch (RemoteException e) {
                 // Empty
@@ -5032,7 +5032,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void overridePendingTransition(int enterAnim, int exitAnim) {
         try {
-            ActivityManagerNative.getDefault().overridePendingTransition(
+            ActivityManager.getService().overridePendingTransition(
                     mToken, getPackageName(), enterAnim, exitAnim);
         } catch (RemoteException e) {
         }
@@ -5157,7 +5157,7 @@ public class Activity extends ContextThemeWrapper
     @Nullable
     public String getCallingPackage() {
         try {
-            return ActivityManagerNative.getDefault().getCallingPackage(mToken);
+            return ActivityManager.getService().getCallingPackage(mToken);
         } catch (RemoteException e) {
             return null;
         }
@@ -5180,7 +5180,7 @@ public class Activity extends ContextThemeWrapper
     @Nullable
     public ComponentName getCallingActivity() {
         try {
-            return ActivityManagerNative.getDefault().getCallingActivity(mToken);
+            return ActivityManager.getService().getCallingActivity(mToken);
         } catch (RemoteException e) {
             return null;
         }
@@ -5265,7 +5265,7 @@ public class Activity extends ContextThemeWrapper
             throw new IllegalStateException("Must be called from main thread");
         }
         try {
-            ActivityManagerNative.getDefault().requestActivityRelaunch(mToken);
+            ActivityManager.getService().requestActivityRelaunch(mToken);
         } catch (RemoteException e) {
         }
     }
@@ -5287,7 +5287,7 @@ public class Activity extends ContextThemeWrapper
                 if (resultData != null) {
                     resultData.prepareToLeaveProcess(this);
                 }
-                if (ActivityManagerNative.getDefault()
+                if (ActivityManager.getService()
                         .finishActivity(mToken, resultCode, resultData, finishTask)) {
                     mFinished = true;
                 }
@@ -5330,7 +5330,7 @@ public class Activity extends ContextThemeWrapper
             throw new IllegalStateException("Can not be called to deliver a result");
         }
         try {
-            if (ActivityManagerNative.getDefault().finishActivityAffinity(mToken)) {
+            if (ActivityManager.getService().finishActivityAffinity(mToken)) {
                 mFinished = true;
             }
         } catch (RemoteException e) {
@@ -5376,7 +5376,7 @@ public class Activity extends ContextThemeWrapper
     public void finishActivity(int requestCode) {
         if (mParent == null) {
             try {
-                ActivityManagerNative.getDefault()
+                ActivityManager.getService()
                     .finishSubActivity(mToken, mEmbeddedID, requestCode);
             } catch (RemoteException e) {
                 // Empty
@@ -5396,7 +5396,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void finishActivityFromChild(@NonNull Activity child, int requestCode) {
         try {
-            ActivityManagerNative.getDefault()
+            ActivityManager.getService()
                 .finishSubActivity(mToken, child.mEmbeddedID, requestCode);
         } catch (RemoteException e) {
             // Empty
@@ -5424,7 +5424,7 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean releaseInstance() {
         try {
-            return ActivityManagerNative.getDefault().releaseActivityInstance(mToken);
+            return ActivityManager.getService().releaseActivityInstance(mToken);
         } catch (RemoteException e) {
             // Empty
         }
@@ -5514,7 +5514,7 @@ public class Activity extends ContextThemeWrapper
         try {
             data.prepareToLeaveProcess(this);
             IIntentSender target =
-                ActivityManagerNative.getDefault().getIntentSender(
+                ActivityManager.getService().getIntentSender(
                         ActivityManager.INTENT_SENDER_ACTIVITY_RESULT, packageName,
                         mParent == null ? mToken : mParent.mToken,
                         mEmbeddedID, requestCode, new Intent[] { data }, null, flags, null,
@@ -5539,7 +5539,7 @@ public class Activity extends ContextThemeWrapper
     public void setRequestedOrientation(@ActivityInfo.ScreenOrientation int requestedOrientation) {
         if (mParent == null) {
             try {
-                ActivityManagerNative.getDefault().setRequestedOrientation(
+                ActivityManager.getService().setRequestedOrientation(
                         mToken, requestedOrientation);
             } catch (RemoteException e) {
                 // Empty
@@ -5562,7 +5562,7 @@ public class Activity extends ContextThemeWrapper
     public int getRequestedOrientation() {
         if (mParent == null) {
             try {
-                return ActivityManagerNative.getDefault()
+                return ActivityManager.getService()
                         .getRequestedOrientation(mToken);
             } catch (RemoteException e) {
                 // Empty
@@ -5581,7 +5581,7 @@ public class Activity extends ContextThemeWrapper
      */
     public int getTaskId() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .getTaskForActivity(mToken, false);
         } catch (RemoteException e) {
             return -1;
@@ -5596,7 +5596,7 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean isTaskRoot() {
         try {
-            return ActivityManagerNative.getDefault().getTaskForActivity(mToken, true) >= 0;
+            return ActivityManager.getService().getTaskForActivity(mToken, true) >= 0;
         } catch (RemoteException e) {
             return false;
         }
@@ -5615,7 +5615,7 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean moveTaskToBack(boolean nonRoot) {
         try {
-            return ActivityManagerNative.getDefault().moveActivityTaskToBack(
+            return ActivityManager.getService().moveActivityTaskToBack(
                     mToken, nonRoot);
         } catch (RemoteException e) {
             // Empty
@@ -5786,7 +5786,7 @@ public class Activity extends ContextThemeWrapper
             }
         }
         try {
-            ActivityManagerNative.getDefault().setTaskDescription(mToken, mTaskDescription);
+            ActivityManager.getService().setTaskDescription(mToken, mTaskDescription);
         } catch (RemoteException e) {
         }
     }
@@ -6049,7 +6049,7 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean isImmersive() {
         try {
-            return ActivityManagerNative.getDefault().isImmersive(mToken);
+            return ActivityManager.getService().isImmersive(mToken);
         } catch (RemoteException e) {
             return false;
         }
@@ -6067,7 +6067,7 @@ public class Activity extends ContextThemeWrapper
             return false;
         }
         try {
-            return ActivityManagerNative.getDefault().isTopOfTask(getActivityToken());
+            return ActivityManager.getService().isTopOfTask(getActivityToken());
         } catch (RemoteException e) {
             return false;
         }
@@ -6093,7 +6093,7 @@ public class Activity extends ContextThemeWrapper
     public void convertFromTranslucent() {
         try {
             mTranslucentCallback = null;
-            if (ActivityManagerNative.getDefault().convertFromTranslucent(mToken)) {
+            if (ActivityManager.getService().convertFromTranslucent(mToken)) {
                 WindowManagerGlobal.getInstance().changeCanvasOpacity(mToken, true);
             }
         } catch (RemoteException e) {
@@ -6132,7 +6132,7 @@ public class Activity extends ContextThemeWrapper
         boolean drawComplete;
         try {
             mTranslucentCallback = callback;
-            mChangeCanvasToTranslucent = ActivityManagerNative.getDefault().convertToTranslucent(
+            mChangeCanvasToTranslucent = ActivityManager.getService().convertToTranslucent(
                     mToken, options == null ? null : options.toBundle());
             WindowManagerGlobal.getInstance().changeCanvasOpacity(mToken, false);
             drawComplete = true;
@@ -6178,7 +6178,7 @@ public class Activity extends ContextThemeWrapper
     ActivityOptions getActivityOptions() {
         try {
             return ActivityOptions.fromBundle(
-                    ActivityManagerNative.getDefault().getActivityOptions(mToken));
+                    ActivityManager.getService().getActivityOptions(mToken));
         } catch (RemoteException e) {
         }
         return null;
@@ -6222,7 +6222,7 @@ public class Activity extends ContextThemeWrapper
             visible = false;
         }
         try {
-            mVisibleBehind = ActivityManagerNative.getDefault()
+            mVisibleBehind = ActivityManager.getService()
                     .requestVisibleBehind(mToken, visible) && visible;
         } catch (RemoteException e) {
             mVisibleBehind = false;
@@ -6263,7 +6263,7 @@ public class Activity extends ContextThemeWrapper
     @SystemApi
     public boolean isBackgroundVisibleBehind() {
         try {
-            return ActivityManagerNative.getDefault().isBackgroundVisibleBehind(mToken);
+            return ActivityManager.getService().isBackgroundVisibleBehind(mToken);
         } catch (RemoteException e) {
         }
         return false;
@@ -6320,7 +6320,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void setImmersive(boolean i) {
         try {
-            ActivityManagerNative.getDefault().setImmersive(mToken, i);
+            ActivityManager.getService().setImmersive(mToken, i);
         } catch (RemoteException e) {
             // pass
         }
@@ -6384,7 +6384,7 @@ public class Activity extends ContextThemeWrapper
     public void setVrModeEnabled(boolean enabled, @NonNull ComponentName requestedComponent)
           throws PackageManager.NameNotFoundException {
         try {
-            if (ActivityManagerNative.getDefault().setVrMode(mToken, enabled, requestedComponent)
+            if (ActivityManager.getService().setVrMode(mToken, enabled, requestedComponent)
                     != 0) {
                 throw new PackageManager.NameNotFoundException(
                         requestedComponent.flattenToString());
@@ -6505,7 +6505,7 @@ public class Activity extends ContextThemeWrapper
             if (info.taskAffinity == null) {
                 return false;
             }
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                     .shouldUpRecreateTask(mToken, info.taskAffinity);
         } catch (RemoteException e) {
             return false;
@@ -6558,7 +6558,7 @@ public class Activity extends ContextThemeWrapper
             }
             try {
                 upIntent.prepareToLeaveProcess(this);
-                return ActivityManagerNative.getDefault().navigateUpTo(mToken, upIntent,
+                return ActivityManager.getService().navigateUpTo(mToken, upIntent,
                         resultCode, resultData);
             } catch (RemoteException e) {
                 return false;
@@ -7074,7 +7074,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void startLockTask() {
         try {
-            ActivityManagerNative.getDefault().startLockTaskModeByToken(mToken);
+            ActivityManager.getService().startLockTaskModeByToken(mToken);
         } catch (RemoteException e) {
         }
     }
@@ -7098,7 +7098,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void stopLockTask() {
         try {
-            ActivityManagerNative.getDefault().stopLockTaskMode();
+            ActivityManager.getService().stopLockTaskMode();
         } catch (RemoteException e) {
         }
     }
@@ -7110,7 +7110,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void showLockTaskEscapeMessage() {
         try {
-            ActivityManagerNative.getDefault().showLockTaskEscapeMessage(mToken);
+            ActivityManager.getService().showLockTaskEscapeMessage(mToken);
         } catch (RemoteException e) {
         }
     }

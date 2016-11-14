@@ -17,7 +17,6 @@
 package com.android.server.voiceinteraction;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.assist.AssistContent;
@@ -182,7 +181,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         mCallback = callback;
         mCallingUid = callingUid;
         mHandler = handler;
-        mAm = ActivityManagerNative.getDefault();
+        mAm = ActivityManager.getService();
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mAppOps = context.getSystemService(AppOpsManager.class);

@@ -21,7 +21,6 @@ import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerInternal;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -1020,7 +1019,7 @@ public class SyncManager {
         final int owningUid = syncAdapterInfo.uid;
         final String owningPackage = syncAdapterInfo.componentName.getPackageName();
         try {
-            if (ActivityManagerNative.getDefault().getAppStartMode(owningUid,
+            if (ActivityManager.getService().getAppStartMode(owningUid,
                     owningPackage) == ActivityManager.APP_START_MODE_DISABLED) {
                 Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
                         + syncAdapterInfo.componentName

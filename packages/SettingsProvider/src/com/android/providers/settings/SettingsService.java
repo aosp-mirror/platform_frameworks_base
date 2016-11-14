@@ -16,7 +16,7 @@
 
 package com.android.providers.settings;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.content.IContentProvider;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -190,7 +190,7 @@ final public class SettingsService extends Binder {
 
             if (mUser == UserHandle.USER_CURRENT) {
                 try {
-                    mUser = ActivityManagerNative.getDefault().getCurrentUser().id;
+                    mUser = ActivityManager.getService().getCurrentUser().id;
                 } catch (RemoteException e) {
                     throw new RuntimeException("Failed in IPC", e);
                 }

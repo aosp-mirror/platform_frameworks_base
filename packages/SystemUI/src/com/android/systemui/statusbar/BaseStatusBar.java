@@ -20,7 +20,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
-import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.Notification;
@@ -334,7 +333,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             // the user switches to home.  We know it is safe to do at this
             // point, so make sure new activity switches are now allowed.
             try {
-                ActivityManagerNative.getDefault().resumeAppSwitches();
+                ActivityManager.getService().resumeAppSwitches();
             } catch (RemoteException e) {
             }
             final boolean isActivity = pendingIntent.isActivity();
@@ -346,7 +345,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     @Override
                     public boolean onDismiss() {
                         try {
-                            ActivityManagerNative.getDefault().resumeAppSwitches();
+                            ActivityManager.getService().resumeAppSwitches();
                         } catch (RemoteException e) {
                         }
 
@@ -515,7 +514,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
                 List<ActivityManager.RecentTaskInfo> recentTask = null;
                 try {
-                    recentTask = ActivityManagerNative.getDefault().getRecentTasks(1,
+                    recentTask = ActivityManager.getService().getRecentTasks(1,
                             ActivityManager.RECENT_WITH_EXCLUDED
                             | ActivityManager.RECENT_INCLUDE_PROFILES,
                             mCurrentUserId).getList();
@@ -1321,7 +1320,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected void sendCloseSystemWindows(String reason) {
         try {
-            ActivityManagerNative.getDefault().closeSystemDialogs(reason);
+            ActivityManager.getService().closeSystemDialogs(reason);
         } catch (RemoteException e) {
         }
     }
@@ -1820,7 +1819,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                             // won't have permission to immediately start an activity after
                             // the user switches to home.  We know it is safe to do at this
                             // point, so make sure new activity switches are now allowed.
-                            ActivityManagerNative.getDefault().resumeAppSwitches();
+                            ActivityManager.getService().resumeAppSwitches();
                         } catch (RemoteException e) {
                         }
                         try {
@@ -1924,7 +1923,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                                 // won't have permission to immediately start an activity after
                                 // the user switches to home.  We know it is safe to do at this
                                 // point, so make sure new activity switches are now allowed.
-                                ActivityManagerNative.getDefault().resumeAppSwitches();
+                                ActivityManager.getService().resumeAppSwitches();
                             } catch (RemoteException e) {
                             }
                             if (intent != null) {
@@ -1938,7 +1937,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                                             && mKeyguardManager.isDeviceLocked(userId)) {
                                         boolean canBypass = false;
                                         try {
-                                            canBypass = ActivityManagerNative.getDefault()
+                                            canBypass = ActivityManager.getService()
                                                     .canBypassWorkChallenge(intent);
                                         } catch (RemoteException e) {
                                         }
@@ -2058,7 +2057,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Intent.EXTRA_INTENT,
                 callBackPendingIntent.getIntentSender());
         try {
-            ActivityManagerNative.getDefault().startConfirmDeviceCredentialIntent(newIntent);
+            ActivityManager.getService().startConfirmDeviceCredentialIntent(newIntent);
         } catch (RemoteException ex) {
             // ignore
         }

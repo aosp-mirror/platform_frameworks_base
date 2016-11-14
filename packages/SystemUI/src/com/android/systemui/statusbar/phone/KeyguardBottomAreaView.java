@@ -20,7 +20,6 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -363,7 +362,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 (DevicePolicyManager) getContext().getSystemService(Context.DEVICE_POLICY_SERVICE);
         if (dpm != null && mPhoneStatusBar != null) {
             try {
-                final int userId = ActivityManagerNative.getDefault().getCurrentUser().id;
+                final int userId = ActivityManager.getService().getCurrentUser().id;
                 final int disabledFlags = dpm.getKeyguardDisabledFeatures(null, userId);
                 final  boolean disabledBecauseKeyguardSecure =
                         (disabledFlags & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0
@@ -487,7 +486,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                     o.setRotationAnimationHint(
                             WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
                     try {
-                        result = ActivityManagerNative.getDefault().startActivityAsUser(
+                        result = ActivityManager.getService().startActivityAsUser(
                                 null, getContext().getBasePackageName(),
                                 intent,
                                 intent.resolveTypeIfNeeded(getContext().getContentResolver()),

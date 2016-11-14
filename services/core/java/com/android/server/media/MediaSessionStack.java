@@ -17,7 +17,6 @@
 package com.android.server.media;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.PlaybackState;
 import android.media.session.MediaSession;
@@ -74,7 +73,7 @@ class MediaSessionStack {
     private static boolean isFromMostRecentApp(MediaSessionRecord record) {
         try {
             List<ActivityManager.RecentTaskInfo> tasks =
-                    ActivityManagerNative.getDefault().getRecentTasks(1,
+                    ActivityManager.getService().getRecentTasks(1,
                             ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
                             ActivityManager.RECENT_IGNORE_UNAVAILABLE |
                             ActivityManager.RECENT_INCLUDE_PROFILES |

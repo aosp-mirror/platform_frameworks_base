@@ -23,7 +23,6 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
-import android.app.ActivityManagerNative;
 import android.app.IActivityContainer;
 import android.app.IActivityController;
 import android.app.IActivityManager;
@@ -108,7 +107,7 @@ public class Am extends BaseCommand {
     @Override
     public void onRun() throws Exception {
 
-        mAm = ActivityManagerNative.getDefault();
+        mAm = ActivityManager.getService();
         if (mAm == null) {
             System.err.println(NO_SYSTEM_ERROR_CODE);
             throw new AndroidException("Can't connect to activity manager; is the system running?");

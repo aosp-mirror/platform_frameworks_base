@@ -26,7 +26,6 @@ import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -983,7 +982,7 @@ public class UserManager {
     public boolean isUserRunning(int userId) {
         // TODO Switch to using UMS internal isUserRunning
         try {
-            return ActivityManagerNative.getDefault().isUserRunning(userId, 0);
+            return ActivityManager.getService().isUserRunning(userId, 0);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -999,7 +998,7 @@ public class UserManager {
     public boolean isUserRunningOrStopping(UserHandle user) {
         try {
             // TODO: reconcile stopped vs stopping?
-            return ActivityManagerNative.getDefault().isUserRunning(
+            return ActivityManager.getService().isUserRunning(
                     user.getIdentifier(), ActivityManager.FLAG_OR_STOPPED);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -1016,7 +1015,7 @@ public class UserManager {
     @Deprecated
     public boolean isUserRunningAndLocked(UserHandle user) {
         try {
-            return ActivityManagerNative.getDefault().isUserRunning(
+            return ActivityManager.getService().isUserRunning(
                     user.getIdentifier(), ActivityManager.FLAG_AND_LOCKED);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -1033,7 +1032,7 @@ public class UserManager {
     @Deprecated
     public boolean isUserRunningAndUnlocked(UserHandle user) {
         try {
-            return ActivityManagerNative.getDefault().isUserRunning(
+            return ActivityManager.getService().isUserRunning(
                     user.getIdentifier(), ActivityManager.FLAG_AND_UNLOCKED);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -1080,7 +1079,7 @@ public class UserManager {
     /** {@hide} */
     public boolean isUserUnlocked(@UserIdInt int userId) {
         try {
-            return ActivityManagerNative.getDefault().isUserRunning(userId,
+            return ActivityManager.getService().isUserRunning(userId,
                     ActivityManager.FLAG_AND_UNLOCKED);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();

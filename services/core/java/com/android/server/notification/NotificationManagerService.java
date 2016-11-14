@@ -50,7 +50,6 @@ import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
@@ -600,7 +599,7 @@ public class NotificationManagerService extends SystemService {
                     REASON_DELEGATE_ERROR, null);
             long ident = Binder.clearCallingIdentity();
             try {
-                ActivityManagerNative.getDefault().crashApplication(uid, initialPid, pkg,
+                ActivityManager.getService().crashApplication(uid, initialPid, pkg,
                         "Bad notification posted from package " + pkg
                         + ": " + message);
             } catch (RemoteException e) {
@@ -952,7 +951,7 @@ public class NotificationManagerService extends SystemService {
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
                 DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE);
 
-        mAm = ActivityManagerNative.getDefault();
+        mAm = ActivityManager.getService();
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
         mAppUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);

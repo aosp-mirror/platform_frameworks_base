@@ -174,9 +174,6 @@ android.app.ActivityManager$TaskThumbnailInfo
 android.app.ActivityManager$TaskThumbnailInfo$1
 android.app.ActivityManagerInternal
 android.app.ActivityManagerInternal$SleepToken
-android.app.ActivityManagerNative
-android.app.ActivityManagerNative$1
-android.app.ActivityManagerProxy
 android.app.ActivityOptions
 android.app.ActivityOptions$OnAnimationFinishedListener
 android.app.ActivityOptions$OnAnimationStartedListener

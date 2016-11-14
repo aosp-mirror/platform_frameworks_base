@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManagerInternal;
@@ -3669,7 +3668,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     void injectRegisterUidObserver(IUidObserver observer, int which) {
         try {
-            ActivityManagerNative.getDefault().registerUidObserver(observer, which,
+            ActivityManager.getService().registerUidObserver(observer, which,
                     ActivityManager.PROCESS_STATE_UNKNOWN, null);
         } catch (RemoteException shouldntHappen) {
         }

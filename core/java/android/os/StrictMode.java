@@ -17,7 +17,6 @@ package android.os;
 
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
 import android.app.IActivityManager;
@@ -1606,7 +1605,7 @@ public final class StrictMode {
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try {
-                    IActivityManager am = ActivityManagerNative.getDefault();
+                    IActivityManager am = ActivityManager.getService();
                     if (am == null) {
                         Log.d(TAG, "No activity manager; failed to Dropbox violation.");
                     } else {
@@ -1943,7 +1942,7 @@ public final class StrictMode {
                 // We restore the current policy below, in the finally block.
                 setThreadPolicyMask(0);
 
-                ActivityManagerNative.getDefault().handleApplicationStrictModeViolation(
+                ActivityManager.getService().handleApplicationStrictModeViolation(
                     RuntimeInit.getApplicationObject(),
                     violationMaskSubset,
                     info);

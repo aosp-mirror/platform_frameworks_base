@@ -21,7 +21,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.SearchManager;
 import android.os.UserHandle;
 
@@ -3715,9 +3715,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     public static void sendCloseSystemWindows(Context context, String reason) {
-        if (ActivityManagerNative.isSystemReady()) {
+        if (ActivityManager.isSystemReady()) {
             try {
-                ActivityManagerNative.getDefault().closeSystemDialogs(reason);
+                ActivityManager.getService().closeSystemDialogs(reason);
             } catch (RemoteException e) {
             }
         }

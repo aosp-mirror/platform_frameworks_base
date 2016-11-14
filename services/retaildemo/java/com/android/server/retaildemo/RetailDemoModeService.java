@@ -17,8 +17,8 @@
 package com.android.server.retaildemo;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -591,7 +591,7 @@ public class RetailDemoModeService extends SystemService {
 
         void switchUser(int userId) {
             if (mAms == null) {
-                mAms = (ActivityManagerService) ActivityManagerNative.getDefault();
+                mAms = (ActivityManagerService) ActivityManager.getService();
             }
             mAms.switchUser(userId);
         }

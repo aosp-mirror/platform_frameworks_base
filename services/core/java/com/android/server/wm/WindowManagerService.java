@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.Notification;
@@ -1018,7 +1017,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mBoundsAnimationController =
                 new BoundsAnimationController(mAppTransition, UiThread.getHandler());
 
-        mActivityManager = ActivityManagerNative.getDefault();
+        mActivityManager = ActivityManager.getService();
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
         AppOpsManager.OnOpChangedInternalListener opListener =

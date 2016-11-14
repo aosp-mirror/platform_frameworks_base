@@ -20,7 +20,6 @@ import android.Manifest;
 import android.accounts.Account;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.job.JobInfo;
 import android.content.BroadcastReceiver;
@@ -434,7 +433,7 @@ public final class ContentService extends IContentService.Stub {
 
     private int checkUriPermission(Uri uri, int pid, int uid, int modeFlags, int userHandle) {
         try {
-            return ActivityManagerNative.getDefault().checkUriPermission(
+            return ActivityManager.getService().checkUriPermission(
                     uri, pid, uid, modeFlags, userHandle, null);
         } catch (RemoteException e) {
             return PackageManager.PERMISSION_DENIED;

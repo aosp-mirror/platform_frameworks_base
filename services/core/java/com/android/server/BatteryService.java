@@ -28,7 +28,7 @@ import com.android.server.am.BatteryStatsService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -557,7 +557,7 @@ public final class BatteryService extends SystemService {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                ActivityManagerNative.broadcastStickyIntent(intent, null, UserHandle.USER_ALL);
+                ActivityManager.broadcastStickyIntent(intent, UserHandle.USER_ALL);
             }
         });
     }

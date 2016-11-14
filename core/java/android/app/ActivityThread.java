@@ -1800,7 +1800,7 @@ public final class ActivityThread {
             }
             if (a != null) {
                 mNewActivities = null;
-                IActivityManager am = ActivityManagerNative.getDefault();
+                IActivityManager am = ActivityManager.getService();
                 ActivityClientRecord prev;
                 do {
                     if (localLOGV) Slog.v(
@@ -2712,7 +2712,7 @@ public final class ActivityThread {
     private Context createBaseContextForActivity(ActivityClientRecord r, final Activity activity) {
         int displayId = Display.DEFAULT_DISPLAY;
         try {
-            displayId = ActivityManagerNative.getDefault().getActivityDisplayId(r.token);
+            displayId = ActivityManager.getService().getActivityDisplayId(r.token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2792,7 +2792,7 @@ public final class ActivityThread {
         } else {
             // If there was an error, for any reason, tell the activity manager to stop us.
             try {
-                ActivityManagerNative.getDefault()
+                ActivityManager.getService()
                     .finishActivity(r.token, Activity.RESULT_CANCELED, null,
                             Activity.DONT_FINISH_TASK_WITH_ACTIVITY);
             } catch (RemoteException ex) {
@@ -2822,7 +2822,7 @@ public final class ActivityThread {
             }
         }
         try {
-            ActivityManagerNative.getDefault().reportSizeConfigurations(r.token,
+            ActivityManager.getService().reportSizeConfigurations(r.token,
                     horizontal.copyKeys(), vertical.copyKeys(), smallest.copyKeys());
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
@@ -2931,7 +2931,7 @@ public final class ActivityThread {
             structure = new AssistStructure();
         }
         mLastAssistStructures.add(new WeakReference<>(structure));
-        IActivityManager mgr = ActivityManagerNative.getDefault();
+        IActivityManager mgr = ActivityManager.getService();
         try {
             mgr.reportAssistContextExtras(cmd.requestToken, data, structure, content, referrer);
         } catch (RemoteException e) {
@@ -2970,7 +2970,7 @@ public final class ActivityThread {
             }
         }
         try {
-            ActivityManagerNative.getDefault().backgroundResourcesReleased(token);
+            ActivityManager.getService().backgroundResourcesReleased(token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3069,7 +3069,7 @@ public final class ActivityThread {
         LoadedApk packageInfo = getPackageInfoNoCheck(
                 data.info.applicationInfo, data.compatInfo);
 
-        IActivityManager mgr = ActivityManagerNative.getDefault();
+        IActivityManager mgr = ActivityManager.getService();
 
         BroadcastReceiver receiver;
         try {
@@ -3195,7 +3195,7 @@ public final class ActivityThread {
 
             // tell the OS that we're live now
             try {
-                ActivityManagerNative.getDefault().backupAgentCreated(packageName, binder);
+                ActivityManager.getService().backupAgentCreated(packageName, binder);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -3252,11 +3252,11 @@ public final class ActivityThread {
 
             Application app = packageInfo.makeApplication(false, mInstrumentation);
             service.attach(context, this, data.info.name, data.token, app,
-                    ActivityManagerNative.getDefault());
+                    ActivityManager.getService());
             service.onCreate();
             mServices.put(data.token, service);
             try {
-                ActivityManagerNative.getDefault().serviceDoneExecuting(
+                ActivityManager.getService().serviceDoneExecuting(
                         data.token, SERVICE_DONE_EXECUTING_ANON, 0, 0);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -3281,11 +3281,11 @@ public final class ActivityThread {
                 try {
                     if (!data.rebind) {
                         IBinder binder = s.onBind(data.intent);
-                        ActivityManagerNative.getDefault().publishService(
+                        ActivityManager.getService().publishService(
                                 data.token, data.intent, binder);
                     } else {
                         s.onRebind(data.intent);
-                        ActivityManagerNative.getDefault().serviceDoneExecuting(
+                        ActivityManager.getService().serviceDoneExecuting(
                                 data.token, SERVICE_DONE_EXECUTING_ANON, 0, 0);
                     }
                     ensureJitEnabled();
@@ -3311,10 +3311,10 @@ public final class ActivityThread {
                 boolean doRebind = s.onUnbind(data.intent);
                 try {
                     if (doRebind) {
-                        ActivityManagerNative.getDefault().unbindFinished(
+                        ActivityManager.getService().unbindFinished(
                                 data.token, data.intent, doRebind);
                     } else {
-                        ActivityManagerNative.getDefault().serviceDoneExecuting(
+                        ActivityManager.getService().serviceDoneExecuting(
                                 data.token, SERVICE_DONE_EXECUTING_ANON, 0, 0);
                     }
                 } catch (RemoteException ex) {
@@ -3397,7 +3397,7 @@ public final class ActivityThread {
                 QueuedWork.waitToFinish();
 
                 try {
-                    ActivityManagerNative.getDefault().serviceDoneExecuting(
+                    ActivityManager.getService().serviceDoneExecuting(
                             data.token, SERVICE_DONE_EXECUTING_START, data.startId, res);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -3428,7 +3428,7 @@ public final class ActivityThread {
                 QueuedWork.waitToFinish();
 
                 try {
-                    ActivityManagerNative.getDefault().serviceDoneExecuting(
+                    ActivityManager.getService().serviceDoneExecuting(
                             token, SERVICE_DONE_EXECUTING_STOP, 0, 0);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -3550,7 +3550,7 @@ public final class ActivityThread {
             boolean willBeVisible = !a.mStartedActivity;
             if (!willBeVisible) {
                 try {
-                    willBeVisible = ActivityManagerNative.getDefault().willActivityBeVisible(
+                    willBeVisible = ActivityManager.getService().willActivityBeVisible(
                             a.getActivityToken());
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -3638,7 +3638,7 @@ public final class ActivityThread {
             // Tell the activity manager we have resumed.
             if (reallyResume) {
                 try {
-                    ActivityManagerNative.getDefault().activityResumed(token);
+                    ActivityManager.getService().activityResumed(token);
                 } catch (RemoteException ex) {
                     throw ex.rethrowFromSystemServer();
                 }
@@ -3648,7 +3648,7 @@ public final class ActivityThread {
             // If an exception was thrown when trying to resume, then
             // just end this activity.
             try {
-                ActivityManagerNative.getDefault()
+                ActivityManager.getService()
                     .finishActivity(token, Activity.RESULT_CANCELED, null,
                             Activity.DONT_FINISH_TASK_WITH_ACTIVITY);
             } catch (RemoteException ex) {
@@ -3737,7 +3737,7 @@ public final class ActivityThread {
             // Tell the activity manager we have paused.
             if (!dontReport) {
                 try {
-                    ActivityManagerNative.getDefault().activityPaused(token);
+                    ActivityManager.getService().activityPaused(token);
                 } catch (RemoteException ex) {
                     throw ex.rethrowFromSystemServer();
                 }
@@ -3835,7 +3835,7 @@ public final class ActivityThread {
             // Tell activity manager we have been stopped.
             try {
                 if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Reporting activity stopped: " + activity);
-                ActivityManagerNative.getDefault().activityStopped(
+                ActivityManager.getService().activityStopped(
                     activity.token, state, persistentState, description);
             } catch (RemoteException ex) {
                 if (ex instanceof TransactionTooLargeException
@@ -4090,7 +4090,7 @@ public final class ActivityThread {
 
             // Tell activity manager we slept.
             try {
-                ActivityManagerNative.getDefault().activitySlept(r.token);
+                ActivityManager.getService().activitySlept(r.token);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -4344,7 +4344,7 @@ public final class ActivityThread {
         }
         if (finishing) {
             try {
-                ActivityManagerNative.getDefault().activityDestroyed(token);
+                ActivityManager.getService().activityDestroyed(token);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -4386,7 +4386,7 @@ public final class ActivityThread {
                     // For each relaunch request, activity manager expects an answer
                     if (!r.onlyLocalRequest && fromServer) {
                         try {
-                            ActivityManagerNative.getDefault().activityRelaunched(token);
+                            ActivityManager.getService().activityRelaunched(token);
                         } catch (RemoteException e) {
                             throw e.rethrowFromSystemServer();
                         }
@@ -4512,7 +4512,7 @@ public final class ActivityThread {
         if (r == null) {
             if (!tmp.onlyLocalRequest) {
                 try {
-                    ActivityManagerNative.getDefault().activityRelaunched(tmp.token);
+                    ActivityManager.getService().activityRelaunched(tmp.token);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
@@ -4585,7 +4585,7 @@ public final class ActivityThread {
 
         if (!tmp.onlyLocalRequest) {
             try {
-                ActivityManagerNative.getDefault().activityRelaunched(r.token);
+                ActivityManager.getService().activityRelaunched(r.token);
                 if (r.window != null) {
                     r.window.reportActivityRelaunched();
                 }
@@ -4950,7 +4950,7 @@ public final class ActivityThread {
             Debug.dumpNativeHeap(dhd.fd.getFileDescriptor());
         }
         try {
-            ActivityManagerNative.getDefault().dumpHeapFinished(dhd.path);
+            ActivityManager.getService().dumpHeapFinished(dhd.path);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -5294,7 +5294,7 @@ public final class ActivityThread {
                 Slog.w(TAG, "Application " + data.info.getPackageName()
                       + " is waiting for the debugger on port 8100...");
 
-                IActivityManager mgr = ActivityManagerNative.getDefault();
+                IActivityManager mgr = ActivityManager.getService();
                 try {
                     mgr.showWaitingForDebugger(mAppThread, true);
                 } catch (RemoteException ex) {
@@ -5488,12 +5488,12 @@ public final class ActivityThread {
     }
 
     /*package*/ final void finishInstrumentation(int resultCode, Bundle results) {
-        IActivityManager am = ActivityManagerNative.getDefault();
+        IActivityManager am = ActivityManager.getService();
         if (mProfiler.profileFile != null && mProfiler.handlingProfiling
                 && mProfiler.profileFd == null) {
             Debug.stopMethodTracing();
         }
-        //Slog.i(TAG, "am: " + ActivityManagerNative.getDefault()
+        //Slog.i(TAG, "am: " + ActivityManager.getService()
         //      + ", app thr: " + mAppThread);
         try {
             am.finishInstrumentation(mAppThread, resultCode, results);
@@ -5524,7 +5524,7 @@ public final class ActivityThread {
         }
 
         try {
-            ActivityManagerNative.getDefault().publishContentProviders(
+            ActivityManager.getService().publishContentProviders(
                 getApplicationThread(), results);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
@@ -5546,7 +5546,7 @@ public final class ActivityThread {
         // be re-entrant in the case where the provider is in the same process.
         ContentProviderHolder holder = null;
         try {
-            holder = ActivityManagerNative.getDefault().getContentProvider(
+            holder = ActivityManager.getService().getContentProvider(
                     getApplicationThread(), auth, userId, stable);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
@@ -5592,7 +5592,7 @@ public final class ActivityThread {
                                 + prc.holder.info.name + ": unstableDelta="
                                 + unstableDelta);
                     }
-                    ActivityManagerNative.getDefault().refContentProvider(
+                    ActivityManager.getService().refContentProvider(
                             prc.holder.connection, 1, unstableDelta);
                 } catch (RemoteException e) {
                     //do nothing content provider object is dead any way
@@ -5621,7 +5621,7 @@ public final class ActivityThread {
                             Slog.v(TAG, "incProviderRef: Now unstable - "
                                     + prc.holder.info.name);
                         }
-                        ActivityManagerNative.getDefault().refContentProvider(
+                        ActivityManager.getService().refContentProvider(
                                 prc.holder.connection, 0, 1);
                     } catch (RemoteException e) {
                         //do nothing content provider object is dead any way
@@ -5695,7 +5695,7 @@ public final class ActivityThread {
                             Slog.v(TAG, "releaseProvider: No longer stable w/lastRef="
                                     + lastRef + " - " + prc.holder.info.name);
                         }
-                        ActivityManagerNative.getDefault().refContentProvider(
+                        ActivityManager.getService().refContentProvider(
                                 prc.holder.connection, -1, lastRef ? 1 : 0);
                     } catch (RemoteException e) {
                         //do nothing content provider object is dead any way
@@ -5719,7 +5719,7 @@ public final class ActivityThread {
                                 Slog.v(TAG, "releaseProvider: No longer unstable - "
                                         + prc.holder.info.name);
                             }
-                            ActivityManagerNative.getDefault().refContentProvider(
+                            ActivityManager.getService().refContentProvider(
                                     prc.holder.connection, 0, -1);
                         } catch (RemoteException e) {
                             //do nothing content provider object is dead any way
@@ -5783,10 +5783,10 @@ public final class ActivityThread {
 
         try {
             if (DEBUG_PROVIDER) {
-                Slog.v(TAG, "removeProvider: Invoking ActivityManagerNative."
+                Slog.v(TAG, "removeProvider: Invoking ActivityManagerService."
                         + "removeContentProvider(" + prc.holder.info.name + ")");
             }
-            ActivityManagerNative.getDefault().removeContentProvider(
+            ActivityManager.getService().removeContentProvider(
                     prc.holder.connection, false);
         } catch (RemoteException e) {
             //do nothing content provider object is dead any way
@@ -5820,7 +5820,7 @@ public final class ActivityThread {
                 // it knows it is dead (so we don't race with its death
                 // notification).
                 try {
-                    ActivityManagerNative.getDefault().unstableProviderDied(
+                    ActivityManager.getService().unstableProviderDied(
                             prc.holder.connection);
                 } catch (RemoteException e) {
                     //do nothing content provider object is dead any way
@@ -5834,7 +5834,7 @@ public final class ActivityThread {
             ProviderRefCount prc = mProviderRefCountMap.get(provider);
             if (prc != null) {
                 try {
-                    ActivityManagerNative.getDefault()
+                    ActivityManager.getService()
                             .appNotRespondingViaProvider(prc.holder.connection);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -5992,7 +5992,7 @@ public final class ActivityThread {
                     if (!noReleaseNeeded) {
                         incProviderRefLocked(prc, stable);
                         try {
-                            ActivityManagerNative.getDefault().removeContentProvider(
+                            ActivityManager.getService().removeContentProvider(
                                     holder.connection, stable);
                         } catch (RemoteException e) {
                             //do nothing content provider object is dead any way
@@ -6029,7 +6029,7 @@ public final class ActivityThread {
             android.ddm.DdmHandleAppName.setAppName("<pre-initialized>",
                                                     UserHandle.myUserId());
             RuntimeInit.setApplicationObject(mAppThread.asBinder());
-            final IActivityManager mgr = ActivityManagerNative.getDefault();
+            final IActivityManager mgr = ActivityManager.getService();
             try {
                 mgr.attachApplication(mAppThread);
             } catch (RemoteException ex) {

@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -64,7 +64,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
     public StatusBarWindowManager(Context context) {
         mContext = context;
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        mActivityManager = ActivityManagerNative.getDefault();
+        mActivityManager = ActivityManager.getService();
         mKeyguardScreenRotation = shouldEnableKeyguardScreenRotation();
         mScreenBrightnessDoze = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_screenBrightnessDoze) / 255f;

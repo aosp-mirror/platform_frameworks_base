@@ -26,7 +26,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IWallpaperManager;
@@ -959,7 +958,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }, shutdownFilter);
 
         try {
-            ActivityManagerNative.getDefault().registerUserSwitchObserver(
+            ActivityManager.getService().registerUserSwitchObserver(
                     new UserSwitchObserver() {
                         @Override
                         public void onUserSwitching(int newUserId, IRemoteCallback reply) {

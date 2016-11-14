@@ -17,8 +17,8 @@
 package android.webkit;
 
 import android.annotation.SystemApi;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.Application;
 import android.content.Context;
@@ -292,7 +292,7 @@ public final class WebViewFactory {
             // killed if the package info goes out-of-date.
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "ActivityManager.addPackageDependency()");
             try {
-                ActivityManagerNative.getDefault().addPackageDependency(
+                ActivityManager.getService().addPackageDependency(
                         response.packageInfo.packageName);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);

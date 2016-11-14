@@ -18,7 +18,7 @@ package com.android.internal.policy;
 
 import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -51,7 +51,7 @@ public class PipMotionHelper {
     public void resizeToBounds(Rect toBounds) {
         mHandler.post(() -> {
             if (mActivityManager == null) {
-                mActivityManager = ActivityManagerNative.getDefault();
+                mActivityManager = ActivityManager.getService();
             }
             try {
                 mActivityManager.resizePinnedStack(toBounds, null /* tempPinnedTaskBounds */);

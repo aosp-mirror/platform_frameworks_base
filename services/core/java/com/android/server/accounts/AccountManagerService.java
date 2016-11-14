@@ -34,7 +34,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -3999,7 +3998,7 @@ public class AccountManagerService
     public AccountAndUser[] getRunningAccounts() {
         final int[] runningUserIds;
         try {
-            runningUserIds = ActivityManagerNative.getDefault().getRunningUserIds();
+            runningUserIds = ActivityManager.getService().getRunningUserIds();
         } catch (RemoteException e) {
             // Running in system_server; should never happen
             throw new RuntimeException(e);
@@ -4940,7 +4939,7 @@ public class AccountManagerService
 
     private int handleIncomingUser(int userId) {
         try {
-            return ActivityManagerNative.getDefault().handleIncomingUser(
+            return ActivityManager.getService().handleIncomingUser(
                     Binder.getCallingPid(), Binder.getCallingUid(), userId, true, true, "", null);
         } catch (RemoteException re) {
             // Shouldn't happen, local.

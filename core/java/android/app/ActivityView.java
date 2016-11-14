@@ -152,7 +152,7 @@ public class ActivityView extends ViewGroup {
 
         try {
             mActivityContainer = new ActivityContainerWrapper(
-                    ActivityManagerNative.getDefault().createVirtualActivityContainer(
+                    ActivityManager.getService().createVirtualActivityContainer(
                             mActivity.getActivityToken(), new ActivityContainerCallback(this)));
         } catch (RemoteException e) {
             throw new RuntimeException("ActivityView: Unable to create ActivityContainer. "

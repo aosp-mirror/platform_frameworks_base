@@ -17,7 +17,6 @@
 package com.android.server.search;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.ISearchManager;
@@ -306,7 +305,7 @@ public class SearchManagerService extends ISearchManager.Stub {
         try {
             Intent intent = new Intent(Intent.ACTION_ASSIST);
             intent.setComponent(comp);
-            IActivityManager am = ActivityManagerNative.getDefault();
+            IActivityManager am = ActivityManager.getService();
             return am.launchAssistIntent(intent, ActivityManager.ASSIST_CONTEXT_BASIC, hint,
                     userHandle, args);
         } catch (RemoteException e) {

@@ -16,7 +16,7 @@
 
 package com.android.server;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -813,7 +813,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         };
 
         try {
-            ActivityManagerNative.getDefault().unlockUser(userId, token, secret, listener);
+            ActivityManager.getService().unlockUser(userId, token, secret, listener);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

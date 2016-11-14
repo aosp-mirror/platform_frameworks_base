@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -93,7 +93,7 @@ public class UserInfoController implements CallbackController<OnUserInfoChangedL
             if (ContactsContract.Intents.ACTION_PROFILE_CHANGED.equals(action) ||
                     Intent.ACTION_USER_INFO_CHANGED.equals(action)) {
                 try {
-                    final int currentUser = ActivityManagerNative.getDefault().getCurrentUser().id;
+                    final int currentUser = ActivityManager.getService().getCurrentUser().id;
                     final int changedUser =
                             intent.getIntExtra(Intent.EXTRA_USER_HANDLE, getSendingUserId());
                     if (changedUser == currentUser) {
@@ -118,7 +118,7 @@ public class UserInfoController implements CallbackController<OnUserInfoChangedL
         Context currentUserContext;
         UserInfo userInfo;
         try {
-            userInfo = ActivityManagerNative.getDefault().getCurrentUser();
+            userInfo = ActivityManager.getService().getCurrentUser();
             currentUserContext = mContext.createPackageContextAsUser("android", 0,
                     new UserHandle(userInfo.id));
         } catch (PackageManager.NameNotFoundException e) {

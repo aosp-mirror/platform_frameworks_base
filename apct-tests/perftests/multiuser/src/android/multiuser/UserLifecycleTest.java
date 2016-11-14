@@ -16,7 +16,6 @@
 package android.multiuser;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.UserSwitchObserver;
@@ -86,7 +85,7 @@ public class UserLifecycleTest {
         final Context context = InstrumentationRegistry.getContext();
         mUm = UserManager.get(context);
         mAm = context.getSystemService(ActivityManager.class);
-        mIam = ActivityManagerNative.getDefault();
+        mIam = ActivityManager.getService();
         mState = mPerfStatusReporter.getBenchmarkState();
         mUsersToRemove = new ArrayList<>();
     }
@@ -249,7 +248,7 @@ public class UserLifecycleTest {
 
     private void registerUserSwitchObserver(final CountDownLatch switchLatch,
             final CountDownLatch bootCompleteLatch, final int userId) throws Exception {
-        ActivityManagerNative.getDefault().registerUserSwitchObserver(
+        ActivityManager.getService().registerUserSwitchObserver(
                 new UserSwitchObserver() {
                     @Override
                     public void onUserSwitchComplete(int newUserId) throws RemoteException {

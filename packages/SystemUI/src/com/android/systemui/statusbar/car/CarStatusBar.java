@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.car;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -256,7 +255,7 @@ public class CarStatusBar extends PhoneStatusBar implements
     private int startActivityWithOptions(Intent intent, Bundle options) {
         int result = ActivityManager.START_CANCELED;
         try {
-            result = ActivityManagerNative.getDefault().startActivityAsUser(null /* caller */,
+            result = ActivityManager.getService().startActivityAsUser(null /* caller */,
                     mContext.getBasePackageName(),
                     intent,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),

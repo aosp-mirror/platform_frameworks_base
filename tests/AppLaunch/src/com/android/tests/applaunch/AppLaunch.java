@@ -19,7 +19,6 @@ import java.io.OutputStreamWriter;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.ActivityManagerNative;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.content.Context;
@@ -144,7 +143,7 @@ public class AppLaunch extends InstrumentationTestCase {
         InstrumentationTestRunner instrumentation =
                 (InstrumentationTestRunner)getInstrumentation();
         Bundle args = instrumentation.getArguments();
-        mAm = ActivityManagerNative.getDefault();
+        mAm = ActivityManager.getService();
         String launchDirectory = args.getString(KEY_LAUNCH_DIRECTORY);
         mTraceDirectoryStr = args.getString(KEY_TRACE_DIRECTORY);
         mDropCache = Boolean.parseBoolean(args.getString(KEY_DROP_CACHE));

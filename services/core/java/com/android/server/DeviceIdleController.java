@@ -17,7 +17,7 @@
 package com.android.server;
 
 import android.Manifest;
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -1572,7 +1572,7 @@ public class DeviceIdleController extends SystemService
                 Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
                 "No permission to change device idle whitelist");
         final int callingUid = Binder.getCallingUid();
-        userId = ActivityManagerNative.getDefault().handleIncomingUser(
+        userId = ActivityManager.getService().handleIncomingUser(
                 Binder.getCallingPid(),
                 callingUid,
                 userId,

@@ -16,7 +16,7 @@
 
 package com.android.systemui.pip.phone;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.view.IWindowManager;
@@ -44,7 +44,7 @@ public class PipManager {
      */
     public void initialize(Context context) {
         mContext = context;
-        mActivityManager = ActivityManagerNative.getDefault();
+        mActivityManager = ActivityManager.getService();
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
 
         mMenuController = new PipMenuActivityController(context, mActivityManager, mWindowManager);

@@ -19,7 +19,7 @@ package com.android.internal.app;
 import com.android.internal.R;
 
 import android.app.Activity;
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
@@ -122,7 +122,7 @@ public class HeavyWeightSwitcherActivity extends Activity {
     private OnClickListener mSwitchOldListener = new OnClickListener() {
         public void onClick(View v) {
             try {
-                ActivityManagerNative.getDefault().moveTaskToFront(mCurTask, 0, null);
+                ActivityManager.getService().moveTaskToFront(mCurTask, 0, null);
             } catch (RemoteException e) {
             }
             finish();
@@ -132,7 +132,7 @@ public class HeavyWeightSwitcherActivity extends Activity {
     private OnClickListener mSwitchNewListener = new OnClickListener() {
         public void onClick(View v) {
             try {
-                ActivityManagerNative.getDefault().finishHeavyWeightApp();
+                ActivityManager.getService().finishHeavyWeightApp();
             } catch (RemoteException e) {
             }
             try {

@@ -101,7 +101,6 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.ResourcesManager;
 import android.app.admin.IDevicePolicyManager;
@@ -4536,7 +4535,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private void killUid(int appId, int userId, String reason) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            IActivityManager am = ActivityManagerNative.getDefault();
+            IActivityManager am = ActivityManager.getService();
             if (am != null) {
                 try {
                     am.killUid(appId, userId, reason);
@@ -7260,7 +7259,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     if (!isFirstBoot() && dexOptDialogShown) {
                         try {
-                            ActivityManagerNative.getDefault().showBootMessage(
+                            ActivityManager.getService().showBootMessage(
                                     mContext.getResources().getString(
                                             R.string.android_upgrading_fstrim), true);
                         } catch (RemoteException e) {
@@ -7347,7 +7346,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (showDialog) {
                 try {
-                    ActivityManagerNative.getDefault().showBootMessage(
+                    ActivityManager.getService().showBootMessage(
                             mContext.getResources().getString(R.string.android_upgrading_apk,
                                     numberOfPackagesVisited, numberOfPackagesToDexopt), true);
                 } catch (RemoteException e) {
@@ -9695,7 +9694,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // version of the application while the new one gets installed.
         final long token = Binder.clearCallingIdentity();
         try {
-            IActivityManager am = ActivityManagerNative.getDefault();
+            IActivityManager am = ActivityManager.getService();
             if (am != null) {
                 try {
                     am.killApplication(pkgName, appId, userId, reason);
@@ -11587,7 +11586,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             @Override
             public void run() {
                 try {
-                    final IActivityManager am = ActivityManagerNative.getDefault();
+                    final IActivityManager am = ActivityManager.getService();
                     if (am == null) return;
                     final int[] resolvedUserIds;
                     if (userIds == null) {
@@ -11684,7 +11683,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         Intent intent = new Intent(PackageManager.ACTION_CLEAN_EXTERNAL_STORAGE);
         intent.setComponent(DEFAULT_CONTAINER_COMPONENT);
-        IActivityManager am = ActivityManagerNative.getDefault();
+        IActivityManager am = ActivityManager.getService();
         if (am != null) {
             try {
                 am.startService(null, intent, null, mContext.getOpPackageName(),
@@ -11834,7 +11833,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (!mUserManagerInternal.isUserRunning(userId)) {
             return;
         }
-        final IActivityManager am = ActivityManagerNative.getDefault();
+        final IActivityManager am = ActivityManager.getService();
         try {
             // Deliver LOCKED_BOOT_COMPLETED first
             Intent lockedBcIntent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED)
@@ -17125,7 +17124,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void postPreferredActivityChangedBroadcast(int userId) {
         mHandler.post(() -> {
-            final IActivityManager am = ActivityManagerNative.getDefault();
+            final IActivityManager am = ActivityManager.getService();
             if (am == null) {
                 return;
             }
@@ -20790,7 +20789,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
             // kill any non-foreground processes so we restart them and
             // grant/revoke the GID.
-            final IActivityManager am = ActivityManagerNative.getDefault();
+            final IActivityManager am = ActivityManager.getService();
             if (am != null) {
                 final long token = Binder.clearCallingIdentity();
                 try {

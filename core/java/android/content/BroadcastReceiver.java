@@ -16,7 +16,7 @@
 
 package android.content;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
 import android.app.QueuedWork;
@@ -366,7 +366,7 @@ public abstract class BroadcastReceiver {
          */
         public final void finish() {
             if (mType == TYPE_COMPONENT) {
-                final IActivityManager mgr = ActivityManagerNative.getDefault();
+                final IActivityManager mgr = ActivityManager.getService();
                 if (QueuedWork.hasPendingWork()) {
                     // If this is a broadcast component, we need to make sure any
                     // queued work is complete before telling AM we are done, so
@@ -393,7 +393,7 @@ public abstract class BroadcastReceiver {
             } else if (mOrderedHint && mType != TYPE_UNREGISTERED) {
                 if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
                         "Finishing broadcast to " + mToken);
-                final IActivityManager mgr = ActivityManagerNative.getDefault();
+                final IActivityManager mgr = ActivityManager.getService();
                 sendFinished(mgr);
             }
         }
@@ -519,7 +519,7 @@ public abstract class BroadcastReceiver {
      * Context#startService(Intent)} for more information.
      */
     public IBinder peekService(Context myContext, Intent service) {
-        IActivityManager am = ActivityManagerNative.getDefault();
+        IActivityManager am = ActivityManager.getService();
         IBinder binder = null;
         try {
             service.prepareToLeaveProcess(myContext);

@@ -31,7 +31,6 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
@@ -836,7 +835,7 @@ class MountService extends IMountService.Stub
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                         user.id);
                 if (provider != null) {
-                    final IActivityManager am = ActivityManagerNative.getDefault();
+                    final IActivityManager am = ActivityManager.getService();
                     try {
                         am.killApplication(provider.applicationInfo.packageName,
                                 UserHandle.getAppId(provider.applicationInfo.uid),
@@ -1029,7 +1028,7 @@ class MountService extends IMountService.Stub
         Configuration config = new Configuration();
         config.setLocale(locale);
         try {
-            ActivityManagerNative.getDefault().updatePersistentConfiguration(config);
+            ActivityManager.getService().updatePersistentConfiguration(config);
         } catch (RemoteException e) {
             Slog.e(TAG, "Error setting system locale from mount service", e);
         }

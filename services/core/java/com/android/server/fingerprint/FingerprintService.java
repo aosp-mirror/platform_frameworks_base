@@ -19,7 +19,6 @@ package com.android.server.fingerprint;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
-import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -465,7 +464,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private boolean isForegroundActivity(int uid, int pid) {
         try {
             List<RunningAppProcessInfo> procs =
-                    ActivityManagerNative.getDefault().getRunningAppProcesses();
+                    ActivityManager.getService().getRunningAppProcesses();
             int N = procs.size();
             for (int i = 0; i < N; i++) {
                 RunningAppProcessInfo proc = procs.get(i);
@@ -1072,7 +1071,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
     private void listenForUserSwitches() {
         try {
-            ActivityManagerNative.getDefault().registerUserSwitchObserver(
+            ActivityManager.getService().registerUserSwitchObserver(
                 new SynchronousUserSwitchObserver() {
                     @Override
                     public void onUserSwitching(int newUserId) throws RemoteException {

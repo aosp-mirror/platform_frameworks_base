@@ -27,7 +27,6 @@ import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -434,7 +433,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                         // Take an "interactive" bugreport.
                         MetricsLogger.action(mContext,
                                 MetricsEvent.ACTION_BUGREPORT_FROM_POWER_MENU_INTERACTIVE);
-                        ActivityManagerNative.getDefault().requestBugReport(
+                        ActivityManager.getService().requestBugReport(
                                 ActivityManager.BUGREPORT_OPTION_INTERACTIVE);
                     } catch (RemoteException e) {
                     }
@@ -452,7 +451,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             try {
                 // Take a "full" bugreport.
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_BUGREPORT_FROM_POWER_MENU_FULL);
-                ActivityManagerNative.getDefault().requestBugReport(
+                ActivityManager.getService().requestBugReport(
                         ActivityManager.BUGREPORT_OPTION_FULL);
             } catch (RemoteException e) {
             }
@@ -592,7 +591,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private UserInfo getCurrentUser() {
         try {
-            return ActivityManagerNative.getDefault().getCurrentUser();
+            return ActivityManager.getService().getCurrentUser();
         } catch (RemoteException re) {
             return null;
         }
@@ -620,7 +619,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                             + (isCurrentUser ? " \u2714" : "")) {
                         public void onPress() {
                             try {
-                                ActivityManagerNative.getDefault().switchUser(user.id);
+                                ActivityManager.getService().switchUser(user.id);
                             } catch (RemoteException re) {
                                 Log.e(TAG, "Couldn't switch user " + re);
                             }

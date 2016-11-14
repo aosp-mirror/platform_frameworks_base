@@ -22,7 +22,6 @@ import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -915,7 +914,7 @@ public final class PrintManagerService extends SystemService {
 
         private int resolveCallingUserEnforcingPermissions(int userId) {
             try {
-                return ActivityManagerNative.getDefault().handleIncomingUser(Binder.getCallingPid(),
+                return ActivityManager.getService().handleIncomingUser(Binder.getCallingPid(),
                         Binder.getCallingUid(), userId, true, true, "", null);
             } catch (RemoteException re) {
                 // Shouldn't happen, local.

@@ -19,7 +19,6 @@ package com.android.server;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.IUiModeManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -475,7 +474,7 @@ final class UiModeManagerService extends SystemService {
             mSetUiMode = mConfiguration.uiMode;
 
             try {
-                ActivityManagerNative.getDefault().updateConfiguration(mConfiguration);
+                ActivityManager.getService().updateConfiguration(mConfiguration);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failure communicating with activity manager", e);
             }
@@ -637,7 +636,7 @@ final class UiModeManagerService extends SystemService {
             Intent homeIntent = buildHomeIntent(category);
             if (Sandman.shouldStartDockApp(getContext(), homeIntent)) {
                 try {
-                    int result = ActivityManagerNative.getDefault().startActivityWithConfig(
+                    int result = ActivityManager.getService().startActivityWithConfig(
                             null, null, homeIntent, null, null, null, 0, 0,
                             mConfiguration, null, UserHandle.USER_CURRENT);
                     if (result >= ActivityManager.START_SUCCESS) {
