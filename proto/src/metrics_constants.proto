@@ -2627,6 +2627,11 @@ message MetricsEvent {
     // ACTION: Logs the end to end time taken by all provisioning tasks.
     PROVISIONING_TOTAL_TASK_TIME_MS = 627;
 
+    // OPEN: Settings > Privacy
+    // CATEGORY: SETTINGS
+    // OS: O
+    ENTERPRISE_PRIVACY_SETTINGS = 628;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
