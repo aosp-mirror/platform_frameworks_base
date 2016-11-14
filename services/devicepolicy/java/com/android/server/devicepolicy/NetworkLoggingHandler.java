@@ -61,8 +61,9 @@ final class NetworkLoggingHandler extends Handler {
     @GuardedBy("this")
     private ArrayList<NetworkEvent> mFullBatch;
 
+    // each full batch is represented by its token, which the DPC has to provide back to revieve it
     @GuardedBy("this")
-    private long currentFullBatchToken;
+    private long mCurrentFullBatchToken;
 
     NetworkLoggingHandler(Looper looper, DevicePolicyManagerService dpm) {
         super(looper);
@@ -101,9 +102,9 @@ final class NetworkLoggingHandler extends Handler {
         scheduleBatchFinalization(BATCH_FINALIZATION_TIMEOUT_MS);
         // notify DO that there's a new non-empty batch waiting
         if (mFullBatch.size() > 0) {
-            currentFullBatchToken++;
+            mCurrentFullBatchToken++;
             Bundle extras = new Bundle();
-            extras.putLong(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_TOKEN, currentFullBatchToken);
+            extras.putLong(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_TOKEN, mCurrentFullBatchToken);
             extras.putInt(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_COUNT, mFullBatch.size());
             mDpm.sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE, extras);
         } else {
@@ -112,7 +113,7 @@ final class NetworkLoggingHandler extends Handler {
     }
 
     synchronized List<NetworkEvent> retrieveFullLogBatch(long batchToken) {
-        if (batchToken != currentFullBatchToken) {
+        if (batchToken != mCurrentFullBatchToken) {
             return null;
         }
         return mFullBatch;
