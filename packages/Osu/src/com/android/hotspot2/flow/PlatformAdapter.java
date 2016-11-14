@@ -530,7 +530,8 @@ public class PlatformAdapter {
 
     private int addSP(String xml) throws IOException, SAXException {
         WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-        return wifiManager.addPasspointManagementObject(xml);
+        // TODO(b/32883320): use the new API for adding Passpoint configuration.
+        return 0;
     }
 
     private int modifySP(HomeSP homeSP, Collection<MOData> mods) throws IOException {
@@ -540,7 +541,8 @@ public class PlatformAdapter {
             defMods.add(new PasspointManagementObjectDefinition(mod.getBaseURI(),
                     mod.getURN(), mod.getMOTree().toXml()));
         }
-        return wifiManager.modifyPasspointManagementObject(homeSP.getFQDN(), defMods);
+        // TODO(b/32883320): use the new API to update Passpoint configuration.
+        return 0;
     }
 
     private void reconnect(Network osuNetwork, int newNwkId) {
