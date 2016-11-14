@@ -261,7 +261,7 @@ public class Paint_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static int nGetFlags(Paint thisPaint, long nativePaint) {
+    /*package*/ static int nGetFlags(long nativePaint) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -274,7 +274,7 @@ public class Paint_Delegate {
 
 
     @LayoutlibDelegate
-    /*package*/ static void nSetFlags(Paint thisPaint, long nativePaint, int flags) {
+    /*package*/ static void nSetFlags(long nativePaint, int flags) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -285,12 +285,12 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetFilterBitmap(Paint thisPaint, long nativePaint, boolean filter) {
+    /*package*/ static void nSetFilterBitmap(long nativePaint, boolean filter) {
         setFlag(nativePaint, Paint.FILTER_BITMAP_FLAG, filter);
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nGetHinting(Paint thisPaint, long nativePaint) {
+    /*package*/ static int nGetHinting(long nativePaint) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -301,7 +301,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetHinting(Paint thisPaint, long nativePaint, int mode) {
+    /*package*/ static void nSetHinting(long nativePaint, int mode) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -312,46 +312,46 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetAntiAlias(Paint thisPaint, long nativePaint, boolean aa) {
+    /*package*/ static void nSetAntiAlias(long nativePaint, boolean aa) {
         setFlag(nativePaint, Paint.ANTI_ALIAS_FLAG, aa);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetSubpixelText(Paint thisPaint, long nativePaint,
+    /*package*/ static void nSetSubpixelText(long nativePaint,
             boolean subpixelText) {
         setFlag(nativePaint, Paint.SUBPIXEL_TEXT_FLAG, subpixelText);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetUnderlineText(Paint thisPaint, long nativePaint,
+    /*package*/ static void nSetUnderlineText(long nativePaint,
             boolean underlineText) {
         setFlag(nativePaint, Paint.UNDERLINE_TEXT_FLAG, underlineText);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetStrikeThruText(Paint thisPaint, long nativePaint,
+    /*package*/ static void nSetStrikeThruText(long nativePaint,
             boolean strikeThruText) {
         setFlag(nativePaint, Paint.STRIKE_THRU_TEXT_FLAG, strikeThruText);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetFakeBoldText(Paint thisPaint, long nativePaint,
+    /*package*/ static void nSetFakeBoldText(long nativePaint,
             boolean fakeBoldText) {
         setFlag(nativePaint, Paint.FAKE_BOLD_TEXT_FLAG, fakeBoldText);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetDither(Paint thisPaint, long nativePaint, boolean dither) {
+    /*package*/ static void nSetDither(long nativePaint, boolean dither) {
         setFlag(nativePaint, Paint.DITHER_FLAG, dither);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetLinearText(Paint thisPaint, long nativePaint, boolean linearText) {
+    /*package*/ static void nSetLinearText(long nativePaint, boolean linearText) {
         setFlag(nativePaint, Paint.LINEAR_TEXT_FLAG, linearText);
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nGetColor(Paint thisPaint, long nativePaint) {
+    /*package*/ static int nGetColor(long nativePaint) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -362,7 +362,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetColor(Paint thisPaint, long nativePaint, int color) {
+    /*package*/ static void nSetColor(long nativePaint, int color) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -373,7 +373,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nGetAlpha(Paint thisPaint, long nativePaint) {
+    /*package*/ static int nGetAlpha(long nativePaint) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -384,7 +384,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetAlpha(Paint thisPaint, long nativePaint, int a) {
+    /*package*/ static void nSetAlpha(long nativePaint, int a) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -395,7 +395,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static float nGetStrokeWidth(Paint thisPaint, long nativePaint) {
+    /*package*/ static float nGetStrokeWidth(long nativePaint) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -406,7 +406,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetStrokeWidth(Paint thisPaint, long nativePaint, float width) {
+    /*package*/ static void nSetStrokeWidth(long nativePaint, float width) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -417,7 +417,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static float nGetStrokeMiter(Paint thisPaint, long nativePaint) {
+    /*package*/ static float nGetStrokeMiter(long nativePaint) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -428,7 +428,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetStrokeMiter(Paint thisPaint, long nativePaint, float miter) {
+    /*package*/ static void nSetStrokeMiter(long nativePaint, float miter) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -455,14 +455,14 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nIsElegantTextHeight(Paint thisPaint, long nativePaint) {
+    /*package*/ static boolean nIsElegantTextHeight(long nativePaint) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         return delegate != null && delegate.mFontVariant == FontVariant.ELEGANT;
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetElegantTextHeight(Paint thisPaint, long nativePaint,
+    /*package*/ static void nSetElegantTextHeight(long nativePaint,
             boolean elegant) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
@@ -474,7 +474,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static float nGetTextSize(Paint thisPaint, long nativePaint) {
+    /*package*/ static float nGetTextSize(long nativePaint) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -485,7 +485,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetTextSize(Paint thisPaint, long nativePaint, float textSize) {
+    /*package*/ static void nSetTextSize(long nativePaint, float textSize) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -499,7 +499,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static float nGetTextScaleX(Paint thisPaint, long nativePaint) {
+    /*package*/ static float nGetTextScaleX(long nativePaint) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -510,7 +510,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetTextScaleX(Paint thisPaint, long nativePaint, float scaleX) {
+    /*package*/ static void nSetTextScaleX(long nativePaint, float scaleX) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -524,7 +524,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static float nGetTextSkewX(Paint thisPaint, long nativePaint) {
+    /*package*/ static float nGetTextSkewX(long nativePaint) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -535,7 +535,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nSetTextSkewX(Paint thisPaint, long nativePaint, float skewX) {
+    /*package*/ static void nSetTextSkewX(long nativePaint, float skewX) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -549,7 +549,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static float nAscent(Paint thisPaint, long nativePaint, long nativeTypeface) {
+    /*package*/ static float nAscent(long nativePaint, long nativeTypeface) {
         // get the delegate
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -566,7 +566,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static float nDescent(Paint thisPaint, long nativePaint, long nativeTypeface) {
+    /*package*/ static float nDescent(long nativePaint, long nativeTypeface) {
         // get the delegate
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
@@ -583,7 +583,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static float nGetFontMetrics(Paint thisPaint, long nativePaint, long nativeTypeface,
+    /*package*/ static float nGetFontMetrics(long nativePaint, long nativeTypeface,
             FontMetrics metrics) {
         // get the delegate
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
@@ -595,7 +595,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nGetFontMetricsInt(Paint thisPaint, long nativePaint,
+    /*package*/ static int nGetFontMetricsInt(long nativePaint,
             long nativeTypeface, FontMetricsInt fmi) {
         // get the delegate
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
@@ -998,7 +998,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nGetTextRunCursor(Paint thisPaint, long native_object, char[] text,
+    /*package*/ static int nGetTextRunCursor(long native_object, char[] text,
             int contextStart, int contextLength, int flags, int offset, int cursorOpt) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
@@ -1007,7 +1007,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nGetTextRunCursor(Paint thisPaint, long native_object, String text,
+    /*package*/ static int nGetTextRunCursor(long native_object, String text,
             int contextStart, int contextEnd, int flags, int offset, int cursorOpt) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,

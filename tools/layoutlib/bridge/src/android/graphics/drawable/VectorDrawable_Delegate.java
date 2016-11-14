@@ -141,12 +141,12 @@ public class VectorDrawable_Delegate {
             long colorFilterPtr, Rect bounds, boolean needsMirroring, boolean canReuseCache) {
         VPathRenderer_Delegate nativePathRenderer = VNativeObject.getDelegate(rendererPtr);
 
-        Canvas_Delegate.native_save(canvasWrapperPtr, MATRIX_SAVE_FLAG | CLIP_SAVE_FLAG);
-        Canvas_Delegate.native_translate(canvasWrapperPtr, bounds.left, bounds.top);
+        Canvas_Delegate.nSave(canvasWrapperPtr, MATRIX_SAVE_FLAG | CLIP_SAVE_FLAG);
+        Canvas_Delegate.nTranslate(canvasWrapperPtr, bounds.left, bounds.top);
 
         if (needsMirroring) {
-            Canvas_Delegate.native_translate(canvasWrapperPtr, bounds.width(), 0);
-            Canvas_Delegate.native_scale(canvasWrapperPtr, -1.0f, 1.0f);
+            Canvas_Delegate.nTranslate(canvasWrapperPtr, bounds.width(), 0);
+            Canvas_Delegate.nScale(canvasWrapperPtr, -1.0f, 1.0f);
         }
 
         // At this point, canvas has been translated to the right position.
@@ -155,7 +155,7 @@ public class VectorDrawable_Delegate {
         bounds.offsetTo(0, 0);
         nativePathRenderer.draw(canvasWrapperPtr, colorFilterPtr, bounds.width(), bounds.height());
 
-        Canvas_Delegate.native_restore(canvasWrapperPtr, true);
+        Canvas_Delegate.nRestore(canvasWrapperPtr, true);
 
         return bounds.width() * bounds.height();
     }
@@ -1108,7 +1108,7 @@ public class VectorDrawable_Delegate {
             currentGroup.mStackedMatrix.preConcat(currentGroup.mLocalMatrix);
 
             // Save the current clip information, which is local to this group.
-            Canvas_Delegate.native_save(canvasPtr, MATRIX_SAVE_FLAG | CLIP_SAVE_FLAG);
+            Canvas_Delegate.nSave(canvasPtr, MATRIX_SAVE_FLAG | CLIP_SAVE_FLAG);
             // Draw the group tree in the same order as the XML file.
             for (int i = 0; i < currentGroup.mChildren.size(); i++) {
                 Object child = currentGroup.mChildren.get(i);
@@ -1121,7 +1121,7 @@ public class VectorDrawable_Delegate {
                     drawPath(currentGroup, childPath, canvasPtr, w, h, filterPtr);
                 }
             }
-            Canvas_Delegate.native_restore(canvasPtr, true);
+            Canvas_Delegate.nRestore(canvasPtr, true);
         }
 
         public void draw(long canvasPtr, long filterPtr, int w, int h) {
@@ -1153,7 +1153,7 @@ public class VectorDrawable_Delegate {
 
             if (VPath.isClipPath()) {
                 mRenderPath.addPath(path, mFinalPathMatrix);
-                Canvas_Delegate.native_clipPath(canvasPtr, mRenderPath.mNativePath, Op
+                Canvas_Delegate.nClipPath(canvasPtr, mRenderPath.mNativePath, Op
                         .INTERSECT.nativeInt);
             } else {
                 VFullPath_Delegate fullPath = (VFullPath_Delegate) VPath;
@@ -1197,7 +1197,7 @@ public class VectorDrawable_Delegate {
                     fillPaintDelegate.setColorFilter(filterPtr);
                     fillPaintDelegate.setShader(fullPath.mFillGradient);
                     Path_Delegate.native_setFillType(mRenderPath.mNativePath, fullPath.mFillType);
-                    Canvas_Delegate.native_drawPath(canvasPtr, mRenderPath.mNativePath, fillPaint
+                    Canvas_Delegate.nDrawPath(canvasPtr, mRenderPath.mNativePath, fillPaint
                             .getNativeInstance());
                 }
 
@@ -1228,7 +1228,7 @@ public class VectorDrawable_Delegate {
                     final float finalStrokeScale = minScale * matrixScale;
                     strokePaint.setStrokeWidth(fullPath.mStrokeWidth * finalStrokeScale);
                     strokePaintDelegate.setShader(fullPath.mStrokeGradient);
-                    Canvas_Delegate.native_drawPath(canvasPtr, mRenderPath.mNativePath, strokePaint
+                    Canvas_Delegate.nDrawPath(canvasPtr, mRenderPath.mNativePath, strokePaint
                             .getNativeInstance());
                 }
             }

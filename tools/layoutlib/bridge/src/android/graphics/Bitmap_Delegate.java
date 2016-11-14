@@ -326,7 +326,7 @@ public final class Bitmap_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nativeReconfigure(long nativeBitmap, int width, int height,
-            int config, int allocSize, boolean isPremultiplied) {
+            int config, boolean isPremultiplied) {
         Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
                 "Bitmap.reconfigure() is not supported", null /*data*/);
     }
@@ -598,6 +598,22 @@ public final class Bitmap_Delegate {
         }
 
         return Arrays.equals(argb1, argb2);
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static int nativeGetAllocationByteCount(long nativeBitmap) {
+        // get the delegate from the native int.
+        Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
+        if (delegate == null) {
+            return 0;
+        }
+        return nativeRowBytes(nativeBitmap) * delegate.mImage.getHeight();
+
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nativePrepareToDraw(long nativeBitmap) {
+        // do nothing as Bitmap_Delegate does not have caches
     }
 
     // ---- Private delegate/helper methods ----
