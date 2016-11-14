@@ -179,7 +179,7 @@ public class ImageUtils {
                 g.drawString("Actual", 2 * imageWidth + 10, 20);
             }
 
-            File output = new File(getTempDir(), "delta-" + imageName);
+            File output = new File(getFailureDir(), "delta-" + imageName);
             if (output.exists()) {
                 boolean deleted = output.delete();
                 assertTrue(deleted);
@@ -302,15 +302,16 @@ public class ImageUtils {
     }
 
     /**
-     * Temp directory where to write the thumbnails and deltas.
+     * Directory where to write the thumbnails and deltas.
      */
     @NonNull
-    private static File getTempDir() {
-        if (System.getProperty("os.name").equals("Mac OS X")) {
-            return new File("/tmp"); //$NON-NLS-1$
-        }
+    private static File getFailureDir() {
+        String workingDirString = System.getProperty("user.dir");
+        File failureDir = new File(workingDirString, "out/failures");
 
-        return new File(System.getProperty("java.io.tmpdir")); //$NON-NLS-1$
+        //noinspection ResultOfMethodCallIgnored
+        failureDir.mkdirs();
+        return failureDir; //$NON-NLS-1$
     }
 
     /**
@@ -319,7 +320,7 @@ public class ImageUtils {
     @NonNull
     private static String saveImageAndAppendMessage(@NonNull BufferedImage image,
             @NonNull String initialMessage, @NonNull String relativePath) throws IOException {
-        File output = new File(getTempDir(), getName(relativePath));
+        File output = new File(getFailureDir(), getName(relativePath));
         if (output.exists()) {
             boolean deleted = output.delete();
             assertTrue(deleted);
