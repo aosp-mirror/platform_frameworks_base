@@ -16,12 +16,15 @@
 
 package android.util;
 
+import android.annotation.HalfFloat;
+
 /**
  * <p>Half is a utility class to manipulate half-precision 16-bit
  * <a href="https://en.wikipedia.org/wiki/Half-precision_floating-point_format">IEEE 754</a>
- * floating point data types (also called fp16 or binary16). A half-precision
- * float is stored in a short data type. A half-precision float can be
- * created from or converted to single-precision floats.</p>
+ * floating point data types (also called fp16 or binary16). A half-precision float can be
+ * created from or converted to single-precision floats, and is stored in a short data type.
+ * To distinguish short values holding half-precision floats from regular short values,
+ * it is recommended to use the <code>@HalfFloat</code> annotation.</p>
  *
  * <p>The IEEE 754 standard specifies an fp16 as having the following format:</p>
  * <ul>
@@ -95,51 +98,53 @@ public final class Half {
      * Epsilon is the difference between 1.0 and the next value representable
      * by a half-precision floating-point.
      */
-    public static final short EPSILON            = (short) 0x1400;
-    /**
-     * Smallest negative value a half-precision float may have.
-     */
-    public static final short LOWEST_VALUE       = (short) 0xfbff;
+    public static final @HalfFloat short EPSILON = (short) 0x1400;
+
     /**
      * Maximum exponent a finite half-precision float may have.
      */
-    public static final int MAX_EXPONENT         = 15;
-    /**
-     * Maximum positive finite value a half-precision float may have.
-     */
-    public static final short MAX_VALUE          = (short) 0x7bff;
+    public static final int MAX_EXPONENT = 15;
     /**
      * Minimum exponent a normalized half-precision float may have.
      */
-    public static final int MIN_EXPONENT         = -14;
+    public static final int MIN_EXPONENT = -14;
+
+    /**
+     * Smallest negative value a half-precision float may have.
+     */
+    public static final @HalfFloat short LOWEST_VALUE = (short) 0xfbff;
+    /**
+     * Maximum positive finite value a half-precision float may have.
+     */
+    public static final @HalfFloat short MAX_VALUE = (short) 0x7bff;
     /**
      * Smallest positive normal value a half-precision float may have.
      */
-    public static final short MIN_NORMAL         = (short) 0x0400;
+    public static final @HalfFloat short MIN_NORMAL = (short) 0x0400;
     /**
      * Smallest positive non-zero value a half-precision float may have.
      */
-    public static final short MIN_VALUE          = (short) 0x0001;
+    public static final @HalfFloat short MIN_VALUE = (short) 0x0001;
     /**
      * A Not-a-Number representation of a half-precision float.
      */
-    public static final short NaN                = (short) 0x7e00;
+    public static final @HalfFloat short NaN = (short) 0x7e00;
     /**
      * Negative infinity of type half-precision float.
      */
-    public static final short NEGATIVE_INFINITY  = (short) 0xfc00;
+    public static final @HalfFloat short NEGATIVE_INFINITY = (short) 0xfc00;
     /**
      * Negative 0 of type half-precision float.
      */
-    public static final short NEGATIVE_ZERO      = (short) 0x8000;
+    public static final @HalfFloat short NEGATIVE_ZERO = (short) 0x8000;
     /**
      * Positive infinity of type half-precision float.
      */
-    public static final short POSITIVE_INFINITY  = (short) 0x7c00;
+    public static final @HalfFloat short POSITIVE_INFINITY = (short) 0x7c00;
     /**
      * Positive 0 of type half-precision float.
      */
-    public static final short POSITIVE_ZERO      = (short) 0x0000;
+    public static final @HalfFloat short POSITIVE_ZERO = (short) 0x0000;
 
     private static final int FP16_SIGN_SHIFT        = 15;
     private static final int FP16_SIGN_MASK         = 0x8000;
@@ -171,7 +176,7 @@ public final class Half {
      * @return A value with the magnitude of the first parameter and the sign
      *         of the second parameter
      */
-    public static short copySign(short magnitude, short sign) {
+    public static @HalfFloat short copySign(@HalfFloat short magnitude, @HalfFloat short sign) {
         return (short) ((sign & FP16_SIGN_MASK) | (magnitude & FP16_COMBINED));
     }
 
@@ -189,7 +194,7 @@ public final class Half {
      * @param h A half-precision float value
      * @return The absolute value of the specified half-precision float
      */
-    public static short abs(short h) {
+    public static @HalfFloat short abs(@HalfFloat short h) {
         return (short) (h & FP16_COMBINED);
     }
 
@@ -209,7 +214,7 @@ public final class Half {
      * @return The value of the specified half-precision float rounded to the nearest
      *         half-precision float value
      */
-    public static short round(short h) {
+    public static @HalfFloat short round(@HalfFloat short h) {
         int bits = h & 0xffff;
         int e = bits & 0x7fff;
         int result = bits;
@@ -243,7 +248,7 @@ public final class Half {
      * @return The smallest half-precision float value toward negative infinity
      *         greater than or equal to the specified half-precision float value
      */
-    public static short ceil(short h) {
+    public static @HalfFloat short ceil(@HalfFloat short h) {
         int bits = h & 0xffff;
         int e = bits & 0x7fff;
         int result = bits;
@@ -277,7 +282,7 @@ public final class Half {
      * @return The largest half-precision float value toward positive infinity
      *         less than or equal to the specified half-precision float value
      */
-    public static short floor(short h) {
+    public static @HalfFloat short floor(@HalfFloat short h) {
         int bits = h & 0xffff;
         int e = bits & 0x7fff;
         int result = bits;
@@ -310,7 +315,7 @@ public final class Half {
      * @return The truncated half-precision float value of the specified
      *         half-precision float value
      */
-    public static short trunc(short h) {
+    public static @HalfFloat short trunc(@HalfFloat short h) {
         int bits = h & 0xffff;
         int e = bits & 0x7fff;
         int result = bits;
@@ -338,7 +343,7 @@ public final class Half {
      * @param y The second half-precision value
      * @return The smaller of the two specified half-precision values
      */
-    public static short min(short x, short y) {
+    public static @HalfFloat short min(@HalfFloat short x, @HalfFloat short y) {
         if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return NaN;
         if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return NaN;
 
@@ -363,7 +368,7 @@ public final class Half {
      *
      * @return The larger of the two specified half-precision values
      */
-    public static short max(short x, short y) {
+    public static @HalfFloat short max(@HalfFloat short x, @HalfFloat short y) {
         if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return NaN;
         if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return NaN;
 
@@ -385,7 +390,7 @@ public final class Half {
      *
      * @return True if x is less than y, false otherwise
      */
-    public static boolean less(short x, short y) {
+    public static boolean less(@HalfFloat short x, @HalfFloat short y) {
         if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
         if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
 
@@ -403,7 +408,7 @@ public final class Half {
      *
      * @return True if x is less than or equal to y, false otherwise
      */
-    public static boolean lessEquals(short x, short y) {
+    public static boolean lessEquals(@HalfFloat short x, @HalfFloat short y) {
         if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
         if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
 
@@ -421,7 +426,7 @@ public final class Half {
      *
      * @return True if x is greater than y, false otherwise
      */
-    public static boolean greater(short x, short y) {
+    public static boolean greater(@HalfFloat short x, @HalfFloat short y) {
         if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
         if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
 
@@ -439,7 +444,7 @@ public final class Half {
      *
      * @return True if x is greater than y, false otherwise
      */
-    public static boolean greaterEquals(short x, short y) {
+    public static boolean greaterEquals(@HalfFloat short x, @HalfFloat short y) {
         if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
         if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
 
@@ -457,7 +462,7 @@ public final class Half {
      *
      * @return True if x is equal to y, false otherwise
      */
-    public static boolean equals(short x, short y) {
+    public static boolean equals(@HalfFloat short x, @HalfFloat short y) {
         if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
         if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
 
@@ -470,7 +475,7 @@ public final class Half {
      * @param h A half-precision float value
      * @return 1 if the value is positive, -1 if the value is negative
      */
-    public static int getSign(short h) {
+    public static int getSign(@HalfFloat short h) {
         return (h & FP16_SIGN_MASK) == 0 ? 1 : -1;
     }
 
@@ -484,7 +489,7 @@ public final class Half {
      * @param h A half-precision float value
      * @return The unbiased exponent of the specified value
      */
-    public static int getExponent(short h) {
+    public static int getExponent(@HalfFloat short h) {
         return ((h >>> FP16_EXPONENT_SHIFT) & FP16_EXPONENT_MASK) - FP16_EXPONENT_BIAS;
     }
 
@@ -495,7 +500,7 @@ public final class Half {
      * @param h A half-precision float value
      * @return The significand, or significand, of the specified vlaue
      */
-    public static int getSignificand(short h) {
+    public static int getSignificand(@HalfFloat short h) {
         return h & FP16_SIGNIFICAND_MASK;
     }
 
@@ -507,7 +512,7 @@ public final class Half {
      * @return true if the value is positive infinity or negative infinity,
      *         false otherwise
      */
-    public static boolean isInfinite(short h) {
+    public static boolean isInfinite(@HalfFloat short h) {
         return (h & FP16_COMBINED) == FP16_EXPONENT_MAX;
     }
 
@@ -518,7 +523,7 @@ public final class Half {
      * @param h A half-precision float value
      * @return true if the value is a NaN, false otherwise
      */
-    public static boolean isNaN(short h) {
+    public static boolean isNaN(@HalfFloat short h) {
         return (h & FP16_COMBINED) > FP16_EXPONENT_MAX;
     }
 
@@ -532,7 +537,7 @@ public final class Half {
      * @param h A half-precision float value
      * @return true if the value is normalized, false otherwise
      */
-    public static boolean isNormalized(short h) {
+    public static boolean isNormalized(@HalfFloat short h) {
         return (h & FP16_EXPONENT_MAX) != 0 && (h & FP16_EXPONENT_MAX) != FP16_EXPONENT_MAX;
     }
 
@@ -551,7 +556,7 @@ public final class Half {
      * @param h The half-precision float value to convert to single-precision
      * @return A normalized single-precision float value
      */
-    public static float toFloat(short h) {
+    public static float toFloat(@HalfFloat short h) {
         int bits = h & 0xffff;
         int s = bits & FP16_SIGN_MASK;
         int e = (bits >>> FP16_EXPONENT_SHIFT) & FP16_EXPONENT_MASK;
@@ -603,7 +608,7 @@ public final class Half {
      * @return A half-precision float value
      */
     @SuppressWarnings("StatementWithEmptyBody")
-    public static short valueOf(float f) {
+    public static @HalfFloat short valueOf(float f) {
         int bits = Float.floatToRawIntBits(f);
         int s = (bits >>> FP32_SIGN_SHIFT    );
         int e = (bits >>> FP32_EXPONENT_SHIFT) & FP32_EXPONENT_MASK;
@@ -653,7 +658,7 @@ public final class Half {
      * @param h A half-precision float value
      * @return A string representation of the specified value
      */
-    public static String toString(short h) {
+    public static String toString(@HalfFloat short h) {
         return Float.toString(toFloat(h));
     }
 
@@ -683,7 +688,7 @@ public final class Half {
      * @param h A half-precision float value
      * @return A hexadecimal string representation of the specified value
      */
-    public static String toHexString(short h) {
+    public static String toHexString(@HalfFloat short h) {
         StringBuilder o = new StringBuilder();
 
         int bits = h & 0xffff;
