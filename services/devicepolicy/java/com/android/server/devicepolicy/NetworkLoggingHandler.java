@@ -55,10 +55,14 @@ final class NetworkLoggingHandler extends Handler {
     private final DevicePolicyManagerService mDpm;
 
     // threadsafe as it's Handler's thread confined
+    @GuardedBy("this")
     private ArrayList<NetworkEvent> mNetworkEvents = new ArrayList<NetworkEvent>();
 
     @GuardedBy("this")
     private ArrayList<NetworkEvent> mFullBatch;
+
+    @GuardedBy("this")
+    private long currentFullBatchToken;
 
     NetworkLoggingHandler(Looper looper, DevicePolicyManagerService dpm) {
         super(looper);
@@ -97,17 +101,21 @@ final class NetworkLoggingHandler extends Handler {
         scheduleBatchFinalization(BATCH_FINALIZATION_TIMEOUT_MS);
         // notify DO that there's a new non-empty batch waiting
         if (mFullBatch.size() > 0) {
-            mDpm.sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE,
-                    /* extras */ null);
+            currentFullBatchToken++;
+            Bundle extras = new Bundle();
+            extras.putLong(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_TOKEN, currentFullBatchToken);
+            extras.putInt(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_COUNT, mFullBatch.size());
+            mDpm.sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE, extras);
         } else {
             mFullBatch = null;
         }
     }
 
-    synchronized List<NetworkEvent> retrieveFullLogBatch() {
-        List<NetworkEvent> ret = mFullBatch;
-        mFullBatch = null;
-        return ret;
+    synchronized List<NetworkEvent> retrieveFullLogBatch(long batchToken) {
+        if (batchToken != currentFullBatchToken) {
+            return null;
+        }
+        return mFullBatch;
     }
 }
 
