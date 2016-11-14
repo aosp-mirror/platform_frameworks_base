@@ -2239,7 +2239,7 @@ public class DevicePolicyManager {
      * Determine whether the current password the user has set is sufficient to meet the policy
      * requirements (e.g. quality, minimum length) that have been requested by the admins of this
      * user and its participating profiles. Restrictions on profiles that have a separate challenge
-     * are not taken into account.
+     * are not taken into account. The user must be unlocked in order to perform the check.
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
@@ -2252,6 +2252,7 @@ public class DevicePolicyManager {
      * @return Returns true if the password meets the current requirements, else false.
      * @throws SecurityException if the calling application does not own an active administrator
      *             that uses {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     * @throws InvalidStateException if the user is not unlocked.
      */
     public boolean isActivePasswordSufficient() {
         if (mService != null) {
@@ -3753,6 +3754,19 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 mService.setActivePasswordState(metrics, userHandle);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void reportPasswordChanged(@UserIdInt int userId) {
+        if (mService != null) {
+            try {
+                mService.reportPasswordChanged(userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
