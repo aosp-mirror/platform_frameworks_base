@@ -267,9 +267,9 @@ static void JHwParcel_native_writeInterfaceToken(
 
     const jchar *interfaceName = env->GetStringCritical(interfaceNameObj, NULL);
     if (interfaceName) {
-        String16 nameCopy(
+        String8 nameCopy = String8(String16(
                 reinterpret_cast<const char16_t *>(interfaceName),
-                env->GetStringLength(interfaceNameObj));
+                env->GetStringLength(interfaceNameObj)));
 
         env->ReleaseStringCritical(interfaceNameObj, interfaceName);
         interfaceName = NULL;
@@ -277,7 +277,7 @@ static void JHwParcel_native_writeInterfaceToken(
         hardware::Parcel *parcel =
             JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
-        status_t err = parcel->writeInterfaceToken(nameCopy);
+        status_t err = parcel->writeInterfaceToken(nameCopy.string());
         signalExceptionForError(env, err);
     }
 }
@@ -294,9 +294,9 @@ static void JHwParcel_native_enforceInterface(
 
     const jchar *interfaceName = env->GetStringCritical(interfaceNameObj, NULL);
     if (interfaceName) {
-        String16 interfaceNameCopy(
+        String8 interfaceNameCopy = String8(String16(
                 reinterpret_cast<const char16_t *>(interfaceName),
-                env->GetStringLength(interfaceNameObj));
+                env->GetStringLength(interfaceNameObj)));
 
         env->ReleaseStringCritical(interfaceNameObj, interfaceName);
         interfaceName = NULL;
@@ -304,7 +304,7 @@ static void JHwParcel_native_enforceInterface(
         hardware::Parcel *parcel =
             JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
-        bool valid = parcel->enforceInterface(interfaceNameCopy);
+        bool valid = parcel->enforceInterface(interfaceNameCopy.string());
 
         if (!valid) {
             jniThrowException(
