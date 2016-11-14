@@ -114,7 +114,10 @@ public final class PhoneAccount implements Parcelable {
     public static final int CAPABILITY_SIM_SUBSCRIPTION = 0x4;
 
     /**
-     * Flag indicating that this {@code PhoneAccount} is capable of placing video calls.
+     * Flag indicating that this {@code PhoneAccount} is currently able to place video calls.
+     * <p>
+     * See also {@link #CAPABILITY_SUPPORTS_VIDEO_CALLING} which indicates whether the
+     * {@code PhoneAccount} supports placing video calls.
      * <p>
      * See {@link #getCapabilities}
      */
@@ -177,6 +180,23 @@ public final class PhoneAccount implements Parcelable {
      * @hide
      */
     public static final int CAPABILITY_EMERGENCY_VIDEO_CALLING = 0x200;
+
+    /**
+     * Flag indicating that this {@link PhoneAccount} supports video calling.
+     * This is not an indication that the {@link PhoneAccount} is currently able to make a video
+     * call, but rather that it has the ability to make video calls (but not necessarily at this
+     * time).
+     * <p>
+     * Whether a {@link PhoneAccount} can make a video call is ultimately controlled by
+     * {@link #CAPABILITY_VIDEO_CALLING}, which indicates whether the {@link PhoneAccount} is
+     * currently capable of making a video call.  Consider a case where, for example, a
+     * {@link PhoneAccount} supports making video calls (e.g.
+     * {@link #CAPABILITY_SUPPORTS_VIDEO_CALLING}), but a current lack of network connectivity
+     * prevents video calls from being made (e.g. {@link #CAPABILITY_VIDEO_CALLING}).
+     * <p>
+     * See {@link #getCapabilities}
+     */
+    public static final int CAPABILITY_SUPPORTS_VIDEO_CALLING = 0x400;
 
     /**
      * URI scheme for telephone number URIs.
@@ -716,6 +736,9 @@ public final class PhoneAccount implements Parcelable {
      */
     private String capabilitiesToString(int capabilities) {
         StringBuilder sb = new StringBuilder();
+        if (hasCapabilities(CAPABILITY_SUPPORTS_VIDEO_CALLING)) {
+            sb.append("SuppVideo ");
+        }
         if (hasCapabilities(CAPABILITY_VIDEO_CALLING)) {
             sb.append("Video ");
         }
