@@ -357,33 +357,40 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     public static final int BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE = 1;
 
     /** @hide */
-    public static final String ACTION_CHOOSE_PRIVATE_KEY_ALIAS = "android.app.action.CHOOSE_PRIVATE_KEY_ALIAS";
+    public static final String ACTION_CHOOSE_PRIVATE_KEY_ALIAS =
+            "android.app.action.CHOOSE_PRIVATE_KEY_ALIAS";
 
     /** @hide */
-    public static final String EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID = "android.app.extra.CHOOSE_PRIVATE_KEY_SENDER_UID";
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID =
+            "android.app.extra.CHOOSE_PRIVATE_KEY_SENDER_UID";
 
     /** @hide */
-    public static final String EXTRA_CHOOSE_PRIVATE_KEY_URI = "android.app.extra.CHOOSE_PRIVATE_KEY_URI";
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_URI =
+            "android.app.extra.CHOOSE_PRIVATE_KEY_URI";
 
     /** @hide */
-    public static final String EXTRA_CHOOSE_PRIVATE_KEY_ALIAS = "android.app.extra.CHOOSE_PRIVATE_KEY_ALIAS";
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_ALIAS =
+            "android.app.extra.CHOOSE_PRIVATE_KEY_ALIAS";
 
     /** @hide */
-    public static final String EXTRA_CHOOSE_PRIVATE_KEY_RESPONSE = "android.app.extra.CHOOSE_PRIVATE_KEY_RESPONSE";
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_RESPONSE =
+            "android.app.extra.CHOOSE_PRIVATE_KEY_RESPONSE";
 
     /**
      * Broadcast action: notify device owner that there is a pending system update.
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_NOTIFY_PENDING_SYSTEM_UPDATE = "android.app.action.NOTIFY_PENDING_SYSTEM_UPDATE";
+    public static final String ACTION_NOTIFY_PENDING_SYSTEM_UPDATE =
+            "android.app.action.NOTIFY_PENDING_SYSTEM_UPDATE";
 
     /**
      * A long type extra for {@link #onSystemUpdatePending} recording the system time as given by
      * {@link System#currentTimeMillis()} when the current pending system update is first available.
      * @hide
      */
-    public static final String EXTRA_SYSTEM_UPDATE_RECEIVED_TIME = "android.app.extra.SYSTEM_UPDATE_RECEIVED_TIME";
+    public static final String EXTRA_SYSTEM_UPDATE_RECEIVED_TIME =
+            "android.app.extra.SYSTEM_UPDATE_RECEIVED_TIME";
 
     /**
      * Name under which a DevicePolicy component publishes information
