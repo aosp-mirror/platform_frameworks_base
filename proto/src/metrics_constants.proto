@@ -22,6 +22,27 @@ package com_android_internal_logging;
 // Wrapper for System UI log events
 message MetricsEvent {
 
+  // Types of events
+  enum Type {
+    // Unknown
+    TYPE_UNKNOWN = 0;
+
+    // The view became visible to the user.
+    TYPE_OPEN = 1;
+
+    // The view became hidden.
+    TYPE_CLOSE = 2;
+
+    // The view switched to detail mode (most relevant for quick settings tiles)
+    TYPE_DETAIL = 3;
+
+    // The view or control was activated.
+    TYPE_ACTION = 4;
+
+    // The view or control was dismissed.
+    TYPE_DISMISS = 5;
+  }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
