@@ -53,7 +53,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.net.Uri;
@@ -70,6 +69,9 @@ import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.service.autofill.FillableInputField;
+import android.service.autofill.AutoFillService;
+import android.service.autofill.IAutoFillCallback;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -90,8 +92,6 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
 import android.view.DragAndDropPermissions;
 import android.view.DragEvent;
-import android.view.InputDevice;
-import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
 import android.view.KeyboardShortcutInfo;
@@ -113,9 +113,11 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
@@ -802,11 +804,13 @@ public class Activity extends ContextThemeWrapper
         private boolean mReleased;
         private boolean mUpdated;
     }
-    private final ArrayList<ManagedCursor> mManagedCursors =
-        new ArrayList<ManagedCursor>();
 
-    // protected by synchronized (this)
+    @GuardedBy("mManagedCursors")
+    private final ArrayList<ManagedCursor> mManagedCursors = new ArrayList<>();
+
+    @GuardedBy("this")
     int mResultCode = RESULT_CANCELED;
+    @GuardedBy("this")
     Intent mResultData = null;
 
     private TranslucentConversionListener mTranslucentCallback;
@@ -836,6 +840,9 @@ public class Activity extends ContextThemeWrapper
 
     private boolean mHasCurrentPermissionsRequest;
     private boolean mEatKeyUpEvent;
+
+    @GuardedBy("this")
+    private IAutoFillCallback mAutoFillCallback;
 
     private static native String getDlWarning();
 
@@ -1685,6 +1692,53 @@ public class Activity extends ContextThemeWrapper
      * @param outContent The assist content to return.
      */
     public void onProvideAssistContent(AssistContent outContent) {
+    }
+
+    /**
+     * Lazily gets the {@code IAutoFillCallback} for this activitity.
+     *
+     * <p>This callback is used by the {@link AutoFillService} app to auto-fill the activity fields.
+     */
+    IAutoFillCallback getAutoFillCallback() {
+        synchronized (this) {
+            if (mAutoFillCallback == null) {
+                mAutoFillCallback = new IAutoFillCallback.Stub() {
+                    @Override
+                    public void autofill(@SuppressWarnings("rawtypes") List fields)
+                            throws RemoteException {
+                        runOnUiThread(() -> {
+                            final View root = getWindow().getDecorView().getRootView();
+                            for (Object field : fields) {
+                                if (!(field instanceof FillableInputField)) {
+                                    Slog.w(TAG,  "autofill(): invalid type " + field.getClass());
+                                    continue;
+                                }
+                                FillableInputField autoFillField = (FillableInputField) field;
+                                final int viewId = autoFillField.getId();
+                                final View view = root.findViewByAccessibilityIdTraversal(viewId);
+                                // TODO: should handle other types of view as well, but that will
+                                // require:
+                                // - a new interface like AutoFillable
+                                // - a way for the views to define the type of the autofield value
+                                if ((view instanceof EditText)) {
+                                    ((EditText) view).setText(autoFillField.getValue());
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void showError(String message) {
+                        runOnUiThread(() -> {
+                            // TODO: temporary show a toast until it uses the Snack bar.
+                            Toast.makeText(Activity.this, "Auto-fill request failed: " + message,
+                                    Toast.LENGTH_LONG).show();
+                        });
+                    }
+                };
+            }
+        }
+        return mAutoFillCallback;
     }
 
     /**
@@ -5972,6 +6026,11 @@ public class Activity extends ContextThemeWrapper
                 getWindow().peekDecorView() != null &&
                 getWindow().peekDecorView().getViewRootImpl() != null) {
             getWindow().peekDecorView().getViewRootImpl().dump(prefix, fd, writer, args);
+        }
+
+        if (mAutoFillCallback != null) {
+            writer.print(prefix); writer.print("mAutoFillCallback: " );
+                    writer.println(mAutoFillCallback);
         }
 
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);

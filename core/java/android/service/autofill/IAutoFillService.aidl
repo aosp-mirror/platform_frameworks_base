@@ -16,15 +16,17 @@
 
 package android.service.autofill;
 
-import android.os.Bundle;
 import android.app.assist.AssistStructure;
+import android.os.Bundle;
+import android.service.autofill.IAutoFillCallback;
+import com.android.internal.os.IResultReceiver;
 
 /**
  * @hide
  */
-oneway interface IAutoFillService {
+interface IAutoFillService {
+    // TODO: rename to onConnected() / onDisconnected()
     void ready();
-    void newSession(String token, in Bundle data, int flags, in AssistStructure structure);
-    void finishSession(String token);
     void shutdown();
+    IResultReceiver getAssistReceiver();
 }

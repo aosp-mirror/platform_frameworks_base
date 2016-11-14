@@ -119,6 +119,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     public static final String KEY_CONTENT = "content";
     /** @hide */
     public static final String KEY_RECEIVER_EXTRAS = "receiverExtras";
+    /** @hide */
+    public static final String KEY_AUTO_FILL_CALLBACK = "autoFillCallback";
 
     final Context mContext;
     final HandlerCaller mHandlerCaller;

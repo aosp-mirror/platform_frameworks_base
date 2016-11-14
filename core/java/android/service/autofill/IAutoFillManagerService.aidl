@@ -19,36 +19,20 @@ package android.service.autofill;
 import android.os.Bundle;
 
 /**
- * Intermediator between apps being auto-filled and auto-fill service implementations.
+ * Mediator between apps being auto-filled and auto-fill service implementations.
  *
  * {@hide}
  */
 interface IAutoFillManagerService {
 
     /**
-     * Starts an auto-fill session for the top activities for a given user.
-     *
-     * It's used to start a new session from system affordances.
+     * Request auto-fill on the top activity of a given user.
      *
      * @param userId user handle.
-     * @param args the bundle to pass as arguments to the voice interaction session.
-     * @param flags flags indicating optional session behavior.
      * @param activityToken optional token of activity that needs to be on top.
      *
-     * @return session token, or null if session was not created (for example, if the activity's
-     *         user does not have an auto-fill service associated with).
+     * @return whether the request succeeded  (for example, if the activity's
+     *         user does not have an auto-fill service associated with, it will return false).
      */
-     // TODO: pass callback providing an onAutoFill() method
-    String startSession(int userId, in Bundle args, int flags, IBinder activityToken);
-
-    /**
-     * Finishes an auto-fill session.
-     *
-     * @param userId user handle.
-     * @param token session token.
-     *
-     * @return true if session existed and was finished.
-     */
-    boolean finishSession(int userId, String token);
-
+    boolean requestAutoFill(int userId, IBinder activityToken);
 }

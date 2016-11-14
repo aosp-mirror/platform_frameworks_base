@@ -16,7 +16,9 @@
 
 package com.android.server.autofill;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,6 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.icu.text.DateFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -41,16 +44,14 @@ import com.android.server.LocalServices;
 import com.android.server.autofill.AutoFillManagerService.AutoFillManagerServiceStub;
 
 import java.io.PrintWriter;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * Bridge between the {@code system_server}'s {@link AutoFillManagerService} and the
  * app's {@link IAutoFillService} implementation.
  *
- * <p>It keeps a list of auto-fill sessions for a specifc user.
  */
 final class AutoFillManagerServiceImpl {
 
@@ -61,13 +62,15 @@ final class AutoFillManagerServiceImpl {
     final ComponentName mComponent;
 
     private final Context mContext;
+    private final IActivityManager mAm;
     private final Object mLock;
     private final AutoFillManagerServiceStub mServiceStub;
     private final AutoFillServiceInfo mInfo;
 
-    // Map of sessions keyed by session tokens.
-    @GuardedBy("mLock")
-    private Map<String, AutoFillSession> mSessions = new HashMap<>();
+    // TODO: improve its usage
+    // - set maximum number of entries
+    // - disable on low-memory devices.
+    private final List<String> mRequestHistory = new ArrayList<>();
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -75,7 +78,7 @@ final class AutoFillManagerServiceImpl {
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 final String reason = intent.getStringExtra("reason");
                 if (DEBUG) Slog.d(TAG, "close system dialogs: " + reason);
-                // TODO: close any pending UI like account selection
+                // TODO: close any pending UI like account selection (or remove this receiver)
             }
         }
     };
@@ -113,8 +116,9 @@ final class AutoFillManagerServiceImpl {
         mServiceStub = stub;
         mUser = user;
         mComponent = component;
+        mAm = ActivityManager.getService();
 
-        AutoFillServiceInfo info;
+        final AutoFillServiceInfo info;
         try {
             info = new AutoFillServiceInfo(component, mUser);
         } catch (PackageManager.NameNotFoundException e) {
@@ -150,19 +154,15 @@ final class AutoFillManagerServiceImpl {
         if (DEBUG) Slog.d(TAG, "Bound to " + mComponent);
     }
 
-    String startSession(Bundle args, int flags, IBinder activityToken) {
-
+    boolean requestAutoFill(IBinder activityToken) {
         if (!mBound) {
             // TODO: should it bind on demand? Or perhaps always run when on on low-memory?
-            Slog.w(TAG, "startSession() failed because it's not bound to service");
-            return null;
+            Slog.w(TAG, "requestAutoFill() failed because it's not bound to service");
+            return false;
         }
 
-        // TODO: session should have activity ids, so same session is reused when called again
-        // for the same activity.
-
         // TODO: activityToken should probably not be null, but we need to wait until the UI is
-        // triggering the call (for now it's trough 'adb shell cmd autofill start session'
+        // triggering the call (for now it's trough 'adb shell cmd autofill request'
         if (activityToken == null) {
             // Let's get top activities from all visible stacks.
 
@@ -175,40 +175,43 @@ final class AutoFillManagerServiceImpl {
                 Slog.d(TAG, "Top activities (" + topActivities.size() + "): " + topActivities);
             if (topActivities.isEmpty()) {
                 Slog.w(TAG, "Could not get top activity");
-                return null;
+                return false;
             }
             activityToken = topActivities.get(0);
         }
 
         synchronized (mLock) {
-            return startSessionLocked(args, flags, activityToken);
+            return requestAutoFillLocked(activityToken);
         }
     }
 
-    // TODO: remove args and flags if not needed?
-    private String startSessionLocked(Bundle args, int flags, IBinder activityToken) {
+    private boolean requestAutoFillLocked(IBinder activityToken) {
+        mRequestHistory.add(
+                DateFormat.getDateTimeInstance().format(new Date()) + " - " + activityToken);
+        if (DEBUG) Slog.d(TAG, "Requesting for user " + mUser + " and activity " + activityToken);
 
-        final String sessionToken = UUID.randomUUID().toString();
-
-        if (DEBUG) Slog.d(TAG, "Starting session for user " + mUser
-                + ": sessionToken=" + sessionToken + ", activityToken=" + activityToken);
-
-        final AutoFillSession session =
-                new AutoFillSession(mService, mLock, sessionToken, activityToken);
-        session.startLocked();
-        mSessions.put(sessionToken, session);
-
-        return sessionToken;
-    }
-
-    // TODO: need a way to automatically call it when the activity is destroyed.
-    boolean finishSessionLocked(String token) {
-        if (DEBUG) Slog.d(TAG, "Removing session " + token + " for user " + mUser);
-        final AutoFillSession session = mSessions.remove(token);
-        if (session != null) {
-            session.finishLocked();
+        // Sanity check
+        if (mService == null) {
+            Slog.w(TAG, "requestAutoFillLocked(: service is null");
+            return false;
         }
-        return session != null;
+
+        /*
+         * TODO: apply security checks below:
+         * - checks if disabled by secure settings / device policy
+         * - log operation using noteOp()
+         * - check flags
+         * - display disclosure if needed
+         */
+        try {
+            // TODO: add MetricsLogger call
+            if (!mAm.requestAutoFillData(mService.getAssistReceiver(), null, activityToken)) {
+                return false;
+            }
+        } catch (RemoteException e) {
+            // Should happen, it's a local call.
+        }
+        return true;
     }
 
     void shutdownLocked() {
@@ -253,23 +256,15 @@ final class AutoFillManagerServiceImpl {
             mInfo.getServiceInfo().dump(new PrintWriterPrinter(pw), prefix + prefix);
         }
 
-        if (!dumpSessionsLocked(prefix, pw)) {
-            pw.print(prefix); pw.print("No active sessions for user "); pw.println(mUser);
+        if (mRequestHistory.isEmpty()) {
+            pw.print(prefix); pw.println("No history");
+        } else {
+            pw.print(prefix); pw.println("History:");
+            final String prefix2 = prefix + prefix;
+            for (int i = 0; i < mRequestHistory.size(); i++) {
+                pw.print(prefix2); pw.print(i); pw.print(": "); pw.println(mRequestHistory.get(i));
+            }
         }
-    }
-
-    boolean dumpSessionsLocked(String prefix, PrintWriter pw) {
-        if (mSessions.isEmpty()) {
-            return false;
-        }
-
-        pw.print(mSessions.size());pw.println(" active sessions:");
-        final String sessionPrefix = prefix + prefix;
-        for (AutoFillSession session : mSessions.values()) {
-            pw.println();
-            session.dumpLocked(sessionPrefix, pw);
-        }
-        return true;
     }
 
     @Override

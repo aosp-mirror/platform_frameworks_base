@@ -275,4 +275,7 @@ public abstract class ViewStructure {
 
     /** @hide */
     public abstract Rect getTempRect();
+
+    /** @hide */
+    public abstract void setAutoFillId(int autoFillId);
 }
