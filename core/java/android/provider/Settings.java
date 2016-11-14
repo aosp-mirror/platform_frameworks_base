@@ -372,6 +372,22 @@ public final class Settings {
             "android.settings.WIFI_IP_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of Wi-Fi saved networks.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_WIFI_SAVED_NETWORK_SETTINGS =
+            "android.settings.WIFI_SAVED_NETWORK_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of Bluetooth.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
