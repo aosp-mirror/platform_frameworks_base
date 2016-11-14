@@ -62,9 +62,6 @@ public final class FillCallback {
         }
     }
 
-    /**
-     * Notifies the activity that the auto-fill request failed.
-     */
     public void onFailure(CharSequence message) {
         if (DEBUG) Log.d(TAG, "onFailure(): message=" + message);
 

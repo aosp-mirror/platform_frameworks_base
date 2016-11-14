@@ -15,7 +15,6 @@
  */
 package android.service.autofill;
 
-import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.app.Activity;
 import android.app.Service;
@@ -33,9 +32,6 @@ import android.util.Log;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * Top-level service of the current auto-fill service for a given user.
@@ -56,9 +52,9 @@ public abstract class AutoFillService extends Service {
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE = "android.service.autofill.AutoFillService";
 
-    private static final int MSG_READY = 1;
-    private static final int MSG_AUTO_FILL = 2;
-    private static final int MSG_SHUTDOWN = 3;
+    private static final int MSG_CONNECT = 1;
+    private static final int MSG_AUTO_FILL_ACTIVITY = 2;
+    private static final int MSG_DISCONNECT = 3;
 
     private final IResultReceiver mAssistReceiver = new IResultReceiver.Stub() {
         @Override
@@ -70,15 +66,15 @@ public abstract class AutoFillService extends Service {
                     .getBinder(VoiceInteractionSession.KEY_AUTO_FILL_CALLBACK);
 
             mHandlerCaller
-                .obtainMessageOO(MSG_AUTO_FILL, structure, binder).sendToTarget();
+                .obtainMessageOO(MSG_AUTO_FILL_ACTIVITY, structure, binder).sendToTarget();
         }
 
     };
 
     private final IAutoFillService mInterface = new IAutoFillService.Stub() {
         @Override
-        public void ready() {
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_READY));
+        public void onConnected() {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_CONNECT));
         }
 
         @Override
@@ -87,8 +83,8 @@ public abstract class AutoFillService extends Service {
         }
 
         @Override
-        public void shutdown() {
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_SHUTDOWN));
+        public void onDisconnected() {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_DISCONNECT));
         }
     };
 
@@ -97,17 +93,17 @@ public abstract class AutoFillService extends Service {
         @Override
         public void executeMessage(Message msg) {
             switch (msg.what) {
-                case MSG_READY: {
-                    onReady();
+                case MSG_CONNECT: {
+                    onConnected();
                     break;
-                } case MSG_AUTO_FILL: {
+                } case MSG_AUTO_FILL_ACTIVITY: {
                     final SomeArgs args = (SomeArgs) msg.obj;
                     final AssistStructure structure = (AssistStructure) args.arg1;
                     final IBinder binder = (IBinder) args.arg2;
-                    autoFillActivity(structure, binder);
+                    requestAutoFill(structure, binder);
                     break;
-                } case MSG_SHUTDOWN: {
-                    onShutdown();
+                } case MSG_DISCONNECT: {
+                    onDisconnected();
                     break;
                 } default: {
                     Log.w(TAG, "MyCallbacks received invalid message type: " + msg);
@@ -135,14 +131,12 @@ public abstract class AutoFillService extends Service {
     }
 
     /**
-     * Called during service initialization to tell you when the system is ready
-     * to receive interaction from it.
+     * Called when the Android System connects to service.
      *
      * <p>You should generally do initialization here rather than in {@link #onCreate}.
      */
-    // TODO: rename to onConnect() / update javadoc
-    public void onReady() {
-        if (DEBUG) Log.d(TAG, "onReady()");
+    public void onConnected() {
+        if (DEBUG) Log.d(TAG, "onConnected()");
     }
 
     /**
@@ -155,21 +149,18 @@ public abstract class AutoFillService extends Service {
     public abstract void onFillRequest(AssistStructure structure,
             CancellationSignal cancellationSignal, FillCallback callback);
 
-    private void autoFillActivity(AssistStructure structure, IBinder binder) {
+    private void requestAutoFill(AssistStructure structure, IBinder binder) {
         final FillCallback callback = new FillCallback(binder);
         // TODO: hook up the cancelationSignal
         onFillRequest(structure, new CancellationSignal(), callback);
     }
 
     /**
-     * Called during service de-initialization to tell you when the system is shutting the
-     * service down.
+     * Called when the Android System disconnects from the service.
      *
      * <p> At this point this service may no longer be an active {@link AutoFillService}.
      */
-    // TODO: rename to onDisconnected() / update javadoc
-    public void onShutdown() {
-        if (DEBUG) Log.d(TAG, "onShutdown()");
+    public void onDisconnected() {
+        if (DEBUG) Log.d(TAG, "onDisconnected()");
     }
-
 }

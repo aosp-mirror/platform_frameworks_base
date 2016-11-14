@@ -16,6 +16,8 @@
 
 package com.android.server.autofill;
 
+import static com.android.server.autofill.AutoFillManagerService.DEBUG;
+
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
@@ -27,10 +29,11 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.icu.text.DateFormat;
-import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.autofill.AutoFillService;
 import android.service.autofill.AutoFillServiceInfo;
@@ -38,14 +41,15 @@ import android.service.autofill.IAutoFillService;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
+import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
-import com.android.server.autofill.AutoFillManagerService.AutoFillManagerServiceStub;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -56,21 +60,23 @@ import java.util.List;
 final class AutoFillManagerServiceImpl {
 
     private static final String TAG = "AutoFillManagerServiceImpl";
-    private static final boolean DEBUG = true; // TODO: change to false once stable
 
-    final int mUser;
-    final ComponentName mComponent;
-
+    private final int mUserId;
+    private final int mUid;
+    private final ComponentName mComponent;
     private final Context mContext;
     private final IActivityManager mAm;
     private final Object mLock;
-    private final AutoFillManagerServiceStub mServiceStub;
     private final AutoFillServiceInfo mInfo;
+    private final AutoFillManagerService mManagerService;
 
     // TODO: improve its usage
     // - set maximum number of entries
     // - disable on low-memory devices.
-    private final List<String> mRequestHistory = new ArrayList<>();
+    private final List<String> mRequestHistory = new LinkedList<>();
+
+    @GuardedBy("mLock")
+    private final List<IBinder> mQueuedRequests = new LinkedList<>();
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -90,9 +96,16 @@ final class AutoFillManagerServiceImpl {
             synchronized (mLock) {
                 mService = IAutoFillService.Stub.asInterface(service);
                 try {
-                    mService.ready();
+                    mService.onConnected();
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "Exception on service.ready(): " + e);
+                    Slog.w(TAG, "Exception on service.onConnected(): " + e);
+                    return;
+                }
+                if (!mQueuedRequests.isEmpty()) {
+                    if (DEBUG) Log.d(TAG, "queued requests:" + mQueuedRequests.size());
+                }
+                for (IBinder activityToken : mQueuedRequests) {
+                    requestAutoFillLocked(activityToken, false);
                 }
             }
         }
@@ -100,7 +113,10 @@ final class AutoFillManagerServiceImpl {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             if (DEBUG) Log.d(TAG, name + " disconnected");
-            mService = null;
+            synchronized (mLock) {
+                mService = null;
+                mManagerService.removeCachedServiceForUserLocked(mUserId);
+            }
         }
     };
 
@@ -109,18 +125,23 @@ final class AutoFillManagerServiceImpl {
     private boolean mBound;
     private boolean mValid;
 
-    AutoFillManagerServiceImpl(Context context, Object lock, AutoFillManagerServiceStub stub,
-            Handler handler, int user, ComponentName component) {
+    // Estimated time when the service will be evicted from the cache.
+    long mEstimateTimeOfDeath;
+
+    AutoFillManagerServiceImpl(AutoFillManagerService managerService, Context context, Object lock,
+            Handler handler, int userId, int uid,ComponentName component, long ttl) {
+        mManagerService = managerService;
         mContext = context;
         mLock = lock;
-        mServiceStub = stub;
-        mUser = user;
+        mUserId = userId;
+        mUid = uid;
         mComponent = component;
         mAm = ActivityManager.getService();
+        setLifeExpectancy(ttl);
 
         final AutoFillServiceInfo info;
         try {
-            info = new AutoFillServiceInfo(component, mUser);
+            info = new AutoFillServiceInfo(component, mUserId);
         } catch (PackageManager.NameNotFoundException e) {
             Slog.w(TAG, "Auto-fill service not found: " + component, e);
             mInfo = null;
@@ -140,13 +161,18 @@ final class AutoFillManagerServiceImpl {
         mContext.registerReceiver(mBroadcastReceiver, filter, null, handler);
     }
 
+    void setLifeExpectancy(long ttl) {
+        mEstimateTimeOfDeath = SystemClock.uptimeMillis() + ttl;
+    }
+
     void startLocked() {
         if (DEBUG) Slog.d(TAG, "startLocked()");
 
         final Intent intent = new Intent(AutoFillService.SERVICE_INTERFACE);
         intent.setComponent(mComponent);
         mBound = mContext.bindServiceAsUser(intent, mConnection,
-                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE, new UserHandle(mUser));
+                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE, new UserHandle(mUserId));
+
         if (!mBound) {
             Slog.w(TAG, "Failed binding to auto-fill service " + mComponent);
             return;
@@ -154,11 +180,12 @@ final class AutoFillManagerServiceImpl {
         if (DEBUG) Slog.d(TAG, "Bound to " + mComponent);
     }
 
-    boolean requestAutoFill(IBinder activityToken) {
-        if (!mBound) {
-            // TODO: should it bind on demand? Or perhaps always run when on on low-memory?
-            Slog.w(TAG, "requestAutoFill() failed because it's not bound to service");
-            return false;
+    void requestAutoFill(IBinder activityToken) {
+        synchronized (mLock) {
+            if (!mBound) {
+                Slog.w(TAG, "requestAutoFill() failed because it's not bound to service");
+                return;
+            }
         }
 
         // TODO: activityToken should probably not be null, but we need to wait until the UI is
@@ -175,25 +202,28 @@ final class AutoFillManagerServiceImpl {
                 Slog.d(TAG, "Top activities (" + topActivities.size() + "): " + topActivities);
             if (topActivities.isEmpty()) {
                 Slog.w(TAG, "Could not get top activity");
-                return false;
+                return;
             }
             activityToken = topActivities.get(0);
         }
 
+        final String historyItem =
+                DateFormat.getDateTimeInstance().format(new Date()) + " - " + activityToken;
         synchronized (mLock) {
-            return requestAutoFillLocked(activityToken);
+            mRequestHistory.add(historyItem);
+            requestAutoFillLocked(activityToken, true);
         }
     }
 
-    private boolean requestAutoFillLocked(IBinder activityToken) {
-        mRequestHistory.add(
-                DateFormat.getDateTimeInstance().format(new Date()) + " - " + activityToken);
-        if (DEBUG) Slog.d(TAG, "Requesting for user " + mUser + " and activity " + activityToken);
-
-        // Sanity check
+    private void requestAutoFillLocked(IBinder activityToken, boolean queueIfNecessary) {
         if (mService == null) {
-            Slog.w(TAG, "requestAutoFillLocked(: service is null");
-            return false;
+            if (!queueIfNecessary) {
+                Slog.w(TAG, "requestAutoFillLocked(): service is null");
+                return;
+            }
+            if (DEBUG) Slog.d(TAG, "requestAutoFill(): service not set yet, queuing it");
+            mQueuedRequests.add(activityToken);
+            return;
         }
 
         /*
@@ -206,23 +236,30 @@ final class AutoFillManagerServiceImpl {
         try {
             // TODO: add MetricsLogger call
             if (!mAm.requestAutoFillData(mService.getAssistReceiver(), null, activityToken)) {
-                return false;
+                // TODO: might need a way to warn user (perhaps a new method on AutoFillService).
+                Slog.w(TAG, "failed to request auto-fill data for " + activityToken);
             }
         } catch (RemoteException e) {
             // Should happen, it's a local call.
         }
-        return true;
     }
 
-    void shutdownLocked() {
-        if (DEBUG) Slog.d(TAG, "shutdownLocked()");
+    void stopLocked() {
+        if (DEBUG) Slog.d(TAG, "stopLocked()");
 
+        // Sanity check.
+        if (mService == null) {
+            Log.w(TAG, "service already null on shutdown");
+            return;
+        }
         try {
-            if (mService != null) {
-                mService.shutdown();
-            }
+            mService.onDisconnected();
         } catch (RemoteException e) {
-            Slog.w(TAG, "RemoteException in shutdown", e);
+            if (! (e instanceof DeadObjectException)) {
+                Slog.w(TAG, "Exception calling service.onDisconnected(): " + e);
+            }
+        } finally {
+            mService = null;
         }
 
         if (mBound) {
@@ -245,10 +282,14 @@ final class AutoFillManagerServiceImpl {
             return;
         }
 
-        pw.print(prefix); pw.print("mUser="); pw.println(mUser);
+        pw.print(prefix); pw.print("mUserId="); pw.println(mUserId);
+        pw.print(prefix); pw.print("mUid="); pw.println(mUid);
         pw.print(prefix); pw.print("mComponent="); pw.println(mComponent.flattenToShortString());
         pw.print(prefix); pw.print("mBound="); pw.println(mBound);
         pw.print(prefix); pw.print("mService="); pw.println(mService);
+        pw.print(prefix); pw.print("mEstimateTimeOfDeath=");
+            TimeUtils.formatDuration(mEstimateTimeOfDeath, SystemClock.uptimeMillis(), pw);
+        pw.println();
 
         if (DEBUG) {
             // ServiceInfo dump is too noisy and redundant (it can be obtained through other dumps)
@@ -265,11 +306,20 @@ final class AutoFillManagerServiceImpl {
                 pw.print(prefix2); pw.print(i); pw.print(": "); pw.println(mRequestHistory.get(i));
             }
         }
+        if (mQueuedRequests.isEmpty()) {
+            pw.print(prefix); pw.println("No queued requests");
+        } else {
+            pw.print(prefix); pw.println("Queued requests:");
+            final String prefix2 = prefix + prefix;
+            for (int i = 0; i < mQueuedRequests.size(); i++) {
+                pw.print(prefix2); pw.print(i); pw.print(": "); pw.println(mQueuedRequests.get(i));
+            }
+        }
     }
 
     @Override
     public String toString() {
-        return "[AutoFillManagerServiceImpl: user=" + mUser
+        return "[AutoFillManagerServiceImpl: userId=" + mUserId + ", uid=" + mUid
                 + ", component=" + mComponent.flattenToShortString() + "]";
     }
 }

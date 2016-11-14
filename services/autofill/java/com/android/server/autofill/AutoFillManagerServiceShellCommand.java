@@ -66,8 +66,8 @@ public final class AutoFillManagerServiceShellCommand extends ShellCommand {
 
     private int requestAutoFill() throws RemoteException {
         final int userId = getUserIdFromArgs();
-        final boolean ok = mService.requestAutoFill(userId, null);
-        return ok ? 0 : 1;
+        mService.requestAutoFill(userId, null);
+        return 0;
     }
 
     private int getUserIdFromArgs() {
