@@ -278,4 +278,23 @@ public final class UsageStatsManager {
         } catch (RemoteException re) {
         }
     }
+
+    /**
+     * Reports a Chooser action to the UsageStatsManager.
+     *
+     * @param packageName The package name of the app that is selected.
+     * @param userId The user id of who makes the selection.
+     * @param contentType The type of the content, e.g., Image, Video, App.
+     * @param annotations The annotations of the content, e.g., Game, Selfie.
+     * @param action The action type of Intent that invokes ChooserActivity.
+     * {@link UsageEvents}
+     * @hide
+     */
+    public void reportChooserSelection(String packageName, int userId, String contentType,
+                                       String[] annotations, String action) {
+        try {
+            mService.reportChooserSelection(packageName, userId, contentType, annotations, action);
+        } catch (RemoteException re) {
+        }
+    }
 }

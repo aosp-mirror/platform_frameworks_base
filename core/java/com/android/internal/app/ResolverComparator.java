@@ -63,6 +63,8 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
     private final long mSinceTime;
     private final LinkedHashMap<ComponentName, ScoredTarget> mScoredTargets = new LinkedHashMap<>();
     private final String mReferrerPackage;
+    public String mContentType;
+    private String mAction;
 
     public ResolverComparator(Context context, Intent intent, String referrerPackage) {
         mCollator = Collator.getInstance(context.getResources().getConfiguration().locale);
@@ -76,6 +78,8 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         mCurrentTime = System.currentTimeMillis();
         mSinceTime = mCurrentTime - USAGE_STATS_PERIOD;
         mStats = mUsm.queryAndAggregateUsageStats(mSinceTime, mCurrentTime);
+        mContentType = intent.getType();
+        mAction = intent.getAction();
     }
 
     public void compute(List<ResolvedComponentInfo> targets) {
@@ -86,6 +90,7 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         long mostRecentlyUsedTime = recentSinceTime + 1;
         long mostTimeSpent = 1;
         int mostLaunched = 1;
+        int mostSelected = 1;
 
         for (ResolvedComponentInfo target : targets) {
             final ScoredTarget scoredTarget
@@ -113,6 +118,25 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
                 scoredTarget.launchCount = launched;
                 if (launched > mostLaunched) {
                     mostLaunched = launched;
+                }
+                // TODO(kanlig): get and combine counts of categories.
+
+                int selected = 0;
+                if (pkStats.mChooserCounts != null && mAction != null
+                        && pkStats.mChooserCounts.get(mAction) != null) {
+                    selected = pkStats.mChooserCounts.get(mAction).getOrDefault(mContentType, 0);
+                }
+                if (DEBUG) {
+                    if (mAction == null) {
+                        Log.d(TAG, "Action type is null");
+                    } else {
+                        Log.d(TAG, "Chooser Count of " + mAction + ":" +
+                                target.name.getPackageName() + " is " + Integer.toString(selected));
+                    }
+                }
+                scoredTarget.chooserCount = selected;
+                if (selected > mostSelected) {
+                    mostSelected = selected;
                 }
             }
         }
@@ -190,7 +214,15 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
                         lhs.activityInfo.packageName, lhs.activityInfo.name));
                 final ScoredTarget rhsTarget = mScoredTargets.get(new ComponentName(
                         rhs.activityInfo.packageName, rhs.activityInfo.name));
-                final float diff = rhsTarget.score - lhsTarget.score;
+
+                final int chooserCountDiff = Long.compare(
+                        rhsTarget.chooserCount, lhsTarget.chooserCount);
+
+                if (chooserCountDiff != 0) {
+                    return chooserCountDiff > 0 ? 1 : -1;
+                }
+
+                final int diff = Float.compare(rhsTarget.score, lhsTarget.score);
 
                 if (diff != 0) {
                     return diff > 0 ? 1 : -1;
@@ -220,6 +252,7 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         public long lastTimeUsed;
         public long timeSpent;
         public long launchCount;
+        public long chooserCount;
 
         public ScoredTarget(ComponentInfo ci) {
             componentInfo = ci;
@@ -232,6 +265,7 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
                     + " lastTimeUsed: " + lastTimeUsed
                     + " timeSpent: " + timeSpent
                     + " launchCount: " + launchCount
+                    + " chooserCount: " + chooserCount
                     + "}";
         }
     }

@@ -183,6 +183,15 @@ class UserUsageStatsService {
         for (IntervalStats stats : mCurrentStats) {
             if (event.mEventType == UsageEvents.Event.CONFIGURATION_CHANGE) {
                 stats.updateConfigurationStats(newFullConfig, event.mTimeStamp);
+            } else if (event.mEventType == UsageEvents.Event.CHOOSER_ACTION) {
+                stats.updateChooserCounts(event.mPackage, event.mContentType, event.mAction);
+                String[] annotations = event.mContentAnnotations;
+                if (annotations != null) {
+                    for (String annotation : annotations) {
+                        // TODO(kanlig): update with confidences of annotations.
+                        stats.updateChooserCounts(event.mPackage, annotation, event.mAction);
+                    }
+                }
             } else {
                 stats.update(event.mPackage, event.mTimeStamp, event.mEventType);
             }
@@ -520,6 +529,32 @@ class UserUsageStatsService {
         }
         pw.decreaseIndent();
 
+        pw.println();
+        pw.increaseIndent();
+        pw.println("ChooserCounts");
+        pw.increaseIndent();
+        for (UsageStats usageStats : pkgStats.values()) {
+            pw.printPair("package", usageStats.mPackageName);
+            if (usageStats.mChooserCounts != null) {
+                final int chooserCountSize = usageStats.mChooserCounts.size();
+                for (int i = 0; i < chooserCountSize; i++) {
+                    final String action = usageStats.mChooserCounts.keyAt(i);
+                    final ArrayMap<String, Integer> counts = usageStats.mChooserCounts.valueAt(i);
+                    final int annotationSize = counts.size();
+                    for (int j = 0; j < annotationSize; j++) {
+                        final String key = counts.keyAt(j);
+                        final int count = counts.valueAt(j);
+                        if (count != 0) {
+                            pw.printPair("ChooserCounts", action + ":" + key + " is " +
+                                    Integer.toString(count));
+                            pw.println();
+                        }
+                    }
+                }
+            }
+            pw.println();
+        }
+
         pw.println("configurations");
         pw.increaseIndent();
         final ArrayMap<Configuration, ConfigurationStats> configStats = stats.configurations;
@@ -593,6 +628,8 @@ class UserUsageStatsService {
                 return "USER_INTERACTION";
             case UsageEvents.Event.SHORTCUT_INVOCATION:
                 return "SHORTCUT_INVOCATION";
+            case UsageEvents.Event.CHOOSER_ACTION:
+                return "CHOOSER_ACTION";
             default:
                 return "UNKNOWN";
         }

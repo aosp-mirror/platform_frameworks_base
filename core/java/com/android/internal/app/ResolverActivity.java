@@ -26,6 +26,7 @@ import android.app.VoiceInteractor.PickOptionRequest.Option;
 import android.app.VoiceInteractor.Prompt;
 import android.content.pm.ComponentInfo;
 import android.os.AsyncTask;
+import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -53,7 +54,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
-import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -114,6 +114,7 @@ public class ResolverActivity extends Activity {
     private ComponentName[] mFilteredComponents;
 
     protected ResolverDrawerLayout mResolverDrawerLayout;
+    protected String mContentType;
 
     private boolean mRegistered;
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -270,6 +271,7 @@ public class ResolverActivity extends Activity {
         final String referrerPackage = getReferrerPackageName();
 
         mResolverComparator = new ResolverComparator(this, getTargetIntent(), referrerPackage);
+        mContentType = mResolverComparator.mContentType;
 
         if (configureContentView(mIntents, initialIntents, rList, alwaysUseOption)) {
             return;

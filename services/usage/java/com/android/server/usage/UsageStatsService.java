@@ -1379,6 +1379,31 @@ public class UsageStatsService extends SystemService implements
             }
             UsageStatsService.this.dump(args, pw);
         }
+
+        @Override
+        public void reportChooserSelection(String packageName, int userId, String contentType,
+                                           String[] annotations, String action) {
+            if (packageName == null) {
+                Slog.w(TAG, "Event report user selecting a null package");
+                return;
+            }
+
+            UsageEvents.Event event = new UsageEvents.Event();
+            event.mPackage = packageName;
+
+            // This will later be converted to system time.
+            event.mTimeStamp = SystemClock.elapsedRealtime();
+
+            event.mEventType = Event.CHOOSER_ACTION;
+
+            event.mAction = action;
+
+            event.mContentType = contentType;
+
+            event.mContentAnnotations = annotations;
+
+            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+        }
     }
 
     /**

@@ -17,6 +17,7 @@
 package com.android.server.usage;
 
 import android.app.usage.TimeSparseArray;
+import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.os.Build;
 import android.util.AtomicFile;
@@ -502,6 +503,12 @@ class UsageStatsDatabase {
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_DAILY],
                     mCal.getTimeInMillis());
 
+            mCal.setTimeInMillis(currentTimeMillis);
+            mCal.addDays(-14);
+            for (int i = 0; i < mIntervalDirs.length; ++i) {
+                pruneChooserCountsOlderThan(mIntervalDirs[i], mCal.getTimeInMillis());
+            }
+
             // We must re-index our file list or we will be trying to read
             // deleted files.
             indexFilesLocked();
@@ -526,6 +533,43 @@ class UsageStatsDatabase {
 
                 if (beginTime < expiryTime) {
                     new AtomicFile(f).delete();
+                }
+            }
+        }
+    }
+
+    private static void pruneChooserCountsOlderThan(File dir, long expiryTime) {
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File f : files) {
+                String path = f.getPath();
+                if (path.endsWith(BAK_SUFFIX)) {
+                    f = new File(path.substring(0, path.length() - BAK_SUFFIX.length()));
+                }
+
+                long beginTime;
+                try {
+                    beginTime = UsageStatsXml.parseBeginTime(f);
+                } catch (IOException e) {
+                    beginTime = 0;
+                }
+
+                if (beginTime < expiryTime) {
+                    try {
+                        final AtomicFile af = new AtomicFile(f);
+                        final IntervalStats stats = new IntervalStats();
+                        UsageStatsXml.read(af, stats);
+                        final int pkgCount = stats.packageStats.size();
+                        for (int i = 0; i < pkgCount; i++) {
+                            UsageStats pkgStats = stats.packageStats.valueAt(i);
+                            if (pkgStats.mChooserCounts != null) {
+                                pkgStats.mChooserCounts.clear();
+                            }
+                        }
+                        UsageStatsXml.write(af, stats);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Failed to delete chooser counts from usage stats file", e);
+                    }
                 }
             }
         }

@@ -26,6 +26,7 @@ import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
+import android.util.ArrayMap;
 
 import java.io.IOException;
 import java.net.ProtocolException;
@@ -36,6 +37,11 @@ import java.net.ProtocolException;
 final class UsageStatsXmlV1 {
     private static final String PACKAGES_TAG = "packages";
     private static final String PACKAGE_TAG = "package";
+
+    private static final String CHOOSER_COUNT_TAG = "chosen_action";
+    private static final String CATEGORY_TAG = "category";
+    private static final String NAME = "name";
+    private static final String COUNT = "count";
 
     private static final String CONFIGURATIONS_TAG = "configurations";
     private static final String CONFIG_TAG = "config";
@@ -59,7 +65,7 @@ final class UsageStatsXmlV1 {
     private static final String TIME_ATTR = "time";
 
     private static void loadUsageStats(XmlPullParser parser, IntervalStats statsOut)
-            throws IOException {
+            throws XmlPullParserException, IOException {
         final String pkg = parser.getAttributeValue(null, PACKAGE_ATTR);
         if (pkg == null) {
             throw new ProtocolException("no " + PACKAGE_ATTR + " attribute present");
@@ -72,6 +78,51 @@ final class UsageStatsXmlV1 {
                 parser, LAST_TIME_ACTIVE_ATTR);
         stats.mTotalTimeInForeground = XmlUtils.readLongAttribute(parser, TOTAL_TIME_ACTIVE_ATTR);
         stats.mLastEvent = XmlUtils.readIntAttribute(parser, LAST_EVENT_ATTR);
+        int eventCode;
+        while ((eventCode = parser.next()) != XmlPullParser.END_DOCUMENT) {
+            final String tag = parser.getName();
+            if (eventCode == XmlPullParser.END_TAG && tag.equals(PACKAGE_TAG)) {
+                break;
+            }
+            if (eventCode != XmlPullParser.START_TAG) {
+                continue;
+            }
+            if (tag.equals(CHOOSER_COUNT_TAG)) {
+                String action = XmlUtils.readStringAttribute(parser, NAME);
+                loadChooserCounts(parser, stats, action);
+            }
+        }
+    }
+
+    private static void loadChooserCounts(
+            XmlPullParser parser, UsageStats usageStats, String action)
+            throws XmlPullParserException, IOException {
+        if (action == null) {
+            return;
+        }
+        if (usageStats.mChooserCounts == null) {
+            usageStats.mChooserCounts = new ArrayMap<>();
+        }
+        if (!usageStats.mChooserCounts.containsKey(action)) {
+            ArrayMap<String, Integer> counts = new ArrayMap<>();
+            usageStats.mChooserCounts.put(action, counts);
+        }
+
+        int eventCode;
+        while ((eventCode = parser.next()) != XmlPullParser.END_DOCUMENT) {
+            final String tag = parser.getName();
+            if (eventCode == XmlPullParser.END_TAG && tag.equals(CHOOSER_COUNT_TAG)) {
+                break;
+            }
+            if (eventCode != XmlPullParser.START_TAG) {
+                continue;
+            }
+            if (tag.equals(CATEGORY_TAG)) {
+                String category = XmlUtils.readStringAttribute(parser, NAME);
+                int count = XmlUtils.readIntAttribute(parser, COUNT);
+                usageStats.mChooserCounts.get(action).put(category, count);
+            }
+        }
     }
 
     private static void loadConfigStats(XmlPullParser parser, IntervalStats statsOut)
@@ -135,8 +186,43 @@ final class UsageStatsXmlV1 {
         XmlUtils.writeStringAttribute(xml, PACKAGE_ATTR, usageStats.mPackageName);
         XmlUtils.writeLongAttribute(xml, TOTAL_TIME_ACTIVE_ATTR, usageStats.mTotalTimeInForeground);
         XmlUtils.writeIntAttribute(xml, LAST_EVENT_ATTR, usageStats.mLastEvent);
-
+        writeChooserCounts(xml, usageStats);
         xml.endTag(null, PACKAGE_TAG);
+    }
+
+    private static void writeChooserCounts(XmlSerializer xml, final UsageStats usageStats)
+            throws IOException {
+        if (usageStats == null || usageStats.mChooserCounts == null ||
+                usageStats.mChooserCounts.keySet().isEmpty()) {
+            return;
+        }
+        final int chooserCountSize = usageStats.mChooserCounts.size();
+        for (int i = 0; i < chooserCountSize; i++) {
+            final String action = usageStats.mChooserCounts.keyAt(i);
+            final ArrayMap<String, Integer> counts = usageStats.mChooserCounts.valueAt(i);
+            if (action == null || counts == null || counts.isEmpty()) {
+                continue;
+            }
+            xml.startTag(null, CHOOSER_COUNT_TAG);
+            XmlUtils.writeStringAttribute(xml, NAME, action);
+            writeCountsForAction(xml, counts);
+            xml.endTag(null, CHOOSER_COUNT_TAG);
+        }
+    }
+
+    private static void writeCountsForAction(XmlSerializer xml, ArrayMap<String, Integer> counts)
+            throws IOException {
+        final int countsSize = counts.size();
+        for (int i = 0; i < countsSize; i++) {
+            String key = counts.keyAt(i);
+            int count = counts.valueAt(i);
+            if (count > 0) {
+                xml.startTag(null, CATEGORY_TAG);
+                XmlUtils.writeStringAttribute(xml, NAME, key);
+                XmlUtils.writeIntAttribute(xml, COUNT, count);
+                xml.endTag(null, CATEGORY_TAG);
+            }
+        }
     }
 
     private static void writeConfigStats(XmlSerializer xml, final IntervalStats stats,

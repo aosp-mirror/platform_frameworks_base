@@ -19,6 +19,7 @@ package com.android.internal.app;
 import android.animation.ObjectAnimator;
 import android.annotation.NonNull;
 import android.app.Activity;
+import android.app.usage.UsageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -398,6 +399,7 @@ public class ChooserActivity extends ResolverActivity {
                 }
             }
         }
+        updateChooserCounts(target, mContentType);
         return super.onTargetSelected(target, alwaysCheck);
     }
 
@@ -542,20 +544,46 @@ public class ChooserActivity extends ResolverActivity {
         // Do nothing. We'll send the voice stuff ourselves.
     }
 
+    void updateChooserCounts(TargetInfo info, String annotation) {
+        if (info != null) {
+            UsageStatsManager usageStatsManager =
+                    (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+            if (usageStatsManager == null) {
+                if (DEBUG) {
+                    Log.d(TAG, "Can not start UsageStatsManager");
+                }
+                return;
+            }
+            final ResolveInfo ri = info.getResolveInfo();
+            if (ri != null && ri.activityInfo != null) {
+                usageStatsManager.reportChooserSelection(ri.activityInfo.packageName, getUserId(),
+                        annotation, null, info.getResolvedIntent().getAction());
+                if (DEBUG) {
+                    Log.d(TAG, "ResolveInfo Package is" + ri.activityInfo.packageName);
+                }
+            } else if(DEBUG) {
+                Log.d(TAG, "Can not log Chooser Counts of null ResovleInfo");
+            }
+        }
+    }
+
     void onRefinementResult(TargetInfo selectedTarget, Intent matchingIntent) {
         if (mRefinementResultReceiver != null) {
             mRefinementResultReceiver.destroy();
             mRefinementResultReceiver = null;
         }
-
         if (selectedTarget == null) {
             Log.e(TAG, "Refinement result intent did not match any known targets; canceling");
         } else if (!checkTargetSourceIntent(selectedTarget, matchingIntent)) {
             Log.e(TAG, "onRefinementResult: Selected target " + selectedTarget
                     + " cannot match refined source intent " + matchingIntent);
-        } else if (super.onTargetSelected(selectedTarget.cloneFilledIn(matchingIntent, 0), false)) {
-            finish();
-            return;
+        } else {
+            TargetInfo clonedTarget = selectedTarget.cloneFilledIn(matchingIntent, 0);
+            if (super.onTargetSelected(clonedTarget, false)) {
+                updateChooserCounts(clonedTarget, mContentType);
+                finish();
+                return;
+            }
         }
         onRefinementCanceled();
     }
