@@ -165,13 +165,22 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
             }
             renderNode->getLayerSurface()->draw(canvas, 0, 0, paint);
 
-            if (CC_UNLIKELY(Properties::debugLayersUpdates
-                    && !renderNode->getSkiaLayer()->hasRenderedSinceRepaint)) {
+            if (!renderNode->getSkiaLayer()->hasRenderedSinceRepaint) {
                 renderNode->getSkiaLayer()->hasRenderedSinceRepaint = true;
-                SkPaint layerPaint;
-                layerPaint.setColor(0x7f00ff00);
-                canvas->drawRect(bounds, layerPaint);
+                if (CC_UNLIKELY(Properties::debugLayersUpdates)) {
+                    SkPaint layerPaint;
+                    layerPaint.setColor(0x7f00ff00);
+                    canvas->drawRect(bounds, layerPaint);
+                } else if (CC_UNLIKELY(Properties::debugOverdraw)) {
+                    // Render transparent rect to increment overdraw for repaint area.
+                    // This can be "else if" because flashing green on layer updates
+                    // will also increment the overdraw if it happens to be turned on.
+                    SkPaint transparentPaint;
+                    transparentPaint.setColor(SK_ColorTRANSPARENT);
+                    canvas->drawRect(bounds, transparentPaint);
+                }
             }
+
         // composing a software layer with alpha
         } else if (properties.effectiveLayerType() == LayerType::Software) {
             SkPaint paint;

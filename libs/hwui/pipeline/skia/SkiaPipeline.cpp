@@ -18,6 +18,8 @@
 
 #include "utils/TraceUtils.h"
 #include <SkOSFile.h>
+#include <SkOverdrawCanvas.h>
+#include <SkOverdrawColorFilter.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
 #include <SkPixelSerializer.h>
@@ -192,6 +194,34 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
         }
     }
 
+    renderFrameImpl(layers, clip, nodes, opaque, contentDrawBounds, canvas);
+
+    if (skpCaptureEnabled() && recordingPicture) {
+        sk_sp<SkPicture> picture = recorder->finishRecordingAsPicture();
+        if (picture->approximateOpCount() > 0) {
+            SkFILEWStream stream(prop);
+            if (stream.isValid()) {
+                PngPixelSerializer serializer;
+                picture->serialize(&stream, &serializer);
+                stream.flush();
+                SkDebugf("Captured Drawing Output (%d bytes) for frame. %s", stream.bytesWritten(), prop);
+            }
+        }
+        surface->getCanvas()->drawPicture(picture);
+    }
+
+    if (CC_UNLIKELY(Properties::debugOverdraw)) {
+        renderOverdraw(layers, clip, nodes, contentDrawBounds, surface);
+    }
+
+    ATRACE_NAME("flush commands");
+    canvas->flush();
+}
+
+void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
+        const std::vector<sp<RenderNode>>& nodes, bool opaque, const Rect &contentDrawBounds,
+        SkCanvas* canvas) {
+
     canvas->clipRect(clip, SkRegion::kReplace_Op);
 
     if (!opaque) {
@@ -250,23 +280,6 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
         canvas->restoreToCount(count);
         layer++;
     }
-
-    if (skpCaptureEnabled() && recordingPicture) {
-        sk_sp<SkPicture> picture = recorder->finishRecordingAsPicture();
-        if (picture->approximateOpCount() > 0) {
-            SkFILEWStream stream(prop);
-            if (stream.isValid()) {
-                PngPixelSerializer serializer;
-                picture->serialize(&stream, &serializer);
-                stream.flush();
-                SkDebugf("Captured Drawing Output (%d bytes) for frame. %s", stream.bytesWritten(), prop);
-            }
-        }
-        surface->getCanvas()->drawPicture(picture);
-    }
-
-    ATRACE_NAME("flush commands");
-    canvas->flush();
 }
 
 void SkiaPipeline::dumpResourceCacheUsage() const {
@@ -281,6 +294,40 @@ void SkiaPipeline::dumpResourceCacheUsage() const {
             bytes, bytes * (1.0f / (1024.0f * 1024.0f)), maxBytes * (1.0f / (1024.0f * 1024.0f)));
 
     ALOGD("%s", log.c_str());
+}
+
+// Overdraw debugging
+
+// These colors should be kept in sync with Caches::getOverdrawColor() with a few differences.
+// This implementation:
+// (1) Requires transparent entries for "no overdraw" and "single draws".
+// (2) Requires premul colors (instead of unpremul).
+// (3) Requires RGBA colors (instead of BGRA).
+static const uint32_t kOverdrawColors[2][6] = {
+        { 0x00000000, 0x00000000, 0x2f2f0000, 0x2f002f00, 0x3f00003f, 0x7f00007f, },
+        { 0x00000000, 0x00000000, 0x2f2f0000, 0x4f004f4f, 0x5f50335f, 0x7f00007f, },
+};
+
+void SkiaPipeline::renderOverdraw(const LayerUpdateQueue& layers, const SkRect& clip,
+        const std::vector<sp<RenderNode>>& nodes, const Rect &contentDrawBounds,
+        sk_sp<SkSurface> surface) {
+    // Set up the overdraw canvas.
+    SkImageInfo offscreenInfo = SkImageInfo::MakeA8(surface->width(), surface->height());
+    sk_sp<SkSurface> offscreen = surface->makeSurface(offscreenInfo);
+    SkOverdrawCanvas overdrawCanvas(offscreen->getCanvas());
+
+    // Fake a redraw to replay the draw commands.  This will increment the alpha channel
+    // each time a pixel would have been drawn.
+    // Pass true for opaque so we skip the clear - the overdrawCanvas is already zero
+    // initialized.
+    renderFrameImpl(layers, clip, nodes, true, contentDrawBounds, &overdrawCanvas);
+    sk_sp<SkImage> counts = offscreen->makeImageSnapshot();
+
+    // Draw overdraw colors to the canvas.  The color filter will convert counts to colors.
+    SkPaint paint;
+    const SkPMColor* colors = kOverdrawColors[static_cast<int>(Properties::overdrawColorSet)];
+    paint.setColorFilter(SkOverdrawColorFilter::Make(colors));
+    surface->getCanvas()->drawImage(counts.get(), 0.0f, 0.0f, &paint);
 }
 
 } /* namespace skiapipeline */

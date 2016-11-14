@@ -107,6 +107,18 @@ protected:
     renderthread::RenderThread& mRenderThread;
 
 private:
+    void renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
+            const std::vector< sp<RenderNode> >& nodes, bool opaque, const Rect &contentDrawBounds,
+            SkCanvas* canvas);
+
+    /**
+     *  Debugging feature.  Draws a semi-transparent overlay on each pixel, indicating
+     *  how many times it has been drawn.
+     */
+    void renderOverdraw(const LayerUpdateQueue& layers, const SkRect& clip,
+            const std::vector< sp<RenderNode> >& nodes, const Rect &contentDrawBounds,
+            sk_sp<SkSurface>);
+
     TaskManager mTaskManager;
     std::vector<sk_sp<SkImage>> mPinnedImages;
     static float mLightRadius;
