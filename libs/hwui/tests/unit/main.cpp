@@ -20,6 +20,7 @@
 #include "Caches.h"
 #include "debug/GlesDriver.h"
 #include "debug/NullGlesDriver.h"
+#include "hwui/Typeface.h"
 #include "thread/TaskManager.h"
 #include "tests/common/LeakChecker.h"
 
@@ -50,6 +51,13 @@ static void gtestSigHandler(int sig, siginfo_t* siginfo, void* context) {
     raise(sig);
 }
 
+class TypefaceEnvironment : public testing::Environment {
+public:
+    virtual void SetUp() {
+        Typeface::setRobotoTypefaceForTest();
+    }
+};
+
 int main(int argc, char* argv[]) {
     // Register a crash handler
     struct sigaction sa;
@@ -68,6 +76,8 @@ int main(int argc, char* argv[]) {
     // Run the tests
     testing::InitGoogleTest(&argc, argv);
     testing::InitGoogleMock(&argc, argv);
+
+    testing::AddGlobalTestEnvironment(new TypefaceEnvironment());
 
     int ret = RUN_ALL_TESTS();
     test::LeakChecker::checkForLeaks();

@@ -70,7 +70,7 @@ static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArr
 
 static void Typeface_setDefault(JNIEnv *env, jobject, jlong faceHandle) {
     Typeface* face = reinterpret_cast<Typeface*>(faceHandle);
-    return Typeface::setDefault(face);
+    Typeface::setDefault(face);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,6 +17,7 @@
 #include "tests/common/LeakChecker.h"
 #include "tests/common/TestScene.h"
 
+#include "hwui/Typeface.h"
 #include "protos/hwui.pb.h"
 #include "Properties.h"
 
@@ -302,6 +303,8 @@ void parseOptions(int argc, char* argv[]) {
 int main(int argc, char* argv[]) {
     // set defaults
     gOpts.count = 150;
+
+    Typeface::setRobotoTypefaceForTest();
 
     parseOptions(argc, argv);
     if (!gBenchmarkReporter && gOpts.renderOffscreen) {
