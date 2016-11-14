@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -94,6 +95,11 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
         mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
 
         mRecentsView = (FrameLayout) findViewById(R.id.recents_view);
+        mRecentsView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        getWindow().getAttributes().privateFlags |=
+                WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
         LinearLayout recentsContainer = (LinearLayout) findViewById(R.id.recents_container);
         mEmptyView = (TextView) mInflater.inflate(R.layout.recents_empty, recentsContainer, false);
         mClearAllButton = findViewById(R.id.button);
