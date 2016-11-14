@@ -42,6 +42,8 @@ import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
+import android.app.IApplicationThread;
+import android.app.IServiceConnection;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -137,6 +139,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.ParcelableString;
@@ -1437,6 +1440,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         IIpConnectivityMetrics getIIpConnectivityMetrics() {
             return (IIpConnectivityMetrics) IIpConnectivityMetrics.Stub.asInterface(
                 ServiceManager.getService(IpConnectivityLog.SERVICE_NAME));
+        }
+
+        PackageManager getPackageManager() {
+            return mContext.getPackageManager();
         }
 
         PowerManagerInternal getPowerManagerInternal() {
@@ -5907,6 +5914,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    boolean isDeviceOwner(ActiveAdmin admin) {
+        return isDeviceOwner(admin.info.getComponent(), admin.getUserHandle().getIdentifier());
+    }
+
     public boolean isDeviceOwner(ComponentName who, int userId) {
         synchronized (this) {
             return mOwners.hasDeviceOwner()
@@ -9428,6 +9439,77 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
+    public boolean bindDeviceAdminServiceAsUser(
+            @NonNull ComponentName admin, @NonNull IApplicationThread caller,
+            @Nullable IBinder activtiyToken, @NonNull Intent serviceIntent,
+            @NonNull IServiceConnection connection, int flags, @UserIdInt int targetUserId) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(admin);
+        Preconditions.checkNotNull(caller);
+        Preconditions.checkNotNull(serviceIntent);
+        Preconditions.checkNotNull(connection);
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        Preconditions.checkArgument(callingUserId != targetUserId,
+                "target user id must be different from the calling user id");
+
+        synchronized (this) {
+            final ActiveAdmin callingAdmin = getActiveAdminForCallerLocked(admin,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            // Ensure the target user is valid.
+            if (isDeviceOwner(callingAdmin)) {
+                enforceManagedProfile(targetUserId, "Target user must be a managed profile");
+            } else {
+                // Further lock down to profile owner in managed profile.
+                enforceManagedProfile(callingUserId,
+                        "Only support profile owner in managed profile.");
+                if (mOwners.getDeviceOwnerUserId() != targetUserId) {
+                    throw new SecurityException("Target user must be a device owner.");
+                }
+            }
+        }
+        final long callingIdentity = mInjector.binderClearCallingIdentity();
+        try {
+            if (!mUserManager.isSameProfileGroup(callingUserId, targetUserId)) {
+                throw new SecurityException(
+                        "Can only bind service across users under the same profile group");
+            }
+            final String targetPackage;
+            synchronized (this) {
+                targetPackage = getOwnerPackageNameForUserLocked(targetUserId);
+            }
+            // STOPSHIP(b/31952368): Add policy to control which packages can talk.
+            if (TextUtils.isEmpty(targetPackage) || !targetPackage.equals(admin.getPackageName())) {
+                throw new SecurityException("Device owner and profile owner must be the same " +
+                        "package in order to communicate.");
+            }
+            // Validate and sanitize the incoming service intent.
+            final Intent sanitizedIntent =
+                    createCrossUserServiceIntent(serviceIntent, targetPackage);
+            if (sanitizedIntent == null) {
+                // Fail, cannot lookup the target service.
+                throw new SecurityException("Invalid intent or failed to look up the service");
+            }
+            // Ask ActivityManager to bind it. Notice that we are binding the service with the
+            // caller app instead of DevicePolicyManagerService.
+            try {
+                return mInjector.getIActivityManager().bindService(
+                        caller, activtiyToken, serviceIntent,
+                        serviceIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                        connection, flags, mContext.getOpPackageName(),
+                        targetUserId) != 0;
+            } catch (RemoteException ex) {
+                // Same process, should not happen.
+            }
+        } finally {
+            mInjector.binderRestoreCallingIdentity(callingIdentity);
+        }
+        // Fail to bind.
+        return false;
+    }
+
     /**
      * Return true if a given user has any accounts that'll prevent installing a device or profile
      * owner {@code owner}.
@@ -9588,5 +9670,47 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return isNetworkLoggingEnabledInternalLocked()
                 ? mNetworkLogger.retrieveLogs(batchToken)
                 : null;
+    }
+
+    /**
+     * Return the package name of owner in a given user.
+     */
+    private String getOwnerPackageNameForUserLocked(int userId) {
+        return getDeviceOwnerUserId() == userId
+                ? mOwners.getDeviceOwnerPackageName()
+                : mOwners.getProfileOwnerPackage(userId);
+    }
+
+    /**
+     * @param rawIntent Original service intent specified by caller.
+     * @param expectedPackageName The expected package name in the incoming intent.
+     * @return Intent that have component explicitly set. {@code null} if the incoming intent
+     *         or target service is invalid.
+     */
+    private Intent createCrossUserServiceIntent (
+            @NonNull Intent rawIntent, @NonNull String expectedPackageName) {
+        if (rawIntent.getComponent() == null && rawIntent.getPackage() == null) {
+            Log.e(LOG_TAG, "Service intent must be explicit (with a package name or component): "
+                    + rawIntent);
+            return null;
+        }
+        ResolveInfo info = mInjector.getPackageManager().resolveService(rawIntent, 0);
+        if (info == null || info.serviceInfo == null) {
+            Log.e(LOG_TAG, "Fail to look up the service: " + rawIntent);
+            return null;
+        }
+        if (!expectedPackageName.equals(info.serviceInfo.packageName)) {
+            Log.e(LOG_TAG, "Only allow to bind service in " + expectedPackageName);
+            return null;
+        }
+        if (info.serviceInfo.exported) {
+            Log.e(LOG_TAG, "The service must be unexported.");
+            return null;
+        }
+        // It is the system server to bind the service, it would be extremely dangerous if it
+        // can be exploited to bind any service. Set the component explicitly to make sure we
+        // do not bind anything accidentally.
+        rawIntent.setComponent(info.serviceInfo.getComponentName());
+        return rawIntent;
     }
 }

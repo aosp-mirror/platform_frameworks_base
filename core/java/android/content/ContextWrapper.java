@@ -16,7 +16,10 @@
 
 package android.content;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.IApplicationThread;
+import android.app.IServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -856,5 +859,30 @@ public class ContextWrapper extends Context {
     @Override
     public boolean isCredentialProtectedStorage() {
         return mBase.isCredentialProtectedStorage();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public IBinder getActivityToken() {
+        return mBase.getActivityToken();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public IServiceConnection getServiceDispatcher(ServiceConnection conn, Handler handler,
+            int flags) {
+        return mBase.getServiceDispatcher(conn, handler, flags);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public IApplicationThread getIApplicationThread() {
+        return mBase.getIApplicationThread();
     }
 }

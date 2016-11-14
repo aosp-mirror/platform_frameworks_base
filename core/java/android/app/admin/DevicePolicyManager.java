@@ -20,19 +20,21 @@ import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
-import android.app.admin.NetworkEvent;
 import android.app.admin.PasswordMetrics;
+import android.app.IServiceConnection;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
@@ -45,10 +47,8 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.ServiceManager.ServiceNotFoundException;
 import android.provider.ContactsContract.Directory;
 import android.provider.Settings;
 import android.security.Credentials;
@@ -6709,6 +6709,42 @@ public class DevicePolicyManager {
         throwIfParentInstance("retrieveNetworkLogs");
         try {
             return mService.retrieveNetworkLogs(admin, batchToken);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by device owner/ profile owner in managed profile to bind the service with each other.
+     * The service must be unexported. Note that the {@link Context} used to obtain this
+     * {@link DevicePolicyManager} instance via {@link Context#getSystemService(Class)} will be used
+     * to bind to the {@link android.app.Service}.
+     * STOPSHIP (b/31952368): Update the javadoc after we policy to control which packages can talk.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param serviceIntent Identifies the service to connect to.  The Intent must specify either an
+     *        explicit component name or a package name to match an
+     *        {@link IntentFilter} published by a service.
+     * @param conn Receives information as the service is started and stopped. This must be a
+     *        valid {@link ServiceConnection} object; it must not be {@code null}.
+     * @param flags Operation options for the binding operation. See
+     *        {@link Context#bindService(Intent, ServiceConnection, int)}.
+     * @param targetUser Which user to bind to.
+     * @return If you have successfully bound to the service, {@code true} is returned;
+     *         {@code false} is returned if the connection is not made and you will not
+     *         receive the service object.
+     * @see Context#bindService(Intent, ServiceConnection, int)
+     */
+    public boolean bindDeviceAdminServiceAsUser(
+            @NonNull ComponentName admin,  Intent serviceIntent, @NonNull ServiceConnection conn,
+            @Context.BindServiceFlags int flags, @NonNull UserHandle targetUser) {
+        throwIfParentInstance("bindDeviceAdminServiceAsUser");
+        // Keep this in sync with ContextImpl.bindServiceCommon.
+        try {
+            final IServiceConnection sd = mContext.getServiceDispatcher(conn, null, flags);
+            serviceIntent.prepareToLeaveProcess(mContext);
+            return mService.bindDeviceAdminServiceAsUser(admin,
+                    mContext.getIApplicationThread(), mContext.getActivityToken(), serviceIntent,
+                    sd, flags, targetUser.getIdentifier());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

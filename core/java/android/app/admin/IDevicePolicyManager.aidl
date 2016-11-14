@@ -18,6 +18,8 @@
 package android.app.admin;
 
 import android.app.admin.NetworkEvent;
+import android.app.IApplicationThread;
+import android.app.IServiceConnection;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.PasswordMetrics;
 import android.content.ComponentName;
@@ -319,4 +321,8 @@ interface IDevicePolicyManager {
     void setNetworkLoggingEnabled(in ComponentName admin, boolean enabled);
     boolean isNetworkLoggingEnabled(in ComponentName admin);
     List<NetworkEvent> retrieveNetworkLogs(in ComponentName admin, long batchToken);
+
+    boolean bindDeviceAdminServiceAsUser(in ComponentName admin,
+        IApplicationThread caller, IBinder token, in Intent service,
+        IServiceConnection connection, int flags, int targetUserId);
 }

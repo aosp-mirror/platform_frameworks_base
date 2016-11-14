@@ -17,6 +17,8 @@
 package android.test.mock;
 
 import android.annotation.SystemApi;
+import android.app.IApplicationThread;
+import android.app.IServiceConnection;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -757,6 +759,25 @@ public class MockContext extends Context {
     @SystemApi
     @Override
     public boolean isCredentialProtectedStorage() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public IBinder getActivityToken() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public IServiceConnection getServiceDispatcher(ServiceConnection conn, Handler handler,
+            int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public IApplicationThread getIApplicationThread() {
         throw new UnsupportedOperationException();
     }
 }

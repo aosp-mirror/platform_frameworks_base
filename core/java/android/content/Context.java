@@ -32,6 +32,10 @@ import android.annotation.StyleableRes;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
+import android.app.IApplicationThread;
+import android.app.IServiceConnection;
+import android.app.LoadedApk;
+import android.app.admin.DevicePolicyManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -4362,5 +4366,28 @@ public abstract class Context {
     @Deprecated
     public boolean isCredentialEncryptedStorage() {
         return isCredentialProtectedStorage();
+    }
+
+    /**
+     * @hide
+     */
+    public IBinder getActivityToken() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * @hide
+     */
+    @Nullable
+    public IServiceConnection getServiceDispatcher(ServiceConnection conn, Handler handler,
+            int flags) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * @hide
+     */
+    public IApplicationThread getIApplicationThread() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 }

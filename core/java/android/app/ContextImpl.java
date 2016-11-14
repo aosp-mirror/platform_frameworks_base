@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -1457,8 +1458,22 @@ class ContextImpl extends Context {
         return bindServiceCommon(service, conn, flags, handler, user);
     }
 
+    /** @hide */
+    @Override
+    public IServiceConnection getServiceDispatcher(ServiceConnection conn, Handler handler,
+            int flags) {
+        return mPackageInfo.getServiceDispatcher(conn, getOuterContext(), handler, flags);
+    }
+
+    /** @hide */
+    @Override
+    public IApplicationThread getIApplicationThread() {
+        return mMainThread.getApplicationThread();
+    }
+
     private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags, Handler
             handler, UserHandle user) {
+        // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser.
         IServiceConnection sd;
         if (conn == null) {
             throw new IllegalArgumentException("connection is null");
@@ -2141,7 +2156,8 @@ class ContextImpl extends Context {
         return mOuterContext;
     }
 
-    final IBinder getActivityToken() {
+    @Override
+    public IBinder getActivityToken() {
         return mActivityToken;
     }
 
