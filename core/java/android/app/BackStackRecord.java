@@ -349,7 +349,9 @@ final class BackStackRecord extends FragmentTransaction implements
 
     public BackStackRecord(FragmentManagerImpl manager) {
         mManager = manager;
-        mAllowOptimization = Build.isAtLeastO();
+        int targetSdkVersion = manager.mHost.getContext().getApplicationInfo().targetSdkVersion;
+        // TODO: make the check N_MR1 or O
+        mAllowOptimization = targetSdkVersion > Build.VERSION_CODES.N;
     }
 
     public int getId() {
