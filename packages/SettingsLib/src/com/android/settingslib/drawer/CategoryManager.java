@@ -18,6 +18,7 @@ package com.android.settingslib.drawer;
 import android.content.ComponentName;
 import android.content.Context;
 import android.support.annotation.VisibleForTesting;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
@@ -25,11 +26,14 @@ import android.util.Pair;
 import com.android.settingslib.applications.InterestingConfigChanges;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 public class CategoryManager {
 
@@ -111,6 +115,7 @@ public class CategoryManager {
                 mCategoryByKeyMap.put(category.key, category);
             }
             backwardCompatCleanupForCategory(mTileByComponentCache, mCategoryByKeyMap);
+            normalizePriority(context, mCategoryByKeyMap);
         }
     }
 
@@ -161,6 +166,59 @@ public class CategoryManager {
                     newCategory.tiles.add(tile);
                 }
             }
+        }
+    }
+
+    /**
+     * Normalize priority values on tiles across injected from all apps to make sure they don't set
+     * the same priority value. However internal tiles' priority remains unchanged.
+     * <p/>
+     * A list of tiles are considered normalized when their priority value increases in a linear
+     * scan.
+     */
+    @VisibleForTesting
+    synchronized void normalizePriority(Context context,
+            Map<String, DashboardCategory> categoryByKeyMap) {
+        for (Entry<String, DashboardCategory> categoryEntry : categoryByKeyMap.entrySet()) {
+            normalizePriorityForExternalTiles(context, categoryEntry.getValue());
+        }
+    }
+
+    /**
+     * Normalize priority value for tiles within a single {@code DashboardCategory}.
+     *
+     * @see #normalizePriority(Context, Map)
+     */
+    private synchronized void normalizePriorityForExternalTiles(Context context,
+            DashboardCategory dashboardCategory) {
+        final String skipPackageName = context.getPackageName();
+
+        // Sort tiles based on [package, priority within package]
+        Collections.sort(dashboardCategory.tiles, (tile1, tile2) -> {
+            final String package1 = tile1.intent.getComponent().getPackageName();
+            final String package2 = tile2.intent.getComponent().getPackageName();
+            final int packageCompare = CASE_INSENSITIVE_ORDER.compare(package1, package2);
+            // First sort by package name
+            if (packageCompare != 0) {
+                return packageCompare;
+            } else if (TextUtils.equals(package1, skipPackageName)) {
+                return 0;
+            }
+            // Then sort by priority
+            return tile1.priority - tile2.priority;
+        });
+        // Update priority for all items so no package define the same priority value.
+        final int count = dashboardCategory.tiles.size();
+        for (int i = 0; i < count; i++) {
+            final String packageName =
+                    dashboardCategory.tiles.get(i).intent.getComponent().getPackageName();
+            if (TextUtils.equals(packageName, skipPackageName)) {
+                // We skip this tile because it's a intent pointing to our own app. We trust the
+                // priority is set correctly, so don't normalize.
+                continue;
+            }
+            dashboardCategory.tiles.get(i).priority = i;
+
         }
     }
 }
