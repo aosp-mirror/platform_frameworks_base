@@ -1324,6 +1324,11 @@ public class WifiP2pManager {
             Channel c, WifiP2pWfdInfo wfdInfo,
             ActionListener listener) {
         checkChannel(c);
+        try {
+            mService.checkConfigureWifiDisplayPermission();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
         c.mAsyncChannel.sendMessage(SET_WFD_INFO, 0, c.putListener(listener), wfdInfo);
     }
 
