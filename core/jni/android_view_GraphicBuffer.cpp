@@ -111,7 +111,7 @@ static jlong android_view_GraphiceBuffer_create(JNIEnv* env, jobject clazz,
     }
 
     status_t error;
-    sp<GraphicBuffer> buffer(alloc->createGraphicBuffer(width, height, format, usage, &error));
+    sp<GraphicBuffer> buffer(alloc->createGraphicBuffer(width, height, format, 1, usage, &error));
     if (buffer == NULL) {
         if (kDebugGraphicBuffer) {
             ALOGW("createGraphicBuffer() failed in GraphicBuffer.create()");
