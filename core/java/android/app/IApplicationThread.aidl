@@ -138,7 +138,7 @@ oneway interface IApplicationThread {
     void scheduleTranslucentConversionComplete(IBinder token, boolean timeout);
     void setProcessState(int state);
     void scheduleInstallProvider(in ProviderInfo provider);
-    void updateTimePrefs(boolean is24Hour);
+    void updateTimePrefs(int timeFormatPreference);
     void scheduleCancelVisibleBehind(IBinder token);
     void scheduleBackgroundVisibleBehindChanged(IBinder token, boolean enabled);
     void scheduleEnterAnimationComplete(IBinder token);
