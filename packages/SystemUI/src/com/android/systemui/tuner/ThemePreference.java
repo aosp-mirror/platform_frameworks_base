@@ -40,12 +40,13 @@ public class ThemePreference extends ListPreference {
     @Override
     public void onAttached() {
         super.onAttached();
-        File file = new File("/vendor/overlay");
-        ArrayList<String> options = Lists.newArrayList(file.list());
         String def = SystemProperties.get("ro.boot.vendor.overlay.theme");
         if (TextUtils.isEmpty(def)) {
             def = getContext().getString(R.string.default_theme);
         }
+        String[] fileList = new File("/vendor/overlay").list();
+        ArrayList<String> options = fileList != null
+                ? Lists.newArrayList(fileList) : new ArrayList<>();
         if (!options.contains(def)) {
             options.add(0, def);
         }
