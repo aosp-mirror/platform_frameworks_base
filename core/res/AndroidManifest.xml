@@ -922,7 +922,7 @@
         android:permissionGroup="android.permission-group.CAMERA"
         android:label="@string/permlab_camera"
         android:description="@string/permdesc_camera"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="dangerous|ephemeral" />
 
 
     <!-- ====================================================================== -->
@@ -1172,7 +1172,7 @@
     <permission android:name="android.permission.ACCESS_NETWORK_STATE"
         android:description="@string/permdesc_accessNetworkState"
         android:label="@string/permlab_accessNetworkState"
-        android:protectionLevel="normal" />
+        android:protectionLevel="normal|ephemeral" />
 
     <!-- Allows applications to access information about Wi-Fi networks.
          <p>Protection level: normal
