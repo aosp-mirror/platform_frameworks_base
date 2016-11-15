@@ -495,12 +495,6 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public Drawable getManagedUserBadgedDrawable(Drawable drawable, Rect badgeLocation,
-        int badgeDensity) {
-        return null;
-    }
-
-    @Override
     public Drawable getUserBadgedIcon(Drawable icon, UserHandle user) {
         return null;
     }

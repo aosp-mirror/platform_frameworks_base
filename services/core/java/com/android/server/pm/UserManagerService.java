@@ -63,6 +63,7 @@ import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
@@ -110,6 +111,8 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -149,6 +152,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_GUEST_TO_REMOVE = "guestToRemove";
     private static final String ATTR_USER_VERSION = "version";
     private static final String ATTR_PROFILE_GROUP_ID = "profileGroupId";
+    private static final String ATTR_PROFILE_BADGE = "profileBadge";
     private static final String ATTR_RESTRICTED_PROFILE_PARENT_ID = "restrictedProfileParentId";
     private static final String ATTR_SEED_ACCOUNT_NAME = "seedAccountName";
     private static final String ATTR_SEED_ACCOUNT_TYPE = "seedAccountType";
@@ -203,7 +207,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     // Maximum number of managed profiles permitted per user is 1. This cannot be increased
     // without first making sure that the rest of the framework is prepared for it.
-    private static final int MAX_MANAGED_PROFILES = 1;
+    @VisibleForTesting
+    static final int MAX_MANAGED_PROFILES = 1;
 
     static final int WRITE_USER_MSG = 1;
     static final int WRITE_USER_DELAY = 2*1000;  // 2 seconds
@@ -232,7 +237,8 @@ public class UserManagerService extends IUserManager.Stub {
      * User-related information that is used for persisting to flash. Only UserInfo is
      * directly exposed to other system apps.
      */
-    private static class UserData {
+    @VisibleForTesting
+    static class UserData {
         // Basic user information and properties
         UserInfo info;
         // Account name used when there is a strong association between a user and an account
@@ -874,6 +880,22 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public int getManagedProfileBadge(@UserIdInt int userId) {
+        int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId != userId && !hasManageUsersPermission()) {
+            if (!isSameProfileGroupNoChecks(callingUserId, userId)) {
+                throw new SecurityException(
+                        "You need MANAGE_USERS permission to: check if specified user a " +
+                        "managed profile outside your profile group");
+            }
+        }
+        synchronized (mUsersLock) {
+            UserInfo userInfo = getUserInfoLU(userId);
+            return userInfo != null ? userInfo.profileBadge : 0;
+        }
+    }
+
+    @Override
     public boolean isManagedProfile(int userId) {
         int callingUserId = UserHandle.getCallingUserId();
         if (callingUserId != userId && !hasManageUsersPermission()) {
@@ -1464,7 +1486,7 @@ public class UserManagerService extends IUserManager.Stub {
         // Limit number of managed profiles that can be created
         final int managedProfilesCount = getProfiles(userId, true).size() - 1;
         final int profilesRemovedCount = managedProfilesCount > 0 && allowedToRemoveOne ? 1 : 0;
-        if (managedProfilesCount - profilesRemovedCount >= MAX_MANAGED_PROFILES) {
+        if (managedProfilesCount - profilesRemovedCount >= getMaxManagedProfiles()) {
             return false;
         }
         synchronized(mUsersLock) {
@@ -1859,13 +1881,6 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    /*
-     * Writes the user file in this format:
-     *
-     * <user flags="20039023" id="0">
-     *   <name>Primary</name>
-     * </user>
-     */
     private void writeUserLP(UserData userData) {
         if (DBG) {
             debug("writeUserLP " + userData);
@@ -1875,83 +1890,98 @@ public class UserManagerService extends IUserManager.Stub {
         try {
             fos = userFile.startWrite();
             final BufferedOutputStream bos = new BufferedOutputStream(fos);
-
-            // XmlSerializer serializer = XmlUtils.serializerInstance();
-            final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(bos, StandardCharsets.UTF_8.name());
-            serializer.startDocument(null, true);
-            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-
-            final UserInfo userInfo = userData.info;
-            serializer.startTag(null, TAG_USER);
-            serializer.attribute(null, ATTR_ID, Integer.toString(userInfo.id));
-            serializer.attribute(null, ATTR_SERIAL_NO, Integer.toString(userInfo.serialNumber));
-            serializer.attribute(null, ATTR_FLAGS, Integer.toString(userInfo.flags));
-            serializer.attribute(null, ATTR_CREATION_TIME, Long.toString(userInfo.creationTime));
-            serializer.attribute(null, ATTR_LAST_LOGGED_IN_TIME,
-                    Long.toString(userInfo.lastLoggedInTime));
-            if (userInfo.lastLoggedInFingerprint != null) {
-                serializer.attribute(null, ATTR_LAST_LOGGED_IN_FINGERPRINT,
-                        userInfo.lastLoggedInFingerprint);
-            }
-            if (userInfo.iconPath != null) {
-                serializer.attribute(null,  ATTR_ICON_PATH, userInfo.iconPath);
-            }
-            if (userInfo.partial) {
-                serializer.attribute(null, ATTR_PARTIAL, "true");
-            }
-            if (userInfo.guestToRemove) {
-                serializer.attribute(null, ATTR_GUEST_TO_REMOVE, "true");
-            }
-            if (userInfo.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
-                serializer.attribute(null, ATTR_PROFILE_GROUP_ID,
-                        Integer.toString(userInfo.profileGroupId));
-            }
-            if (userInfo.restrictedProfileParentId != UserInfo.NO_PROFILE_GROUP_ID) {
-                serializer.attribute(null, ATTR_RESTRICTED_PROFILE_PARENT_ID,
-                        Integer.toString(userInfo.restrictedProfileParentId));
-            }
-            // Write seed data
-            if (userData.persistSeedData) {
-                if (userData.seedAccountName != null) {
-                    serializer.attribute(null, ATTR_SEED_ACCOUNT_NAME, userData.seedAccountName);
-                }
-                if (userData.seedAccountType != null) {
-                    serializer.attribute(null, ATTR_SEED_ACCOUNT_TYPE, userData.seedAccountType);
-                }
-            }
-            if (userInfo.name != null) {
-                serializer.startTag(null, TAG_NAME);
-                serializer.text(userInfo.name);
-                serializer.endTag(null, TAG_NAME);
-            }
-            synchronized (mRestrictionsLock) {
-                UserRestrictionsUtils.writeRestrictions(serializer,
-                        mBaseUserRestrictions.get(userInfo.id), TAG_RESTRICTIONS);
-                UserRestrictionsUtils.writeRestrictions(serializer,
-                        mDevicePolicyLocalUserRestrictions.get(userInfo.id),
-                        TAG_DEVICE_POLICY_RESTRICTIONS);
-            }
-
-            if (userData.account != null) {
-                serializer.startTag(null, TAG_ACCOUNT);
-                serializer.text(userData.account);
-                serializer.endTag(null, TAG_ACCOUNT);
-            }
-
-            if (userData.persistSeedData && userData.seedAccountOptions != null) {
-                serializer.startTag(null, TAG_SEED_ACCOUNT_OPTIONS);
-                userData.seedAccountOptions.saveToXml(serializer);
-                serializer.endTag(null, TAG_SEED_ACCOUNT_OPTIONS);
-            }
-            serializer.endTag(null, TAG_USER);
-
-            serializer.endDocument();
+            writeUserLP(userData, bos);
             userFile.finishWrite(fos);
         } catch (Exception ioe) {
             Slog.e(LOG_TAG, "Error writing user info " + userData.info.id, ioe);
             userFile.failWrite(fos);
         }
+    }
+
+    /*
+     * Writes the user file in this format:
+     *
+     * <user flags="20039023" id="0">
+     *   <name>Primary</name>
+     * </user>
+     */
+    @VisibleForTesting
+    void writeUserLP(UserData userData, OutputStream os)
+            throws IOException, XmlPullParserException {
+        // XmlSerializer serializer = XmlUtils.serializerInstance();
+        final XmlSerializer serializer = new FastXmlSerializer();
+        serializer.setOutput(os, StandardCharsets.UTF_8.name());
+        serializer.startDocument(null, true);
+        serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+
+        final UserInfo userInfo = userData.info;
+        serializer.startTag(null, TAG_USER);
+        serializer.attribute(null, ATTR_ID, Integer.toString(userInfo.id));
+        serializer.attribute(null, ATTR_SERIAL_NO, Integer.toString(userInfo.serialNumber));
+        serializer.attribute(null, ATTR_FLAGS, Integer.toString(userInfo.flags));
+        serializer.attribute(null, ATTR_CREATION_TIME, Long.toString(userInfo.creationTime));
+        serializer.attribute(null, ATTR_LAST_LOGGED_IN_TIME,
+                Long.toString(userInfo.lastLoggedInTime));
+        if (userInfo.lastLoggedInFingerprint != null) {
+            serializer.attribute(null, ATTR_LAST_LOGGED_IN_FINGERPRINT,
+                    userInfo.lastLoggedInFingerprint);
+        }
+        if (userInfo.iconPath != null) {
+            serializer.attribute(null,  ATTR_ICON_PATH, userInfo.iconPath);
+        }
+        if (userInfo.partial) {
+            serializer.attribute(null, ATTR_PARTIAL, "true");
+        }
+        if (userInfo.guestToRemove) {
+            serializer.attribute(null, ATTR_GUEST_TO_REMOVE, "true");
+        }
+        if (userInfo.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
+            serializer.attribute(null, ATTR_PROFILE_GROUP_ID,
+                    Integer.toString(userInfo.profileGroupId));
+        }
+        serializer.attribute(null, ATTR_PROFILE_BADGE,
+                Integer.toString(userInfo.profileBadge));
+        if (userInfo.restrictedProfileParentId != UserInfo.NO_PROFILE_GROUP_ID) {
+            serializer.attribute(null, ATTR_RESTRICTED_PROFILE_PARENT_ID,
+                    Integer.toString(userInfo.restrictedProfileParentId));
+        }
+        // Write seed data
+        if (userData.persistSeedData) {
+            if (userData.seedAccountName != null) {
+                serializer.attribute(null, ATTR_SEED_ACCOUNT_NAME, userData.seedAccountName);
+            }
+            if (userData.seedAccountType != null) {
+                serializer.attribute(null, ATTR_SEED_ACCOUNT_TYPE, userData.seedAccountType);
+            }
+        }
+        if (userInfo.name != null) {
+            serializer.startTag(null, TAG_NAME);
+            serializer.text(userInfo.name);
+            serializer.endTag(null, TAG_NAME);
+        }
+        synchronized (mRestrictionsLock) {
+            UserRestrictionsUtils.writeRestrictions(serializer,
+                    mBaseUserRestrictions.get(userInfo.id), TAG_RESTRICTIONS);
+            UserRestrictionsUtils.writeRestrictions(serializer,
+                    mDevicePolicyLocalUserRestrictions.get(userInfo.id),
+                    TAG_DEVICE_POLICY_RESTRICTIONS);
+        }
+
+        if (userData.account != null) {
+            serializer.startTag(null, TAG_ACCOUNT);
+            serializer.text(userData.account);
+            serializer.endTag(null, TAG_ACCOUNT);
+        }
+
+        if (userData.persistSeedData && userData.seedAccountOptions != null) {
+            serializer.startTag(null, TAG_SEED_ACCOUNT_OPTIONS);
+            userData.seedAccountOptions.saveToXml(serializer);
+            serializer.endTag(null, TAG_SEED_ACCOUNT_OPTIONS);
+        }
+
+        serializer.endTag(null, TAG_USER);
+
+        serializer.endDocument();
     }
 
     /*
@@ -2020,6 +2050,25 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private UserData readUserLP(int id) {
+        FileInputStream fis = null;
+        try {
+            AtomicFile userFile =
+                    new AtomicFile(new File(mUsersDir, Integer.toString(id) + XML_SUFFIX));
+            fis = userFile.openRead();
+            return readUserLP(id, fis);
+        } catch (IOException ioe) {
+            Slog.e(LOG_TAG, "Error reading user list");
+        } catch (XmlPullParserException pe) {
+            Slog.e(LOG_TAG, "Error reading user list");
+        } finally {
+            IoUtils.closeQuietly(fis);
+        }
+        return null;
+    }
+
+    @VisibleForTesting
+    UserData readUserLP(int id, InputStream is) throws IOException,
+            XmlPullParserException {
         int flags = 0;
         int serialNumber = id;
         String name = null;
@@ -2029,6 +2078,7 @@ public class UserManagerService extends IUserManager.Stub {
         long lastLoggedInTime = 0L;
         String lastLoggedInFingerprint = null;
         int profileGroupId = UserInfo.NO_PROFILE_GROUP_ID;
+        int profileBadge = 0;
         int restrictedProfileParentId = UserInfo.NO_PROFILE_GROUP_ID;
         boolean partial = false;
         boolean guestToRemove = false;
@@ -2039,120 +2089,106 @@ public class UserManagerService extends IUserManager.Stub {
         Bundle baseRestrictions = new Bundle();
         Bundle localRestrictions = new Bundle();
 
-        FileInputStream fis = null;
-        try {
-            AtomicFile userFile =
-                    new AtomicFile(new File(mUsersDir, Integer.toString(id) + XML_SUFFIX));
-            fis = userFile.openRead();
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, StandardCharsets.UTF_8.name());
-            int type;
-            while ((type = parser.next()) != XmlPullParser.START_TAG
-                    && type != XmlPullParser.END_DOCUMENT) {
-                // Skip
-            }
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(is, StandardCharsets.UTF_8.name());
+        int type;
+        while ((type = parser.next()) != XmlPullParser.START_TAG
+                && type != XmlPullParser.END_DOCUMENT) {
+            // Skip
+        }
 
-            if (type != XmlPullParser.START_TAG) {
-                Slog.e(LOG_TAG, "Unable to read user " + id);
+        if (type != XmlPullParser.START_TAG) {
+            Slog.e(LOG_TAG, "Unable to read user " + id);
+            return null;
+        }
+
+        if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_USER)) {
+            int storedId = readIntAttribute(parser, ATTR_ID, -1);
+            if (storedId != id) {
+                Slog.e(LOG_TAG, "User id does not match the file name");
                 return null;
             }
+            serialNumber = readIntAttribute(parser, ATTR_SERIAL_NO, id);
+            flags = readIntAttribute(parser, ATTR_FLAGS, 0);
+            iconPath = parser.getAttributeValue(null, ATTR_ICON_PATH);
+            creationTime = readLongAttribute(parser, ATTR_CREATION_TIME, 0);
+            lastLoggedInTime = readLongAttribute(parser, ATTR_LAST_LOGGED_IN_TIME, 0);
+            lastLoggedInFingerprint = parser.getAttributeValue(null,
+                    ATTR_LAST_LOGGED_IN_FINGERPRINT);
+            profileGroupId = readIntAttribute(parser, ATTR_PROFILE_GROUP_ID,
+                    UserInfo.NO_PROFILE_GROUP_ID);
+            profileBadge = readIntAttribute(parser, ATTR_PROFILE_BADGE, 0);
+            restrictedProfileParentId = readIntAttribute(parser,
+                    ATTR_RESTRICTED_PROFILE_PARENT_ID, UserInfo.NO_PROFILE_GROUP_ID);
+            String valueString = parser.getAttributeValue(null, ATTR_PARTIAL);
+            if ("true".equals(valueString)) {
+                partial = true;
+            }
+            valueString = parser.getAttributeValue(null, ATTR_GUEST_TO_REMOVE);
+            if ("true".equals(valueString)) {
+                guestToRemove = true;
+            }
 
-            if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_USER)) {
-                int storedId = readIntAttribute(parser, ATTR_ID, -1);
-                if (storedId != id) {
-                    Slog.e(LOG_TAG, "User id does not match the file name");
-                    return null;
-                }
-                serialNumber = readIntAttribute(parser, ATTR_SERIAL_NO, id);
-                flags = readIntAttribute(parser, ATTR_FLAGS, 0);
-                iconPath = parser.getAttributeValue(null, ATTR_ICON_PATH);
-                creationTime = readLongAttribute(parser, ATTR_CREATION_TIME, 0);
-                lastLoggedInTime = readLongAttribute(parser, ATTR_LAST_LOGGED_IN_TIME, 0);
-                lastLoggedInFingerprint = parser.getAttributeValue(null,
-                        ATTR_LAST_LOGGED_IN_FINGERPRINT);
-                profileGroupId = readIntAttribute(parser, ATTR_PROFILE_GROUP_ID,
-                        UserInfo.NO_PROFILE_GROUP_ID);
-                restrictedProfileParentId = readIntAttribute(parser,
-                        ATTR_RESTRICTED_PROFILE_PARENT_ID, UserInfo.NO_PROFILE_GROUP_ID);
-                String valueString = parser.getAttributeValue(null, ATTR_PARTIAL);
-                if ("true".equals(valueString)) {
-                    partial = true;
-                }
-                valueString = parser.getAttributeValue(null, ATTR_GUEST_TO_REMOVE);
-                if ("true".equals(valueString)) {
-                    guestToRemove = true;
-                }
+            seedAccountName = parser.getAttributeValue(null, ATTR_SEED_ACCOUNT_NAME);
+            seedAccountType = parser.getAttributeValue(null, ATTR_SEED_ACCOUNT_TYPE);
+            if (seedAccountName != null || seedAccountType != null) {
+                persistSeedData = true;
+            }
 
-                seedAccountName = parser.getAttributeValue(null, ATTR_SEED_ACCOUNT_NAME);
-                seedAccountType = parser.getAttributeValue(null, ATTR_SEED_ACCOUNT_TYPE);
-                if (seedAccountName != null || seedAccountType != null) {
+            int outerDepth = parser.getDepth();
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                    continue;
+                }
+                String tag = parser.getName();
+                if (TAG_NAME.equals(tag)) {
+                    type = parser.next();
+                    if (type == XmlPullParser.TEXT) {
+                        name = parser.getText();
+                    }
+                } else if (TAG_RESTRICTIONS.equals(tag)) {
+                    UserRestrictionsUtils.readRestrictions(parser, baseRestrictions);
+                } else if (TAG_DEVICE_POLICY_RESTRICTIONS.equals(tag)) {
+                    UserRestrictionsUtils.readRestrictions(parser, localRestrictions);
+                } else if (TAG_ACCOUNT.equals(tag)) {
+                    type = parser.next();
+                    if (type == XmlPullParser.TEXT) {
+                        account = parser.getText();
+                    }
+                } else if (TAG_SEED_ACCOUNT_OPTIONS.equals(tag)) {
+                    seedAccountOptions = PersistableBundle.restoreFromXml(parser);
                     persistSeedData = true;
-                }
-
-                int outerDepth = parser.getDepth();
-                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                       && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-                    if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                        continue;
-                    }
-                    String tag = parser.getName();
-                    if (TAG_NAME.equals(tag)) {
-                        type = parser.next();
-                        if (type == XmlPullParser.TEXT) {
-                            name = parser.getText();
-                        }
-                    } else if (TAG_RESTRICTIONS.equals(tag)) {
-                        UserRestrictionsUtils.readRestrictions(parser, baseRestrictions);
-                    } else if (TAG_DEVICE_POLICY_RESTRICTIONS.equals(tag)) {
-                        UserRestrictionsUtils.readRestrictions(parser, localRestrictions);
-                    } else if (TAG_ACCOUNT.equals(tag)) {
-                        type = parser.next();
-                        if (type == XmlPullParser.TEXT) {
-                            account = parser.getText();
-                        }
-                    } else if (TAG_SEED_ACCOUNT_OPTIONS.equals(tag)) {
-                        seedAccountOptions = PersistableBundle.restoreFromXml(parser);
-                        persistSeedData = true;
-                    }
-                }
-            }
-
-            // Create the UserInfo object that gets passed around
-            UserInfo userInfo = new UserInfo(id, name, iconPath, flags);
-            userInfo.serialNumber = serialNumber;
-            userInfo.creationTime = creationTime;
-            userInfo.lastLoggedInTime = lastLoggedInTime;
-            userInfo.lastLoggedInFingerprint = lastLoggedInFingerprint;
-            userInfo.partial = partial;
-            userInfo.guestToRemove = guestToRemove;
-            userInfo.profileGroupId = profileGroupId;
-            userInfo.restrictedProfileParentId = restrictedProfileParentId;
-
-            // Create the UserData object that's internal to this class
-            UserData userData = new UserData();
-            userData.info = userInfo;
-            userData.account = account;
-            userData.seedAccountName = seedAccountName;
-            userData.seedAccountType = seedAccountType;
-            userData.persistSeedData = persistSeedData;
-            userData.seedAccountOptions = seedAccountOptions;
-
-            synchronized (mRestrictionsLock) {
-                mBaseUserRestrictions.put(id, baseRestrictions);
-                mDevicePolicyLocalUserRestrictions.put(id, localRestrictions);
-            }
-            return userData;
-        } catch (IOException ioe) {
-        } catch (XmlPullParserException pe) {
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
                 }
             }
         }
-        return null;
+
+        // Create the UserInfo object that gets passed around
+        UserInfo userInfo = new UserInfo(id, name, iconPath, flags);
+        userInfo.serialNumber = serialNumber;
+        userInfo.creationTime = creationTime;
+        userInfo.lastLoggedInTime = lastLoggedInTime;
+        userInfo.lastLoggedInFingerprint = lastLoggedInFingerprint;
+        userInfo.partial = partial;
+        userInfo.guestToRemove = guestToRemove;
+        userInfo.profileGroupId = profileGroupId;
+        userInfo.profileBadge = profileBadge;
+        userInfo.restrictedProfileParentId = restrictedProfileParentId;
+
+        // Create the UserData object that's internal to this class
+        UserData userData = new UserData();
+        userData.info = userInfo;
+        userData.account = account;
+        userData.seedAccountName = seedAccountName;
+        userData.seedAccountType = seedAccountType;
+        userData.persistSeedData = persistSeedData;
+        userData.seedAccountOptions = seedAccountOptions;
+
+        synchronized (mRestrictionsLock) {
+            mBaseUserRestrictions.put(id, baseRestrictions);
+            mDevicePolicyLocalUserRestrictions.put(id, localRestrictions);
+        }
+        return userData;
     }
 
     private int readIntAttribute(XmlPullParser parser, String attr, int defaultValue) {
@@ -2316,6 +2352,9 @@ public class UserManagerService extends IUserManager.Stub {
                     userInfo.creationTime = (now > EPOCH_PLUS_30_YEARS) ? now : 0;
                     userInfo.partial = true;
                     userInfo.lastLoggedInFingerprint = Build.FINGERPRINT;
+                    if (isManagedProfile && parentId != UserHandle.USER_NULL) {
+                        userInfo.profileBadge = getFreeProfileBadgeLU(parentId);
+                    }
                     userData = new UserData();
                     userData.info = userInfo;
                     mUsers.put(userId, userData);
@@ -3642,5 +3681,40 @@ public class UserManagerService extends IUserManager.Stub {
     private static void debug(String message) {
         Log.d(LOG_TAG, message +
                 (DBG_WITH_STACKTRACE ? " called at\n" + Debug.getCallers(10, "  ") : ""));
+    }
+
+    @VisibleForTesting
+    static int getMaxManagedProfiles() {
+        // Allow overriding max managed profiles on debuggable builds for testing
+        // of multiple profiles.
+        if (!Build.IS_DEBUGGABLE) {
+            return MAX_MANAGED_PROFILES;
+        } else {
+            return SystemProperties.getInt("persist.sys.max_profiles",
+                    MAX_MANAGED_PROFILES);
+        }
+    }
+
+    @VisibleForTesting
+    int getFreeProfileBadgeLU(int parentUserId) {
+        int maxManagedProfiles = getMaxManagedProfiles();
+        boolean[] usedBadges = new boolean[maxManagedProfiles];
+        final int userSize = mUsers.size();
+        for (int i = 0; i < userSize; i++) {
+            UserInfo ui = mUsers.valueAt(i).info;
+            // Check which badge indexes are already used by this profile group.
+            if (ui.isManagedProfile()
+                    && ui.profileGroupId == parentUserId
+                    && !mRemovingUserIds.get(ui.id)
+                    && ui.profileBadge < maxManagedProfiles) {
+                usedBadges[ui.profileBadge] = true;
+            }
+        }
+        for (int i = 0; i < maxManagedProfiles; i++) {
+            if (!usedBadges[i]) {
+                return i;
+            }
+        }
+        return 0;
     }
 }

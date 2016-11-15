@@ -58,9 +58,11 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -81,6 +83,7 @@ import android.view.Display;
 import dalvik.system.VMRuntime;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.UserIcons;
@@ -1175,21 +1178,21 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public Drawable getManagedUserBadgedDrawable(Drawable drawable, Rect badgeLocation,
-            int badgeDensity) {
-        Drawable badgeDrawable = getDrawableForDensity(
-            com.android.internal.R.drawable.ic_corp_badge, badgeDensity);
-        return getBadgedDrawable(drawable, badgeDrawable, badgeLocation, true);
-    }
-
-    @Override
     public Drawable getUserBadgedIcon(Drawable icon, UserHandle user) {
-        final int badgeResId = getBadgeResIdForUser(user.getIdentifier());
-        if (badgeResId == 0) {
+        if (!isManagedProfile(user.getIdentifier())) {
             return icon;
         }
-        Drawable badgeIcon = getDrawable("system", badgeResId, null);
-        return getBadgedDrawable(icon, badgeIcon, null, true);
+        Drawable badgeShadow = getDrawable("system",
+                com.android.internal.R.drawable.ic_corp_icon_badge_shadow, null);
+        Drawable badgeColor = getDrawable("system",
+                com.android.internal.R.drawable.ic_corp_icon_badge_color, null);
+        badgeColor.setTint(getUserBadgeColor(user));
+        Drawable badgeForeground = getDrawable("system",
+                com.android.internal.R.drawable.ic_corp_icon_badge_case, null);
+
+        Drawable badge = new LayerDrawable(
+                new Drawable[] {badgeShadow, badgeColor, badgeForeground });
+        return getBadgedDrawable(icon, badge, null, true);
     }
 
     @Override
@@ -1202,16 +1205,53 @@ public class ApplicationPackageManager extends PackageManager {
         return getBadgedDrawable(drawable, badgeDrawable, badgeLocation, true);
     }
 
+    // Should have enough colors to cope with UserManagerService.getMaxManagedProfiles()
+    @VisibleForTesting
+    public static final int[] CORP_BADGE_COLORS = new int[] {
+        com.android.internal.R.color.profile_badge_1,
+        com.android.internal.R.color.profile_badge_2,
+        com.android.internal.R.color.profile_badge_3
+    };
+
+    @VisibleForTesting
+    public static final int[] CORP_BADGE_LABEL_RES_ID = new int[] {
+        com.android.internal.R.string.managed_profile_label_badge,
+        com.android.internal.R.string.managed_profile_label_badge_2,
+        com.android.internal.R.string.managed_profile_label_badge_3
+    };
+
+    private int getUserBadgeColor(UserHandle user) {
+        int badge = getUserManager().getManagedProfileBadge(user.getIdentifier());
+        if (badge < 0) {
+            badge = 0;
+        }
+        int resourceId = CORP_BADGE_COLORS[badge % CORP_BADGE_COLORS.length];
+        return Resources.getSystem().getColor(resourceId, null);
+    }
+
     @Override
     public Drawable getUserBadgeForDensity(UserHandle user, int density) {
-        return getManagedProfileIconForDensity(user, com.android.internal.R.drawable.ic_corp_badge,
-                density);
+        Drawable badgeColor = getManagedProfileIconForDensity(user,
+                com.android.internal.R.drawable.ic_corp_badge_color, density);
+        if (badgeColor == null) {
+            return null;
+        }
+        badgeColor.setTint(getUserBadgeColor(user));
+        Drawable badgeForeground = getDrawableForDensity(
+                com.android.internal.R.drawable.ic_corp_badge_case, density);
+        Drawable badge = new LayerDrawable(
+                new Drawable[] {badgeColor, badgeForeground });
+        return badge;
     }
 
     @Override
     public Drawable getUserBadgeForDensityNoBackground(UserHandle user, int density) {
-        return getManagedProfileIconForDensity(user,
+        Drawable badge = getManagedProfileIconForDensity(user,
                 com.android.internal.R.drawable.ic_corp_badge_no_background, density);
+        if (badge != null) {
+            badge.setTint(getUserBadgeColor(user));
+        }
+        return badge;
     }
 
     private Drawable getDrawableForDensity(int drawableId, int density) {
@@ -1231,8 +1271,9 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public CharSequence getUserBadgedLabel(CharSequence label, UserHandle user) {
         if (isManagedProfile(user.getIdentifier())) {
-            return Resources.getSystem().getString(
-                    com.android.internal.R.string.managed_profile_label_badge, label);
+            int badge = getUserManager().getManagedProfileBadge(user.getIdentifier());
+            int resourceId = CORP_BADGE_LABEL_RES_ID[badge % CORP_BADGE_LABEL_RES_ID.length];
+            return Resources.getSystem().getString(resourceId, label);
         }
         return label;
     }
@@ -2353,14 +2394,6 @@ public class ApplicationPackageManager extends PackageManager {
         }
 
         return drawable;
-    }
-
-    private int getBadgeResIdForUser(int userId) {
-        // Return the framework-provided badge.
-        if (isManagedProfile(userId)) {
-            return com.android.internal.R.drawable.ic_corp_icon_badge;
-        }
-        return 0;
     }
 
     private boolean isManagedProfile(int userId) {
