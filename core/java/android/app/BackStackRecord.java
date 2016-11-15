@@ -764,7 +764,7 @@ final class BackStackRecord extends FragmentTransaction implements
         }
         if (!mAllowOptimization) {
             // Added fragments are added at the end to comply with prior behavior.
-            mManager.moveToState(mManager.mCurState);
+            mManager.moveToState(mManager.mCurState, true);
         }
     }
 
@@ -810,7 +810,7 @@ final class BackStackRecord extends FragmentTransaction implements
             }
         }
         if (!mAllowOptimization) {
-            mManager.moveToState(mManager.mCurState);
+            mManager.moveToState(mManager.mCurState, true);
         }
     }
 
