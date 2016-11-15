@@ -18,11 +18,12 @@ package android.graphics;
 
 import android.annotation.ColorInt;
 import android.annotation.Size;
-import android.util.MathUtils;
+
 import com.android.internal.util.XmlUtils;
 
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.function.DoubleUnaryOperator;
 
 /**
  * The Color class defines methods for creating and converting color ints.
@@ -94,7 +95,7 @@ public class Color {
      */
     @ColorInt
     public static int rgb(int red, int green, int blue) {
-        return (0xFF << 24) | (red << 16) | (green << 8) | blue;
+        return 0xff000000 | (red << 16) | (green << 8) | blue;
     }
 
     /**
@@ -121,12 +122,11 @@ public class Color {
      * @return a value between 0 (darkest black) and 1 (lightest white)
      */
     public static float luminance(@ColorInt int color) {
-        double red = Color.red(color) / 255.0;
-        red = red < 0.03928 ? red / 12.92 : Math.pow((red + 0.055) / 1.055, 2.4);
-        double green = Color.green(color) / 255.0;
-        green = green < 0.03928 ? green / 12.92 : Math.pow((green + 0.055) / 1.055, 2.4);
-        double blue = Color.blue(color) / 255.0;
-        blue = blue < 0.03928 ? blue / 12.92 : Math.pow((blue + 0.055) / 1.055, 2.4);
+        ColorSpace.Rgb cs = (ColorSpace.Rgb) ColorSpace.get(ColorSpace.Named.SRGB);
+        DoubleUnaryOperator eotf = cs.getEotf();
+        double red = eotf.applyAsDouble(Color.red(color) / 255.0);
+        double green = eotf.applyAsDouble(Color.green(color) / 255.0);
+        double blue = eotf.applyAsDouble(Color.blue(color) / 255.0);
         return (float) ((0.2126 * red) + (0.7152 * green) + (0.0722 * blue));
     }
 
@@ -250,9 +250,8 @@ public class Color {
     }
 
     private static final HashMap<String, Integer> sColorNameMap;
-
     static {
-        sColorNameMap = new HashMap<String, Integer>();
+        sColorNameMap = new HashMap<>();
         sColorNameMap.put("black", BLACK);
         sColorNameMap.put("darkgray", DKGRAY);
         sColorNameMap.put("gray", GRAY);
