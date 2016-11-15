@@ -1226,7 +1226,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private String getKeyguardOrLockScreenString() {
-        if (mQs.isCustomizing()) {
+        if (mQs != null && mQs.isCustomizing()) {
             return getContext().getString(R.string.accessibility_desc_quick_settings_edit);
         } else if (mStatusBarState == StatusBarState.KEYGUARD) {
             return getContext().getString(R.string.accessibility_desc_lock_screen);
