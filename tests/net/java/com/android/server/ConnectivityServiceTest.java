@@ -2012,6 +2012,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
     @SmallTest
     public void testRequestBenchmark() throws Exception {
+        // TODO: turn this unit test into a real benchmarking test.
         // Benchmarks connecting and switching performance in the presence of a large number of
         // NetworkRequests.
         // 1. File NUM_REQUESTS requests.
@@ -2025,61 +2026,80 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         final CountDownLatch availableLatch = new CountDownLatch(NUM_REQUESTS);
         final CountDownLatch losingLatch = new CountDownLatch(NUM_REQUESTS);
 
-        final int REGISTER_TIME_LIMIT_MS = 100;
-        long startTime = System.currentTimeMillis();
         for (int i = 0; i < NUM_REQUESTS; i++) {
             callbacks[i] = new NetworkCallback() {
                 @Override public void onAvailable(Network n) { availableLatch.countDown(); }
                 @Override public void onLosing(Network n, int t) { losingLatch.countDown(); }
             };
-            mCm.registerNetworkCallback(request, callbacks[i]);
         }
-        long timeTaken = System.currentTimeMillis() - startTime;
-        String msg = String.format("Register %d callbacks: %dms, acceptable %dms",
-                NUM_REQUESTS, timeTaken, REGISTER_TIME_LIMIT_MS);
-        Log.d(TAG, msg);
-        assertTrue(msg, timeTaken < REGISTER_TIME_LIMIT_MS);
 
-        final int CONNECT_TIME_LIMIT_MS = 30;
+        final int REGISTER_TIME_LIMIT_MS = 180;
+        assertTimeLimit("Registering callbacks", REGISTER_TIME_LIMIT_MS, () -> {
+            for (NetworkCallback cb : callbacks) {
+                mCm.registerNetworkCallback(request, cb);
+            }
+        });
+
+        final int CONNECT_TIME_LIMIT_MS = 40;
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
         // Don't request that the network validate, because otherwise connect() will block until
         // the network gets NET_CAPABILITY_VALIDATED, after all the callbacks below have fired,
         // and we won't actually measure anything.
         mCellNetworkAgent.connect(false);
-        startTime = System.currentTimeMillis();
-        if (!availableLatch.await(CONNECT_TIME_LIMIT_MS, TimeUnit.MILLISECONDS)) {
-            fail(String.format("Only dispatched %d/%d onAvailable callbacks in %dms",
-                    NUM_REQUESTS - availableLatch.getCount(), NUM_REQUESTS,
-                    CONNECT_TIME_LIMIT_MS));
-        }
-        timeTaken = System.currentTimeMillis() - startTime;
-        Log.d(TAG, String.format("Connect, %d callbacks: %dms, acceptable %dms",
-                NUM_REQUESTS, timeTaken, CONNECT_TIME_LIMIT_MS));
 
-        final int SWITCH_TIME_LIMIT_MS = 30;
+        long onAvailableDispatchingDuration = durationOf(() -> {
+            if (!awaitLatch(availableLatch, CONNECT_TIME_LIMIT_MS)) {
+                fail(String.format("Only dispatched %d/%d onAvailable callbacks in %dms",
+                        NUM_REQUESTS - availableLatch.getCount(), NUM_REQUESTS,
+                        CONNECT_TIME_LIMIT_MS));
+            }
+        });
+        Log.d(TAG, String.format("Connect, %d callbacks: %dms, acceptable %dms",
+                NUM_REQUESTS, onAvailableDispatchingDuration, CONNECT_TIME_LIMIT_MS));
+
+        final int SWITCH_TIME_LIMIT_MS = 40;
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         // Give wifi a high enough score that we'll linger cell when wifi comes up.
         mWiFiNetworkAgent.adjustScore(40);
         mWiFiNetworkAgent.connect(false);
-        startTime = System.currentTimeMillis();
-        if (!losingLatch.await(SWITCH_TIME_LIMIT_MS, TimeUnit.MILLISECONDS)) {
-            fail(String.format("Only dispatched %d/%d onLosing callbacks in %dms",
-                    NUM_REQUESTS - losingLatch.getCount(), NUM_REQUESTS, SWITCH_TIME_LIMIT_MS));
-        }
-        timeTaken = System.currentTimeMillis() - startTime;
+
+        long onLostDispatchingDuration = durationOf(() -> {
+            if (!awaitLatch(losingLatch, SWITCH_TIME_LIMIT_MS)) {
+                fail(String.format("Only dispatched %d/%d onLosing callbacks in %dms",
+                        NUM_REQUESTS - losingLatch.getCount(), NUM_REQUESTS, SWITCH_TIME_LIMIT_MS));
+            }
+        });
         Log.d(TAG, String.format("Linger, %d callbacks: %dms, acceptable %dms",
-                NUM_REQUESTS, timeTaken, SWITCH_TIME_LIMIT_MS));
+                NUM_REQUESTS, onLostDispatchingDuration, SWITCH_TIME_LIMIT_MS));
 
         final int UNREGISTER_TIME_LIMIT_MS = 10;
-        startTime = System.currentTimeMillis();
-        for (int i = 0; i < NUM_REQUESTS; i++) {
-            mCm.unregisterNetworkCallback(callbacks[i]);
-        }
-        timeTaken = System.currentTimeMillis() - startTime;
-        msg = String.format("Unregister %d callbacks: %dms, acceptable %dms",
-                NUM_REQUESTS, timeTaken, UNREGISTER_TIME_LIMIT_MS);
+        assertTimeLimit("Unregistering callbacks", UNREGISTER_TIME_LIMIT_MS, () -> {
+            for (NetworkCallback cb : callbacks) {
+                mCm.unregisterNetworkCallback(cb);
+            }
+        });
+    }
+
+    private long durationOf(Runnable fn) {
+        long startTime = SystemClock.elapsedRealtime();
+        fn.run();
+        return SystemClock.elapsedRealtime() - startTime;
+    }
+
+    private void assertTimeLimit(String descr, long timeLimit, Runnable fn) {
+        long timeTaken = durationOf(fn);
+        String msg = String.format("%s: took %dms, limit was %dms", descr, timeTaken, timeLimit);
         Log.d(TAG, msg);
-        assertTrue(msg, timeTaken < UNREGISTER_TIME_LIMIT_MS);
+        assertTrue(msg, timeTaken <= timeLimit);
+    }
+
+    private boolean awaitLatch(CountDownLatch l, long timeoutMs) {
+        try {
+            if (l.await(timeoutMs, TimeUnit.MILLISECONDS)) {
+                return true;
+            }
+        } catch (InterruptedException e) {}
+        return false;
     }
 
     @SmallTest
