@@ -137,7 +137,8 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
 
     private void applyFocusableFlag(State state) {
         boolean panelFocusable = state.statusBarFocusable && state.panelExpanded;
-        if (state.bouncerShowing || BaseStatusBar.ENABLE_REMOTE_INPUT && state.remoteInputActive) {
+        if (state.bouncerShowing && (state.keyguardOccluded || state.keyguardNeedsInput)
+                || BaseStatusBar.ENABLE_REMOTE_INPUT && state.remoteInputActive) {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {
