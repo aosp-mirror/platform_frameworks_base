@@ -6031,6 +6031,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void clearDeviceOwnerLocked(ActiveAdmin admin, int userId) {
+        disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
         if (admin != null) {
             admin.disableCamera = false;
             admin.userRestrictions = null;
@@ -6042,7 +6043,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mOwners.clearDeviceOwner();
         mOwners.writeDeviceOwner();
         updateDeviceOwnerLocked();
-        disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
         try {
             if (mInjector.getIBackupManager() != null) {
                 // Reactivate backup service.
