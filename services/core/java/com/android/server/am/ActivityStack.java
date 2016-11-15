@@ -1471,7 +1471,7 @@ final class ActivityStack extends ConfigurationContainer {
             return STACK_INVISIBLE;
         }
 
-        if (mStackSupervisor.isFrontStack(this) || mStackSupervisor.isFocusedStack(this)) {
+        if (mStackSupervisor.isFrontStackOnDisplay(this) || mStackSupervisor.isFocusedStack(this)) {
             return STACK_VISIBLE;
         }
 

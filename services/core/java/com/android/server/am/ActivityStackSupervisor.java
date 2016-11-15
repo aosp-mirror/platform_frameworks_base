@@ -612,6 +612,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer
 
     /** The top most stack. */
     boolean isFrontStack(ActivityStack stack) {
+        return isFrontOfStackList(stack, mHomeStack.mStacks);
+    }
+
+    /** The top most stack on its display. */
+    boolean isFrontStackOnDisplay(ActivityStack stack) {
+        return isFrontOfStackList(stack, stack.mActivityContainer.mActivityDisplay.mStacks);
+    }
+
+    private boolean isFrontOfStackList(ActivityStack stack, List<ActivityStack> stackList) {
         if (stack == null) {
             return false;
         }
@@ -620,7 +629,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
         if (parent != null) {
             stack = parent.getStack();
         }
-        return stack == mHomeStack.mStacks.get((mHomeStack.mStacks.size() - 1));
+        return stack == stackList.get((stackList.size() - 1));
     }
 
     /** NOTE: Should only be called from {@link ActivityStack#moveToFront} */
