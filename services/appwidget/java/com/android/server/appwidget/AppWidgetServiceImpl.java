@@ -1593,14 +1593,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         // Make sure the package runs under the caller uid.
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
-
-        final int bitmapMemoryUsage = (views != null) ? views.estimateMemoryUsage() : 0;
-        if (bitmapMemoryUsage > mMaxWidgetBitmapMemory) {
-            throw new IllegalArgumentException("RemoteViews for widget update exceeds"
-                    + " maximum bitmap memory usage (used: " + bitmapMemoryUsage
-                    + ", max: " + mMaxWidgetBitmapMemory + ")");
-        }
-
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
 
@@ -1811,6 +1803,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             } else {
                 // For a full update we replace the RemoteViews completely.
                 widget.views = views;
+            }
+            int memoryUsage;
+            if ((UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) &&
+                    (widget.views != null) &&
+                    ((memoryUsage = widget.views.estimateMemoryUsage()) > mMaxWidgetBitmapMemory)) {
+                widget.views = null;
+                throw new IllegalArgumentException("RemoteViews for widget update exceeds"
+                        + " maximum bitmap memory usage (used: " + memoryUsage
+                        + ", max: " + mMaxWidgetBitmapMemory + ")");
             }
             scheduleNotifyUpdateAppWidgetLocked(widget, widget.getEffectiveViewsLocked());
         }
