@@ -15,10 +15,10 @@
         android:checked="true"
         android:layout_gravity="center"
         />
-    <com.android.layoutlib.test.myapplication.CustomDate
+    <com.android.layoutlib.test.myapplication.widgets.CustomDate
         android:layout_width="100dp"
         android:layout_height="wrap_content"/>
-    <com.android.layoutlib.test.myapplication.CustomCalendar
+    <com.android.layoutlib.test.myapplication.widgets.CustomCalendar
         android:layout_width="200dp"
         android:layout_gravity="center_horizontal"
         android:layout_height="200dp"/>
