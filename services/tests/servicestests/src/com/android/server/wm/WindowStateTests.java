@@ -41,9 +41,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Tests for the {@link WindowState} class.
  *
- * Build: mmma -j32 frameworks/base/services/tests/servicestests
- * Install: adb install -r out/target/product/$TARGET_PRODUCT/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
- * Run: adb shell am instrument -w -e class com.android.server.wm.WindowStateTests com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+ * runtest frameworks-services -c com.android.server.wm.WindowStateTests
  */
 @SmallTest
 @Presubmit
@@ -158,6 +156,15 @@ public class WindowStateTests {
         assertEquals(root, child1.getTopParentWindow());
         assertEquals(child1, child2.getParentWindow());
         assertEquals(root, child2.getTopParentWindow());
+    }
+
+    @Test
+    public void testIsOnScreen_hiddenByPolicy() {
+        final WindowState window = createWindow(null, TYPE_APPLICATION);
+        window.setHasSurface(true);
+        assertTrue(window.isOnScreen());
+        window.hideLw(false /* doAnimation */);
+        assertFalse(window.isOnScreen());
     }
 
     private WindowState createWindow(WindowState parent, int type) {
