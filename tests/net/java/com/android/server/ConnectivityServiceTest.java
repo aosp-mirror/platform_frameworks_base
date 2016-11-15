@@ -90,6 +90,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BooleanSupplier;
 
 /**
  * Tests for {@link ConnectivityService}.
@@ -623,7 +624,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     private class WrappedAvoidBadWifiTracker extends AvoidBadWifiTracker {
-        public boolean configRestrictsAvoidBadWifi;
+        public volatile boolean configRestrictsAvoidBadWifi;
 
         public WrappedAvoidBadWifiTracker(Context c, Handler h, Runnable r) {
             super(c, h, r);
@@ -2169,7 +2170,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             tracker.reevaluate();
             mService.waitForIdle();
             String msg = String.format("config=false, setting=%s", values[i]);
-            assertTrue(msg, mService.avoidBadWifi());
+            assertEventuallyTrue(() -> mService.avoidBadWifi(), 50);
             assertFalse(msg, tracker.shouldNotifyWifiUnvalidated());
         }
 
@@ -2178,19 +2179,19 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         Settings.Global.putInt(cr, settingName, 0);
         tracker.reevaluate();
         mService.waitForIdle();
-        assertFalse(mService.avoidBadWifi());
+        assertEventuallyTrue(() -> !mService.avoidBadWifi(), 50);
         assertFalse(tracker.shouldNotifyWifiUnvalidated());
 
         Settings.Global.putInt(cr, settingName, 1);
         tracker.reevaluate();
         mService.waitForIdle();
-        assertTrue(mService.avoidBadWifi());
+        assertEventuallyTrue(() -> mService.avoidBadWifi(), 50);
         assertFalse(tracker.shouldNotifyWifiUnvalidated());
 
         Settings.Global.putString(cr, settingName, null);
         tracker.reevaluate();
         mService.waitForIdle();
-        assertFalse(mService.avoidBadWifi());
+        assertEventuallyTrue(() -> !mService.avoidBadWifi(), 50);
         assertTrue(tracker.shouldNotifyWifiUnvalidated());
     }
 
@@ -2388,6 +2389,17 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(false);
         networkCallback.assertNoCallback();
+    }
+
+    public void assertEventuallyTrue(BooleanSupplier fn, long maxWaitingTimeMs) throws Exception {
+        long start = SystemClock.elapsedRealtime();
+        while (SystemClock.elapsedRealtime() <= start + maxWaitingTimeMs) {
+            if (fn.getAsBoolean()) {
+                return;
+            }
+            Thread.sleep(10);
+        }
+        assertTrue(fn.getAsBoolean());
     }
 
     private static class TestKeepaliveCallback extends PacketKeepaliveCallback {
