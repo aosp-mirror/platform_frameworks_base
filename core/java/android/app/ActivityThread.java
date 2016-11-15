@@ -5177,7 +5177,14 @@ public final class ActivityThread {
         }
         updateDefaultDensity();
 
-        final boolean is24Hr = "24".equals(mCoreSettings.getString(Settings.System.TIME_12_24));
+        final String use24HourSetting = mCoreSettings.getString(Settings.System.TIME_12_24);
+        Boolean is24Hr = null;
+        if (use24HourSetting != null) {
+            is24Hr = "24".equals(use24HourSetting) ? Boolean.TRUE : Boolean.FALSE;
+        }
+        // null : use locale default for 12/24 hour formatting,
+        // false : use 12 hour format,
+        // true : use 24 hour format.
         DateFormat.set24HourTimePref(is24Hr);
 
         View.mDebugViewAttributes =
