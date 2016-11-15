@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -347,6 +348,7 @@ public class StackScrollAlgorithm {
         int collapsedHeight = child.getCollapsedHeight();
         childViewState.yTranslation = currentYPosition;
         boolean belowShelf = i >= ambientState.getShelfIndex();
+        boolean isDismissView = child instanceof DismissView;
         if (i == 0) {
             updateFirstChildHeight(child, childViewState, childHeight, ambientState, belowShelf);
         }
@@ -354,7 +356,7 @@ public class StackScrollAlgorithm {
         // The y position after this element
         float nextYPosition = currentYPosition + childHeight +
                 paddingAfterChild;
-        if (nextYPosition >= bottomStackStart && belowShelf) {
+        if (nextYPosition >= bottomStackStart && belowShelf && !isDismissView) {
             // Case 1:
             // We are in the bottom stack.
             if (currentYPosition >= bottomStackStart) {
@@ -374,8 +376,14 @@ public class StackScrollAlgorithm {
             // We are in the regular scroll area.
             childViewState.location = ExpandableViewState.LOCATION_MAIN_AREA;
             if (belowShelf) {
-                clampPositionToBottomStackStart(childViewState, childViewState.height, childHeight,
-                        ambientState);
+                if (!isDismissView) {
+                    clampPositionToBottomStackStart(childViewState, childViewState.height,
+                            childHeight,
+                            ambientState);
+                } else {
+                    childViewState.yTranslation = Math.min(childViewState.yTranslation,
+                            ambientState.getInnerHeight() - childHeight);
+                }
             } else {
                 clampPositionToShelf(childViewState, ambientState);
             }
