@@ -557,6 +557,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             try (ParcelFileDescriptor.AutoCloseOutputStream stream =
                     new ParcelFileDescriptor.AutoCloseOutputStream(fd)) {
                 stream.write("Hello".getBytes());
+                fd.getFileDescriptor().sync();
             }
         }
         {
