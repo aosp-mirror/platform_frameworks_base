@@ -80,6 +80,7 @@ import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.view.Display.INVALID_DISPLAY;
 
 final class ActivityManagerShellCommand extends ShellCommand {
     public static final String NO_CLASS_ERROR_CODE = "Error type 3";
@@ -114,6 +115,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private String mProfileFile;
     private int mSamplingInterval;
     private boolean mAutoStop;
+    private int mDisplayId;
     private int mStackId;
 
     final boolean mDumping;
@@ -249,6 +251,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mSamplingInterval = 0;
         mAutoStop = false;
         mUserId = defUser;
+        mDisplayId = INVALID_DISPLAY;
         mStackId = INVALID_STACK_ID;
 
         return Intent.parseCommandArgs(this, new Intent.CommandOptionHandler() {
@@ -278,6 +281,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mUserId = UserHandle.parseUserArg(getNextArgRequired());
                 } else if (opt.equals("--receiver-permission")) {
                     mReceiverPermission = getNextArgRequired();
+                } else if (opt.equals("--display")) {
+                    mDisplayId = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--stack")) {
                     mStackId = Integer.parseInt(getNextArgRequired());
                 } else {
@@ -354,6 +359,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
             int res;
             final long startTime = SystemClock.uptimeMillis();
             ActivityOptions options = null;
+            if (mDisplayId != INVALID_DISPLAY) {
+                options = ActivityOptions.makeBasic();
+                options.setLaunchDisplayId(mDisplayId);
+            }
             if (mStackId != INVALID_STACK_ID) {
                 options = ActivityOptions.makeBasic();
                 options.setLaunchStackId(mStackId);

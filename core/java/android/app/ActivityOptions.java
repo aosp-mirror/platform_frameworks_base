@@ -18,6 +18,7 @@ package android.app;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -152,6 +153,12 @@ public class ActivityOptions {
     private static final String KEY_ANIM_SPECS = "android:activity.animSpecs";
 
     /**
+     * The display id the activity should be launched into.
+     * @hide
+     */
+    private static final String KEY_LAUNCH_DISPLAY_ID = "android.activity.launchDisplayId";
+
+    /**
      * The stack id the activity should be launched into.
      * @hide
      */
@@ -240,6 +247,7 @@ public class ActivityOptions {
     private int mResultCode;
     private int mExitCoordinatorIndex;
     private PendingIntent mUsageTimeReport;
+    private int mLaunchDisplayId = INVALID_DISPLAY;
     private int mLaunchStackId = INVALID_STACK_ID;
     private int mLaunchTaskId = -1;
     private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
@@ -850,6 +858,7 @@ public class ActivityOptions {
                 mExitCoordinatorIndex = opts.getInt(KEY_EXIT_COORDINATOR_INDEX);
                 break;
         }
+        mLaunchDisplayId = opts.getInt(KEY_LAUNCH_DISPLAY_ID, INVALID_DISPLAY);
         mLaunchStackId = opts.getInt(KEY_LAUNCH_STACK_ID, INVALID_STACK_ID);
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
         mTaskOverlay = opts.getBoolean(KEY_TASK_OVERLAY, false);
@@ -1013,6 +1022,25 @@ public class ActivityOptions {
         if (options != null) {
             options.abort();
         }
+    }
+
+    /**
+     * Gets the id of the display where activity should be launched.
+     * @return The id of the display where activity should be launched,
+     *         {@link android.view.Display#INVALID_DISPLAY} if not set.
+     */
+    public int getLaunchDisplayId() {
+        return mLaunchDisplayId;
+    }
+
+    /**
+     * Sets the id of the display where activity should be launched.
+     * @param launchDisplayId The id of the display where the activity should be launched.
+     * @return {@code this} {@link ActivityOptions} instance.
+     */
+    public ActivityOptions setLaunchDisplayId(int launchDisplayId) {
+        mLaunchDisplayId = launchDisplayId;
+        return this;
     }
 
     /** @hide */
@@ -1209,6 +1237,7 @@ public class ActivityOptions {
                 b.putInt(KEY_EXIT_COORDINATOR_INDEX, mExitCoordinatorIndex);
                 break;
         }
+        b.putInt(KEY_LAUNCH_DISPLAY_ID, mLaunchDisplayId);
         b.putInt(KEY_LAUNCH_STACK_ID, mLaunchStackId);
         b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
         b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);

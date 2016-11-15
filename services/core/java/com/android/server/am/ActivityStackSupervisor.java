@@ -38,6 +38,8 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.FLAG_PRIVATE;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONTAINERS;
@@ -90,6 +92,7 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -1483,16 +1486,35 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             Slog.w(TAG, message);
             return false;
         }
-        if (options != null && options.getLaunchTaskId() != -1) {
-            final int startInTaskPerm = mService.checkPermission(START_TASKS_FROM_RECENTS,
-                    callingPid, callingUid);
-            if (startInTaskPerm != PERMISSION_GRANTED) {
-                final String msg = "Permission Denial: starting " + intent.toString()
-                        + " from " + callerApp + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ") with launchTaskId="
-                        + options.getLaunchTaskId();
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
+        if (options != null) {
+            if (options.getLaunchTaskId() != INVALID_STACK_ID) {
+                final int startInTaskPerm = mService.checkPermission(START_TASKS_FROM_RECENTS,
+                        callingPid, callingUid);
+                if (startInTaskPerm != PERMISSION_GRANTED) {
+                    final String msg = "Permission Denial: starting " + intent.toString()
+                            + " from " + callerApp + " (pid=" + callingPid
+                            + ", uid=" + callingUid + ") with launchTaskId="
+                            + options.getLaunchTaskId();
+                    Slog.w(TAG, msg);
+                    throw new SecurityException(msg);
+                }
+            }
+            // Check if someone tries to launch an activity on a private display with a different
+            // owner.
+            final int launchDisplayId = options.getLaunchDisplayId();
+            if (launchDisplayId != INVALID_DISPLAY) {
+                final ActivityDisplay activityDisplay = mActivityDisplays.get(launchDisplayId);
+                if (activityDisplay != null
+                        && (activityDisplay.mDisplay.getFlags() & FLAG_PRIVATE) != 0) {
+                    if (activityDisplay.mDisplay.getOwnerUid() != callingUid) {
+                        final String msg = "Permission Denial: starting " + intent.toString()
+                                + " from " + callerApp + " (pid=" + callingPid
+                                + ", uid=" + callingUid + ") with launchDisplayId="
+                                + launchDisplayId;
+                        Slog.w(TAG, msg);
+                        throw new SecurityException(msg);
+                    }
+                }
             }
         }
 
@@ -1937,7 +1959,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
     }
 
     ActivityStack getStack(int stackId, boolean createStaticStackIfNeeded, boolean createOnTop) {
-        ActivityContainer activityContainer = mActivityContainers.get(stackId);
+        final ActivityContainer activityContainer = mActivityContainers.get(stackId);
         if (activityContainer != null) {
             return activityContainer.mStack;
         }
@@ -1946,6 +1968,40 @@ public class ActivityStackSupervisor extends ConfigurationContainer
         }
         // TODO(multi-display): Allow creating stacks on secondary displays.
         return createStackOnDisplay(stackId, DEFAULT_DISPLAY, createOnTop);
+    }
+
+    /**
+     * Get a topmost stack on the display, that is a valid launch stack for specified activity.
+     * If there is no such stack, new dynamic stack can be created.
+     * @param displayId Target display.
+     * @param r Activity that should be launched there.
+     * @return Existing stack if there is a valid one, new dynamic stack if it is valid or null.
+     */
+    ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r) {
+        final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+        if (activityDisplay == null) {
+            throw new IllegalArgumentException(
+                    "Display with displayId=" + displayId + " not found.");
+        }
+
+        // Return the topmost valid stack on the display.
+        for (int i = activityDisplay.mStacks.size() - 1; i >= 0; --i) {
+            final ActivityStack stack = activityDisplay.mStacks.get(i);
+            if (mService.mActivityStarter.isValidLaunchStackId(stack.mStackId, r)) {
+                return stack;
+            }
+        }
+
+        // If there is no valid stack on the external display - check if new dynamic stack will do.
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            final int newDynamicStackId = getNextStackId();
+            if (mService.mActivityStarter.isValidLaunchStackId(newDynamicStackId, r)) {
+                return createStackOnDisplay(newDynamicStackId, displayId, true /*onTop*/);
+            }
+        }
+
+        Slog.w(TAG, "getValidLaunchStackOnDisplay: can't launch on displayId " + displayId);
+        return null;
     }
 
     ArrayList<ActivityStack> getStacks() {
@@ -2326,11 +2382,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer
      * Restores a recent task to a stack
      * @param task The recent task to be restored.
      * @param stackId The stack to restore the task to (default launch stack will be used
-     *                if stackId is {@link android.app.ActivityManager.StackId#INVALID_STACK_ID}).
+     *                if stackId is {@link android.app.ActivityManager.StackId#INVALID_STACK_ID}
+     *                or is not a static stack).
      * @return true if the task has been restored successfully.
      */
     private boolean restoreRecentTaskLocked(TaskRecord task, int stackId) {
-        if (stackId == INVALID_STACK_ID) {
+        if (!StackId.isStaticStack(stackId)) {
+            // If stack is not static (or stack id is invalid) - use the default one.
+            // This means that tasks that were on external displays will be restored on the
+            // primary display.
             stackId = task.getLaunchStackId();
         } else if (stackId == DOCKED_STACK_ID && !task.canGoInDockedStack()) {
             // Preferred stack is the docked stack, but the task can't go in the docked stack.
