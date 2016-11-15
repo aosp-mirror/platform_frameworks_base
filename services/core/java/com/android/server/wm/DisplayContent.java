@@ -127,6 +127,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
 
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.view.IInputMethodClient;
 import com.android.server.input.InputWindowHandle;
 
@@ -141,6 +142,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Utility class for keeping track of the WindowStates and other pertinent contents of a
@@ -1407,9 +1409,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void adjustWallpaperWindows() {
-        if (mWallpaperController.adjustWallpaperWindows(mWindows)) {
-            assignWindowLayers(true /*setLayoutNeeded*/);
-        }
+        mWallpaperController.adjustWallpaperWindows(this);
     }
 
     /**
@@ -3235,17 +3235,27 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         @Override
-        void forAllWindows(Consumer<WindowState> callback, boolean traverseTopToBottom) {
+        boolean forAllWindows(ToBooleanFunction<WindowState> callback,
+                boolean traverseTopToBottom) {
             if (traverseTopToBottom) {
-                super.forAllWindows(callback, traverseTopToBottom);
-                forAllExitingAppTokenWindows(callback, traverseTopToBottom);
+                if (super.forAllWindows(callback, traverseTopToBottom)) {
+                    return true;
+                }
+                if (forAllExitingAppTokenWindows(callback, traverseTopToBottom)) {
+                    return true;
+                }
             } else {
-                forAllExitingAppTokenWindows(callback, traverseTopToBottom);
-                super.forAllWindows(callback, traverseTopToBottom);
+                if (forAllExitingAppTokenWindows(callback, traverseTopToBottom)) {
+                    return true;
+                }
+                if (super.forAllWindows(callback, traverseTopToBottom)) {
+                    return true;
+                }
             }
+            return false;
         }
 
-        private void forAllExitingAppTokenWindows(Consumer<WindowState> callback,
+        private boolean forAllExitingAppTokenWindows(ToBooleanFunction<WindowState> callback,
                 boolean traverseTopToBottom) {
             // For legacy reasons we process the TaskStack.mExitingAppTokens first here before the
             // app tokens.
@@ -3255,7 +3265,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 for (int i = mChildren.size() - 1; i >= 0; --i) {
                     final AppTokenList appTokens = mChildren.get(i).mExitingAppTokens;
                     for (int j = appTokens.size() - 1; j >= 0; --j) {
-                        appTokens.get(j).forAllWindowsUnchecked(callback, traverseTopToBottom);
+                        if (appTokens.get(j).forAllWindowsUnchecked(callback,
+                                traverseTopToBottom)) {
+                            return true;
+                        }
                     }
                 }
             } else {
@@ -3264,10 +3277,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     final AppTokenList appTokens = mChildren.get(i).mExitingAppTokens;
                     final int appTokensCount = appTokens.size();
                     for (int j = 0; j < appTokensCount; j++) {
-                        appTokens.get(j).forAllWindowsUnchecked(callback, traverseTopToBottom);
+                        if (appTokens.get(j).forAllWindowsUnchecked(callback,
+                                traverseTopToBottom)) {
+                            return true;
+                        }
                     }
                 }
             }
+            return false;
         }
 
         @Override

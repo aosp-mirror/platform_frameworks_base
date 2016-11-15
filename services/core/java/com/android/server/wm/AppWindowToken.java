@@ -47,6 +47,7 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE
 import static com.android.server.wm.WindowManagerService.logWithStack;
 
 import android.os.Debug;
+import com.android.internal.util.ToBooleanFunction;
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.wm.WindowManagerService.H;
 
@@ -66,7 +67,7 @@ import android.view.animation.Animation;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 class AppTokenList extends ArrayList<AppWindowToken> {
 }
@@ -1270,19 +1271,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     @Override
-    void forAllWindows(Consumer<WindowState> callback, boolean traverseTopToBottom) {
+    boolean forAllWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
         // For legacy reasons we process the TaskStack.mExitingAppTokens first in DisplayContent
         // before the non-exiting app tokens. So, we skip the exiting app tokens here.
         // TODO: Investigate if we need to continue to do this or if we can just process them
         // in-order.
         if (mIsExiting && !waitingForReplacement()) {
-            return;
+            return false;
         }
-        forAllWindowsUnchecked(callback, traverseTopToBottom);
+        return forAllWindowsUnchecked(callback, traverseTopToBottom);
     }
 
-    void forAllWindowsUnchecked(Consumer<WindowState> callback, boolean traverseTopToBottom) {
-        super.forAllWindows(callback, traverseTopToBottom);
+    boolean forAllWindowsUnchecked(ToBooleanFunction<WindowState> callback,
+            boolean traverseTopToBottom) {
+        return super.forAllWindows(callback, traverseTopToBottom);
     }
 
     @Override

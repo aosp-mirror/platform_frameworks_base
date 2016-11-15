@@ -271,8 +271,9 @@ class DragState {
             Slog.d(TAG_WM, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
         }
 
-        mDisplayContent.forAllWindows((w) -> sendDragStartedLw(w, touchX, touchY, mDataDescription),
-                false /* traverseTopToBottom */ );
+        mDisplayContent.forAllWindows(w -> {
+            sendDragStartedLw(w, touchX, touchY, mDataDescription);
+        }, false /* traverseTopToBottom */ );
     }
 
     /* helper - send a ACTION_DRAG_STARTED event, if the

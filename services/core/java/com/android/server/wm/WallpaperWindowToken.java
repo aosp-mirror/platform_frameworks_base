@@ -119,11 +119,8 @@ class WallpaperWindowToken extends WindowToken {
         }
     }
 
-    boolean updateWallpaperWindowsPlacement(WindowList windowList,
-            WindowState wallpaperTarget, int wallpaperTargetIndex, boolean visible, int dw, int dh,
-            int wallpaperAnimLayerAdj) {
+    void updateWallpaperWindows(boolean visible, int animLayerAdj) {
 
-        boolean changed = false;
         if (hidden == visible) {
             if (DEBUG_WALLPAPER_LIGHT) Slog.d(TAG,
                     "Wallpaper token " + token + " hidden=" + !visible);
@@ -132,6 +129,9 @@ class WallpaperWindowToken extends WindowToken {
             mDisplayContent.setLayoutNeeded();
         }
 
+        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
+        final int dw = displayInfo.logicalWidth;
+        final int dh = displayInfo.logicalHeight;
         final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
@@ -142,66 +142,11 @@ class WallpaperWindowToken extends WindowToken {
 
             // First, make sure the client has the current visibility state.
             wallpaper.dispatchWallpaperVisibility(visible);
-            wallpaper.adjustAnimLayer(wallpaperAnimLayerAdj);
+            wallpaper.adjustAnimLayer(animLayerAdj);
 
             if (DEBUG_LAYERS || DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "adjustWallpaper win "
                     + wallpaper + " anim layer: " + wallpaper.mWinAnimator.mAnimLayer);
-
-            // First, if this window is at the current index, then all is well.
-            if (wallpaper == wallpaperTarget) {
-                wallpaperTargetIndex--;
-                wallpaperTarget = wallpaperTargetIndex > 0
-                        ? windowList.get(wallpaperTargetIndex - 1) : null;
-                continue;
-            }
-
-            // The window didn't match...  the current wallpaper window,
-            // wherever it is, is in the wrong place, so make sure it is not in the list.
-            int oldIndex = windowList.indexOf(wallpaper);
-            if (oldIndex >= 0) {
-                if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG,
-                        "Wallpaper removing at " + oldIndex + ": " + wallpaper);
-                mDisplayContent.removeFromWindowList(wallpaper);
-                if (oldIndex < wallpaperTargetIndex) {
-                    wallpaperTargetIndex--;
-                }
-            }
-
-            // Now stick it in. For apps over wallpaper keep the wallpaper at the bottommost
-            // layer. For keyguard over wallpaper put the wallpaper under the lowest window that
-            // is currently on screen, i.e. not hidden by policy.
-            int insertionIndex = 0;
-            if (visible && wallpaperTarget != null) {
-                final int privateFlags = wallpaperTarget.mAttrs.privateFlags;
-                if ((privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
-                    insertionIndex = Math.min(windowList.indexOf(wallpaperTarget),
-                            findLowestWindowOnScreen(windowList));
-                }
-            }
-            if (DEBUG_WALLPAPER_LIGHT || DEBUG_WINDOW_MOVEMENT
-                    || (DEBUG_ADD_REMOVE && oldIndex != insertionIndex)) Slog.v(TAG,
-                    "Moving wallpaper " + wallpaper + " from " + oldIndex + " to " + insertionIndex);
-
-            mDisplayContent.addToWindowList(wallpaper, insertionIndex);
-            changed = true;
         }
-
-        return changed;
-    }
-
-    /**
-     * @return The index in {@param windows} of the lowest window that is currently on screen and
-     *         not hidden by the policy.
-     */
-    private int findLowestWindowOnScreen(WindowList windowList) {
-        final int size = windowList.size();
-        for (int index = 0; index < size; index++) {
-            final WindowState win = windowList.get(index);
-            if (win.isOnScreen()) {
-                return index;
-            }
-        }
-        return Integer.MAX_VALUE;
     }
 
     boolean hasVisibleNotDrawnWallpaper() {

@@ -19,10 +19,12 @@ package com.android.server.wm;
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
 import android.view.animation.Animation;
+import com.android.internal.util.ToBooleanFunction;
 
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
@@ -496,17 +498,38 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         return addIndex;
     }
 
-    void forAllWindows(Consumer<WindowState> callback, boolean traverseTopToBottom) {
+    /**
+     * For all windows at or below this container call the callback.
+     * @param   callback Calls the {@link ToBooleanFunction#apply} method for each window found and
+     *                   stops the search if {@link ToBooleanFunction#apply} returns true.
+     * @param   traverseTopToBottom If true traverses the hierarchy from top-to-bottom in terms of
+     *                              z-order, else from bottom-to-top.
+     * @return  True if the search ended before we reached the end of the hierarchy due to
+     *          {@link Function#apply} returning true.
+     */
+    boolean forAllWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
         if (traverseTopToBottom) {
             for (int i = mChildren.size() - 1; i >= 0; --i) {
-                mChildren.get(i).forAllWindows(callback, traverseTopToBottom);
+                if (mChildren.get(i).forAllWindows(callback, traverseTopToBottom)) {
+                    return true;
+                }
             }
         } else {
             final int count = mChildren.size();
             for (int i = 0; i < count; i++) {
-                mChildren.get(i).forAllWindows(callback, traverseTopToBottom);
+                if (mChildren.get(i).forAllWindows(callback, traverseTopToBottom)) {
+                    return true;
+                }
             }
         }
+        return false;
+    }
+
+    void forAllWindows(Consumer<WindowState> callback, boolean traverseTopToBottom) {
+        forAllWindows(w -> {
+            callback.accept(w);
+            return false;
+        }, traverseTopToBottom);
     }
 
     WindowState getWindow(Predicate<WindowState> callback) {

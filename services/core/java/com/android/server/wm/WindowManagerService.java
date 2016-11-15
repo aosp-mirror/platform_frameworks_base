@@ -4905,9 +4905,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (rotateSeamlessly) {
-                dc.forAllWindows((w) ->
-                        w.mWinAnimator.seamlesslyRotateWindow(oldRotation, mRotation),
-                        true /* traverseTopToBottom */);
+                dc.forAllWindows(w -> {
+                        w.mWinAnimator.seamlesslyRotateWindow(oldRotation, mRotation);
+                }, true /* traverseTopToBottom */);
             }
 
             mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
@@ -4920,7 +4920,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        dc.forAllWindows((w) -> {
+        dc.forAllWindows(w -> {
             // Discard surface after orientation change, these can't be reused.
             if (w.mAppToken != null) {
                 w.mAppToken.destroySavedSurfaces();
@@ -5183,7 +5183,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final WindowList windows = new WindowList();
         synchronized (mWindowMap) {
-            mRoot.forAllWindows(windows::add, false /* traverseTopToBottom */);
+            mRoot.forAllWindows(w -> {
+                windows.add(w);
+            }, false /* traverseTopToBottom */);
         }
 
         BufferedWriter out = null;
@@ -8260,7 +8262,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mRoot.dumpChildrenNames(output, " ");
                     pw.println(output.toString());
                     pw.println(" ");
-                    mRoot.forAllWindows(pw::println, true /* traverseTopToBottom */);
+                    mRoot.forAllWindows(w -> {pw.println(w);}, true /* traverseTopToBottom */);
                 }
                 return;
             } else {
