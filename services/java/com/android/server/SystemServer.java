@@ -42,7 +42,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -167,8 +167,8 @@ public final class SystemServer {
             "com.android.server.job.JobSchedulerService";
     private static final String LOCK_SETTINGS_SERVICE_CLASS =
             "com.android.server.LockSettingsService$Lifecycle";
-    private static final String MOUNT_SERVICE_CLASS =
-            "com.android.server.MountService$Lifecycle";
+    private static final String STORAGE_MANAGER_SERVICE_CLASS =
+            "com.android.server.StorageManagerService$Lifecycle";
     private static final String SEARCH_MANAGER_SERVICE_CLASS =
             "com.android.server.search.SearchManagerService$Lifecycle";
     private static final String THERMAL_OBSERVER_CLASS =
@@ -572,7 +572,7 @@ public final class SystemServer {
     private void startOtherServices() {
         final Context context = mSystemContext;
         VibratorService vibrator = null;
-        IMountService mountService = null;
+        IStorageManager storageManager = null;
         NetworkManagementService networkManagement = null;
         NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
@@ -784,17 +784,17 @@ public final class SystemServer {
         if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
             if (!disableStorage &&
                 !"0".equals(SystemProperties.get("system_init.startmountservice"))) {
-                traceBeginAndSlog("StartMountService");
+                traceBeginAndSlog("StartStorageManagerService");
                 try {
                     /*
-                     * NotificationManagerService is dependant on MountService,
-                     * (for media / usb notifications) so we must start MountService first.
+                     * NotificationManagerService is dependant on StorageManagerService,
+                     * (for media / usb notifications) so we must start StorageManagerService first.
                      */
-                    mSystemServiceManager.startService(MOUNT_SERVICE_CLASS);
-                    mountService = IMountService.Stub.asInterface(
+                    mSystemServiceManager.startService(STORAGE_MANAGER_SERVICE_CLASS);
+                    storageManager = IStorageManager.Stub.asInterface(
                             ServiceManager.getService("mount"));
                 } catch (Throwable e) {
-                    reportWtf("starting Mount Service", e);
+                    reportWtf("starting StorageManager Service", e);
                 }
                 traceEnd();
             }
@@ -993,14 +993,14 @@ public final class SystemServer {
             }
 
             /*
-             * MountService has a few dependencies: Notification Manager and
-             * AppWidget Provider. Make sure MountService is completely started
+             * StorageManagerService has a few dependencies: Notification Manager and
+             * AppWidget Provider. Make sure StorageManagerService is completely started
              * first before continuing.
              */
-            if (mountService != null && !mOnlyCore) {
+            if (storageManager != null && !mOnlyCore) {
                 traceBeginAndSlog("WaitForAsecScan");
                 try {
-                    mountService.waitForAsecScan();
+                    storageManager.waitForAsecScan();
                 } catch (RemoteException ignored) {
                 }
                 traceEnd();

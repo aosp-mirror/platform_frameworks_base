@@ -75,7 +75,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.util.ArraySet;
 import android.util.IntArray;
@@ -735,8 +735,8 @@ final class UserController {
         }
     }
 
-    private IMountService getMountService() {
-        return IMountService.Stub.asInterface(ServiceManager.getService("mount"));
+    private IStorageManager getStorageManager() {
+        return IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
     }
 
     /**
@@ -980,10 +980,10 @@ final class UserController {
             // TODO Move this block outside of synchronized if it causes lock contention
             if (!StorageManager.isUserKeyUnlocked(userId)) {
                 final UserInfo userInfo = getUserInfo(userId);
-                final IMountService mountService = getMountService();
+                final IStorageManager storageManager = getStorageManager();
                 try {
                     // We always want to unlock user storage, even user is not started yet
-                    mountService.unlockUserKey(userId, userInfo.serialNumber, token, secret);
+                    storageManager.unlockUserKey(userId, userInfo.serialNumber, token, secret);
                 } catch (RemoteException | RuntimeException e) {
                     Slog.w(TAG, "Failed to unlock: " + e.getMessage());
                 }

@@ -80,7 +80,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.Environment.UserEnvironment;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.system.ErrnoException;
@@ -268,7 +268,7 @@ public class BackupManagerService {
     private IActivityManager mActivityManager;
     private PowerManager mPowerManager;
     private AlarmManager mAlarmManager;
-    private IMountService mMountService;
+    private IStorageManager mStorageManager;
     IBackupManager mBackupManagerBinder;
 
     boolean mEnabled;   // access to this is synchronized on 'this'
@@ -1079,7 +1079,7 @@ public class BackupManagerService {
 
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        mMountService = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
+        mStorageManager = IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
 
         mBackupManagerBinder = Trampoline.asInterface(parent.asBinder());
 
@@ -3982,14 +3982,14 @@ public class BackupManagerService {
 
     boolean deviceIsEncrypted() {
         try {
-            return mMountService.getEncryptionState()
+            return mStorageManager.getEncryptionState()
                      != StorageManager.ENCRYPTION_STATE_NONE
-                && mMountService.getPasswordType()
+                && mStorageManager.getPasswordType()
                      != StorageManager.CRYPT_TYPE_DEFAULT;
         } catch (Exception e) {
-            // If we can't talk to the mount service we have a serious problem; fail
+            // If we can't talk to the storagemanager service we have a serious problem; fail
             // "secure" i.e. assuming that the device is encrypted.
-            Slog.e(TAG, "Unable to communicate with mount service: " + e.getMessage());
+            Slog.e(TAG, "Unable to communicate with storagemanager service: " + e.getMessage());
             return true;
         }
     }

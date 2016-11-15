@@ -27,7 +27,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -64,7 +64,7 @@ public class BackupRestoreConfirmation extends Activity {
 
     Handler mHandler;
     IBackupManager mBackupManager;
-    IMountService mMountService;
+    IStorageManager mStorageManager;
     FullObserver mObserver;
     int mToken;
     boolean mIsEncrypted;
@@ -158,7 +158,7 @@ public class BackupRestoreConfirmation extends Activity {
         }
 
         mBackupManager = IBackupManager.Stub.asInterface(ServiceManager.getService(Context.BACKUP_SERVICE));
-        mMountService = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
+        mStorageManager = IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
 
         mHandler = new ObserverHandler(getApplicationContext());
         final Object oldObserver = getLastNonConfigurationInstance();
@@ -271,14 +271,14 @@ public class BackupRestoreConfirmation extends Activity {
 
     boolean deviceIsEncrypted() {
         try {
-            return mMountService.getEncryptionState()
+            return mStorageManager.getEncryptionState()
                      != StorageManager.ENCRYPTION_STATE_NONE
-                && mMountService.getPasswordType()
+                && mStorageManager.getPasswordType()
                      != StorageManager.CRYPT_TYPE_DEFAULT;
         } catch (Exception e) {
-            // If we can't talk to the mount service we have a serious problem; fail
+            // If we can't talk to the storagemanager service we have a serious problem; fail
             // "secure" i.e. assuming that the device is encrypted.
-            Slog.e(TAG, "Unable to communicate with mount service: " + e.getMessage());
+            Slog.e(TAG, "Unable to communicate with storagemanager service: " + e.getMessage());
             return true;
         }
     }

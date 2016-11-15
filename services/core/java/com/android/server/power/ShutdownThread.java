@@ -43,8 +43,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.os.SystemVibrator;
-import android.os.storage.IMountService;
-import android.os.storage.IMountShutdownObserver;
+import android.os.storage.IStorageShutdownObserver;
+import android.os.storage.IStorageManager;
 import android.system.ErrnoException;
 import android.system.Os;
 
@@ -442,30 +442,30 @@ public final class ShutdownThread extends Thread {
             sInstance.setRebootProgress(RADIO_STOP_PERCENT, null);
         }
 
-        // Shutdown MountService to ensure media is in a safe state
-        IMountShutdownObserver observer = new IMountShutdownObserver.Stub() {
+        // Shutdown StorageManagerService to ensure media is in a safe state
+        IStorageShutdownObserver observer = new IStorageShutdownObserver.Stub() {
             public void onShutDownComplete(int statusCode) throws RemoteException {
-                Log.w(TAG, "Result code " + statusCode + " from MountService.shutdown");
+                Log.w(TAG, "Result code " + statusCode + " from StorageManagerService.shutdown");
                 actionDone();
             }
         };
 
-        Log.i(TAG, "Shutting down MountService");
+        Log.i(TAG, "Shutting down StorageManagerService");
 
         // Set initial variables and time out time.
         mActionDone = false;
         final long endShutTime = SystemClock.elapsedRealtime() + MAX_SHUTDOWN_WAIT_TIME;
         synchronized (mActionDoneSync) {
             try {
-                final IMountService mount = IMountService.Stub.asInterface(
+                final IStorageManager storageManager = IStorageManager.Stub.asInterface(
                         ServiceManager.checkService("mount"));
-                if (mount != null) {
-                    mount.shutdown(observer);
+                if (storageManager != null) {
+                    storageManager.shutdown(observer);
                 } else {
-                    Log.w(TAG, "MountService unavailable for shutdown");
+                    Log.w(TAG, "StorageManagerService unavailable for shutdown");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Exception during MountService shutdown", e);
+                Log.e(TAG, "Exception during StorageManagerService shutdown", e);
             }
             while (!mActionDone) {
                 long delay = endShutTime - SystemClock.elapsedRealtime();

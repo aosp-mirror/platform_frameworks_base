@@ -24,9 +24,9 @@ package android.os.storage;
  *
  * @hide - For internal consumption only.
  */
-interface IMountShutdownObserver {
+interface IStorageShutdownObserver {
     /**
-     * This method is called when the shutdown of MountService completed.
+     * This method is called when the shutdown of StorageManagerService completed.
      *
      * @param statusCode indicates success or failure of the shutdown.
      */

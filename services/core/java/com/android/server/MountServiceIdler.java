@@ -67,7 +67,7 @@ public class MountServiceIdler extends JobService {
         // that lets us cleanly end our idle timeslice.  It's safe to call
         // finishIdle() from any thread.
         mJobParams = params;
-        MountService ms = MountService.sSelf;
+        StorageManagerService ms = StorageManagerService.sSelf;
         if (ms != null) {
             synchronized (mFinishCallback) {
                 mStarted = true;

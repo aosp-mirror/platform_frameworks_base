@@ -29,7 +29,7 @@ import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
 import android.os.storage.StorageVolume;
@@ -53,7 +53,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * Constants used internally between the PackageManager
  * and media container service transports.
- * Some utility methods to invoke MountService api.
+ * Some utility methods to invoke StorageManagerService api.
  */
 public class PackageHelper {
     public static final int RECOMMEND_INSTALL_INTERNAL = 1;
@@ -74,13 +74,13 @@ public class PackageHelper {
     public static final int APP_INSTALL_INTERNAL = 1;
     public static final int APP_INSTALL_EXTERNAL = 2;
 
-    public static IMountService getMountService() throws RemoteException {
+    public static IStorageManager getStorageManager() throws RemoteException {
         IBinder service = ServiceManager.getService("mount");
         if (service != null) {
-            return IMountService.Stub.asInterface(service);
+            return IStorageManager.Stub.asInterface(service);
         } else {
-            Log.e(TAG, "Can't get mount service");
-            throw new RemoteException("Could not contact mount service");
+            Log.e(TAG, "Can't get storagemanager service");
+            throw new RemoteException("Could not contact storagemanager service");
         }
     }
 
@@ -89,23 +89,23 @@ public class PackageHelper {
         // Round up to nearest MB, plus another MB for filesystem overhead
         final int sizeMb = (int) ((sizeBytes + MB_IN_BYTES) / MB_IN_BYTES) + 1;
         try {
-            IMountService mountService = getMountService();
+            IStorageManager storageManager = getStorageManager();
 
             if (localLOGV)
                 Log.i(TAG, "Size of container " + sizeMb + " MB");
 
-            int rc = mountService.createSecureContainer(cid, sizeMb, "ext4", sdEncKey, uid,
+            int rc = storageManager.createSecureContainer(cid, sizeMb, "ext4", sdEncKey, uid,
                     isExternal);
             if (rc != StorageResultCode.OperationSucceeded) {
                 Log.e(TAG, "Failed to create secure container " + cid);
                 return null;
             }
-            String cachePath = mountService.getSecureContainerPath(cid);
+            String cachePath = storageManager.getSecureContainerPath(cid);
             if (localLOGV) Log.i(TAG, "Created secure container " + cid +
                     " at " + cachePath);
                 return cachePath;
         } catch (RemoteException e) {
-            Log.e(TAG, "MountService running?");
+            Log.e(TAG, "StorageManagerService running?");
         }
         return null;
     }
@@ -114,13 +114,13 @@ public class PackageHelper {
         // Round up to nearest MB, plus another MB for filesystem overhead
         final int sizeMb = (int) ((sizeBytes + MB_IN_BYTES) / MB_IN_BYTES) + 1;
         try {
-            IMountService mountService = getMountService();
-            int rc = mountService.resizeSecureContainer(cid, sizeMb, sdEncKey);
+            IStorageManager storageManager = getStorageManager();
+            int rc = storageManager.resizeSecureContainer(cid, sizeMb, sdEncKey);
             if (rc == StorageResultCode.OperationSucceeded) {
                 return true;
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "MountService running?");
+            Log.e(TAG, "StorageManagerService running?");
         }
         Log.e(TAG, "Failed to create secure container " + cid);
         return false;
@@ -132,35 +132,35 @@ public class PackageHelper {
 
     public static String mountSdDir(String cid, String key, int ownerUid, boolean readOnly) {
         try {
-            int rc = getMountService().mountSecureContainer(cid, key, ownerUid, readOnly);
+            int rc = getStorageManager().mountSecureContainer(cid, key, ownerUid, readOnly);
             if (rc != StorageResultCode.OperationSucceeded) {
                 Log.i(TAG, "Failed to mount container " + cid + " rc : " + rc);
                 return null;
             }
-            return getMountService().getSecureContainerPath(cid);
+            return getStorageManager().getSecureContainerPath(cid);
         } catch (RemoteException e) {
-            Log.e(TAG, "MountService running?");
+            Log.e(TAG, "StorageManagerService running?");
         }
         return null;
     }
 
    public static boolean unMountSdDir(String cid) {
     try {
-        int rc = getMountService().unmountSecureContainer(cid, true);
+        int rc = getStorageManager().unmountSecureContainer(cid, true);
         if (rc != StorageResultCode.OperationSucceeded) {
             Log.e(TAG, "Failed to unmount " + cid + " with rc " + rc);
             return false;
         }
         return true;
     } catch (RemoteException e) {
-        Log.e(TAG, "MountService running?");
+        Log.e(TAG, "StorageManagerService running?");
     }
         return false;
    }
 
    public static boolean renameSdDir(String oldId, String newId) {
        try {
-           int rc = getMountService().renameSecureContainer(oldId, newId);
+           int rc = getStorageManager().renameSecureContainer(oldId, newId);
            if (rc != StorageResultCode.OperationSucceeded) {
                Log.e(TAG, "Failed to rename " + oldId + " to " +
                        newId + "with rc " + rc);
@@ -176,7 +176,7 @@ public class PackageHelper {
 
    public static String getSdDir(String cid) {
        try {
-            return getMountService().getSecureContainerPath(cid);
+            return getStorageManager().getSecureContainerPath(cid);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get container path for " + cid +
                 " with exception " + e);
@@ -186,7 +186,7 @@ public class PackageHelper {
 
    public static String getSdFilesystem(String cid) {
        try {
-            return getMountService().getSecureContainerFilesystemPath(cid);
+            return getStorageManager().getSecureContainerFilesystemPath(cid);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get container path for " + cid +
                 " with exception " + e);
@@ -196,7 +196,7 @@ public class PackageHelper {
 
     public static boolean finalizeSdDir(String cid) {
         try {
-            int rc = getMountService().finalizeSecureContainer(cid);
+            int rc = getStorageManager().finalizeSecureContainer(cid);
             if (rc != StorageResultCode.OperationSucceeded) {
                 Log.i(TAG, "Failed to finalize container " + cid);
                 return false;
@@ -212,7 +212,7 @@ public class PackageHelper {
     public static boolean destroySdDir(String cid) {
         try {
             if (localLOGV) Log.i(TAG, "Forcibly destroying container " + cid);
-            int rc = getMountService().destroySecureContainer(cid, true);
+            int rc = getStorageManager().destroySecureContainer(cid, true);
             if (rc != StorageResultCode.OperationSucceeded) {
                 Log.i(TAG, "Failed to destroy container " + cid);
                 return false;
@@ -227,7 +227,7 @@ public class PackageHelper {
 
     public static String[] getSecureContainerList() {
         try {
-            return getMountService().getSecureContainerList();
+            return getStorageManager().getSecureContainerList();
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get secure container list with exception" +
                     e);
@@ -237,7 +237,7 @@ public class PackageHelper {
 
    public static boolean isContainerMounted(String cid) {
        try {
-           return getMountService().isSecureContainerMounted(cid);
+           return getStorageManager().isSecureContainerMounted(cid);
        } catch (RemoteException e) {
            Log.e(TAG, "Failed to find out if container " + cid + " mounted");
        }
@@ -325,7 +325,7 @@ public class PackageHelper {
 
     public static boolean fixSdPermissions(String cid, int gid, String filename) {
         try {
-            int rc = getMountService().fixPermissionsSecureContainer(cid, gid, filename);
+            int rc = getStorageManager().fixPermissionsSecureContainer(cid, gid, filename);
             if (rc != StorageResultCode.OperationSucceeded) {
                 Log.i(TAG, "Failed to fixperms container " + cid);
                 return false;

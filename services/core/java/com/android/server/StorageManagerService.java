@@ -68,11 +68,11 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.DiskInfo;
-import android.os.storage.IMountService;
-import android.os.storage.IMountServiceListener;
-import android.os.storage.IMountShutdownObserver;
+import android.os.storage.IStorageEventListener;
+import android.os.storage.IStorageShutdownObserver;
 import android.os.storage.IObbActionListener;
-import android.os.storage.MountServiceInternal;
+import android.os.storage.IStorageManager;
+import android.os.storage.StorageManagerInternal;
 import android.os.storage.OnObbStateChangeListener;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
@@ -149,14 +149,14 @@ import javax.crypto.spec.PBEKeySpec;
  * watch for and manage dynamically added storage, such as SD cards and USB mass
  * storage. Also decides how storage should be presented to users on the device.
  */
-class MountService extends IMountService.Stub
+class StorageManagerService extends IStorageManager.Stub
         implements INativeDaemonConnectorCallbacks, Watchdog.Monitor {
 
     // Static direct instance pointer for the tightly-coupled idle service to use
-    static MountService sSelf = null;
+    static StorageManagerService sSelf = null;
 
     public static class Lifecycle extends SystemService {
-        private MountService mMountService;
+        private StorageManagerService mStorageManagerService;
 
         public Lifecycle(Context context) {
             super(context);
@@ -164,33 +164,33 @@ class MountService extends IMountService.Stub
 
         @Override
         public void onStart() {
-            mMountService = new MountService(getContext());
-            publishBinderService("mount", mMountService);
-            mMountService.start();
+            mStorageManagerService = new StorageManagerService(getContext());
+            publishBinderService("mount", mStorageManagerService);
+            mStorageManagerService.start();
         }
 
         @Override
         public void onBootPhase(int phase) {
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-                mMountService.systemReady();
+                mStorageManagerService.systemReady();
             } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
-                mMountService.bootCompleted();
+                mStorageManagerService.bootCompleted();
             }
         }
 
         @Override
         public void onSwitchUser(int userHandle) {
-            mMountService.mCurrentUserId = userHandle;
+            mStorageManagerService.mCurrentUserId = userHandle;
         }
 
         @Override
         public void onUnlockUser(int userHandle) {
-            mMountService.onUnlockUser(userHandle);
+            mStorageManagerService.onUnlockUser(userHandle);
         }
 
         @Override
         public void onCleanupUser(int userHandle) {
-            mMountService.onCleanupUser(userHandle);
+            mStorageManagerService.onCleanupUser(userHandle);
         }
     }
 
@@ -209,7 +209,7 @@ class MountService extends IMountService.Stub
      */
     private static final boolean EMULATE_FBE_SUPPORTED = true;
 
-    private static final String TAG = "MountService";
+    private static final String TAG = "StorageManagerService";
 
     private static final String TAG_STORAGE_BENCHMARK = "storage_benchmark";
     private static final String TAG_STORAGE_TRIM = "storage_trim";
@@ -500,7 +500,8 @@ class MountService extends IMountService.Stub
     final private Map<String, ObbState> mObbPathToStateMap = new HashMap<String, ObbState>();
 
     // Not guarded by a lock.
-    private final MountServiceInternalImpl mMountServiceInternal = new MountServiceInternalImpl();
+    private final StorageManagerInternalImpl mStorageManagerInternal
+            = new StorageManagerInternalImpl();
 
     class ObbState implements IBinder.DeathRecipient {
         public ObbState(String rawPath, String canonicalPath, int callingUid,
@@ -609,8 +610,8 @@ class MountService extends IMountService.Stub
     private static final int H_PARTITION_FORGET = 9;
     private static final int H_RESET = 10;
 
-    class MountServiceHandler extends Handler {
-        public MountServiceHandler(Looper looper) {
+    class StorageManagerServiceHandler extends Handler {
+        public StorageManagerServiceHandler(Looper looper) {
             super(looper);
         }
 
@@ -661,7 +662,7 @@ class MountService extends IMountService.Stub
                     break;
                 }
                 case H_SHUTDOWN: {
-                    final IMountShutdownObserver obs = (IMountShutdownObserver) msg.obj;
+                    final IStorageShutdownObserver obs = (IStorageShutdownObserver) msg.obj;
                     boolean success = false;
                     try {
                         success = mConnector.execute("volume", "shutdown").isClassOk();
@@ -1481,11 +1482,11 @@ class MountService extends IMountService.Stub
     }
 
     /**
-     * Constructs a new MountService instance
+     * Constructs a new StorageManagerService instance
      *
      * @param context  Binder context for this service
      */
-    public MountService(Context context) {
+    public StorageManagerService(Context context) {
         sSelf = this;
 
         mContext = context;
@@ -1497,9 +1498,9 @@ class MountService extends IMountService.Stub
 
         HandlerThread hthread = new HandlerThread(TAG);
         hthread.start();
-        mHandler = new MountServiceHandler(hthread.getLooper());
+        mHandler = new StorageManagerServiceHandler(hthread.getLooper());
 
-        // Add OBB Action Handler to MountService thread.
+        // Add OBB Action Handler to StorageManagerService thread.
         mObbActionHandler = new ObbActionHandler(IoThread.get().getLooper());
 
         // Initialize the last-fstrim tracking if necessary
@@ -1525,7 +1526,7 @@ class MountService extends IMountService.Stub
             readSettingsLocked();
         }
 
-        LocalServices.addService(MountServiceInternal.class, mMountServiceInternal);
+        LocalServices.addService(StorageManagerInternal.class, mStorageManagerInternal);
 
         /*
          * Create the connection to vold with a maximum queue of twice the
@@ -1685,17 +1686,17 @@ class MountService extends IMountService.Stub
      */
 
     @Override
-    public void registerListener(IMountServiceListener listener) {
+    public void registerListener(IStorageEventListener listener) {
         mCallbacks.register(listener);
     }
 
     @Override
-    public void unregisterListener(IMountServiceListener listener) {
+    public void unregisterListener(IStorageEventListener listener) {
         mCallbacks.unregister(listener);
     }
 
     @Override
-    public void shutdown(final IMountShutdownObserver observer) {
+    public void shutdown(final IStorageShutdownObserver observer) {
         enforcePermission(android.Manifest.permission.SHUTDOWN);
 
         Slog.i(TAG, "Shutting down");
@@ -3045,7 +3046,7 @@ class MountService extends IMountService.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             userKeyUnlocked = isUserKeyUnlocked(userId);
-            storagePermission = mMountServiceInternal.hasExternalStorage(uid, packageName);
+            storagePermission = mStorageManagerInternal.hasExternalStorage(uid, packageName);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -3162,7 +3163,7 @@ class MountService extends IMountService.Stub
             for (final ObbState o : obbStates) {
                 if (o.rawPath.equals(obbState.rawPath)) {
                     throw new IllegalStateException("Attempt to add ObbState twice. "
-                            + "This indicates an error in the MountService logic.");
+                            + "This indicates an error in the StorageManagerService logic.");
                 }
             }
         }
@@ -3424,7 +3425,7 @@ class MountService extends IMountService.Stub
             try {
                 mObbState.token.onObbResult(mObbState.rawPath, mObbState.nonce, status);
             } catch (RemoteException e) {
-                Slog.w(TAG, "MountServiceListener went away while calling onObbStateChanged");
+                Slog.w(TAG, "StorageEventListener went away while calling onObbStateChanged");
             }
         }
     }
@@ -3614,18 +3615,18 @@ class MountService extends IMountService.Stub
         private static final int MSG_DISK_SCANNED = 5;
         private static final int MSG_DISK_DESTROYED = 6;
 
-        private final RemoteCallbackList<IMountServiceListener>
+        private final RemoteCallbackList<IStorageEventListener>
                 mCallbacks = new RemoteCallbackList<>();
 
         public Callbacks(Looper looper) {
             super(looper);
         }
 
-        public void register(IMountServiceListener callback) {
+        public void register(IStorageEventListener callback) {
             mCallbacks.register(callback);
         }
 
-        public void unregister(IMountServiceListener callback) {
+        public void unregister(IStorageEventListener callback) {
             mCallbacks.unregister(callback);
         }
 
@@ -3634,7 +3635,7 @@ class MountService extends IMountService.Stub
             final SomeArgs args = (SomeArgs) msg.obj;
             final int n = mCallbacks.beginBroadcast();
             for (int i = 0; i < n; i++) {
-                final IMountServiceListener callback = mCallbacks.getBroadcastItem(i);
+                final IStorageEventListener callback = mCallbacks.getBroadcastItem(i);
                 try {
                     invokeCallback(callback, msg.what, args);
                 } catch (RemoteException ignored) {
@@ -3644,7 +3645,7 @@ class MountService extends IMountService.Stub
             args.recycle();
         }
 
-        private void invokeCallback(IMountServiceListener callback, int what, SomeArgs args)
+        private void invokeCallback(IStorageEventListener callback, int what, SomeArgs args)
                 throws RemoteException {
             switch (what) {
                 case MSG_STORAGE_STATE_CHANGED: {
@@ -3829,7 +3830,7 @@ class MountService extends IMountService.Stub
         }
     }
 
-    private final class MountServiceInternalImpl extends MountServiceInternal {
+    private final class StorageManagerInternalImpl extends StorageManagerInternal {
         // Not guarded by a lock.
         private final CopyOnWriteArrayList<ExternalStorageMountPolicy> mPolicies =
                 new CopyOnWriteArrayList<>();
