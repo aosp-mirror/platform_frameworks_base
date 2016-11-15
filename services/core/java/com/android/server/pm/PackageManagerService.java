@@ -233,6 +233,7 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.IParcelFileDescriptorFactory;
 import com.android.internal.os.InstallerConnection.InstallerException;
+import com.android.internal.os.RoSystemProperties;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
 import com.android.internal.telephony.CarrierAppUtils;
@@ -10394,14 +10395,28 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private boolean grantSignaturePermission(String perm, PackageParser.Package pkg,
             BasePermission bp, PermissionsState origPermissions) {
-        boolean allowed;
-        allowed = (compareSignatures(
+        boolean privilegedPermission = (bp.protectionLevel
+                & PermissionInfo.PROTECTION_FLAG_PRIVILEGED) != 0;
+        boolean controlPrivappPermissions = RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS;
+        boolean platformPermission = PLATFORM_PACKAGE_NAME.equals(bp.sourcePackage);
+        boolean platformPackage = PLATFORM_PACKAGE_NAME.equals(pkg.packageName);
+        if (controlPrivappPermissions && privilegedPermission && pkg.isPrivilegedApp()
+                && !platformPackage && platformPermission) {
+            ArraySet<String> wlPermissions = SystemConfig.getInstance()
+                    .getPrivAppPermissions(pkg.packageName);
+            boolean whitelisted = wlPermissions != null && wlPermissions.contains(perm);
+            if (!whitelisted) {
+                Slog.e(TAG, "Not granting privileged permission " + perm + " for package "
+                        + pkg.packageName + " - not in privapp-permissions whitelist");
+                return false;
+            }
+        }
+        boolean allowed = (compareSignatures(
                 bp.packageSetting.signatures.mSignatures, pkg.mSignatures)
                         == PackageManager.SIGNATURE_MATCH)
                 || (compareSignatures(mPlatformPackage.mSignatures, pkg.mSignatures)
                         == PackageManager.SIGNATURE_MATCH);
-        if (!allowed && (bp.protectionLevel
-                & PermissionInfo.PROTECTION_FLAG_PRIVILEGED) != 0) {
+        if (!allowed && privilegedPermission) {
             if (isSystemApp(pkg)) {
                 // For updated system applications, a system permission
                 // is granted only if it had been defined by the original application.
