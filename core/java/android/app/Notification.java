@@ -2803,10 +2803,6 @@ public class Notification implements Parcelable
          * It will be played using the {@link #AUDIO_ATTRIBUTES_DEFAULT default audio attributes}
          * for notifications.
          *
-         * <p>
-         * A notification that is noisy is more likely to be presented as a heads-up notification.
-         * </p>
-         *
          * @see Notification#sound
          */
         public Builder setSound(Uri sound) {
@@ -2820,9 +2816,6 @@ public class Notification implements Parcelable
          *
          * See {@link android.media.AudioManager} for the <code>STREAM_</code> constants.
          *
-         * <p>
-         * A notification that is noisy is more likely to be presented as a heads-up notification.
-         * </p>
          * @deprecated use {@link #setSound(Uri, AudioAttributes)} instead.
          * @see Notification#sound
          */
@@ -2836,10 +2829,6 @@ public class Notification implements Parcelable
         /**
          * Set the sound to play, along with specific {@link AudioAttributes audio attributes} to
          * use during playback.
-         *
-         * <p>
-         * A notification that is noisy is more likely to be presented as a heads-up notification.
-         * </p>
          *
          * @see Notification#sound
          */

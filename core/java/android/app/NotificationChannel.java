@@ -48,8 +48,9 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_IMPORTANCE = "importance";
     private static final String ATT_LIGHTS = "lights";
     private static final String ATT_VIBRATION = "vibration";
-    private static final String ATT_RINGTONE = "ringtone";
-    private static final String ATT_USER_APPROVED = "approved";
+    private static final String ATT_SOUND = "sound";
+    //TODO: add audio attributes support
+    private static final String ATT_AUDIO_ATTRIBUTES = "audio_attributes";
     private static final String ATT_USER_LOCKED = "locked";
 
     /**
@@ -81,7 +82,7 @@ public final class NotificationChannel implements Parcelable {
      * @hide
      */
     @SystemApi
-    public static final int USER_LOCKED_RINGTONE = 0x00000020;
+    public static final int USER_LOCKED_SOUND = 0x00000020;
 
     private static final int DEFAULT_VISIBILITY =
             NotificationManager.VISIBILITY_NO_OVERRIDE;
@@ -93,7 +94,7 @@ public final class NotificationChannel implements Parcelable {
     private int mImportance = DEFAULT_IMPORTANCE;
     private boolean mBypassDnd;
     private int mLockscreenVisibility = DEFAULT_VISIBILITY;
-    private Uri mRingtone;
+    private Uri mSound;
     private boolean mLights;
     private boolean mVibration;
     private int mUserLockedFields;
@@ -124,9 +125,9 @@ public final class NotificationChannel implements Parcelable {
         mBypassDnd = in.readByte() != 0;
         mLockscreenVisibility = in.readInt();
         if (in.readByte() != 0) {
-            mRingtone = Uri.CREATOR.createFromParcel(in);
+            mSound = Uri.CREATOR.createFromParcel(in);
         } else {
-            mRingtone = null;
+            mSound = null;
         }
         mLights = in.readByte() != 0;
         mVibration = in.readByte() != 0;
@@ -145,9 +146,9 @@ public final class NotificationChannel implements Parcelable {
         dest.writeInt(mImportance);
         dest.writeByte(mBypassDnd ? (byte) 1 : (byte) 0);
         dest.writeInt(mLockscreenVisibility);
-        if (mRingtone != null) {
+        if (mSound != null) {
             dest.writeByte((byte) 1);
-            mRingtone.writeToParcel(dest, 0);
+            mSound.writeToParcel(dest, 0);
         } else {
             dest.writeByte((byte) 0);
         }
@@ -202,12 +203,12 @@ public final class NotificationChannel implements Parcelable {
     // Modifiable by apps on channel creation.
 
     /**
-     * Sets the ringtone that should be played for notifications posted to this channel if
-     * the notifications don't supply a ringtone. Only modifiable before the channel is submitted
+     * Sets the sound that should be played for notifications posted to this channel if
+     * the notifications don't supply a sound. Only modifiable before the channel is submitted
      * to the NotificationManager.
      */
-    public void setRingtone(Uri ringtone) {
-        this.mRingtone = ringtone;
+    public void setSound(Uri sound) {
+        this.mSound = sound;
     }
 
     /**
@@ -261,8 +262,8 @@ public final class NotificationChannel implements Parcelable {
     /**
      * Returns the notification sound for this channel.
      */
-    public Uri getRingtone() {
-        return mRingtone;
+    public Uri getSound() {
+        return mSound;
     }
 
     /**
@@ -304,7 +305,7 @@ public final class NotificationChannel implements Parcelable {
         setBypassDnd(Notification.PRIORITY_DEFAULT
                 != safeInt(parser, ATT_PRIORITY, Notification.PRIORITY_DEFAULT));
         setLockscreenVisibility(safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY));
-        setRingtone(safeUri(parser, ATT_RINGTONE));
+        setSound(safeUri(parser, ATT_SOUND));
         setLights(safeBool(parser, ATT_LIGHTS, false));
         setVibration(safeBool(parser, ATT_VIBRATION, false));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
@@ -330,8 +331,8 @@ public final class NotificationChannel implements Parcelable {
             out.attribute(null, ATT_VISIBILITY,
                     Integer.toString(getLockscreenVisibility()));
         }
-        if (getRingtone() != null) {
-            out.attribute(null, ATT_RINGTONE, getRingtone().toString());
+        if (getSound() != null) {
+            out.attribute(null, ATT_SOUND, getSound().toString());
         }
         if (shouldShowLights()) {
             out.attribute(null, ATT_LIGHTS, Boolean.toString(shouldShowLights()));
@@ -364,8 +365,8 @@ public final class NotificationChannel implements Parcelable {
         if (getLockscreenVisibility() != DEFAULT_VISIBILITY) {
             record.put(ATT_VISIBILITY, Notification.visibilityToString(getLockscreenVisibility()));
         }
-        if (getRingtone() != null) {
-            record.put(ATT_RINGTONE, getRingtone().toString());
+        if (getSound() != null) {
+            record.put(ATT_SOUND, getSound().toString());
         }
         record.put(ATT_LIGHTS, Boolean.toString(shouldShowLights()));
         record.put(ATT_VIBRATION, Boolean.toString(shouldVibrate()));
@@ -432,8 +433,8 @@ public final class NotificationChannel implements Parcelable {
         if (getId() != null ? !getId().equals(that.getId()) : that.getId() != null) return false;
         if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null)
             return false;
-        return getRingtone() != null ? getRingtone().equals(
-                that.getRingtone()) : that.getRingtone() == null;
+        return getSound() != null ? getSound().equals(
+                that.getSound()) : that.getSound() == null;
 
     }
 
@@ -444,7 +445,7 @@ public final class NotificationChannel implements Parcelable {
         result = 31 * result + getImportance();
         result = 31 * result + (mBypassDnd ? 1 : 0);
         result = 31 * result + getLockscreenVisibility();
-        result = 31 * result + (getRingtone() != null ? getRingtone().hashCode() : 0);
+        result = 31 * result + (getSound() != null ? getSound().hashCode() : 0);
         result = 31 * result + (mLights ? 1 : 0);
         result = 31 * result + (mVibration ? 1 : 0);
         result = 31 * result + getUserLockedFields();
@@ -459,7 +460,7 @@ public final class NotificationChannel implements Parcelable {
                 ", mImportance=" + mImportance +
                 ", mBypassDnd=" + mBypassDnd +
                 ", mLockscreenVisibility=" + mLockscreenVisibility +
-                ", mRingtone=" + mRingtone +
+                ", mSound=" + mSound +
                 ", mLights=" + mLights +
                 ", mVibration=" + mVibration +
                 ", mUserLockedFields=" + mUserLockedFields +

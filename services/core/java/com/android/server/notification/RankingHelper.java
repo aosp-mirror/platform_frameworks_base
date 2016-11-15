@@ -497,8 +497,8 @@ public class RankingHelper implements RankingConfig {
         if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_PRIORITY) == 0) {
             channel.setBypassDnd(updatedChannel.canBypassDnd());
         }
-        if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_RINGTONE) == 0) {
-            channel.setRingtone(updatedChannel.getRingtone());
+        if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_SOUND) == 0) {
+            channel.setSound(updatedChannel.getSound());
         }
         if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_VIBRATION) == 0) {
             channel.setVibration(updatedChannel.shouldVibrate());
