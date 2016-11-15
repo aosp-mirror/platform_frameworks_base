@@ -134,8 +134,8 @@ public class WifiNetworkAdapter {
     public HomeSP addSP(MOTree instanceTree) throws IOException, SAXException {
         WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         String xml = instanceTree.toXml();
-        wifiManager.addPasspointManagementObject(xml);
-        return MOManager.buildSP(xml);
+        // TODO(b/32883320): use the new API for adding Passpoint configuration.
+        return null;
     }
 
     public void removeSP(String fqdn) throws IOException {
