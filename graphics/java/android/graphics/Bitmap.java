@@ -1241,6 +1241,11 @@ public final class Bitmap implements Parcelable {
      * #getAllocationByteCount()}.</p>
      */
     public final int getByteCount() {
+        if (mRecycled) {
+            Log.w(TAG, "Called getByteCount() on a recycle()'d bitmap! "
+                    + "This is undefined behavior!");
+            return 0;
+        }
         // int result permits bitmaps up to 46,340 x 46,340
         return getRowBytes() * getHeight();
     }
@@ -1260,6 +1265,11 @@ public final class Bitmap implements Parcelable {
      * @see #reconfigure(int, int, Config)
      */
     public final int getAllocationByteCount() {
+        if (mRecycled) {
+            Log.w(TAG, "Called getAllocationByteCount() on a recycle()'d bitmap! "
+                    + "This is undefined behavior!");
+            return 0;
+        }
         return nativeGetAllocationByteCount(mNativePtr);
     }
 
