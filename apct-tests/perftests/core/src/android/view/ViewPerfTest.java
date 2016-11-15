@@ -44,4 +44,15 @@ public class ViewPerfTest {
             inflater.inflate(R.layout.test_simple_view, root, false);
         }
     }
+
+    @Test
+    public void testTwelveKeyInflate() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
+        FrameLayout root = new FrameLayout(context);
+        while (state.keepRunning()) {
+            inflater.inflate(R.layout.twelve_key_entry, root, false);
+        }
+    }
 }
