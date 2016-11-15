@@ -13,22 +13,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="24dp"
-    android:paddingBottom="54dp"
-    android:orientation="vertical"
-    android:id="@+id/recents_container"
+    android:id="@+id/recents_view"
+    android:gravity="center"
     android:background="#99000000">
     <include layout="@layout/recents_stack_action_button" />
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/recents_view"
-        android:layout_marginLeft="12dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="12dp"
-        android:gravity="center">
-    </FrameLayout>
-</LinearLayout>
+</FrameLayout>
