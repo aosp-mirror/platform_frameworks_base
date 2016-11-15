@@ -30,6 +30,7 @@ import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -673,6 +674,27 @@ public class WebViewUpdateServiceImpl {
             mMinimumVersionCode = minimumVersionCode;
             return mMinimumVersionCode;
         }
+
+        public void dumpState(PrintWriter pw) {
+            synchronized (mLock) {
+                if (mCurrentWebViewPackage == null) {
+                    pw.println("  Current WebView package is null");
+                } else {
+                    pw.println(String.format("  Current WebView package (name, version): (%s, %s)",
+                            mCurrentWebViewPackage.packageName,
+                            mCurrentWebViewPackage.versionName));
+                }
+                pw.println(String.format("  Minimum WebView version code: %d",
+                      mMinimumVersionCode));
+                pw.println(String.format("  Number of relros started: %d",
+                        mNumRelroCreationsStarted));
+                pw.println(String.format("  Number of relros finished: %d",
+                            mNumRelroCreationsFinished));
+                pw.println(String.format("  WebView package dirty: %b", mWebViewPackageDirty));
+                pw.println(String.format("  Any WebView package installed: %b",
+                        mAnyWebViewInstalled));
+            }
+        }
     }
 
     private static boolean providerHasValidSignature(WebViewProviderInfo provider,
@@ -740,5 +762,15 @@ public class WebViewUpdateServiceImpl {
         private void notifyZygote() {
             mSystemInterface.setMultiProcessEnabledFromContext(mContext);
         }
+    }
+
+    /**
+     * Dump the state of this Service.
+     */
+    void dumpState(PrintWriter pw) {
+        pw.println("Current WebView Update Service state");
+        pw.println(String.format("  Fallback logic enabled: %b",
+                mSystemInterface.isFallbackLogicEnabled()));
+        mWebViewUpdater.dumpState(pw);
     }
 }
