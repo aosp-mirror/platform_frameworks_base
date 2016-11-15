@@ -59,11 +59,6 @@ interface IWifiManager
 
     int addOrUpdateNetwork(in WifiConfiguration config);
 
-    int addPasspointManagementObject(String mo);
-
-    int modifyPasspointManagementObject(String fqdn,
-                                        in List<PasspointManagementObjectDefinition> mos);
-
     boolean addPasspointConfiguration(in PasspointConfiguration config);
 
     boolean removePasspointConfiguration(in String fqdn);
@@ -131,8 +126,6 @@ interface IWifiManager
     int getWifiApEnabledState();
 
     WifiConfiguration getWifiApConfiguration();
-
-    WifiConfiguration buildWifiConfig(String uriString, String mimeType, in byte[] data);
 
     void setWifiApConfiguration(in WifiConfiguration wifiConfig);
 
