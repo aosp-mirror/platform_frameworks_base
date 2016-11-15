@@ -673,19 +673,13 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Implement this to support refresh of content identified by {@code uri}. By default, this
-     * method returns false; providers who wish to implement this should return true to signal the
-     * client that the provider has tried refreshing with its own implementation.
-     * <p>
      * This allows clients to request an explicit refresh of content identified by {@code uri}.
      * <p>
      * Client code should only invoke this method when there is a strong indication (such as a user
      * initiated pull to refresh gesture) that the content is stale.
      * <p>
-     * Remember to send {@link ContentResolver#notifyChange(Uri, android.database.ContentObserver)}
-     * notifications when content changes.
      *
-     * @param uri The Uri identifying the data to refresh.
+     * @param url The Uri identifying the data to refresh.
      * @param args Additional options from the client. The definitions of these are specific to the
      *            content provider being called.
      * @param cancellationSignal A signal to cancel the operation in progress, or {@code null} if
@@ -693,7 +687,6 @@ public abstract class ContentResolver {
      *            {@link CancellationSignal#throwIfCanceled()} to check whether the client has
      *            canceled the refresh request.
      * @return true if the provider actually tried refreshing.
-     * @hide
      */
     public final boolean refresh(@NonNull Uri url, @Nullable Bundle args,
             @Nullable CancellationSignal cancellationSignal) {
