@@ -113,7 +113,7 @@ static auto SCENES = {
 
 void BM_FrameBuilder_defer_scene(benchmark::State& state) {
     TestUtils::runOnRenderThread([&state](RenderThread& thread) {
-        const char* sceneName = *(SCENES.begin() + state.range_x());
+        const char* sceneName = *(SCENES.begin() + state.range(0));
         state.SetLabel(sceneName);
         auto node = getSyncedSceneNode(sceneName);
         while (state.KeepRunning()) {
@@ -129,7 +129,7 @@ BENCHMARK(BM_FrameBuilder_defer_scene)->DenseRange(0, SCENES.size() - 1);
 
 void BM_FrameBuilder_deferAndRender_scene(benchmark::State& state) {
     TestUtils::runOnRenderThread([&state](RenderThread& thread) {
-        const char* sceneName = *(SCENES.begin() + state.range_x());
+        const char* sceneName = *(SCENES.begin() + state.range(0));
         state.SetLabel(sceneName);
         auto node = getSyncedSceneNode(sceneName);
 
