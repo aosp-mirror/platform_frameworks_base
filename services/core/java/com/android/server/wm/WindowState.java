@@ -1905,9 +1905,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     int getAnimLayerAdjustment() {
-        final boolean isImeType =
-                mAttrs.type == TYPE_INPUT_METHOD || mAttrs.type == TYPE_INPUT_METHOD_DIALOG;
-        if (isImeType && mService.mInputMethodTarget != null) {
+        if (mIsImWindow && mService.mInputMethodTarget != null) {
             final AppWindowToken appToken = mService.mInputMethodTarget.mAppToken;
             if (appToken != null) {
                 return appToken.mAppAnimator.animLayerAdjustment;

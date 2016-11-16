@@ -45,16 +45,7 @@ import static org.junit.Assert.assertTrue;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class AppWindowTokenTests {
-
-    private static WindowManagerService sWm = null;
-    private final IWindow mIWindow = new TestIWindow();
-
-    @Before
-    public void setUp() throws Exception {
-        final Context context = InstrumentationRegistry.getTargetContext();
-        sWm = TestWindowManagerPolicy.getWindowManagerService(context);
-    }
+public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testAddWindow_Order() throws Exception {
@@ -62,10 +53,11 @@ public class AppWindowTokenTests {
 
         assertEquals(0, token.getWindowsCount());
 
-        final WindowState win1 = createWindow(null, TYPE_APPLICATION, token);
-        final WindowState startingWin = createWindow(null, TYPE_APPLICATION_STARTING, token);
-        final WindowState baseWin = createWindow(null, TYPE_BASE_APPLICATION, token);
-        final WindowState win4 = createWindow(null, TYPE_APPLICATION, token);
+        final WindowState win1 = createWindow(null, TYPE_APPLICATION, token, "win1");
+        final WindowState startingWin = createWindow(null, TYPE_APPLICATION_STARTING, token,
+                "startingWin");
+        final WindowState baseWin = createWindow(null, TYPE_BASE_APPLICATION, token, "baseWin");
+        final WindowState win4 = createWindow(null, TYPE_APPLICATION, token, "win4");
 
         token.addWindow(win1);
         token.addWindow(startingWin);
@@ -92,22 +84,16 @@ public class AppWindowTokenTests {
 
         assertNull(token.findMainWindow());
 
-        final WindowState window1 = createWindow(null, TYPE_BASE_APPLICATION, token);
-        final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, token);
-        final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, token);
+        final WindowState window1 = createWindow(null, TYPE_BASE_APPLICATION, token, "window1");
+        final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, token, "window11");
+        final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, token, "window12");
         token.addWindow(window1);
         assertEquals(window1, token.findMainWindow());
         window1.mAnimatingExit = true;
         assertEquals(window1, token.findMainWindow());
-        final WindowState window2 = createWindow(null, TYPE_APPLICATION_STARTING, token);
+        final WindowState window2 = createWindow(null, TYPE_APPLICATION_STARTING, token, "window2");
         token.addWindow(window2);
         assertEquals(window2, token.findMainWindow());
-    }
-
-    private WindowState createWindow(WindowState parent, int type, WindowToken token) {
-        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
-
-        return new WindowState(sWm, null, mIWindow, token, parent, 0, 0, attrs, 0, 0);
     }
 
     /* Used so we can gain access to some protected members of the {@link AppWindowToken} class */

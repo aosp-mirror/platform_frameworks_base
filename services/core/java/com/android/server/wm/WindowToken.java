@@ -176,21 +176,6 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     /**
-     * Recursive search through a WindowList and all of its windows' children.
-     * @param target The window to search for.
-     * @return The index of win in windows or of the window that is an ancestor of win.
-     */
-    int getWindowIndex(WindowState target) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState w = mChildren.get(i);
-            if (w == target || w.hasChild(target)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
      * Returns true if the new window is considered greater than the existing window in terms of
      * z-order.
      */
