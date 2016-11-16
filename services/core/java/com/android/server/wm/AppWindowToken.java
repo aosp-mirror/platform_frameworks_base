@@ -413,6 +413,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         boolean delayed = setVisibility(null, false, TRANSIT_UNSET, true, voiceInteraction);
 
         mService.mOpeningApps.remove(this);
+        mService.mUnknownAppVisibilityController.appRemoved(this);
         waitingToShow = false;
         if (mService.mClosingApps.contains(this)) {
             delayed = true;

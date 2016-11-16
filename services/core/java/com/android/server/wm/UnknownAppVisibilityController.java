@@ -16,8 +16,13 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_UNKNOWN_APP_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.annotation.NonNull;
 import android.util.ArrayMap;
+import android.util.Slog;
 
 import com.android.server.wm.WindowManagerService.H;
 
@@ -30,6 +35,8 @@ import java.io.PrintWriter;
  * start the transition to avoid flickers.
  */
 class UnknownAppVisibilityController {
+
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "UnknownAppVisibility" : TAG_WM;
 
     /**
      * We are currently waiting until the app is done resuming.
@@ -78,6 +85,9 @@ class UnknownAppVisibilityController {
     }
 
     void appRemoved(@NonNull AppWindowToken appWindow) {
+        if (DEBUG_UNKNOWN_APP_VISIBILITY) {
+            Slog.d(TAG, "App removed appWindow=" + appWindow);
+        }
         mUnknownApps.remove(appWindow);
     }
 
@@ -86,6 +96,9 @@ class UnknownAppVisibilityController {
      * it is resumed and relaid out to resolve the visibility.
      */
     void notifyLaunched(@NonNull AppWindowToken appWindow) {
+        if (DEBUG_UNKNOWN_APP_VISIBILITY) {
+            Slog.d(TAG, "App launched appWindow=" + appWindow);
+        }
         mUnknownApps.put(appWindow, UNKNOWN_STATE_WAITING_RESUME);
     }
 
@@ -95,6 +108,9 @@ class UnknownAppVisibilityController {
     void notifyAppResumedFinished(@NonNull AppWindowToken appWindow) {
         if (mUnknownApps.containsKey(appWindow)
                 && mUnknownApps.get(appWindow) == UNKNOWN_STATE_WAITING_RESUME) {
+            if (DEBUG_UNKNOWN_APP_VISIBILITY) {
+                Slog.d(TAG, "App resume finished appWindow=" + appWindow);
+            }
             mUnknownApps.put(appWindow, UNKNOWN_STATE_WAITING_RELAYOUT);
         }
     }
@@ -106,6 +122,9 @@ class UnknownAppVisibilityController {
         if (!mUnknownApps.containsKey(appWindow)) {
             return;
         }
+        if (DEBUG_UNKNOWN_APP_VISIBILITY) {
+            Slog.d(TAG, "App relayouted appWindow=" + appWindow);
+        }
         int state = mUnknownApps.get(appWindow);
         if (state == UNKNOWN_STATE_WAITING_RELAYOUT) {
             mUnknownApps.put(appWindow, UNKNOWN_STATE_WAITING_VISIBILITY_UPDATE);
@@ -114,6 +133,9 @@ class UnknownAppVisibilityController {
     }
 
     private void notifyVisibilitiesUpdated() {
+        if (DEBUG_UNKNOWN_APP_VISIBILITY) {
+            Slog.d(TAG, "Visibility updated DONE");
+        }
         boolean changed = false;
         for (int i = mUnknownApps.size() - 1; i >= 0; i--) {
             if (mUnknownApps.valueAt(i) == UNKNOWN_STATE_WAITING_VISIBILITY_UPDATE) {
