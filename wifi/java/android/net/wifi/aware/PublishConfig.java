@@ -32,9 +32,8 @@ import java.util.Arrays;
 /**
  * Defines the configuration of a Aware publish session. Built using
  * {@link PublishConfig.Builder}. A publish session is created using
- * {@link WifiAwareSession#publish(android.os.Handler, PublishConfig,
- * WifiAwareDiscoverySessionCallback)}
- * or updated using
+ * {@link WifiAwareSession#publish(PublishConfig, WifiAwareDiscoverySessionCallback,
+ * android.os.Handler)} or updated using
  * {@link WifiAwarePublishDiscoverySession#updatePublish(PublishConfig)}.
  *
  * @hide PROPOSED_AWARE_API
