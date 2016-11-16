@@ -10412,9 +10412,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     .getPrivAppPermissions(pkg.packageName);
             boolean whitelisted = wlPermissions != null && wlPermissions.contains(perm);
             if (!whitelisted) {
-                Slog.e(TAG, "Not granting privileged permission " + perm + " for package "
+                // Log for now. TODO Enforce permissions
+                Slog.w(TAG, "Privileged permission " + perm + " for package "
                         + pkg.packageName + " - not in privapp-permissions whitelist");
-                return false;
             }
         }
         boolean allowed = (compareSignatures(
