@@ -851,6 +851,8 @@
   <java-symbol type="string" name="ringtone_default" />
   <java-symbol type="string" name="ringtone_default_with_actual" />
   <java-symbol type="string" name="ringtone_picker_title" />
+  <java-symbol type="string" name="ringtone_picker_title_alarm" />
+  <java-symbol type="string" name="ringtone_picker_title_notification" />
   <java-symbol type="string" name="ringtone_silent" />
   <java-symbol type="string" name="ringtone_unknown" />
   <java-symbol type="string" name="roamingText0" />

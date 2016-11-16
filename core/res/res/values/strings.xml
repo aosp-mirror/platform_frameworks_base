@@ -2906,13 +2906,17 @@
     <!-- Choice in the ringtone picker.  If chosen, the default ringtone will be used. -->
     <string name="ringtone_default">Default ringtone</string>
     <!-- Choice in the ringtone picker.  If chosen, the default ringtone will be used. This fills in the actual ringtone's title into the message. -->
-    <string name="ringtone_default_with_actual">Default ringtone (<xliff:g id="actual_ringtone">%1$s</xliff:g>)</string>
+    <string name="ringtone_default_with_actual">Default (<xliff:g id="actual_ringtone">%1$s</xliff:g>)</string>
     <!-- Choice in the ringtone picker.  If chosen, there will be silence instead of a ringtone played. -->
     <string name="ringtone_silent">None</string>
     <!-- The title of the ringtone picker dialog. -->
     <string name="ringtone_picker_title">Ringtones</string>
+    <!-- The title of the alarm sound picker dialog [CHAR LIMIT=100] -->
+    <string name="ringtone_picker_title_alarm">Alarm sounds</string>
+    <!-- The title of the notification sound picker dialog [CHAR LIMIT=100] -->
+    <string name="ringtone_picker_title_notification">Notification sounds</string>
     <!-- If there is ever a ringtone set for some setting, but that ringtone can no longer be resolved, t his is shown instead.  For example, if the ringtone was on a SD card and it had been removed, this woudl be shown for ringtones on that SD card. -->
-    <string name="ringtone_unknown">Unknown ringtone</string>
+    <string name="ringtone_unknown">Unknown</string>
 
     <!-- A notification is shown when there are open wireless networks nearby.  This is the notification's title. -->
     <plurals name="wifi_available">
