@@ -182,7 +182,7 @@ void BM_DisplayListCanvas_basicViewGroupDraw(benchmark::State& benchState) {
         canvas->insertReorderBarrier(true);
 
         // Draw child loop
-        for (int i = 0; i < benchState.range_x(); i++) {
+        for (int i = 0; i < benchState.range(0); i++) {
             canvas->drawRenderNode(child.get());
         }
 
