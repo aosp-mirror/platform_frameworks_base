@@ -6490,11 +6490,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             // SDK can see it. Since access to the serial is now behind a
             // permission we push down the value.
             String buildSerial = Build.UNKNOWN;
-            if (appInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
+            // TODO: SHTOPSHIP Uncomment the check when clients migrate
+//            if (appInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
                 buildSerial = IDeviceIdentifiersPolicyService.Stub.asInterface(
                         ServiceManager.getService(Context.DEVICE_IDENTIFIERS_SERVICE))
                         .getSerial();
-            }
+//            }
 
             thread.bindApplication(processName, appInfo, providers, app.instrumentationClass,
                     profilerInfo, app.instrumentationArguments, app.instrumentationWatcher,
