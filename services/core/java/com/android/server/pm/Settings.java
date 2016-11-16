@@ -1410,7 +1410,6 @@ final class Settings {
         VersionInfo ver = mVersion.get(volumeUuid);
         if (ver == null) {
             ver = new VersionInfo();
-            ver.forceCurrent();
             mVersion.put(volumeUuid, ver);
         }
         return ver;
@@ -2795,8 +2794,8 @@ final class Settings {
                             "No settings file; creating initial state");
                     // It's enough to just touch version details to create them
                     // with default values
-                    findOrCreateVersion(StorageManager.UUID_PRIVATE_INTERNAL);
-                    findOrCreateVersion(StorageManager.UUID_PRIMARY_PHYSICAL);
+                    findOrCreateVersion(StorageManager.UUID_PRIVATE_INTERNAL).forceCurrent();
+                    findOrCreateVersion(StorageManager.UUID_PRIMARY_PHYSICAL).forceCurrent();
                     return false;
                 }
                 str = new FileInputStream(mSettingsFilename);
