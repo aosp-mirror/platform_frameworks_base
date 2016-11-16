@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.SparseArray;
 
@@ -208,4 +209,16 @@ public abstract class PackageManagerInternal {
      */
     public abstract String getNameForUid(int uid);
 
+    /**
+     * Request to perform the second phase of ephemeral resolution.
+     * @param responseObj The response of the first phase of ephemeral resolution
+     * @param origIntent The original intent that triggered ephemeral resolution
+     * @param resolvedType The resolved type of the intent
+     * @param launchIntent The intent that would launch if there was no ephemeral application
+     * @param callingPackage The name of the package requesting the ephemeral application
+     * @param userId The ID of the user that triggered ephemeral resolution
+     */
+    public abstract void requestEphemeralResolutionPhaseTwo(EphemeralResponse responseObj,
+            Intent origIntent, String resolvedType, Intent launchIntent, String callingPackage,
+            int userId);
 }

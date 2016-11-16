@@ -23,8 +23,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.EphemeralResolveInfo;
+import android.content.pm.EphemeralResponse;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
@@ -54,8 +56,6 @@ final class EphemeralResolverConnection {
     private final Object mLock = new Object();
     private final GetEphemeralResolveInfoCaller mGetEphemeralResolveInfoCaller =
             new GetEphemeralResolveInfoCaller();
-    private final GetEphemeralIntentFilterCaller mGetEphemeralIntentFilterCaller =
-            new GetEphemeralIntentFilterCaller();
     private final ServiceConnection mServiceConnection = new MyServiceConnection();
     private final Context mContext;
     /** Intent used to bind to the service */
@@ -84,19 +84,27 @@ final class EphemeralResolverConnection {
         return null;
     }
 
-    public final List<EphemeralResolveInfo> getEphemeralIntentFilterList(int digestPrefix[]) {
-        throwIfCalledOnMainThread();
+    public final void getEphemeralIntentFilterList(int digestPrefix[], PhaseTwoCallback callback,
+            Handler callbackHandler, final int sequence) {
+        final IRemoteCallback remoteCallback = new IRemoteCallback.Stub() {
+            @Override
+            public void sendResult(Bundle data) throws RemoteException {
+                final ArrayList<EphemeralResolveInfo> ephemeralResolveInfoList =
+                        data.getParcelableArrayList(EphemeralResolverService.EXTRA_RESOLVE_INFO);
+                callbackHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onPhaseTwoResolved(ephemeralResolveInfoList, sequence);
+                    }
+                });
+            }
+        };
         try {
-            return mGetEphemeralIntentFilterCaller.getEphemeralIntentFilterList(
-                    getRemoteInstanceLazy(), digestPrefix);
+            getRemoteInstanceLazy()
+                    .getEphemeralIntentFilterList(remoteCallback, digestPrefix, sequence);
         } catch (RemoteException re) {
         } catch (TimeoutException te) {
-        } finally {
-            synchronized (mLock) {
-                mLock.notifyAll();
-            }
         }
-        return null;
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String prefix) {
@@ -161,6 +169,14 @@ final class EphemeralResolverConnection {
         }
     }
 
+    /**
+     * Asynchronous callback when results come back from ephemeral resolution phase two.
+     */
+    public abstract static class PhaseTwoCallback {
+        abstract void onPhaseTwoResolved(List<EphemeralResolveInfo> ephemeralResolveInfoList,
+                int sequence);
+    }
+
     private final class MyServiceConnection implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -202,34 +218,6 @@ final class EphemeralResolverConnection {
                         throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();
             target.getEphemeralResolveInfoList(mCallback, hashPrefix, sequence);
-            return getResultTimed(sequence);
-        }
-    }
-
-    private static final class GetEphemeralIntentFilterCaller
-            extends TimedRemoteCaller<List<EphemeralResolveInfo>> {
-        private final IRemoteCallback mCallback;
-
-        public GetEphemeralIntentFilterCaller() {
-            super(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
-            mCallback = new IRemoteCallback.Stub() {
-                @Override
-                public void sendResult(Bundle data) throws RemoteException {
-                    final ArrayList<EphemeralResolveInfo> resolveList =
-                            data.getParcelableArrayList(
-                                    EphemeralResolverService.EXTRA_RESOLVE_INFO);
-                    int sequence =
-                            data.getInt(EphemeralResolverService.EXTRA_SEQUENCE, -1);
-                    onRemoteMethodResult(resolveList, sequence);
-                }
-            };
-        }
-
-        public List<EphemeralResolveInfo> getEphemeralIntentFilterList(
-                IEphemeralResolver target, int digestPrefix[])
-                        throws RemoteException, TimeoutException {
-            final int sequence = onBeforeRemoteCall();
-            target.getEphemeralIntentFilterList(mCallback, digestPrefix, sequence);
             return getResultTimed(sequence);
         }
     }
