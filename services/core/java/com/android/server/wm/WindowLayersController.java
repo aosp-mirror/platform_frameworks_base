@@ -23,6 +23,7 @@ import java.util.ArrayDeque;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -63,17 +64,19 @@ class WindowLayersController {
     private int mCurBaseLayer;
     private int mCurLayer;
     private boolean mAnyLayerChanged;
+    private int mHighestLayerInImeTargetBaseLayer;
+    private WindowState mImeTarget;
 
     final void assignWindowLayers(DisplayContent dc) {
         if (DEBUG_LAYERS) Slog.v(TAG_WM, "Assigning layers based",
                 new RuntimeException("here").fillInStackTrace());
 
-        clear();
+        reset();
         dc.forAllWindows((w) -> {
             boolean layerChanged = false;
 
             int oldLayer = w.mLayer;
-            if (w.mBaseLayer == mCurBaseLayer || w.mIsImWindow) {
+            if (w.mBaseLayer == mCurBaseLayer) {
                 mCurLayer += WINDOW_LAYER_MULTIPLIER;
             } else {
                 mCurBaseLayer = mCurLayer = w.mBaseLayer;
@@ -92,6 +95,11 @@ class WindowLayersController {
                 mHighestApplicationLayer = Math.max(mHighestApplicationLayer,
                         w.mWinAnimator.mAnimLayer);
             }
+            if (mImeTarget != null && w.mBaseLayer == mImeTarget.mBaseLayer) {
+                mHighestLayerInImeTargetBaseLayer = Math.max(mHighestLayerInImeTargetBaseLayer,
+                        w.mWinAnimator.mAnimLayer);
+            }
+
             collectSpecialWindows(w);
 
             if (layerChanged) {
@@ -103,7 +111,7 @@ class WindowLayersController {
 
         //TODO (multidisplay): Magnification is supported only for the default display.
         if (mService.mAccessibilityController != null && mAnyLayerChanged
-                && dc.getDisplayId() == Display.DEFAULT_DISPLAY) {
+                && dc.getDisplayId() == DEFAULT_DISPLAY) {
             mService.mAccessibilityController.onWindowLayersChangedLocked();
         }
 
@@ -120,7 +128,7 @@ class WindowLayersController {
         }, false /* traverseTopToBottom */);
     }
 
-    private void clear() {
+    private void reset() {
         mHighestApplicationLayer = 0;
         mPinnedWindows.clear();
         mInputMethodWindows.clear();
@@ -132,6 +140,9 @@ class WindowLayersController {
         mCurBaseLayer = 0;
         mCurLayer = 0;
         mAnyLayerChanged = false;
+
+        mImeTarget = mService.mInputMethodTarget;
+        mHighestLayerInImeTargetBaseLayer = (mImeTarget != null) ? mImeTarget.mBaseLayer : 0;
     }
 
     private void collectSpecialWindows(WindowState w) {
@@ -174,20 +185,8 @@ class WindowLayersController {
 
         layer = assignAndIncreaseLayerIfNeeded(mDockDivider, layer);
 
-        boolean onTopLauncherVisible = !mOnTopLauncherWindows.isEmpty();
         while (!mOnTopLauncherWindows.isEmpty()) {
             layer = assignAndIncreaseLayerIfNeeded(mOnTopLauncherWindows.remove(), layer);
-        }
-
-        // Make sure IME windows are showing above the dock divider and on-top launcher windows.
-        if ((mDockDivider != null && mDockDivider.isVisibleLw()) || onTopLauncherVisible) {
-            while (!mInputMethodWindows.isEmpty()) {
-                final WindowState w = mInputMethodWindows.remove();
-                // Only ever move IME windows up, else we brake IME for windows above the divider.
-                if (layer > w.mLayer) {
-                    layer = assignAndIncreaseLayerIfNeeded(w, layer);
-                }
-            }
         }
 
         // We know that we will be animating a relaunching window in the near future, which will
@@ -200,12 +199,26 @@ class WindowLayersController {
         while (!mPinnedWindows.isEmpty()) {
             layer = assignAndIncreaseLayerIfNeeded(mPinnedWindows.remove(), layer);
         }
+
+        // Make sure IME is the highest window in the base layer of it's target.
+        if (mImeTarget != null) {
+            if (mImeTarget.mAppToken == null) {
+                // For non-app ime targets adjust the layer we start from to match what we found
+                // when assigning layers. Otherwise, just use the highest app layer we have some far.
+                layer = mHighestLayerInImeTargetBaseLayer + WINDOW_LAYER_MULTIPLIER;
+            }
+
+            while (!mInputMethodWindows.isEmpty()) {
+                layer = assignAndIncreaseLayerIfNeeded(mInputMethodWindows.remove(), layer);
+            }
+        }
+
     }
 
     private int assignAndIncreaseLayerIfNeeded(WindowState win, int layer) {
         if (win != null) {
             assignAnimLayer(win, layer);
-            // Make sure we leave space inbetween normal windows for dims and such.
+            // Make sure we leave space in-between normal windows for dims and such.
             layer += WINDOW_LAYER_MULTIPLIER;
         }
         return layer;
