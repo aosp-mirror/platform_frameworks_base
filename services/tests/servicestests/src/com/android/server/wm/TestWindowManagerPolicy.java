@@ -272,22 +272,26 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode) {
+    public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
+            int displayId) {
         return 0;
     }
 
     @Override
-    public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode) {
+    public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
+            int displayId) {
         return 0;
     }
 
     @Override
-    public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode) {
+    public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
+            int displayId) {
         return 0;
     }
 
     @Override
-    public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode) {
+    public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
+            int displayId) {
         return 0;
     }
 
