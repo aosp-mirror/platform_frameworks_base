@@ -164,6 +164,14 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
                 paint = &tmpPaint;
             }
             renderNode->getLayerSurface()->draw(canvas, 0, 0, paint);
+
+            if (CC_UNLIKELY(Properties::debugLayersUpdates
+                    && !renderNode->getSkiaLayer()->hasRenderedSinceRepaint)) {
+                renderNode->getSkiaLayer()->hasRenderedSinceRepaint = true;
+                SkPaint layerPaint;
+                layerPaint.setColor(0x7f00ff00);
+                canvas->drawRect(bounds, layerPaint);
+            }
         // composing a software layer with alpha
         } else if (properties.effectiveLayerType() == LayerType::Software) {
             SkPaint paint;

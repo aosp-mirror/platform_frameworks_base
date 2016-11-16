@@ -106,6 +106,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
                 return;
             }
 
+            layerNode->getSkiaLayer()->hasRenderedSinceRepaint = false;
             layerCanvas->clear(SK_ColorTRANSPARENT);
 
             RenderNodeDrawable root(layerNode, layerCanvas, false);
