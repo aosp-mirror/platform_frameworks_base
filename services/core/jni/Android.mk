@@ -67,7 +67,8 @@ LOCAL_SHARED_LIBRARIES += \
     libEGL \
     libGLESv2 \
     libnetutils \
-    libhidl \
+    libhidlbase \
+    libhidltransport \
     libhwbinder \
     libutils \
     android.hardware.audio.common@2.0 \

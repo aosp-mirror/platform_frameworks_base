@@ -277,7 +277,8 @@ LOCAL_SHARED_LIBRARIES := \
     libradio_metadata \
     libnativeloader \
     libmemunreachable \
-    libhidl \
+    libhidlbase \
+    libhidltransport \
     libhwbinder \
 
 LOCAL_SHARED_LIBRARIES += \
