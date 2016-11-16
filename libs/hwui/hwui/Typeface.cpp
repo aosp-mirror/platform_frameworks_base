@@ -49,60 +49,10 @@ static void resolveStyle(Typeface* typeface) {
 }
 
 Typeface* gDefaultTypeface = NULL;
-pthread_once_t gDefaultTypefaceOnce = PTHREAD_ONCE_INIT;
-
-// This installs a default typeface (from a hardcoded path) that allows
-// layouts to work (not crash on null pointer) before the default
-// typeface is set. This happens if HWUI is used outside of zygote/app_process.
-static minikin::FontCollection *makeFontCollection() {
-    std::vector<minikin::FontFamily *>typefaces;
-    const char *fns[] = {
-        "/system/fonts/Roboto-Regular.ttf",
-    };
-
-    minikin::FontFamily *family = new minikin::FontFamily();
-    for (size_t i = 0; i < sizeof(fns)/sizeof(fns[0]); i++) {
-        const char *fn = fns[i];
-        ALOGD("makeFontCollection adding %s", fn);
-        sk_sp<SkTypeface> skFace = SkTypeface::MakeFromFile(fn);
-        if (skFace != NULL) {
-            // TODO: might be a nice optimization to get access to the underlying font
-            // data, but would require us opening the file ourselves and passing that
-            // to the appropriate Create method of SkTypeface.
-            minikin::MinikinFont *font = new MinikinFontSkia(std::move(skFace), NULL, 0, 0);
-            family->addFont(font);
-            font->Unref();
-        } else {
-            ALOGE("failed to create font %s", fn);
-        }
-    }
-    typefaces.push_back(family);
-
-    minikin::FontCollection *result = new minikin::FontCollection(typefaces);
-    family->Unref();
-    return result;
-}
-
-static void getDefaultTypefaceOnce() {
-  minikin::Layout::init();
-    if (gDefaultTypeface == NULL) {
-        // We expect the client to set a default typeface, but provide a
-        // default so we can make progress before that happens.
-        gDefaultTypeface = new Typeface;
-        gDefaultTypeface->fFontCollection = makeFontCollection();
-        gDefaultTypeface->fSkiaStyle = SkTypeface::kNormal;
-        gDefaultTypeface->fBaseWeight = 400;
-        resolveStyle(gDefaultTypeface);
-    }
-}
 
 Typeface* Typeface::resolveDefault(Typeface* src) {
-    if (src == NULL) {
-        pthread_once(&gDefaultTypefaceOnce, getDefaultTypefaceOnce);
-        return gDefaultTypeface;
-    } else {
-        return src;
-    }
+    LOG_ALWAYS_FATAL_IF(gDefaultTypeface == nullptr);
+    return src == nullptr ? gDefaultTypeface : src;
 }
 
 Typeface* Typeface::createFromTypeface(Typeface* src, SkTypeface::Style style) {
@@ -162,6 +112,29 @@ void Typeface::unref() {
 
 void Typeface::setDefault(Typeface* face) {
     gDefaultTypeface = face;
+}
+
+void Typeface::setRobotoTypefaceForTest() {
+    const char* kRobotoFont = "/system/fonts/Roboto-Regular.ttf";
+    sk_sp<SkTypeface> typeface = SkTypeface::MakeFromFile(kRobotoFont);
+    LOG_ALWAYS_FATAL_IF(typeface == nullptr, "Failed to make typeface from %s", kRobotoFont);
+
+    minikin::FontFamily* family = new minikin::FontFamily();
+    minikin::MinikinFont* font = new MinikinFontSkia(std::move(typeface), nullptr, 0, 0);
+    family->addFont(font);
+    font->Unref();
+
+    std::vector<minikin::FontFamily*> typefaces = { family };
+    minikin::FontCollection *collection = new minikin::FontCollection(typefaces);
+    family->Unref();
+
+    Typeface* hwTypeface = new Typeface();
+    hwTypeface->fFontCollection = collection;
+    hwTypeface->fSkiaStyle = SkTypeface::kNormal;
+    hwTypeface->fBaseWeight = 400;
+    hwTypeface->fStyle = minikin::FontStyle(4 /* weight */, false /* italic */);
+
+    Typeface::setDefault(hwTypeface);
 }
 
 }

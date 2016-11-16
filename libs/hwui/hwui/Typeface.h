@@ -48,6 +48,9 @@ struct ANDROID_API Typeface {
     static Typeface* createFromFamilies(const std::vector<minikin::FontFamily*>& families);
 
     static void setDefault(Typeface* face);
+
+    // Sets roboto font as the default typeface for testing purpose.
+    static void setRobotoTypefaceForTest();
 };
 
 }
