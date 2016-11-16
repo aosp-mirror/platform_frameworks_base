@@ -242,14 +242,20 @@ public class TransitionManager {
 
         Transition mTransition;
         ViewGroup mSceneRoot;
+        final ViewTreeObserver mViewTreeObserver;
 
         MultiListener(Transition transition, ViewGroup sceneRoot) {
             mTransition = transition;
             mSceneRoot = sceneRoot;
+            mViewTreeObserver = mSceneRoot.getViewTreeObserver();
         }
 
         private void removeListeners() {
-            mSceneRoot.getViewTreeObserver().removeOnPreDrawListener(this);
+            if (mViewTreeObserver.isAlive()) {
+                mViewTreeObserver.removeOnPreDrawListener(this);
+            } else {
+                mSceneRoot.getViewTreeObserver().removeOnPreDrawListener(this);
+            }
             mSceneRoot.removeOnAttachStateChangeListener(this);
         }
 

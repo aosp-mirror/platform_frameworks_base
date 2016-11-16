@@ -34,8 +34,9 @@ import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
+
+import com.android.internal.view.OneShotPreDrawListener;
 
 import java.util.ArrayList;
 
@@ -168,15 +169,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         });
         final ArrayList<View> sharedElementSnapshots = createSnapshots(mExitSharedElementBundle,
                 mSharedElementNames);
-        decorView.getViewTreeObserver()
-                .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        decorView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        setSharedElementState(mExitSharedElementBundle, sharedElementSnapshots);
-                        return true;
-                    }
-                });
+        OneShotPreDrawListener.add(decorView, () -> {
+            setSharedElementState(mExitSharedElementBundle, sharedElementSnapshots);
+        });
         setGhostVisibility(View.INVISIBLE);
         scheduleGhostVisibilityChange(View.INVISIBLE);
         if (mListener != null) {

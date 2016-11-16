@@ -37,6 +37,8 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.ImageView;
 
+import com.android.internal.view.OneShotPreDrawListener;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -570,16 +572,9 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     protected void scheduleSetSharedElementEnd(final ArrayList<View> snapshots) {
         final View decorView = getDecor();
         if (decorView != null) {
-            decorView.getViewTreeObserver().addOnPreDrawListener(
-                    new ViewTreeObserver.OnPreDrawListener() {
-                        @Override
-                        public boolean onPreDraw() {
-                            decorView.getViewTreeObserver().removeOnPreDrawListener(this);
-                            notifySharedElementEnd(snapshots);
-                            return true;
-                        }
-                    }
-            );
+            OneShotPreDrawListener.add(decorView, () -> {
+                notifySharedElementEnd(snapshots);
+            });
         }
     }
 
@@ -816,6 +811,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 if (moveWithParent && !isInTransitionGroup(parent, decor)) {
                     GhostViewListeners listener = new GhostViewListeners(view, parent, decor);
                     parent.getViewTreeObserver().addOnPreDrawListener(listener);
+                    parent.addOnAttachStateChangeListener(listener);
                     mGhostViewListeners.add(listener);
                 }
             }
@@ -842,8 +838,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         int numListeners = mGhostViewListeners.size();
         for (int i = 0; i < numListeners; i++) {
             GhostViewListeners listener = mGhostViewListeners.get(i);
-            ViewGroup parent = (ViewGroup) listener.getView().getParent();
-            parent.getViewTreeObserver().removeOnPreDrawListener(listener);
+            listener.removeListener();
         }
         mGhostViewListeners.clear();
 
@@ -874,15 +869,9 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     protected void scheduleGhostVisibilityChange(final int visibility) {
         final View decorView = getDecor();
         if (decorView != null) {
-            decorView.getViewTreeObserver()
-                    .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                        @Override
-                        public boolean onPreDraw() {
-                            decorView.getViewTreeObserver().removeOnPreDrawListener(this);
-                            setGhostVisibility(visibility);
-                            return true;
-                        }
-                    });
+            OneShotPreDrawListener.add(decorView, () -> {
+                setGhostVisibility(visibility);
+            });
         }
     }
 
@@ -988,16 +977,19 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         }
     }
 
-    private static class GhostViewListeners implements ViewTreeObserver.OnPreDrawListener {
+    private static class GhostViewListeners implements ViewTreeObserver.OnPreDrawListener,
+            View.OnAttachStateChangeListener {
         private View mView;
         private ViewGroup mDecor;
         private View mParent;
         private Matrix mMatrix = new Matrix();
+        private ViewTreeObserver mViewTreeObserver;
 
         public GhostViewListeners(View view, View parent, ViewGroup decor) {
             mView = view;
             mParent = parent;
             mDecor = decor;
+            mViewTreeObserver = parent.getViewTreeObserver();
         }
 
         public View getView() {
@@ -1008,12 +1000,31 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         public boolean onPreDraw() {
             GhostView ghostView = GhostView.getGhost(mView);
             if (ghostView == null) {
-                mParent.getViewTreeObserver().removeOnPreDrawListener(this);
+                removeListener();
             } else {
                 GhostView.calculateMatrix(mView, mDecor, mMatrix);
                 ghostView.setMatrix(mMatrix);
             }
             return true;
+        }
+
+        public void removeListener() {
+            if (mViewTreeObserver.isAlive()) {
+                mViewTreeObserver.removeOnPreDrawListener(this);
+            } else {
+                mParent.getViewTreeObserver().removeOnPreDrawListener(this);
+            }
+            mParent.removeOnAttachStateChangeListener(this);
+        }
+
+        @Override
+        public void onViewAttachedToWindow(View v) {
+            mViewTreeObserver = v.getViewTreeObserver();
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(View v) {
+            removeListener();
         }
     }
 
