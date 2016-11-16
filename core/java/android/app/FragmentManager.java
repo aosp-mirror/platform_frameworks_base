@@ -1072,7 +1072,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         if (f.mDeferStart && f.mState < Fragment.STARTED && newState > Fragment.STOPPED) {
             newState = Fragment.STOPPED;
         }
-        if (f.mState < newState) {
+        if (f.mState <= newState) {
             // For fragments that are created from a layout, when restoring from
             // state we don't want to allow them to be created until they are
             // being reloaded from the layout.
@@ -1089,65 +1089,59 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             }
             switch (f.mState) {
                 case Fragment.INITIALIZING:
-                    if (DEBUG) Log.v(TAG, "moveto CREATED: " + f);
-                    if (f.mSavedFragmentState != null) {
-                        f.mSavedViewState = f.mSavedFragmentState.getSparseParcelableArray(
-                                FragmentManagerImpl.VIEW_STATE_TAG);
-                        f.mTarget = getFragment(f.mSavedFragmentState,
-                                FragmentManagerImpl.TARGET_STATE_TAG);
-                        if (f.mTarget != null) {
-                            f.mTargetRequestCode = f.mSavedFragmentState.getInt(
-                                    FragmentManagerImpl.TARGET_REQUEST_CODE_STATE_TAG, 0);
-                        }
-                        f.mUserVisibleHint = f.mSavedFragmentState.getBoolean(
-                                FragmentManagerImpl.USER_VISIBLE_HINT_TAG, true);
-                        if (!f.mUserVisibleHint) {
-                            f.mDeferStart = true;
-                            if (newState > Fragment.STOPPED) {
-                                newState = Fragment.STOPPED;
+                    if (newState > Fragment.INITIALIZING) {
+                        if (DEBUG) Log.v(TAG, "moveto CREATED: " + f);
+                        if (f.mSavedFragmentState != null) {
+                            f.mSavedViewState = f.mSavedFragmentState.getSparseParcelableArray(
+                                    FragmentManagerImpl.VIEW_STATE_TAG);
+                            f.mTarget = getFragment(f.mSavedFragmentState,
+                                    FragmentManagerImpl.TARGET_STATE_TAG);
+                            if (f.mTarget != null) {
+                                f.mTargetRequestCode = f.mSavedFragmentState.getInt(
+                                        FragmentManagerImpl.TARGET_REQUEST_CODE_STATE_TAG, 0);
+                            }
+                            f.mUserVisibleHint = f.mSavedFragmentState.getBoolean(
+                                    FragmentManagerImpl.USER_VISIBLE_HINT_TAG, true);
+                            if (!f.mUserVisibleHint) {
+                                f.mDeferStart = true;
+                                if (newState > Fragment.STOPPED) {
+                                    newState = Fragment.STOPPED;
+                                }
                             }
                         }
-                    }
-                    f.mHost = mHost;
-                    f.mParentFragment = mParent;
-                    f.mFragmentManager = mParent != null
-                            ? mParent.mChildFragmentManager : mHost.getFragmentManagerImpl();
-                    dispatchOnFragmentPreAttached(f, mHost.getContext(), false);
-                    f.mCalled = false;
-                    f.onAttach(mHost.getContext());
-                    if (!f.mCalled) {
-                        throw new SuperNotCalledException("Fragment " + f
-                                + " did not call through to super.onAttach()");
-                    }
-                    if (f.mParentFragment == null) {
-                        mHost.onAttachFragment(f);
-                    } else {
-                        f.mParentFragment.onAttachFragment(f);
-                    }
-                    dispatchOnFragmentAttached(f, mHost.getContext(), false);
-
-                    if (!f.mRetaining) {
-                        f.performCreate(f.mSavedFragmentState);
-                        dispatchOnFragmentCreated(f, f.mSavedFragmentState, false);
-                    } else {
-                        f.restoreChildFragmentState(f.mSavedFragmentState, true);
-                        f.mState = Fragment.CREATED;
-                    }
-                    f.mRetaining = false;
-                    if (f.mFromLayout) {
-                        // For fragments that are part of the content view
-                        // layout, we need to instantiate the view immediately
-                        // and the inflater will take care of adding it.
-                        f.mView = f.performCreateView(f.getLayoutInflater(
-                                f.mSavedFragmentState), null, f.mSavedFragmentState);
-                        if (f.mView != null) {
-                            f.mView.setSaveFromParentEnabled(false);
-                            if (f.mHidden) f.mView.setVisibility(View.GONE);
-                            f.onViewCreated(f.mView, f.mSavedFragmentState);
-                            dispatchOnFragmentViewCreated(f, f.mView, f.mSavedFragmentState, false);
+                        f.mHost = mHost;
+                        f.mParentFragment = mParent;
+                        f.mFragmentManager = mParent != null
+                                ? mParent.mChildFragmentManager : mHost.getFragmentManagerImpl();
+                        dispatchOnFragmentPreAttached(f, mHost.getContext(), false);
+                        f.mCalled = false;
+                        f.onAttach(mHost.getContext());
+                        if (!f.mCalled) {
+                            throw new SuperNotCalledException("Fragment " + f
+                                    + " did not call through to super.onAttach()");
                         }
+                        if (f.mParentFragment == null) {
+                            mHost.onAttachFragment(f);
+                        } else {
+                            f.mParentFragment.onAttachFragment(f);
+                        }
+                        dispatchOnFragmentAttached(f, mHost.getContext(), false);
+
+                        if (!f.mRetaining) {
+                            f.performCreate(f.mSavedFragmentState);
+                            dispatchOnFragmentCreated(f, f.mSavedFragmentState, false);
+                        } else {
+                            f.restoreChildFragmentState(f.mSavedFragmentState, true);
+                            f.mState = Fragment.CREATED;
+                        }
+                        f.mRetaining = false;
                     }
                 case Fragment.CREATED:
+                    // This is outside the if statement below on purpose; we want this to run
+                    // even if we do a moveToState from CREATED => *, CREATED => CREATED, and
+                    // * => CREATED as part of the case fallthrough above.
+                    ensureInflatedFragmentView(f);
+
                     if (newState > Fragment.CREATED) {
                         if (DEBUG) Log.v(TAG, "moveto ACTIVITY_CREATED: " + f);
                         if (!f.mFromLayout) {
@@ -1281,6 +1275,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         }
                         f.mContainer = null;
                         f.mView = null;
+                        f.mInLayout = false;
                     }
                 case Fragment.CREATED:
                     if (newState < Fragment.CREATED) {
@@ -1338,6 +1333,19 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     
     void moveToState(Fragment f) {
         moveToState(f, mCurState, 0, 0, false);
+    }
+
+    void ensureInflatedFragmentView(Fragment f) {
+        if (f.mFromLayout && !f.mPerformedCreateView) {
+            f.mView = f.performCreateView(f.getLayoutInflater(
+                    f.mSavedFragmentState), null, f.mSavedFragmentState);
+            if (f.mView != null) {
+                f.mView.setSaveFromParentEnabled(false);
+                if (f.mHidden) f.mView.setVisibility(View.GONE);
+                f.onViewCreated(f.mView, f.mSavedFragmentState);
+                dispatchOnFragmentViewCreated(f, f.mView, f.mSavedFragmentState, false);
+            }
+        }
     }
 
     /**
@@ -3262,7 +3270,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
 
         // If we haven't finished entering the CREATED state ourselves yet,
-        // push the inflated child fragment along.
+        // push the inflated child fragment along. This will ensureInflatedFragmentView
+        // at the right phase of the lifecycle so that we will have mView populated
+        // for compliant fragments below.
         if (mCurState < Fragment.CREATED && fragment.mFromLayout) {
             moveToState(fragment, Fragment.CREATED, 0, 0, false);
         } else {
