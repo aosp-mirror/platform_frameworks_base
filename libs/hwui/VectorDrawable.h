@@ -622,10 +622,15 @@ public:
         }
 
         void setScaledSize(int width, int height) {
-            if (mNonAnimatableProperties.scaledWidth != width
-                    || mNonAnimatableProperties.scaledHeight != height) {
-                mNonAnimatableProperties.scaledWidth = width;
-                mNonAnimatableProperties.scaledHeight = height;
+            // If the requested size is bigger than what the bitmap was, then
+            // we increase the bitmap size to match. The width and height
+            // are bound by MAX_CACHED_BITMAP_SIZE.
+            if (mNonAnimatableProperties.scaledWidth < width
+                    || mNonAnimatableProperties.scaledHeight < height) {
+                mNonAnimatableProperties.scaledWidth = std::max(width,
+                        mNonAnimatableProperties.scaledWidth);
+                mNonAnimatableProperties.scaledHeight = std::max(height,
+                        mNonAnimatableProperties.scaledHeight);
                 mNonAnimatablePropertiesDirty = true;
                 mTree->onPropertyChanged(this);
             }
