@@ -48,9 +48,11 @@ void SkiaPipeline::onDestroyHardwareResources() {
 
 bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {
     for (SkImage* image : mutableImages) {
-        mPinnedImages.emplace_back(sk_ref_sp(image));
-        // TODO: return false if texture creation fails (see b/32691999)
-        SkImage_pinAsTexture(image, mRenderThread.getGrContext());
+        if (SkImage_pinAsTexture(image, mRenderThread.getGrContext())) {
+            mPinnedImages.emplace_back(sk_ref_sp(image));
+        } else {
+            return false;
+        }
     }
     return true;
 }

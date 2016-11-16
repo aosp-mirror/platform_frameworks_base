@@ -84,7 +84,7 @@ public:
      * remain in the cache until it has been unpinned. We leverage this feature
      * to avoid making a CPU copy of the pixels.
      *
-     * @return true if the images have been successfully pinned to the GPU cache
+     * @return true if all images have been successfully pinned to the GPU cache
      *         and false otherwise (e.g. cache limits have been exceeded).
      */
     bool pinImages(std::vector<SkImage*>& mutableImages) {
