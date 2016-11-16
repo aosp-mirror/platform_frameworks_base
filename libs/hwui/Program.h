@@ -133,7 +133,7 @@ struct ProgramDescription {
 
     // Shaders
     bool hasBitmap;
-    bool isBitmapNpot;
+    bool useShaderBasedWrap;
 
     bool hasVertexAlpha;
     bool useShadowAlphaInterp;
@@ -180,7 +180,7 @@ struct ProgramDescription {
         modulate = false;
 
         hasBitmap = false;
-        isBitmapNpot = false;
+        useShaderBasedWrap = false;
 
         hasGradient = false;
         gradientType = kGradientLinear;
@@ -234,7 +234,7 @@ struct ProgramDescription {
         if (hasAlpha8Texture) key |= PROGRAM_KEY_A8_TEXTURE;
         if (hasBitmap) {
             key |= PROGRAM_KEY_BITMAP;
-            if (isBitmapNpot) {
+            if (useShaderBasedWrap) {
                 key |= PROGRAM_KEY_BITMAP_NPOT;
                 key |= getEnumForWrap(bitmapWrapS) << PROGRAM_BITMAP_WRAPS_SHIFT;
                 key |= getEnumForWrap(bitmapWrapT) << PROGRAM_BITMAP_WRAPT_SHIFT;

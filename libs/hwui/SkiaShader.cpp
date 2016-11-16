@@ -58,7 +58,7 @@ static inline void bindUniformColor(int slot, FloatColor color) {
 }
 
 static inline void bindTexture(Caches* caches, Texture* texture, GLenum wrapS, GLenum wrapT) {
-    caches->textureState().bindTexture(texture->id());
+    caches->textureState().bindTexture(texture->target(), texture->id());
     texture->setWrapST(wrapS, wrapT);
 }
 
@@ -218,10 +218,13 @@ bool tryStoreBitmap(Caches& caches, const SkShader& shader, const Matrix4& model
     const float height = outData->bitmapTexture->height();
 
     description->hasBitmap = true;
-    if (!caches.extensions().hasNPot()
+    // gralloc doesn't support non-clamp modes
+    if (hwuiBitmap->isHardware() || (!caches.extensions().hasNPot()
             && (!isPowerOfTwo(width) || !isPowerOfTwo(height))
-            && (xy[0] != SkShader::kClamp_TileMode || xy[1] != SkShader::kClamp_TileMode)) {
-        description->isBitmapNpot = true;
+            && (xy[0] != SkShader::kClamp_TileMode || xy[1] != SkShader::kClamp_TileMode))) {
+        // need non-clamp mode, but it's not supported for this draw,
+        // so enable custom shader logic to mimic
+        description->useShaderBasedWrap = true;
         description->bitmapWrapS = gTileModes[xy[0]];
         description->bitmapWrapT = gTileModes[xy[1]];
 

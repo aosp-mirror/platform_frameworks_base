@@ -413,7 +413,6 @@ void* Bitmap::getStorage() const {
     case PixelStorageType::Heap:
         return mPixelStorage.heap.address;
     case PixelStorageType::Hardware:
-        LOG_ALWAYS_FATAL_IF("Can't get address for hardware bitmap");
         return nullptr;
     }
 }
@@ -465,6 +464,12 @@ void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
         LOG_ALWAYS_FATAL("Not implemented");
         return;
     }
+    outBitmap->setInfo(info(), rowBytes());
+    outBitmap->setPixelRef(this);
+    outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
+}
+
+void Bitmap::getSkBitmapForShaders(SkBitmap* outBitmap) {
     outBitmap->setInfo(info(), rowBytes());
     outBitmap->setPixelRef(this);
     outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);

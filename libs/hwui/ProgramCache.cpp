@@ -707,7 +707,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (blendFramebuffer) {
         generateBlend(shader, "blendFramebuffer", description.framebufferMode);
     }
-    if (description.isBitmapNpot) {
+    if (description.useShaderBasedWrap) {
         generateTextureWrap(shader, description.bitmapWrapS, description.bitmapWrapT);
     }
     if (description.hasGradient) {
@@ -736,7 +736,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
             shader.append(gFS_Main_FetchGradient[gradientIndex(description)]);
         }
         if (description.hasBitmap) {
-            if (!description.isBitmapNpot) {
+            if (!description.useShaderBasedWrap) {
                 shader.append(gFS_Main_FetchBitmap);
             } else {
                 shader.append(gFS_Main_FetchBitmapNpot);
