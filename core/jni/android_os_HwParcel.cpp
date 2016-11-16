@@ -26,6 +26,7 @@
 
 #include <JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <hidl/HidlTransportSupport.h>
 #include <hidl/Status.h>
 #include <nativehelper/ScopedLocalRef.h>
 
@@ -383,7 +384,7 @@ static void JHwParcel_native_writeStatus(
     hardware::Parcel *parcel =
         JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
-    status_t err = status.writeToParcel(parcel);
+    status_t err = ::android::hardware::writeToParcel(status, parcel);
     signalExceptionForError(env, err);
 }
 
@@ -394,7 +395,7 @@ static void JHwParcel_native_verifySuccess(JNIEnv *env, jobject thiz) {
         JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
     Status status;
-    status_t err = status.readFromParcel(*parcel);
+    status_t err = ::android::hardware::readFromParcel(&status, *parcel);
     signalExceptionForError(env, err);
 }
 
