@@ -46,25 +46,25 @@ import static org.junit.Assert.assertTrue;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class WindowStateTests {
+public class WindowStateTests extends WindowTestsBase {
 
-    private static WindowManagerService sWm = null;
     private WindowToken mWindowToken;
-    private final IWindow mIWindow = new TestIWindow();
 
     @Before
     public void setUp() throws Exception {
-        final Context context = InstrumentationRegistry.getTargetContext();
-        sWm = TestWindowManagerPolicy.getWindowManagerService(context);
+        super.setUp();
         mWindowToken = new WindowToken(sWm, new Binder(), 0, false,
                 sWm.getDefaultDisplayContentLocked());
     }
 
     @Test
     public void testIsParentWindowHidden() throws Exception {
-        final WindowState parentWindow = createWindow(null, TYPE_APPLICATION);
-        final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW);
-        final WindowState child2 = createWindow(parentWindow, FIRST_SUB_WINDOW);
+        final WindowState parentWindow =
+                createWindow(null, TYPE_APPLICATION, mWindowToken, "parentWindow");
+        final WindowState child1 =
+                createWindow(parentWindow, FIRST_SUB_WINDOW, mWindowToken, "child1");
+        final WindowState child2 =
+                createWindow(parentWindow, FIRST_SUB_WINDOW, mWindowToken, "child2");
 
         assertFalse(parentWindow.mHidden);
         assertFalse(parentWindow.isParentWindowHidden());
@@ -79,10 +79,14 @@ public class WindowStateTests {
 
     @Test
     public void testIsChildWindow() throws Exception {
-        final WindowState parentWindow = createWindow(null, TYPE_APPLICATION);
-        final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW);
-        final WindowState child2 = createWindow(parentWindow, FIRST_SUB_WINDOW);
-        final WindowState randomWindow = createWindow(null, TYPE_APPLICATION);
+        final WindowState parentWindow =
+                createWindow(null, TYPE_APPLICATION, mWindowToken, "parentWindow");
+        final WindowState child1 =
+                createWindow(parentWindow, FIRST_SUB_WINDOW, mWindowToken, "child1");
+        final WindowState child2 =
+                createWindow(parentWindow, FIRST_SUB_WINDOW, mWindowToken, "child2");
+        final WindowState randomWindow =
+                createWindow(null, TYPE_APPLICATION, mWindowToken, "randomWindow");
 
         assertFalse(parentWindow.isChildWindow());
         assertTrue(child1.isChildWindow());
@@ -92,12 +96,13 @@ public class WindowStateTests {
 
     @Test
     public void testHasChild() throws Exception {
-        final WindowState win1 = createWindow(null, TYPE_APPLICATION);
-        final WindowState win11 = createWindow(win1, FIRST_SUB_WINDOW);
-        final WindowState win12 = createWindow(win1, FIRST_SUB_WINDOW);
-        final WindowState win2 = createWindow(null, TYPE_APPLICATION);
-        final WindowState win21 = createWindow(win2, FIRST_SUB_WINDOW);
-        final WindowState randomWindow = createWindow(null, TYPE_APPLICATION);
+        final WindowState win1 = createWindow(null, TYPE_APPLICATION, mWindowToken, "win1");
+        final WindowState win11 = createWindow(win1, FIRST_SUB_WINDOW, mWindowToken, "win11");
+        final WindowState win12 = createWindow(win1, FIRST_SUB_WINDOW, mWindowToken, "win12");
+        final WindowState win2 = createWindow(null, TYPE_APPLICATION, mWindowToken, "win2");
+        final WindowState win21 = createWindow(win2, FIRST_SUB_WINDOW, mWindowToken, "win21");
+        final WindowState randomWindow =
+                createWindow(null, TYPE_APPLICATION, mWindowToken, "randomWindow");
 
         assertTrue(win1.hasChild(win11));
         assertTrue(win1.hasChild(win12));
@@ -113,23 +118,28 @@ public class WindowStateTests {
 
     @Test
     public void testGetBottomChild() throws Exception {
-        final WindowState parentWindow = createWindow(null, TYPE_APPLICATION);
+        final WindowState parentWindow =
+                createWindow(null, TYPE_APPLICATION, mWindowToken, "parentWindow");
         assertNull(parentWindow.getBottomChild());
 
-        final WindowState child1 = createWindow(parentWindow, TYPE_APPLICATION_PANEL);
+        final WindowState child1 =
+                createWindow(parentWindow, TYPE_APPLICATION_PANEL, mWindowToken, "child1");
         assertEquals(child1, parentWindow.getBottomChild());
 
-        final WindowState child2 = createWindow(parentWindow, TYPE_APPLICATION_PANEL);
+        final WindowState child2 =
+                createWindow(parentWindow, TYPE_APPLICATION_PANEL, mWindowToken, "child2");
         // Since child1 and child2 are at the same layer, then child2 is expect to be added on top
         // on child1
         assertEquals(child1, parentWindow.getBottomChild());
 
-        final WindowState child3 = createWindow(parentWindow, TYPE_APPLICATION_MEDIA_OVERLAY);
+        final WindowState child3 =
+                createWindow(parentWindow, TYPE_APPLICATION_MEDIA_OVERLAY, mWindowToken, "child3");
         // Since child3 is a negative layer, we would expect it to be added below current children
         // with positive layers.
         assertEquals(child3, parentWindow.getBottomChild());
 
-        final WindowState child4 = createWindow(parentWindow, TYPE_APPLICATION_MEDIA_OVERLAY);
+        final WindowState child4 =
+                createWindow(parentWindow, TYPE_APPLICATION_MEDIA_OVERLAY, mWindowToken, "child4");
         // We would also expect additional negative layers to be added below existing negative
         // layers.
         assertEquals(child4, parentWindow.getBottomChild());
@@ -137,9 +147,12 @@ public class WindowStateTests {
 
     @Test
     public void testGetParentWindow() throws Exception {
-        final WindowState parentWindow = createWindow(null, TYPE_APPLICATION);
-        final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW);
-        final WindowState child2 = createWindow(parentWindow, FIRST_SUB_WINDOW);
+        final WindowState parentWindow =
+                createWindow(null, TYPE_APPLICATION, mWindowToken, "parentWindow");
+        final WindowState child1 =
+                createWindow(parentWindow, FIRST_SUB_WINDOW, mWindowToken, "child1");
+        final WindowState child2 =
+                createWindow(parentWindow, FIRST_SUB_WINDOW, mWindowToken, "child2");
 
         assertNull(parentWindow.getParentWindow());
         assertEquals(parentWindow, child1.getParentWindow());
@@ -148,9 +161,9 @@ public class WindowStateTests {
 
     @Test
     public void testGetTopParentWindow() throws Exception {
-        final WindowState root = createWindow(null, TYPE_APPLICATION);
-        final WindowState child1 = createWindow(root, FIRST_SUB_WINDOW);
-        final WindowState child2 = createWindow(child1, FIRST_SUB_WINDOW);
+        final WindowState root = createWindow(null, TYPE_APPLICATION, mWindowToken, "root");
+        final WindowState child1 = createWindow(root, FIRST_SUB_WINDOW, mWindowToken, "child1");
+        final WindowState child2 = createWindow(child1, FIRST_SUB_WINDOW, mWindowToken, "child2");
 
         assertEquals(root, root.getTopParentWindow());
         assertEquals(root, child1.getTopParentWindow());
@@ -160,16 +173,10 @@ public class WindowStateTests {
 
     @Test
     public void testIsOnScreen_hiddenByPolicy() {
-        final WindowState window = createWindow(null, TYPE_APPLICATION);
+        final WindowState window = createWindow(null, TYPE_APPLICATION, mWindowToken, "window");
         window.setHasSurface(true);
         assertTrue(window.isOnScreen());
         window.hideLw(false /* doAnimation */);
         assertFalse(window.isOnScreen());
-    }
-
-    private WindowState createWindow(WindowState parent, int type) {
-        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
-
-        return new WindowState(sWm, null, mIWindow, mWindowToken, parent, 0, 0, attrs, 0, 0);
     }
 }

@@ -47,17 +47,7 @@ import static org.mockito.Mockito.mock;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class WindowTokenTests {
-
-    private WindowManagerService mWm = null;
-    private final IWindow mIWindow = new TestIWindow();
-    private final Session mMockSession = mock(Session.class);
-
-    @Before
-    public void setUp() throws Exception {
-        final Context context = InstrumentationRegistry.getTargetContext();
-        mWm = TestWindowManagerPolicy.getWindowManagerService(context);
-    }
+public class WindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testAddWindow() throws Exception {
@@ -65,11 +55,11 @@ public class WindowTokenTests {
 
         assertEquals(0, token.getWindowsCount());
 
-        final WindowState window1 = createWindow(null, TYPE_APPLICATION, token);
-        final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, token);
-        final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, token);
-        final WindowState window2 = createWindow(null, TYPE_APPLICATION, token);
-        final WindowState window3 = createWindow(null, TYPE_APPLICATION, token);
+        final WindowState window1 = createWindow(null, TYPE_APPLICATION, token, "window1");
+        final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, token, "window11");
+        final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, token, "window12");
+        final WindowState window2 = createWindow(null, TYPE_APPLICATION, token, "window2");
+        final WindowState window3 = createWindow(null, TYPE_APPLICATION, token, "window3");
 
         token.addWindow(window1);
         // NOTE: Child windows will not be added to the token as window containers can only
@@ -91,12 +81,12 @@ public class WindowTokenTests {
     @Test
     public void testChildRemoval() throws Exception {
         final TestWindowToken token = new TestWindowToken();
-        final DisplayContent dc = mWm.getDefaultDisplayContentLocked();
+        final DisplayContent dc = sWm.getDefaultDisplayContentLocked();
 
         assertEquals(token, dc.getWindowToken(token.token));
 
-        final WindowState window1 = createWindow(null, TYPE_APPLICATION, token);
-        final WindowState window2 = createWindow(null, TYPE_APPLICATION, token);
+        final WindowState window1 = createWindow(null, TYPE_APPLICATION, token, "window1");
+        final WindowState window2 = createWindow(null, TYPE_APPLICATION, token, "window2");
         token.addWindow(window1);
         token.addWindow(window2);
 
@@ -113,11 +103,11 @@ public class WindowTokenTests {
     @Test
     public void testAdjustAnimLayer() throws Exception {
         final TestWindowToken token = new TestWindowToken();
-        final WindowState window1 = createWindow(null, TYPE_APPLICATION, token);
-        final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, token);
-        final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, token);
-        final WindowState window2 = createWindow(null, TYPE_APPLICATION, token);
-        final WindowState window3 = createWindow(null, TYPE_APPLICATION, token);
+        final WindowState window1 = createWindow(null, TYPE_APPLICATION, token, "window1");
+        final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, token, "window11");
+        final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, token, "window12");
+        final WindowState window2 = createWindow(null, TYPE_APPLICATION, token, "window2");
+        final WindowState window3 = createWindow(null, TYPE_APPLICATION, token, "window3");
 
         token.addWindow(window1);
         token.addWindow(window2);
@@ -136,60 +126,11 @@ public class WindowTokenTests {
         assertEquals(window3StartLayer + adj, highestLayer);
     }
 
-    @Test
-    public void testGetTopWindow() throws Exception {
-        final TestWindowToken token = new TestWindowToken();
-
-        assertNull(token.getTopWindow());
-
-        final WindowState window1 = createWindow(null, TYPE_APPLICATION, token);
-        token.addWindow(window1);
-        assertEquals(window1, token.getTopWindow());
-        final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, token);
-        final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, token);
-        assertEquals(window12, token.getTopWindow());
-
-        final WindowState window2 = createWindow(null, TYPE_APPLICATION, token);
-        token.addWindow(window2);
-        // Since new windows are added to the bottom of the token, we would still expect the
-        // previous one to the top.
-        assertEquals(window12, token.getTopWindow());
-    }
-
-    @Test
-    public void testGetWindowIndex() throws Exception {
-        final TestWindowToken token = new TestWindowToken();
-
-        final WindowState window1 = createWindow(null, TYPE_APPLICATION, token);
-        assertEquals(-1, token.getWindowIndex(window1));
-        token.addWindow(window1);
-        assertEquals(0, token.getWindowIndex(window1));
-        final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, token);
-        final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, token);
-        // Child windows should report the same index as their parents.
-        assertEquals(0, token.getWindowIndex(window11));
-        assertEquals(0, token.getWindowIndex(window12));
-
-        final WindowState window2 = createWindow(null, TYPE_APPLICATION, token);
-        assertEquals(-1, token.getWindowIndex(window2));
-        token.addWindow(window2);
-        // Since new windows are added to the bottom of the token, we would expect the added window
-        // to be at index 0.
-        assertEquals(0, token.getWindowIndex(window2));
-        assertEquals(1, token.getWindowIndex(window1));
-    }
-
-    private WindowState createWindow(WindowState parent, int type, WindowToken token) {
-        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
-
-        return new WindowState(mWm, mMockSession, mIWindow, token, parent, OP_NONE, 0, attrs, 0, 0);
-    }
-
     /* Used so we can gain access to some protected members of the {@link WindowToken} class */
     private class TestWindowToken extends WindowToken {
 
         TestWindowToken() {
-            super(mWm, mock(IBinder.class), 0, false, mWm.getDefaultDisplayContentLocked());
+            super(sWm, mock(IBinder.class), 0, false, sWm.getDefaultDisplayContentLocked());
         }
 
         int getWindowsCount() {
