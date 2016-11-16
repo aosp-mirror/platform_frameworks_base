@@ -1219,5 +1219,5 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** {@hide} */ public String[] getSplitCodePaths() { return splitSourceDirs; }
     /** {@hide} */ public String getResourcePath() { return scanPublicSourceDir; }
     /** {@hide} */ public String getBaseResourcePath() { return publicSourceDir; }
-    /** {@hide} */ public String[] getSplitResourcePaths() { return splitSourceDirs; }
+    /** {@hide} */ public String[] getSplitResourcePaths() { return splitPublicSourceDirs; }
 }
