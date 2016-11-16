@@ -1598,20 +1598,6 @@ public class WifiManager {
     }
 
     /**
-     * Builds a WifiConfiguration from Hotspot 2.0 MIME file.
-     * @return AP details in WifiConfiguration
-     *
-     * @hide Dont open yet
-     */
-    public WifiConfiguration buildWifiConfig(String uriString, String mimeType, byte[] data) {
-        try {
-            return mService.buildWifiConfig(uriString, mimeType, data);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Sets the Wi-Fi AP Configuration.
      * @return {@code true} if the operation succeeded, {@code false} otherwise
      *
