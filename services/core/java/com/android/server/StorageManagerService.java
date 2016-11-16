@@ -2991,38 +2991,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    @Override
-    public ParcelFileDescriptor mountAppFuse(final String name) throws RemoteException {
-        try {
-            final int uid = Binder.getCallingUid();
-            final int pid = Binder.getCallingPid();
-            final NativeDaemonEvent event =
-                    mConnector.execute("appfuse", "mount", uid, pid, name);
-            if (event.getFileDescriptors() == null) {
-                throw new RemoteException("AppFuse FD from vold is null.");
-            }
-            return ParcelFileDescriptor.fromFd(
-                    event.getFileDescriptors()[0],
-                    mHandler,
-                    new ParcelFileDescriptor.OnCloseListener() {
-                        @Override
-                        public void onClose(IOException e) {
-                            try {
-                                final NativeDaemonEvent event = mConnector.execute(
-                                        "appfuse", "unmount", uid, pid, name);
-                            } catch (NativeDaemonConnectorException unmountException) {
-                                Log.e(TAG, "Failed to unmount appfuse.");
-                            }
-                        }
-                    });
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        } catch (IOException e) {
-            throw new RemoteException(e.getMessage());
-        }
-    }
-
-
     class CloseableHolder<T extends AutoCloseable> implements AutoCloseable {
         @Nullable T mCloseable;
 
