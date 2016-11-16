@@ -228,4 +228,60 @@ public class CategoryManagerTest {
         assertThat(category.tiles.get(1).priority).isEqualTo(100);
         assertThat(category.tiles.get(2).priority).isEqualTo(50);
     }
+
+    @Test
+    public void filterTiles_noDuplicate_noChange() {
+        // Create some unique tiles
+        final String testPackage =
+                ShadowApplication.getInstance().getApplicationContext().getPackageName();
+        final DashboardCategory category = new DashboardCategory();
+        final Tile tile1 = new Tile();
+        tile1.intent =
+                new Intent().setComponent(new ComponentName(testPackage, "class1"));
+        tile1.priority = 100;
+        final Tile tile2 = new Tile();
+        tile2.intent =
+                new Intent().setComponent(new ComponentName(testPackage, "class2"));
+        tile2.priority = 100;
+        final Tile tile3 = new Tile();
+        tile3.intent =
+                new Intent().setComponent(new ComponentName(testPackage, "class3"));
+        tile3.priority = 50;
+        category.tiles.add(tile1);
+        category.tiles.add(tile2);
+        category.tiles.add(tile3);
+        mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
+
+        mCategoryManager.filterDuplicateTiles(mCategoryByKeyMap);
+
+        assertThat(category.tiles.size()).isEqualTo(3);
+    }
+
+    @Test
+    public void filterTiles_hasDuplicate_shouldOnlyKeepUniqueTiles() {
+        // Create tiles pointing to same intent.
+        final String testPackage =
+                ShadowApplication.getInstance().getApplicationContext().getPackageName();
+        final DashboardCategory category = new DashboardCategory();
+        final Tile tile1 = new Tile();
+        tile1.intent =
+                new Intent().setComponent(new ComponentName(testPackage, "class1"));
+        tile1.priority = 100;
+        final Tile tile2 = new Tile();
+        tile2.intent =
+                new Intent().setComponent(new ComponentName(testPackage, "class1"));
+        tile2.priority = 100;
+        final Tile tile3 = new Tile();
+        tile3.intent =
+                new Intent().setComponent(new ComponentName(testPackage, "class1"));
+        tile3.priority = 50;
+        category.tiles.add(tile1);
+        category.tiles.add(tile2);
+        category.tiles.add(tile3);
+        mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
+
+        mCategoryManager.filterDuplicateTiles(mCategoryByKeyMap);
+
+        assertThat(category.tiles.size()).isEqualTo(1);
+    }
 }

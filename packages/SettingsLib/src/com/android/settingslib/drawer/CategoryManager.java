@@ -20,6 +20,7 @@ import android.content.Context;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 
@@ -116,6 +117,7 @@ public class CategoryManager {
             }
             backwardCompatCleanupForCategory(mTileByComponentCache, mCategoryByKeyMap);
             normalizePriority(context, mCategoryByKeyMap);
+            filterDuplicateTiles(mCategoryByKeyMap);
         }
     }
 
@@ -185,6 +187,31 @@ public class CategoryManager {
     }
 
     /**
+     * Filter out duplicate tiles from category. Duplicate tiles are the ones pointing to the
+     * same intent.
+     */
+    @VisibleForTesting
+    synchronized void filterDuplicateTiles(Map<String, DashboardCategory> categoryByKeyMap) {
+        for (Entry<String, DashboardCategory> categoryEntry : categoryByKeyMap.entrySet()) {
+            final DashboardCategory category = categoryEntry.getValue();
+            final int count = category.tiles.size();
+            final Set<ComponentName> components = new ArraySet<>();
+            for (int i = count - 1; i >= 0; i--) {
+                final Tile tile = category.tiles.get(i);
+                if (tile.intent == null) {
+                    continue;
+                }
+                final ComponentName tileComponent = tile.intent.getComponent();
+                if (components.contains(tileComponent)) {
+                    category.tiles.remove(i);
+                } else {
+                    components.add(tileComponent);
+                }
+            }
+        }
+    }
+
+    /**
      * Normalize priority value for tiles within a single {@code DashboardCategory}.
      *
      * @see #normalizePriority(Context, Map)
@@ -218,7 +245,6 @@ public class CategoryManager {
                 continue;
             }
             dashboardCategory.tiles.get(i).priority = i;
-
         }
     }
 }
