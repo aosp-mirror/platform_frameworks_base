@@ -1879,6 +1879,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Slog.d(TAG, "Destroying " + ps.name + " because volume was forgotten");
                     deletePackage(ps.name, new LegacyPackageDeleteObserver(null).getBinder(),
                             UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS);
+
+                    // Try very hard to release any references to this package
+                    // so we don't risk the system server being killed due to
+                    // open FDs
+                    AttributeCache.instance().removePackage(ps.name);
                 }
 
                 mSettings.onVolumeForgotten(fsUuid);
