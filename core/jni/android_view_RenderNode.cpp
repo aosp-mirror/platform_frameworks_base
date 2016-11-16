@@ -124,10 +124,6 @@ static void releaseRenderNode(RenderNode* renderNode) {
     renderNode->decStrong(0);
 }
 
-static void android_view_RenderNode_finalize(JNIEnv* env, jobject clazz, jlong renderNodePtr) {
-    releaseRenderNode(reinterpret_cast<RenderNode*>(renderNodePtr));
-}
-
 static jlong android_view_RenderNode_getNativeFinalizer(JNIEnv* env,
         jobject clazz) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&releaseRenderNode));
@@ -654,7 +650,6 @@ static const JNINativeMethod gMethods[] = {
 // Regular JNI
 // ----------------------------------------------------------------------------
     { "nCreate",               "(Ljava/lang/String;)J", (void*) android_view_RenderNode_create },
-    { "nFinalize",             "(J)V",   (void*) android_view_RenderNode_finalize },
     { "nGetNativeFinalizer",   "()J",    (void*) android_view_RenderNode_getNativeFinalizer },
     { "nSetDisplayList",       "(JJ)V",   (void*) android_view_RenderNode_setDisplayList },
     { "nOutput",               "(J)V",    (void*) android_view_RenderNode_output },
