@@ -2337,7 +2337,7 @@ public abstract class Context {
      * matches <var>filter</var>, in the main application thread.
      *
      * <p>The system may broadcast Intents that are "sticky" -- these stay
-     * around after the broadcast as finished, to be sent to any later
+     * around after the broadcast has finished, to be sent to any later
      * registrations. If your IntentFilter matches one of these sticky
      * Intents, that Intent will be returned by this function
      * <strong>and</strong> sent to your <var>receiver</var> as if it had just
