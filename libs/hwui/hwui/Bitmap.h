@@ -85,6 +85,10 @@ public:
 
     void getSkBitmap(SkBitmap* outBitmap);
 
+    // Ugly hack: in case of hardware bitmaps, it sets nullptr as pixels pointer
+    // so it would crash if anyone tries to render this bitmap.
+    void getSkBitmapForShaders(SkBitmap* outBitmap);
+
     int getAshmemFd() const;
     size_t getAllocationByteCount() const;
 
