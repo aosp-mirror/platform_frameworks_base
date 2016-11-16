@@ -2753,6 +2753,9 @@
 
   <java-symbol type="dimen" name="config_appTransitionAnimationDurationScaleDefault" />
 
-<!-- Network Recommendation -->
+  <!-- Network Recommendation -->
   <java-symbol type="array" name="config_networkRecommendationPackageNames" />
+
+  <!-- Whether allow 3rd party apps on internal storage. -->
+  <java-symbol type="bool" name="config_allow3rdPartyAppOnInternal" />
 </resources>
