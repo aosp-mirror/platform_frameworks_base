@@ -116,9 +116,34 @@ public interface SurfaceHolder {
          * size before it has been correctly drawn that way).  This will
          * typically be preceeded by a call to {@link #surfaceChanged}.
          *
+         * As of O, {@link #surfaceRedrawNeededAsync} may be implemented
+         * to provide a non-blocking implementation. If {@link #surfaceRedrawNeededAsync}
+         * is not implemented, then this will be called instead.
+         *
          * @param holder The SurfaceHolder whose surface has changed.
          */
-        public void surfaceRedrawNeeded(SurfaceHolder holder);
+        void surfaceRedrawNeeded(SurfaceHolder holder);
+
+        /**
+         * An alternative to surfaceRedrawNeeded where it is not required to block
+         * until the redraw is complete. You should initiate the redraw, and return,
+         * later invoking drawingFinished when your redraw is complete.
+         *
+         * This can be useful to avoid blocking your main application thread on rendering.
+         *
+         * As of O, if this is implemented {@link #surfaceRedrawNeeded} will not be called.
+         * However it is still recommended to implement {@link #surfaceRedrawNeeded} for
+         * compatibility with older versions of the platform.
+         *
+         * @param holder The SurfaceHolder which needs redrawing.
+         * @param drawingFinished A runnable to signal completion. This may be invoked
+         * from any thread.
+         *
+         */
+        default void surfaceRedrawNeededAsync(SurfaceHolder holder, Runnable drawingFinished) {
+            surfaceRedrawNeeded(holder);
+            drawingFinished.run();
+        }
     }
 
     /**

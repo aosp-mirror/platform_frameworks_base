@@ -33,6 +33,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import com.android.internal.view.BaseIWindow;
+import com.android.internal.view.SurfaceCallbackHelper;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -639,21 +640,13 @@ public class SurfaceView extends View {
                             if (callbacks == null) {
                                 callbacks = getSurfaceCallbacks();
                             }
-                            for (SurfaceHolder.Callback c : callbacks) {
-                                if (c instanceof SurfaceHolder.Callback2) {
-                                    ((SurfaceHolder.Callback2)c).surfaceRedrawNeeded(
-                                            mSurfaceHolder);
-                                }
-                            }
+                            SurfaceCallbackHelper sch =
+                                    new SurfaceCallbackHelper(mSession, mWindow);
+                            sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);
                         }
                     }
                 } finally {
                     mIsCreating = false;
-                    if (redrawNeeded) {
-                        if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
-                                + "finishedDrawing");
-                        mSession.finishDrawing(mWindow);
-                    }
                     mSession.performDeferredDestroy(mWindow);
                 }
             } catch (RemoteException ex) {
@@ -876,7 +869,6 @@ public class SurfaceView extends View {
     }
 
     private final SurfaceHolder mSurfaceHolder = new SurfaceHolder() {
-
         private static final String LOG_TAG = "SurfaceHolder";
 
         @Override

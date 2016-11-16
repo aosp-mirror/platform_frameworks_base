@@ -86,7 +86,7 @@ public abstract class BaseSurfaceHolder implements SurfaceHolder {
             mCallbacks.remove(callback);
         }
     }
-    
+
     public SurfaceHolder.Callback[] getCallbacks() {
         if (mHaveGottenCallbacks) {
             return mGottenCallbacks;
