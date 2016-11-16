@@ -489,6 +489,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_DIRECT_BOOT_AWARE = 1 << 6;
 
     /**
+     * Value for {@link #flags}: {@code true} if the application is blocked via restrictions
+     * and for most purposes is considered as not installed.
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_EPHEMERAL = 1 << 7;
+
+    /**
      * When set, at least one component inside this application is direct boot
      * aware.
      *
@@ -496,12 +503,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE = 1 << 8;
 
-    /**
-     * Value for {@link #flags}: {@code true} if the application is blocked via restrictions
-     * and for most purposes is considered as not installed.
-     * {@hide}
-     */
-    public static final int PRIVATE_FLAG_EPHEMERAL = 1 << 9;
 
     /**
      * When set, signals that the application is required for the system user and should not be
@@ -509,7 +510,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
-    public static final int PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER = 1 << 10;
+    public static final int PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER = 1 << 9;
 
     /**
      * When set, the application explicitly requested that its activities by resizeable by default.
@@ -517,7 +518,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
-    public static final int PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_EXPLICITLY_SET = 1 << 11;
+    public static final int PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_EXPLICITLY_SET = 1 << 10;
 
     /**
      * The application isn't requesting explicitly requesting for its activities to be resizeable or
@@ -531,7 +532,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
-    public static final int PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION = 1 << 12;
+    public static final int PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION = 1 << 11;
 
     /**
      * Value for {@link #privateFlags}: {@code true} means the OS should go ahead and
@@ -539,7 +540,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * foreground-equivalent run state.  Defaults to {@code false} if unspecified.
      * @hide
      */
-    public static final int PRIVATE_FLAG_BACKUP_IN_FOREGROUND = 1 << 13;
+    public static final int PRIVATE_FLAG_BACKUP_IN_FOREGROUND = 1 << 12;
 
     /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
