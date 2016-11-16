@@ -672,7 +672,7 @@ public interface WindowManagerPolicy {
      * button bar.
      */
     public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation,
-            int uiMode);
+            int uiMode, int displayId);
 
     /**
      * Return the display height available after excluding any screen
@@ -680,7 +680,7 @@ public interface WindowManagerPolicy {
      * button bar.
      */
     public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation,
-            int uiMode);
+            int uiMode, int displayId);
 
     /**
      * Return the available screen width that we should report for the
@@ -689,7 +689,7 @@ public interface WindowManagerPolicy {
      * that to account for more transient decoration like a status bar.
      */
     public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation,
-            int uiMode);
+            int uiMode, int displayId);
 
     /**
      * Return the available screen height that we should report for the
@@ -698,7 +698,7 @@ public interface WindowManagerPolicy {
      * that to account for more transient decoration like a status bar.
      */
     public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation,
-            int uiMode);
+            int uiMode, int displayId);
 
     /**
      * Return whether the given window can become the Keyguard window. Typically returns true for

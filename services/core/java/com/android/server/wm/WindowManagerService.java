@@ -5458,17 +5458,16 @@ public class WindowManagerService extends IWindowManager.Stub
         return config;
     }
 
-    private void adjustDisplaySizeRanges(DisplayInfo displayInfo, int rotation, int uiMode,
-            int dw, int dh) {
-        // TODO: Multidisplay: for now only use with default display.
-        final int width = mPolicy.getConfigDisplayWidth(dw, dh, rotation, uiMode);
+    private void adjustDisplaySizeRanges(DisplayInfo displayInfo, int displayId, int rotation,
+            int uiMode, int dw, int dh) {
+        final int width = mPolicy.getConfigDisplayWidth(dw, dh, rotation, uiMode, displayId);
         if (width < displayInfo.smallestNominalAppWidth) {
             displayInfo.smallestNominalAppWidth = width;
         }
         if (width > displayInfo.largestNominalAppWidth) {
             displayInfo.largestNominalAppWidth = width;
         }
-        final int height = mPolicy.getConfigDisplayHeight(dw, dh, rotation, uiMode);
+        final int height = mPolicy.getConfigDisplayHeight(dw, dh, rotation, uiMode, displayId);
         if (height < displayInfo.smallestNominalAppHeight) {
             displayInfo.smallestNominalAppHeight = height;
         }
@@ -5478,11 +5477,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private int reduceConfigLayout(int curLayout, int rotation, float density,
-            int dw, int dh, int uiMode) {
-        // TODO: Multidisplay: for now only use with default display.
+            int dw, int dh, int uiMode, int displayId) {
         // Get the app screen size at this rotation.
-        int w = mPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode);
-        int h = mPolicy.getNonDecorDisplayHeight(dw, dh, rotation, uiMode);
+        int w = mPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode, displayId);
+        int h = mPolicy.getNonDecorDisplayHeight(dw, dh, rotation, uiMode, displayId);
 
         // Compute the screen layout size class for this rotation.
         int longSize = w;
@@ -5497,9 +5495,8 @@ public class WindowManagerService extends IWindowManager.Stub
         return Configuration.reduceScreenLayout(curLayout, longSize, shortSize);
     }
 
-    private void computeSizeRangesAndScreenLayout(DisplayInfo displayInfo, boolean rotated,
-                  int uiMode, int dw, int dh, float density, Configuration outConfig) {
-        // TODO: Multidisplay: for now only use with default display.
+    private void computeSizeRangesAndScreenLayout(DisplayInfo displayInfo, int displayId,
+            boolean rotated, int uiMode, int dw, int dh, float density, Configuration outConfig) {
 
         // We need to determine the smallest width that will occur under normal
         // operation.  To this, start with the base screen size and compute the
@@ -5517,24 +5514,33 @@ public class WindowManagerService extends IWindowManager.Stub
         displayInfo.smallestNominalAppHeight = 1<<30;
         displayInfo.largestNominalAppWidth = 0;
         displayInfo.largestNominalAppHeight = 0;
-        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_0, uiMode, unrotDw, unrotDh);
-        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_90, uiMode, unrotDh, unrotDw);
-        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_180, uiMode, unrotDw, unrotDh);
-        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_270, uiMode, unrotDh, unrotDw);
+        adjustDisplaySizeRanges(displayInfo, displayId, Surface.ROTATION_0, uiMode, unrotDw,
+                unrotDh);
+        adjustDisplaySizeRanges(displayInfo, displayId, Surface.ROTATION_90, uiMode, unrotDh,
+                unrotDw);
+        adjustDisplaySizeRanges(displayInfo, displayId, Surface.ROTATION_180, uiMode, unrotDw,
+                unrotDh);
+        adjustDisplaySizeRanges(displayInfo, displayId, Surface.ROTATION_270, uiMode, unrotDh,
+                unrotDw);
         int sl = Configuration.resetScreenLayout(outConfig.screenLayout);
-        sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh, uiMode);
-        sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw, uiMode);
-        sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh, uiMode);
-        sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw, uiMode);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh, uiMode,
+                displayId);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw, uiMode,
+                displayId);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh, uiMode,
+                displayId);
+        sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw, uiMode,
+                displayId);
         outConfig.smallestScreenWidthDp = (int)(displayInfo.smallestNominalAppWidth / density);
         outConfig.screenLayout = sl;
     }
 
     private int reduceCompatConfigWidthSize(int curSize, int rotation, int uiMode,
-            DisplayMetrics dm, int dw, int dh) {
-        // TODO: Multidisplay: for now only use with default display.
-        dm.noncompatWidthPixels = mPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode);
-        dm.noncompatHeightPixels = mPolicy.getNonDecorDisplayHeight(dw, dh, rotation, uiMode);
+            DisplayMetrics dm, int dw, int dh, int displayId) {
+        dm.noncompatWidthPixels = mPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode,
+                displayId);
+        dm.noncompatHeightPixels = mPolicy.getNonDecorDisplayHeight(dw, dh, rotation, uiMode,
+                displayId);
         float scale = CompatibilityInfo.computeCompatibleScaling(dm, null);
         int size = (int)(((dm.noncompatWidthPixels / scale) / dm.density) + .5f);
         if (curSize == 0 || size < curSize) {
@@ -5543,8 +5549,8 @@ public class WindowManagerService extends IWindowManager.Stub
         return curSize;
     }
 
-    private int computeCompatSmallestWidth(boolean rotated, int uiMode, DisplayMetrics dm, int dw, int dh) {
-        // TODO: Multidisplay: for now only use with default display.
+    private int computeCompatSmallestWidth(boolean rotated, int uiMode, DisplayMetrics dm, int dw,
+            int dh, int displayId) {
         mTmpDisplayMetrics.setTo(dm);
         final DisplayMetrics tmpDm = mTmpDisplayMetrics;
         final int unrotDw, unrotDh;
@@ -5555,10 +5561,14 @@ public class WindowManagerService extends IWindowManager.Stub
             unrotDw = dw;
             unrotDh = dh;
         }
-        int sw = reduceCompatConfigWidthSize(0, Surface.ROTATION_0, uiMode, tmpDm, unrotDw, unrotDh);
-        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_90, uiMode, tmpDm, unrotDh, unrotDw);
-        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_180, uiMode, tmpDm, unrotDw, unrotDh);
-        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_270, uiMode, tmpDm, unrotDh, unrotDw);
+        int sw = reduceCompatConfigWidthSize(0, Surface.ROTATION_0, uiMode, tmpDm, unrotDw, unrotDh,
+                displayId);
+        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_90, uiMode, tmpDm, unrotDh, unrotDw,
+                displayId);
+        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_180, uiMode, tmpDm, unrotDw, unrotDh,
+                displayId);
+        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_270, uiMode, tmpDm, unrotDh, unrotDw,
+                displayId);
         return sw;
     }
 
@@ -5593,8 +5603,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // Update application display metrics.
-        final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation, uiMode);
-        final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation, uiMode);
+        final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation, uiMode, displayId);
+        final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation, uiMode,
+                displayId);
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         displayInfo.rotation = mRotation;
         displayInfo.logicalWidth = dw;
@@ -5633,15 +5644,15 @@ public class WindowManagerService extends IWindowManager.Stub
         config.orientation = (dw <= dh) ? Configuration.ORIENTATION_PORTRAIT :
                 Configuration.ORIENTATION_LANDSCAPE;
         config.screenWidthDp =
-                (int)(mPolicy.getConfigDisplayWidth(dw, dh, mRotation, config.uiMode) /
+                (int)(mPolicy.getConfigDisplayWidth(dw, dh, mRotation, config.uiMode, displayId) /
                         mDisplayMetrics.density);
         config.screenHeightDp =
-                (int)(mPolicy.getConfigDisplayHeight(dw, dh, mRotation, config.uiMode) /
+                (int)(mPolicy.getConfigDisplayHeight(dw, dh, mRotation, config.uiMode, displayId) /
                         mDisplayMetrics.density);
         final boolean rotated = (mRotation == Surface.ROTATION_90
                 || mRotation == Surface.ROTATION_270);
 
-        computeSizeRangesAndScreenLayout(displayInfo, rotated, config.uiMode, dw, dh,
+        computeSizeRangesAndScreenLayout(displayInfo, displayId, rotated, config.uiMode, dw, dh,
                 mDisplayMetrics.density, config);
 
         config.screenLayout = (config.screenLayout & ~Configuration.SCREENLAYOUT_ROUND_MASK)
@@ -5652,7 +5663,7 @@ public class WindowManagerService extends IWindowManager.Stub
         config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
         config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
         config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, config.uiMode,
-                mDisplayMetrics, dw, dh);
+                mDisplayMetrics, dw, dh, displayId);
         config.densityDpi = displayInfo.logicalDensityDpi;
 
         // Update the configuration based on available input devices, lid switch,

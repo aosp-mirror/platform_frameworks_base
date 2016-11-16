@@ -2677,9 +2677,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation,
-            int uiMode) {
-        if (mHasNavigationBar) {
+    public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
+            int displayId) {
+        // TODO(multi-display): Support navigation bar on secondary displays.
+        if (displayId == Display.DEFAULT_DISPLAY && mHasNavigationBar) {
             // For a basic navigation bar, when we are in landscape mode we place
             // the navigation bar to the side.
             if (mNavigationBarCanMove && fullWidth > fullHeight) {
@@ -2698,9 +2699,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation,
-            int uiMode) {
-        if (mHasNavigationBar) {
+    public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
+            int displayId) {
+        // TODO(multi-display): Support navigation bar on secondary displays.
+        if (displayId == Display.DEFAULT_DISPLAY && mHasNavigationBar) {
             // For a basic navigation bar, when we are in portrait mode we place
             // the navigation bar to the bottom.
             if (!mNavigationBarCanMove || fullWidth < fullHeight) {
@@ -2711,18 +2713,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode) {
-        return getNonDecorDisplayWidth(fullWidth, fullHeight, rotation, uiMode);
+    public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
+            int displayId) {
+        return getNonDecorDisplayWidth(fullWidth, fullHeight, rotation, uiMode, displayId);
     }
 
     @Override
-    public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode) {
+    public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
+            int displayId) {
         // There is a separate status bar at the top of the display.  We don't count that as part
         // of the fixed decor, since it can hide; however, for purposes of configurations,
         // we do want to exclude it since applications can't generally use that part
         // of the screen.
-        return getNonDecorDisplayHeight(
-                fullWidth, fullHeight, rotation, uiMode) - mStatusBarHeight;
+        // TODO(multi-display): Support status bars on secondary displays.
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation, uiMode, displayId)
+                    - mStatusBarHeight;
+        }
+        return fullHeight;
     }
 
     @Override
