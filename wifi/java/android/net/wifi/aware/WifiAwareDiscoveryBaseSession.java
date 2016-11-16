@@ -35,7 +35,7 @@ import java.lang.ref.WeakReference;
  *     <li>Sending messages: {@link #sendMessage(WifiAwareManager.PeerHandle, int, byte[])} or
  *     {@link #sendMessage(WifiAwareManager.PeerHandle, int, byte[], int)} methods.
  *     <li>Creating a network-specifier when requesting a Aware connection:
- *     {@link #createNetworkSpecifier(int, WifiAwareManager.PeerHandle, byte[])}.
+ *     {@link #createNetworkSpecifier(WifiAwareManager.PeerHandle, byte[])}.
  * </ul>
  * The {@link #destroy()} method must be called to destroy discovery sessions once they are
  * no longer needed.
@@ -260,10 +260,10 @@ public class WifiAwareDiscoveryBaseSession {
      * OOB (out-of-band) mechanism then use the alternative
      * {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])} method - which uses the
      * peer's MAC address.
+     * <p>
+     * Note: per the Wi-Fi Aware specification the roles are fixed - a Subscriber is an INITIATOR
+     * and a Publisher is a RESPONDER.
      *
-     * @param role The role of this device:
-     * {@link WifiAwareManager#WIFI_AWARE_DATA_PATH_ROLE_INITIATOR} or
-     * {@link WifiAwareManager#WIFI_AWARE_DATA_PATH_ROLE_RESPONDER}
      * @param peerHandle The peer's handle obtained through
      * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
      * byte[], byte[])} or
@@ -283,8 +283,8 @@ public class WifiAwareDiscoveryBaseSession {
      * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
      */
-    public String createNetworkSpecifier(@WifiAwareManager.DataPathRole int role,
-            @Nullable WifiAwareManager.PeerHandle peerHandle, @Nullable byte[] token) {
+    public String createNetworkSpecifier(@Nullable WifiAwareManager.PeerHandle peerHandle,
+            @Nullable byte[] token) {
         if (mTerminated) {
             Log.w(TAG, "createNetworkSpecifier: called on terminated session");
             return null;
@@ -294,6 +294,10 @@ public class WifiAwareDiscoveryBaseSession {
                 Log.w(TAG, "createNetworkSpecifier: called post GC on WifiAwareManager");
                 return null;
             }
+
+            int role = this instanceof WifiAwareSubscribeDiscoverySession
+                    ? WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
+                    : WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
 
             return mgr.createNetworkSpecifier(mClientId, role, mSessionId, peerHandle, token);
         }
