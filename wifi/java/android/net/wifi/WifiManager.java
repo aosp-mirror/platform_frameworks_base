@@ -842,36 +842,6 @@ public class WifiManager {
     }
 
     /**
-     * Add a Hotspot 2.0 release 2 Management Object
-     * @param mo The MO in XML form
-     * @return -1 for failure
-     * @hide
-     */
-    public int addPasspointManagementObject(String mo) {
-        try {
-            return mService.addPasspointManagementObject(mo);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Modify a Hotspot 2.0 release 2 Management Object
-     * @param fqdn The FQDN of the service provider
-     * @param mos A List of MO definitions to be updated
-     * @return the number of nodes updated, or -1 for failure
-     * @hide
-     */
-    public int modifyPasspointManagementObject(String fqdn,
-                                               List<PasspointManagementObjectDefinition> mos) {
-        try {
-            return mService.modifyPasspointManagementObject(fqdn, mos);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Add a Passpoint configuration.  The configuration provides a credential
      * for connecting to Passpoint networks that are operated by the Passpoint
      * service provider specified in the configuration.
