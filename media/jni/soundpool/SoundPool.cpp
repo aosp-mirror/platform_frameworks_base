@@ -60,6 +60,7 @@ SoundPool::SoundPool(int maxChannels, const audio_attributes_t* pAttributes)
     ALOGW_IF(maxChannels != mMaxChannels, "App requested %d channels", maxChannels);
 
     mQuit = false;
+    mMuted = false;
     mDecodeThread = 0;
     memcpy(&mAttributes, pAttributes, sizeof(audio_attributes_t));
     mAllocated = 0;
@@ -364,6 +365,19 @@ void SoundPool::resume(int channelID)
     if (channel) {
         channel->resume();
     }
+}
+
+void SoundPool::mute(bool muting)
+{
+    ALOGV("mute(%d)", muting);
+    Mutex::Autolock lock(&mLock);
+    mMuted = muting;
+    if (!mChannels.empty()) {
+            for (List<SoundChannel*>::iterator iter = mChannels.begin();
+                    iter != mChannels.end(); ++iter) {
+                (*iter)->mute(muting);
+            }
+        }
 }
 
 void SoundPool::autoResume()
@@ -1032,7 +1046,7 @@ void SoundChannel::setVolume_l(float leftVolume, float rightVolume)
 {
     mLeftVolume = leftVolume;
     mRightVolume = rightVolume;
-    if (mAudioTrack != NULL)
+    if (mAudioTrack != NULL && !mMuted)
         mAudioTrack->setVolume(leftVolume, rightVolume);
 }
 
@@ -1040,6 +1054,19 @@ void SoundChannel::setVolume(float leftVolume, float rightVolume)
 {
     Mutex::Autolock lock(&mLock);
     setVolume_l(leftVolume, rightVolume);
+}
+
+void SoundChannel::mute(bool muting)
+{
+    Mutex::Autolock lock(&mLock);
+    mMuted = muting;
+    if (mAudioTrack != NULL) {
+        if (mMuted) {
+            mAudioTrack->setVolume(0.0f, 0.0f);
+        } else {
+            mAudioTrack->setVolume(mLeftVolume, mRightVolume);
+        }
+    }
 }
 
 void SoundChannel::setLoop(int loop)

@@ -132,6 +132,15 @@ android_media_SoundPool_setVolume(JNIEnv *env, jobject thiz, jint channelID,
 }
 
 static void
+android_media_SoundPool_mute(JNIEnv *env, jobject thiz, jboolean muting)
+{
+    ALOGV("android_media_SoundPool_mute(%d)", muting);
+    SoundPool *ap = MusterSoundPool(env, thiz);
+    if (ap == NULL) return;
+    ap->mute(muting == JNI_TRUE);
+}
+
+static void
 android_media_SoundPool_setPriority(JNIEnv *env, jobject thiz, jint channelID,
         jint priority)
 {
@@ -269,6 +278,10 @@ static JNINativeMethod gMethods[] = {
     {   "_setVolume",
         "(IFF)V",
         (void *)android_media_SoundPool_setVolume
+    },
+    {   "_mute",
+        "(Z)V",
+        (void *)android_media_SoundPool_mute
     },
     {   "setPriority",
         "(II)V",

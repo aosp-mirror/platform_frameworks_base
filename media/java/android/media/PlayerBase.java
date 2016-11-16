@@ -39,6 +39,11 @@ import com.android.internal.app.IAppOpsService;
  */
 public abstract class PlayerBase {
 
+    private final static String TAG = "PlayerBase";
+    private static IAudioService sService; //lazy initialization, use getService()
+    /** Debug app ops */
+    protected static final boolean DEBUG_APP_OPS = Log.isLoggable(TAG + ".AO", Log.DEBUG);
+
     // parameters of the player that affect AppOps
     protected AudioAttributes mAttributes;
     protected float mLeftVolume = 1.0f;
@@ -50,7 +55,6 @@ public abstract class PlayerBase {
     private final IAppOpsCallback mAppOpsCallback;
     private boolean mHasAppOpsPlayAudio = true;
     private final Object mAppOpsLock = new Object();
-
 
     /**
      * Constructor. Must be given audio attributes, as they are required for AppOps.
@@ -101,7 +105,7 @@ public abstract class PlayerBase {
     void baseStart() {
         synchronized (mAppOpsLock) {
             if (isRestricted_sync()) {
-                playerSetVolume(0, 0);
+                playerSetVolume(true/*muting*/,0, 0);
             }
         }
     }
@@ -114,7 +118,7 @@ public abstract class PlayerBase {
                 return;
             }
         }
-        playerSetVolume(leftVolume, rightVolume);
+        playerSetVolume(false/*muting*/,leftVolume, rightVolume);
     }
 
     int baseSetAuxEffectSendLevel(float level) {
@@ -124,7 +128,7 @@ public abstract class PlayerBase {
                 return AudioSystem.SUCCESS;
             }
         }
-        return playerSetAuxEffectSendLevel(level);
+        return playerSetAuxEffectSendLevel(false/*muting*/, level);
     }
 
     /**
@@ -159,18 +163,24 @@ public abstract class PlayerBase {
         try {
             if (oldHasAppOpsPlayAudio != mHasAppOpsPlayAudio) {
                 if (mHasAppOpsPlayAudio) {
-                    playerSetVolume(mLeftVolume, mRightVolume);
-                    playerSetAuxEffectSendLevel(mAuxEffectSendLevel);
+                    if (DEBUG_APP_OPS) {
+                        Log.v(TAG, "updateAppOpsPlayAudio: unmuting player, vol=" + mLeftVolume
+                                + "/" + mRightVolume);
+                    }
+                    playerSetVolume(false/*muting*/, mLeftVolume, mRightVolume);
+                    playerSetAuxEffectSendLevel(false/*muting*/, mAuxEffectSendLevel);
                 } else {
-                    playerSetVolume(0.0f, 0.0f);
-                    playerSetAuxEffectSendLevel(0.0f);
+                    if (DEBUG_APP_OPS) {
+                        Log.v(TAG, "updateAppOpsPlayAudio: muting player");
+                    }
+                    playerSetVolume(true/*muting*/, 0.0f, 0.0f);
+                    playerSetAuxEffectSendLevel(true/*muting*/, 0.0f);
                 }
             }
         } catch (Exception e) {
             // failing silently, player might not be in right state
         }
     }
-
 
     /**
      * To be called by the subclass whenever an operation is potentially restricted.
@@ -189,10 +199,41 @@ public abstract class PlayerBase {
         if ((mAttributes.getAllFlags() & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0) {
             return false;
         }
+        // check force audibility flag and camera restriction
+        if (((mAttributes.getAllFlags() & AudioAttributes.FLAG_AUDIBILITY_ENFORCED) != 0)
+                && (mAttributes.getUsage() == AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)) {
+            boolean cameraSoundForced = false;
+            try {
+                cameraSoundForced = getService().isCameraSoundForced();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot access AudioService in isRestricted_sync()");
+            } catch (NullPointerException e) {
+                Log.e(TAG, "Null AudioService in isRestricted_sync()");
+            }
+            if (cameraSoundForced) {
+                return false;
+            }
+        }
         return true;
     }
 
+    private static IAudioService getService()
+    {
+        if (sService != null) {
+            return sService;
+        }
+        IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+        sService = IAudioService.Stub.asInterface(b);
+        return sService;
+    }
+
     // Abstract methods a subclass needs to implement
-    abstract void playerSetVolume(float leftVolume, float rightVolume);
-    abstract int playerSetAuxEffectSendLevel(float level);
+    /**
+     * Abstract method for the subclass behavior's for volume and muting commands
+     * @param muting if true, the player is to be muted, and the volume values can be ignored
+     * @param leftVolume the left volume to use if muting is false
+     * @param rightVolume the right volume to use if muting is false
+     */
+    abstract void playerSetVolume(boolean muting, float leftVolume, float rightVolume);
+    abstract int playerSetAuxEffectSendLevel(boolean muting, float level);
 }

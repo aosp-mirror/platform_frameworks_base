@@ -1513,9 +1513,9 @@ public class AudioTrack extends PlayerBase
     }
 
     @Override
-    void playerSetVolume(float leftVolume, float rightVolume) {
-        leftVolume = clampGainOrLevel(leftVolume);
-        rightVolume = clampGainOrLevel(rightVolume);
+    void playerSetVolume(boolean muting, float leftVolume, float rightVolume) {
+        leftVolume = clampGainOrLevel(muting ? 0.0f : leftVolume);
+        rightVolume = clampGainOrLevel(muting ? 0.0f : rightVolume);
 
         native_setVolume(leftVolume, rightVolume);
     }
@@ -2393,8 +2393,8 @@ public class AudioTrack extends PlayerBase
     }
 
     @Override
-    int playerSetAuxEffectSendLevel(float level) {
-        level = clampGainOrLevel(level);
+    int playerSetAuxEffectSendLevel(boolean muting, float level) {
+        level = clampGainOrLevel(muting ? 0.0f : level);
         int err = native_setAuxEffectSendLevel(level);
         return err == 0 ? SUCCESS : ERROR;
     }
