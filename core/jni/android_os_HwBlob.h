@@ -20,6 +20,7 @@
 #include <android-base/macros.h>
 #include <jni.h>
 #include <hidl/HidlSupport.h>
+#include <hwbinder/Parcel.h>
 #include <utils/RefBase.h>
 #include <utils/Vector.h>
 
