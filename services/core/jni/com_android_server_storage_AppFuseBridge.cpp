@@ -30,7 +30,7 @@ constexpr const char* CLASS_NAME = "com/android/server/storage/AppFuseBridge";
 static jclass appFuseClass;
 static jmethodID appFuseOnMount;
 
-class Callback : public FuseBridgeLoop::Callback {
+class Callback : public fuse::FuseBridgeLoopCallback {
     JNIEnv* mEnv;
     jobject mSelf;
 
@@ -47,9 +47,8 @@ public:
 
 jboolean com_android_server_storage_AppFuseBridge_start_loop(
         JNIEnv* env, jobject self, jint devJavaFd, jint proxyJavaFd) {
-    FuseBridgeLoop loop;
     Callback callback(env, self);
-    return loop.Start(devJavaFd, proxyJavaFd, &callback);
+    return fuse::StartFuseBridgeLoop(devJavaFd, proxyJavaFd, &callback);
 }
 
 const JNINativeMethod methods[] = {
