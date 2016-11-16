@@ -208,6 +208,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
@@ -286,6 +287,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -337,7 +339,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * <pre>
  * $ runtest -c android.content.pm.PackageManagerTests frameworks-core
- * $ cts-tradefed run commandAndExit cts -m AppSecurityTests
+ * $ cts-tradefed run commandAndExit cts -m CtsAppSecurityHostTestCases
  * </pre>
  */
 public class PackageManagerService extends IPackageManager.Stub {
@@ -14281,11 +14283,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private File getNextCodePath(File targetDir, String packageName) {
-        int suffix = 1;
         File result;
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[16];
         do {
+            random.nextBytes(bytes);
+            String suffix = Base64.encodeToString(bytes, Base64.URL_SAFE | Base64.NO_WRAP);
             result = new File(targetDir, packageName + "-" + suffix);
-            suffix++;
         } while (result.exists());
         return result;
     }
