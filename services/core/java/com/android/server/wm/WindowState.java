@@ -1357,7 +1357,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * being visible.
      */
     boolean isOnScreen() {
-        if (!mHasSurface || mDestroying) {
+        if (!mHasSurface || mDestroying || !mPolicyVisibility) {
             return false;
         }
         final AppWindowToken atoken = mAppToken;
