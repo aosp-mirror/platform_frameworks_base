@@ -39,6 +39,8 @@ public final class CategoryKey {
     public static final String CATEGORY_SYSTEM_INPUT = "com.android.settings.category.ia.input";
     public static final String CATEGORY_SYSTEM_LANGUAGE =
             "com.android.settings.category.ia.language";
+    public static final String CATEGORY_SYSTEM_DEVELOPMENT =
+            "com.android.settings.category.ia.development";
 
     public static final Map<String, String> KEY_COMPAT_MAP;
 
