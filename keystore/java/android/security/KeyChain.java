@@ -414,6 +414,9 @@ public final class KeyChain {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
+        if (context == null) {
+            throw new NullPointerException("context == null");
+        }
 
         final String keyId;
         try (KeyChainConnection keyChainConnection = bind(context.getApplicationContext())) {
