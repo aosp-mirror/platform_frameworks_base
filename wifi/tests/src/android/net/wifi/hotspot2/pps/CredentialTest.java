@@ -470,4 +470,52 @@ public class CredentialTest {
         cred.simCredential.eapType = EAPConstants.EAP_SIM;
         assertFalse(cred.validate());
     }
+
+    /**
+     * Verify that copy constructor works when pass in a null source.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateCopyConstructorWithNullSource() throws Exception {
+        Credential copyCred = new Credential(null);
+        Credential defaultCred = new Credential();
+        assertTrue(copyCred.equals(defaultCred));
+    }
+
+    /**
+     * Verify that copy constructor works when pass in a source with user credential.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateCopyConstructorWithSourceWithUserCred() throws Exception {
+        Credential sourceCred = createCredentialWithUserCredential();
+        Credential copyCred = new Credential(sourceCred);
+        assertTrue(copyCred.equals(sourceCred));
+    }
+
+    /**
+     * Verify that copy constructor works when pass in a source with certificate credential.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateCopyConstructorWithSourceWithCertCred() throws Exception {
+        Credential sourceCred = createCredentialWithCertificateCredential();
+        Credential copyCred = new Credential(sourceCred);
+        assertTrue(copyCred.equals(sourceCred));
+    }
+
+    /**
+     * Verify that copy constructor works when pass in a source with SIM credential.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateCopyConstructorWithSourceWithSimCred() throws Exception {
+        Credential sourceCred = createCredentialWithSimCredential();
+        Credential copyCred = new Credential(sourceCred);
+        assertTrue(copyCred.equals(sourceCred));
+    }
 }

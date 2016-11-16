@@ -33,6 +33,11 @@ import org.junit.Test;
 @SmallTest
 public class PasspointConfigurationTest {
 
+    /**
+     * Utility function for creating a {@link android.net.wifi.hotspot2.pps.HomeSP}.
+     *
+     * @return {@link android.net.wifi.hotspot2.pps.HomeSP}
+     */
     private static HomeSP createHomeSp() {
         HomeSP homeSp = new HomeSP();
         homeSp.fqdn = "fqdn";
@@ -41,6 +46,11 @@ public class PasspointConfigurationTest {
         return homeSp;
     }
 
+    /**
+     * Utility function for creating a {@link android.net.wifi.hotspot2.pps.Credential}.
+     *
+     * @return {@link android.net.wifi.hotspot2.pps.Credential}
+     */
     private static Credential createCredential() {
         Credential cred = new Credential();
         cred.realm = "realm";
@@ -55,6 +65,12 @@ public class PasspointConfigurationTest {
         return cred;
     }
 
+    /**
+     * Verify parcel write and read consistency for the given configuration.
+     *
+     * @param writeConfig The configuration to verify
+     * @throws Exception
+     */
     private static void verifyParcel(PasspointConfiguration writeConfig) throws Exception {
         Parcel parcel = Parcel.obtain();
         writeConfig.writeToParcel(parcel, 0);
@@ -77,6 +93,7 @@ public class PasspointConfigurationTest {
 
     /**
      * Verify parcel read/write for a configuration that contained both HomeSP and Credential.
+     *
      * @throws Exception
      */
     @Test
@@ -157,5 +174,31 @@ public class PasspointConfigurationTest {
         config.homeSp = createHomeSp();
         config.credential = createCredential();
         assertTrue(config.validate());
+    }
+
+    /**
+     * Verify that copy constructor works when pass in a null source.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateCopyConstructorWithNullSource() throws Exception {
+        PasspointConfiguration copyConfig = new PasspointConfiguration(null);
+        PasspointConfiguration defaultConfig = new PasspointConfiguration();
+        assertTrue(copyConfig.equals(defaultConfig));
+    }
+
+    /**
+     * Verify that copy constructor works when pass in a valid source.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateCopyConstructorWithValidSource() throws Exception {
+        PasspointConfiguration sourceConfig = new PasspointConfiguration();
+        sourceConfig.homeSp = createHomeSp();
+        sourceConfig.credential = createCredential();
+        PasspointConfiguration copyConfig = new PasspointConfiguration(sourceConfig);
+        assertTrue(copyConfig.equals(sourceConfig));
     }
 }

@@ -109,6 +109,25 @@ public final class Credential implements Parcelable {
          */
         public String nonEapInnerMethod = null;
 
+        /**
+         * Constructor for creating UserCredential with default values.
+         */
+        public UserCredential() {}
+
+        /**
+         * Copy constructor.
+         *
+         * @param source The source to copy from
+         */
+        public UserCredential(UserCredential source) {
+            if (source != null) {
+                username = source.username;
+                password = source.password;
+                eapType = source.eapType;
+                nonEapInnerMethod = source.nonEapInnerMethod;
+            }
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -221,6 +240,26 @@ public final class Credential implements Parcelable {
          */
         public byte[] certSha256FingerPrint = null;
 
+        /**
+         * Constructor for creating CertificateCredential with default values.
+         */
+        public CertificateCredential() {}
+
+        /**
+         * Copy constructor.
+         *
+         * @param source The source to copy from
+         */
+        public CertificateCredential(CertificateCredential source) {
+            if (source != null) {
+                certType = source.certType;
+                if (source.certSha256FingerPrint != null) {
+                    certSha256FingerPrint = Arrays.copyOf(source.certSha256FingerPrint,
+                                                          source.certSha256FingerPrint.length);
+                }
+            }
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -306,6 +345,23 @@ public final class Credential implements Parcelable {
          * Using Integer.MIN_VALUE to indicate unset value.
          */
         public int eapType = Integer.MIN_VALUE;
+
+        /**
+         * Constructor for creating SimCredential with default values.
+         */
+        public SimCredential() {}
+
+        /**
+         * Copy constructor
+         *
+         * @param source The source to copy from
+         */
+        public SimCredential(SimCredential source) {
+            if (source != null) {
+                imsi = source.imsi;
+                eapType = source.eapType;
+            }
+        }
 
         @Override
         public int describeContents() {
@@ -421,6 +477,37 @@ public final class Credential implements Parcelable {
      * Client side private key.
      */
     public PrivateKey clientPrivateKey = null;
+
+    /**
+     * Constructor for creating Credential with default values.
+     */
+    public Credential() {}
+
+    /**
+     * Copy constructor.
+     *
+     * @param source The source to copy from
+     */
+    public Credential(Credential source) {
+        if (source != null) {
+            realm = source.realm;
+            if (source.userCredential != null) {
+                userCredential = new UserCredential(source.userCredential);
+            }
+            if (source.certCredential != null) {
+                certCredential = new CertificateCredential(source.certCredential);
+            }
+            if (source.simCredential != null) {
+                simCredential = new SimCredential(source.simCredential);
+            }
+            if (source.clientCertificateChain != null) {
+                clientCertificateChain = Arrays.copyOf(source.clientCertificateChain,
+                                                       source.clientCertificateChain.length);
+            }
+            caCertificate = source.caCertificate;
+            clientPrivateKey = source.clientPrivateKey;
+        }
+    }
 
     @Override
     public int describeContents() {
