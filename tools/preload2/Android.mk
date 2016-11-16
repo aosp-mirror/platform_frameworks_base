@@ -5,7 +5,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(call all-java-files-under,src)
 
 # To connect to devices (and take hprof dumps).
-LOCAL_STATIC_JAVA_LIBRARIES := ddmlib-prebuilt
+LOCAL_STATIC_JAVA_LIBRARIES := ddmlib-prebuilt tools-common-prebuilt
 
 # To process hprof dumps.
 LOCAL_STATIC_JAVA_LIBRARIES += perflib-prebuilt trove-prebuilt guavalib
