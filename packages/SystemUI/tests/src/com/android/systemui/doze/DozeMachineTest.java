@@ -189,6 +189,19 @@ public class DozeMachineTest {
 
     @Test
     @UiThreadTest
+    public void testWakeLock_releasedAfterPulse() {
+        mMachine.requestState(INITIALIZED);
+
+        mMachine.requestState(DOZE);
+        mMachine.requestState(DOZE_REQUEST_PULSE);
+        mMachine.requestState(DOZE_PULSING);
+        mMachine.requestState(DOZE_PULSE_DONE);
+
+        assertFalse(mWakeLockFake.isHeld());
+    }
+
+    @Test
+    @UiThreadTest
     public void testScreen_offInDoze() {
         mMachine.requestState(INITIALIZED);
 
