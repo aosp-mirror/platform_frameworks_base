@@ -51,35 +51,31 @@ import java.util.Map;
  * {@hide}
  */
 oneway interface IApplicationThread {
-    /**
-     * Don't change the existing transaction Ids as they could be used in the native code.
-     * When adding a new method, assign the next available transaction id.
-     */
     void schedulePauseActivity(IBinder token, boolean finished, boolean userLeaving,
-            int configChanges, boolean dontReport) = 0;
+            int configChanges, boolean dontReport);
     void scheduleStopActivity(IBinder token, boolean showWindow,
-            int configChanges) = 2;
-    void scheduleWindowVisibility(IBinder token, boolean showWindow) = 3;
+            int configChanges);
+    void scheduleWindowVisibility(IBinder token, boolean showWindow);
     void scheduleResumeActivity(IBinder token, int procState, boolean isForward,
-            in Bundle resumeArgs) = 4;
-    void scheduleSendResult(IBinder token, in List<ResultInfo> results) = 5;
+            in Bundle resumeArgs);
+    void scheduleSendResult(IBinder token, in List<ResultInfo> results);
     void scheduleLaunchActivity(in Intent intent, IBinder token, int ident,
             in ActivityInfo info, in Configuration curConfig, in Configuration overrideConfig,
             in CompatibilityInfo compatInfo, in String referrer, IVoiceInteractor voiceInteractor,
             int procState, in Bundle state, in PersistableBundle persistentState,
             in List<ResultInfo> pendingResults, in List<ReferrerIntent> pendingNewIntents,
-            boolean notResumed, boolean isForward, in ProfilerInfo profilerInfo) = 6;
+            boolean notResumed, boolean isForward, in ProfilerInfo profilerInfo);
     void scheduleNewIntent(
-            in List<ReferrerIntent> intent, IBinder token, boolean andPause) = 7;
+            in List<ReferrerIntent> intent, IBinder token, boolean andPause);
     void scheduleDestroyActivity(IBinder token, boolean finished,
-            int configChanges) = 8;
+            int configChanges);
     void scheduleReceiver(in Intent intent, in ActivityInfo info,
             in CompatibilityInfo compatInfo,
             int resultCode, in String data, in Bundle extras, boolean sync,
-            int sendingUser, int processState) = 9;
+            int sendingUser, int processState);
     void scheduleCreateService(IBinder token, in ServiceInfo info,
-            in CompatibilityInfo compatInfo, int processState) = 10;
-    void scheduleStopService(IBinder token) = 11;
+            in CompatibilityInfo compatInfo, int processState);
+    void scheduleStopService(IBinder token);
     void bindApplication(in String packageName, in ApplicationInfo info,
             in List<ProviderInfo> providers, in ComponentName testName,
             in ProfilerInfo profilerInfo, in Bundle testArguments,
@@ -87,77 +83,73 @@ oneway interface IApplicationThread {
             int debugMode, boolean enableBinderTracking, boolean trackAllocation,
             boolean restrictedBackupMode, boolean persistent, in Configuration config,
             in CompatibilityInfo compatInfo, in Map services,
-            in Bundle coreSettings, in String buildSerial) = 12;
-    void scheduleExit() = 13;
-    void scheduleConfigurationChanged(in Configuration config) = 15;
+            in Bundle coreSettings, in String buildSerial);
+    void scheduleExit();
+    void scheduleConfigurationChanged(in Configuration config);
     void scheduleServiceArgs(IBinder token, boolean taskRemoved, int startId,
-            int flags, in Intent args) = 16;
-    void updateTimeZone() = 17;
-    void processInBackground() = 18;
+            int flags, in Intent args);
+    void updateTimeZone();
+    void processInBackground();
     void scheduleBindService(IBinder token,
-            in Intent intent, boolean rebind, int processState) = 19;
+            in Intent intent, boolean rebind, int processState);
     void scheduleUnbindService(IBinder token,
-            in Intent intent) = 20;
+            in Intent intent);
     void dumpService(in ParcelFileDescriptor fd, IBinder servicetoken,
-            in String[] args) = 21;
+            in String[] args);
     void scheduleRegisteredReceiver(IIntentReceiver receiver, in Intent intent,
             int resultCode, in String data, in Bundle extras, boolean ordered,
-            boolean sticky, int sendingUser, int processState) = 22;
-    void scheduleLowMemory() = 23;
+            boolean sticky, int sendingUser, int processState);
+    void scheduleLowMemory();
     void scheduleActivityConfigurationChanged(IBinder token, in Configuration overrideConfig,
-            boolean reportToActivity) = 24;
+            boolean reportToActivity);
     void scheduleRelaunchActivity(IBinder token, in List<ResultInfo> pendingResults,
             in List<ReferrerIntent> pendingNewIntents, int configChanges, boolean notResumed,
-            in Configuration config, in Configuration overrideConfig, boolean preserveWindow) = 25;
-    void scheduleSleeping(IBinder token, boolean sleeping) = 26;
-    void profilerControl(boolean start, in ProfilerInfo profilerInfo, int profileType) = 27;
-    void setSchedulingGroup(int group) = 28;
+            in Configuration config, in Configuration overrideConfig, boolean preserveWindow);
+    void scheduleSleeping(IBinder token, boolean sleeping);
+    void profilerControl(boolean start, in ProfilerInfo profilerInfo, int profileType);
+    void setSchedulingGroup(int group);
     void scheduleCreateBackupAgent(in ApplicationInfo app, in CompatibilityInfo compatInfo,
-            int backupMode) = 29;
+            int backupMode);
     void scheduleDestroyBackupAgent(in ApplicationInfo app,
-            in CompatibilityInfo compatInfo) = 30;
-    void scheduleOnNewActivityOptions(IBinder token, in Bundle options) = 31;
-    void scheduleSuicide() = 32;
-    void dispatchPackageBroadcast(int cmd, in String[] packages) = 33;
-    void scheduleCrash(in String msg) = 34;
-    void dumpHeap(boolean managed, in String path, in ParcelFileDescriptor fd) = 35;
+            in CompatibilityInfo compatInfo);
+    void scheduleOnNewActivityOptions(IBinder token, in Bundle options);
+    void scheduleSuicide();
+    void dispatchPackageBroadcast(int cmd, in String[] packages);
+    void scheduleCrash(in String msg);
+    void dumpHeap(boolean managed, in String path, in ParcelFileDescriptor fd);
     void dumpActivity(in ParcelFileDescriptor fd, IBinder servicetoken, in String prefix,
-            in String[] args) = 36;
-    void clearDnsCache() = 37;
+            in String[] args);
+    void clearDnsCache();
     void setHttpProxy(in String proxy, in String port, in String exclList,
-            in Uri pacFileUrl) = 38;
-    void setCoreSettings(in Bundle coreSettings) = 39;
-    void updatePackageCompatibilityInfo(in String pkg, in CompatibilityInfo info) = 40;
-    void scheduleTrimMemory(int level) = 41;
+            in Uri pacFileUrl);
+    void setCoreSettings(in Bundle coreSettings);
+    void updatePackageCompatibilityInfo(in String pkg, in CompatibilityInfo info);
+    void scheduleTrimMemory(int level);
     void dumpMemInfo(in ParcelFileDescriptor fd, in Debug.MemoryInfo mem, boolean checkin,
             boolean dumpInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable,
-            in String[] args) = 42;
-    void dumpGfxInfo(in ParcelFileDescriptor fd, in String[] args) = 43;
+            in String[] args);
+    void dumpGfxInfo(in ParcelFileDescriptor fd, in String[] args);
     void dumpProvider(in ParcelFileDescriptor fd, IBinder servicetoken,
-            in String[] args) = 44;
-    void dumpDbInfo(in ParcelFileDescriptor fd, in String[] args) = 45;
-    void unstableProviderDied(IBinder provider) = 46;
+            in String[] args);
+    void dumpDbInfo(in ParcelFileDescriptor fd, in String[] args);
+    void unstableProviderDied(IBinder provider);
     void requestAssistContextExtras(IBinder activityToken, IBinder requestToken,
-            int requestType, int sessionId) = 47;
-    void scheduleTranslucentConversionComplete(IBinder token, boolean timeout) = 48;
-    void setProcessState(int state) = 49;
-    void scheduleInstallProvider(in ProviderInfo provider) = 50;
-    void updateTimePrefs(boolean is24Hour) = 51;
-    void scheduleCancelVisibleBehind(IBinder token) = 52;
-    void scheduleBackgroundVisibleBehindChanged(IBinder token, boolean enabled) = 53;
-    void scheduleEnterAnimationComplete(IBinder token) = 54;
-    void notifyCleartextNetwork(in byte[] firstPacket) = 55;
-    void startBinderTracking() = 56;
-    void stopBinderTrackingAndDump(in ParcelFileDescriptor fd) = 57;
-    void scheduleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode) = 58;
+            int requestType, int sessionId);
+    void scheduleTranslucentConversionComplete(IBinder token, boolean timeout);
+    void setProcessState(int state);
+    void scheduleInstallProvider(in ProviderInfo provider);
+    void updateTimePrefs(boolean is24Hour);
+    void scheduleCancelVisibleBehind(IBinder token);
+    void scheduleBackgroundVisibleBehindChanged(IBinder token, boolean enabled);
+    void scheduleEnterAnimationComplete(IBinder token);
+    void notifyCleartextNetwork(in byte[] firstPacket);
+    void startBinderTracking();
+    void stopBinderTrackingAndDump(in ParcelFileDescriptor fd);
+    void scheduleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode);
     void schedulePictureInPictureModeChanged(IBinder token,
-            boolean isInPictureInPictureMode) = 59;
+            boolean isInPictureInPictureMode);
     void scheduleLocalVoiceInteractionStarted(IBinder token,
-            IVoiceInteractor voiceInteractor) = 60;
-    void handleTrustStorageUpdate() = 61;
-    void attachAgent(String path) = 62;
-    /**
-     * Don't change the existing transaction Ids as they could be used in the native code.
-     * When adding a new method, assign the next available transaction id.
-     */
+            IVoiceInteractor voiceInteractor);
+    void handleTrustStorageUpdate();
+    void attachAgent(String path);
 }
