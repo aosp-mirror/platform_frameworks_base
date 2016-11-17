@@ -66,6 +66,93 @@ public class ScanResult implements Parcelable {
      * supported by the access point.
      */
     public String capabilities;
+
+    /**
+     * @hide
+     * No security protocol.
+     */
+    public static final int PROTOCOL_NONE = 0;
+    /**
+     * @hide
+     * Security protocol type: WPA version 1.
+     */
+    public static final int PROTOCOL_WPA = 1;
+    /**
+     * @hide
+     * Security protocol type: WPA version 2, also called RSN.
+     */
+    public static final int PROTOCOL_WPA2 = 2;
+    /**
+     * @hide
+     * Security protocol type:
+     * OSU Server-only authenticated layer 2 Encryption Network.
+     * Used for Hotspot 2.0.
+     */
+    public static final int PROTOCOL_OSEN = 3;
+
+    /**
+     * @hide
+     * No security key management scheme.
+     */
+    public static final int KEY_MGMT_NONE = 0;
+    /**
+     * @hide
+     * Security key management scheme: PSK.
+     */
+    public static final int KEY_MGMT_PSK = 1;
+    /**
+     * @hide
+     * Security key management scheme: EAP.
+     */
+    public static final int KEY_MGMT_EAP = 2;
+    /**
+     * @hide
+     * Security key management scheme: FT_PSK.
+     */
+    public static final int KEY_MGMT_FT_PSK = 3;
+    /**
+     * @hide
+     * Security key management scheme: FT_EAP.
+     */
+    public static final int KEY_MGMT_FT_EAP = 4;
+    /**
+     * @hide
+     * Security key management scheme: PSK_SHA256
+     */
+    public static final int KEY_MGMT_PSK_SHA256 = 5;
+    /**
+     * @hide
+     * Security key management scheme: EAP_SHA256.
+     */
+    public static final int KEY_MGMT_EAP_SHA256 = 6;
+    /**
+     * @hide
+     * Security key management scheme: OSEN.
+     * Used for Hotspot 2.0.
+     */
+    public static final int KEY_MGMT_OSEN = 7;
+
+    /**
+     * @hide
+     * No cipher suite.
+     */
+    public static final int CIPHER_NONE = 0;
+    /**
+     * @hide
+     * No group addressed, only used for group data cipher.
+     */
+    public static final int CIPHER_NO_GROUP_ADDRESSED = 1;
+    /**
+     * @hide
+     * Cipher suite: TKIP
+     */
+    public static final int CIPHER_TKIP = 2;
+    /**
+     * @hide
+     * Cipher suite: CCMP
+     */
+    public static final int CIPHER_CCMP = 3;
+
     /**
      * The detected signal level in dBm, also known as the RSSI.
      *
