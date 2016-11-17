@@ -325,4 +325,8 @@ interface IDevicePolicyManager {
     boolean bindDeviceAdminServiceAsUser(in ComponentName admin,
         IApplicationThread caller, IBinder token, in Intent service,
         IServiceConnection connection, int flags, int targetUserId);
+
+    long getLastSecurityLogRetrievalTime();
+    long getLastBugReportRequestTime();
+    long getLastNetworkLogRetrievalTime();
 }

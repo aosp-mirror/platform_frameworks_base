@@ -22,6 +22,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
 import android.media.IAudioService;
+import android.net.IIpConnectivityMetrics;
 import android.net.Uri;
 import android.os.Looper;
 import android.os.PowerManagerInternal;
@@ -150,6 +151,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         NotificationManager getNotificationManager() {
             return context.notificationManager;
+        }
+
+        @Override
+        IIpConnectivityMetrics getIIpConnectivityMetrics() {
+            return context.iipConnectivityMetrics;
         }
 
         @Override

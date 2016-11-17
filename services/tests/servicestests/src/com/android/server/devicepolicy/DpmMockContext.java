@@ -26,11 +26,14 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.media.IAudioService;
+import android.net.IIpConnectivityMetrics;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -249,6 +252,7 @@ public class DpmMockContext extends MockContext {
 
     public final MockBinder binder;
     public final EnvironmentForMock environment;
+    public final Resources resources;
     public final SystemPropertiesForMock systemProperties;
     public final UserManager userManager;
     public final UserManagerInternal userManagerInternal;
@@ -257,6 +261,7 @@ public class DpmMockContext extends MockContext {
     public final PowerManagerForMock powerManager;
     public final PowerManagerInternal powerManagerInternal;
     public final NotificationManager notificationManager;
+    public final IIpConnectivityMetrics iipConnectivityMetrics;
     public final IWindowManager iwindowManager;
     public final IActivityManager iactivityManager;
     public final IPackageManager ipackageManager;
@@ -278,6 +283,10 @@ public class DpmMockContext extends MockContext {
 
     public final BuildMock buildMock = new BuildMock();
 
+    public String packageName = null;
+
+    public ApplicationInfo applicationInfo = null;
+
     public DpmMockContext(Context context, File dataDir) {
         realTestContext = context;
 
@@ -286,7 +295,8 @@ public class DpmMockContext extends MockContext {
 
         binder = new MockBinder();
         environment = mock(EnvironmentForMock.class);
-        systemProperties= mock(SystemPropertiesForMock.class);
+        resources = mock(Resources.class);
+        systemProperties = mock(SystemPropertiesForMock.class);
         userManager = mock(UserManager.class);
         userManagerInternal = mock(UserManagerInternal.class);
         userManagerForMock = mock(UserManagerForMock.class);
@@ -294,6 +304,7 @@ public class DpmMockContext extends MockContext {
         powerManager = mock(PowerManagerForMock.class);
         powerManagerInternal = mock(PowerManagerInternal.class);
         notificationManager = mock(NotificationManager.class);
+        iipConnectivityMetrics = mock(IIpConnectivityMetrics.class);
         iwindowManager = mock(IWindowManager.class);
         iactivityManager = mock(IActivityManager.class);
         ipackageManager = mock(IPackageManager.class);
@@ -413,6 +424,32 @@ public class DpmMockContext extends MockContext {
     public void setUserRunning(int userId, boolean isRunning) {
         when(userManager.isUserRunning(MockUtils.checkUserHandle(userId)))
                 .thenReturn(isRunning);
+    }
+
+    @Override
+    public Resources getResources() {
+        return resources;
+    }
+
+    @Override
+    public Resources.Theme getTheme() {
+        return spiedContext.getTheme();
+    }
+
+    @Override
+    public String getPackageName() {
+        if (packageName != null) {
+            return packageName;
+        }
+        return super.getPackageName();
+    }
+
+    @Override
+    public ApplicationInfo getApplicationInfo() {
+        if (applicationInfo != null) {
+            return applicationInfo;
+        }
+        return super.getApplicationInfo();
     }
 
     @Override
@@ -614,5 +651,10 @@ public class DpmMockContext extends MockContext {
     @Override
     public ContentResolver getContentResolver() {
         return contentResolver;
+    }
+
+    @Override
+    public int getUserId() {
+        return UserHandle.getUserId(binder.getCallingUid());
     }
 }

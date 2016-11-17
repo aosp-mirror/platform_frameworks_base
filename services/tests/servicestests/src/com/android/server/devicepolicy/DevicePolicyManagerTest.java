@@ -25,6 +25,9 @@ import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.net.IIpConnectivityMetrics;
 import android.net.wifi.WifiInfo;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -38,6 +41,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 import android.util.Pair;
 
+import com.android.internal.R;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
@@ -53,6 +57,7 @@ import java.util.Set;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
@@ -2266,6 +2271,150 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // THEN the state in dpms is not changed
         assertFalse(dpms.hasUserSetupCompleted());
+    }
+
+    private long getLastSecurityLogRetrievalTime() {
+        final long ident = mContext.binder.clearCallingIdentity();
+        final long lastSecurityLogRetrievalTime = dpm.getLastSecurityLogRetrievalTime();
+        mContext.binder.restoreCallingIdentity(ident);
+        return lastSecurityLogRetrievalTime;
+    }
+
+    public void testGetLastSecurityLogRetrievalTime() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        when(mContext.userManager.getUserCount()).thenReturn(1);
+        when(mContext.resources.getBoolean(R.bool.config_supportPreRebootSecurityLogs))
+                .thenReturn(true);
+
+        // No logs were retrieved so far.
+        assertEquals(-1, getLastSecurityLogRetrievalTime());
+
+        // Enabling logging should not change the timestamp.
+        dpm.setSecurityLoggingEnabled(admin1, true);
+        assertEquals(-1, getLastSecurityLogRetrievalTime());
+
+        // Retrieving the logs should update the timestamp.
+        final long beforeRetrieval = System.currentTimeMillis();
+        dpm.retrieveSecurityLogs(admin1);
+        final long firstSecurityLogRetrievalTime = getLastSecurityLogRetrievalTime();
+        final long afterRetrieval = System.currentTimeMillis();
+        assertTrue(firstSecurityLogRetrievalTime >= beforeRetrieval);
+        assertTrue(firstSecurityLogRetrievalTime <= afterRetrieval);
+
+        // Retrieving the pre-boot logs should update the timestamp.
+        Thread.sleep(2);
+        dpm.retrievePreRebootSecurityLogs(admin1);
+        final long secondSecurityLogRetrievalTime = getLastSecurityLogRetrievalTime();
+        assertTrue(secondSecurityLogRetrievalTime > firstSecurityLogRetrievalTime);
+
+        // Checking the timestamp again should not change it.
+        Thread.sleep(2);
+        assertEquals(secondSecurityLogRetrievalTime, getLastSecurityLogRetrievalTime());
+
+        // Retrieving the logs again should update the timestamp.
+        dpm.retrieveSecurityLogs(admin1);
+        final long thirdSecurityLogRetrievalTime = getLastSecurityLogRetrievalTime();
+        assertTrue(thirdSecurityLogRetrievalTime > secondSecurityLogRetrievalTime);
+
+        // Disabling logging should not change the timestamp.
+        Thread.sleep(2);
+        dpm.setSecurityLoggingEnabled(admin1, false);
+        assertEquals(thirdSecurityLogRetrievalTime, getLastSecurityLogRetrievalTime());
+
+        // Restarting the DPMS should not lose the timestamp.
+        initializeDpms();
+        assertEquals(thirdSecurityLogRetrievalTime, getLastSecurityLogRetrievalTime());
+    }
+
+    private long getLastBugReportRequestTime() {
+        final long ident = mContext.binder.clearCallingIdentity();
+        final long lastBugRequestTime = dpm.getLastBugReportRequestTime();
+        mContext.binder.restoreCallingIdentity(ident);
+        return lastBugRequestTime;
+    }
+
+    public void testGetLastBugReportRequestTime() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        when(mContext.userManager.getUserCount()).thenReturn(1);
+        mContext.packageName = admin1.getPackageName();
+        mContext.applicationInfo = new ApplicationInfo();
+        when(mContext.resources.getColor(eq(R.color.notification_action_list), anyObject()))
+                .thenReturn(Color.WHITE);
+        when(mContext.resources.getColor(eq(R.color.notification_material_background_color),
+                anyObject())).thenReturn(Color.WHITE);
+
+        // No bug reports were requested so far.
+        assertEquals(-1, getLastSecurityLogRetrievalTime());
+
+        // Requesting a bug report should update the timestamp.
+        final long beforeRequest = System.currentTimeMillis();
+        dpm.requestBugreport(admin1);
+        final long bugReportRequestTime = getLastBugReportRequestTime();
+        final long afterRequest = System.currentTimeMillis();
+        assertTrue(bugReportRequestTime >= beforeRequest);
+        assertTrue(bugReportRequestTime <= afterRequest);
+
+        // Checking the timestamp again should not change it.
+        Thread.sleep(2);
+        assertEquals(bugReportRequestTime, getLastBugReportRequestTime());
+
+        // Restarting the DPMS should not lose the timestamp.
+        initializeDpms();
+        assertEquals(bugReportRequestTime, getLastBugReportRequestTime());
+    }
+
+    private long getLastNetworkLogRetrievalTime() {
+        final long ident = mContext.binder.clearCallingIdentity();
+        final long lastNetworkLogRetrievalTime = dpm.getLastNetworkLogRetrievalTime();
+        mContext.binder.restoreCallingIdentity(ident);
+        return lastNetworkLogRetrievalTime;
+    }
+
+    public void testGetLastNetworkLogRetrievalTime() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        when(mContext.userManager.getUserCount()).thenReturn(1);
+        when(mContext.iipConnectivityMetrics.registerNetdEventCallback(anyObject()))
+                .thenReturn(true);
+
+        // No logs were retrieved so far.
+        assertEquals(-1, getLastNetworkLogRetrievalTime());
+
+        // Attempting to retrieve logs without enabling logging should not change the timestamp.
+        dpm.retrieveNetworkLogs(admin1, 0 /* batchToken */);
+        assertEquals(-1, getLastNetworkLogRetrievalTime());
+
+        // Enabling logging should not change the timestamp.
+        dpm.setNetworkLoggingEnabled(admin1, true);
+        assertEquals(-1, getLastNetworkLogRetrievalTime());
+
+        // Retrieving the logs should update the timestamp.
+        final long beforeRetrieval = System.currentTimeMillis();
+        dpm.retrieveNetworkLogs(admin1, 0 /* batchToken */);
+        final long firstNetworkLogRetrievalTime = getLastNetworkLogRetrievalTime();
+        final long afterRetrieval = System.currentTimeMillis();
+        assertTrue(firstNetworkLogRetrievalTime >= beforeRetrieval);
+        assertTrue(firstNetworkLogRetrievalTime <= afterRetrieval);
+
+        // Checking the timestamp again should not change it.
+        Thread.sleep(2);
+        assertEquals(firstNetworkLogRetrievalTime, getLastNetworkLogRetrievalTime());
+
+        // Retrieving the logs again should update the timestamp.
+        dpm.retrieveNetworkLogs(admin1, 0 /* batchToken */);
+        final long secondNetworkLogRetrievalTime = getLastNetworkLogRetrievalTime();
+        assertTrue(secondNetworkLogRetrievalTime > firstNetworkLogRetrievalTime);
+
+        // Disabling logging should not change the timestamp.
+        Thread.sleep(2);
+        dpm.setNetworkLoggingEnabled(admin1, false);
+        assertEquals(secondNetworkLogRetrievalTime, getLastNetworkLogRetrievalTime());
+
+        // Restarting the DPMS should not lose the timestamp.
+        initializeDpms();
+        assertEquals(secondNetworkLogRetrievalTime, getLastNetworkLogRetrievalTime());
     }
 
     private void setUserSetupCompleteForUser(boolean isUserSetupComplete, int userhandle) {
