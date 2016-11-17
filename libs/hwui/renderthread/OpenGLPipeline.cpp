@@ -20,7 +20,7 @@
 #include "EglManager.h"
 #include "ProfileRenderer.h"
 #include "renderstate/RenderState.h"
-#include "Readback.h"
+#include "OpenGLReadback.h"
 
 #include <android/native_window.h>
 #include <cutils/properties.h>
@@ -117,9 +117,9 @@ bool OpenGLPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect& sc
 }
 
 bool OpenGLPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
+    ATRACE_CALL();
     layer->apply();
-    return Readback::copyTextureLayerInto(mRenderThread, *(layer->backingLayer()), bitmap)
-            == CopyResult::Success;
+    return OpenGLReadbackImpl::copyLayerInto(mRenderThread, *(layer->backingLayer()), bitmap);
 }
 
 DeferredLayerUpdater* OpenGLPipeline::createTextureLayer() {

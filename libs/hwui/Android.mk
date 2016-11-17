@@ -24,6 +24,7 @@ hwui_src_files := \
     pipeline/skia/ReorderBarrierDrawables.cpp \
     pipeline/skia/SkiaDisplayList.cpp \
     pipeline/skia/SkiaOpenGLPipeline.cpp \
+    pipeline/skia/SkiaOpenGLReadback.cpp \
     pipeline/skia/SkiaPipeline.cpp \
     pipeline/skia/SkiaProfileRenderer.cpp \
     pipeline/skia/SkiaRecordingCanvas.cpp \
@@ -84,6 +85,7 @@ hwui_src_files := \
     LayerUpdateQueue.cpp \
     Matrix.cpp \
     OpDumper.cpp \
+    OpenGLReadback.cpp \
     Patch.cpp \
     PatchCache.cpp \
     PathCache.cpp \
@@ -96,7 +98,6 @@ hwui_src_files := \
     Properties.cpp \
     PropertyValuesAnimatorSet.cpp \
     PropertyValuesHolder.cpp \
-    Readback.cpp \
     RecordingCanvas.cpp \
     RenderBufferCache.cpp \
     RenderNode.cpp \

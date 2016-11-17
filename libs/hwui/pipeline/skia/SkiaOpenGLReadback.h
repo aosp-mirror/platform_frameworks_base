@@ -16,34 +16,20 @@
 
 #pragma once
 
-#include "Layer.h"
-
-#include <SkCanvas.h>
-#include <SkDrawable.h>
+#include "OpenGLReadback.h"
 
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-/*
- * Draws a layer backed by an OpenGL texture into a SkCanvas.
- */
-class LayerDrawable : public SkDrawable {
- public:
-    explicit LayerDrawable(Layer* layer)
-            : mLayer(layer) {}
-
-    static bool DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer);
- protected:
-     virtual SkRect onGetBounds() override {
-         return SkRect::MakeWH(mLayer->getWidth(), mLayer->getHeight());
-     }
-     virtual void onDraw(SkCanvas* canvas) override;
-
-private:
-    sp<Layer> mLayer;
+class SkiaOpenGLReadback : public OpenGLReadback {
+public:
+    SkiaOpenGLReadback(renderthread::RenderThread& thread) : OpenGLReadback(thread) {}
+protected:
+    virtual CopyResult copyImageInto(EGLImageKHR eglImage, const Matrix4& imgTransform,
+            int imgWidth, int imgHeight, const Rect& srcRect, SkBitmap* bitmap) override;
 };
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+} /* namespace skiapipeline */
+} /* namespace uirenderer */
+} /* namespace android */

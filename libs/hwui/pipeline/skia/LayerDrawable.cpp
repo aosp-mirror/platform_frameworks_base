@@ -23,36 +23,41 @@ namespace uirenderer {
 namespace skiapipeline {
 
 void LayerDrawable::onDraw(SkCanvas* canvas) {
+    DrawLayer(canvas->getGrContext(), canvas, mLayer.get());
+}
+
+bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer) {
     // transform the matrix based on the layer
     int saveCount = -1;
-    if (!mLayer->getTransform().isIdentity()) {
+    if (!layer->getTransform().isIdentity()) {
         saveCount = canvas->save();
         SkMatrix transform;
-        mLayer->getTransform().copyTo(transform);
+        layer->getTransform().copyTo(transform);
         canvas->concat(transform);
     }
     GrGLTextureInfo externalTexture;
-    externalTexture.fTarget = mLayer->getRenderTarget();
-    externalTexture.fID = mLayer->getTextureId();
-    GrContext* context = canvas->getGrContext();
+    externalTexture.fTarget = layer->getRenderTarget();
+    externalTexture.fID = layer->getTextureId();
     GrBackendTextureDesc textureDescription;
-    textureDescription.fWidth = mLayer->getWidth();
-    textureDescription.fHeight = mLayer->getHeight();
+    textureDescription.fWidth = layer->getWidth();
+    textureDescription.fHeight = layer->getHeight();
     textureDescription.fConfig = kRGBA_8888_GrPixelConfig;
     textureDescription.fOrigin = kTopLeft_GrSurfaceOrigin;
     textureDescription.fTextureHandle = reinterpret_cast<GrBackendObject>(&externalTexture);
     sk_sp<SkImage> layerImage = SkImage::MakeFromTexture(context, textureDescription);
     if (layerImage) {
         SkPaint paint;
-        paint.setAlpha(mLayer->getAlpha());
-        paint.setBlendMode(mLayer->getMode());
-        paint.setColorFilter(sk_ref_sp(mLayer->getColorFilter()));
+        paint.setAlpha(layer->getAlpha());
+        paint.setBlendMode(layer->getMode());
+        paint.setColorFilter(sk_ref_sp(layer->getColorFilter()));
         canvas->drawImage(layerImage, 0, 0, &paint);
     }
     // restore the original matrix
     if (saveCount >= 0) {
         canvas->restoreToCount(saveCount);
     }
+
+    return layerImage;
 }
 
 }; // namespace skiapipeline

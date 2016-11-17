@@ -602,8 +602,8 @@ void RenderProxy::removeFrameMetricsObserver(FrameMetricsObserver* observer) {
 
 CREATE_BRIDGE4(copySurfaceInto, RenderThread* thread,
         Surface* surface, Rect srcRect, SkBitmap* bitmap) {
-    return (void*) Readback::copySurfaceInto(*args->thread,
-            *args->surface, args->srcRect, args->bitmap);
+    return (void*)args->thread->readback().copySurfaceInto(*args->surface,
+            args->srcRect, args->bitmap);
 }
 
 int RenderProxy::copySurfaceInto(sp<Surface>& surface, int left, int top,
