@@ -62,8 +62,7 @@ public class FragmentHostManager {
     private void createFragmentHost(Parcelable savedState) {
         mFragments = FragmentController.createController(new HostCallbacks());
         mFragments.attachHost(null);
-        // TODO: Remove non-staticness from FragmentLifecycleCallbacks (hopefully).
-        mLifecycleCallbacks = mFragments.getFragmentManager().new FragmentLifecycleCallbacks() {
+        mLifecycleCallbacks = new FragmentLifecycleCallbacks() {
             @Override
             public void onFragmentViewCreated(FragmentManager fm, Fragment f, View v,
                     Bundle savedInstanceState) {
