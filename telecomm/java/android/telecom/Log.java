@@ -48,13 +48,13 @@ public class Log {
     // Generic tag for all Telecom logging
     @VisibleForTesting
     public static String TAG = "TelecomFramework";
+    public static boolean DEBUG = isLoggable(android.util.Log.DEBUG);
+    public static boolean INFO = isLoggable(android.util.Log.INFO);
+    public static boolean VERBOSE = isLoggable(android.util.Log.VERBOSE);
+    public static boolean WARN = isLoggable(android.util.Log.WARN);
+    public static boolean ERROR = isLoggable(android.util.Log.ERROR);
 
     private static final boolean FORCE_LOGGING = false; /* STOP SHIP if true */
-    public static final boolean DEBUG = isLoggable(android.util.Log.DEBUG);
-    public static final boolean INFO = isLoggable(android.util.Log.INFO);
-    public static final boolean VERBOSE = isLoggable(android.util.Log.VERBOSE);
-    public static final boolean WARN = isLoggable(android.util.Log.WARN);
-    public static final boolean ERROR = isLoggable(android.util.Log.ERROR);
 
     // Used to synchronize singleton logging lazy initialization
     private static final Object sSingletonSync = new Object();
@@ -340,6 +340,11 @@ public class Log {
 
     public static void setTag(String tag) {
         TAG = tag;
+        DEBUG = isLoggable(android.util.Log.DEBUG);
+        INFO = isLoggable(android.util.Log.INFO);
+        VERBOSE = isLoggable(android.util.Log.VERBOSE);
+        WARN = isLoggable(android.util.Log.WARN);
+        ERROR = isLoggable(android.util.Log.ERROR);
     }
 
     /**
