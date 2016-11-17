@@ -479,7 +479,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             childState.dimmed = parentState.dimmed;
             childState.dark = parentState.dark;
             childState.hideSensitive = parentState.hideSensitive;
-            childState.belowShelf = parentState.belowShelf;
+            childState.belowSpeedBump = parentState.belowSpeedBump;
             childState.clipTopAmount = 0;
             childState.alpha = 0;
             if (i < firstOverflowIndex) {

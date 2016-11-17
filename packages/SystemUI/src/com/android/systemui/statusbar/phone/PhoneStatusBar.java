@@ -1868,7 +1868,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mTmpChildOrderMap.clear();
 
         updateRowStates();
-        updateShelfIndex();
+        updateSpeedBumpIndex();
         updateClearAll();
         updateEmptyShadeView();
 
@@ -1989,8 +1989,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNotificationPanel.setShadeEmpty(showEmptyShade);
     }
 
-    private void updateShelfIndex() {
-        int shelfIndex = -1;
+    private void updateSpeedBumpIndex() {
+        int speedBumpIndex = -1;
         int currentIndex = 0;
         final int N = mStackScroller.getChildCount();
         for (int i = 0; i < N; i++) {
@@ -2000,17 +2000,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
             if (mNotificationData.isAmbient(row.getStatusBarNotification().getKey())) {
-                shelfIndex = currentIndex;
+                speedBumpIndex = currentIndex;
                 break;
             }
             currentIndex++;
         }
         boolean noAmbient = false;
-        if (shelfIndex == -1) {
-            shelfIndex = currentIndex;
+        if (speedBumpIndex == -1) {
+            speedBumpIndex = currentIndex;
             noAmbient = true;
         }
-        mStackScroller.updateShelfIndex(shelfIndex, noAmbient);
+        mStackScroller.updateSpeedBumpIndex(speedBumpIndex, noAmbient);
     }
 
     public static boolean isTopLevelChild(Entry entry) {

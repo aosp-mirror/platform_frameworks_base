@@ -413,6 +413,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (mNotificationParent != null) {
             mNotificationParent.updateBackgroundForGroupState();
         }
+        updateIconVisibilities();
     }
 
     @Override
@@ -847,6 +848,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
+    @Override
+    protected void onBelowSpeedBumpChanged() {
+        updateIconVisibilities();
+    }
+
     private void updateContentFadeOut() {
         if (!isChildInGroup()) {
             float contentAlpha = 1.0f - mIconTransformationAmount;
@@ -866,12 +872,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     private void updateIconVisibilities() {
-        if (!isChildInGroup()) {
-            mPublicLayout.setIconsVisible(mIconsVisible);
-            mPrivateLayout.setIconsVisible(mIconsVisible);
-            if (mChildrenContainer != null) {
-                mChildrenContainer.setIconsVisible(mIconsVisible);
-            }
+        boolean visible = isChildInGroup() || isBelowSpeedBump() || mIconsVisible;
+        mPublicLayout.setIconsVisible(visible);
+        mPrivateLayout.setIconsVisible(visible);
+        if (mChildrenContainer != null) {
+            mChildrenContainer.setIconsVisible(visible);
         }
     }
 

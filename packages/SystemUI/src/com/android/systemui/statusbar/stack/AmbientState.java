@@ -36,7 +36,7 @@ public class AmbientState {
     private ActivatableNotificationView mActivatedChild;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
-    private int mShelfIndex = -1;
+    private int mSpeedBumpIndex = -1;
     private boolean mDark;
     private boolean mHideSensitive;
     private HeadsUpManager mHeadsUpManager;
@@ -51,6 +51,7 @@ public class AmbientState {
     private int mZDistanceBetweenElements;
     private int mBaseZHeight;
     private int mMaxLayoutHeight;
+    private ActivatableNotificationView mLastVisibleBackgroundChild;
 
     public AmbientState(Context context) {
         reload(context);
@@ -62,8 +63,7 @@ public class AmbientState {
     public void reload(Context context) {
         mZDistanceBetweenElements = Math.max(1, context.getResources()
                 .getDimensionPixelSize(R.dimen.z_distance_between_notifications));
-        mBaseZHeight = (StackScrollAlgorithm.MAX_ITEMS_IN_BOTTOM_STACK + 1)
-                * mZDistanceBetweenElements;
+        mBaseZHeight = 4 * mZDistanceBetweenElements;
     }
 
     /**
@@ -153,12 +153,12 @@ public class AmbientState {
         return top ? mOverScrollTopAmount : mOverScrollBottomAmount;
     }
 
-    public int getShelfIndex() {
-        return mShelfIndex;
+    public int getSpeedBumpIndex() {
+        return mSpeedBumpIndex;
     }
 
-    public void setShelfIndex(int shelfIndex) {
-        mShelfIndex = shelfIndex;
+    public void setSpeedBumpIndex(int shelfIndex) {
+        mSpeedBumpIndex = shelfIndex;
     }
 
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
@@ -227,5 +227,18 @@ public class AmbientState {
 
     public void setLayoutMaxHeight(int maxLayoutHeight) {
         mMaxLayoutHeight = maxLayoutHeight;
+    }
+
+    /**
+     * Sets the last visible view of the host layout, that has a background, i.e the very last
+     * view in the shade, without the clear all button.
+     */
+    public void setLastVisibleBackgroundChild(
+            ActivatableNotificationView lastVisibleBackgroundChild) {
+        mLastVisibleBackgroundChild = lastVisibleBackgroundChild;
+    }
+
+    public ActivatableNotificationView getLastVisibleBackgroundChild() {
+        return mLastVisibleBackgroundChild;
     }
 }

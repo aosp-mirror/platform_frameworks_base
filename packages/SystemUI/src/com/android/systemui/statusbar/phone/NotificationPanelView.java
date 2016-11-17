@@ -1490,9 +1490,7 @@ public class NotificationPanelView extends PanelView implements
         // and expanding/collapsing the whole panel from/to quick settings.
         if (mNotificationStackScroller.getNotGoneChildCount() == 0
                 && mShadeEmpty) {
-            notificationHeight = mNotificationStackScroller.getEmptyShadeViewHeight()
-                    + mNotificationStackScroller.getBottomStackPeekSize()
-                    + mNotificationStackScroller.getBottomStackSlowDownHeight();
+            notificationHeight = mNotificationStackScroller.getEmptyShadeViewHeight();
         }
         int maxQsHeight = mQsMaxExpansionHeight;
 
@@ -1523,8 +1521,7 @@ public class NotificationPanelView extends PanelView implements
 
     private float getFadeoutAlpha() {
         float alpha = (getNotificationsTopY() + mNotificationStackScroller.getFirstItemMinHeight())
-                / (mQsMinExpansionHeight + mNotificationStackScroller.getBottomStackPeekSize()
-                - mNotificationStackScroller.getBottomStackSlowDownHeight());
+                / mQsMinExpansionHeight;
         alpha = Math.max(0, Math.min(alpha, 1));
         alpha = (float) Math.pow(alpha, 0.75);
         return alpha;

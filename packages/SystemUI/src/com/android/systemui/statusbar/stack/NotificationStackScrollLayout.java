@@ -135,8 +135,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private Paint mDebugPaint;
     private int mContentHeight;
     private int mCollapsedSize;
-    private int mBottomStackSlowDownHeight;
-    private int mBottomStackPeekSize;
     private int mPaddingBetweenElements;
     private int mIncreasedPaddingBetweenElements;
     private int mTopPadding;
@@ -424,11 +422,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (DEBUG) {
             int y = mTopPadding;
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
-            y = (int) (getLayoutHeight() - mBottomStackPeekSize
-                    - mBottomStackSlowDownHeight);
-            canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
-            y = (int) (getLayoutHeight() - mBottomStackPeekSize);
-            canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
             y = (int) getLayoutHeight();
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
             y = getHeight() - getEmptyBottomMargin();
@@ -465,15 +458,12 @@ public class NotificationStackScrollLayout extends ViewGroup
         mOverflingDistance = configuration.getScaledOverflingDistance();
         mCollapsedSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_min_height);
-        mBottomStackPeekSize = context.getResources()
-                .getDimensionPixelSize(R.dimen.bottom_stack_peek_amount);
         mStackScrollAlgorithm.initView(context);
         mAmbientState.reload(context);
         mPaddingBetweenElements = Math.max(1, context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_divider_height));
         mIncreasedPaddingBetweenElements = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_divider_height_increased);
-        mBottomStackSlowDownHeight = mStackScrollAlgorithm.getBottomStackSlowDownLength();
         mMinTopOverScrollToEscape = getResources().getDimensionPixelSize(
                 R.dimen.min_top_overscroll_to_qs);
         mStatusBarHeight = getResources().getDimensionPixelOffset(R.dimen.status_bar_height);
@@ -537,8 +527,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    public void updateShelfIndex(int newIndex, boolean noAmbient) {
-        mAmbientState.setShelfIndex(newIndex);
+    public void updateSpeedBumpIndex(int newIndex, boolean noAmbient) {
+        mAmbientState.setSpeedBumpIndex(newIndex);
         mNoAmbient = noAmbient;
     }
 
@@ -777,13 +767,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     private float getAppearEndPosition() {
         int appearPosition;
         if (mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()) {
-            appearPosition = mHeadsUpManager.getTopHeadsUpPinnedHeight() + mBottomStackPeekSize
-                    + mBottomStackSlowDownHeight;
+            appearPosition = mHeadsUpManager.getTopHeadsUpPinnedHeight();
         } else {
             appearPosition = getFirstItemMinHeight();
-            if (mAmbientState.getShelfIndex() > 1) {
-                appearPosition += mShelf.getIntrinsicHeight();
-            }
+        }
+        if (getNotGoneChildCount() > 1) {
+            appearPosition += mShelf.getIntrinsicHeight();
         }
         return appearPosition + (onKeyguard() ? mTopPadding : mIntrinsicPadding);
     }
@@ -824,14 +813,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     public int getFirstItemMinHeight() {
         final ExpandableView firstChild = getFirstChildNotGone();
         return firstChild != null ? firstChild.getMinHeight() : mCollapsedSize;
-    }
-
-    public int getBottomStackPeekSize() {
-        return mBottomStackPeekSize;
-    }
-
-    public int getBottomStackSlowDownHeight() {
-        return mBottomStackSlowDownHeight;
     }
 
     public void setLongPressListener(SwipeHelper.LongPressListener listener) {
@@ -1803,8 +1784,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private int getScrollRange() {
         int contentHeight = getContentHeight();
-        int scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight + mBottomStackPeekSize
-                + mBottomStackSlowDownHeight);
+        int scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight);
         int imeInset = getImeInset();
         scrollRange += Math.min(imeInset, Math.max(0,
                 getContentHeight() - (getHeight() - imeInset)));
@@ -1822,7 +1802,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() != View.GONE) {
+            if (child.getVisibility() != View.GONE && child != mShelf) {
                 return (ExpandableView) child;
             }
         }
@@ -1869,7 +1849,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
             View child = getChildAt(i);
-            if (child.getVisibility() != View.GONE) {
+            if (child.getVisibility() != View.GONE && child != mShelf) {
                 return child;
             }
         }
@@ -1884,7 +1864,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         int count = 0;
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = (ExpandableView) getChildAt(i);
-            if (child.getVisibility() != View.GONE && !child.willBeGone()) {
+            if (child.getVisibility() != View.GONE && !child.willBeGone() && child != mShelf) {
                 count++;
             }
         }
@@ -2311,8 +2291,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         final ExpandableView firstChild = getFirstChildNotGone();
         final int firstChildMinHeight = firstChild != null ? firstChild.getCollapsedHeight()
                 : mCollapsedSize;
-        return mIntrinsicPadding + firstChildMinHeight + mBottomStackPeekSize
-                + mBottomStackSlowDownHeight;
+        int shelfHeight = 0;
+        if (mLastVisibleBackgroundChild != null) {
+            shelfHeight = mShelf.getIntrinsicHeight();
+        }
+        return mIntrinsicPadding + firstChildMinHeight + shelfHeight;
     }
 
     private int clampPadding(int desiredPadding) {
@@ -2651,6 +2634,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         mFirstVisibleBackgroundChild = firstChild;
         mLastVisibleBackgroundChild = lastChild;
+        mAmbientState.setLastVisibleBackgroundChild(lastChild);
     }
 
     private void onViewAddedInternal(View child) {
@@ -3152,13 +3136,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getEmptyBottomMargin() {
-        int emptyMargin = mMaxLayoutHeight - mContentHeight;
-        if (!mNoAmbient || mEmptyShadeView.getVisibility() == VISIBLE) {
-            // If we have ambient notifications or a clear all button, we need to make sure that the
-            // notifications are a bit taller, otherwise they will be pushed under the other cards
-            emptyMargin -= (mBottomStackPeekSize + mBottomStackSlowDownHeight);
-        }
-        return Math.max(emptyMargin, 0);
+        return Math.max(mMaxLayoutHeight - mContentHeight, 0);
     }
 
     public void onExpansionStarted() {
@@ -3268,18 +3246,16 @@ public class NotificationStackScrollLayout extends ViewGroup
                 if (row.isChildInGroup()) {
                     endPosition += row.getNotificationParent().getTranslationY();
                 }
-                int stackEnd = getStackEndPosition();
-                if (endPosition > stackEnd) {
-                    setOwnScrollY((int) (mOwnScrollY + endPosition - stackEnd));
+                int layoutEnd = mMaxLayoutHeight + (int) mStackTranslation;
+                if (row != mLastVisibleBackgroundChild) {
+                    layoutEnd -= mShelf.getIntrinsicHeight() + mPaddingBetweenElements;
+                }
+                if (endPosition > layoutEnd) {
+                    setOwnScrollY((int) (mOwnScrollY + endPosition - layoutEnd));
                     mDisallowScrollingInThisMotion = true;
                 }
             }
         }
-    }
-
-    private int getStackEndPosition() {
-        return mMaxLayoutHeight - mBottomStackPeekSize - mBottomStackSlowDownHeight
-                + mPaddingBetweenElements + (int) mStackTranslation;
     }
 
     public void setOnHeightChangedListener(

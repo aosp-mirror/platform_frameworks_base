@@ -37,7 +37,6 @@ import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.stack.ExpandableViewState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
@@ -132,7 +131,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private final int mLegacyColor;
     private final int mNormalColor;
     private final int mLowPriorityColor;
-    private boolean mIsBelowShelf;
+    private boolean mIsBelowSpeedBump;
     private FalsingManager mFalsingManager;
     private boolean mTrackTouch;
 
@@ -444,12 +443,23 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     @Override
-    public void setBelowShelf(boolean below) {
-        super.setBelowShelf(below);
-        if (below != mIsBelowShelf) {
-            mIsBelowShelf = below;
+    public void setBelowSpeedBump(boolean below) {
+        super.setBelowSpeedBump(below);
+        if (below != mIsBelowSpeedBump) {
+            mIsBelowSpeedBump = below;
             updateBackgroundTint();
+            onBelowSpeedBumpChanged();
         }
+    }
+
+    protected void onBelowSpeedBumpChanged() {
+    }
+
+    /**
+     * @return whether we are below the speed bump
+     */
+    public boolean isBelowSpeedBump() {
+        return mIsBelowSpeedBump;
     }
 
     /**
@@ -857,7 +867,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             return mBgTint;
         } else if (mShowingLegacyBackground) {
             return mLegacyColor;
-        } else if (mIsBelowShelf) {
+        } else if (mIsBelowSpeedBump) {
             return mLowPriorityColor;
         } else {
             return mNormalColor;
@@ -869,7 +879,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             return mTintedRippleColor;
         } else if (mShowingLegacyBackground) {
             return mTintedRippleColor;
-        } else if (mIsBelowShelf) {
+        } else if (mIsBelowSpeedBump) {
             return mLowPriorityRippleColor;
         } else {
             return mNormalRippleColor;
@@ -915,7 +925,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         setTintColor(0);
         resetBackgroundAlpha();
         setShowingLegacyBackground(false);
-        setBelowShelf(false);
+        setBelowSpeedBump(false);
     }
 
     public boolean hasSameBgColor(ActivatableNotificationView otherView) {

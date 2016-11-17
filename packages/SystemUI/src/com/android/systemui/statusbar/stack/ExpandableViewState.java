@@ -84,7 +84,7 @@ public class ExpandableViewState extends ViewState {
     public boolean dimmed;
     public boolean dark;
     public boolean hideSensitive;
-    public boolean belowShelf;
+    public boolean belowSpeedBump;
     public float shadowAlpha;
     public boolean inShelf;
 
@@ -121,7 +121,7 @@ public class ExpandableViewState extends ViewState {
             shadowAlpha = svs.shadowAlpha;
             dark = svs.dark;
             hideSensitive = svs.hideSensitive;
-            belowShelf = svs.belowShelf;
+            belowSpeedBump = svs.belowSpeedBump;
             clipTopAmount = svs.clipTopAmount;
             notGoneIndex = svs.notGoneIndex;
             location = svs.location;
@@ -161,8 +161,8 @@ public class ExpandableViewState extends ViewState {
             expandableView.setHideSensitive(
                     this.hideSensitive, false /* animated */, 0 /* delay */, 0 /* duration */);
 
-            // apply below shelf speedBump
-            expandableView.setBelowShelf(this.belowShelf);
+            // apply below shelf speed bump
+            expandableView.setBelowSpeedBump(this.belowSpeedBump);
 
             // apply dark
             expandableView.setDark(this.dark, false /* animate */, 0 /* delay */);
@@ -211,8 +211,8 @@ public class ExpandableViewState extends ViewState {
         // start dimmed animation
         expandableView.setDimmed(this.dimmed, animationFilter.animateDimmed);
 
-        // apply below shelf state
-        expandableView.setBelowShelf(this.belowShelf);
+        // apply below the speed bump
+        expandableView.setBelowSpeedBump(this.belowSpeedBump);
 
         // start hiding sensitive animation
         expandableView.setHideSensitive(this.hideSensitive, animationFilter.animateHideSensitive,

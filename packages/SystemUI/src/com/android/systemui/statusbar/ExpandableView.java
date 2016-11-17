@@ -283,10 +283,10 @@ public abstract class ExpandableView extends FrameLayout {
     public abstract void performAddAnimation(long delay, long duration);
 
     /**
-     * Set the notification appearance to be below the shelf.
+     * Set the notification appearance to be below the speed bump.
      * @param below true if it is below.
      */
-    public void setBelowShelf(boolean below) {
+    public void setBelowSpeedBump(boolean below) {
     }
 
     public int getPinnedHeadsUpHeight() {
