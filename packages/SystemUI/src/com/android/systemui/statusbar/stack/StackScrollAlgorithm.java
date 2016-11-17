@@ -350,7 +350,8 @@ public class StackScrollAlgorithm {
         boolean belowShelf = i >= ambientState.getShelfIndex();
         boolean isDismissView = child instanceof DismissView;
         if (i == 0) {
-            updateFirstChildHeight(child, childViewState, childHeight, ambientState, belowShelf);
+            updateFirstChildHeight(child, childViewState, childHeight, algorithmState, ambientState,
+                    belowShelf);
         }
 
         // The y position after this element
@@ -581,14 +582,16 @@ public class StackScrollAlgorithm {
 
     /**
      * Update the height of the first child i.e clamp it to the bottom stack
-     *  @param child the child to update
+     * @param child the child to update
      * @param childViewState the viewstate of the child
      * @param childHeight the height of the child
+     * @param algorithmState the algorithm state
      * @param ambientState The ambient state of the algorithm
-     * @param belowShelf
+     * @param belowShelf whether it is below the shelf
      */
     protected void updateFirstChildHeight(ExpandableView child, ExpandableViewState childViewState,
-            int childHeight, AmbientState ambientState, boolean belowShelf) {
+            int childHeight, StackScrollAlgorithmState algorithmState,
+            AmbientState ambientState, boolean belowShelf) {
 
         int bottomStart;
         if (belowShelf) {
@@ -596,8 +599,11 @@ public class StackScrollAlgorithm {
             bottomStart = ambientState.getInnerHeight() - mBottomStackPeekSize -
                     mBottomStackSlowDownLength;
         } else {
-            bottomStart = ambientState.getInnerHeight()
-                    - ambientState.getShelf().getIntrinsicHeight() - mPaddingBetweenElements;
+            bottomStart = ambientState.getInnerHeight();
+            if (algorithmState.visibleChildren.size() > 1) {
+                bottomStart -= ambientState.getShelf().getIntrinsicHeight()
+                        - mPaddingBetweenElements;
+            }
         }
         bottomStart += ambientState.getScrollY();
             // Collapse and expand the first child while the shade is being expanded
