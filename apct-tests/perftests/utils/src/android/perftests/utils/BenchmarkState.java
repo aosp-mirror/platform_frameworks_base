@@ -63,7 +63,7 @@ public final class BenchmarkState {
     // TODO: Tune these values.
     private static final long TARGET_TEST_DURATION_NS = ms2ns(500); // target testing for 500 ms
     private static final int MAX_TEST_ITERATIONS = 1000000;
-    private static final int MIN_TEST_ITERATIONS = 100;
+    private static final int MIN_TEST_ITERATIONS = 10;
     private static final int REPEAT_COUNT = 5;
 
     private long mStartTimeNs = 0;  // Previously captured System.nanoTime().
