@@ -1442,6 +1442,28 @@ public class Paint {
     }
 
     /**
+     * Return the paint's word-spacing for text. The default value is 0.
+     *
+     * @return the paint's word-spacing for drawing text.
+     * @hide
+     */
+    public float getWordSpacing() {
+        return nGetWordSpacing(mNativePaint);
+    }
+
+    /**
+     * Set the paint's word-spacing for text. The default value is 0.
+     * The value is in pixels (note the units are not the same as for
+     * letter-spacing).
+     *
+     * @param wordSpacing set the paint's word-spacing for drawing text.
+     * @hide
+     */
+    public void setWordSpacing(float wordSpacing) {
+        nSetWordSpacing(mNativePaint, wordSpacing);
+    }
+
+    /**
      * Returns the font feature settings. The format is the same as the CSS
      * font-feature-settings attribute:
      * <a href="https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop">
@@ -2710,6 +2732,10 @@ public class Paint {
     private static native float nGetLetterSpacing(long paintPtr);
     @CriticalNative
     private static native void nSetLetterSpacing(long paintPtr, float letterSpacing);
+    @CriticalNative
+    private static native float nGetWordSpacing(long paintPtr);
+    @CriticalNative
+    private static native void nSetWordSpacing(long paintPtr, float wordSpacing);
     @CriticalNative
     private static native int nGetHyphenEdit(long paintPtr);
     @CriticalNative

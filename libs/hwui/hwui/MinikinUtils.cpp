@@ -45,6 +45,7 @@ minikin::FontStyle MinikinUtils::prepareMinikinPaint(minikin::MinikinPaint* mini
     minikinPaint->scaleX = paint->getTextScaleX();
     minikinPaint->skewX = paint->getTextSkewX();
     minikinPaint->letterSpacing = paint->getLetterSpacing();
+    minikinPaint->wordSpacing = paint->getWordSpacing();
     minikinPaint->paintFlags = MinikinFontSkia::packPaintFlags(paint);
     minikinPaint->fontFeatureSettings = paint->getFontFeatureSettings();
     minikinPaint->hyphenEdit = minikin::HyphenEdit(paint->getHyphenEdit());

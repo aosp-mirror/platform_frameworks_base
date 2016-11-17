@@ -218,4 +218,13 @@ public class PaintTest extends AndroidTestCase {
             assertEquals(width, p.measureText(bidiText), 1.0f);
         }
     }
+
+    public void testSetGetWordSpacing() {
+        Paint p = new Paint();
+        assertEquals(0.0f, p.getWordSpacing());  // The default value should be 0.
+        p.setWordSpacing(1.0f);
+        assertEquals(1.0f, p.getWordSpacing());
+        p.setWordSpacing(-2.0f);
+        assertEquals(-2.0f, p.getWordSpacing());
+    }
 }

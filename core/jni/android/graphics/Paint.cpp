@@ -915,6 +915,16 @@ namespace PaintGlue {
         paint->setLetterSpacing(letterSpacing);
     }
 
+    static jfloat getWordSpacing(jlong paintHandle) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        return paint->getWordSpacing();
+    }
+
+    static void setWordSpacing(jlong paintHandle, jfloat wordSpacing) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        paint->setWordSpacing(wordSpacing);
+    }
+
     static jint getHyphenEdit(jlong paintHandle, jint hyphen) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         return paint->getHyphenEdit();
@@ -1043,6 +1053,8 @@ static const JNINativeMethod methods[] = {
     {"nSetTextSkewX","(JF)V", (void*) PaintGlue::setTextSkewX},
     {"nGetLetterSpacing","(J)F", (void*) PaintGlue::getLetterSpacing},
     {"nSetLetterSpacing","(JF)V", (void*) PaintGlue::setLetterSpacing},
+    {"nGetWordSpacing","(J)F", (void*) PaintGlue::getWordSpacing},
+    {"nSetWordSpacing","(JF)V", (void*) PaintGlue::setWordSpacing},
     {"nGetHyphenEdit", "(J)I", (void*) PaintGlue::getHyphenEdit},
     {"nSetHyphenEdit", "(JI)V", (void*) PaintGlue::setHyphenEdit},
     {"nAscent","(JJ)F", (void*) PaintGlue::ascent},

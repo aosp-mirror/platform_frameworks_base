@@ -48,6 +48,14 @@ public:
         return mLetterSpacing;
     }
 
+    void setWordSpacing(float wordSpacing) {
+        mWordSpacing = wordSpacing;
+    }
+
+    float getWordSpacing() const {
+        return mWordSpacing;
+    }
+
     void setFontFeatureSettings(const std::string& fontFeatureSettings) {
         mFontFeatureSettings = fontFeatureSettings;
     }
@@ -82,6 +90,7 @@ public:
 
 private:
     float mLetterSpacing = 0;
+    float mWordSpacing = 0;
     std::string mFontFeatureSettings;
     uint32_t mMinikinLangListId;
     minikin::FontVariant mFontVariant;
