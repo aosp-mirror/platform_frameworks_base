@@ -17,7 +17,7 @@
 #include "SkiaVulkanPipeline.h"
 
 #include "DeferredLayerUpdater.h"
-#include "renderthread/EglManager.h" // needed for Frame
+#include "renderthread/Frame.h"
 #include "Readback.h"
 #include "renderstate/RenderState.h"
 #include "SkiaPipeline.h"
@@ -58,8 +58,7 @@ Frame SkiaVulkanPipeline::getFrame() {
         return Frame(-1, -1, 0);
     }
 
-    // TODO: support buffer age if Vulkan API can do it
-    Frame frame(backBuffer->width(), backBuffer->height(), 0);
+    Frame frame(backBuffer->width(), backBuffer->height(), mVkManager.getAge(mVkSurface));
     return frame;
 }
 

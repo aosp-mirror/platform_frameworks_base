@@ -26,36 +26,8 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
+class Frame;
 class RenderThread;
-class EglManager;
-
-class Frame {
-public:
-    Frame(EGLint width, EGLint height, EGLint bufferAge)
-            : mWidth(width)
-            , mHeight(height)
-            , mBufferAge(bufferAge) { }
-
-    EGLint width() const { return mWidth; }
-    EGLint height() const { return mHeight; }
-
-    // See: https://www.khronos.org/registry/egl/extensions/EXT/EGL_EXT_buffer_age.txt
-    // for what this means
-    EGLint bufferAge() const { return mBufferAge; }
-
-private:
-    Frame() {}
-    friend class EglManager;
-
-    EGLSurface mSurface;
-    EGLint mWidth;
-    EGLint mHeight;
-    EGLint mBufferAge;
-
-    // Maps from 0,0 in top-left to 0,0 in bottom-left
-    // If out is not an EGLint[4] you're going to have a bad time
-    void map(const SkRect& in, EGLint* out) const;
-};
 
 // This class contains the shared global EGL objects, such as EGLDisplay
 // and EGLConfig, which are re-used by CanvasContext

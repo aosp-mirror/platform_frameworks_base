@@ -19,6 +19,7 @@
 #include "DeferredLayerUpdater.h"
 #include "LayerDrawable.h"
 #include "renderthread/EglManager.h"
+#include "renderthread/Frame.h"
 #include "renderstate/RenderState.h"
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"

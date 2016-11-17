@@ -20,6 +20,7 @@
 #include "AnimationContext.h"
 #include "Caches.h"
 #include "EglManager.h"
+#include "Frame.h"
 #include "LayerUpdateQueue.h"
 #include "Properties.h"
 #include "RenderThread.h"
