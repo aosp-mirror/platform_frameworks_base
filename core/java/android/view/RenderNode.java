@@ -26,6 +26,8 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 
 import dalvik.annotation.optimization.FastNative;
 
+import libcore.util.NativeAllocationRegistry;
+
 /**
  * <p>A display list records a series of graphics related operations and can replay
  * them later. Display lists are usually built by recording operations on a
@@ -130,13 +132,20 @@ import dalvik.annotation.optimization.FastNative;
  */
 public class RenderNode {
 
+    // Use a Holder to allow static initialization in the boot image.
+    private static class NoImagePreloadHolder {
+        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+                RenderNode.class.getClassLoader(), nGetNativeFinalizer(), 1024);
+    }
+
     private boolean mValid;
     // Do not access directly unless you are ThreadedRenderer
-    long mNativeRenderNode;
+    final long mNativeRenderNode;
     private final View mOwningView;
 
     private RenderNode(String name, View owningView) {
         mNativeRenderNode = nCreate(name);
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeRenderNode);
         mOwningView = owningView;
     }
 
@@ -145,6 +154,7 @@ public class RenderNode {
      */
     private RenderNode(long nativePtr) {
         mNativeRenderNode = nativePtr;
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeRenderNode);
         mOwningView = null;
     }
 
@@ -154,19 +164,7 @@ public class RenderNode {
      * is not feasible.
      */
     public void destroy() {
-        if (mNativeRenderNode != 0) {
-            nFinalize(mNativeRenderNode);
-            mNativeRenderNode = 0;
-        }
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            destroy();
-        } finally {
-            super.finalize();
-        }
+        // TODO: Removed temporarily
     }
 
     /**
@@ -835,7 +833,6 @@ public class RenderNode {
 
     // Intentionally not static because it acquires a reference to 'this'
     private native long nCreate(String name);
-    private native void nFinalize(long renderNode);
 
     private static native long nGetNativeFinalizer();
     private static native void nSetDisplayList(long renderNode, long newData);
