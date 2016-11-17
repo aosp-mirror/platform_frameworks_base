@@ -307,6 +307,7 @@ LOCAL_SRC_FILES += \
     tests/unit/SkiaBehaviorTests.cpp \
     tests/unit/SkiaDisplayListTests.cpp \
     tests/unit/SkiaPipelineTests.cpp \
+    tests/unit/SkiaRenderPropertiesTests.cpp \
     tests/unit/SkiaCanvasTests.cpp \
     tests/unit/SnapshotTests.cpp \
     tests/unit/StringUtilsTests.cpp \

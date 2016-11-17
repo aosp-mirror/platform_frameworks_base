@@ -293,6 +293,9 @@ public:
 
     static SkColor getColor(const sk_sp<SkSurface>& surface, int x, int y);
 
+    static SkRect getClipBounds(const SkCanvas* canvas);
+    static SkRect getLocalClipBounds(const SkCanvas* canvas);
+
 private:
     static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {
         node->syncProperties();

@@ -22,6 +22,7 @@
 #include <renderthread/EglManager.h>
 #include <renderthread/OpenGLPipeline.h>
 #include <utils/Unicode.h>
+#include <SkClipStack.h>
 
 namespace android {
 namespace uirenderer {
@@ -162,6 +163,24 @@ SkColor TestUtils::getColor(const sk_sp<SkSurface>& surface, int x, int y) {
             return 0;
     }
     return 0;
+}
+
+SkRect TestUtils::getClipBounds(const SkCanvas* canvas) {
+    SkClipStack::BoundsType boundType;
+    SkRect clipBounds;
+    canvas->getClipStack()->getBounds(&clipBounds, &boundType);
+    return clipBounds;
+}
+
+SkRect TestUtils::getLocalClipBounds(const SkCanvas* canvas) {
+    SkMatrix invertedTotalMatrix;
+    if (!canvas->getTotalMatrix().invert(&invertedTotalMatrix)) {
+        return SkRect::MakeEmpty();
+    }
+    SkRect outlineInDeviceCoord = TestUtils::getClipBounds(canvas);
+    SkRect outlineInLocalCoord;
+    invertedTotalMatrix.mapRect(&outlineInLocalCoord, outlineInDeviceCoord);
+    return outlineInLocalCoord;
 }
 
 } /* namespace uirenderer */

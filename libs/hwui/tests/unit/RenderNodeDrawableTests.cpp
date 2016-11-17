@@ -29,6 +29,7 @@
 #include <SkSurface_Base.h>
 #include <SkLiteRecorder.h>
 #include <SkClipStack.h>
+#include "FatalTestCanvas.h"
 #include <string.h>
 
 
@@ -89,11 +90,11 @@ public:
     ZReorderCanvas(int width, int height) : SkCanvas(width, height) {}
     void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
         int expectedOrder = SkColorGetB(paint.getColor()); // extract order from blue channel
-        EXPECT_EQ(expectedOrder, mIndex++) << "An op was drawn out of order";
+        EXPECT_EQ(expectedOrder, mDrawCounter++) << "An op was drawn out of order";
     }
-    int getIndex() { return mIndex; }
+    int getIndex() { return mDrawCounter; }
 protected:
-    int mIndex = 0;
+    int mDrawCounter = 0;
 };
 
 } // end anonymous namespace
@@ -173,21 +174,6 @@ public:
         return new AnimationContext(clock);
     }
 };
-
-inline SkRect getBounds(const SkCanvas* canvas) {
-    SkClipStack::BoundsType boundType;
-    SkRect clipBounds;
-    canvas->getClipStack()->getBounds(&clipBounds, &boundType);
-    return clipBounds;
-}
-inline SkRect getLocalBounds(const SkCanvas* canvas) {
-    SkMatrix invertedTotalMatrix;
-    EXPECT_TRUE(canvas->getTotalMatrix().invert(&invertedTotalMatrix));
-    SkRect outlineInDeviceCoord = getBounds(canvas);
-    SkRect outlineInLocalCoord;
-    invertedTotalMatrix.mapRect(&outlineInLocalCoord, outlineInDeviceCoord);
-    return outlineInLocalCoord;
-}
 } // end anonymous namespace
 
 RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorder) {
@@ -197,26 +183,26 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorder) {
     public:
         ProjectionTestCanvas(int width, int height) : SkCanvas(width, height) {}
         void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
-            const int index = mIndex++;
+            const int index = mDrawCounter++;
             SkMatrix expectedMatrix;;
             switch (index) {
             case 0:  //this is node "B"
                 EXPECT_EQ(SkRect::MakeWH(100, 100), rect);
                 EXPECT_EQ(SK_ColorWHITE, paint.getColor());
                 expectedMatrix.reset();
-                EXPECT_EQ(SkRect::MakeLTRB(0, 0, 100, 100), getBounds(this));
+                EXPECT_EQ(SkRect::MakeLTRB(0, 0, 100, 100), TestUtils::getClipBounds(this));
                 break;
             case 1:  //this is node "P"
                 EXPECT_EQ(SkRect::MakeLTRB(-10, -10, 60, 60), rect);
                 EXPECT_EQ(SK_ColorDKGRAY, paint.getColor());
                 expectedMatrix.setTranslate(50 - SCROLL_X, 50 - SCROLL_Y);
-                EXPECT_EQ(SkRect::MakeLTRB(-35, -30, 45, 50), getLocalBounds(this));
+                EXPECT_EQ(SkRect::MakeLTRB(-35, -30, 45, 50), TestUtils::getLocalClipBounds(this));
                 break;
             case 2:  //this is node "C"
                 EXPECT_EQ(SkRect::MakeWH(100, 50), rect);
                 EXPECT_EQ(SK_ColorBLUE, paint.getColor());
                 expectedMatrix.setTranslate(-SCROLL_X, 50 - SCROLL_Y);
-                EXPECT_EQ(SkRect::MakeLTRB(0, 40, 95, 90), getBounds(this));
+                EXPECT_EQ(SkRect::MakeLTRB(0, 40, 95, 90), TestUtils::getClipBounds(this));
                 break;
             default:
                 ADD_FAILURE();
@@ -224,9 +210,9 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorder) {
             EXPECT_EQ(expectedMatrix, getTotalMatrix());
         }
 
-        int getIndex() { return mIndex; }
+        int getIndex() { return mDrawCounter; }
     protected:
-        int mIndex = 0;
+        int mDrawCounter = 0;
     };
 
     /**
@@ -315,23 +301,23 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
     public:
         ProjectionTestCanvas(int* drawCounter)
             : SkCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
-            , mDrawCounter(drawCounter) 
+            , mDrawCounter(drawCounter)
         {}
         void onDrawArc(const SkRect&, SkScalar startAngle, SkScalar sweepAngle, bool useCenter,
                 const SkPaint&) override {
             EXPECT_EQ(0, (*mDrawCounter)++); //part of painting the layer
-            EXPECT_EQ(SkRect::MakeLTRB(0, 0, LAYER_WIDTH, LAYER_HEIGHT), getBounds(this));
+            EXPECT_EQ(SkRect::MakeLTRB(0, 0, LAYER_WIDTH, LAYER_HEIGHT), TestUtils::getClipBounds(this));
         }
         void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
             EXPECT_EQ(1, (*mDrawCounter)++);
-            EXPECT_EQ(SkRect::MakeLTRB(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT), getBounds(this));
+            EXPECT_EQ(SkRect::MakeLTRB(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT), TestUtils::getClipBounds(this));
         }
         void onDrawOval(const SkRect&, const SkPaint&) override {
             EXPECT_EQ(2, (*mDrawCounter)++);
             SkMatrix expectedMatrix;
             expectedMatrix.setTranslate(100 - SCROLL_X, 100 - SCROLL_Y);
             EXPECT_EQ(expectedMatrix, getTotalMatrix());
-            EXPECT_EQ(SkRect::MakeLTRB(-85, -80, 295, 300), getLocalBounds(this));
+            EXPECT_EQ(SkRect::MakeLTRB(-85, -80, 295, 300), TestUtils::getLocalClipBounds(this));
         }
         int* mDrawCounter;
     };
@@ -345,7 +331,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
         void onDraw(SkCanvas*, SkScalar x, SkScalar y, const SkPaint*) override {
             EXPECT_EQ(3, (*mDrawCounter)++);
             EXPECT_EQ(SkRect::MakeLTRB(100 - SCROLL_X, 100 - SCROLL_Y, 300 - SCROLL_X,
-                   300 - SCROLL_Y), getBounds(this->getCanvas()));
+                   300 - SCROLL_Y), TestUtils::getClipBounds(this->getCanvas()));
         }
         SkCanvas* onNewCanvas() override {
             return new ProjectionTestCanvas(mDrawCounter);
@@ -440,15 +426,15 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionChildScroll) {
     public:
         ProjectionChildScrollTestCanvas() : SkCanvas(CANVAS_WIDTH, CANVAS_HEIGHT) {}
         void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
-            EXPECT_EQ(0, mIndex++);
+            EXPECT_EQ(0, mDrawCounter++);
             EXPECT_TRUE(getTotalMatrix().isIdentity());
         }
         void onDrawOval(const SkRect&, const SkPaint&) override {
-            EXPECT_EQ(1, mIndex++);
-            EXPECT_EQ(SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT), getBounds(this));
+            EXPECT_EQ(1, mDrawCounter++);
+            EXPECT_EQ(SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT), TestUtils::getClipBounds(this));
             EXPECT_TRUE(getTotalMatrix().isIdentity());
         }
-        int mIndex = 0;
+        int mDrawCounter = 0;
     };
 
     auto receiverBackground = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
@@ -494,7 +480,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionChildScroll) {
     std::unique_ptr<ProjectionChildScrollTestCanvas> canvas(new ProjectionChildScrollTestCanvas());
     RenderNodeDrawable drawable(parent.get(), canvas.get(), true);
     canvas->drawDrawable(&drawable);
-    EXPECT_EQ(2, canvas->mIndex);
+    EXPECT_EQ(2, canvas->mDrawCounter);
 }
 
 namespace {
@@ -787,3 +773,124 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorderTwoReceivablesDeeper) {
     }); //nodeA
     EXPECT_EQ(5, drawNode(renderThread, nodeA));
 }
+
+RENDERTHREAD_TEST(RenderNodeDrawable, simple) {
+    static const int CANVAS_WIDTH = 100;
+    static const int CANVAS_HEIGHT = 200;
+    class SimpleTestCanvas : public TestCanvasBase {
+    public:
+        SimpleTestCanvas() : TestCanvasBase(CANVAS_WIDTH, CANVAS_HEIGHT) {
+        }
+        void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
+            EXPECT_EQ(0, mDrawCounter++);
+        }
+        void onDrawImage(const SkImage*, SkScalar dx, SkScalar dy, const SkPaint*) override {
+            EXPECT_EQ(1, mDrawCounter++);
+        }
+    };
+
+    auto node = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        sk_sp<Bitmap> bitmap(TestUtils::createBitmap(25, 25));
+        canvas.drawRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, SkPaint());
+        canvas.drawBitmap(*bitmap, 10, 10, nullptr);
+    });
+
+    SimpleTestCanvas canvas;
+    RenderNodeDrawable drawable(node.get(), &canvas, true);
+    canvas.drawDrawable(&drawable);
+    EXPECT_EQ(2, canvas.mDrawCounter);
+}
+
+RENDERTHREAD_TEST(RenderNodeDrawable, colorOp_unbounded) {
+    static const int CANVAS_WIDTH = 200;
+    static const int CANVAS_HEIGHT = 200;
+    class ColorTestCanvas : public TestCanvasBase {
+    public:
+        ColorTestCanvas() : TestCanvasBase(CANVAS_WIDTH, CANVAS_HEIGHT) {
+        }
+        void onDrawPaint(const SkPaint&) {
+            switch (mDrawCounter++) {
+            case 0:
+                // While this mirrors FrameBuilder::colorOp_unbounded, this value is different
+                // because there is no root (root is clipped in SkiaPipeline::renderFrame).
+                // SkiaPipeline.clipped and clip_replace verify the root clip.
+                EXPECT_TRUE(TestUtils::getClipBounds(this).isEmpty());
+                break;
+            case 1:
+                EXPECT_EQ(SkRect::MakeWH(10, 10), TestUtils::getClipBounds(this));
+                break;
+            default:
+                ADD_FAILURE();
+            }
+        }
+    };
+
+    auto unclippedColorView = TestUtils::createSkiaNode(0, 0, 10, 10,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        props.setClipToBounds(false);
+        canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
+    });
+
+    auto clippedColorView = TestUtils::createSkiaNode(0, 0, 10, 10,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
+    });
+
+    ColorTestCanvas canvas;
+    RenderNodeDrawable drawable(unclippedColorView.get(), &canvas, true);
+    canvas.drawDrawable(&drawable);
+    EXPECT_EQ(1, canvas.mDrawCounter);
+    RenderNodeDrawable drawable2(clippedColorView.get(), &canvas, true);
+    canvas.drawDrawable(&drawable2);
+    EXPECT_EQ(2, canvas.mDrawCounter);
+}
+
+TEST(RenderNodeDrawable, renderNode) {
+    static const int CANVAS_WIDTH = 200;
+    static const int CANVAS_HEIGHT = 200;
+    class RenderNodeTestCanvas : public TestCanvasBase {
+    public:
+        RenderNodeTestCanvas() : TestCanvasBase(CANVAS_WIDTH, CANVAS_HEIGHT) {
+        }
+        void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
+            switch(mDrawCounter++) {
+            case 0:
+                EXPECT_EQ(SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT), TestUtils::getClipBounds(this));
+                EXPECT_EQ(SK_ColorDKGRAY, paint.getColor());
+                break;
+            case 1:
+                EXPECT_EQ(SkRect::MakeLTRB(50, 50, 150, 150), TestUtils::getClipBounds(this));
+                EXPECT_EQ(SK_ColorWHITE, paint.getColor());
+                break;
+            default:
+                ADD_FAILURE();
+            }
+        }
+    };
+
+    auto child = TestUtils::createSkiaNode(10, 10, 110, 110,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setColor(SK_ColorWHITE);
+        canvas.drawRect(0, 0, 100, 100, paint);
+    });
+
+    auto parent = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
+            [&child](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setColor(SK_ColorDKGRAY);
+        canvas.drawRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, paint);
+
+        canvas.save(SaveFlags::MatrixClip);
+        canvas.translate(40, 40);
+        canvas.drawRenderNode(child.get());
+        canvas.restore();
+    });
+
+    RenderNodeTestCanvas canvas;
+    RenderNodeDrawable drawable(parent.get(), &canvas, true);
+    canvas.drawDrawable(&drawable);
+    EXPECT_EQ(2, canvas.mDrawCounter);
+}
+
