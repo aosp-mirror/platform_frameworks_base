@@ -52,6 +52,7 @@ import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.app.NightDisplayController;
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.os.ZygoteInit;
@@ -275,7 +276,9 @@ public final class SystemServer {
 
             // Here we go!
             Slog.i(TAG, "Entered the Android system server!");
-            EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN, SystemClock.uptimeMillis());
+            int uptimeMillis = (int) SystemClock.uptimeMillis();
+            EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN, uptimeMillis);
+            MetricsLogger.histogram(null, "boot_system_server_init", uptimeMillis);
 
             // In case the runtime switched since last boot (such as when
             // the old runtime was removed in an OTA), set the system
@@ -364,6 +367,7 @@ public final class SystemServer {
         if (StrictMode.conditionallyEnableDebugLogging()) {
             Slog.i(TAG, "Enabled StrictMode for system server main thread.");
         }
+        MetricsLogger.histogram(null, "boot_system_server_ready", (int) SystemClock.uptimeMillis());
 
         // Loop forever.
         Looper.loop();
@@ -492,13 +496,16 @@ public final class SystemServer {
         }
 
         // Start the package manager.
+        MetricsLogger.histogram(null, "boot_package_manager_init_start",
+                (int) SystemClock.uptimeMillis());
         traceBeginAndSlog("StartPackageManagerService");
         mPackageManagerService = PackageManagerService.main(mSystemContext, installer,
                 mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, mOnlyCore);
         mFirstBoot = mPackageManagerService.isFirstBoot();
         mPackageManager = mSystemContext.getPackageManager();
         traceEnd();
-
+        MetricsLogger.histogram(null, "boot_package_manager_init_ready",
+                (int) SystemClock.uptimeMillis());
         // Manages A/B OTA dexopting. This is a bootstrap service as we need it to rename
         // A/B artifacts after boot, before anything else might touch/need them.
         // Note: this isn't needed during decryption (we don't have /data anyways).
