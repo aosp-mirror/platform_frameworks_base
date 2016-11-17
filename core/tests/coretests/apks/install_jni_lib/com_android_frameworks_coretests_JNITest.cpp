@@ -14,24 +14,11 @@
  * limitations under the License.
  */
 
-#include "nativehelper/JNIHelp.h"
+#include <jni.h>
 
-namespace android {
-
-static jint checkFunction(JNIEnv*, jclass) {
+extern "C" JNIEXPORT
+jint JNICALL Java_com_android_frameworks_coretests_JNITests_checkFunction(JNIEnv*, jclass) {
     return 1;
-}
-
-static const JNINativeMethod sMethods[] = {
-    /* name, signature, funcPtr */
-    { "checkFunction", "()I", (void*) checkFunction },
-};
-
-int register_com_android_frameworks_coretests_JNITests(JNIEnv* env) {
-    return jniRegisterNativeMethods(env, "com/android/frameworks/coretests/JNITests", sMethods,
-            NELEM(sMethods));
-}
-
 }
 
 /*
@@ -39,14 +26,9 @@ int register_com_android_frameworks_coretests_JNITests(JNIEnv* env) {
  */
 jint JNI_OnLoad(JavaVM *jvm, void */* reserved */) {
     JNIEnv *e;
-    int status;
 
     // Check JNI version
     if (jvm->GetEnv((void **) &e, JNI_VERSION_1_6)) {
-        return JNI_ERR;
-    }
-
-    if ((status = android::register_com_android_frameworks_coretests_JNITests(e)) < 0) {
         return JNI_ERR;
     }
 
