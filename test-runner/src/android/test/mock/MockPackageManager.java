@@ -316,6 +316,12 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
+    public List<ApplicationInfo> getInstalledApplicationsAsUser(int flags, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
     public List<EphemeralApplicationInfo> getEphemeralApplications() {
         throw new UnsupportedOperationException();
     }
