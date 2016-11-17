@@ -19,6 +19,7 @@ package android.telecom.Logging;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telecom.Log;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -26,20 +27,23 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.ArrayList;
 
 /**
- * The session that stores information about a thread's point of entry into the Telecom code that
- * persists until the thread exits Telecom.
+ * Stores information about a thread's point of entry into that should persist until that thread
+ * exits.
  * @hide
  */
 public class Session {
 
     public static final String START_SESSION = "START_SESSION";
+    public static final String START_EXTERNAL_SESSION = "START_EXTERNAL_SESSION";
     public static final String CREATE_SUBSESSION = "CREATE_SUBSESSION";
     public static final String CONTINUE_SUBSESSION = "CONTINUE_SUBSESSION";
     public static final String END_SUBSESSION = "END_SUBSESSION";
     public static final String END_SESSION = "END_SESSION";
 
     public static final String SUBSESSION_SEPARATION_CHAR = "->";
+    public static final String SESSION_SEPARATION_CHAR_CHILD = "_";
     public static final String EXTERNAL_INDICATOR = "E-";
+    public static final String TRUNCATE_STRING = "...";
 
     /**
      * Initial value of mExecutionEndTimeMs and the final value of {@link #getLocalExecutionTime()}
@@ -49,15 +53,19 @@ public class Session {
 
     public static class Info implements Parcelable {
         public final String sessionId;
-        public final String shortMethodName;
+        public final String methodPath;
 
-        private Info(String id, String methodName) {
+        private Info(String id, String path) {
             sessionId = id;
-            shortMethodName = methodName;
+            methodPath = path;
         }
 
         public static Info getInfo (Session s) {
-            return new Info(s.getFullSessionId(), s.getShortMethodName());
+            // Create Info based on the truncated method path if the session is external, so we do
+            // not get multiple stacking external sessions (unless we have DEBUG level logging or
+            // lower).
+            return new Info(s.getFullSessionId(), s.getFullMethodPath(
+                    !Log.DEBUG && s.isSessionExternal()));
         }
 
         /** Responsible for creating Info objects for deserialized Parcels. */
@@ -86,7 +94,7 @@ public class Session {
         @Override
         public void writeToParcel(Parcel destination, int flags) {
             destination.writeString(sessionId);
-            destination.writeString(shortMethodName);
+            destination.writeString(methodPath);
         }
     }
 
@@ -226,7 +234,15 @@ public class Session {
         if (parentSession == null) {
             return mSessionId;
         } else {
-            return parentSession.getFullSessionId() + "_" + mSessionId;
+            if (Log.VERBOSE) {
+                return parentSession.getFullSessionId() +
+                        // Append "_X" to subsession to show subsession designation.
+                        SESSION_SEPARATION_CHAR_CHILD + mSessionId;
+            } else {
+                // Only worry about the base ID at the top of the tree.
+                return parentSession.getFullSessionId();
+            }
+
         }
     }
 
@@ -259,16 +275,18 @@ public class Session {
     }
 
     // Recursively concatenate mShortMethodName with the parent Sessions to create full method
-    // path. Caches this string so that multiple calls for the path will be quick.
-    public String getFullMethodPath() {
+    // path. if truncatePath is set to true, all other external sessions (except for the most
+    // recent) will be truncated to "..."
+    public String getFullMethodPath(boolean truncatePath) {
         StringBuilder sb = new StringBuilder();
-        getFullMethodPath(sb);
+        getFullMethodPath(sb, truncatePath);
         return sb.toString();
     }
 
-    private synchronized void getFullMethodPath(StringBuilder sb) {
-        // Don't calculate if we have already figured it out!
-        if (!TextUtils.isEmpty(mFullMethodPathCache)) {
+    private synchronized void getFullMethodPath(StringBuilder sb, boolean truncatePath) {
+        // Return cached value for method path. When returning the truncated path, recalculate the
+        // full path without using the cached value.
+        if (!TextUtils.isEmpty(mFullMethodPathCache) && !truncatePath) {
             sb.append(mFullMethodPathCache);
             return;
         }
@@ -278,23 +296,35 @@ public class Session {
             // Check to see if the session has been renamed yet. If it has not, then the session
             // has not been continued.
             isSessionStarted = !mShortMethodName.equals(parentSession.mShortMethodName);
-            parentSession.getFullMethodPath(sb);
+            parentSession.getFullMethodPath(sb, truncatePath);
             sb.append(SUBSESSION_SEPARATION_CHAR);
         }
         // Encapsulate the external session's method name so it is obvious what part of the session
-        // is external.
+        // is external or truncate it if we do not want the entire history.
         if (isExternal()) {
-            sb.append("(");
-            sb.append(mShortMethodName);
-            sb.append(")");
+            if (truncatePath) {
+                sb.append(TRUNCATE_STRING);
+            } else {
+                sb.append("(");
+                sb.append(mShortMethodName);
+                sb.append(")");
+            }
         } else {
             sb.append(mShortMethodName);
         }
-
-        if(isSessionStarted) {
+        // If we are returning the truncated path, do not save that path as the full path.
+        if (isSessionStarted && !truncatePath) {
             // Cache this value so that we do not have to do this work next time!
             // We do not cache the value if the session being evaluated hasn't been continued yet.
             mFullMethodPathCache = sb.toString();
+        }
+    }
+    // Recursively move to the top of the tree to see if the parent session is external.
+    private boolean isSessionExternal() {
+        if (getParentSession() == null) {
+            return isExternal();
+        } else {
+            return getParentSession().isSessionExternal();
         }
     }
 
@@ -350,7 +380,7 @@ public class Session {
             return mParentSession.toString();
         } else {
             StringBuilder methodName = new StringBuilder();
-            methodName.append(getFullMethodPath());
+            methodName.append(getFullMethodPath(false /*truncatePath*/));
             if (mOwnerInfo != null && !mOwnerInfo.isEmpty()) {
                 methodName.append("(InCall package: ");
                 methodName.append(mOwnerInfo);
