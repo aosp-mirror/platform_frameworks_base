@@ -2189,9 +2189,9 @@ public class ExifInterface {
     /**
      * Loads EXIF attributes from a JPEG input stream.
      *
-     * @param inputStream The input stream that starts with the JPEG data.
+     * @param in The input stream that starts with the JPEG data.
      * @param jpegOffset The offset value in input stream for JPEG data.
-     * @param imageTypes The image type from which to retrieve metadata. Use IFD_TYPE_PRIMARY for
+     * @param imageType The image type from which to retrieve metadata. Use IFD_TYPE_PRIMARY for
      *                   primary image, IFD_TYPE_PREVIEW for preview image, and
      *                   IFD_TYPE_THUMBNAIL for thumbnail image.
      * @throws IOException If the data contains invalid JPEG markers, offsets, or length values.
