@@ -60,6 +60,11 @@ public abstract class ActivityManagerInternal {
      */
     public static final int APP_TRANSITION_TIMEOUT = 3;
 
+    /**
+     * Verify that calling app has access to the given provider.
+     */
+    public abstract String checkContentProviderAccess(String authority, int userId);
+
     // Called by the power manager.
     public abstract void onWakefulnessChanged(int wakefulness);
 
