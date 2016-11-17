@@ -53,11 +53,15 @@ void SkiaDisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) 
 
 bool SkiaDisplayList::prepareListAndChildren(TreeInfo& info, bool functorsNeedLayer,
         std::function<void(RenderNode*, TreeInfo&, bool)> childFn) {
-    // If the prepare tree is triggered by the UI thread then we must force all
-    // mutable images to be pinned in the GPU cache until the next UI thread
-    // draw
-    if (info.mode == TreeInfo::MODE_FULL) {
-        info.prepareTextures = info.canvasContext.pinImages(mMutableImages);
+    // If the prepare tree is triggered by the UI thread and no previous call to
+    // pinImages has failed then we must pin all mutable images in the GPU cache
+    // until the next UI thread draw.
+    if (info.prepareTextures && !info.canvasContext.pinImages(mMutableImages)) {
+        // In the event that pinning failed we prevent future pinImage calls for the
+        // remainder of this tree traversal and also unpin any currently pinned images
+        // to free up GPU resources.
+        info.prepareTextures = false;
+        info.canvasContext.unpinImages();
     }
 
     for (auto& child : mChildNodes) {
