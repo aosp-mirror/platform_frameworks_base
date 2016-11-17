@@ -220,6 +220,11 @@ static void SystemProperties_add_change_callback(JNIEnv *env, jobject clazz)
     }
 }
 
+static void SystemProperties_report_sysprop_change(JNIEnv /**env*/, jobject /*clazz*/)
+{
+    report_sysprop_change();
+}
+
 static const JNINativeMethod method_table[] = {
     { "native_get", "(Ljava/lang/String;)Ljava/lang/String;",
       (void*) SystemProperties_getS },
@@ -235,6 +240,8 @@ static const JNINativeMethod method_table[] = {
       (void*) SystemProperties_set },
     { "native_add_change_callback", "()V",
       (void*) SystemProperties_add_change_callback },
+    { "native_report_sysprop_change", "()V",
+      (void*) SystemProperties_report_sysprop_change },
 };
 
 int register_android_os_SystemProperties(JNIEnv *env)
