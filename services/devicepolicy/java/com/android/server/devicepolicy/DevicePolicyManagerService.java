@@ -205,6 +205,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String TAG_AFFILIATION_ID = "affiliation-id";
 
+    private static final String TAG_LAST_SECURITY_LOG_RETRIEVAL = "last-security-log-retrieval";
+
+    private static final String TAG_LAST_BUG_REPORT_REQUEST = "last-bug-report-request";
+
+    private static final String TAG_LAST_NETWORK_LOG_RETRIEVAL = "last-network-log-retrieval";
+
     private static final String TAG_ADMIN_BROADCAST_PENDING = "admin-broadcast-pending";
 
     private static final String ATTR_VALUE = "value";
@@ -465,6 +471,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         String mApplicationRestrictionsManagingPackage;
 
         Set<String> mAffiliationIds = new ArraySet<>();
+
+        long mLastSecurityLogRetrievalTime = -1;
+
+        long mLastBugReportRequestTime = -1;
+
+        long mLastNetworkLogsRetrievalTime = -1;
 
         // Used for initialization of users created by createAndManageUsers.
         boolean mAdminBroadcastPending = false;
@@ -2359,6 +2371,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, TAG_AFFILIATION_ID);
             }
 
+            if (policy.mLastSecurityLogRetrievalTime >= 0) {
+                out.startTag(null, TAG_LAST_SECURITY_LOG_RETRIEVAL);
+                out.attribute(null, ATTR_VALUE,
+                        Long.toString(policy.mLastSecurityLogRetrievalTime));
+                out.endTag(null, TAG_LAST_SECURITY_LOG_RETRIEVAL);
+            }
+
+            if (policy.mLastBugReportRequestTime >= 0) {
+                out.startTag(null, TAG_LAST_BUG_REPORT_REQUEST);
+                out.attribute(null, ATTR_VALUE,
+                        Long.toString(policy.mLastBugReportRequestTime));
+                out.endTag(null, TAG_LAST_BUG_REPORT_REQUEST);
+            }
+
+            if (policy.mLastNetworkLogsRetrievalTime >= 0) {
+                out.startTag(null, TAG_LAST_NETWORK_LOG_RETRIEVAL);
+                out.attribute(null, ATTR_VALUE,
+                        Long.toString(policy.mLastNetworkLogsRetrievalTime));
+                out.endTag(null, TAG_LAST_NETWORK_LOG_RETRIEVAL);
+            }
+
             if (policy.mAdminBroadcastPending) {
                 out.startTag(null, TAG_ADMIN_BROADCAST_PENDING);
                 out.attribute(null, ATTR_VALUE,
@@ -2515,6 +2548,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     policy.doNotAskCredentialsOnBoot = true;
                 } else if (TAG_AFFILIATION_ID.equals(tag)) {
                     policy.mAffiliationIds.add(parser.getAttributeValue(null, "id"));
+                } else if (TAG_LAST_SECURITY_LOG_RETRIEVAL.equals(tag)) {
+                    policy.mLastSecurityLogRetrievalTime = Long.parseLong(
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_LAST_BUG_REPORT_REQUEST.equals(tag)) {
+                    policy.mLastBugReportRequestTime = Long.parseLong(
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_LAST_NETWORK_LOG_RETRIEVAL.equals(tag)) {
+                    policy.mLastNetworkLogsRetrievalTime = Long.parseLong(
+                            parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_ADMIN_BROADCAST_PENDING.equals(tag)) {
                     String pending = parser.getAttributeValue(null, ATTR_VALUE);
                     policy.mAdminBroadcastPending = Boolean.toString(true).equals(pending);
@@ -5521,9 +5563,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
 
+        final long currentTime = System.currentTimeMillis();
+        synchronized (this) {
+            DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
+            if (currentTime > policyData.mLastBugReportRequestTime) {
+                policyData.mLastBugReportRequestTime = currentTime;
+                saveSettingsLocked(UserHandle.USER_SYSTEM);
+            }
+        }
+
         final long callingIdentity = mInjector.binderClearCallingIdentity();
         try {
-            ActivityManager.getService().requestBugReport(
+            mInjector.getIActivityManager().requestBugReport(
                     ActivityManager.BUGREPORT_OPTION_REMOTE);
 
             mRemoteBugreportServiceIsActive.set(true);
@@ -6527,6 +6578,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void enforceNotManagedProfile(int userHandle, String message) {
         if(isManagedProfile(userHandle)) {
             throw new SecurityException("You can not " + message + " for a managed profile.");
+        }
+    }
+
+    private void enforceSystemUid() {
+        if (!isCallerWithSystemUid()) {
+            throw new SecurityException("Only the system can call this method.");
         }
     }
 
@@ -9169,6 +9226,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private synchronized void recordSecurityLogRetrievalTime() {
+        final long currentTime = System.currentTimeMillis();
+        DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
+        if (currentTime > policyData.mLastSecurityLogRetrievalTime) {
+            policyData.mLastSecurityLogRetrievalTime = currentTime;
+            saveSettingsLocked(UserHandle.USER_SYSTEM);
+        }
+    }
+
     @Override
     public ParceledListSlice<SecurityEvent> retrievePreRebootSecurityLogs(ComponentName admin) {
         Preconditions.checkNotNull(admin);
@@ -9177,6 +9243,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mContext.getResources().getBoolean(R.bool.config_supportPreRebootSecurityLogs)) {
             return null;
         }
+
+        recordSecurityLogRetrievalTime();
 
         ArrayList<SecurityEvent> output = new ArrayList<SecurityEvent>();
         try {
@@ -9192,6 +9260,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public ParceledListSlice<SecurityEvent> retrieveSecurityLogs(ComponentName admin) {
         Preconditions.checkNotNull(admin);
         ensureDeviceOwnerManagingSingleUser(admin);
+
+        recordSecurityLogRetrievalTime();
 
         List<SecurityEvent> logs = mSecurityLogMonitor.retrieveLogs();
         return logs != null ? new ParceledListSlice<SecurityEvent>(logs) : null;
@@ -9668,9 +9738,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (mNetworkLogger == null) {
             return null;
         }
-        return isNetworkLoggingEnabledInternalLocked()
-                ? mNetworkLogger.retrieveLogs(batchToken)
-                : null;
+
+        if (!isNetworkLoggingEnabledInternalLocked()) {
+            return null;
+        }
+
+        final long currentTime = System.currentTimeMillis();
+        synchronized (this) {
+            DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
+            if (currentTime > policyData.mLastNetworkLogsRetrievalTime) {
+                policyData.mLastNetworkLogsRetrievalTime = currentTime;
+                saveSettingsLocked(UserHandle.USER_SYSTEM);
+            }
+        }
+
+        return mNetworkLogger.retrieveLogs(batchToken);
     }
 
     /**
@@ -9713,5 +9795,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // do not bind anything accidentally.
         rawIntent.setComponent(info.serviceInfo.getComponentName());
         return rawIntent;
+    }
+
+    @Override
+    public long getLastSecurityLogRetrievalTime() {
+        enforceSystemUid();
+        return getUserData(UserHandle.USER_SYSTEM).mLastSecurityLogRetrievalTime;
+     }
+
+    @Override
+    public long getLastBugReportRequestTime() {
+        enforceSystemUid();
+        return getUserData(UserHandle.USER_SYSTEM).mLastBugReportRequestTime;
+     }
+
+    @Override
+    public long getLastNetworkLogRetrievalTime() {
+        enforceSystemUid();
+        return getUserData(UserHandle.USER_SYSTEM).mLastNetworkLogsRetrievalTime;
     }
 }

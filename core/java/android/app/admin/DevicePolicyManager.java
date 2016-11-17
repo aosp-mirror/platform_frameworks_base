@@ -6749,4 +6749,54 @@ public class DevicePolicyManager {
             throw re.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Called by the system to get the time at which the device owner last retrieved security
+     * logging entries.
+     *
+     * @return the time at which the device owner most recently retrieved security logging entries,
+     *         in milliseconds since epoch; -1 if security logging entries were never retrieved.
+     *
+     * @hide
+     */
+    public long getLastSecurityLogRetrievalTime() {
+        try {
+            return mService.getLastSecurityLogRetrievalTime();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by the system to get the time at which the device owner last requested a bug report.
+     *
+     * @return the time at which the device owner most recently requested a bug report, in
+     *         milliseconds since epoch; -1 if a bug report was never requested.
+     *
+     * @hide
+     */
+    public long getLastBugReportRequestTime() {
+        try {
+            return mService.getLastBugReportRequestTime();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by the system to get the time at which the device owner last retrieved network logging
+     * events.
+     *
+     * @return the time at which the device owner most recently retrieved network logging events, in
+     *         milliseconds since epoch; -1 if network logging events were never retrieved.
+     *
+     * @hide
+     */
+    public long getLastNetworkLogRetrievalTime() {
+        try {
+            return mService.getLastNetworkLogRetrievalTime();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
 }
