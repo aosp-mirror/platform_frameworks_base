@@ -26,7 +26,7 @@
 
     <!-- Flags setup as productivity oriented in which case Downloads app will be presented
              as Files app. Including showing of the Documents and "advanced" roots. -->
-    <bool name="productivity_device">false</bool>
+    <bool name="productivity_device">true</bool>
 
     <!-- Indicates if search view is taking the whole toolbar space -->
     <bool name="full_bar_search_view">true</bool>
