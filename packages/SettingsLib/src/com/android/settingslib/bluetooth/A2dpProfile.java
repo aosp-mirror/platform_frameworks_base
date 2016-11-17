@@ -116,6 +116,10 @@ public final class A2dpProfile implements LocalBluetoothProfile {
         List<BluetoothDevice> sinks = getConnectedDevices();
         if (sinks != null) {
             for (BluetoothDevice sink : sinks) {
+                if (sink.equals(device)) {
+                    Log.w(TAG, "Connecting to device " + device + " : disconnect skipped");
+                    continue;
+                }
                 mService.disconnect(sink);
             }
         }
