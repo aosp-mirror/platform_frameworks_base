@@ -272,6 +272,11 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public List<ApplicationInfo> getInstalledApplicationsAsUser(int flags, int userId) {
+        return null;
+    }
+
+    @Override
     public List<EphemeralApplicationInfo> getEphemeralApplications() {
         return null;
     }

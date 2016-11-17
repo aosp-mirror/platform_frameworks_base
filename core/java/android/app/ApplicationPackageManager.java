@@ -698,7 +698,13 @@ public class ApplicationPackageManager extends PackageManager {
     @SuppressWarnings("unchecked")
     @Override
     public List<ApplicationInfo> getInstalledApplications(int flags) {
-        final int userId = mContext.getUserId();
+        return getInstalledApplicationsAsUser(flags, mContext.getUserId());
+    }
+
+    /** @hide */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ApplicationInfo> getInstalledApplicationsAsUser(int flags, int userId) {
         try {
             ParceledListSlice<ApplicationInfo> parceledList =
                     mPM.getInstalledApplications(flags, userId);

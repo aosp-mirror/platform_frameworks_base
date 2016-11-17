@@ -3514,6 +3514,36 @@ public abstract class PackageManager {
     public abstract List<ApplicationInfo> getInstalledApplications(@ApplicationInfoFlags int flags);
 
     /**
+     * Return a List of all application packages that are installed on the device, for a specific
+     * user. If flag GET_UNINSTALLED_PACKAGES has been set, a list of all applications including
+     * those deleted with {@code DONT_DELETE_DATA} (partially installed apps with data directory)
+     * will be returned.
+     *
+     * @param flags Additional option flags. Use any combination of
+     * {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     * {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
+     * to modify the data returned.
+     * @param userId The user for whom the installed applications are to be listed
+     *
+     * @return A List of ApplicationInfo objects, one for each installed application.
+     *         In the unlikely case there are no installed packages, an empty list
+     *         is returned. If flag {@code MATCH_UNINSTALLED_PACKAGES} is set, the
+     *         application information is retrieved from the list of uninstalled
+     *         applications (which includes installed applications as well as
+     *         applications with data directory i.e. applications which had been
+     *         deleted with {@code DONT_DELETE_DATA} flag set).
+     * @hide
+     *
+     * @see #GET_META_DATA
+     * @see #GET_SHARED_LIBRARY_FILES
+     * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
+     * @see #MATCH_SYSTEM_ONLY
+     * @see #MATCH_UNINSTALLED_PACKAGES
+     */
+    public abstract List<ApplicationInfo> getInstalledApplicationsAsUser(
+            @ApplicationInfoFlags int flags, @UserIdInt int userId);
+
+    /**
      * Gets the ephemeral applications the user recently used. Requires
      * holding "android.permission.ACCESS_EPHEMERAL_APPS".
      *
