@@ -177,8 +177,9 @@ public class SessionManager {
         }
 
         // Create Session from Info and add to the sessionMapper under this ID.
+        Log.d(LOGGING_TAG, Session.START_EXTERNAL_SESSION);
         Session externalSession = new Session(Session.EXTERNAL_INDICATOR + sessionInfo.sessionId,
-                sessionInfo.shortMethodName, System.currentTimeMillis(),
+                sessionInfo.methodPath, System.currentTimeMillis(),
                 false /*isStartedFromActiveSession*/, null);
         externalSession.setIsExternal(true);
         // Mark the external session as already completed, since we have no way of knowing when
@@ -190,8 +191,6 @@ public class SessionManager {
         // Create a subsession from this external Session parent node
         Session childSession = createSubsession();
         continueSession(childSession, shortMethodName);
-
-        Log.d(LOGGING_TAG, Session.START_SESSION);
     }
 
     /**
