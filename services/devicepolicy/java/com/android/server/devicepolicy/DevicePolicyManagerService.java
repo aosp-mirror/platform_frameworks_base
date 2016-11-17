@@ -8699,9 +8699,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // Managed user cannot have a managed profile.
                 return false;
             }
+            boolean canRemoveProfile
+                    = !mUserManager.hasUserRestriction(UserManager.DISALLOW_REMOVE_USER);
             final long ident = mInjector.binderClearCallingIdentity();
             try {
-                if (!mUserManager.canAddMoreManagedProfiles(callingUserId, true)) {
+                if (!mUserManager.canAddMoreManagedProfiles(callingUserId, canRemoveProfile)) {
                     return false;
                 }
             } finally {
