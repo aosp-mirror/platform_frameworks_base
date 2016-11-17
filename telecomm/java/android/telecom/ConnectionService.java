@@ -515,9 +515,12 @@ public abstract class ConnectionService extends Service {
                         final boolean isUnknown = args.argi2 == 1;
                         if (!mAreAccountsInitialized) {
                             Log.d(this, "Enqueueing pre-init request %s", id);
-                            mPreInitializationConnectionRequests.add(new Runnable() {
+                            mPreInitializationConnectionRequests.add(
+                                    new android.telecom.Logging.Runnable(
+                                            SESSION_HANDLER + SESSION_CREATE_CONN + ".pICR",
+                                            null /*lock*/) {
                                 @Override
-                                public void run() {
+                                public void loggedRun() {
                                     createConnection(
                                             connectionManagerPhoneAccount,
                                             id,
@@ -525,7 +528,7 @@ public abstract class ConnectionService extends Service {
                                             isIncoming,
                                             isUnknown);
                                 }
-                            });
+                            }.prepare());
                         } else {
                             createConnection(
                                     connectionManagerPhoneAccount,
@@ -1381,9 +1384,9 @@ public abstract class ConnectionService extends Service {
             public void onResult(
                     final List<ComponentName> componentNames,
                     final List<IBinder> services) {
-                mHandler.post(new Runnable() {
+                mHandler.post(new android.telecom.Logging.Runnable("oAA.qRCS.oR", null /*lock*/) {
                     @Override
-                    public void run() {
+                    public void loggedRun() {
                         for (int i = 0; i < componentNames.size() && i < services.size(); i++) {
                             mRemoteConnectionManager.addConnectionService(
                                     componentNames.get(i),
@@ -1392,17 +1395,17 @@ public abstract class ConnectionService extends Service {
                         onAccountsInitialized();
                         Log.d(this, "remote connection services found: " + services);
                     }
-                });
+                }.prepare());
             }
 
             @Override
             public void onError() {
-                mHandler.post(new Runnable() {
+                mHandler.post(new android.telecom.Logging.Runnable("oAA.qRCS.oE", null /*lock*/) {
                     @Override
-                    public void run() {
+                    public void loggedRun() {
                         mAreAccountsInitialized = true;
                     }
-                });
+                }.prepare());
             }
         });
     }
