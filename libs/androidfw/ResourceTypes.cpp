@@ -3166,7 +3166,7 @@ struct ResTable::Package
 {
     Package(ResTable* _owner, const Header* _header, const ResTable_package* _package)
         : owner(_owner), header(_header), package(_package), typeIdOffset(0) {
-        if (dtohs(package->header.headerSize) == sizeof(package)) {
+        if (dtohs(package->header.headerSize) == sizeof(*package)) {
             // The package structure is the same size as the definition.
             // This means it contains the typeIdOffset field.
             typeIdOffset = package->typeIdOffset;
