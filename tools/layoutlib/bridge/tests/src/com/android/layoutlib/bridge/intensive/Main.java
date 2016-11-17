@@ -53,7 +53,6 @@ import org.junit.runner.Description;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.PackageInstaller.Session;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -61,29 +60,12 @@ import android.util.DisplayMetrics;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.CopyOption;
-import java.nio.file.FileVisitOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiPredicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import com.google.android.collect.Lists;
 
@@ -453,15 +435,8 @@ public class Main {
         SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
                 layoutLibCallback, "Theme.Material.Light.NoActionBar", false,
                 RenderingMode.NORMAL, 22);
-        try {
-            renderAndVerify(params, "scrolled.png");
-        } catch(AssertionError e) {
-            // In this particular test we do not care about the image similarity.
-            // TODO: Create new render method that allows to not compare images.
-            if (!e.getLocalizedMessage().startsWith("Images differ")) {
-                throw e;
-            }
-        }
+
+        render(params, -1);
 
         assertTrue((Boolean)field.get(null));
         field.set(null, false);
@@ -654,6 +629,37 @@ public class Main {
         return new LayoutPullParser(APP_TEST_RES + "/layout/" + layoutPath);
     }
 
+    @NonNull
+    private static RenderResult render(SessionParams params, long frameTimeNanos) {
+        // TODO: Set up action bar handler properly to test menu rendering.
+        // Create session params.
+        System_Delegate.setBootTimeNanos(TimeUnit.MILLISECONDS.toNanos(871732800000L));
+        System_Delegate.setNanosTime(TimeUnit.MILLISECONDS.toNanos(871732800000L));
+        RenderSession session = sBridge.createSession(params);
+
+        try {
+
+            if (frameTimeNanos != -1) {
+                session.setElapsedFrameTimeNanos(frameTimeNanos);
+            }
+
+            if (!session.getResult().isSuccess()) {
+                getLogger().error(session.getResult().getException(),
+                        session.getResult().getErrorMessage());
+            }
+            // Render the session with a timeout of 50s.
+            Result renderResult = session.render(50000);
+            if (!renderResult.isSuccess()) {
+                getLogger().error(session.getResult().getException(),
+                        session.getResult().getErrorMessage());
+            }
+
+            return RenderResult.getFromSession(session);
+        } finally {
+            session.dispose();
+        }
+    }
+
     /**
      * Create a new rendering session and test that rendering the given layout doesn't throw any
      * exceptions and matches the provided image.
@@ -662,40 +668,19 @@ public class Main {
      * how far in the future is.
      */
     @Nullable
-    private RenderResult renderAndVerify(SessionParams params, String goldenFileName, long frameTimeNanos)
+    private static RenderResult renderAndVerify(SessionParams params, String goldenFileName, long
+            frameTimeNanos)
             throws ClassNotFoundException {
-        // TODO: Set up action bar handler properly to test menu rendering.
-        // Create session params.
-        System_Delegate.setBootTimeNanos(TimeUnit.MILLISECONDS.toNanos(871732800000L));
-        System_Delegate.setNanosTime(TimeUnit.MILLISECONDS.toNanos(871732800000L));
-        RenderSession session = sBridge.createSession(params);
-
-        if (frameTimeNanos != -1) {
-            session.setElapsedFrameTimeNanos(frameTimeNanos);
-        }
-
-        if (!session.getResult().isSuccess()) {
-            getLogger().error(session.getResult().getException(),
-                    session.getResult().getErrorMessage());
-        }
-        // Render the session with a timeout of 50s.
-        Result renderResult = session.render(50000);
-        if (!renderResult.isSuccess()) {
-            getLogger().error(session.getResult().getException(),
-                    session.getResult().getErrorMessage());
-        }
+        RenderResult result = Main.render(params, frameTimeNanos);
         try {
             String goldenImagePath = APP_TEST_DIR + "/golden/" + goldenFileName;
-            ImageUtils.requireSimilar(goldenImagePath, session.getImage());
-
-            return RenderResult.getFromSession(session);
+            assertNotNull(result.getImage());
+            ImageUtils.requireSimilar(goldenImagePath, result.getImage());
         } catch (IOException e) {
             getLogger().error(e, e.getMessage());
-        } finally {
-            session.dispose();
         }
 
-        return null;
+        return result;
     }
 
     /**
@@ -703,9 +688,9 @@ public class Main {
      * exceptions and matches the provided image.
      */
     @Nullable
-    private RenderResult renderAndVerify(SessionParams params, String goldenFileName)
+    private static RenderResult renderAndVerify(SessionParams params, String goldenFileName)
             throws ClassNotFoundException {
-        return renderAndVerify(params, goldenFileName, -1);
+        return Main.renderAndVerify(params, goldenFileName, -1);
     }
 
     /**
