@@ -225,8 +225,10 @@ public class DozeMachine {
         boolean newPolicy = wakeLockPolicy(newState);
         if (mWakeLockHeldForCurrentState && !newPolicy) {
             mWakeLock.release();
+            mWakeLockHeldForCurrentState = false;
         } else if (!mWakeLockHeldForCurrentState && newPolicy) {
             mWakeLock.acquire();
+            mWakeLockHeldForCurrentState = true;
         }
     }
 
