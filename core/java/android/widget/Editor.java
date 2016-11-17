@@ -111,6 +111,8 @@ import android.widget.TextView.Drawables;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.Preconditions;
@@ -1119,14 +1121,26 @@ public class Editor {
             getInsertionController().show();
             mIsInsertionActionModeStartPending = true;
             handled = true;
+            MetricsLogger.action(
+                    mTextView.getContext(),
+                    MetricsEvent.TEXT_LONGPRESS,
+                    TextViewMetrics.SUBTYPE_LONG_PRESS_OTHER);
         }
 
         if (!handled && mTextActionMode != null) {
             if (touchPositionIsInSelection()) {
                 startDragAndDrop();
+                MetricsLogger.action(
+                        mTextView.getContext(),
+                        MetricsEvent.TEXT_LONGPRESS,
+                        TextViewMetrics.SUBTYPE_LONG_PRESS_DRAG_AND_DROP);
             } else {
                 stopTextActionMode();
                 selectCurrentWordAndStartDrag();
+                MetricsLogger.action(
+                        mTextView.getContext(),
+                        MetricsEvent.TEXT_LONGPRESS,
+                        TextViewMetrics.SUBTYPE_LONG_PRESS_SELECTION);
             }
             handled = true;
         }
@@ -1134,6 +1148,12 @@ public class Editor {
         // Start a new selection
         if (!handled) {
             handled = selectCurrentWordAndStartDrag();
+            if (handled) {
+                MetricsLogger.action(
+                        mTextView.getContext(),
+                        MetricsEvent.TEXT_LONGPRESS,
+                        TextViewMetrics.SUBTYPE_LONG_PRESS_SELECTION);
+            }
         }
 
         return handled;

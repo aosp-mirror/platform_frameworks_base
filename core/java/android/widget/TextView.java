@@ -148,6 +148,8 @@ import android.view.textservice.TextServicesManager;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.FastMath;
 import com.android.internal.widget.EditableInputConnection;
 
@@ -9685,6 +9687,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (handled) {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             if (mEditor != null) mEditor.mDiscardNextActionUp = true;
+        } else {
+            MetricsLogger.action(
+                    mContext,
+                    MetricsEvent.TEXT_LONGPRESS,
+                    TextViewMetrics.SUBTYPE_LONG_PRESS_OTHER);
         }
 
         return handled;
