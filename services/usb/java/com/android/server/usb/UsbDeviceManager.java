@@ -362,11 +362,6 @@ public class UsbDeviceManager {
                             UsbManager.removeFunction(persisted, UsbManager.USB_FUNCTION_MTP));
                 }
 
-                String buildType = SystemProperties.get(BUILD_TYPE_PROPERTY);
-                if (buildType.equals(BUILD_TYPE_USERDEBUG) || buildType.equals(BUILD_TYPE_ENG)) {
-                    setAdbEnabled(true);
-                }
-
                 setEnabledFunctions(null, false, false);
 
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
@@ -483,7 +478,7 @@ public class UsbDeviceManager {
                 SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY, newFunction);
 
                 // Remove mtp from the config if file transfer is not enabled
-                if (oldFunctions.equals(UsbManager.USB_FUNCTION_MTP) && 
+                if (oldFunctions.equals(UsbManager.USB_FUNCTION_MTP) &&
                         !mUsbDataUnlocked && enable) {
                     oldFunctions = UsbManager.USB_FUNCTION_NONE;
                 }
