@@ -245,13 +245,16 @@ public class LockSettingsService extends ILockSettings.Stub {
         try {
             randomLockSeed = SecureRandom.getInstance("SHA1PRNG").generateSeed(40);
             String newPassword = String.valueOf(HexEncoding.encode(randomLockSeed));
+            tieProfileLockToParent(managedUserId, newPassword);
             setLockPasswordInternal(newPassword, managedUserPassword, managedUserId);
             // We store a private credential for the managed user that's unlocked by the primary
             // account holder's credential. As such, the user will never be prompted to enter this
             // password directly, so we always store a password.
             setLong(LockPatternUtils.PASSWORD_TYPE_KEY,
                     DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC, managedUserId);
-            tieProfileLockToParent(managedUserId, newPassword);
+        } catch (KeyStoreException e) {
+            // Bug: 32490092
+            Slog.e(TAG, "Not able to set keys to keystore", e);
         } catch (NoSuchAlgorithmException | RemoteException e) {
             Slog.e(TAG, "Fail to tie managed profile", e);
             // Nothing client can do to fix this issue, so we do not throw exception out
@@ -758,6 +761,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void unlockChildProfile(int profileHandle) throws RemoteException {
+        if (DEBUG) Slog.v(TAG, "Unlock child profile");
         try {
             doVerifyPassword(getDecryptedPasswordForTiedProfile(profileHandle), false,
                     0 /* no challenge */, profileHandle, null /* progressCallback */);
@@ -1017,7 +1021,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private void tieProfileLockToParent(int userId, String password) {
+    private void tieProfileLockToParent(int userId, String password) throws KeyStoreException {
         if (DEBUG) Slog.v(TAG, "tieProfileLockToParent for user: " + userId);
         byte[] randomLockSeed = password.getBytes(StandardCharsets.UTF_8);
         byte[] encryptionResult;
@@ -1059,7 +1063,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 keyStore.deleteEntry(LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userId);
             }
         } catch (CertificateException | UnrecoverableKeyException
-                | IOException | BadPaddingException | IllegalBlockSizeException | KeyStoreException
+                | IOException | BadPaddingException | IllegalBlockSizeException
                 | NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException e) {
             throw new RuntimeException("Failed to encrypt key", e);
         }
@@ -1201,7 +1205,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         } finally {
             if (managedUserId != -1 && managedUserDecryptedPassword != null) {
                 if (DEBUG) Slog.v(TAG, "Restore tied profile lock");
-                tieProfileLockToParent(managedUserId, managedUserDecryptedPassword);
+                try {
+                    tieProfileLockToParent(managedUserId, managedUserDecryptedPassword);
+                } catch (KeyStoreException e) {
+                    throw new RuntimeException("Failed to tie profile lock", e);
+                }
             }
         }
     }
