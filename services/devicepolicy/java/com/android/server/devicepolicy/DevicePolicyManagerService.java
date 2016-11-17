@@ -544,8 +544,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 new MonitoringCertNotificationTask().execute(userId);
             }
             if (Intent.ACTION_USER_ADDED.equals(action)) {
+                sendUserAddedOrRemovedCommand(DeviceAdminReceiver.ACTION_USER_ADDED, userHandle);
                 disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
+                sendUserAddedOrRemovedCommand(DeviceAdminReceiver.ACTION_USER_REMOVED, userHandle);
                 disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
                 removeUserData(userHandle);
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
@@ -566,6 +568,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 handlePackagesChanged(intent.getData().getSchemeSpecificPart(), userHandle);
             } else if (Intent.ACTION_MANAGED_PROFILE_ADDED.equals(action)) {
                 clearWipeProfileNotification();
+            }
+        }
+
+        private void sendUserAddedOrRemovedCommand(String action, int userHandle) {
+            synchronized (DevicePolicyManagerService.this) {
+                ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+                if (deviceOwner != null) {
+                    Bundle extras = new Bundle();
+                    extras.putParcelable(Intent.EXTRA_USER, UserHandle.of(userHandle));
+                    sendAdminCommandLocked(deviceOwner, action, extras, null);
+                }
             }
         }
     };
