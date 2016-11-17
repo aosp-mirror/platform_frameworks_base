@@ -1881,7 +1881,13 @@ public class AccountManagerService
                 final long accountId = accounts.accountsDb.findDeAccountId(accountToRename);
                 if (accountId >= 0) {
                     accounts.accountsDb.renameCeAccount(accountId, newName);
-                    accounts.accountsDb.renameDeAccount(accountId, newName, accountToRename.name);
+                    if (accounts.accountsDb.renameDeAccount(
+                            accountId, newName, accountToRename.name)) {
+                        accounts.accountsDb.setTransactionSuccessful();
+                    } else {
+                        Log.e(TAG, "renameAccount failed");
+                        return null;
+                    }
                 }
             } finally {
                 accounts.accountsDb.endTransaction();
