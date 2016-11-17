@@ -9303,6 +9303,43 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     /**
+     * Check if the calling UID has a possible chance at accessing the provider
+     * at the given authority and user.
+     */
+    public String checkContentProviderAccess(String authority, int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, TAG);
+            userId = UserHandle.getCallingUserId();
+        }
+
+        ProviderInfo cpi = null;
+        try {
+            cpi = AppGlobals.getPackageManager().resolveContentProvider(authority,
+                    STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS, userId);
+        } catch (RemoteException ignored) {
+        }
+        if (cpi == null) {
+            // TODO: make this an outright failure in a future platform release;
+            // until then anonymous content notifications are unprotected
+            //return "Failed to find provider " + authority + " for user " + userId;
+            return null;
+        }
+
+        ProcessRecord r = null;
+        synchronized (mPidsSelfLocked) {
+            r = mPidsSelfLocked.get(Binder.getCallingPid());
+        }
+        if (r == null) {
+            return "Failed to find PID " + Binder.getCallingPid();
+        }
+
+        synchronized (this) {
+            return checkContentProviderPermissionLocked(cpi, r, userId, true);
+        }
+    }
+
+    /**
      * Check if {@link ProcessRecord} has a possible chance at accessing the
      * given {@link ProviderInfo}. Final permission checking is always done
      * in {@link ContentProvider}.
@@ -20623,6 +20660,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final class LocalService extends ActivityManagerInternal {
+        @Override
+        public String checkContentProviderAccess(String authority, int userId) {
+            return ActivityManagerService.this.checkContentProviderAccess(authority, userId);
+        }
+
         @Override
         public void onWakefulnessChanged(int wakefulness) {
             ActivityManagerService.this.onWakefulnessChanged(wakefulness);
