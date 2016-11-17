@@ -23,6 +23,6 @@ oneway interface IEphemeralResolver {
     void getEphemeralResolveInfoList(IRemoteCallback callback, in int[] digestPrefix,
             int sequence);
 
-    void getEphemeralIntentFilterList(IRemoteCallback callback, in int[] digestPrefix,
+    void getEphemeralIntentFilterList(IRemoteCallback callback, String hostName,
             int sequence);
 }

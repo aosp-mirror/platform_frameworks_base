@@ -68,9 +68,9 @@ public abstract class EphemeralResolverService extends Service {
     /**
      * Called to retrieve intent filters for ephemeral applications.
      *
-     * @param digestPrefix The hash prefix of the ephemeral's domain.
+     * @param hostName The name of the host to get intent filters for.
      */
-    public List<EphemeralResolveInfo> onGetEphemeralIntentFilter(int digestPrefix[]) {
+    public EphemeralResolveInfo onGetEphemeralIntentFilter(String hostName) {
         throw new IllegalStateException("Must define");
     }
 
@@ -96,11 +96,11 @@ public abstract class EphemeralResolverService extends Service {
 
             @Override
             public void getEphemeralIntentFilterList(
-                    IRemoteCallback callback, int digestPrefix[], int sequence) {
+                    IRemoteCallback callback, String hostName, int sequence) {
                 final Message msg = mHandler.obtainMessage(
                         ServiceHandler.MSG_GET_EPHEMERAL_INTENT_FILTER, sequence, 0, callback);
                 final Bundle data = new Bundle();
-                data.putIntArray(EXTRA_PREFIX, digestPrefix);
+                data.putString(EXTRA_HOSTNAME, hostName);
                 msg.setData(data);
                 msg.sendToTarget();
             }
@@ -136,12 +136,11 @@ public abstract class EphemeralResolverService extends Service {
 
                 case MSG_GET_EPHEMERAL_INTENT_FILTER: {
                     final IRemoteCallback callback = (IRemoteCallback) message.obj;
-                    final int[] digestPrefix = message.getData().getIntArray(EXTRA_PREFIX);
-                    final List<EphemeralResolveInfo> resolveInfo =
-                            onGetEphemeralIntentFilter(digestPrefix);
+                    final String hostName = message.getData().getString(EXTRA_HOSTNAME);
+                    final EphemeralResolveInfo resolveInfo = onGetEphemeralIntentFilter(hostName);
                     final Bundle data = new Bundle();
                     data.putInt(EXTRA_SEQUENCE, message.arg1);
-                    data.putParcelableList(EXTRA_RESOLVE_INFO, resolveInfo);
+                    data.putParcelable(EXTRA_RESOLVE_INFO, resolveInfo);
                     try {
                         callback.sendResult(data);
                     } catch (RemoteException e) {

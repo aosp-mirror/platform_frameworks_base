@@ -39,6 +39,7 @@ import android.util.Slog;
 
 import com.android.server.pm.EphemeralResolverConnection.PhaseTwoCallback;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -72,19 +73,19 @@ public abstract class EphemeralResolver {
             EphemeralResolverConnection connection, EphemeralRequest requestObj,
             ActivityInfo ephemeralInstaller, Handler callbackHandler) {
         final Intent intent = requestObj.origIntent;
-        final EphemeralDigest digest =
-                new EphemeralDigest(intent.getData().getHost(), 5 /*maxDigests*/);
-        final int[] shaPrefix = digest.getDigestPrefix();
-        final byte[][] digestBytes = digest.getDigestBytes();
+        final String hostName = intent.getData().getHost();
+        final EphemeralDigest digest = new EphemeralDigest(hostName, 5 /*maxDigests*/);
 
         final PhaseTwoCallback callback = new PhaseTwoCallback() {
             @Override
-            void onPhaseTwoResolved(List<EphemeralResolveInfo> ephemeralResolveInfoList,
+            void onPhaseTwoResolved(EphemeralResolveInfo ephemeralResolveInfo,
                     int sequence) {
                 final String packageName;
                 final String splitName;
-                if (ephemeralResolveInfoList != null
-                        && ephemeralResolveInfoList.size() > 0) {
+                if (ephemeralResolveInfo != null) {
+                    final ArrayList<EphemeralResolveInfo> ephemeralResolveInfoList =
+                            new ArrayList<EphemeralResolveInfo>(1);
+                    ephemeralResolveInfoList.add(ephemeralResolveInfo);
                     final EphemeralResponse ephemeralIntentInfo =
                             EphemeralResolver.filterEphemeralIntent(
                                     ephemeralResolveInfoList, intent, null /*resolvedType*/,
@@ -118,7 +119,7 @@ public abstract class EphemeralResolver {
             }
         };
         connection.getEphemeralIntentFilterList(
-                shaPrefix, callback, callbackHandler, 0 /*sequence*/);
+                hostName, callback, callbackHandler, 0 /*sequence*/);
     }
 
     /**

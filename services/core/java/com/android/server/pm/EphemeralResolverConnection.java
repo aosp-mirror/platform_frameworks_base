@@ -84,24 +84,24 @@ final class EphemeralResolverConnection {
         return null;
     }
 
-    public final void getEphemeralIntentFilterList(int digestPrefix[], PhaseTwoCallback callback,
+    public final void getEphemeralIntentFilterList(String hostName, PhaseTwoCallback callback,
             Handler callbackHandler, final int sequence) {
         final IRemoteCallback remoteCallback = new IRemoteCallback.Stub() {
             @Override
             public void sendResult(Bundle data) throws RemoteException {
-                final ArrayList<EphemeralResolveInfo> ephemeralResolveInfoList =
-                        data.getParcelableArrayList(EphemeralResolverService.EXTRA_RESOLVE_INFO);
+                final EphemeralResolveInfo ephemeralResolveInfo =
+                        data.getParcelable(EphemeralResolverService.EXTRA_RESOLVE_INFO);
                 callbackHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        callback.onPhaseTwoResolved(ephemeralResolveInfoList, sequence);
+                        callback.onPhaseTwoResolved(ephemeralResolveInfo, sequence);
                     }
                 });
             }
         };
         try {
             getRemoteInstanceLazy()
-                    .getEphemeralIntentFilterList(remoteCallback, digestPrefix, sequence);
+                    .getEphemeralIntentFilterList(remoteCallback, hostName, sequence);
         } catch (RemoteException re) {
         } catch (TimeoutException te) {
         }
@@ -173,8 +173,7 @@ final class EphemeralResolverConnection {
      * Asynchronous callback when results come back from ephemeral resolution phase two.
      */
     public abstract static class PhaseTwoCallback {
-        abstract void onPhaseTwoResolved(List<EphemeralResolveInfo> ephemeralResolveInfoList,
-                int sequence);
+        abstract void onPhaseTwoResolved(EphemeralResolveInfo ephemeralResolveInfo, int sequence);
     }
 
     private final class MyServiceConnection implements ServiceConnection {
