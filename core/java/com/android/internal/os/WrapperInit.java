@@ -17,6 +17,8 @@
 package com.android.internal.os;
 
 import android.os.Process;
+import android.os.Trace;
+import android.util.BootTimingsTraceLog;
 import android.util.Slog;
 
 import dalvik.system.VMRuntime;
@@ -75,7 +77,8 @@ public class WrapperInit {
             }
 
             // Mimic system Zygote preloading.
-            ZygoteInit.preload();
+            ZygoteInit.preload(new BootTimingsTraceLog("WrapperInitTiming",
+                    Trace.TRACE_TAG_DALVIK));
 
             // Launch the application.
             String[] runtimeArgs = new String[args.length - 2];
