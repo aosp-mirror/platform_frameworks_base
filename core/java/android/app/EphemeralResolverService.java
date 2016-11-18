@@ -74,10 +74,17 @@ public abstract class EphemeralResolverService extends Service {
         throw new IllegalStateException("Must define");
     }
 
+    /**
+     * Returns a {@link Looper} to perform service operations on.
+     */
+    public Looper getLooper() {
+        return getBaseContext().getMainLooper();
+    }
+
     @Override
     public final void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        mHandler = new ServiceHandler(base.getMainLooper());
+        mHandler = new ServiceHandler(getLooper());
     }
 
     @Override
