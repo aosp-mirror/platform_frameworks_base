@@ -107,10 +107,17 @@ import java.util.regex.Pattern;
 public final class TvInputManagerService extends SystemService {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvInputManagerService";
+    private static final String DVB_DIRECTORY = "/dev/dvb";
 
-    // Pattern for selecting the DVB frontend devices from the list of files in the /dev directory.
+    // There are two different formats of DVB frontend devices. One is /dev/dvb%d.frontend%d,
+    // another one is /dev/dvb/adapter%d/frontend%d. Followings are the patterns for selecting the
+    // DVB frontend devices from the list of files in the /dev and /dev/dvb/adapter%d directory.
     private static final Pattern sFrontEndDevicePattern =
             Pattern.compile("^dvb([0-9]+)\\.frontend([0-9]+)$");
+    private static final Pattern sAdapterDirPattern =
+            Pattern.compile("^adapter([0-9]+)$");
+    private static final Pattern sFrontEndInAdapterDirPattern =
+            Pattern.compile("^frontend([0-9]+)$");
 
     private final Context mContext;
     private final TvInputHardwareManager mTvInputHardwareManager;
@@ -1739,17 +1746,46 @@ public final class TvInputManagerService extends SystemService {
 
             final long identity = Binder.clearCallingIdentity();
             try {
-                ArrayList<DvbDeviceInfo> deviceInfos = new ArrayList<>();
+                // Pattern1: /dev/dvb%d.frontend%d
+                ArrayList<DvbDeviceInfo> deviceInfosFromPattern1 = new ArrayList<>();
                 File devDirectory = new File("/dev");
+                boolean dvbDirectoryFound = false;
                 for (String fileName : devDirectory.list()) {
                     Matcher matcher = sFrontEndDevicePattern.matcher(fileName);
                     if (matcher.find()) {
                         int adapterId = Integer.parseInt(matcher.group(1));
                         int deviceId = Integer.parseInt(matcher.group(2));
-                        deviceInfos.add(new DvbDeviceInfo(adapterId, deviceId));
+                        deviceInfosFromPattern1.add(new DvbDeviceInfo(adapterId, deviceId));
+                    }
+                    if (TextUtils.equals("dvb", fileName)) {
+                        dvbDirectoryFound = true;
                     }
                 }
-                return Collections.unmodifiableList(deviceInfos);
+                if (!dvbDirectoryFound) {
+                    return Collections.unmodifiableList(deviceInfosFromPattern1);
+                }
+                File dvbDirectory = new File(DVB_DIRECTORY);
+                // Pattern2: /dev/dvb/adapter%d/frontend%d
+                ArrayList<DvbDeviceInfo> deviceInfosFromPattern2 = new ArrayList<>();
+                for (String fileNameInDvb : dvbDirectory.list()) {
+                    Matcher adapterMatcher = sAdapterDirPattern.matcher(fileNameInDvb);
+                    if (adapterMatcher.find()) {
+                        int adapterId = Integer.parseInt(adapterMatcher.group(1));
+                        File adapterDirectory = new File(DVB_DIRECTORY + "/" + fileNameInDvb);
+                        for (String fileNameInAdapter : adapterDirectory.list()) {
+                            Matcher frontendMatcher = sFrontEndInAdapterDirPattern.matcher(
+                                    fileNameInAdapter);
+                            if (frontendMatcher.find()) {
+                                int deviceId = Integer.parseInt(frontendMatcher.group(1));
+                                deviceInfosFromPattern2.add(
+                                        new DvbDeviceInfo(adapterId, deviceId));
+                            }
+                        }
+                    }
+                }
+                return deviceInfosFromPattern2.isEmpty()
+                        ? Collections.unmodifiableList(deviceInfosFromPattern1)
+                        : Collections.unmodifiableList(deviceInfosFromPattern2);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1763,21 +1799,52 @@ public final class TvInputManagerService extends SystemService {
                 throw new SecurityException("Requires DVB_DEVICE permission");
             }
 
+            File devDirectory = new File("/dev");
+            boolean dvbDeviceFound = false;
+            for (String fileName : devDirectory.list()) {
+                if (TextUtils.equals("dvb", fileName)) {
+                    File dvbDirectory = new File(DVB_DIRECTORY);
+                    for (String fileNameInDvb : dvbDirectory.list()) {
+                        Matcher adapterMatcher = sAdapterDirPattern.matcher(fileNameInDvb);
+                        if (adapterMatcher.find()) {
+                            File adapterDirectory = new File(DVB_DIRECTORY + "/" + fileNameInDvb);
+                            for (String fileNameInAdapter : adapterDirectory.list()) {
+                                Matcher frontendMatcher = sFrontEndInAdapterDirPattern.matcher(
+                                        fileNameInAdapter);
+                                if (frontendMatcher.find()) {
+                                    dvbDeviceFound = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (dvbDeviceFound) {
+                            break;
+                        }
+                    }
+                }
+                if (dvbDeviceFound) {
+                    break;
+                }
+            }
+
             final long identity = Binder.clearCallingIdentity();
             try {
                 String deviceFileName;
                 switch (device) {
                     case TvInputManager.DVB_DEVICE_DEMUX:
-                        deviceFileName = String.format("/dev/dvb%d.demux%d", info.getAdapterId(),
-                                info.getDeviceId());
+                        deviceFileName = String.format(dvbDeviceFound
+                                ? "/dev/dvb/adapter%d/demux%d" : "/dev/dvb%d.demux%d",
+                                info.getAdapterId(), info.getDeviceId());
                         break;
                     case TvInputManager.DVB_DEVICE_DVR:
-                        deviceFileName = String.format("/dev/dvb%d.dvr%d", info.getAdapterId(),
-                                info.getDeviceId());
+                        deviceFileName = String.format(dvbDeviceFound
+                                ? "/dev/dvb/adapter%d/dvr%d" : "/dev/dvb%d.dvr%d",
+                                info.getAdapterId(), info.getDeviceId());
                         break;
                     case TvInputManager.DVB_DEVICE_FRONTEND:
-                        deviceFileName = String.format("/dev/dvb%d.frontend%d", info.getAdapterId(),
-                                info.getDeviceId());
+                        deviceFileName = String.format(dvbDeviceFound
+                                ? "/dev/dvb/adapter%d/frontend%d" : "/dev/dvb%d.frontend%d",
+                                info.getAdapterId(), info.getDeviceId());
                         break;
                     default:
                         throw new IllegalArgumentException("Invalid DVB device: " + device);
