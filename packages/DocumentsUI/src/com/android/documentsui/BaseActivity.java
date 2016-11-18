@@ -387,6 +387,12 @@ public abstract class BaseActivity extends Activity
         }
 
         mNavigator.update();
+        // Causes talkback to announce the activity's new title
+        if (mState.stack.isRecents()) {
+            setTitle(mRoots.getRecentsRoot().title);
+        } else {
+            setTitle(mState.stack.getTitle());
+        }
         invalidateOptionsMenu();
     }
 
