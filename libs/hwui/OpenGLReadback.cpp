@@ -34,8 +34,6 @@ namespace uirenderer {
 CopyResult OpenGLReadback::copySurfaceInto(Surface& surface, const Rect& srcRect,
         SkBitmap* bitmap) {
     ATRACE_CALL();
-    mRenderThread.eglManager().initialize();
-
     // Setup the source
     sp<GraphicBuffer> sourceBuffer;
     sp<Fence> sourceFence;
@@ -61,13 +59,19 @@ CopyResult OpenGLReadback::copySurfaceInto(Surface& surface, const Rect& srcRect
         return CopyResult::Timeout;
     }
 
+    return copyGraphicBufferInto(sourceBuffer.get(), texTransform, srcRect, bitmap);
+}
+
+CopyResult OpenGLReadback::copyGraphicBufferInto(GraphicBuffer* graphicBuffer,
+        Matrix4& texTransform, const Rect& srcRect, SkBitmap* bitmap) {
+    mRenderThread.eglManager().initialize();
     // TODO: Can't use Image helper since it forces GL_TEXTURE_2D usage via
     // GL_OES_EGL_image, which doesn't work since we need samplerExternalOES
     // to be able to properly sample from the buffer.
 
     // Create the EGLImage object that maps the GraphicBuffer
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    EGLClientBuffer clientBuffer = (EGLClientBuffer) sourceBuffer->getNativeBuffer();
+    EGLClientBuffer clientBuffer = (EGLClientBuffer) graphicBuffer->getNativeBuffer();
     EGLint attrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE };
 
     EGLImageKHR sourceImage = eglCreateImageKHR(display, EGL_NO_CONTEXT,
@@ -78,8 +82,8 @@ CopyResult OpenGLReadback::copySurfaceInto(Surface& surface, const Rect& srcRect
         return CopyResult::UnknownError;
     }
 
-    CopyResult copyResult = copyImageInto(sourceImage, texTransform, sourceBuffer->getWidth(),
-            sourceBuffer->getHeight(), srcRect, bitmap);
+    CopyResult copyResult = copyImageInto(sourceImage, texTransform, graphicBuffer->getWidth(),
+            graphicBuffer->getHeight(), srcRect, bitmap);
 
     // All we're flushing & finishing is the deletion of the texture since
     // copyImageInto already did a major flush & finish as an implicit
@@ -87,6 +91,14 @@ CopyResult OpenGLReadback::copySurfaceInto(Surface& surface, const Rect& srcRect
     glFinish();
     eglDestroyImageKHR(display, sourceImage);
     return copyResult;
+}
+
+CopyResult OpenGLReadback::copyGraphicBufferInto(GraphicBuffer* graphicBuffer, SkBitmap* bitmap) {
+    Rect srcRect;
+    Matrix4 transform;
+    transform.loadScale(1, -1, 1);
+    transform.translate(0, -1);
+    return copyGraphicBufferInto(graphicBuffer, transform, srcRect, bitmap);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -28,6 +28,8 @@ class OpenGLReadback : public Readback {
 public:
     virtual CopyResult copySurfaceInto(Surface& surface, const Rect& srcRect,
             SkBitmap* bitmap) override;
+    virtual CopyResult copyGraphicBufferInto(GraphicBuffer* graphicBuffer,
+            SkBitmap* bitmap) override;
 
 protected:
     explicit OpenGLReadback(renderthread::RenderThread& thread) : Readback(thread) {}
@@ -35,6 +37,9 @@ protected:
 
     virtual CopyResult copyImageInto(EGLImageKHR eglImage, const Matrix4& imgTransform,
             int imgWidth, int imgHeight, const Rect& srcRect, SkBitmap* bitmap) = 0;
+private:
+    CopyResult copyGraphicBufferInto(GraphicBuffer* graphicBuffer, Matrix4& texTransform,
+            const Rect& srcRect, SkBitmap* bitmap);
 };
 
 class OpenGLReadbackImpl : public OpenGLReadback {

@@ -459,14 +459,15 @@ void Bitmap::setAlphaType(SkAlphaType alphaType) {
 }
 
 void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
+    outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
     if (isHardware()) {
-        //TODO: use readback to get pixels
-        LOG_ALWAYS_FATAL("Not implemented");
+        ALOGW("Warning: attempt to read pixels from hardware bitmap, which is very slow operation");
+        outBitmap->allocPixels(info());
+        uirenderer::renderthread::RenderProxy::copyGraphicBufferInto(graphicBuffer(), outBitmap);
         return;
     }
     outBitmap->setInfo(info(), rowBytes());
     outBitmap->setPixelRef(this);
-    outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
 }
 
 void Bitmap::getSkBitmapForShaders(SkBitmap* outBitmap) {
