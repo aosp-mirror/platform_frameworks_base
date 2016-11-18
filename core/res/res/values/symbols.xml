@@ -2774,4 +2774,8 @@
 
   <!-- Whether allow 3rd party apps on internal storage. -->
   <java-symbol type="bool" name="config_allow3rdPartyAppOnInternal" />
+
+  <java-symbol type="bool" name="use_lock_pattern_drawable" />
+  <java-symbol type="drawable" name="lockscreen_notselected" />
+  <java-symbol type="drawable" name="lockscreen_selected" />
 </resources>
