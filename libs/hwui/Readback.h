@@ -23,6 +23,7 @@
 #include <gui/Surface.h>
 
 namespace android {
+class GraphicBuffer;
 namespace uirenderer {
 
 // Keep in sync with PixelCopy.java codes
@@ -42,6 +43,7 @@ public:
      */
     virtual CopyResult copySurfaceInto(Surface& surface, const Rect& srcRect,
             SkBitmap* bitmap) = 0;
+    virtual CopyResult copyGraphicBufferInto(GraphicBuffer* graphicBuffer, SkBitmap* bitmap) = 0;
 
 protected:
     explicit Readback(renderthread::RenderThread& thread) : mRenderThread(thread) {}

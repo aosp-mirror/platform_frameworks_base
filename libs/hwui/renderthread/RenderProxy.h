@@ -35,6 +35,8 @@
 #include "DrawFrameTask.h"
 
 namespace android {
+class GraphicBuffer;
+
 namespace uirenderer {
 
 class DeferredLayerUpdater;
@@ -131,6 +133,8 @@ public:
     ANDROID_API static void prepareToDraw(Bitmap& bitmap);
 
     static sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& bitmap);
+
+    static int copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap);
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;

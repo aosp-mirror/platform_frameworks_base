@@ -27,6 +27,8 @@
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
 
+#include <ui/GraphicBuffer.h>
+
 namespace android {
 namespace uirenderer {
 namespace renderthread {
@@ -661,6 +663,18 @@ sk_sp<Bitmap> RenderProxy::allocateHardwareBitmap(SkBitmap& bitmap) {
     args->thread = &RenderThread::getInstance();
     sk_sp<Bitmap> hardwareBitmap(reinterpret_cast<Bitmap*>(staticPostAndWait(task)));
     return hardwareBitmap;
+}
+
+CREATE_BRIDGE3(copyGraphicBufferInto, RenderThread* thread, GraphicBuffer* buffer, SkBitmap* bitmap) {
+    return (void*) args->thread->readback().copyGraphicBufferInto(args->buffer, args->bitmap);
+}
+
+int RenderProxy::copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap) {
+    SETUP_TASK(copyGraphicBufferInto);
+    args->thread = &RenderThread::getInstance();
+    args->bitmap = bitmap;
+    args->buffer = buffer;
+    return static_cast<int>(reinterpret_cast<intptr_t>(staticPostAndWait(task)));
 }
 
 void RenderProxy::post(RenderTask* task) {
