@@ -16,8 +16,10 @@
 
 package android.net.wifi.hotspot2;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.net.wifi.EAPConstants;
 import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSP;
 import android.os.Parcel;
@@ -44,7 +46,9 @@ public class PasspointConfigurationTest {
         cred.realm = "realm";
         cred.userCredential = null;
         cred.certCredential = null;
-        cred.simCredential = null;
+        cred.simCredential = new Credential.SimCredential();
+        cred.simCredential.imsi = "1234*";
+        cred.simCredential.eapType = EAPConstants.EAP_SIM;
         cred.caCertificate = null;
         cred.clientCertificateChain = null;
         cred.clientPrivateKey = null;
@@ -61,11 +65,20 @@ public class PasspointConfigurationTest {
         assertTrue(readConfig.equals(writeConfig));
     }
 
+    /**
+     * Verify parcel read/write for a default configuration.
+     *
+     * @throws Exception
+     */
     @Test
     public void verifyParcelWithDefault() throws Exception {
         verifyParcel(new PasspointConfiguration());
     }
 
+    /**
+     * Verify parcel read/write for a configuration that contained both HomeSP and Credential.
+     * @throws Exception
+     */
     @Test
     public void verifyParcelWithHomeSPAndCredential() throws Exception {
         PasspointConfiguration config = new PasspointConfiguration();
@@ -74,6 +87,11 @@ public class PasspointConfigurationTest {
         verifyParcel(config);
     }
 
+    /**
+     * Verify parcel read/write for a configuration that contained only HomeSP.
+     *
+     * @throws Exception
+     */
     @Test
     public void verifyParcelWithHomeSPOnly() throws Exception {
         PasspointConfiguration config = new PasspointConfiguration();
@@ -81,10 +99,63 @@ public class PasspointConfigurationTest {
         verifyParcel(config);
     }
 
+    /**
+     * Verify parcel read/write for a configuration that contained only Credential.
+     *
+     * @throws Exception
+     */
     @Test
     public void verifyParcelWithCredentialOnly() throws Exception {
         PasspointConfiguration config = new PasspointConfiguration();
         config.credential = createCredential();
         verifyParcel(config);
+    }
+
+    /**
+     * Verify that a default/empty configuration is invalid.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateDefaultConfig() throws Exception {
+        PasspointConfiguration config = new PasspointConfiguration();
+        assertFalse(config.validate());
+    }
+
+    /**
+     * Verify that a configuration without Credential is invalid.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateConfigWithoutCredential() throws Exception {
+        PasspointConfiguration config = new PasspointConfiguration();
+        config.homeSp = createHomeSp();
+        assertFalse(config.validate());
+    }
+
+    /**
+     * Verify that a a configuration without HomeSP is invalid.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateConfigWithoutHomeSp() throws Exception {
+        PasspointConfiguration config = new PasspointConfiguration();
+        config.credential = createCredential();
+        assertFalse(config.validate());
+    }
+
+    /**
+     * Verify a valid configuration.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateValidConfig() throws Exception {
+        PasspointConfiguration config = new PasspointConfiguration();
+        config.homeSp = createHomeSp();
+        config.credential = createCredential();
+        assertTrue(config.validate());
     }
 }
