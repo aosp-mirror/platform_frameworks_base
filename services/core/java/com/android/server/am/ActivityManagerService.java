@@ -6416,13 +6416,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             removeLruProcessLocked(app);
             if (mBackupTarget != null && mBackupTarget.app.pid == pid) {
                 Slog.w(TAG, "Unattached app died before backup, skipping");
-                try {
-                    IBackupManager bm = IBackupManager.Stub.asInterface(
-                            ServiceManager.getService(Context.BACKUP_SERVICE));
-                    bm.agentDisconnected(app.info.packageName);
-                } catch (RemoteException e) {
-                    // Can't happen; the backup manager is local
-                }
+                mHandler.post(new Runnable() {
+                @Override
+                    public void run(){
+                        try {
+                            IBackupManager bm = IBackupManager.Stub.asInterface(
+                                    ServiceManager.getService(Context.BACKUP_SERVICE));
+                            bm.agentDisconnected(app.info.packageName);
+                        } catch (RemoteException e) {
+                            // Can't happen; the backup manager is local
+                        }
+                    }
+                });
             }
             if (isPendingBroadcastProcessLocked(pid)) {
                 Slog.w(TAG, "Unattached app died before broadcast acknowledged, skipping");
@@ -16972,13 +16977,18 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (mBackupTarget != null && app.pid == mBackupTarget.app.pid) {
             if (DEBUG_BACKUP || DEBUG_CLEANUP) Slog.d(TAG_CLEANUP, "App "
                     + mBackupTarget.appInfo + " died during backup");
-            try {
-                IBackupManager bm = IBackupManager.Stub.asInterface(
-                        ServiceManager.getService(Context.BACKUP_SERVICE));
-                bm.agentDisconnected(app.info.packageName);
-            } catch (RemoteException e) {
-                // can't happen; backup manager is local
-            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run(){
+                    try {
+                        IBackupManager bm = IBackupManager.Stub.asInterface(
+                                ServiceManager.getService(Context.BACKUP_SERVICE));
+                        bm.agentDisconnected(app.info.packageName);
+                    } catch (RemoteException e) {
+                        // can't happen; backup manager is local
+                    }
+                }
+            });
         }
 
         for (int i = mPendingProcessChanges.size() - 1; i >= 0; i--) {
