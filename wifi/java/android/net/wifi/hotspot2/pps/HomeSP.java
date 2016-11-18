@@ -19,6 +19,7 @@ package android.net.wifi.hotspot2.pps;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.Arrays;
 
@@ -34,6 +35,8 @@ import java.util.Arrays;
  * @hide
  */
 public final class HomeSP implements Parcelable {
+    private static final String TAG = "HomeSP";
+
     /**
      * FQDN (Fully Qualified Domain Name) of this home service provider.
      */
@@ -75,6 +78,23 @@ public final class HomeSP implements Parcelable {
         return TextUtils.equals(fqdn, that.fqdn) &&
                 TextUtils.equals(friendlyName, that.friendlyName) &&
                 Arrays.equals(roamingConsortiumOIs, that.roamingConsortiumOIs);
+    }
+
+    /**
+     * Validate HomeSP data.
+     *
+     * @return true on success or false on failure
+     */
+    public boolean validate() {
+        if (TextUtils.isEmpty(fqdn)) {
+            Log.d(TAG, "Missing FQDN");
+            return false;
+        }
+        if (TextUtils.isEmpty(friendlyName)) {
+            Log.d(TAG, "Missing friendly name");
+            return false;
+        }
+        return true;
     }
 
     public static final Creator<HomeSP> CREATOR =
