@@ -164,6 +164,14 @@ public class StatusBarWindowView extends FrameLayout {
         mBrightnessMirror = findViewById(R.id.brightness_mirror);
     }
 
+    @Override
+    public void onViewAdded(View child) {
+        super.onViewAdded(child);
+        if (child.getId() == R.id.brightness_mirror) {
+            mBrightnessMirror = child;
+        }
+    }
+
     public void setService(PhoneStatusBar service) {
         mService = service;
         mDragDownHelper = new DragDownHelper(getContext(), this, mStackScrollLayout, mService);
