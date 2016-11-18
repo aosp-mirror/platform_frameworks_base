@@ -17,11 +17,14 @@
 package android.content.pm;
 
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
+
+import dalvik.system.VMRuntime;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -127,7 +130,11 @@ public class ParceledListSlice<T extends Parcelable> implements Parcelable {
     }
 
     public List<T> getList() {
-        return mList;
+        if (VMRuntime.getRuntime().getTargetSdkVersion() > Build.VERSION_CODES.N_MR1) {
+            return Collections.unmodifiableList(mList);
+        } else {
+            return mList;
+        }
     }
 
     @Override
