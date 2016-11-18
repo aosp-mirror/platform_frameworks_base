@@ -13523,9 +13523,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         final ProcessRecord r = handleApplicationWtfInner(callingUid, callingPid, app, tag,
                 crashInfo);
 
-        if (r != null && r.pid != Process.myPid() &&
-                Settings.Global.getInt(mContext.getContentResolver(),
-                        Settings.Global.WTF_IS_FATAL, 0) != 0) {
+        final boolean isFatal = "eng".equals(Build.TYPE) || Settings.Global
+                .getInt(mContext.getContentResolver(), Settings.Global.WTF_IS_FATAL, 0) != 0;
+        final boolean isSystem = (r == null) || r.persistent;
+
+        if (isFatal && !isSystem) {
             mAppErrors.crashApplication(r, crashInfo);
             return true;
         } else {
