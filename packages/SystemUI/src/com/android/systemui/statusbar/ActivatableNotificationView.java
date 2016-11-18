@@ -86,6 +86,12 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      */
     private static final float DARK_EXIT_SCALE_START = 0.93f;
 
+    /**
+     * A sentinel value when no color should be used. Can be used with {@link #setTintColor(int)}
+     * or {@link #setOverrideTintColor(int, float)}.
+     */
+    protected static final int NO_COLOR = 0;
+
     private static final Interpolator ACTIVATE_INVERSE_INTERPOLATOR
             = new PathInterpolator(0.6f, 0, 0.5f, 1);
     private static final Interpolator ACTIVATE_INVERSE_ALPHA_INTERPOLATOR
@@ -167,6 +173,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private int mCurrentBackgroundTint;
     private int mTargetTint;
     private int mStartTint;
+    private int mOverrideTint;
+    private float mOverrideAmount;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -475,6 +483,23 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     public void setTintColor(int color, boolean animated) {
         mBgTint = color;
         updateBackgroundTint(animated);
+    }
+
+    /**
+     * Set an override tint color that is used for the background.
+     *
+     * @param color the color that should be used to tint the background.
+     *              This can be {@link #NO_COLOR} if the tint should be normally computed.
+     * @param overrideAmount a value from 0 to 1 how much the override tint should be used. The
+     *                       background color will then be the interpolation between this and the
+     *                       regular background color, where 1 means the overrideTintColor is fully
+     *                       used and the background color not at all.
+     */
+    public void setOverrideTintColor(int color, float overrideAmount) {
+        mOverrideTint = color;
+        mOverrideAmount = overrideAmount;
+        int newColor = calculateBgColor();
+        setBackgroundTintColor(newColor);
     }
 
     protected void updateBackgroundTint() {
@@ -859,11 +884,20 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     protected abstract View getContentView();
 
     public int calculateBgColor() {
-        return calculateBgColor(true /* withTint */);
+        return calculateBgColor(true /* withTint */, true /* withOverRide */);
     }
 
-    private int calculateBgColor(boolean withTint) {
-        if (withTint && mBgTint != 0) {
+    /**
+     * @param withTint should a possible tint be factored in?
+     * @param withOverRide should the value be interpolated with {@link #mOverrideTint}
+     * @return the calculated background color
+     */
+    private int calculateBgColor(boolean withTint, boolean withOverRide) {
+        if (withOverRide && mOverrideTint != NO_COLOR) {
+            int defaultTint = calculateBgColor(withTint, false);
+            return NotificationUtils.interpolateColors(defaultTint, mOverrideTint, mOverrideAmount);
+        }
+        if (withTint && mBgTint != NO_COLOR) {
             return mBgTint;
         } else if (mShowingLegacyBackground) {
             return mLegacyColor;
@@ -954,7 +988,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     public int getBackgroundColorWithoutTint() {
-        return calculateBgColor(false /* withTint */);
+        return calculateBgColor(false /* withTint */, false /* withOverride */);
     }
 
     public interface OnActivatedListener {

@@ -148,7 +148,7 @@ public class NotificationShelf extends ActivatableNotificationView {
             mShelfState.openedAmount = openedAmount;
             mShelfState.clipTopAmount = 0;
             mShelfState.alpha = 1.0f;
-            mShelfState.belowSpeedBump = false;
+            mShelfState.belowSpeedBump = mAmbientState.getSpeedBumpIndex() == 0;
             mShelfState.shadowAlpha = 1.0f;
             mShelfState.isBottomClipped = false;
             mShelfState.hideSensitive = false;
@@ -183,10 +183,14 @@ public class NotificationShelf extends ActivatableNotificationView {
         //  find the first view that doesn't overlap with the shelf
         int notificationIndex = 0;
         int notGoneIndex = 0;
+        int colorOfViewBeforeLast = 0;
         boolean backgroundForceHidden = false;
         if (mHideBackground && !mShelfState.hasItemsInStableShelf) {
             backgroundForceHidden = true;
         }
+        int colorTwoBefore = NO_COLOR;
+        int previousColor = NO_COLOR;
+        float transitionAmount = 0.0f;
         while (notificationIndex < mHostLayout.getChildCount()) {
             ExpandableView child = (ExpandableView) mHostLayout.getChildAt(notificationIndex);
             notificationIndex++;
@@ -200,12 +204,13 @@ public class NotificationShelf extends ActivatableNotificationView {
             float notificationClipEnd;
             float shelfStart = getTranslationY();
             boolean aboveShelf = row.getTranslationZ() > mAmbientState.getBaseZHeight();
-            if (child == lastChild || aboveShelf || backgroundForceHidden) {
+            boolean isLastChild = child == lastChild;
+            if (isLastChild || aboveShelf || backgroundForceHidden) {
                 notificationClipEnd = shelfStart + getIntrinsicHeight();
             } else {
                 notificationClipEnd = shelfStart - mPaddingBetweenElements;
                 float height = notificationClipEnd - row.getTranslationY();
-                if (height <= getNotificationMergeSize()) {
+                if (!row.isBelowSpeedBump() && height <= getNotificationMergeSize()) {
                     // We want the gap to close when we reached the minimum size and only shrink
                     // before
                     notificationClipEnd = Math.min(shelfStart,
@@ -213,14 +218,29 @@ public class NotificationShelf extends ActivatableNotificationView {
                 }
             }
             updateNotificationClipHeight(row, notificationClipEnd);
-            numViewsInShelf += updateIconAppearance(row, iconState, icon, expandAmount);
+            float inShelfAmount = updateIconAppearance(row, iconState, icon, expandAmount);
+            numViewsInShelf += inShelfAmount;
+            int ownColorUntinted = row.getBackgroundColorWithoutTint();
             if (row.getTranslationY() >= getTranslationY() && mNotGoneIndex == -1) {
                 mNotGoneIndex = notGoneIndex;
+                setTintColor(previousColor);
+                setOverrideTintColor(colorTwoBefore, transitionAmount);
+
+            } else if (mNotGoneIndex == -1) {
+                colorTwoBefore = previousColor;
+                transitionAmount = inShelfAmount;
+            }
+            if (isLastChild && colorOfViewBeforeLast != NO_COLOR) {
+                row.setOverrideTintColor(colorOfViewBeforeLast, inShelfAmount);
+            } else {
+                colorOfViewBeforeLast = ownColorUntinted;
+                row.setOverrideTintColor(NO_COLOR, 0 /* overrideAmount */);
             }
             if (notGoneIndex != 0 || !aboveShelf) {
                 row.setAboveShelf(false);
             }
             notGoneIndex++;
+            previousColor = ownColorUntinted;
         }
         mShelfIcons.calculateIconTranslations();
         mShelfIcons.applyIconStates();
@@ -246,6 +266,9 @@ public class NotificationShelf extends ActivatableNotificationView {
         }
     }
 
+    /**
+     * @return the icon amount how much this notification is in the shelf;
+     */
     private float updateIconAppearance(ExpandableNotificationRow row,
             NotificationIconContainer.IconState iconState, StatusBarIconView icon,
             float expandAmount) {
