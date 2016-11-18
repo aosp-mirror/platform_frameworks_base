@@ -107,12 +107,12 @@ public abstract class CarrierService extends Service {
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges.
-     *   @see {@link android.telephony.TelephonyManager#hasCarrierPrivileges}
+     * or the calling app has carrier privileges.
      *
      * @param active Whether the carrier network change is or shortly will be
      *               active. Set this value to true to begin showing
      *               alternative UI and false to stop.
+     * @see android.telephony.TelephonyManager#hasCarrierPrivileges
      */
     public final void notifyCarrierNetworkChange(boolean active) {
         try {
