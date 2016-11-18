@@ -241,9 +241,22 @@ class FileDescriptorInfo {
     is_sock(false) {
   }
 
+  static bool StartsWith(const std::string& str, const std::string& prefix) {
+    return str.compare(0, prefix.size(), prefix) == 0;
+  }
+
+  static bool EndsWith(const std::string& str, const std::string& suffix) {
+    if (suffix.size() > str.size()) {
+      return false;
+    }
+
+    return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+  }
+
   // Returns true iff. a given path is whitelisted. A path is whitelisted
   // if it belongs to the whitelist (see kPathWhitelist) or if it's a path
-  // under /system/framework that ends with ".jar".
+  // under /system/framework that ends with ".jar" or if it is a system
+  // framework overlay.
   static bool IsWhitelisted(const std::string& path) {
     for (size_t i = 0; i < (sizeof(kPathWhitelist) / sizeof(kPathWhitelist[0])); ++i) {
       if (kPathWhitelist[i] == path) {
@@ -253,10 +266,41 @@ class FileDescriptorInfo {
 
     static const std::string kFrameworksPrefix = "/system/framework/";
     static const std::string kJarSuffix = ".jar";
-    if (path.compare(0, kFrameworksPrefix.size(), kFrameworksPrefix) == 0 &&
-        path.compare(path.size() - kJarSuffix.size(), kJarSuffix.size(), kJarSuffix) == 0) {
+    if (StartsWith(path, kFrameworksPrefix) && EndsWith(path, kJarSuffix)) {
       return true;
     }
+
+    // Whitelist files needed for Runtime Resource Overlay, like these:
+    // /system/vendor/overlay/framework-res.apk
+    // /system/vendor/overlay-subdir/pg/framework-res.apk
+    // /data/resource-cache/system@vendor@overlay@framework-res.apk@idmap
+    // /data/resource-cache/system@vendor@overlay-subdir@pg@framework-res.apk@idmap
+    // See AssetManager.cpp for more details on overlay-subdir.
+    static const std::string kOverlayDir = "/system/vendor/overlay/";
+    static const std::string kVendorOverlayDir = "/vendor/overlay";
+    static const std::string kOverlaySubdir = "/system/vendor/overlay-subdir/";
+    static const std::string kApkSuffix = ".apk";
+
+    if ((StartsWith(path, kOverlayDir) || StartsWith(path, kOverlaySubdir)
+         || StartsWith(path, kVendorOverlayDir))
+        && EndsWith(path, kApkSuffix)
+        && path.find("/../") == std::string::npos) {
+      return true;
+    }
+
+    static const std::string kOverlayIdmapPrefix = "/data/resource-cache/";
+    static const std::string kOverlayIdmapSuffix = ".apk@idmap";
+    if (StartsWith(path, kOverlayIdmapPrefix) && EndsWith(path, kOverlayIdmapSuffix)
+        && path.find("/../") == std::string::npos) {
+      return true;
+    }
+
+    // All regular files that are placed under this path are whitelisted automatically.
+    static const std::string kZygoteWhitelistPath = "/vendor/zygote_whitelist/";
+    if (StartsWith(path, kZygoteWhitelistPath) && path.find("/../") == std::string::npos) {
+      return true;
+    }
+
     return false;
   }
 
