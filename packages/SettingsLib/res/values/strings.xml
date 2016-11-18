@@ -863,4 +863,6 @@
     <!-- Content description for drawer menu button [CHAR_LIMIT=30]-->
     <string name="content_description_menu_button">Menu</string>
 
+    <!-- Label for Greenwich mean time, used in a string like GMT+05:00. [CHAR LIMIT=NONE] -->
+    <string name="time_zone_gmt">GMT</string>
 </resources>
