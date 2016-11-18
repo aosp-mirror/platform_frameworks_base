@@ -3161,6 +3161,10 @@ message MetricsEvent {
     // OPEN: Settings > System > Input & Gesture > Double twist gesture
     SETTINGS_GESTURE_DOUBLE_TWIST = 755;
 
+    // OPEN: Settings > Support > SupportDisclaimerDialog > SupportSystemInformationDialog
+    // CATEGORY: Settings
+    DIALOG_SUPPORT_SYSTEM_INFORMATION = 756;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
