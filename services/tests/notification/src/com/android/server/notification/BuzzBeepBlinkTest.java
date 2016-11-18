@@ -15,6 +15,10 @@
  */
 package com.android.server.notification;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
+
 import com.android.server.lights.Light;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
@@ -37,7 +41,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -75,7 +78,6 @@ public class BuzzBeepBlinkTest {
     private String mTag = null;
     private int mUid = 1000;
     private int mPid = 2000;
-    private int mScore = 10;
     private android.os.UserHandle mUser = UserHandle.of(ActivityManager.getCurrentUser());
 
     private static final long[] CUSTOM_VIBRATION = new long[] {
@@ -86,6 +88,7 @@ public class BuzzBeepBlinkTest {
     private static final int CUSTOM_LIGHT_COLOR = Color.BLACK;
     private static final int CUSTOM_LIGHT_ON = 10000;
     private static final int CUSTOM_LIGHT_OFF = 10000;
+    private static final long[] FALLBACK_VIBRATION = new long[] {100, 100, 100};
 
     @Before
     public void setUp() {
@@ -104,7 +107,7 @@ public class BuzzBeepBlinkTest {
         mService.setStatusBarManager(mStatusBar);
         mService.setLights(mLight);
         mService.setScreenOn(false);
-        mService.setSystemNotificationSound("beep!");
+        mService.setFallbackVibrationPattern(FALLBACK_VIBRATION);
     }
 
     //
@@ -161,21 +164,14 @@ public class BuzzBeepBlinkTest {
                 false /* noisy */, true /* buzzy*/, false /* lights */);
     }
 
+    private NotificationRecord getBuzzyBeepyNotification() {
+        return getNotificationRecord(mId, false /* insistent */, false /* once */,
+                true /* noisy */, true /* buzzy*/, false /* lights */);
+    }
+
     private NotificationRecord getLightsNotification() {
         return getNotificationRecord(mId, false /* insistent */, true /* once */,
                 false /* noisy */, true /* buzzy*/, true /* lights */);
-    }
-
-    private NotificationRecord getCustomBuzzyOnceNotification() {
-        return getNotificationRecord(mId, false /* insistent */, true /* once */,
-                false /* noisy */, true /* buzzy*/, false /* lights */,
-                false /* defaultVibration */, true /* defaultSound */, true /* defaultLights */);
-    }
-
-    private NotificationRecord getCustomBeepyNotification() {
-        return getNotificationRecord(mId, false /* insistent */, false /* once */,
-                true /* noisy */, false /* buzzy*/, false /* lights */,
-                true /* defaultVibration */, false /* defaultSound */, true /* defaultLights */);
     }
 
     private NotificationRecord getCustomLightsNotification() {
@@ -192,6 +188,8 @@ public class BuzzBeepBlinkTest {
     private NotificationRecord getNotificationRecord(int id, boolean insistent, boolean once,
             boolean noisy, boolean buzzy, boolean lights, boolean defaultVibration,
             boolean defaultSound, boolean defaultLights) {
+        NotificationChannel channel =
+                new NotificationChannel("test", "test", NotificationManager.IMPORTANCE_HIGH);
         final Builder builder = new Builder(getContext())
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -202,8 +200,10 @@ public class BuzzBeepBlinkTest {
         if (noisy) {
             if (defaultSound) {
                 defaults |= Notification.DEFAULT_SOUND;
+                channel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
             } else {
                 builder.setSound(CUSTOM_SOUND);
+                channel.setSound(CUSTOM_SOUND);
             }
         }
         if (buzzy) {
@@ -212,6 +212,7 @@ public class BuzzBeepBlinkTest {
             } else {
                 builder.setVibrate(CUSTOM_VIBRATION);
             }
+            channel.setVibration(true);
         }
         if (lights) {
             if (defaultLights) {
@@ -219,6 +220,7 @@ public class BuzzBeepBlinkTest {
             } else {
                 builder.setLights(CUSTOM_LIGHT_COLOR, CUSTOM_LIGHT_ON, CUSTOM_LIGHT_OFF);
             }
+            channel.setLights(true);
         }
         builder.setDefaults(defaults);
 
@@ -226,8 +228,7 @@ public class BuzzBeepBlinkTest {
         if (insistent) {
             n.flags |= Notification.FLAG_INSISTENT;
         }
-        NotificationChannel channel =
-                new NotificationChannel("test", "test", NotificationManager.IMPORTANCE_HIGH);
+
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, channel, id, mTag, mUid,
                 mPid, n, mUser, null, System.currentTimeMillis());
         NotificationRecord r = new NotificationRecord(getContext(), sbn);
@@ -282,11 +283,6 @@ public class BuzzBeepBlinkTest {
                 eq(0), (AudioAttributes) anyObject());
     }
 
-    private void verifyCustomVibrate() {
-        verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), eq(CUSTOM_VIBRATION), eq(-1),
-                (AudioAttributes) anyObject());
-    }
-
     private void verifyStopVibrate() {
         verify(mVibrator, times(1)).cancel();
     }
@@ -333,30 +329,6 @@ public class BuzzBeepBlinkTest {
     }
 
     @Test
-    public void testBeepFromChannel() throws Exception {
-        NotificationRecord r = getQuietNotification();
-        r.getChannel().setRingtone(Settings.System.DEFAULT_NOTIFICATION_URI);
-        r.setImportance(NotificationManager.IMPORTANCE_DEFAULT, "for testing");
-
-        mService.buzzBeepBlinkLocked(r);
-
-        verifyBeepLooped();
-        verifyNeverVibrate();
-    }
-
-    @Test
-    public void testVibrateFromChannel() throws Exception {
-        NotificationRecord r = getQuietNotification();
-        r.getChannel().setVibration(true);
-        r.setImportance(NotificationManager.IMPORTANCE_DEFAULT, "for testing");
-
-        mService.buzzBeepBlinkLocked(r);
-
-        verifyNeverBeep();
-        verifyVibrate();
-    }
-
-    @Test
     public void testLightsFromChannel() throws Exception {
         NotificationRecord r = getQuietNotification();
         r.setImportance(NotificationManager.IMPORTANCE_DEFAULT, "for testing");
@@ -374,26 +346,6 @@ public class BuzzBeepBlinkTest {
         mService.buzzBeepBlinkLocked(r);
 
         verifyBeep();
-    }
-
-    @Test
-    public void testChannelNoOverwriteCustomVibration() throws Exception {
-        NotificationRecord r = getCustomBuzzyOnceNotification();
-        r.getChannel().setVibration(true);
-
-        mService.buzzBeepBlinkLocked(r);
-
-        verifyCustomVibrate();
-    }
-
-    @Test
-    public void testChannelNoOverwriteCustomBeep() throws Exception {
-        NotificationRecord r = getCustomBeepyNotification();
-        r.getChannel().setRingtone(Settings.System.DEFAULT_RINGTONE_URI);
-
-        mService.buzzBeepBlinkLocked(r);
-
-        verifyCustomBeep();
     }
 
     @Test
@@ -542,22 +494,39 @@ public class BuzzBeepBlinkTest {
     }
 
     @Test
-    public void testDemoteSoundToVibrate() throws Exception {
-        NotificationRecord r = getBeepyNotification();
+    public void testNoDemoteSoundToVibrateIfVibrateGiven() throws Exception {
+        NotificationRecord r = getBuzzyBeepyNotification();
+        assertTrue(r.getSound() != null);
 
         // the phone is quiet
-        when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
 
         mService.buzzBeepBlinkLocked(r);
 
-        verifyNeverBeep();
-        verifyVibrate();
+       verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), eq(r.getVibration()),
+                    eq(-1), (AudioAttributes) anyObject());
     }
 
     @Test
-    public void testDemoteInsistenteSoundToVibrate() throws Exception {
+    public void testDemoteSoundToVibrate() throws Exception {
+        NotificationRecord r = getBeepyNotification();
+        assertTrue(r.getSound() != null);
+        assertNull(r.getVibration());
+
+        // the phone is quiet
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), eq(FALLBACK_VIBRATION),
+                eq(-1), (AudioAttributes) anyObject());
+    }
+
+    @Test
+    public void testDemoteInsistentSoundToVibrate() throws Exception {
         NotificationRecord r = getInsistentBeepyNotification();
+        assertTrue(r.getSound() != null);
+        assertNull(r.getVibration());
 
         // the phone is quiet
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
@@ -677,6 +646,7 @@ public class BuzzBeepBlinkTest {
 
         // set up internal state
         mService.buzzBeepBlinkLocked(r);
+        verifyVibrate();
 
         // quiet update should stop making noise
         mService.buzzBeepBlinkLocked(s);
@@ -684,14 +654,14 @@ public class BuzzBeepBlinkTest {
     }
 
     @Test
-    public void testQuietOnceUpdateCancelsvibrate() throws Exception {
+    public void testQuietOnceUpdateCancelVibrate() throws Exception {
         NotificationRecord r = getBuzzyNotification();
         NotificationRecord s = getQuietOnceNotification();
         s.isUpdate = true;
 
         // set up internal state
         mService.buzzBeepBlinkLocked(r);
-        Mockito.reset(mVibrator);
+        verifyVibrate();
 
         // stop making noise - this is a weird corner case, but quiet should override once
         mService.buzzBeepBlinkLocked(s);

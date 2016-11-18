@@ -24,15 +24,21 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
+import android.media.AudioSystem;
+import android.net.Uri;
+import android.os.Build;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.EventLogTags;
@@ -100,6 +106,10 @@ public final class NotificationRecord {
     private int mSuppressedVisualEffects = 0;
     private String mUserExplanation;
     private String mPeopleExplanation;
+    private boolean mPreChannelsNotification = true;
+    private Uri mSound;
+    private long[] mVibration;
+    private AudioAttributes mAttributes;
 
     @VisibleForTesting
     public NotificationRecord(Context context, StatusBarNotification sbn)
@@ -111,12 +121,95 @@ public final class NotificationRecord {
         mUpdateTimeMs = mCreationTimeMs;
         mContext = context;
         stats = new NotificationUsageStats.SingleNotificationStats();
-        mImportance = defaultImportance();
+        mPreChannelsNotification = isPreChannelsNotification();
+        mSound = calculateSound();
+        mVibration = calculateVibration();
+        mAttributes = calculateAttributes();
+        mImportance = calculateImportance();
     }
 
-    private int defaultImportance() {
+    private boolean isPreChannelsNotification() {
+        try {
+            if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(getChannel().getId())) {
+                final ApplicationInfo applicationInfo =
+                        mContext.getPackageManager().getApplicationInfoAsUser(sbn.getPackageName(),
+                                0, sbn.getUserId());
+                if (applicationInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
+                    return true;
+                }
+            }
+        } catch (NameNotFoundException e) {
+            Slog.e(TAG, "Can't find package", e);
+        }
+        return false;
+    }
+
+    private Uri calculateSound() {
         final Notification n = sbn.getNotification();
-        int importance = IMPORTANCE_DEFAULT;
+
+        Uri sound = sbn.getNotificationChannel().getSound();
+        if (mPreChannelsNotification && (getChannel().getUserLockedFields()
+                & NotificationChannel.USER_LOCKED_SOUND) == 0) {
+
+            final boolean useDefaultSound = (n.defaults & Notification.DEFAULT_SOUND) != 0;
+            if (useDefaultSound) {
+                sound = Settings.System.DEFAULT_NOTIFICATION_URI;
+            } else if (n.sound != null) {
+                sound = n.sound;
+            }
+        }
+        return sound;
+    }
+
+    private long[] calculateVibration() {
+        long[] vibration;
+        final long[] defaultVibration =  NotificationManagerService.getLongArray(
+                mContext.getResources(),
+                com.android.internal.R.array.config_defaultNotificationVibePattern,
+                NotificationManagerService.VIBRATE_PATTERN_MAXLEN,
+                NotificationManagerService.DEFAULT_VIBRATE_PATTERN);
+        if (getChannel().shouldVibrate()) {
+            vibration = defaultVibration;
+        } else {
+            vibration = null;
+        }
+        if (mPreChannelsNotification
+                && (getChannel().getUserLockedFields()
+                & NotificationChannel.USER_LOCKED_VIBRATION) == 0) {
+            final Notification notification = sbn.getNotification();
+            final boolean useDefaultVibrate =
+                    (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
+            if (useDefaultVibrate) {
+                vibration = defaultVibration;
+            } else {
+                vibration = notification.vibrate;
+            }
+        }
+        return vibration;
+    }
+
+    private AudioAttributes calculateAttributes() {
+        final Notification n = sbn.getNotification();
+        AudioAttributes attributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
+
+        if (n.audioAttributes != null) {
+            // prefer audio attributes to stream type
+            attributes = n.audioAttributes;
+        } else if (n.audioStreamType >= 0 && n.audioStreamType < AudioSystem.getNumStreamTypes()) {
+            // the stream type is valid, use it
+            attributes = new AudioAttributes.Builder()
+                    .setInternalLegacyStreamType(n.audioStreamType)
+                    .build();
+        } else if (n.audioStreamType != AudioSystem.STREAM_DEFAULT) {
+            Log.w(TAG, String.format("Invalid stream type: %d", n.audioStreamType));
+        }
+        return attributes;
+    }
+
+    private int calculateImportance() {
+        final Notification n = sbn.getNotification();
+        int importance = getChannel().getImportance();
+        int requestedImportance = IMPORTANCE_DEFAULT;
 
         // Migrate notification flags to scores
         if (0 != (n.flags & Notification.FLAG_HIGH_PRIORITY)) {
@@ -125,41 +218,39 @@ public final class NotificationRecord {
 
         switch (n.priority) {
             case Notification.PRIORITY_MIN:
-                importance = IMPORTANCE_MIN;
+                requestedImportance = IMPORTANCE_MIN;
                 break;
             case Notification.PRIORITY_LOW:
-                importance = IMPORTANCE_LOW;
+                requestedImportance = IMPORTANCE_LOW;
                 break;
             case Notification.PRIORITY_DEFAULT:
-                importance = IMPORTANCE_DEFAULT;
+                requestedImportance = IMPORTANCE_DEFAULT;
                 break;
             case Notification.PRIORITY_HIGH:
             case Notification.PRIORITY_MAX:
-                importance = IMPORTANCE_HIGH;
+                requestedImportance = IMPORTANCE_HIGH;
                 break;
         }
-        stats.requestedImportance = importance;
+        stats.requestedImportance = requestedImportance;
+        stats.isNoisy = mSound != null || mVibration != null;
 
-        boolean isNoisy = (n.defaults & Notification.DEFAULT_SOUND) != 0
-                || (n.defaults & Notification.DEFAULT_VIBRATE) != 0
-                || n.sound != null
-                || n.vibrate != null
-                || sbn.getNotificationChannel().shouldVibrate()
-                || sbn.getNotificationChannel().getRingtone() != null;
-        stats.isNoisy = isNoisy;
-
-        if (!isNoisy && importance > IMPORTANCE_LOW) {
-            importance = IMPORTANCE_LOW;
-        }
-
-        if (isNoisy) {
-            if (importance < IMPORTANCE_DEFAULT) {
-                importance = IMPORTANCE_DEFAULT;
+        if (mPreChannelsNotification
+                && (getChannel().getUserLockedFields()
+                & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0) {
+            if (!stats.isNoisy && requestedImportance > IMPORTANCE_LOW) {
+                requestedImportance = IMPORTANCE_LOW;
             }
-        }
 
-        if (n.fullScreenIntent != null) {
-            importance = IMPORTANCE_HIGH;
+            if (stats.isNoisy) {
+                if (requestedImportance < IMPORTANCE_DEFAULT) {
+                    requestedImportance = IMPORTANCE_DEFAULT;
+                }
+            }
+
+            if (n.fullScreenIntent != null) {
+                requestedImportance = IMPORTANCE_HIGH;
+            }
+            importance = requestedImportance;
         }
 
         stats.naturalImportance = importance;
@@ -284,6 +375,9 @@ public final class NotificationRecord {
         pw.println(prefix + "  mUpdateTimeMs=" + mUpdateTimeMs);
         pw.println(prefix + "  mSuppressedVisualEffects= " + mSuppressedVisualEffects);
         pw.println(prefix + "  notificationChannel= " + notification.getChannel());
+        pw.println(prefix + "  mSound= " + mSound);
+        pw.println(prefix + "  mVibration= " + mVibration);
+        pw.println(prefix + "  mAttributes= " + mAttributes);
     }
 
 
@@ -362,16 +456,16 @@ public final class NotificationRecord {
 
     private String getUserExplanation() {
         if (mUserExplanation == null) {
-            mUserExplanation =
-                    mContext.getString(com.android.internal.R.string.importance_from_user);
+            mUserExplanation = mContext.getResources().getString(
+                    com.android.internal.R.string.importance_from_user);
         }
         return mUserExplanation;
     }
 
     private String getPeopleExplanation() {
         if (mPeopleExplanation == null) {
-            mPeopleExplanation =
-                    mContext.getString(com.android.internal.R.string.importance_from_person);
+            mPeopleExplanation = mContext.getResources().getString(
+                    com.android.internal.R.string.importance_from_person);
         }
         return mPeopleExplanation;
     }
@@ -532,5 +626,17 @@ public final class NotificationRecord {
 
     public NotificationChannel getChannel() {
         return sbn.getNotificationChannel();
+    }
+
+    public Uri getSound() {
+        return mSound;
+    }
+
+    public long[] getVibration() {
+        return mVibration;
+    }
+
+    public AudioAttributes getAudioAttributes() {
+        return mAttributes;
     }
 }

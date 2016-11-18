@@ -52,7 +52,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -225,7 +224,7 @@ public class RankingHelperTest {
                 new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
         NotificationChannel channel2 =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
-        channel2.setRingtone(new Uri.Builder().scheme("test").build());
+        channel2.setSound(new Uri.Builder().scheme("test").build());
         channel2.setLights(true);
         channel2.setBypassDnd(true);
         channel2.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
@@ -441,15 +440,15 @@ public class RankingHelperTest {
         // all fields locked by user
         final NotificationChannel channel =
             new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
-        channel.setRingtone(new Uri.Builder().scheme("test").build());
-        channel.lockFields(NotificationChannel.USER_LOCKED_RINGTONE);
+        channel.setSound(new Uri.Builder().scheme("test").build());
+        channel.lockFields(NotificationChannel.USER_LOCKED_SOUND);
 
         mHelper.createNotificationChannel(pkg, uid, channel);
 
         // same id, try to update all fields
         final NotificationChannel channel2 =
             new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
-        channel2.setRingtone(new Uri.Builder().scheme("test2").build());
+        channel2.setSound(new Uri.Builder().scheme("test2").build());
 
         mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
 
@@ -462,7 +461,7 @@ public class RankingHelperTest {
         // no fields locked by user
         final NotificationChannel channel =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
-        channel.setRingtone(new Uri.Builder().scheme("test").build());
+        channel.setSound(new Uri.Builder().scheme("test").build());
         channel.setLights(true);
         channel.setBypassDnd(true);
         channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
@@ -472,7 +471,7 @@ public class RankingHelperTest {
         // same id, try to update all fields
         final NotificationChannel channel2 =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
-        channel2.setRingtone(new Uri.Builder().scheme("test2").build());
+        channel2.setSound(new Uri.Builder().scheme("test2").build());
         channel2.setLights(false);
         channel2.setBypassDnd(false);
         channel2.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
