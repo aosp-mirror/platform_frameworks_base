@@ -35,15 +35,15 @@ public:
      *  Create a new SkiaCanvas.
      *
      *  @param canvas SkCanvas to handle calls made to this SkiaCanvas. Must
-     *      not be NULL. This constructor will ref() the SkCanvas, and unref()
-     *      it in its destructor.
+     *      not be NULL. This constructor does not take ownership, so the caller
+     *      must guarantee that it remains valid while the SkiaCanvas is valid.
      */
     explicit SkiaCanvas(SkCanvas* canvas);
 
     virtual ~SkiaCanvas();
 
     virtual SkCanvas* asSkCanvas() override {
-        return mCanvas.get();
+        return mCanvas;
     }
 
     virtual void resetRecording(int width, int height,
@@ -182,7 +182,9 @@ private:
 
     class Clip;
 
-    sk_sp<SkCanvas>          mCanvas;
+    std::unique_ptr<SkCanvas> mCanvasOwned; // might own a canvas we allocated
+    SkCanvas*                 mCanvas;    // we do NOT own this canvas, it must survive us
+                                          // unless it is the same as mCanvasOwned.get()
     std::unique_ptr<SkDeque> mSaveStack; // lazily allocated, tracks partial saves.
     std::vector<Clip>        mClipStack; // tracks persistent clips.
 };
