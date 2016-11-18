@@ -61,6 +61,21 @@ public final class PasspointConfiguration implements Parcelable {
                     credential.equals(that.credential));
     }
 
+    /**
+     * Validate the configuration data.
+     *
+     * @return true on success or false on failure
+     */
+    public boolean validate() {
+        if (homeSp == null || !homeSp.validate()) {
+            return false;
+        }
+        if (credential == null || !credential.validate()) {
+            return false;
+        }
+        return true;
+    }
+
     public static final Creator<PasspointConfiguration> CREATOR =
         new Creator<PasspointConfiguration>() {
             @Override
