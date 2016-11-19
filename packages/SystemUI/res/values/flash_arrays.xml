@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2017 Flash ROM
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <string-array name="volume_stream_titles_new" trabslatable="false" >
+        <item>@string/stream_title_call</item> <!-- STREAM_VOICE_CALL -->
+        <item>@string/stream_title_system</item> <!-- STREAM_SYSTEM -->
+        <item>@string/stream_title_ring</item> <!-- STREAM_RING -->
+        <item>@string/stream_title_music</item> <!-- STREAM_MUSIC -->
+        <item>@string/stream_title_alarm</item> <!-- STREAM_ALARM -->
+        <item>@string/stream_title_notification</item> <!-- STREAM_NOTIFICATION -->
+        <item>@string/stream_title_bluetooth</item> <!-- STREAM_BLUETOOTH_SCO -->
+        <item></item> <!-- STREAM_SYSTEM_ENFORCED -->
+        <item></item> <!-- STREAM_DTMF -->
+        <item></item> <!-- STREAM_TTS -->
+    </string-array>
+
+</resources>

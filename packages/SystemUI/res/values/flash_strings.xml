@@ -106,4 +106,12 @@
     <!-- Android Auto 2.0x QS tile -->
     <string name="quick_settings_androidauto_label">Android Auto</string>
 
+    <string name="stream_title_call">Call</string>
+    <string name="stream_title_system">System</string>
+    <string name="stream_title_ring">Ring</string>
+    <string name="stream_title_music">Music</string>
+    <string name="stream_title_alarm">Alarm</string>
+    <string name="stream_title_notification">Notification</string>
+    <string name="stream_title_bluetooth">Bluetooth</string>
+
 </resources>

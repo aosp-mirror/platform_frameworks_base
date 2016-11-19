@@ -122,7 +122,7 @@ public class VolumeDialogController {
         mObserver = new SettingObserver(mWorker);
         mObserver.init();
         mReceiver.init();
-        mStreamTitles = mContext.getResources().getStringArray(R.array.volume_stream_titles);
+        mStreamTitles = mContext.getResources().getStringArray(R.array.volume_stream_titles_new);
         mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator != null && mVibrator.hasVibrator();
     }
