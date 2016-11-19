@@ -17,19 +17,52 @@
 package com.android.systemui.doze;
 
 import android.app.Application;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.SystemClock;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
+import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIApplication;
+import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.plugins.doze.DozeProvider;
 import com.android.systemui.statusbar.phone.DozeParameters;
 
 public class DozeFactory {
 
+    private static DozeFactory sInstance;
+
+    private DozeProvider mDozePlugin;
+
+    /** Returns the singleton instance. */
+    public static DozeFactory getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new DozeFactory();
+            PluginManager.getInstance(context).addPluginListener(DozeProvider.ACTION,
+                    new PluginListener<DozeProvider>() {
+                        @Override
+                        public void onPluginConnected(DozeProvider plugin) {
+                            sInstance.mDozePlugin = plugin;
+                        }
+
+                        @Override
+                        public void onPluginDisconnected(DozeProvider plugin) {
+                            if (sInstance.mDozePlugin == plugin) {
+                                sInstance.mDozePlugin = null;
+                            }
+                        }
+                    },
+                    DozeProvider.VERSION, false /* Only one */);
+        }
+        return sInstance;
+    }
+
     /** Creates a DozeMachine with its parts for {@code dozeService}. */
-    public static DozeMachine assembleMachine(DozeService dozeService) {
+    public DozeMachine assembleMachine(DozeService dozeService) {
         Context context = dozeService;
         SensorManager sensorManager = context.getSystemService(SensorManager.class);
         PowerManager powerManager = context.getSystemService(PowerManager.class);
@@ -43,12 +76,101 @@ public class DozeFactory {
 
         DozeMachine machine = new DozeMachine(dozeService, params, wakeLock);
         machine.setParts(new DozeMachine.Part[]{
-                new DozeTriggers(context, machine, host, config, params,
-                        sensorManager, handler, wakeLock),
-                new DozeUi(context, machine, wakeLock, host),
+                createDozeTriggers(context, sensorManager, host, config, params, handler, wakeLock,
+                        machine),
+                createDozeUi(context, host, wakeLock, machine),
         });
 
         return machine;
+    }
+
+    private DozeTriggers createDozeTriggers(Context context, SensorManager sensorManager,
+            DozeHost host, AmbientDisplayConfiguration config, DozeParameters params,
+            Handler handler, WakeLock wakeLock, DozeMachine machine) {
+        boolean allowPulseTriggers = mDozePlugin == null || mDozePlugin.allowDefaultPulseTriggers();
+        return new DozeTriggers(context, machine, host, config, params,
+                sensorManager, handler, wakeLock, allowPulseTriggers);
+    }
+
+    private DozeMachine.Part createDozeUi(Context context, DozeHost host, WakeLock wakeLock,
+            DozeMachine machine) {
+        if (mDozePlugin != null) {
+            DozeProvider.DozeUi dozeUi = mDozePlugin.provideDozeUi(context,
+                    pluginMachine(context, machine, host),
+                    wakeLock);
+            return (oldState, newState) -> {
+                dozeUi.transitionTo(pluginState(oldState),
+                        pluginState(newState));
+            };
+        } else {
+            return new DozeUi(context, machine, wakeLock, host);
+        }
+    }
+
+    private DozeProvider.DozeMachine pluginMachine(Context context, DozeMachine machine,
+            DozeHost host) {
+        return new DozeProvider.DozeMachine() {
+            @Override
+            public void requestState(DozeProvider.DozeState state) {
+                if (state == DozeProvider.DozeState.WAKE_UP) {
+                    PowerManager pm = context.getSystemService(PowerManager.class);
+                    pm.wakeUp(SystemClock.uptimeMillis(), "com.android.systemui:NODOZE");
+                    return;
+                }
+                machine.requestState(implState(state));
+            }
+
+            @Override
+            public void requestSendIntent(PendingIntent intent) {
+                host.startPendingIntentDismissingKeyguard(intent);
+            }
+        };
+    }
+
+    private DozeMachine.State implState(DozeProvider.DozeState s) {
+        switch (s) {
+            case UNINITIALIZED:
+                return DozeMachine.State.UNINITIALIZED;
+            case INITIALIZED:
+                return DozeMachine.State.INITIALIZED;
+            case DOZE:
+                return DozeMachine.State.DOZE;
+            case DOZE_AOD:
+                return DozeMachine.State.DOZE_AOD;
+            case DOZE_REQUEST_PULSE:
+                return DozeMachine.State.DOZE_REQUEST_PULSE;
+            case DOZE_PULSING:
+                return DozeMachine.State.DOZE_PULSING;
+            case DOZE_PULSE_DONE:
+                return DozeMachine.State.DOZE_PULSE_DONE;
+            case FINISH:
+                return DozeMachine.State.FINISH;
+            default:
+                throw new IllegalArgumentException("Unknown state: " + s);
+        }
+    }
+
+    private DozeProvider.DozeState pluginState(DozeMachine.State s) {
+        switch (s) {
+            case UNINITIALIZED:
+                return DozeProvider.DozeState.UNINITIALIZED;
+            case INITIALIZED:
+                return DozeProvider.DozeState.INITIALIZED;
+            case DOZE:
+                return DozeProvider.DozeState.DOZE;
+            case DOZE_AOD:
+                return DozeProvider.DozeState.DOZE_AOD;
+            case DOZE_REQUEST_PULSE:
+                return DozeProvider.DozeState.DOZE_REQUEST_PULSE;
+            case DOZE_PULSING:
+                return DozeProvider.DozeState.DOZE_PULSING;
+            case DOZE_PULSE_DONE:
+                return DozeProvider.DozeState.DOZE_PULSE_DONE;
+            case FINISH:
+                return DozeProvider.DozeState.FINISH;
+            default:
+                throw new IllegalArgumentException("Unknown state: " + s);
+        }
     }
 
     private static DozeHost getHost(DozeService service) {
@@ -58,7 +180,7 @@ public class DozeFactory {
     }
 
     /** A wrapper around {@link PowerManager.WakeLock} for testability. */
-    public static class WakeLock {
+    public static class WakeLock implements DozeProvider.WakeLock {
         private final PowerManager.WakeLock mInner;
 
         public WakeLock(PowerManager.WakeLock inner) {
@@ -78,6 +200,15 @@ public class DozeFactory {
         /** @see PowerManager.WakeLock#wrap(Runnable) */
         public Runnable wrap(Runnable runnable) {
             return mInner.wrap(runnable);
+        }
+    }
+
+    /** Hack: We need to initialize the plugin listener before doze actually starts.
+     * This will be unnecessary once we have proper one-shot support */
+    public static class Initializer extends SystemUI {
+        @Override
+        public void start() {
+            getInstance(mContext);
         }
     }
 }

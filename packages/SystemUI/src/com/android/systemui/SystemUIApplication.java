@@ -29,6 +29,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.android.systemui.doze.DozeFactory;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyboard.KeyboardUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -76,7 +77,8 @@ public class SystemUIApplication extends Application {
             PipUI.class,
             ShortcutKeyDispatcher.class,
             VendorServices.class,
-            LatencyTester.class
+            LatencyTester.class,
+            DozeFactory.Initializer.class,
     };
 
     /**
