@@ -212,7 +212,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         mDividers.add(newIndex, divider);
 
         updateGroupOverflow();
-        row.setIconTransformationAmount(0);
+        row.setIconTransformationAmount(0, false /* isLastChild */);
     }
 
     public void removeNotification(ExpandableNotificationRow row) {

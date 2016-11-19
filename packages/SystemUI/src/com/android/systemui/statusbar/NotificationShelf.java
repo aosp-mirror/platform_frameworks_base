@@ -308,7 +308,7 @@ public class NotificationShelf extends ActivatableNotificationView {
         float notificationIconSize = 0.0f;
         int iconTopPadding;
         if (rowIcon != null) {
-            iconTopPadding = getIconTopPadding(rowIcon);
+            iconTopPadding = row.getRelativeTopPadding(rowIcon);
             notificationIconSize = rowIcon.getHeight();
         } else {
             iconTopPadding = mIconAppearTopPadding;
@@ -347,7 +347,7 @@ public class NotificationShelf extends ActivatableNotificationView {
         // The notification size is different from the size in the shelf / statusbar
         float newSize = NotificationUtils.interpolate(notificationIconSize, shelfIconSize,
                 transitionAmount);
-        row.setIconTransformationAmount(transitionAmount);
+        row.setIconTransformationAmount(transitionAmount, isLastChild);
         if (iconState != null) {
             iconState.scaleX = newSize / icon.getHeight() / icon.getIconScale();
             iconState.scaleY = iconState.scaleX;
@@ -369,19 +369,6 @@ public class NotificationShelf extends ActivatableNotificationView {
 
     private float getFullyClosedTranslation() {
         return - (getIntrinsicHeight() - mStatusBarHeight) / 2;
-    }
-
-    private int getIconTopPadding(View icon) {
-        View view = icon;
-        int topPadding = 0;
-        while (view.getParent() instanceof ViewGroup) {
-            topPadding += view.getTop();
-            view = (View) view.getParent();
-            if (view instanceof ExpandableNotificationRow) {
-                return topPadding;
-            }
-        }
-        return topPadding;
     }
 
     public int getNotificationMergeSize() {

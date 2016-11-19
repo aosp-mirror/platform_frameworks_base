@@ -89,7 +89,7 @@
     <dimen name="notification_icon_appear_padding">15dp</dimen>
 
     <!-- The amount the content shifts upwards when transforming into the icon -->
-    <dimen name="notification_icon_transform_content_shift">16dp</dimen>
+    <dimen name="notification_icon_transform_content_shift">32dp</dimen>
 
     <!-- Minimum layouted height of a notification in the statusbar-->
     <dimen name="min_notification_layout_height">48dp</dimen>

@@ -36,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -45,6 +46,7 @@ import android.widget.ImageView;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.widget.CachingIconView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
@@ -65,6 +67,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private static final int DEFAULT_DIVIDER_ALPHA = 0x29;
     private static final int COLORED_DIVIDER_ALPHA = 0x7B;
     private int mIconTransformContentShift;
+    private int mIconTransformContentShiftNoIcon;
     private int mNotificationMinHeightLegacy;
     private int mMaxHeadsUpHeightLegacy;
     private int mMaxHeadsUpHeight;
@@ -193,6 +196,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private float mIconTransformationAmount;
     private boolean mIconsVisible = true;
     private boolean mAboveShelf;
+    private boolean mIsLastChild;
 
     public boolean isGroupExpansionChanging() {
         if (isChildInGroup()) {
@@ -835,11 +839,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      *
      * @param iconTransformationAmount A value from 0 to 1 indicating how much we are transformed
      *                                 to an icon
+     * @param isLastChild is this the last child in the list. If true, then the transformation is
+     *                    different since it's content fades out.
      */
-    public void setIconTransformationAmount(float iconTransformationAmount) {
-        if (mIconTransformationAmount != iconTransformationAmount) {
-            mIconTransformationAmount = iconTransformationAmount;
-            updateContentFadeOut();
+    public void setIconTransformationAmount(float iconTransformationAmount, boolean isLastChild) {
+        boolean changeTransformation = isLastChild != mIsLastChild;
+        changeTransformation |= mIconTransformationAmount != iconTransformationAmount;
+        mIsLastChild = isLastChild;
+        mIconTransformationAmount = iconTransformationAmount;
+        if (changeTransformation) {
+            updateContentTransformation();
             boolean iconsVisible = mIconTransformationAmount == 0.0f;
             if (iconsVisible != mIconsVisible) {
                 mIconsVisible = iconsVisible;
@@ -853,21 +862,25 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         updateIconVisibilities();
     }
 
-    private void updateContentFadeOut() {
-        if (!isChildInGroup()) {
-            float contentAlpha = 1.0f - mIconTransformationAmount;
-            contentAlpha = Math.max((contentAlpha - 0.5f) / 0.5f, 0.0f);
+    private void updateContentTransformation() {
+        float contentAlpha;
+        float translationY = - mIconTransformationAmount * mIconTransformContentShift;
+        if (mIsLastChild) {
+            contentAlpha = 1.0f - mIconTransformationAmount;
+            contentAlpha = Math.min(contentAlpha / 0.5f, 1.0f);
             contentAlpha = Interpolators.ALPHA_OUT.getInterpolation(contentAlpha);
-            mPublicLayout.setAlpha(contentAlpha);
-            float translationY = - mIconTransformationAmount * mIconTransformContentShift;
-            mPublicLayout.setTranslationY(translationY);
-            mPrivateLayout.setAlpha(contentAlpha);
-            mPrivateLayout.setTranslationY(translationY);
-            if (mChildrenContainer != null) {
-                mChildrenContainer.setAlpha(contentAlpha);
-                mChildrenContainer.setTranslationY(translationY);
-                // TODO: handle children fade out better
-            }
+            translationY *= 0.4f;
+        } else {
+            contentAlpha = 1.0f;
+        }
+        mPublicLayout.setAlpha(contentAlpha);
+        mPrivateLayout.setAlpha(contentAlpha);
+        mPublicLayout.setTranslationY(translationY);
+        mPrivateLayout.setTranslationY(translationY);
+        if (mChildrenContainer != null) {
+            mChildrenContainer.setAlpha(contentAlpha);
+            mChildrenContainer.setTranslationY(translationY);
+            // TODO: handle children fade out better
         }
     }
 
@@ -878,6 +891,26 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (mChildrenContainer != null) {
             mChildrenContainer.setIconsVisible(visible);
         }
+    }
+
+    /**
+     * Get the relative top padding of a view relative to this view. This recursively walks up the
+     * hierarchy and does the corresponding measuring.
+     *
+     * @param view the view to the the padding for. The requested view has to be a child of this
+     *             notification.
+     * @return the toppadding
+     */
+    public int getRelativeTopPadding(View view) {
+        int topPadding = 0;
+        while (view.getParent() instanceof ViewGroup) {
+            topPadding += view.getTop();
+            view = (View) view.getParent();
+            if (view instanceof ExpandableNotificationRow) {
+                return topPadding;
+            }
+        }
+        return topPadding;
     }
 
     public interface ExpansionLogger {
@@ -899,7 +932,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mMaxHeadsUpHeight = getFontScaledHeight(R.dimen.notification_max_heads_up_height);
         mIncreasedPaddingBetweenElements = getResources()
                 .getDimensionPixelSize(R.dimen.notification_divider_height_increased);
-        mIconTransformContentShift = getResources().getDimensionPixelSize(
+        mIconTransformContentShiftNoIcon = getResources().getDimensionPixelSize(
                 R.dimen.notification_icon_transform_content_shift);
     }
 
@@ -1372,6 +1405,21 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         updateMaxHeights();
         if (mSettingsIconRow != null) {
             mSettingsIconRow.updateVerticalLocation();
+        }
+        updateContentShiftHeight();
+    }
+
+    /**
+     * Updates the content shift height such that the header is completely hidden when coming from
+     * the top.
+     */
+    private void updateContentShiftHeight() {
+        NotificationHeaderView notificationHeader = getNotificationHeader();
+        if (notificationHeader != null) {
+            CachingIconView icon = notificationHeader.getIcon();
+            mIconTransformContentShift = getRelativeTopPadding(icon) + icon.getHeight();
+        } else {
+            mIconTransformContentShift = mIconTransformContentShiftNoIcon;
         }
     }
 

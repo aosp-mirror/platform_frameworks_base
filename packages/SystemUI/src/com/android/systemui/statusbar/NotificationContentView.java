@@ -595,10 +595,16 @@ public class NotificationContentView extends FrameLayout {
         updateClipping();
     }
 
+    @Override
+    public void setTranslationY(float translationY) {
+        super.setTranslationY(translationY);
+        updateClipping();
+    }
+
     private void updateClipping() {
         if (mClipToActualHeight) {
-            int top = mClipTopAmount;
-            int bottom = mContentHeight - mClipBottomAmount;
+            int top = (int) (mClipTopAmount - getTranslationY());
+            int bottom = (int) (mContentHeight - mClipBottomAmount - getTranslationY());
             bottom = Math.max(top, bottom);
             mClipBounds.set(0, top, getWidth(), bottom);
             setClipBounds(mClipBounds);
