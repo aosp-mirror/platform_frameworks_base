@@ -218,7 +218,8 @@ public class NotificationShelf extends ActivatableNotificationView {
                 }
             }
             updateNotificationClipHeight(row, notificationClipEnd);
-            float inShelfAmount = updateIconAppearance(row, iconState, icon, expandAmount);
+            float inShelfAmount = updateIconAppearance(row, iconState, icon, expandAmount,
+                    isLastChild);
             numViewsInShelf += inShelfAmount;
             int ownColorUntinted = row.getBackgroundColorWithoutTint();
             if (row.getTranslationY() >= getTranslationY() && mNotGoneIndex == -1) {
@@ -271,10 +272,14 @@ public class NotificationShelf extends ActivatableNotificationView {
      */
     private float updateIconAppearance(ExpandableNotificationRow row,
             NotificationIconContainer.IconState iconState, StatusBarIconView icon,
-            float expandAmount) {
+            float expandAmount, boolean isLastChild) {
         // Let calculate how much the view is in the shelf
         float viewStart = row.getTranslationY();
         int transformHeight = row.getActualHeight() + mPaddingBetweenElements;
+        if (isLastChild) {
+            transformHeight =
+                    Math.min(transformHeight, row.getMinHeight() - getIntrinsicHeight());
+        }
         float viewEnd = viewStart + transformHeight;
         float iconAppearAmount;
         float yTranslation;
@@ -312,6 +317,10 @@ public class NotificationShelf extends ActivatableNotificationView {
         float shelfIconPosition = getTranslationY() + icon.getTop();
         shelfIconPosition += ((1.0f - icon.getIconScale()) * icon.getHeight()) / 2.0f;
         float transitionDistance = getIntrinsicHeight() * 1.5f;
+        if (isLastChild) {
+            transitionDistance = Math.min(transitionDistance, row.getMinHeight()
+                    - getIntrinsicHeight());
+        }
         float transformationStartPosition = getTranslationY() - transitionDistance;
         float transitionAmount = 0.0f;
         if (viewStart < transformationStartPosition
