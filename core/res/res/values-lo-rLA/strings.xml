@@ -1059,10 +1059,16 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"ລະດັບສຽງຂອງສື່"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"ລະດັບສຽງການແຈ້ງເຕືອນ"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"ຣິງໂທນເລີ່ມຕົ້ນ"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"ຣິງໂທນເລີ່ມຕົ້ນ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
+    <skip />
     <string name="ringtone_silent" msgid="7937634392408977062">"ບໍ່ມີ"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"ຣິງໂທນ"</string>
-    <string name="ringtone_unknown" msgid="5477919988701784788">"ຣິງໂທນທີ່ບໍ່ຮູ້ຈັກ"</string>
+    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
+    <skip />
+    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
+    <skip />
+    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
+    <skip />
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">ເຄືອຂ່າຍ Wi-Fi ທີ່ມີໃຫ້</item>
       <item quantity="one">ເຄືອຂ່າຍ Wi-Fi ທີ່ມີໃຫ້</item>

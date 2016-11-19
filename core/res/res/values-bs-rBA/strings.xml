@@ -1084,10 +1084,16 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Jačina zvuka za medijske sadržaje"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Jačina zvuka za obavještenja"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Zadana melodija zvona"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Zadano zvono (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
+    <skip />
     <string name="ringtone_silent" msgid="7937634392408977062">"Bez zvuka"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Melodije zvona"</string>
-    <string name="ringtone_unknown" msgid="5477919988701784788">"Nepoznato zvono"</string>
+    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
+    <skip />
+    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
+    <skip />
+    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
+    <skip />
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="one">Wi-Fi mreže su dostupne</item>
       <item quantity="few">Wi-Fi mreže su dostupne</item>
