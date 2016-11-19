@@ -32,7 +32,6 @@ import android.content.IntentSender;
 import android.content.ReceiverCallNotAllowedException;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -159,7 +158,7 @@ class ContextImpl extends Context {
     private final String mOpPackageName;
 
     private final @NonNull ResourcesManager mResourcesManager;
-    private final @NonNull Resources mResources;
+    private @NonNull Resources mResources;
     private @Nullable Display mDisplay; // may be null if default display
 
     private final int mFlags;
@@ -1820,6 +1819,19 @@ class ContextImpl extends Context {
         }
     }
 
+    private static Resources createResources(IBinder activityToken, LoadedApk pi, int displayId,
+            Configuration overrideConfig, CompatibilityInfo compatInfo) {
+        return ResourcesManager.getInstance().getResources(activityToken,
+                pi.getResDir(),
+                pi.getSplitResDirs(),
+                pi.getOverlayDirs(),
+                pi.getApplicationInfo().sharedLibraryFiles,
+                displayId,
+                overrideConfig,
+                compatInfo,
+                pi.getClassLoader());
+    }
+
     @Override
     public Context createApplicationContext(ApplicationInfo application, int flags)
             throws NameNotFoundException {
@@ -1827,8 +1839,13 @@ class ContextImpl extends Context {
                 flags | CONTEXT_REGISTER_PACKAGE);
         if (pi != null) {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken,
-                    new UserHandle(UserHandle.getUserId(application.uid)), flags,
-                    mDisplay, null, Display.INVALID_DISPLAY);
+                    new UserHandle(UserHandle.getUserId(application.uid)), flags);
+
+            final int displayId = mDisplay != null
+                    ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
+
+            c.mResources = createResources(mActivityToken, pi, displayId, null,
+                    getDisplayAdjustments(displayId).getCompatibilityInfo());
             if (c.mResources != null) {
                 return c;
             }
@@ -1849,15 +1866,21 @@ class ContextImpl extends Context {
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
             throws NameNotFoundException {
         if (packageName.equals("system") || packageName.equals("android")) {
-            return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                    user, flags, mDisplay, null, Display.INVALID_DISPLAY);
+            // The system resources are loaded in every application, so we can safely copy
+            // the context without reloading Resources.
+            return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken, user, flags);
         }
 
         LoadedApk pi = mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(),
                 flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier());
         if (pi != null) {
-            ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken,
-                    user, flags, mDisplay, null, Display.INVALID_DISPLAY);
+            ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken, user, flags);
+
+            final int displayId = mDisplay != null
+                    ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
+
+            c.mResources = createResources(mActivityToken, pi, displayId, null,
+                    getDisplayAdjustments(displayId).getCompatibilityInfo());
             if (c.mResources != null) {
                 return c;
             }
@@ -1874,8 +1897,13 @@ class ContextImpl extends Context {
             throw new IllegalArgumentException("overrideConfiguration must not be null");
         }
 
-        return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                mUser, mFlags, mDisplay, overrideConfiguration, Display.INVALID_DISPLAY);
+        ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
+                mUser, mFlags);
+
+        final int displayId = mDisplay != null ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
+        context.mResources = createResources(mActivityToken, mPackageInfo, displayId,
+                overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo());
+        return context;
     }
 
     @Override
@@ -1884,24 +1912,28 @@ class ContextImpl extends Context {
             throw new IllegalArgumentException("display must not be null");
         }
 
-        return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                mUser, mFlags, display, null, Display.INVALID_DISPLAY);
+        ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
+                mUser, mFlags);
+
+        final int displayId = display.getDisplayId();
+        context.mResources = createResources(mActivityToken, mPackageInfo, displayId, null,
+                getDisplayAdjustments(displayId).getCompatibilityInfo());
+        context.mDisplay = display;
+        return context;
     }
 
     @Override
     public Context createDeviceProtectedStorageContext() {
         final int flags = (mFlags & ~Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE)
                 | Context.CONTEXT_DEVICE_PROTECTED_STORAGE;
-        return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                mUser, flags, mDisplay, null, Display.INVALID_DISPLAY);
+        return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken, mUser, flags);
     }
 
     @Override
     public Context createCredentialProtectedStorageContext() {
         final int flags = (mFlags & ~Context.CONTEXT_DEVICE_PROTECTED_STORAGE)
                 | Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE;
-        return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                mUser, flags, mDisplay, null, Display.INVALID_DISPLAY);
+        return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken, mUser, flags);
     }
 
     @Override
@@ -1988,8 +2020,8 @@ class ContextImpl extends Context {
 
     static ContextImpl createSystemContext(ActivityThread mainThread) {
         LoadedApk packageInfo = new LoadedApk(mainThread);
-        ContextImpl context = new ContextImpl(null, mainThread,
-                packageInfo, null, null, 0, null, null, Display.INVALID_DISPLAY);
+        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, 0);
+        context.mResources = packageInfo.getResources(mainThread);
         context.mResources.updateConfiguration(context.mResourcesManager.getConfiguration(),
                 context.mResourcesManager.getDisplayMetrics());
         return context;
@@ -1997,21 +2029,35 @@ class ContextImpl extends Context {
 
     static ContextImpl createAppContext(ActivityThread mainThread, LoadedApk packageInfo) {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
-        return new ContextImpl(null, mainThread,
-                packageInfo, null, null, 0, null, null, Display.INVALID_DISPLAY);
+        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, 0);
+        context.mResources = packageInfo.getResources(mainThread);
+        return context;
     }
 
     static ContextImpl createActivityContext(ActivityThread mainThread,
             LoadedApk packageInfo, IBinder activityToken, int displayId,
             Configuration overrideConfiguration) {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
-        return new ContextImpl(null, mainThread, packageInfo, activityToken, null, 0,
-                null, overrideConfiguration, displayId);
+
+        ContextImpl context = new ContextImpl(null, mainThread, packageInfo, activityToken, null,
+                0);
+
+        // Clamp display ID to DEFAULT_DISPLAY if it is INVALID_DISPLAY.
+        displayId = (displayId != Display.INVALID_DISPLAY) ? displayId : Display.DEFAULT_DISPLAY;
+
+        final CompatibilityInfo compatInfo = (displayId == Display.DEFAULT_DISPLAY)
+                ? packageInfo.getCompatibilityInfo()
+                : CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
+
+        context.mResources = createResources(activityToken, packageInfo, displayId,
+                overrideConfiguration, compatInfo);
+        context.mDisplay = ResourcesManager.getInstance().getAdjustedDisplay(displayId,
+                context.mResources.getDisplayAdjustments());
+        return context;
     }
 
     private ContextImpl(ContextImpl container, ActivityThread mainThread,
-            LoadedApk packageInfo, IBinder activityToken, UserHandle user, int flags,
-            Display display, Configuration overrideConfiguration, int createDisplayWithId) {
+            LoadedApk packageInfo, IBinder activityToken, UserHandle user, int flags) {
         mOuterContext = this;
 
         // If creator didn't specify which storage to use, use the default
@@ -2038,64 +2084,11 @@ class ContextImpl extends Context {
         mPackageInfo = packageInfo;
         mResourcesManager = ResourcesManager.getInstance();
 
-        final int displayId = (createDisplayWithId != Display.INVALID_DISPLAY)
-                ? createDisplayWithId
-                : (display != null) ? display.getDisplayId() : Display.DEFAULT_DISPLAY;
-
-        CompatibilityInfo compatInfo = null;
-        if (container != null) {
-            compatInfo = container.getDisplayAdjustments(displayId).getCompatibilityInfo();
-        }
-        if (compatInfo == null) {
-            compatInfo = (displayId == Display.DEFAULT_DISPLAY)
-                    ? packageInfo.getCompatibilityInfo()
-                    : CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
-        }
-
-        Resources resources = packageInfo.getResources(mainThread);
-        if (resources != null) {
-            if (displayId != Display.DEFAULT_DISPLAY
-                    || overrideConfiguration != null
-                    || (compatInfo != null && compatInfo.applicationScale
-                            != resources.getCompatibilityInfo().applicationScale)) {
-
-                if (container != null) {
-                    // This is a nested Context, so it can't be a base Activity context.
-                    // Just create a regular Resources object associated with the Activity.
-                    resources = mResourcesManager.getResources(
-                            activityToken,
-                            packageInfo.getResDir(),
-                            packageInfo.getSplitResDirs(),
-                            packageInfo.getOverlayDirs(),
-                            packageInfo.getApplicationInfo().sharedLibraryFiles,
-                            displayId,
-                            overrideConfiguration,
-                            compatInfo,
-                            packageInfo.getClassLoader());
-                } else {
-                    // This is not a nested Context, so it must be the root Activity context.
-                    // All other nested Contexts will inherit the configuration set here.
-                    resources = mResourcesManager.createBaseActivityResources(
-                            activityToken,
-                            packageInfo.getResDir(),
-                            packageInfo.getSplitResDirs(),
-                            packageInfo.getOverlayDirs(),
-                            packageInfo.getApplicationInfo().sharedLibraryFiles,
-                            displayId,
-                            overrideConfiguration,
-                            compatInfo,
-                            packageInfo.getClassLoader());
-                }
-            }
-        }
-        mResources = resources;
-
-        mDisplay = (createDisplayWithId == Display.INVALID_DISPLAY) ? display
-                : mResourcesManager.getAdjustedDisplay(displayId, mResources.getDisplayAdjustments());
-
         if (container != null) {
             mBasePackageName = container.mBasePackageName;
             mOpPackageName = container.mOpPackageName;
+            mResources = container.mResources;
+            mDisplay = container.mDisplay;
         } else {
             mBasePackageName = packageInfo.mPackageName;
             ApplicationInfo ainfo = packageInfo.getApplicationInfo();
