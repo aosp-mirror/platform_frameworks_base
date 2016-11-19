@@ -435,11 +435,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     public static final String ACTION_TRIGGER_IDLE = "com.android.server.ACTION_TRIGGER_IDLE";
 
     /** Control over CPU and battery monitoring */
-    // write battery stats every 30 minutes.
-    static final long BATTERY_STATS_TIME = 30 * 60 * 1000;
+    // write battery stats every 45 minutes.
+    static final long BATTERY_STATS_TIME = 45 * 60 * 1000;
     static final boolean MONITOR_CPU_USAGE = true;
-    // don't sample cpu less than every 5 seconds.
-    static final long MONITOR_CPU_MIN_TIME = 5 * 1000;
+    // don't sample cpu less than every 10 seconds.
+    static final long MONITOR_CPU_MIN_TIME = 10 * 1000;
     // wait possibly forever for next cpu sample.
     static final long MONITOR_CPU_MAX_TIME = 0x0fffffff;
     static final boolean MONITOR_THREAD_CPU_USAGE = false;
