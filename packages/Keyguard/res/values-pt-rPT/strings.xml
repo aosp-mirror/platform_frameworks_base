@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"O cartão SIM está bloqueado."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"O cartão SIM está bloqueado por PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"A desbloquear o cartão SIM..."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueio através de sequência."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueio através de PIN."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueio através de palavra-passe."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Área da sequência."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Área de deslize."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Área do PIN"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Área do PIN do SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Área do PUK do SIM"</string>
@@ -108,7 +103,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Falha ao introduzir o PUK do cartão SIM!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Código aceite!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Sem serviço."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Alternar botão de método de introdução."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Alternar o método de introdução."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Modo de avião"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"É necessário um padrão após reiniciar o dispositivo"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"É necessário um PIN após reiniciar o dispositivo"</string>
@@ -119,6 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"É necessário um padrão quando muda de perfil"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"É necessário um PIN quando muda de perfil"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"É necessária uma palavra-passe quando muda de perfil"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"O administrador do dispositivo bloqueou o dispositivo"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"O dispositivo foi bloqueado manualmente"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_1">%d</xliff:g> horas. Confirme a sequência.</item>
       <item quantity="one">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirme a sequência.</item>

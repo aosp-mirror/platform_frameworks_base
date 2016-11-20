@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM картасы бекітулі."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM картасының PUK коды бекітілген."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM картасының бекітпесін ашуда…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Кескін арқылы ашу."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin арқылы ашу."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Кілтсөз арқылы ашу."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Кескін арқылы ашу аймағы."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Сырғыту аймағы."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN аумағы"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN аумағы"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK аумағы"</string>
@@ -108,7 +103,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK жұмысы орындалмады!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Код қабылданды!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Қызмет көрсетілмейді."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Енгізу әдісі түймесін ауыстыру."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Енгізу әдісін ауыстыру"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Ұшақ режимі"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Құрылғы қайта іске қосылғаннан кейін өрнекті енгізу қажет"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Құрылғы қайта іске қосылғаннан кейін PIN кодты енгізу қажет"</string>
@@ -119,6 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Профильдерді ауыстырғанда өрнекті енгізу қажет"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Профильдерді ауыстырғанда PIN кодты енгізу қажет"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Профильдерді ауыстырғанда кілтсөзді енгізу қажет"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Құрылғы әкімшісі құрылғыны құлыптады"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Құрылғы қолмен құлыпталды"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Құрылғы құлпы <xliff:g id="NUMBER_1">%d</xliff:g> сағат бойы ашылмады. Өрнекті растаңыз.</item>
       <item quantity="one">Құрылғы құлпы <xliff:g id="NUMBER_0">%d</xliff:g> сағат бойы ашылмады. Өрнекті растаңыз.</item>

@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"‏כרטיס ה-SIM נעול."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"‏כרטיס SIM נעול באמצעות PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"‏מבטל נעילה של כרטיס SIM…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ביטול נעילה באמצעות ציור קו."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"‏ביטול נעילה באמצעות מספר PIN."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ביטול נעילה באמצעות סיסמה."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"אזור ציור קו."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"אזור הסטה."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"‏אזור עבור קוד PIN"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"‏אזור עבור קוד PIN של SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"‏אזור עבור קוד PUK של SIM"</string>
@@ -112,7 +107,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"‏פעולת קוד ה-PUK של כרטיס ה-SIM נכשלה!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"הקוד התקבל!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"אין קליטה."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"לחצן החלפת שיטת קלט."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"החלפת שיטת קלט"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"מצב טיסה"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"יש להזין את קו ביטול הנעילה לאחר הפעלה מחדש של המכשיר"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"‏יש להזין PIN לאחר הפעלה מחדש של המכשיר"</string>
@@ -123,6 +118,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"יש להזין את קו ביטול הנעילה בעת החלפת פרופילים"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"‏יש להזין את ה-PIN בעת החלפת פרופילים"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"יש להזין את הסיסמה בעת החלפת פרופילים"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"מנהל המכשיר נעל אותו"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"המכשיר ננעל באופן ידני"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="two">נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_1">%d</xliff:g> שעות. אשר את קו ביטול הנעילה.</item>
       <item quantity="many">נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_1">%d</xliff:g> שעות. אשר את קו ביטול הנעילה.</item>
