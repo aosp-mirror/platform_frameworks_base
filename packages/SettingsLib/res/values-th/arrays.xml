@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"4 M ต่อบัฟเฟอร์ไฟล์บันทึก"</item>
     <item msgid="5431354956856655120">"16 M ต่อบัฟเฟอร์ไฟล์บันทึก"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"ปิด"</item>
+    <item msgid="3054662377365844197">"ทั้งหมด"</item>
+    <item msgid="688870735111627832">"ทั้งหมดเว้นวิทยุ"</item>
+    <item msgid="2850427388488887328">"เฉพาะเคอร์เนล"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"ปิด"</item>
+    <item msgid="172978079776521897">"บัฟเฟอร์บันทึกทั้งหมด"</item>
+    <item msgid="3873873912383879240">"ทั้งหมดยกเว้นบัฟเฟอร์บันทึกวิทยุ"</item>
+    <item msgid="8489661142527693381">"เฉพาะบัฟเฟอร์ไฟล์บันทึกเคอร์เนล"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"ปิดภาพเคลื่อนไหว"</item>
     <item msgid="6624864048416710414">"ภาพเคลื่อนไหวขนาด 0.5 เท่า"</item>

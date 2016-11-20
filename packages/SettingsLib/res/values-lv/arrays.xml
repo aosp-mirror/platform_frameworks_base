@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"4 MB vienam žurnāla buferim"</item>
     <item msgid="5431354956856655120">"16 MB vienam žurnāla buferim"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Izslēgts"</item>
+    <item msgid="3054662377365844197">"Visi"</item>
+    <item msgid="688870735111627832">"Visi, izņemot radio"</item>
+    <item msgid="2850427388488887328">"tikai kodolā"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Izslēgts"</item>
+    <item msgid="172978079776521897">"Visi reģistra buferi"</item>
+    <item msgid="3873873912383879240">"Visi, izņemot radio reģistra buferus"</item>
+    <item msgid="8489661142527693381">"tikai kodola žurnāla buferī"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animācija ir izslēgta"</item>
     <item msgid="6624864048416710414">"Animācijas mērogs: 0,5x"</item>

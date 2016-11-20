@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"Bufer: maks. 4 MB"</item>
     <item msgid="5431354956856655120">"Bufer: maks. 16 MB"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"O‘chiq"</item>
+    <item msgid="3054662377365844197">"Hammasi"</item>
+    <item msgid="688870735111627832">"Radiodan boshqa hammasi"</item>
+    <item msgid="2850427388488887328">"faqat yadro"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"O‘chiq"</item>
+    <item msgid="172978079776521897">"Barcha jurnallar buferi"</item>
+    <item msgid="3873873912383879240">"Radio jurnallar buferidan tashqari hammasi"</item>
+    <item msgid="8489661142527693381">"faqat yadro jurnali buferi"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animatsiya o‘chiq"</item>
     <item msgid="6624864048416710414">"Animatsiya (0,5x)"</item>

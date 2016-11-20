@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"4M / லாக் பஃபர்"</item>
     <item msgid="5431354956856655120">"16M / லாக் பஃபர்"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"முடக்கத்தில்"</item>
+    <item msgid="3054662377365844197">"எல்லாம்"</item>
+    <item msgid="688870735111627832">"எல்லாம் (ரேடியோ தவிர்த்து)"</item>
+    <item msgid="2850427388488887328">"கெர்னல் மட்டும்"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"முடக்கத்தில்"</item>
+    <item msgid="172978079776521897">"தற்காலிகமாகச் சேமித்த எல்லா பதிவுகளும்"</item>
+    <item msgid="3873873912383879240">"எல்லாம் (தற்காலிகமாகச் சேமித்த ரேடியோ பதிவுகள் தவிர்த்து)"</item>
+    <item msgid="8489661142527693381">"கெர்னல் லாக் பஃபர் மட்டும்"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"அனிமேஷனை முடக்கு"</item>
     <item msgid="6624864048416710414">"அனிமேஷன் அளவு .5x"</item>

@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"Рег. буфер – 4 МБ"</item>
     <item msgid="5431354956856655120">"Рег. буфер – 16 МБ"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Изкл."</item>
+    <item msgid="3054662377365844197">"Всички"</item>
+    <item msgid="688870735111627832">"Вс. без радио"</item>
+    <item msgid="2850427388488887328">"само ядрото"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Изкл."</item>
+    <item msgid="172978079776521897">"Всички регистрационни буфери"</item>
+    <item msgid="3873873912383879240">"Всички регистрационни буфери освен тези за радиото"</item>
+    <item msgid="8489661142527693381">"само регистрационния буфер на ядрото"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Анимацията е изключена"</item>
     <item msgid="6624864048416710414">"Скала на анимацията .5x"</item>

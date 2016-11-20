@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"4 MB na vyrovnávací paměť protokolů"</item>
     <item msgid="5431354956856655120">"16 MB na vyrovnávací paměť protokolů"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Vypnuto"</item>
+    <item msgid="3054662377365844197">"Vše"</item>
+    <item msgid="688870735111627832">"Bezdrát. ne"</item>
+    <item msgid="2850427388488887328">"pouze jádro"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Vypnuto"</item>
+    <item msgid="172978079776521897">"Všechny vyrovnávací paměti protokolů"</item>
+    <item msgid="3873873912383879240">"Všechny kromě protokolu bezdrátových modulů"</item>
+    <item msgid="8489661142527693381">"pouze protokol vyrovnávací paměti jádra"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animace je vypnuta"</item>
     <item msgid="6624864048416710414">"Měřítko animace 0,5x"</item>

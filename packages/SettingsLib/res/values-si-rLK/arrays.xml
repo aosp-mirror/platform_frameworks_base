@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"ලොග අන්තරාවකට 4M"</item>
     <item msgid="5431354956856655120">"ලොග අන්තරාවකට 16M"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"ක්‍රියාවිරහිතය"</item>
+    <item msgid="3054662377365844197">"සියලු"</item>
+    <item msgid="688870735111627832">"සැම වුවද රේඩි."</item>
+    <item msgid="2850427388488887328">"කර්නල පමණි"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"ක්‍රියාවිරහිතයි"</item>
+    <item msgid="172978079776521897">"සියලු ලොග අන්තරාචය"</item>
+    <item msgid="3873873912383879240">"සියලු නමුත් රේඩියෝ ලොග අන්තරාචය"</item>
+    <item msgid="8489661142527693381">"කර්නල ලොග් අන්තරාචය පමණි"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"සජිවිකරණය අක්‍රිය කිරීම"</item>
     <item msgid="6624864048416710414">"සජීවීකරණ පරිමාණය .5x"</item>
