@@ -29,4 +29,7 @@
     <!-- Status bar battery level text color -->
     <color name="status_bar_battery_level_text_color">#ffffff</color>
 
+    <!-- Battery charging color -->
+    <color name="system_primary_color">@*android:color/material_blue_grey_900</color>
+
 </resources>
