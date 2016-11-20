@@ -315,7 +315,6 @@ public class BatteryMeterDrawable extends Drawable implements
         super.setBounds(left, top, right, bottom);
         mHeight = bottom - top;
         mWidth = right - left;
-        mWarningTextPaint.setTextSize(mHeight * 0.75f);
         mWarningTextHeight = -mWarningTextPaint.getFontMetrics().ascent;
     }
 
@@ -532,7 +531,7 @@ public class BatteryMeterDrawable extends Drawable implements
 
         final float widthDiv2 = mWidth / 2f;
         // text size is width / 2 - 2dp for wiggle room
-        final float textSize = widthDiv2 - mContext.getResources().getDisplayMetrics().density * 2;
+        final float textSize = mStyle == 2 ? widthDiv2 - mContext.getResources().getDisplayMetrics().density * 2 : widthDiv2;
         mTextAndBoltPaint.setTextSize(textSize);
         mWarningTextPaint.setTextSize(textSize);
 

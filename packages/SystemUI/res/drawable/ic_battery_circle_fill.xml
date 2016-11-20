@@ -25,6 +25,6 @@
         android:name="battery_level"
         android:strokeColor="#000000"
         android:strokeLineJoin="round"
-        android:strokeWidth="3"
+        android:strokeWidth="2"
         android:pathData="@string/battery_circle_path" />
 </vector>
