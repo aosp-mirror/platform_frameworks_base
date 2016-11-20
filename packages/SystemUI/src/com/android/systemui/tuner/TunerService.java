@@ -37,7 +37,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import com.android.systemui.BatteryMeterDrawable;
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
@@ -140,7 +139,7 @@ public class TunerService extends SystemUI {
         Uri uri = Settings.Secure.getUriFor(key);
         if (!mListeningUris.containsKey(uri)) {
             mListeningUris.put(uri, key);
-            mContentResolver.registerContentObserver(uri, false, mObserver, mCurrentUser);
+            mContentResolver.registerContentObserver(uri, true, mObserver, mCurrentUser);
         }
         // Send the first state.
         String value = Settings.Secure.getStringForUser(mContentResolver, key, mCurrentUser);
@@ -159,7 +158,7 @@ public class TunerService extends SystemUI {
         }
         mContentResolver.unregisterContentObserver(mObserver);
         for (Uri uri : mListeningUris.keySet()) {
-            mContentResolver.registerContentObserver(uri, false, mObserver, mCurrentUser);
+            mContentResolver.registerContentObserver(uri, true, mObserver, mCurrentUser);
         }
     }
 
@@ -186,13 +185,6 @@ public class TunerService extends SystemUI {
     }
 
     public void clearAll() {
-        // A couple special cases.
-        Settings.Global.putString(mContentResolver, DemoMode.DEMO_MODE_ALLOWED, null);
-        Settings.System.putString(mContentResolver, BatteryMeterDrawable.SHOW_PERCENT_SETTING, null);
-        Intent intent = new Intent(DemoMode.ACTION_DEMO);
-        intent.putExtra(DemoMode.EXTRA_COMMAND, DemoMode.COMMAND_EXIT);
-        mContext.sendBroadcast(intent);
-
         for (String key : mTunableLookup.keySet()) {
             Settings.Secure.putString(mContentResolver, key, null);
         }
@@ -234,13 +226,6 @@ public class TunerService extends SystemUI {
                 context.getString(R.string.guest_exit_guest_dialog_remove), new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // Tell the tuner (in main SysUI process) to clear all its settings.
-                context.sendBroadcast(new Intent(TunerService.ACTION_CLEAR));
-                // Disable access to tuner.
-                TunerService.setTunerEnabled(context, false);
-                // Make them sit through the warning dialog again.
-                Settings.Secure.putInt(context.getContentResolver(),
-                        TunerFragment.SETTING_SEEN_TUNER_WARNING, 0);
                 if (onDisabled != null) {
                     onDisabled.run();
                 }
@@ -249,27 +234,8 @@ public class TunerService extends SystemUI {
         dialog.show();
     }
 
-    public static final void setTunerEnabled(Context context, boolean enabled) {
-        userContext(context).getPackageManager().setComponentEnabledSetting(
-                new ComponentName(context, TunerActivity.class),
-                enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                        : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                        PackageManager.DONT_KILL_APP);
-    }
-
     public static final boolean isTunerEnabled(Context context) {
-        return userContext(context).getPackageManager().getComponentEnabledSetting(
-                new ComponentName(context, TunerActivity.class))
-                == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-    }
-
-    private static Context userContext(Context context) {
-        try {
-            return context.createPackageContextAsUser(context.getPackageName(), 0,
-                    new UserHandle(ActivityManager.getCurrentUser()));
-        } catch (NameNotFoundException e) {
-            return context;
-        }
+        return true;
     }
 
     private class Observer extends ContentObserver {

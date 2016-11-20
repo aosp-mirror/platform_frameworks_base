@@ -231,18 +231,12 @@
                 android:exported="true" />
 
         <activity android:name=".tuner.TunerActivity"
-                  android:enabled="false"
                   android:icon="@drawable/tuner"
                   android:theme="@style/TunerSettings"
-                  android:label="@string/system_ui_tuner"
+                  android:label="@string/statusbar_icons_blacklist"
                   android:process=":tuner"
+                  android:parentActivityName="com.flash.settings.fragments.StatusBarSettings"
                   android:exported="true">
-            <intent-filter>
-                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data android:name="com.android.settings.category"
-                    android:value="com.android.settings.category.system" />
         </activity>
 
         <activity-alias android:name=".DemoMode"
@@ -257,6 +251,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity-alias>
+
+        <activity android:name=".tuner.PowerNotificationControlsActivity"
+                  android:theme="@style/TunerSettings"
+                  android:label="@string/tuner_notification_control"
+                  android:process=":tuner"
+                  android:parentActivityName="com.flash.settings.fragments.NotificationMediaSettings"
+                  android:exported="true">
+        </activity>
 
         <!-- Service used by secondary users to register themselves with the system user. -->
         <service android:name=".recents.RecentsSystemUserService"

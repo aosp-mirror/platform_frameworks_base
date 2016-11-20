@@ -15,6 +15,11 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- statusbar items tuner -->
+    <string name="statusbar_icons_blacklist">Status bar icons</string>
+    <!-- notification controls -->
+    <string name="tuner_notification_control">Power notification controls</string>
+
     <!-- Screenrecord Notification Ticker -->
     <string name="screenrecord_notif_ticker">Screen is being recorded</string>
     <!-- Screenrecord notification title -->

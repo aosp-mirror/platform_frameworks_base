@@ -315,7 +315,6 @@
     </style>
 
     <style name="TunerSettings" parent="@android:style/Theme.DeviceDefault.Settings">
-        <item name="android:windowActionBar">false</item>
         <item name="preferenceTheme">@style/TunerPreferenceTheme</item>
     </style>
 
