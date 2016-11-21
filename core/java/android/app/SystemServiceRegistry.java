@@ -322,10 +322,10 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.KEYGUARD_SERVICE, KeyguardManager.class,
-                new StaticServiceFetcher<KeyguardManager>() {
+                new CachedServiceFetcher<KeyguardManager>() {
             @Override
-            public KeyguardManager createService() throws ServiceNotFoundException {
-                return new KeyguardManager();
+            public KeyguardManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                return new KeyguardManager(ctx);
             }});
 
         registerService(Context.LAYOUT_INFLATER_SERVICE, LayoutInflater.class,
