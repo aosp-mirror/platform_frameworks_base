@@ -129,6 +129,17 @@ public class Binder implements IBinder {
         return sTransactionTracker;
     }
 
+    /** @hide */
+    public static IBinder allowBlocking(IBinder binder) {
+        // NOTE: real implementation on internal branch
+        return binder;
+    }
+
+    /** @hide */
+    public static void copyAllowBlocking(IBinder fromBinder, IBinder toBinder) {
+        // NOTE: real implementation on internal branch
+    }
+
     /* mObject is used by native code, do not remove or rename */
     private long mObject;
     private IInterface mOwner;
