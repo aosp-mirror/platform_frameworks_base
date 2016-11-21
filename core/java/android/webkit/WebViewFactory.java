@@ -56,7 +56,9 @@ import java.util.zip.ZipFile;
 @SystemApi
 public final class WebViewFactory {
 
-    private static final String CHROMIUM_WEBVIEW_FACTORY =
+    // visible for WebViewZygoteInit to look up the class by reflection and call preloadInZygote.
+    /** @hide */
+    public static final String CHROMIUM_WEBVIEW_FACTORY =
             "com.android.webview.chromium.WebViewChromiumFactoryProvider";
 
     private static final String NULL_WEBVIEW_FACTORY =
