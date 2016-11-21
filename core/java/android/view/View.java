@@ -128,6 +128,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -9086,6 +9087,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Find the nearest keyboard navigation cluster in the specified direction.
+     * This does not actually give focus to that cluster.
+     *
+     * @param direction Direction to look
+     *
+     * @return The nearest keyboard navigation cluster in the specified direction, or null if none
+     *         can be found
+     */
+    public View keyboardNavigationClusterSearch(int direction) {
+        if (mParent != null) {
+            final View currentCluster = isKeyboardNavigationCluster() ? this : null;
+            return mParent.keyboardNavigationClusterSearch(currentCluster, direction);
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * This method is the last chance for the focused view and its ancestors to
      * respond to an arrow key. This is called when the focused view did not
      * consume the key internally, nor could the view system find a new view in
@@ -9202,6 +9221,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         if ((focusableMode & FOCUSABLES_TOUCH_MODE) == FOCUSABLES_TOUCH_MODE
                 && !isFocusableInTouchMode()) {
+            return;
+        }
+        views.add(this);
+    }
+
+    /**
+     * Adds any keyboard navigation cluster roots that are descendants of this view (possibly
+     * including this view if it is a cluster root itself) to views.
+     *
+     * @param views Cluster roots found so far
+     * @param direction Direction to look
+     */
+    public void addKeyboardNavigationClusters(@NonNull Collection<View> views, int direction) {
+        if (!isKeyboardNavigationCluster()) {
             return;
         }
         views.add(this);

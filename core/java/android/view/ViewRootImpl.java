@@ -4324,6 +4324,87 @@ public final class ViewRootImpl implements ViewParent,
             super.onDeliverToNext(q);
         }
 
+        private boolean performFocusNavigation(KeyEvent event) {
+            int direction = 0;
+            switch (event.getKeyCode()) {
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                    if (event.hasNoModifiers()) {
+                        direction = View.FOCUS_LEFT;
+                    }
+                    break;
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                    if (event.hasNoModifiers()) {
+                        direction = View.FOCUS_RIGHT;
+                    }
+                    break;
+                case KeyEvent.KEYCODE_DPAD_UP:
+                    if (event.hasNoModifiers()) {
+                        direction = View.FOCUS_UP;
+                    }
+                    break;
+                case KeyEvent.KEYCODE_DPAD_DOWN:
+                    if (event.hasNoModifiers()) {
+                        direction = View.FOCUS_DOWN;
+                    }
+                    break;
+                case KeyEvent.KEYCODE_TAB:
+                    if (event.hasNoModifiers()) {
+                        direction = View.FOCUS_FORWARD;
+                    } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+                        direction = View.FOCUS_BACKWARD;
+                    }
+                    break;
+            }
+            if (direction != 0) {
+                View focused = mView.findFocus();
+                if (focused != null) {
+                    View v = focused.focusSearch(direction);
+                    if (v != null && v != focused) {
+                        // do the math the get the interesting rect
+                        // of previous focused into the coord system of
+                        // newly focused view
+                        focused.getFocusedRect(mTempRect);
+                        if (mView instanceof ViewGroup) {
+                            ((ViewGroup) mView).offsetDescendantRectToMyCoords(
+                                    focused, mTempRect);
+                            ((ViewGroup) mView).offsetRectIntoDescendantCoords(
+                                    v, mTempRect);
+                        }
+                        if (v.requestFocus(direction, mTempRect)) {
+                            playSoundEffect(SoundEffectConstants
+                                    .getContantForFocusDirection(direction));
+                            return true;
+                        }
+                    }
+
+                    // Give the focused view a last chance to handle the dpad key.
+                    if (mView.dispatchUnhandledMove(focused, direction)) {
+                        return true;
+                    }
+                } else {
+                    // find the best view to give focus to in this non-touch-mode with no-focus
+                    View v = focusSearch(null, direction);
+                    if (v != null && v.requestFocus(direction)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private boolean performClusterNavigation(int direction) {
+            final View focused = mView.findFocus();
+            final View cluster = focused != null
+                    ? focused.keyboardNavigationClusterSearch(direction)
+                    : keyboardNavigationClusterSearch(null, direction);
+
+            if (cluster != null && cluster.requestFocus()) {
+                return true;
+            }
+
+            return false;
+        }
+
         private int processKeyEvent(QueuedInputEvent q) {
             final KeyEvent event = (KeyEvent)q.mEvent;
 
@@ -4336,11 +4417,26 @@ public final class ViewRootImpl implements ViewParent,
                 return FINISH_NOT_HANDLED;
             }
 
+            int clusterNavigationDirection = 0;
+
+            if (event.getAction() == KeyEvent.ACTION_DOWN && event.isCtrlPressed()) {
+                final int character =
+                        event.getUnicodeChar(event.getMetaState() & ~KeyEvent.META_CTRL_MASK);
+                if (character == '+') {
+                    clusterNavigationDirection = View.FOCUS_FORWARD;
+                }
+
+                if (character == '_') {
+                    clusterNavigationDirection = View.FOCUS_BACKWARD;
+                }
+            }
+
             // If the Control modifier is held, try to interpret the key as a shortcut.
             if (event.getAction() == KeyEvent.ACTION_DOWN
                     && event.isCtrlPressed()
                     && event.getRepeatCount() == 0
-                    && !KeyEvent.isModifierKey(event.getKeyCode())) {
+                    && !KeyEvent.isModifierKey(event.getKeyCode())
+                    && clusterNavigationDirection == 0) {
                 if (mView.dispatchKeyShortcutEvent(event)) {
                     return FINISH_HANDLED;
                 }
@@ -4359,68 +4455,13 @@ public final class ViewRootImpl implements ViewParent,
 
             // Handle automatic focus changes.
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                int direction = 0;
-                switch (event.getKeyCode()) {
-                    case KeyEvent.KEYCODE_DPAD_LEFT:
-                        if (event.hasNoModifiers()) {
-                            direction = View.FOCUS_LEFT;
-                        }
-                        break;
-                    case KeyEvent.KEYCODE_DPAD_RIGHT:
-                        if (event.hasNoModifiers()) {
-                            direction = View.FOCUS_RIGHT;
-                        }
-                        break;
-                    case KeyEvent.KEYCODE_DPAD_UP:
-                        if (event.hasNoModifiers()) {
-                            direction = View.FOCUS_UP;
-                        }
-                        break;
-                    case KeyEvent.KEYCODE_DPAD_DOWN:
-                        if (event.hasNoModifiers()) {
-                            direction = View.FOCUS_DOWN;
-                        }
-                        break;
-                    case KeyEvent.KEYCODE_TAB:
-                        if (event.hasNoModifiers()) {
-                            direction = View.FOCUS_FORWARD;
-                        } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
-                            direction = View.FOCUS_BACKWARD;
-                        }
-                        break;
-                }
-                if (direction != 0) {
-                    View focused = mView.findFocus();
-                    if (focused != null) {
-                        View v = focused.focusSearch(direction);
-                        if (v != null && v != focused) {
-                            // do the math the get the interesting rect
-                            // of previous focused into the coord system of
-                            // newly focused view
-                            focused.getFocusedRect(mTempRect);
-                            if (mView instanceof ViewGroup) {
-                                ((ViewGroup) mView).offsetDescendantRectToMyCoords(
-                                        focused, mTempRect);
-                                ((ViewGroup) mView).offsetRectIntoDescendantCoords(
-                                        v, mTempRect);
-                            }
-                            if (v.requestFocus(direction, mTempRect)) {
-                                playSoundEffect(SoundEffectConstants
-                                        .getContantForFocusDirection(direction));
-                                return FINISH_HANDLED;
-                            }
-                        }
-
-                        // Give the focused view a last chance to handle the dpad key.
-                        if (mView.dispatchUnhandledMove(focused, direction)) {
-                            return FINISH_HANDLED;
-                        }
-                    } else {
-                        // find the best view to give focus to in this non-touch-mode with no-focus
-                        View v = focusSearch(null, direction);
-                        if (v != null && v.requestFocus(direction)) {
-                            return FINISH_HANDLED;
-                        }
+                if (clusterNavigationDirection != 0) {
+                    if (performClusterNavigation(clusterNavigationDirection)) {
+                        return FINISH_HANDLED;
+                    }
+                } else {
+                    if (performFocusNavigation(event)) {
+                        return FINISH_HANDLED;
                     }
                 }
             }
@@ -5840,6 +5881,19 @@ public final class ViewRootImpl implements ViewParent,
             return null;
         }
         return FocusFinder.getInstance().findNextFocus((ViewGroup) mView, focused, direction);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public View keyboardNavigationClusterSearch(View currentCluster, int direction) {
+        checkThread();
+        if (!(mView instanceof ViewGroup)) {
+            return null;
+        }
+        return FocusFinder.getInstance().findNextKeyboardNavigationCluster(
+                (ViewGroup) mView, currentCluster, direction);
     }
 
     public void debug() {
