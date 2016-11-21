@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"4 MB/bufor dziennika"</item>
     <item msgid="5431354956856655120">"16 MB/bufor dziennika"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Wyłączone"</item>
+    <item msgid="3054662377365844197">"Wszystkie"</item>
+    <item msgid="688870735111627832">"Bez radiowych"</item>
+    <item msgid="2850427388488887328">"tylko jądro"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Wyłączone"</item>
+    <item msgid="172978079776521897">"Wszystkie bufory dziennika"</item>
+    <item msgid="3873873912383879240">"Wszystkie oprócz buforów dzienników radiowych"</item>
+    <item msgid="8489661142527693381">"tylko bufor dziennika jądra"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animacja wyłączona"</item>
     <item msgid="6624864048416710414">"Skala animacji 0,5x"</item>

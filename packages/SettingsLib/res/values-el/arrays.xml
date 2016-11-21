@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"4 M ανά προσ. μν. αρχ. καταγρ."</item>
     <item msgid="5431354956856655120">"16 M ανά πρ. μν. αρχ. καταγρ."</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Ανενεργό"</item>
+    <item msgid="3054662377365844197">"Όλα"</item>
+    <item msgid="688870735111627832">"Όλοι εκτός από του αποστολέα"</item>
+    <item msgid="2850427388488887328">"μόνο πυρήνας"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Ανενεργό"</item>
+    <item msgid="172978079776521897">"Όλα τα αρχεία καταγραφής προσωρινής μνήμης"</item>
+    <item msgid="3873873912383879240">"Όλα εκτός από τα αρχεία κατ.προσ.μνήμης αποστολέα"</item>
+    <item msgid="8489661142527693381">"μόνο προσωρινή μνήμη αρχείου καταγραφής πυρήνα"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Κινούμ.εικόνες απενεργοποιημένες"</item>
     <item msgid="6624864048416710414">"Κλίμ. κινούμ. εικ. 0,5x"</item>

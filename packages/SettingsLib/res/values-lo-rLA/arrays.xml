@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"ບັບ​ເຟີ 4M ​ຕໍ່​ບັນທຶກ"</item>
     <item msgid="5431354956856655120">"ບັບ​ເຟີ 16M ​ຕໍ່​ບັນທຶກ"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"ປິດ"</item>
+    <item msgid="3054662377365844197">"ທັງໝົດ"</item>
+    <item msgid="688870735111627832">"ທັງໝົດຍົກເວັ້ນວິທະຍຸ"</item>
+    <item msgid="2850427388488887328">"ເຄີນເນວເທົ່ານັ້ນ"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"ປິດ"</item>
+    <item msgid="172978079776521897">"ບັບເຟີບັນທຶກທັງໝົດ"</item>
+    <item msgid="3873873912383879240">"ທັງໝົດຍົກເວັ້ນບັບເຟີບັນທຶກວິທະຍຸ"</item>
+    <item msgid="8489661142527693381">"ບັບເຟີບັນທຶກເຄີນເນວເທົ່ານັ້ນ"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"ປິດອະນິເມຊັນ"</item>
     <item msgid="6624864048416710414">"ຂະໜາດອະນິເມຊັນ .5x"</item>

@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"ഓരോ ലോഗ് ബഫറിനും 4M"</item>
     <item msgid="5431354956856655120">"ഓരോ ലോഗ് ബഫറിനും 16M"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"ഓഫ്"</item>
+    <item msgid="3054662377365844197">"എല്ലാം"</item>
+    <item msgid="688870735111627832">"റേഡിയോ ഒഴികെയുള്ള എല്ലാം"</item>
+    <item msgid="2850427388488887328">"കേർനൽ മാത്രം"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"ഓഫ്"</item>
+    <item msgid="172978079776521897">"എല്ലാ ലോഗ് ബഫറുകളും"</item>
+    <item msgid="3873873912383879240">"റേഡിയോ ലോഗ് ബഫറുകൾ ഒഴികെയുള്ള എല്ലാം"</item>
+    <item msgid="8489661142527693381">"കേർനൽ ലോഗ് ബഫർ മാത്രം"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"ആനിമേഷൻ ഓഫുചെയ്യുക"</item>
     <item msgid="6624864048416710414">"ആനിമേഷൻ സ്‌കെയിൽ .5x"</item>

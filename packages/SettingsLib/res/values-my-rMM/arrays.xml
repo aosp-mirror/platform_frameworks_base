@@ -49,12 +49,12 @@
     <item msgid="1805837518286731242">"နှေးကွေးသောဆက်သွယ်မှုကို ယာယီရှောင်ရှားထားသည်"</item>
   </string-array>
   <string-array name="hdcp_checking_titles">
-    <item msgid="441827799230089869">"မည်သည့်အခါမှ မစစ်ဆေးပါနှင့်"</item>
+    <item msgid="441827799230089869">"ဘယ်တော့မှ မစစ်ဆေးပါနှင့်"</item>
     <item msgid="6042769699089883931">"DRMအကြောင်းအရာကိုသာ စစ်ဆေးမည်"</item>
     <item msgid="9174900380056846820">"အမြဲစစ်ဆေးရန်"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
-    <item msgid="505558545611516707">"HDCP checkingအားမည်သည့်အခါမျှမသုံးပါနှင့်"</item>
+    <item msgid="505558545611516707">"HDCP checking အား ဘယ်တော့မှ မသုံးပါနှင့်"</item>
     <item msgid="3878793616631049349">"DRMအကြောင်းအရာအတွက် HDCPစစ်ဆေးခြင်းကိုသုံးမည်"</item>
     <item msgid="45075631231212732">"HDCP checkingအားအမြဲသုံးပါ"</item>
   </string-array>
@@ -79,6 +79,18 @@
     <item msgid="1314234299552254621">"မှတ်တမ်းယာယီကြားခံနယ်တစ်ခုလျှင် 1M"</item>
     <item msgid="3606047780792894151">"မှတ်တမ်းယာယီကြားခံနယ်တစ်ခုလျှင် 4M"</item>
     <item msgid="5431354956856655120">"မှတ်တမ်းယာယီကြားခံနယ်တစ်ခုလျှင် 16M"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"ပိတ်ပါ"</item>
+    <item msgid="3054662377365844197">"အားလုံး"</item>
+    <item msgid="688870735111627832">"ရေဒီယိုမှလွဲ၍ အားလုံး"</item>
+    <item msgid="2850427388488887328">"ကာနယ်သာ"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"ပိတ်ပါ"</item>
+    <item msgid="172978079776521897">"မှတ်တမ်းသိမ်းဆည်းရန် လျာထားချက်များ အားလုံး"</item>
+    <item msgid="3873873912383879240">"ရေဒီယို မှတ်တမ်းသိမ်းဆည်းရန်လျာထားချက်မှလွဲ၍ အားလုံး"</item>
+    <item msgid="8489661142527693381">"ကာနယ်မှတ်တမ်းသိမ်းဆည်းရန် လျာထားချက်သာ"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"လှုပ်ရှားသက်ဝင်မှုပုံများကိုပိတ်ပါ"</item>

@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"4 Mo/tampon journal"</item>
     <item msgid="5431354956856655120">"16 Mo/tampon journal"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Désactivé"</item>
+    <item msgid="3054662377365844197">"Tous"</item>
+    <item msgid="688870735111627832">"Tous sauf radio"</item>
+    <item msgid="2850427388488887328">"noyau uniquement"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Désactivé"</item>
+    <item msgid="172978079776521897">"Tous les tampons de journal"</item>
+    <item msgid="3873873912383879240">"Tous les tampons de journal sauf celui de la radio"</item>
+    <item msgid="8489661142527693381">"tampon journal du noyau uniquement"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animation désactivée"</item>
     <item msgid="6624864048416710414">"Échelle d\'animation 0,5x"</item>
