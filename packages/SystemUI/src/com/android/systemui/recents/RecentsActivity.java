@@ -396,7 +396,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         RecentsActivityLaunchState launchState = config.getLaunchState();
         if (!loadPlan.hasTasks()) {
             loader.preloadTasks(loadPlan, launchState.launchedToTaskId,
-                    !launchState.launchedFromHome);
+                    !launchState.launchedFromHome && !launchState.launchedViaDockGesture);
         }
 
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
@@ -523,12 +523,14 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, false));
         MetricsLogger.hidden(this, MetricsEvent.OVERVIEW_ACTIVITY);
 
-        // Workaround for b/22542869, if the RecentsActivity is started again, but without going
-        // through SystemUI, we need to reset the config launch flags to ensure that we do not
-        // wait on the system to send a signal that was never queued.
-        RecentsConfiguration config = Recents.getConfiguration();
-        RecentsActivityLaunchState launchState = config.getLaunchState();
-        launchState.reset();
+        if (!isChangingConfigurations()) {
+            // Workaround for b/22542869, if the RecentsActivity is started again, but without going
+            // through SystemUI, we need to reset the config launch flags to ensure that we do not
+            // wait on the system to send a signal that was never queued.
+            RecentsConfiguration config = Recents.getConfiguration();
+            RecentsActivityLaunchState launchState = config.getLaunchState();
+            launchState.reset();
+        }
     }
 
     @Override
