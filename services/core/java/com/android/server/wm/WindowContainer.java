@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
+import android.util.Pools;
+
 import com.android.internal.util.ToBooleanFunction;
 
 import java.util.Comparator;
@@ -67,6 +69,9 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
 
     // The specified orientation for this window container.
     protected int mOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
+    private final Pools.SynchronizedPool<ForAllWindowsConsumerWrapper> mConsumerWrapperPool =
+            new Pools.SynchronizedPool<>(3);
 
     final protected WindowContainer getParent() {
         return mParent;
@@ -517,10 +522,9 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
     }
 
     void forAllWindows(Consumer<WindowState> callback, boolean traverseTopToBottom) {
-        forAllWindows(w -> {
-            callback.accept(w);
-            return false;
-        }, traverseTopToBottom);
+        ForAllWindowsConsumerWrapper wrapper = obtainConsumerWrapper(callback);
+        forAllWindows(wrapper, traverseTopToBottom);
+        wrapper.release();
     }
 
     WindowState getWindow(Predicate<WindowState> callback) {
@@ -613,4 +617,32 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         return toString();
     }
 
+    private ForAllWindowsConsumerWrapper obtainConsumerWrapper(Consumer<WindowState> consumer) {
+        ForAllWindowsConsumerWrapper wrapper = mConsumerWrapperPool.acquire();
+        if (wrapper == null) {
+            wrapper = new ForAllWindowsConsumerWrapper();
+        }
+        wrapper.setConsumer(consumer);
+        return wrapper;
+    }
+
+    private final class ForAllWindowsConsumerWrapper implements ToBooleanFunction<WindowState> {
+
+        private Consumer<WindowState> mConsumer;
+
+        void setConsumer(Consumer<WindowState> consumer) {
+            mConsumer = consumer;
+        }
+
+        @Override
+        public boolean apply(WindowState w) {
+            mConsumer.accept(w);
+            return false;
+        }
+
+        void release() {
+            mConsumer = null;
+            mConsumerWrapperPool.release(this);
+        }
+    }
 }
