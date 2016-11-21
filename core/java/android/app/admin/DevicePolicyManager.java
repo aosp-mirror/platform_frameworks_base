@@ -6715,11 +6715,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner/ profile owner in managed profile to bind the service with each other.
+     * Called by a device owner to bind to a service from a profile owner of a managed profile or
+     * vice versa. See {@link #getBindDeviceAdminTargetUsers} for a definition of which
+     * device/profile owners are allowed to bind to services of another profile/device owner.
+     * <p>
      * The service must be unexported. Note that the {@link Context} used to obtain this
      * {@link DevicePolicyManager} instance via {@link Context#getSystemService(Class)} will be used
      * to bind to the {@link android.app.Service}.
-     * STOPSHIP (b/31952368): Update the javadoc after we policy to control which packages can talk.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param serviceIntent Identifies the service to connect to.  The Intent must specify either an
      *        explicit component name or a package name to match an
@@ -6728,11 +6731,15 @@ public class DevicePolicyManager {
      *        valid {@link ServiceConnection} object; it must not be {@code null}.
      * @param flags Operation options for the binding operation. See
      *        {@link Context#bindService(Intent, ServiceConnection, int)}.
-     * @param targetUser Which user to bind to.
+     * @param targetUser Which user to bind to. Must be one of the users returned by
+     *        {@link #getBindDeviceAdminTargetUsers}, otherwise a {@link SecurityException} will
+     *        be thrown.
      * @return If you have successfully bound to the service, {@code true} is returned;
      *         {@code false} is returned if the connection is not made and you will not
      *         receive the service object.
+     *
      * @see Context#bindService(Intent, ServiceConnection, int)
+     * @see #getBindDeviceAdminTargetUsers(ComponentName)
      */
     public boolean bindDeviceAdminServiceAsUser(
             @NonNull ComponentName admin,  Intent serviceIntent, @NonNull ServiceConnection conn,
@@ -6745,6 +6752,29 @@ public class DevicePolicyManager {
             return mService.bindDeviceAdminServiceAsUser(admin,
                     mContext.getIApplicationThread(), mContext.getActivityToken(), serviceIntent,
                     sd, flags, targetUser.getIdentifier());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of target users that the calling device or profile owner can use when
+     * calling {@link #bindDeviceAdminServiceAsUser}.
+     * <p>
+     * A device owner can bind to a service from a profile owner of a managed profile and
+     * vice versa, provided that:
+     * <ul>
+     * <li>Both belong to the same package name.
+     * <li>The managed profile is a profile of the user where the device owner is set.
+     *     See {@link UserManager#getUserProfiles()}
+     * <li>Both users are affiliated.
+     *         STOPSHIP(b/32326223) Add reference to setAffiliationIds here once public.
+     * </ul>
+     */
+    public @NonNull List<UserHandle> getBindDeviceAdminTargetUsers(@NonNull ComponentName admin) {
+        throwIfParentInstance("getBindDeviceAdminTargetUsers");
+        try {
+            return mService.getBindDeviceAdminTargetUsers(admin);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
