@@ -3739,6 +3739,16 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    @VisibleForTesting
+    ShortcutLauncher getLauncherShortcutForTest(String packageName, int userId) {
+        synchronized (mLock) {
+            final ShortcutUser user = mUsers.get(userId);
+            if (user == null) return null;
+
+            return user.getAllLaunchersForTest().get(PackageWithUser.of(userId, packageName));
+        }
+    }
+
     /**
      * Control whether {@link #verifyStates} should be performed.  We always perform it during unit
      * tests.

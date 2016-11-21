@@ -4938,6 +4938,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertEquals(0, mManager.getDynamicShortcuts().size());
             assertEquals(0, mManager.getPinnedShortcuts().size());
         });
+        assertFalse(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, USER_0)
+                .getPackageInfo().isShadow());
+
 
         installPackage(USER_0, CALLING_PACKAGE_2);
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
@@ -4946,6 +4949,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     mManager.getPinnedShortcuts()),
                     "s1", "s2", "s3");
         });
+        assertFalse(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, USER_0)
+                .getPackageInfo().isShadow());
 
         installPackage(USER_0, LAUNCHER_1);
         runWithCaller(LAUNCHER_1, USER_0, () -> {
@@ -5069,6 +5074,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
                     /* empty */);
         });
+        assertFalse(mService.getLauncherShortcutForTest(LAUNCHER_1, USER_0)
+                .getPackageInfo().isShadow());
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(0, mManager.getDynamicShortcuts().size());
@@ -5091,6 +5098,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
                     /* empty */);
         });
+        assertFalse(mService.getLauncherShortcutForTest(LAUNCHER_2, USER_0)
+                .getPackageInfo().isShadow());
 
         installPackage(USER_0, CALLING_PACKAGE_3);
         runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
