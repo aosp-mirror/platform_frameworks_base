@@ -114,6 +114,11 @@ public abstract class AutoFillService extends Service {
 
     private HandlerCaller mHandlerCaller;
 
+    /**
+     * {@inheritDoc}
+     *
+     * <strong>NOTE: </strong>if overridden, it must call {@code super.onCreate()}.
+     */
     @Override
     public void onCreate() {
         super.onCreate();
