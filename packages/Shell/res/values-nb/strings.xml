@@ -17,23 +17,27 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Kommandoliste"</string>
-    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Feilrapporten blir generert"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"Feilrapporten er lagret"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Feilrapporten <xliff:g id="ID">#%d</xliff:g> blir generert"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"Feilrapporten <xliff:g id="ID">#%d</xliff:g> er fullført"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Legger til detaljer i feilrapporten"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Vent litt"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Sveip til venstre for å dele feilrapporten din"</string>
-    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Trykk for å dele feilrapporten din"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"Feilrapporter inkluderer data fra systemets forskjellige loggfiler. Dette omfatter personlig og privat informasjon. Du bør bare dele feilrapporter med apper og folk du stoler på."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Vis denne meldingen neste gang"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Feilrapporten vises snart på telefonen"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Trykk for å dele feilrapporten"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Trykk for å dele feilrapporten uten noen skjermdump, eller vent til skjermdumpen er klar"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Trykk for å dele feilrapporten uten noen skjermdump, eller vent til skjermdumpen er klar"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Feilrapporter inneholder data fra systemets forskjellige loggfiler. Dette kan inkludere data du ser på som sensitiv (for eksempel appbruk og posisjonsdata). Du bør bare dele feilrapporter med folk og apper du stoler på."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Ikke vis igjen"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Feilrapporter"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Feilrapportfilen kunne ikke leses"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Kunne ikke legge til informasjon fra feilrapporten i ZIP-filen"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"uten navn"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Detaljer"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Skjermdump"</string>
-    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Skjermdumpen er tatt."</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Skjermdumpen er tatt."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Skjermdumpen kunne ikke tas."</string>
-    <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Detaljer om feilrapporten"</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Detaljer om feilrapporten <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Filnavn"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"Tittel"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"Detaljert beskrivelse"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Navn på feil"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Oppsummering av feil"</string>
+    <string name="save" msgid="4781509040564835759">"Lagre"</string>
 </resources>

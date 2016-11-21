@@ -17,23 +17,27 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
-    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"جارٍ إنشاء تقرير الخطأ"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"تم الحصول على تقرير الأخطاء"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"جارٍ إنشاء تقرير الخطأ <xliff:g id="ID">#%d</xliff:g>."</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"تم تسجيل تقرير الخطأ <xliff:g id="ID">#%d</xliff:g>."</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"إضافة تفاصيل إلى تقرير الخطأ"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"الرجاء الانتظار…"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"مرر بسرعة لليمين لمشاركة تقرير الخطأ"</string>
-    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"المس لمشاركة تقرير الأخطاء"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"تحتوي تقارير الأخطاء على بيانات من ملفات سجلات النظام المتنوعة، بما في ذلك معلومات شخصية وخاصة. لا تشارك تقارير الأخطاء إلا مع التطبيقات والأشخاص الموثوق بهم."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"إظهار هذه الرسالة في المرة القادمة"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"سيظهر تقرير الخطأ على الهاتف بعد قليل"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"انقر لمشاركة تقرير الخطأ."</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"انقر لمشاركة تقرير الأخطاء بدون لقطة شاشة أو انتظر حتى انتهاء لقطة الشاشة"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"انقر لمشاركة تقرير الأخطاء بدون لقطة شاشة أو انتظر حتى انتهاء لقطة الشاشة"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"تحتوي تقارير الأخطاء على بيانات من عدة ملفات سجلات في النظام، بما في ذلك بيانات قد ترى أنها حساسة (مثل بيانات استخدام التطبيقات وبيانات الموقع). ولذلك احرص على عدم مشاركة تقارير الأخطاء إلا مع من تثق به من الأشخاص والتطبيقات."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"عدم الإظهار مرة أخرى"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"تقارير الأخطاء"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"تعذرت قراءة ملف تقرير الخطأ."</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"‏تعذرت إضافة تفاصيل تقرير الخطأ إلى ملف Zip"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"بدون اسم"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"التفاصيل"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"لقطة شاشة"</string>
-    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"تم التقاط لقطة الشاشة بنجاح."</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"تم تسجيل لقطة الشاشة بنجاح."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"تعذر التقاط لقطة الشاشة."</string>
-    <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"تفاصيل تقرير الخطأ"</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"تفاصيل تقرير الخطأ <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"اسم الملف"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"العنوان"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"وصف تفصيلي"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"عنوان الخطأ"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"ملخص الخطأ"</string>
+    <string name="save" msgid="4781509040564835759">"حفظ"</string>
 </resources>
