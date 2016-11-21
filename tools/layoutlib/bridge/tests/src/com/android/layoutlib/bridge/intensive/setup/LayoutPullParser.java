@@ -42,9 +42,11 @@ public class LayoutPullParser extends KXmlParser implements ILayoutPullParser{
      * @param layoutPath Must start with '/' and be relative to test resources.
      */
     public LayoutPullParser(String layoutPath) {
-        assert layoutPath.startsWith("/");
+        if (layoutPath.startsWith("/")) {
+            layoutPath = layoutPath.substring(1);
+        }
         try {
-            init(getClass().getResourceAsStream(layoutPath));
+            init(getClass().getClassLoader().getResourceAsStream(layoutPath));
         } catch (XmlPullParserException e) {
             throw new IOError(e);
         }
