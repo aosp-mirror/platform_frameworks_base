@@ -58,7 +58,8 @@ public class WifiAwareCharacteristics implements Parcelable {
      * message exchange. Restricts the parameters of the
      * {@link PublishConfig.Builder#setServiceSpecificInfo(byte[])},
      * {@link SubscribeConfig.Builder#setServiceSpecificInfo(byte[])}, and
-     * {@link WifiAwareDiscoveryBaseSession#sendMessage(Object, int, byte[])} variants.
+     * {@link WifiAwareDiscoveryBaseSession#sendMessage(WifiAwareManager.PeerHandle, int, byte[])}
+     * variants.
      *
      * @return A positive integer, maximum length of byte array for Aware messaging.
      */

@@ -21,8 +21,8 @@ import android.util.Log;
 
 /**
  * A class representing a Aware subscribe session. Created when
- * {@link WifiAwareSession#subscribe(android.os.Handler, SubscribeConfig,
- * WifiAwareDiscoverySessionCallback)}
+ * {@link WifiAwareSession#subscribe(SubscribeConfig,
+ * WifiAwareDiscoverySessionCallback, android.os.Handler)}
  * is called and a discovery session is created and returned in
  * {@link WifiAwareDiscoverySessionCallback#onSubscribeStarted(WifiAwareSubscribeDiscoverySession)}.
  * See baseline functionality of all discovery sessions in {@link WifiAwareDiscoveryBaseSession}.
