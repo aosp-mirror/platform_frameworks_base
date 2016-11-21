@@ -339,39 +339,43 @@ public final class LoadedApk {
          * concatenation of both apps' shared library lists.
          */
 
-        String instrumentationPackageName = activityThread.mInstrumentationPackageName;
-        String instrumentationAppDir = activityThread.mInstrumentationAppDir;
-        String[] instrumentationSplitAppDirs = activityThread.mInstrumentationSplitAppDirs;
-        String instrumentationLibDir = activityThread.mInstrumentationLibDir;
-
-        String instrumentedAppDir = activityThread.mInstrumentedAppDir;
-        String[] instrumentedSplitAppDirs = activityThread.mInstrumentedSplitAppDirs;
-        String instrumentedLibDir = activityThread.mInstrumentedLibDir;
         String[] instrumentationLibs = null;
+        // activityThread will be null when called from the WebView zygote; just assume
+        // no instrumentation applies in this case.
+        if (activityThread != null) {
+            String instrumentationPackageName = activityThread.mInstrumentationPackageName;
+            String instrumentationAppDir = activityThread.mInstrumentationAppDir;
+            String[] instrumentationSplitAppDirs = activityThread.mInstrumentationSplitAppDirs;
+            String instrumentationLibDir = activityThread.mInstrumentationLibDir;
 
-        if (appDir.equals(instrumentationAppDir)
-                || appDir.equals(instrumentedAppDir)) {
-            outZipPaths.clear();
-            outZipPaths.add(instrumentationAppDir);
-            if (instrumentationSplitAppDirs != null) {
-                Collections.addAll(outZipPaths, instrumentationSplitAppDirs);
-            }
-            if (!instrumentationAppDir.equals(instrumentedAppDir)) {
-                outZipPaths.add(instrumentedAppDir);
-                if (instrumentedSplitAppDirs != null) {
-                    Collections.addAll(outZipPaths, instrumentedSplitAppDirs);
+            String instrumentedAppDir = activityThread.mInstrumentedAppDir;
+            String[] instrumentedSplitAppDirs = activityThread.mInstrumentedSplitAppDirs;
+            String instrumentedLibDir = activityThread.mInstrumentedLibDir;
+
+            if (appDir.equals(instrumentationAppDir)
+                    || appDir.equals(instrumentedAppDir)) {
+                outZipPaths.clear();
+                outZipPaths.add(instrumentationAppDir);
+                if (instrumentationSplitAppDirs != null) {
+                    Collections.addAll(outZipPaths, instrumentationSplitAppDirs);
                 }
-            }
-
-            if (outLibPaths != null) {
-                outLibPaths.add(instrumentationLibDir);
-                if (!instrumentationLibDir.equals(instrumentedLibDir)) {
-                    outLibPaths.add(instrumentedLibDir);
+                if (!instrumentationAppDir.equals(instrumentedAppDir)) {
+                    outZipPaths.add(instrumentedAppDir);
+                    if (instrumentedSplitAppDirs != null) {
+                        Collections.addAll(outZipPaths, instrumentedSplitAppDirs);
+                    }
                 }
-            }
 
-            if (!instrumentedAppDir.equals(instrumentationAppDir)) {
-                instrumentationLibs = getLibrariesFor(instrumentationPackageName);
+                if (outLibPaths != null) {
+                    outLibPaths.add(instrumentationLibDir);
+                    if (!instrumentationLibDir.equals(instrumentedLibDir)) {
+                        outLibPaths.add(instrumentedLibDir);
+                    }
+                }
+
+                if (!instrumentedAppDir.equals(instrumentationAppDir)) {
+                    instrumentationLibs = getLibrariesFor(instrumentationPackageName);
+                }
             }
         }
 
