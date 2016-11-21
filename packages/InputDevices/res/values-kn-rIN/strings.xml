@@ -3,7 +3,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"ಇನ್‌ಪುಟ್ ಸಾಧನಗಳು"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android ಕೀಬೋರ್ಡ್"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"ಇಂಗ್ಲಿಷ್ (UK)"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"ಇಂಗ್ಲಿಷ್ (ಯುಕೆ)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"ಇಂಗ್ಲಿಷ್ (US)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"ಇಂಗ್ಲಿಷ್ (US), ಅಂತರರಾಷ್ಟ್ರೀಯ ಶೈಲಿ"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"ಇಂಗ್ಲಿಷ್ (US), ಕೋಲ್ಮಾರ್ಕ್ ಶೈಲಿ"</string>

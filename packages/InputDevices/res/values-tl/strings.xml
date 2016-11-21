@@ -3,11 +3,11 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"Mga Input Device"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android keyboard"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Ingles (UK)"</string>
-    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Ingles (US)"</string>
-    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Ingles (US), istilong International"</string>
-    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Ingles (US), istilong Colemak"</string>
-    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Ingles (US), istilong Dvorak"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"English (UK)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"English (US)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"English (US), istilong International"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"English (US), istilong Colemak"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"English (US), istilong Dvorak"</string>
     <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"English (US), Workman style"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"German"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"French"</string>
