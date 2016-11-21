@@ -19,7 +19,7 @@
     <string name="backup_confirm_title" msgid="827563724209303345">"Úplná záloha"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Úplné obnovenie"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"Bola vyžiadaná úplná záloha všetkých dát do pripojeného počítača. Chcete túto akciu povoliť?\n\nAk ste zálohu nevyžiadali vy, túto operáciu nepovoľujte."</string>
-    <string name="allow_backup_button_label" msgid="4217228747769644068">"Zálohovať dáta"</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Zálohovať moje dáta"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Nezálohovať"</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"Z pripojeného počítača bolo vyžiadané úplné obnovenie všetkých údajov. Chcete túto akciu povoliť?\n\nAk ste toto obnovenie nevyžiadali vy, túto operáciu nepovoľujte. Táto akcia nahradí všetky údaje v zariadení."</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Obnoviť údaje"</string>
