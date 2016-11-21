@@ -131,9 +131,16 @@ public class Resources_Delegate {
         if (resourceInfo != null) {
             String attributeName = resourceInfo.getSecond();
             RenderResources renderResources = resources.mContext.getRenderResources();
-            return Pair.of(attributeName, platformResFlag_out[0] ?
+            ResourceValue value = platformResFlag_out[0] ?
                     renderResources.getFrameworkResource(resourceInfo.getFirst(), attributeName) :
-                    renderResources.getProjectResource(resourceInfo.getFirst(), attributeName));
+                    renderResources.getProjectResource(resourceInfo.getFirst(), attributeName);
+
+            if (value == null) {
+                // Unable to resolve the attribute, just leave the unresolved value
+                value = new ResourceValue(resourceInfo.getFirst(), attributeName, attributeName,
+                        platformResFlag_out[0]);
+            }
+            return Pair.of(attributeName, value);
         }
 
         return null;

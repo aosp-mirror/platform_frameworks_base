@@ -638,6 +638,9 @@ public final class BridgeTypedArray extends TypedArray {
                 return mContext.getProjectResourceValue(ResourceType.ID, idName, defValue);
             }
         }
+        else if (value.startsWith("@aapt:_aapt")) {
+            return mContext.getLayoutlibCallback().getResourceId(ResourceType.AAPT, value);
+        }
 
         // not a direct id valid reference. First check if it's an enum (this is a corner case
         // for attributes that have a reference|enum type), then fallback to resolve
