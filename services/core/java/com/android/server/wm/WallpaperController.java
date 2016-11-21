@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import com.android.internal.util.ToBooleanFunction;
+
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
@@ -51,7 +53,7 @@ import java.util.ArrayList;
  */
 class WallpaperController {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WallpaperController" : TAG_WM;
-    final private WindowManagerService mService;
+    private WindowManagerService mService;
 
     private final ArrayList<WallpaperWindowToken> mWallpaperTokens = new ArrayList<>();
 
@@ -96,6 +98,78 @@ class WallpaperController {
     private int mWallpaperDrawState = WALLPAPER_DRAW_NORMAL;
 
     private final FindWallpaperTargetResult mFindResults = new FindWallpaperTargetResult();
+
+    private final ToBooleanFunction<WindowState> mFindWallpaperTargetFunction = w -> {
+        final WindowAnimator winAnimator = mService.mAnimator;
+        if ((w.mAttrs.type == TYPE_WALLPAPER)) {
+            if (mFindResults.topWallpaper == null || mFindResults.resetTopWallpaper) {
+                mFindResults.setTopWallpaper(w);
+                mFindResults.resetTopWallpaper = false;
+            }
+            return false;
+        }
+
+        mFindResults.resetTopWallpaper = true;
+        if (w != winAnimator.mWindowDetachedWallpaper && w.mAppToken != null) {
+            // If this window's app token is hidden and not animating, it is of no interest to us.
+            if (w.mAppToken.hidden && w.mAppToken.mAppAnimator.animation == null) {
+                if (DEBUG_WALLPAPER) Slog.v(TAG,
+                        "Skipping hidden and not animating token: " + w);
+                return false;
+            }
+        }
+        if (DEBUG_WALLPAPER) Slog.v(TAG, "Win " + w + ": isOnScreen=" + w.isOnScreen()
+                + " mDrawState=" + w.mWinAnimator.mDrawState);
+
+        if (w.mWillReplaceWindow && mWallpaperTarget == null
+                && !mFindResults.useTopWallpaperAsTarget) {
+            // When we are replacing a window and there was wallpaper before replacement, we want to
+            // keep the window until the new windows fully appear and can determine the visibility,
+            // to avoid flickering.
+            mFindResults.setUseTopWallpaperAsTarget(true);
+        }
+
+        final boolean keyguardGoingAwayWithWallpaper = (w.mAppToken != null
+                && AppTransition.isKeyguardGoingAwayTransit(
+                w.mAppToken.mAppAnimator.getTransit())
+                && (w.mAppToken.mAppAnimator.getTransitFlags()
+                & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
+
+        boolean needsShowWhenLockedWallpaper = false;
+        if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
+                && mService.mPolicy.isKeyguardLocked()
+                && mService.mPolicy.isKeyguardOccluded()) {
+            // The lowest show when locked window decides whether we need to put the wallpaper
+            // behind.
+            needsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
+                    || (w.mAppToken != null && !w.mAppToken.fillsParent());
+        }
+
+        if (keyguardGoingAwayWithWallpaper || needsShowWhenLockedWallpaper) {
+            // Keep the wallpaper during Keyguard exit but also when it's needed for a
+            // non-fullscreen show when locked activity.
+            mFindResults.setUseTopWallpaperAsTarget(true);
+        }
+
+        final boolean hasWallpaper = (w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
+        if (hasWallpaper && w.isOnScreen() && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
+            if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: " + w);
+            mFindResults.setWallpaperTarget(w);
+            if (w == mWallpaperTarget && w.mWinAnimator.isAnimationSet()) {
+                // The current wallpaper target is animating, so we'll look behind it for
+                // another possible target and figure out what is going on later.
+                if (DEBUG_WALLPAPER) Slog.v(TAG,
+                        "Win " + w + ": token animating, looking behind.");
+            }
+            // Found a target! End search.
+            return true;
+        } else if (w == winAnimator.mWindowDetachedWallpaper) {
+            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
+                    "Found animating detached wallpaper target win: " + w);
+            mFindResults.setUseTopWallpaperAsTarget(true);
+        }
+        return false;
+    };
 
     public WallpaperController(WindowManagerService service) {
         mService = service;
@@ -371,89 +445,18 @@ class WallpaperController {
         return mWallpaperAnimLayerAdjustment;
     }
 
-    private void findWallpaperTarget(DisplayContent dc , FindWallpaperTargetResult result) {
-        final WindowAnimator winAnimator = mService.mAnimator;
-        result.reset();
+    private void findWallpaperTarget(DisplayContent dc) {
+        mFindResults.reset();
         if (mService.isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID)) {
             // In freeform mode we set the wallpaper as its own target, so we don't need an
             // additional window to make it visible.
-            result.setUseTopWallpaperAsTarget(true);
+            mFindResults.setUseTopWallpaperAsTarget(true);
         }
 
-        dc.forAllWindows(w -> {
-            if ((w.mAttrs.type == TYPE_WALLPAPER)) {
-                if (result.topWallpaper == null || result.resetTopWallpaper) {
-                    result.setTopWallpaper(w);
-                    result.resetTopWallpaper = false;
-                }
-                return false;
-            }
+        dc.forAllWindows(mFindWallpaperTargetFunction, true /* traverseTopToBottom */);
 
-            result.resetTopWallpaper = true;
-            if (w != winAnimator.mWindowDetachedWallpaper && w.mAppToken != null) {
-                // If this window's app token is hidden and not animating,
-                // it is of no interest to us.
-                if (w.mAppToken.hidden && w.mAppToken.mAppAnimator.animation == null) {
-                    if (DEBUG_WALLPAPER) Slog.v(TAG,
-                            "Skipping hidden and not animating token: " + w);
-                    return false;
-                }
-            }
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "Win " + w + ": isOnScreen=" + w.isOnScreen()
-                    + " mDrawState=" + w.mWinAnimator.mDrawState);
-
-            if (w.mWillReplaceWindow && mWallpaperTarget == null
-                    && !result.useTopWallpaperAsTarget) {
-                // When we are replacing a window and there was wallpaper before replacement, we
-                // want to keep the window until the new windows fully appear and can determine the
-                // visibility, to avoid flickering.
-                result.setUseTopWallpaperAsTarget(true);
-            }
-
-            final boolean keyguardGoingAwayWithWallpaper = (w.mAppToken != null
-                    && AppTransition.isKeyguardGoingAwayTransit(
-                            w.mAppToken.mAppAnimator.getTransit())
-                    && (w.mAppToken.mAppAnimator.getTransitFlags()
-                            & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
-
-            boolean needsShowWhenLockedWallpaper = false;
-            if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
-                    && mService.mPolicy.isKeyguardLocked()
-                    && mService.mPolicy.isKeyguardOccluded()) {
-                // The lowest show when locked window decides whether we need to put the wallpaper
-                // behind.
-                needsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
-                        || (w.mAppToken != null && !w.mAppToken.fillsParent());
-            }
-
-            if (keyguardGoingAwayWithWallpaper || needsShowWhenLockedWallpaper) {
-                // Keep the wallpaper during Keyguard exit but also when it's needed for a
-                // non-fullscreen show when locked activity.
-                result.setUseTopWallpaperAsTarget(true);
-            }
-
-            final boolean hasWallpaper = (w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
-            if (hasWallpaper && w.isOnScreen() && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
-                if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: " + w);
-                result.setWallpaperTarget(w);
-                if (w == mWallpaperTarget && w.mWinAnimator.isAnimationSet()) {
-                    // The current wallpaper target is animating, so we'll look behind it for
-                    // another possible target and figure out what is going on later.
-                    if (DEBUG_WALLPAPER) Slog.v(TAG,
-                            "Win " + w + ": token animating, looking behind.");
-                }
-                // Found a target! End search.
-                return true;
-            } else if (w == winAnimator.mWindowDetachedWallpaper) {
-                if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                        "Found animating detached wallpaper target win: " + w);
-                result.setUseTopWallpaperAsTarget(true);
-            }
-            return false;
-        }, true /* traverseTopToBottom */);
-
-        if (result.wallpaperTarget == null && result.useTopWallpaperAsTarget) {
-            result.setWallpaperTarget(result.topWallpaper);
+        if (mFindResults.wallpaperTarget == null && mFindResults.useTopWallpaperAsTarget) {
+            mFindResults.setWallpaperTarget(mFindResults.topWallpaper);
         }
     }
 
@@ -552,7 +555,7 @@ class WallpaperController {
 
         // First find top-most window that has asked to be on top of the wallpaper;
         // all wallpapers go behind it.
-        findWallpaperTarget(dc, mFindResults);
+        findWallpaperTarget(dc);
         updateWallpaperWindowsTarget(dc, mFindResults);
 
         // The window is visible to the compositor...but is it visible to the user?

@@ -25,7 +25,6 @@ import com.android.internal.util.ToBooleanFunction;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
@@ -501,7 +500,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
      * @param   traverseTopToBottom If true traverses the hierarchy from top-to-bottom in terms of
      *                              z-order, else from bottom-to-top.
      * @return  True if the search ended before we reached the end of the hierarchy due to
-     *          {@link Function#apply} returning true.
+     *          {@link ToBooleanFunction#apply} returning true.
      */
     boolean forAllWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
         if (traverseTopToBottom) {

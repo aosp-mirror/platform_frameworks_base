@@ -40,6 +40,7 @@ import com.android.server.EventLogTags;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
@@ -128,6 +129,23 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
     private final WindowLayersController mLayersController;
     final WallpaperController mWallpaperController;
+
+    private String mCloseSystemDialogsReason;
+    private final Consumer<WindowState> mCloseSystemDialogsConsumer = w -> {
+        if (w.mHasSurface) {
+            try {
+                w.mClient.closeSystemDialogs(mCloseSystemDialogsReason);
+            } catch (RemoteException e) {
+            }
+        }
+    };
+
+    private static final Consumer<WindowState> sRemoveReplacedWindowsConsumer = w -> {
+        final AppWindowToken aToken = w.mAppToken;
+        if (aToken != null) {
+            aToken.removeReplacedWindowIfNeeded(w);
+        }
+    };
 
     RootWindowContainer(WindowManagerService service) {
         mService = service;
@@ -376,26 +394,15 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     void closeSystemDialogs(String reason) {
-        forAllWindows((w) -> {
-            if (w.mHasSurface) {
-                try {
-                    w.mClient.closeSystemDialogs(reason);
-                } catch (RemoteException e) {
-                }
-            }
-        }, false /* traverseTopToBottom */);
+        mCloseSystemDialogsReason = reason;
+        forAllWindows(mCloseSystemDialogsConsumer, false /* traverseTopToBottom */);
     }
 
     void removeReplacedWindows() {
         if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION removeReplacedWindows");
         mService.openSurfaceTransaction();
         try {
-            forAllWindows((w) -> {
-                final AppWindowToken aToken = w.mAppToken;
-                if (aToken != null) {
-                    aToken.removeReplacedWindowIfNeeded(w);
-                }
-            }, true /* traverseTopToBottom */);
+            forAllWindows(sRemoveReplacedWindowsConsumer, true /* traverseTopToBottom */);
         } finally {
             mService.closeSurfaceTransaction();
             if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION removeReplacedWindows");

@@ -20,6 +20,7 @@ import android.util.Slog;
 import android.view.Display;
 
 import java.util.ArrayDeque;
+import java.util.function.Consumer;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
@@ -69,45 +70,47 @@ class WindowLayersController {
     private boolean mAboveImeTarget;
     private ArrayDeque<WindowState> mAboveImeTargetAppWindows = new ArrayDeque();
 
+    private final Consumer<WindowState> mAssignWindowLayersConsumer = w -> {
+        boolean layerChanged = false;
+
+        int oldLayer = w.mLayer;
+        if (w.mBaseLayer == mCurBaseLayer) {
+            mCurLayer += WINDOW_LAYER_MULTIPLIER;
+        } else {
+            mCurBaseLayer = mCurLayer = w.mBaseLayer;
+        }
+        assignAnimLayer(w, mCurLayer);
+
+        // TODO: Preserved old behavior of code here but not sure comparing oldLayer to
+        // mAnimLayer and mLayer makes sense...though the worst case would be unintentional
+        // layer reassignment.
+        if (w.mLayer != oldLayer || w.mWinAnimator.mAnimLayer != oldLayer) {
+            layerChanged = true;
+            mAnyLayerChanged = true;
+        }
+
+        if (w.mAppToken != null) {
+            mHighestApplicationLayer = Math.max(mHighestApplicationLayer,
+                    w.mWinAnimator.mAnimLayer);
+        }
+        if (mImeTarget != null && w.mBaseLayer == mImeTarget.mBaseLayer) {
+            mHighestLayerInImeTargetBaseLayer = Math.max(mHighestLayerInImeTargetBaseLayer,
+                    w.mWinAnimator.mAnimLayer);
+        }
+
+        collectSpecialWindows(w);
+
+        if (layerChanged) {
+            w.scheduleAnimationIfDimming();
+        }
+    };
+
     final void assignWindowLayers(DisplayContent dc) {
         if (DEBUG_LAYERS) Slog.v(TAG_WM, "Assigning layers based",
                 new RuntimeException("here").fillInStackTrace());
 
         reset();
-        dc.forAllWindows((w) -> {
-            boolean layerChanged = false;
-
-            int oldLayer = w.mLayer;
-            if (w.mBaseLayer == mCurBaseLayer) {
-                mCurLayer += WINDOW_LAYER_MULTIPLIER;
-            } else {
-                mCurBaseLayer = mCurLayer = w.mBaseLayer;
-            }
-            assignAnimLayer(w, mCurLayer);
-
-            // TODO: Preserved old behavior of code here but not sure comparing oldLayer to
-            // mAnimLayer and mLayer makes sense...though the worst case would be unintentional
-            // layer reassignment.
-            if (w.mLayer != oldLayer || w.mWinAnimator.mAnimLayer != oldLayer) {
-                layerChanged = true;
-                mAnyLayerChanged = true;
-            }
-
-            if (w.mAppToken != null) {
-                mHighestApplicationLayer = Math.max(mHighestApplicationLayer,
-                        w.mWinAnimator.mAnimLayer);
-            }
-            if (mImeTarget != null && w.mBaseLayer == mImeTarget.mBaseLayer) {
-                mHighestLayerInImeTargetBaseLayer = Math.max(mHighestLayerInImeTargetBaseLayer,
-                        w.mWinAnimator.mAnimLayer);
-            }
-
-            collectSpecialWindows(w);
-
-            if (layerChanged) {
-                w.scheduleAnimationIfDimming();
-            }
-        }, false /* traverseTopToBottom */);
+        dc.forAllWindows(mAssignWindowLayersConsumer, false /* traverseTopToBottom */);
 
         adjustSpecialWindows();
 
