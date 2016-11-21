@@ -17,6 +17,7 @@
 package android.media;
 
 import android.os.IBinder;
+import android.util.Log;
 
 /** @hide */
 public class MediaHTTPService extends IMediaHTTPService.Stub {
@@ -31,10 +32,10 @@ public class MediaHTTPService extends IMediaHTTPService.Stub {
 
     /* package private */static IBinder createHttpServiceBinderIfNecessary(
             String path) {
-        if (path.startsWith("http://")
-                || path.startsWith("https://")
-                || path.startsWith("widevine://")) {
+        if (path.startsWith("http://") || path.startsWith("https://")) {
             return (new MediaHTTPService()).asBinder();
+        } else if (path.startsWith("widevine://")) {
+            Log.d(TAG, "Widevine classic is no longer supported");
         }
 
         return null;
