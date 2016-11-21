@@ -300,15 +300,19 @@ class AppErrors {
      * @param crashInfo describing the failure
      */
     void crashApplication(ProcessRecord r, ApplicationErrorReport.CrashInfo crashInfo) {
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+
         final long origId = Binder.clearCallingIdentity();
         try {
-            crashApplicationInner(r, crashInfo);
+            crashApplicationInner(r, crashInfo, callingPid, callingUid);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
     }
 
-    void crashApplicationInner(ProcessRecord r, ApplicationErrorReport.CrashInfo crashInfo) {
+    void crashApplicationInner(ProcessRecord r, ApplicationErrorReport.CrashInfo crashInfo,
+            int callingPid, int callingUid) {
         long timeMillis = System.currentTimeMillis();
         String shortMsg = crashInfo.exceptionClassName;
         String longMsg = crashInfo.exceptionMessage;
@@ -327,7 +331,7 @@ class AppErrors {
              * finish now and don't show the app error dialog.
              */
             if (handleAppCrashInActivityController(r, crashInfo, shortMsg, longMsg, stackTrace,
-                    timeMillis)) {
+                    timeMillis, callingPid, callingUid)) {
                 return;
             }
 
@@ -429,15 +433,16 @@ class AppErrors {
     private boolean handleAppCrashInActivityController(ProcessRecord r,
                                                        ApplicationErrorReport.CrashInfo crashInfo,
                                                        String shortMsg, String longMsg,
-                                                       String stackTrace, long timeMillis) {
+                                                       String stackTrace, long timeMillis,
+                                                       int callingPid, int callingUid) {
         if (mService.mController == null) {
             return false;
         }
 
         try {
             String name = r != null ? r.processName : null;
-            int pid = r != null ? r.pid : Binder.getCallingPid();
-            int uid = r != null ? r.info.uid : Binder.getCallingUid();
+            int pid = r != null ? r.pid : callingPid;
+            int uid = r != null ? r.info.uid : callingUid;
             if (!mService.mController.appCrashed(name, pid,
                     shortMsg, longMsg, timeMillis, crashInfo.stackTrace)) {
                 if ("1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"))
