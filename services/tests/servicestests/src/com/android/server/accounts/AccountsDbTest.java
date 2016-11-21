@@ -37,6 +37,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -337,5 +338,66 @@ public class AccountsDbTest {
         assertEquals(-1, actualId);
         actualId = mAccountsDb.findDeAccountId(account);
         assertEquals(-1, actualId);
+    }
+
+    @Test
+    public void testFindDeAccountByAccountId() {
+        long accId = 10;
+        Account account = new Account("name", "example.com");
+        assertNull(mAccountsDb.findDeAccountByAccountId(accId));
+
+        mAccountsDb.insertDeAccount(account, accId);
+
+        Account foundAccount = mAccountsDb.findDeAccountByAccountId(accId);
+        assertEquals(account, foundAccount);
+    }
+
+    @Test
+    public void testVisibilityFindSetDelete() {
+        long accId = 10;
+        int uid1 = 100500;
+        int uid2 = 100501;
+        Account account = new Account("name", "example.com");
+        assertNull(mAccountsDb.findAccountVisibility(account, uid1));
+
+        mAccountsDb.insertDeAccount(account, accId);
+        assertNull(mAccountsDb.findAccountVisibility(account, uid1));
+        assertNull(mAccountsDb.findAccountVisibility(accId, uid1));
+
+        mAccountsDb.setAccountVisibility(accId, uid1, 1);
+        assertEquals(mAccountsDb.findAccountVisibility(account, uid1), Integer.valueOf(1));
+        assertEquals(mAccountsDb.findAccountVisibility(accId, uid1), Integer.valueOf(1));
+
+        mAccountsDb.setAccountVisibility(accId, uid2, 2);
+        assertEquals(mAccountsDb.findAccountVisibility(accId, uid2), Integer.valueOf(2));
+
+        mAccountsDb.setAccountVisibility(accId, uid2, 3);
+        assertEquals(mAccountsDb.findAccountVisibility(accId, uid2), Integer.valueOf(3));
+
+        Map<Integer, Integer> vis = mAccountsDb.findAccountVisibilityForAccountId(accId);
+        assertEquals(vis.size(), 2);
+        assertEquals(vis.get(uid1), Integer.valueOf(1));
+        assertEquals(vis.get(uid2), Integer.valueOf(3));
+
+        assertTrue(mAccountsDb.deleteAccountVisibilityForUid(uid1));
+        assertNull(mAccountsDb.findAccountVisibility(accId, uid1));
+        assertFalse(mAccountsDb.deleteAccountVisibilityForUid(uid1)); // Already deleted.
+    }
+
+    @Test
+    public void testVisibilityCleanupTrigger() {
+        long accId = 10;
+        int uid1 = 100500;
+        Account account = new Account("name", "example.com");
+
+        assertNull(mAccountsDb.findAccountVisibility(account, uid1));
+        mAccountsDb.insertDeAccount(account, accId);
+        assertNull(mAccountsDb.findAccountVisibility(account, uid1));
+
+        mAccountsDb.setAccountVisibility(accId, uid1, 1);
+        assertEquals(mAccountsDb.findAccountVisibility(accId, uid1), Integer.valueOf(1));
+
+        assertTrue(mAccountsDb.deleteDeAccount(accId)); // Trigger should remove visibility.
+        assertNull(mAccountsDb.findAccountVisibility(account, uid1));
     }
 }
