@@ -555,7 +555,7 @@ public class Main {
 
     /** Test activity.xml */
     @Test
-    public void testScrolling() throws ClassNotFoundException {
+    public void testScrollingAndMeasure() throws ClassNotFoundException {
         // Create the layout pull parser.
         LayoutPullParser parser = createLayoutPullParser("scrolled.xml");
         // Create LayoutLibCallback.
@@ -569,7 +569,10 @@ public class Main {
         params.setForceNoDecor();
         params.setExtendedViewInfoMode(true);
 
-        RenderResult result = renderAndVerify(params, "scrolled.png");
+        // Do an only-measure pass
+        RenderSession session = sBridge.createSession(params);
+        session.measure();
+        RenderResult result = RenderResult.getFromSession(session);
         assertNotNull(result);
         assertNotNull(result.getResult());
         assertTrue(result.getResult().isSuccess());
@@ -586,6 +589,20 @@ public class Main {
         assertEquals(90, rootLayout.getChildren().get(5).getChildren().get(0).getLeft());
         assertEquals(-270, rootLayout.getChildren().get(5).getChildren().get(0).getBottom());
         assertEquals(690, rootLayout.getChildren().get(5).getChildren().get(0).getRight());
+
+        // Do a full render pass
+        parser = createLayoutPullParser("scrolled.xml");
+
+        params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
+                RenderingMode.V_SCROLL, 22);
+        params.setForceNoDecor();
+        params.setExtendedViewInfoMode(true);
+
+        result = renderAndVerify(params, "scrolled.png");
+        assertNotNull(result);
+        assertNotNull(result.getResult());
+        assertTrue(result.getResult().isSuccess());
     }
 
     @Test

@@ -385,13 +385,10 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     }
 
     /**
-     * Renders the given view hierarchy to the passed canvas and returns the result of the render
-     * operation.
-     * @param canvas an optional canvas to render the views to. If null, only the measure and
-     * layout steps will be executed.
+     * Runs a layout pass for the given view root
      */
-    private static Result renderAndBuildResult(@NonNull BridgeContext context, @NonNull ViewGroup viewRoot,
-            @Nullable Canvas canvas, int width, int height) {
+    private static void doLayout(@NonNull BridgeContext context, @NonNull ViewGroup viewRoot,
+            int width, int height) {
         // measure again with the size we need
         // This must always be done before the call to layout
         measureView(viewRoot, null /*measuredView*/,
@@ -401,7 +398,16 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         // now do the layout.
         viewRoot.layout(0, 0, width, height);
         handleScrolling(context, viewRoot);
+    }
 
+    /**
+     * Renders the given view hierarchy to the passed canvas and returns the result of the render
+     * operation.
+     * @param canvas an optional canvas to render the views to. If null, only the measure and
+     * layout steps will be executed.
+     */
+    private static Result renderAndBuildResult(@NonNull BridgeContext context, @NonNull ViewGroup viewRoot,
+            @Nullable Canvas canvas, int width, int height) {
         if (canvas == null) {
             return SUCCESS.createResult();
         }
@@ -479,6 +485,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 // delete the canvas and image to reset them on the next full rendering
                 mImage = null;
                 mCanvas = null;
+                doLayout(getContext(), mViewRoot, mMeasuredScreenWidth, mMeasuredScreenHeight);
             } else {
                 // draw the views
                 // create the BufferedImage into which the layout will be rendered.
@@ -539,6 +546,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     gc.dispose();
                 }
 
+                doLayout(getContext(), mViewRoot, mMeasuredScreenWidth, mMeasuredScreenHeight);
                 if (mElapsedFrameTimeNanos >= 0) {
                     long initialTime = System_Delegate.nanoTime();
                     if (!mFirstFrameExecuted) {
