@@ -65,7 +65,7 @@ public class WifiAwareSession {
      * session-wide destroy.
      * <p>
      * An application may re-attach after a destroy using
-     * {@link WifiAwareManager#attach(Handler, WifiAwareAttachCallback)} .
+     * {@link WifiAwareManager#attach(WifiAwareAttachCallback, Handler)} .
      */
     public void destroy() {
         WifiAwareManager mgr = mMgr.get();
@@ -116,15 +116,15 @@ public class WifiAwareSession {
      * <p>The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
      * permission to start a publish discovery session.
      *
-     * @param handler The Handler on whose thread to execute the callbacks of the {@code
-     * callback} object. If a null is provided then the application's main thread will be used.
      * @param publishConfig The {@link PublishConfig} specifying the
      *            configuration of the requested publish session.
      * @param callback A {@link WifiAwareDiscoverySessionCallback} derived object to be used for
      *                 session event callbacks.
+     * @param handler The Handler on whose thread to execute the callbacks of the {@code
+     * callback} object. If a null is provided then the application's main thread will be used.
      */
-    public void publish(@Nullable Handler handler, @NonNull PublishConfig publishConfig,
-            @NonNull WifiAwareDiscoverySessionCallback callback) {
+    public void publish(@NonNull PublishConfig publishConfig,
+            @NonNull WifiAwareDiscoverySessionCallback callback, @Nullable Handler handler) {
         WifiAwareManager mgr = mMgr.get();
         if (mgr == null) {
             Log.e(TAG, "publish: called post GC on WifiAwareManager");
@@ -162,15 +162,15 @@ public class WifiAwareSession {
      * <p>The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
      * permission to start a subscribe discovery session.
      *
-     * @param handler The Handler on whose thread to execute the callbacks of the {@code
-     * callback} object. If a null is provided then the application's main thread will be used.
      * @param subscribeConfig The {@link SubscribeConfig} specifying the
      *            configuration of the requested subscribe session.
      * @param callback A {@link WifiAwareDiscoverySessionCallback} derived object to be used for
      *                 session event callbacks.
+     * @param handler The Handler on whose thread to execute the callbacks of the {@code
+     * callback} object. If a null is provided then the application's main thread will be used.
      */
-    public void subscribe(@Nullable Handler handler, @NonNull SubscribeConfig subscribeConfig,
-            @NonNull WifiAwareDiscoverySessionCallback callback) {
+    public void subscribe(@NonNull SubscribeConfig subscribeConfig,
+            @NonNull WifiAwareDiscoverySessionCallback callback, @Nullable Handler handler) {
         WifiAwareManager mgr = mMgr.get();
         if (mgr == null) {
             Log.e(TAG, "publish: called post GC on WifiAwareManager");
@@ -193,7 +193,8 @@ public class WifiAwareSession {
      *     This API is targeted for applications which can obtain the peer MAC address using OOB
      *     (out-of-band) discovery. Aware discovery does not provide the MAC address of the peer -
      *     when using Aware discovery use the alternative network specifier method -
-     *     {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])}.
+     *     {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int,
+     *     WifiAwareManager.PeerHandle, byte[])}.
      *
      * @param role  The role of this device:
      *              {@link WifiAwareManager#WIFI_AWARE_DATA_PATH_ROLE_INITIATOR} or

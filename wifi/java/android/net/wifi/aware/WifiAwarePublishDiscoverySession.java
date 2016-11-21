@@ -21,9 +21,8 @@ import android.util.Log;
 
 /**
  * A class representing a Aware publish session. Created when
- * {@link WifiAwareSession#publish(android.os.Handler, PublishConfig,
- * WifiAwareDiscoverySessionCallback)}
- * is called and a discovery session is created and returned in
+ * {@link WifiAwareSession#publish(PublishConfig, WifiAwareDiscoverySessionCallback,
+ * android.os.Handler)} is called and a discovery session is created and returned in
  * {@link WifiAwareDiscoverySessionCallback#onPublishStarted(WifiAwarePublishDiscoverySession)}. See
  * baseline functionality of all discovery sessions in {@link WifiAwareDiscoveryBaseSession}. This
  * object allows updating an existing/running publish discovery session using

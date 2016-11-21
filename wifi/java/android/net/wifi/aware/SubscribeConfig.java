@@ -32,9 +32,8 @@ import java.util.Arrays;
 /**
  * Defines the configuration of a Aware subscribe session. Built using
  * {@link SubscribeConfig.Builder}. Subscribe is done using
- * {@link WifiAwareSession#subscribe(android.os.Handler, SubscribeConfig,
- * WifiAwareDiscoverySessionCallback)}
- * or
+ * {@link WifiAwareSession#subscribe(SubscribeConfig, WifiAwareDiscoverySessionCallback,
+ * android.os.Handler)} or
  * {@link WifiAwareSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}.
  *
  * @hide PROPOSED_AWARE_API
@@ -403,8 +402,8 @@ public final class SubscribeConfig implements Parcelable {
          * Sets the match style of the subscription - how are matches from a
          * single match session (corresponding to the same publish action on the
          * peer) reported to the host (using the
-         * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(Object, byte[], byte[])}
-         * ). The options are: only report the first match and ignore the rest
+         * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
+         * byte[], byte[])}). The options are: only report the first match and ignore the rest
          * {@link SubscribeConfig#MATCH_STYLE_FIRST_ONLY} or report every single
          * match {@link SubscribeConfig#MATCH_STYLE_ALL} (the default).
          *
