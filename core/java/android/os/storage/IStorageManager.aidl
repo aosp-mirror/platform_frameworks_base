@@ -288,4 +288,5 @@ interface IStorageManager {
     ParcelFileDescriptor mountAppFuse(in String name) = 69;
     void addUserKeyAuth(int userId, int serialNumber, in byte[] token, in byte[] secret) = 70;
     void fixateNewestUserKeyAuth(int userId) = 71;
+    void fstrim(int flags) = 72;
 }

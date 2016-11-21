@@ -92,6 +92,8 @@ public final class Sm {
             runSetEmulateFbe();
         } else if ("get-fbe-mode".equals(op)) {
             runGetFbeMode();
+        } else if ("fstrim".equals(op)) {
+            runFstrim();
         } else {
             throw new IllegalArgumentException();
         }
@@ -210,13 +212,17 @@ public final class Sm {
         mSm.benchmark(volId);
     }
 
-    public void runForget() throws RemoteException{
+    public void runForget() throws RemoteException {
         final String fsUuid = nextArg();
         if ("all".equals(fsUuid)) {
             mSm.forgetAllVolumes();
         } else {
             mSm.forgetVolume(fsUuid);
         }
+    }
+
+    public void runFstrim() throws RemoteException {
+        mSm.fstrim(0);
     }
 
     private String nextArg() {
@@ -240,6 +246,7 @@ public final class Sm {
         System.err.println("       sm unmount VOLUME");
         System.err.println("       sm format VOLUME");
         System.err.println("       sm benchmark VOLUME");
+        System.err.println("       sm fstrim");
         System.err.println("");
         System.err.println("       sm forget [UUID|all]");
         System.err.println("");

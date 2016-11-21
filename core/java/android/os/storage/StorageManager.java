@@ -134,6 +134,11 @@ public class StorageManager {
     /** {@hide} */
     public static final int FLAG_INCLUDE_INVISIBLE = 1 << 10;
 
+    /** {@hide} */
+    public static final int FSTRIM_FLAG_DEEP = 1 << 0;
+    /** {@hide} */
+    public static final int FSTRIM_FLAG_BENCHMARK = 1 << 1;
+
     /** @hide The volume is not encrypted. */
     public static final int ENCRYPTION_STATE_NONE = 1;
 
