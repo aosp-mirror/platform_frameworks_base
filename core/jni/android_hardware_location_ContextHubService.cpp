@@ -16,25 +16,25 @@
 
 #include "context_hub.h"
 
+#undef LOG_NDEBUG
+#undef LOG_TAG
 #define LOG_NDEBUG 0
 #define LOG_TAG "ContextHubService"
 
 #include <inttypes.h>
 #include <jni.h>
-#include <mutex>
-#include <string.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-// TOOD: On master, alphabetize these and move <mutex> into this
-//     grouping.
-#include <chrono>
-#include <unordered_map>
-#include <queue>
+#include <string.h>
 
 #include <android-base/macros.h>
 #include <cutils/log.h>
+
+#include <chrono>
+#include <mutex>
+#include <queue>
+#include <unordered_map>
 
 #include "JNIHelp.h"
 #include "core_jni_helpers.h"
@@ -1180,7 +1180,6 @@ static jint nativeSendMessage(JNIEnv *env, jobject instance, jintArray header_,
     }
 
     if (setAddressSuccess && hubId >= 0) {
-        ALOGD("Asking HAL to remove app");
         retVal = db.hubInfo.contextHubModule->send_message(hubId, &msg);
     } else {
       ALOGD("Could not find app instance %" PRId32 " on hubHandle %" PRId32
