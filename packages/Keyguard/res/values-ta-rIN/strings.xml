@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"சிம் கார்டு பூட்டப்பட்டுள்ளது."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"சிம் கார்டு PUK ஆல் பூட்டப்பட்டது."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"சிம் கார்டின் தடையைநீக்குகிறது..."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"வடிவம் மூலம் திறத்தல்."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin மூலம் திறத்தல்."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"கடவுச்சொல் மூலம் திறத்தல்."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"வடிவப் பகுதி."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ஸ்லைடு பகுதி."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN பகுதி"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"சிம் PIN பகுதி"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"சிம் PUK பகுதி"</string>
@@ -108,7 +103,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"சிம் PUK செயல்பாடு தோல்வி!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"குறியீடு ஏற்கப்பட்டது!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"சேவை இல்லை."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"உள்ளீட்டு முறையை மாற்றும் பொத்தான்."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"உள்ளீட்டு முறையை மாற்று"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"விமானப் பயன்முறை"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"சாதனத்தை மீண்டும் தொடங்கியதும் வடிவத்தை வரைய வேண்டும்"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"சாதனத்தை மீண்டும் தொடங்கியதும் பின்னை உள்ளிட வேண்டும்"</string>
@@ -119,6 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"சுயவிவரங்களுக்கு இடையே மாறும் போது, வடிவத்தை வரைய வேண்டும்"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"சுயவிவரங்களுக்கு இடையே மாறும் போது, பின்னை உள்ளிட வேண்டும்"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"சுயவிவரங்களுக்கு இடையே மாறும் போது, கடவுச்சொல்லை உள்ளிட வேண்டும்"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"சாதன நிர்வாகி சாதனத்தைப் பூட்டியுள்ளார்"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"பயனர் சாதனத்தைப் பூட்டியுள்ளார்"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> மணிநேரமாகச் சாதனம் திறக்கப்படவில்லை. வடிவத்தை உறுதிப்படுத்தவும்.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> மணிநேரமாகச் சாதனம் திறக்கப்படவில்லை. வடிவத்தை உறுதிப்படுத்தவும்.</item>

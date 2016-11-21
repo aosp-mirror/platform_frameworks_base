@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM kart kilidlənib."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SİM kart PUK ilə kilidlənib."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SİM kartın kilidi açılır..."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Kild açma modeli."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin kilid açması."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Şifrə kilidi."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Model sahəsi."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Sürüşdürmə sahəsi."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN sahəsi"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN sahəsi"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK sahəsi"</string>
@@ -108,17 +103,19 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK əməliyyatı alınmadı!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kod Qəbul Edildi!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Xidmət yoxdur."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Daxiletmə metodu düyməsinə keç"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Daxiletmə metoduna keçin"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Təyyarə rejimi"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Cihaz yeniden başladıqdan sonra qəlib kod tələb olunur"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Cihaz söndürülüb yandırılandan sonra qrafik açar tələb olunur"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Cihaz yeniden başladıqdan sonra PIN tələb olunur"</string>
     <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Cihaz yeniden başladıqdan sonra parol tələb olunur"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Əlavə təhlükəsizlik üçün qəlib tələb olunur"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Əlavə güvənlik üçün qrafik açar gərəkdir"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Əlavə təhlükəsizlik üçün PIN tələb olunur"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Əlavə təhlükəsizlik üçün parol tələb olunur"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Profillər arasında keçid edərkən qəlib kod tələb olunur"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Profillər arasında keçid edərkən qrafik açar tələb olunur"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Profillər arasında keçid edərkən PIN kod tələb olunur"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Profillər arasında keçid edərkən parol tələb olunur"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Cihaz administratoru cihazı kilidlədi"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Cihaz əl ilə kilidləndi"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Cihaz <xliff:g id="NUMBER_1">%d</xliff:g> saat kiliddən çıxarılmayıb. Nümunə kodu təsdiq edin.</item>
       <item quantity="one">Cihaz <xliff:g id="NUMBER_0">%d</xliff:g> saat kiliddən çıxarılmayıb. Nümunə kodu təsdiq edin.</item>

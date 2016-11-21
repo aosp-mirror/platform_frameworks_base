@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"Kartu SIM terkunci."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Kartu SIM terkunci PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Membuka kartu SIM…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Buka kunci dengan pola."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Buka kunci dengan PIN."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Buka kunci dengan sandi."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Area pola."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Area geser."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Bidang PIN"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Bidang PIN SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Bidang PUK SIM"</string>
@@ -108,7 +103,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operasi PUK SIM gagal!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kode Diterima!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Tidak ada layanan."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Tombol beralih metode masukan."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Beralih metode masukan"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Mode pesawat"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Pola diperlukan setelah perangkat dimulai ulang"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"PIN diperlukan setelah perangkat dimulai ulang"</string>
@@ -119,6 +114,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Pola diperlukan jika Anda beralih profil"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"PIN diperlukan jika Anda beralih profil"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Sandi diperlukan jika Anda beralih profil"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Perangkat dikunci oleh administrator"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Perangkat dikunci secara manual"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Perangkat belum dibuka kuncinya selama <xliff:g id="NUMBER_1">%d</xliff:g> jam. Konfirmasi pola.</item>
       <item quantity="one">Perangkat belum dibuka kuncinya selama <xliff:g id="NUMBER_0">%d</xliff:g> jam. Konfirmasi pola.</item>
