@@ -56,14 +56,14 @@ import java.util.Arrays;
  * The class provides access to:
  * <ul>
  * <li>Initialize a Aware cluster (peer-to-peer synchronization). Refer to
- * {@link #attach(Handler, WifiAwareAttachCallback)}.
+ * {@link #attach(WifiAwareAttachCallback, Handler)}.
  * <li>Create discovery sessions (publish or subscribe sessions). Refer to
- * {@link WifiAwareSession#publish(Handler, PublishConfig, WifiAwareDiscoverySessionCallback)} and
- * {@link WifiAwareSession#subscribe(Handler, SubscribeConfig, WifiAwareDiscoverySessionCallback)}.
+ * {@link WifiAwareSession#publish(PublishConfig, WifiAwareDiscoverySessionCallback, Handler)} and
+ * {@link WifiAwareSession#subscribe(SubscribeConfig, WifiAwareDiscoverySessionCallback, Handler)}.
  * <li>Create a Aware network specifier to be used with
  * {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
  * to set-up a Aware connection with a peer. Refer to
- * {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])} and
+ * {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, PeerHandle, byte[])} and
  * {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])}.
  * </ul>
  * <p>
@@ -73,7 +73,7 @@ import java.util.Arrays;
  *     broadcast. Note that this broadcast is not sticky - you should register for it and then
  *     check the above API to avoid a race condition.
  * <p>
- *     An application must use {@link #attach(Handler, WifiAwareAttachCallback)} to initialize a
+ *     An application must use {@link #attach(WifiAwareAttachCallback, Handler)} to initialize a
  *     Aware cluster - before making any other Aware operation. Aware cluster membership is a
  *     device-wide operation - the API guarantees that the device is in a cluster or joins a
  *     Aware cluster (or starts one if none can be found). Information about attach success (or
@@ -86,12 +86,11 @@ import java.util.Arrays;
  *     application detaches.
  * <p>
  *     Once a Aware attach is confirmed use the
- *     {@link WifiAwareSession#publish(Handler, PublishConfig, WifiAwareDiscoverySessionCallback)}
+ *     {@link WifiAwareSession#publish(PublishConfig, WifiAwareDiscoverySessionCallback, Handler)}
  *     or
- *     {@link WifiAwareSession#subscribe(Handler, SubscribeConfig,
- *     WifiAwareDiscoverySessionCallback)}
- *     to create publish or subscribe Aware discovery sessions. Events are called on the provided
- *     callback object {@link WifiAwareDiscoverySessionCallback}. Specifically, the
+ *     {@link WifiAwareSession#subscribe(SubscribeConfig, WifiAwareDiscoverySessionCallback,
+ *     Handler)} to create publish or subscribe Aware discovery sessions. Events are called on the
+ *     provided callback object {@link WifiAwareDiscoverySessionCallback}. Specifically, the
  *     {@link WifiAwareDiscoverySessionCallback#onPublishStarted(WifiAwarePublishDiscoverySession)}
  *     and
  *     {@link WifiAwareDiscoverySessionCallback#onSubscribeStarted(
@@ -102,7 +101,7 @@ import java.util.Arrays;
  *     the session {@link WifiAwarePublishDiscoverySession#updatePublish(PublishConfig)} and
  *     {@link WifiAwareSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}. Sessions can
  *     also be used to send messages using the
- *     {@link WifiAwareDiscoveryBaseSession#sendMessage(Object, int, byte[])} APIs. When an
+ *     {@link WifiAwareDiscoveryBaseSession#sendMessage(PeerHandle, int, byte[])} APIs. When an
  *     application is finished with a discovery session it <b>must</b> terminate it using the
  *     {@link WifiAwareDiscoveryBaseSession#destroy()} API.
  * <p>
@@ -115,7 +114,7 @@ import java.util.Arrays;
  *        {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
  *        <li>{@link NetworkRequest.Builder#setNetworkSpecifier(String)} using
  *        {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])} or
- *        {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])}.
+ *        {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, PeerHandle, byte[])}.
  *    </ul>
  *
  * @hide PROPOSED_AWARE_API
@@ -225,7 +224,7 @@ public class WifiAwareManager {
      * Connection creation role is that of INITIATOR. Used to create a network specifier string
      * when requesting a Aware network.
      *
-     * @see WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])
+     * @see WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, PeerHandle, byte[])
      * @see WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])
      */
     public static final int WIFI_AWARE_DATA_PATH_ROLE_INITIATOR = 0;
@@ -234,7 +233,7 @@ public class WifiAwareManager {
      * Connection creation role is that of RESPONDER. Used to create a network specifier string
      * when requesting a Aware network.
      *
-     * @see WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])
+     * @see WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, PeerHandle, byte[])
      * @see WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])
      */
     public static final int WIFI_AWARE_DATA_PATH_ROLE_RESPONDER = 1;
@@ -326,13 +325,13 @@ public class WifiAwareManager {
      * then this function will simply indicate success immediately using the same {@code
      * attachCallback}.
      *
+     * @param attachCallback A callback for attach events, extended from
+     * {@link WifiAwareAttachCallback}.
      * @param handler The Handler on whose thread to execute the callbacks of the {@code
      * attachCallback} object. If a null is provided then the application's main thread will be
      *                used.
-     * @param attachCallback A callback for attach events, extended from
-     * {@link WifiAwareAttachCallback}.
      */
-    public void attach(@Nullable Handler handler, @NonNull WifiAwareAttachCallback attachCallback) {
+    public void attach(@NonNull WifiAwareAttachCallback attachCallback, @Nullable Handler handler) {
         attach(handler, null, attachCallback, null);
     }
 
@@ -352,20 +351,21 @@ public class WifiAwareManager {
      * on startup and whenever it is updated (it is randomized at regular intervals for privacy).
      * The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
      * permission to execute this attach request. Otherwise, use the
-     * {@link #attach(Handler, WifiAwareAttachCallback)} version. Note that aside from permission
+     * {@link #attach(WifiAwareAttachCallback, Handler)} version. Note that aside from permission
      * requirements this listener will wake up the host at regular intervals causing higher power
      * consumption, do not use it unless the information is necessary (e.g. for OOB discovery).
      *
-     * @param handler The Handler on whose thread to execute the callbacks of the {@code
-     * attachCallback} and {@code identityChangedListener} objects. If a null is provided then the
-     *                application's main thread will be used.
      * @param attachCallback A callback for attach events, extended from
      * {@link WifiAwareAttachCallback}.
      * @param identityChangedListener A listener for changed identity, extended from
      * {@link WifiAwareIdentityChangedListener}.
+     * @param handler The Handler on whose thread to execute the callbacks of the {@code
+     * attachCallback} and {@code identityChangedListener} objects. If a null is provided then the
+     *                application's main thread will be used.
      */
-    public void attach(@Nullable Handler handler, @NonNull WifiAwareAttachCallback attachCallback,
-            @NonNull WifiAwareIdentityChangedListener identityChangedListener) {
+    public void attach(@NonNull WifiAwareAttachCallback attachCallback,
+            @NonNull WifiAwareIdentityChangedListener identityChangedListener,
+            @Nullable Handler handler) {
         attach(handler, null, attachCallback, identityChangedListener);
     }
 
@@ -481,7 +481,7 @@ public class WifiAwareManager {
     }
 
     /** @hide */
-    public void sendMessage(int clientId, int sessionId, Object peerHandle, byte[] message,
+    public void sendMessage(int clientId, int sessionId, PeerHandle peerHandle, byte[] message,
             int messageId, int retryCount) {
         if (peerHandle == null) {
             throw new IllegalArgumentException(
@@ -490,13 +490,13 @@ public class WifiAwareManager {
 
         if (VDBG) {
             Log.v(TAG, "sendMessage(): clientId=" + clientId + ", sessionId=" + sessionId
-                    + ", peerHandle=" + ((OpaquePeerHandle) peerHandle).peerId + ", messageId="
+                    + ", peerHandle=" + peerHandle.peerId + ", messageId="
                     + messageId + ", retryCount=" + retryCount);
         }
 
         try {
-            mService.sendMessage(clientId, sessionId, ((OpaquePeerHandle) peerHandle).peerId,
-                    message, messageId, retryCount);
+            mService.sendMessage(clientId, sessionId, peerHandle.peerId, message, messageId,
+                    retryCount);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -524,12 +524,12 @@ public class WifiAwareManager {
     }
 
     /** @hide */
-    public String createNetworkSpecifier(int clientId, int role, int sessionId, Object peerHandle,
-            byte[] token) {
+    public String createNetworkSpecifier(int clientId, int role, int sessionId,
+            PeerHandle peerHandle, byte[] token) {
         if (VDBG) {
             Log.v(TAG, "createNetworkSpecifier: role=" + role + ", sessionId=" + sessionId
-                    + ", peerHandle=" + ((peerHandle == null) ? peerHandle
-                    : ((OpaquePeerHandle) peerHandle).peerId) + ", token=" + token);
+                    + ", peerHandle=" + ((peerHandle == null) ? peerHandle : peerHandle.peerId)
+                    + ", token=" + token);
         }
 
         int type;
@@ -569,7 +569,7 @@ public class WifiAwareManager {
             json.put(NETWORK_SPECIFIER_KEY_CLIENT_ID, clientId);
             json.put(NETWORK_SPECIFIER_KEY_SESSION_ID, sessionId);
             if (peerHandle != null) {
-                json.put(NETWORK_SPECIFIER_KEY_PEER_ID, ((OpaquePeerHandle) peerHandle).peerId);
+                json.put(NETWORK_SPECIFIER_KEY_PEER_ID, peerHandle.peerId);
             }
             if (token != null) {
                 json.put(NETWORK_SPECIFIER_KEY_TOKEN,
@@ -876,18 +876,18 @@ public class WifiAwareManager {
                             break;
                         case CALLBACK_MATCH:
                             mOriginalCallback.onServiceDiscovered(
-                                    new OpaquePeerHandle(msg.arg1),
+                                    new PeerHandle(msg.arg1),
                                     msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
                                     msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2));
                             break;
                         case CALLBACK_MESSAGE_SEND_SUCCESS:
-                            mOriginalCallback.onMessageSent(msg.arg1);
+                            mOriginalCallback.onMessageSendSucceeded(msg.arg1);
                             break;
                         case CALLBACK_MESSAGE_SEND_FAIL:
                             mOriginalCallback.onMessageSendFailed(msg.arg1);
                             break;
                         case CALLBACK_MESSAGE_RECEIVED:
-                            mOriginalCallback.onMessageReceived(new OpaquePeerHandle(msg.arg1),
+                            mOriginalCallback.onMessageReceived(new PeerHandle(msg.arg1),
                                     (byte[]) msg.obj);
                             break;
                     }
@@ -1019,12 +1019,14 @@ public class WifiAwareManager {
         }
     }
 
-    /** @hide */
-    public static class OpaquePeerHandle {
-        public OpaquePeerHandle(int peerId) {
+    /** @hide PROPOSED_AWARE_API */
+    public static class PeerHandle {
+        /** @hide */
+        public PeerHandle(int peerId) {
             this.peerId = peerId;
         }
 
+        /** @hide */
         public int peerId;
     }
 }
