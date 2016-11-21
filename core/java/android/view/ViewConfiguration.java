@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.TestApi;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -228,6 +229,29 @@ public class ViewConfiguration {
      * Default duration to hide an action mode for.
      */
     private static final long ACTION_MODE_HIDE_DURATION_DEFAULT = 2000;
+
+    /**
+     * Defines the duration in milliseconds before an end of a long press causes a tooltip to be
+     * hidden.
+     */
+    private static final int LONG_PRESS_TOOLTIP_HIDE_TIMEOUT = 1500;
+
+    /**
+     * Defines the duration in milliseconds before a hover event causes a tooltip to be shown.
+     */
+    private static final int HOVER_TOOLTIP_SHOW_TIMEOUT = 500;
+
+    /**
+     * Defines the duration in milliseconds before mouse inactivity causes a tooltip to be hidden.
+     * (default variant to be used when {@link View#SYSTEM_UI_FLAG_LOW_PROFILE} is not set).
+     */
+    private static final int HOVER_TOOLTIP_HIDE_TIMEOUT = 15000;
+
+    /**
+     * Defines the duration in milliseconds before mouse inactivity causes a tooltip to be hidden
+     * (short version to be used when {@link View#SYSTEM_UI_FLAG_LOW_PROFILE} is set).
+     */
+    private static final int HOVER_TOOLTIP_HIDE_SHORT_TIMEOUT = 3000;
 
     /**
      * Configuration values for overriding {@link #hasPermanentMenuKey()} behavior.
@@ -799,5 +823,44 @@ public class ViewConfiguration {
      */
     public boolean isFadingMarqueeEnabled() {
         return mFadingMarqueeEnabled;
+    }
+
+    /**
+     * @return the duration in milliseconds before an end of a long press causes a tooltip to be
+     * hidden
+     * @hide
+     */
+    @TestApi
+    public static int getLongPressTooltipHideTimeout() {
+        return LONG_PRESS_TOOLTIP_HIDE_TIMEOUT;
+    }
+
+    /**
+     * @return the duration in milliseconds before a hover event causes a tooltip to be shown
+     * @hide
+     */
+    @TestApi
+    public static int getHoverTooltipShowTimeout() {
+        return HOVER_TOOLTIP_SHOW_TIMEOUT;
+    }
+
+    /**
+     * @return the duration in milliseconds before mouse inactivity causes a tooltip to be hidden
+     * (default variant to be used when {@link View#SYSTEM_UI_FLAG_LOW_PROFILE} is not set).
+     * @hide
+     */
+    @TestApi
+    public static int getHoverTooltipHideTimeout() {
+        return HOVER_TOOLTIP_HIDE_TIMEOUT;
+    }
+
+    /**
+     * @return the duration in milliseconds before mouse inactivity causes a tooltip to be hidden
+     * (shorter variant to be used when {@link View#SYSTEM_UI_FLAG_LOW_PROFILE} is set).
+     * @hide
+     */
+    @TestApi
+    public static int getHoverTooltipHideShortTimeout() {
+        return HOVER_TOOLTIP_HIDE_SHORT_TIMEOUT;
     }
 }

@@ -435,6 +435,8 @@
   <java-symbol type="dimen" name="search_view_preferred_height" />
   <java-symbol type="dimen" name="textview_error_popup_default_width" />
   <java-symbol type="dimen" name="toast_y_offset" />
+  <java-symbol type="dimen" name="tooltip_precise_anchor_threshold" />
+  <java-symbol type="dimen" name="tooltip_y_offset" />
   <java-symbol type="dimen" name="action_bar_stacked_max_height" />
   <java-symbol type="dimen" name="action_bar_stacked_tab_max_width" />
   <java-symbol type="dimen" name="notification_text_size" />
@@ -1123,6 +1125,7 @@
   <java-symbol type="string" name="demo_starting_message" />
   <java-symbol type="string" name="demo_restarting_message" />
   <java-symbol type="string" name="conference_call" />
+  <java-symbol type="string" name="tooltip_popup_title" />
 
 
   <java-symbol type="plurals" name="bugreport_countdown" />
@@ -1373,6 +1376,7 @@
   <java-symbol type="layout" name="textview_hint" />
   <java-symbol type="layout" name="time_picker_legacy" />
   <java-symbol type="layout" name="time_picker_dialog" />
+  <java-symbol type="layout" name="tooltip" />
   <java-symbol type="layout" name="transient_notification" />
   <java-symbol type="layout" name="voice_interaction_session" />
   <java-symbol type="layout" name="web_text_view_dropdown" />
@@ -1423,6 +1427,7 @@
   <java-symbol type="style" name="Animation.DropDownUp" />
   <java-symbol type="style" name="Animation.DropDownDown" />
   <java-symbol type="style" name="Animation.PopupWindow" />
+  <java-symbol type="style" name="Animation.Tooltip" />
   <java-symbol type="style" name="Animation.TypingFilter" />
   <java-symbol type="style" name="Animation.TypingFilterRestore" />
   <java-symbol type="style" name="Animation.Dream" />

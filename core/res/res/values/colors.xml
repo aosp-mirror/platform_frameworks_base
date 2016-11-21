@@ -186,4 +186,7 @@
 
     <color name="resize_shadow_start_color">#2a000000</color>
     <color name="resize_shadow_end_color">#00000000</color>
+
+    <color name="tooltip_background_dark">#e6616161</color>
+    <color name="tooltip_background_light">#e6FFFFFF</color>
 </resources>

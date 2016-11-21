@@ -159,6 +159,11 @@ please see styles_device_defaults.xml.
         <item name="windowExitAnimation">@anim/toast_exit</item>
     </style>
 
+    <style name="Animation.Tooltip">
+        <item name="windowEnterAnimation">@anim/tooltip_enter</item>
+        <item name="windowExitAnimation">@anim/tooltip_exit</item>
+    </style>
+
     <style name="Animation.DropDownDown">
         <item name="windowEnterAnimation">@anim/grow_fade_in</item>
         <item name="windowExitAnimation">@anim/shrink_fade_out</item>
@@ -948,6 +953,11 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Toast">
         <item name="fontFamily">sans-serif-condensed</item>
+    </style>
+
+    <style name="TextAppearance.Tooltip">
+        <item name="fontFamily">sans-serif</item>
+        <item name="textSize">14sp</item>
     </style>
 
     <style name="Widget.ActivityChooserView">
