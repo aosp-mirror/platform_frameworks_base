@@ -109,13 +109,13 @@ public final class MediaBrowser {
     private IMediaBrowserServiceCallbacks mServiceCallbacks;
 
     /**
-     * Creates a media browser for the specified media browse service.
+     * Creates a media browser for the specified media browser service.
      *
      * @param context The context.
-     * @param serviceComponent The component name of the media browse service.
+     * @param serviceComponent The component name of the media browser service.
      * @param callback The connection callback.
      * @param rootHints An optional bundle of service-specific arguments to send
-     * to the media browse service when connecting and retrieving the root id
+     * to the media browser service when connecting and retrieving the root id
      * for browsing, or null if none. The contents of this bundle may affect
      * the information returned when browsing.
      * @see android.service.media.MediaBrowserService.BrowserRoot#EXTRA_RECENT
@@ -140,7 +140,7 @@ public final class MediaBrowser {
     }
 
     /**
-     * Connects to the media browse service.
+     * Connects to the media browser service.
      * <p>
      * The connection callback specified in the constructor will be invoked
      * when the connection completes or fails.
@@ -206,7 +206,7 @@ public final class MediaBrowser {
     }
 
     /**
-     * Disconnects from the media browse service.
+     * Disconnects from the media browser service.
      * After this, no more callbacks will be received.
      */
     public void disconnect() {
@@ -362,7 +362,7 @@ public final class MediaBrowser {
      *
      * @param parentId The id of the parent media item whose list of children
      *            will be subscribed.
-     * @param options A bundle of service-specific arguments to send to the media
+     * @param options The bundle of service-specific arguments to send to the media
      *            browse service. The contents of this bundle may affect the
      *            information returned when browsing.
      * @param callback The callback to receive the list of children.
@@ -370,7 +370,7 @@ public final class MediaBrowser {
     public void subscribe(@NonNull String parentId, @NonNull Bundle options,
             @NonNull SubscriptionCallback callback) {
         if (options == null) {
-            throw new IllegalArgumentException("options are null");
+            throw new IllegalArgumentException("options cannot be null");
         }
         subscribeInternal(parentId, new Bundle(options), callback);
     }
@@ -398,11 +398,11 @@ public final class MediaBrowser {
      *
      * @param parentId The id of the parent media item whose list of children
      *            will be unsubscribed.
-     * @param callback A callback sent to the media browse service to subscribe.
+     * @param callback A callback sent to the media browser service to subscribe.
      */
     public void unsubscribe(@NonNull String parentId, @NonNull SubscriptionCallback callback) {
         if (callback == null) {
-            throw new IllegalArgumentException("callback is null");
+            throw new IllegalArgumentException("callback cannot be null");
         }
         unsubscribeInternal(parentId, callback);
     }
@@ -417,10 +417,10 @@ public final class MediaBrowser {
      */
     public void getItem(final @NonNull String mediaId, @NonNull final ItemCallback cb) {
         if (TextUtils.isEmpty(mediaId)) {
-            throw new IllegalArgumentException("mediaId is empty.");
+            throw new IllegalArgumentException("mediaId cannot be empty.");
         }
         if (cb == null) {
-            throw new IllegalArgumentException("cb is null.");
+            throw new IllegalArgumentException("cb cannot be null.");
         }
         if (mState != CONNECT_STATE_CONNECTED) {
             Log.i(TAG, "Not connected, unable to retrieve the MediaItem.");
@@ -451,7 +451,7 @@ public final class MediaBrowser {
         try {
             mServiceBinder.getMediaItem(mediaId, receiver, mServiceCallbacks);
         } catch (RemoteException e) {
-            Log.i(TAG, "Remote error getting media item.");
+            Log.i(TAG, "Remote error getting media item.", e);
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -461,13 +461,74 @@ public final class MediaBrowser {
         }
     }
 
+    /**
+     * Searches {@link MediaItem media items} from the connected service. Not
+     * all services may support this, and {@link SearchCallback#onError} will be
+     * called if not implemented.
+     *
+     * @param query The search query that contains keywords separated by space. Should not be
+     *            an empty string.
+     * @param extras The bundle of service-specific arguments to send to the media browser
+     *            service. The contents of this bundle may affect the search result.
+     * @param callback The callback to receive the search result.
+     */
+    public void search(@NonNull final String query, final Bundle extras, SearchCallback callback) {
+        if (TextUtils.isEmpty(query)) {
+            throw new IllegalArgumentException("query cannot be empty.");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null.");
+        }
+        if (mState != CONNECT_STATE_CONNECTED) {
+            Log.i(TAG, "Not connected, unable to search.");
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onError(query, extras);
+                }
+            });
+            return;
+        }
+        ResultReceiver receiver = new ResultReceiver(mHandler) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                if (resultCode != 0 || resultData == null
+                        || !resultData.containsKey(MediaBrowserService.KEY_SEARCH_RESULTS)) {
+                    callback.onError(query, extras);
+                    return;
+                }
+                Parcelable[] items = resultData.getParcelableArray(
+                        MediaBrowserService.KEY_SEARCH_RESULTS);
+                List<MediaItem> results = null;
+                if (items != null) {
+                    results = new ArrayList<>();
+                    for (Parcelable item : items) {
+                        results.add((MediaItem) item);
+                    }
+                }
+                callback.onSearchResult(query, extras, results);
+            }
+        };
+        try {
+            mServiceBinder.search(query, extras, receiver, mServiceCallbacks);
+        } catch (RemoteException e) {
+            Log.i(TAG, "Remote error getting media item.", e);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onError(query, extras);
+                }
+            });
+        }
+    }
+
     private void subscribeInternal(String parentId, Bundle options, SubscriptionCallback callback) {
         // Check arguments.
         if (TextUtils.isEmpty(parentId)) {
-            throw new IllegalArgumentException("parentId is empty.");
+            throw new IllegalArgumentException("parentId cannot be empty.");
         }
         if (callback == null) {
-            throw new IllegalArgumentException("callback is null");
+            throw new IllegalArgumentException("callback cannot be null");
         }
         // Update or create the subscription.
         Subscription sub = mSubscriptions.get(parentId);
@@ -497,7 +558,7 @@ public final class MediaBrowser {
     private void unsubscribeInternal(String parentId, SubscriptionCallback callback) {
         // Check arguments.
         if (TextUtils.isEmpty(parentId)) {
-            throw new IllegalArgumentException("parentId is empty.");
+            throw new IllegalArgumentException("parentId cannot be empty.");
         }
 
         Subscription sub = mSubscriptions.get(parentId);
@@ -712,7 +773,9 @@ public final class MediaBrowser {
     }
 
     /**
-     * A class with information on a single media item for use in browsing media.
+     * A class with information on a single media item for use in browsing/searching media.
+     * MediaItems are application dependent so we cannot guarantee that they contain the
+     * right values.
      */
     public static class MediaItem implements Parcelable {
         private final int mFlags;
@@ -830,7 +893,7 @@ public final class MediaBrowser {
          * Returns the media id in the {@link MediaDescription} for this item.
          * @see android.media.MediaMetadata#METADATA_KEY_MEDIA_ID
          */
-        public @NonNull String getMediaId() {
+        public @Nullable String getMediaId() {
             return mDescription.getMediaId();
         }
     }
@@ -882,7 +945,7 @@ public final class MediaBrowser {
          *
          * @param parentId The media id of the parent media item.
          * @param children The children which were loaded.
-         * @param options A bundle of service-specific arguments sent to the media
+         * @param options The bundle of service-specific arguments sent to the media
          *            browse service. The contents of this bundle may affect the
          *            information returned when browsing.
          */
@@ -912,8 +975,8 @@ public final class MediaBrowser {
          *
          * @param parentId The media id of the parent media item whose children could
          *            not be loaded.
-         * @param options A bundle of service-specific arguments sent to the media
-         *            browse service.
+         * @param options The bundle of service-specific arguments sent to the media
+         *            browser service.
          */
         public void onError(@NonNull String parentId, @NonNull Bundle options) {
         }
@@ -924,7 +987,7 @@ public final class MediaBrowser {
      */
     public static abstract class ItemCallback {
         /**
-         * Called when the item has been returned by the browser service.
+         * Called when the item has been returned by the connected service.
          *
          * @param item The item that was returned or null if it doesn't exist.
          */
@@ -932,11 +995,38 @@ public final class MediaBrowser {
         }
 
         /**
-         * Called when the item doesn't exist or there was an error retrieving it.
+         * Called there was an error retrieving it or the connected service doesn't support
+         * {@link #getItem}.
          *
-         * @param itemId The media id of the media item which could not be loaded.
+         * @param mediaId The media id of the media item which could not be loaded.
          */
-        public void onError(@NonNull String itemId) {
+        public void onError(@NonNull String mediaId) {
+        }
+    }
+
+    /**
+     * Callback for receiving the result of {@link #search}.
+     */
+    public static abstract class SearchCallback {
+        /**
+         * Called when the {@link #search} finished successfully.
+         *
+         * @param query The search query sent for the search request to the connected service.
+         * @param extras The bundle of service-specific arguments sent to the connected service.
+         * @param items The list of media items which contains the search result.
+         */
+        public void onSearchResult(@NonNull String query, Bundle extras,
+                @NonNull List<MediaItem> items) {
+        }
+
+        /**
+         * Called when an error happens while {@link #search} or the connected service doesn't
+         * support {@link #search}.
+         *
+         * @param query The search query sent for the search request to the connected service.
+         * @param extras The bundle of service-specific arguments sent to the connected service.
+         */
+        public void onError(@NonNull String query, Bundle extras) {
         }
     }
 
