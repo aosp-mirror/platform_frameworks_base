@@ -34,6 +34,9 @@ using Brightness = ::android::hardware::light::V2_0::Brightness;
 using Flash      = ::android::hardware::light::V2_0::Flash;
 using Type       = ::android::hardware::light::V2_0::Type;
 using LightState = ::android::hardware::light::V2_0::LightState;
+using Status     = ::android::hardware::light::V2_0::Status;
+template<typename T>
+using Return     = ::android::hardware::Return<T>;
 
 static sp<ILight> gLight;
 
@@ -108,9 +111,33 @@ static void setLight_native(
 
     state.brightnessMode = brightness;
 
+    Status status;
+
     {
         ALOGD_IF_SLOW(50, "Excessive delay setting light");
-        gLight->setLight(type, state);
+        Return<Status> ret = gLight->setLight(type, state);
+
+        // TODO(b/31348667): this is transport specific status
+        if (!ret.getStatus().isOk()) {
+            ALOGE("Failed to issue set light command.");
+            return;
+        }
+
+        status = static_cast<Status>(ret); // hal status
+    }
+
+    switch (status) {
+        case Status::SUCCESS:
+            break;
+        case Status::LIGHT_NOT_SUPPORTED:
+            ALOGE("Light requested not availale on this device.");
+            break;
+        case Status::BRIGHTNESS_NOT_SUPPORTED:
+            ALOGE("Brightness parameter not supported on this device.");
+            break;
+        case Status::UNKNOWN:
+        default:
+            ALOGE("Unknown error setting light.");
     }
 }
 
