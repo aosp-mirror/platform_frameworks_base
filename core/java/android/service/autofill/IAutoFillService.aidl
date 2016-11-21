@@ -25,7 +25,7 @@ import com.android.internal.os.IResultReceiver;
  * @hide
  */
 interface IAutoFillService {
-    void onConnected();
-    void onDisconnected();
+    oneway void onConnected();
+    oneway void onDisconnected();
     IResultReceiver getAssistReceiver();
 }

@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @hide
  */
-interface IAutoFillCallback {
+oneway interface IAutoFillCallback {
     void autofill(in List values);
     void showError(String message);
 }

@@ -23,7 +23,7 @@ import android.os.Bundle;
  *
  * {@hide}
  */
-interface IAutoFillManagerService {
+oneway interface IAutoFillManagerService {
 
     /**
      * Request auto-fill on the top activity of a given user.
