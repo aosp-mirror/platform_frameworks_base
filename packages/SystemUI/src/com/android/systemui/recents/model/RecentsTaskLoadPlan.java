@@ -104,8 +104,8 @@ public class RecentsTaskLoadPlan {
         int currentUserId = UserHandle.USER_CURRENT;
         updateCurrentQuietProfilesCache(currentUserId);
         SystemServicesProxy ssp = Recents.getSystemServices();
-        mRawTasks = new ArrayList<>(ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
-                currentUserId, includeFrontMostExcludedTask, mCurrentQuietProfiles));
+        mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
+                currentUserId, includeFrontMostExcludedTask, mCurrentQuietProfiles);
 
         // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
         Collections.reverse(mRawTasks);
