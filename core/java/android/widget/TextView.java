@@ -76,6 +76,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.StaticLayout;
+import android.text.TextAssistant;
 import android.text.TextDirectionHeuristic;
 import android.text.TextDirectionHeuristics;
 import android.text.TextPaint;
@@ -9817,6 +9818,35 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public ActionMode.Callback getCustomInsertionActionModeCallback() {
         return mEditor == null ? null : mEditor.mCustomInsertionActionModeCallback;
+    }
+
+    private TextAssistant mTextAssistant;
+
+    /**
+     * Sets the {@link TextAssistant} for this TextView.
+     * If null, this TextView uses the default TextAssistant which comes from the Activity.
+     */
+    public void setTextAssistant(TextAssistant textAssistant) {
+        mTextAssistant = textAssistant;
+    }
+
+    /**
+     * Returns the {@link TextAssistant} used by this TextView.
+     * If no TextAssistant is set, it'll use the one from this TextView's {@link Activity} or
+     * {@link Context}. If no TextAssistant is found, it'll use a no-op TextAssistant.
+     */
+    public TextAssistant getTextAssistant() {
+        if (mTextAssistant != null) {
+            return mTextAssistant;
+        }
+        if (mContext instanceof Activity) {
+            mTextAssistant = ((Activity) mContext).getTextAssistant();
+        } else {
+            // The context of this TextView should be an Activity. If it is not and no
+            // text assistant has been set, return a NO_OP TextAssistant.
+            mTextAssistant = TextAssistant.NO_OP;
+        }
+        return  mTextAssistant;
     }
 
     /**

@@ -60,6 +60,8 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.StaticLayout;
+import android.text.TextClassification;
+import android.text.TextSelection;
 import android.text.TextUtils;
 import android.text.method.KeyListener;
 import android.text.method.MetaKeyKeyListener;
@@ -147,16 +149,17 @@ public class Editor {
     private static final String UNDO_OWNER_TAG = "Editor";
 
     // Ordering constants used to place the Action Mode or context menu items in their menu.
-    private static final int MENU_ITEM_ORDER_UNDO = 1;
-    private static final int MENU_ITEM_ORDER_REDO = 2;
-    private static final int MENU_ITEM_ORDER_CUT = 3;
-    private static final int MENU_ITEM_ORDER_COPY = 4;
-    private static final int MENU_ITEM_ORDER_PASTE = 5;
-    private static final int MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 6;
-    private static final int MENU_ITEM_ORDER_SHARE = 7;
-    private static final int MENU_ITEM_ORDER_SELECT_ALL = 8;
-    private static final int MENU_ITEM_ORDER_REPLACE = 9;
-    private static final int MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 10;
+    // Reserve 1 for the app that the ASSIST logic suggests as the best app to handle the selection.
+    private static final int MENU_ITEM_ORDER_UNDO = 2;
+    private static final int MENU_ITEM_ORDER_REDO = 3;
+    private static final int MENU_ITEM_ORDER_SHARE = 4;
+    private static final int MENU_ITEM_ORDER_CUT = 5;
+    private static final int MENU_ITEM_ORDER_COPY = 6;
+    private static final int MENU_ITEM_ORDER_PASTE = 7;
+    private static final int MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 8;
+    private static final int MENU_ITEM_ORDER_SELECT_ALL = 9;
+    private static final int MENU_ITEM_ORDER_REPLACE = 10;
+    private static final int MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 11;
 
     // Each Editor manages its own undo stack.
     private final UndoManager mUndoManager = new UndoManager();
@@ -3767,10 +3770,12 @@ public class Editor {
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            TextClassification textClassification = updateSelectionWithTextAssistant();
+
             mode.setTitle(null);
             mode.setSubtitle(null);
             mode.setTitleOptionalHint(true);
-            populateMenuWithItems(menu);
+            populateMenuWithItems(menu, textClassification);
 
             Callback customCallback = getCustomCallback();
             if (customCallback != null) {
@@ -3796,13 +3801,30 @@ public class Editor {
             }
         }
 
+        private TextClassification updateSelectionWithTextAssistant() {
+            // Trim the text so that only text necessary to provide context of the selected text is
+            // sent to the assistant.
+            CharSequence trimmedText = mTextView.getText();
+            int textLength = mTextView.getText().length();
+            int trimStartIndex = 0;
+            int startIndex = mTextView.getSelectionStart() - trimStartIndex;
+            int endIndex = mTextView.getSelectionEnd() - trimStartIndex;
+            TextSelection textSelection = mTextView.getTextAssistant()
+                    .suggestSelection(trimmedText, startIndex, endIndex);
+            Selection.setSelection(
+                    (Spannable) mTextView.getText(),
+                    Math.max(0, textSelection.getSelectionStartIndex() + trimStartIndex),
+                    Math.min(textLength, textSelection.getSelectionEndIndex() + trimStartIndex));
+            return textSelection.getTextClassification();
+        }
+
         private Callback getCustomCallback() {
             return mHasSelection
                     ? mCustomSelectionActionModeCallback
                     : mCustomInsertionActionModeCallback;
         }
 
-        private void populateMenuWithItems(Menu menu) {
+        private void populateMenuWithItems(Menu menu, TextClassification textClassification) {
             if (mTextView.canCut()) {
                 menu.add(Menu.NONE, TextView.ID_CUT, MENU_ITEM_ORDER_CUT,
                         com.android.internal.R.string.cut)
@@ -3827,11 +3849,12 @@ public class Editor {
             if (mTextView.canShare()) {
                 menu.add(Menu.NONE, TextView.ID_SHARE, MENU_ITEM_ORDER_SHARE,
                         com.android.internal.R.string.share)
-                                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             }
 
             updateSelectAllItem(menu);
             updateReplaceItem(menu);
+            updateAssistMenuItem(menu, textClassification);
         }
 
         @Override
@@ -3868,6 +3891,12 @@ public class Editor {
             } else if (!canReplace && replaceItemExists) {
                 menu.removeItem(TextView.ID_REPLACE);
             }
+        }
+
+        private void updateAssistMenuItem(Menu menu, TextClassification textClassification) {
+            // TODO: Find the best app available to handle the selected text based on information in
+            // the TextClassification object.
+            // Add app icon + intent to trigger app to the menu.
         }
 
         @Override
