@@ -1487,6 +1487,8 @@ RENDERTHREAD_TEST(FrameBuilder, buildLayer) {
     *layerHandle = nullptr;
 }
 
+namespace {
+
 static void drawOrderedRect(Canvas* canvas, uint8_t expectedDrawOrder) {
     SkPaint paint;
     // order put in blue channel, transparent so overlapped content doesn't get rejected
@@ -1502,15 +1504,30 @@ static void drawOrderedNode(Canvas* canvas, uint8_t expectedDrawOrder, float z) 
     node->setPropertyFieldsDirty(RenderNode::TRANSLATION_Z);
     canvas->drawRenderNode(node.get()); // canvas takes reference/sole ownership
 }
-RENDERTHREAD_TEST(FrameBuilder, zReorder) {
-    class ZReorderTestRenderer : public TestRendererBase {
-    public:
-        void onRectOp(const RectOp& op, const BakedOpState& state) override {
-            int expectedOrder = SkColorGetB(op.paint->getColor()); // extract order from blue channel
-            EXPECT_EQ(expectedOrder, mIndex++) << "An op was drawn out of order";
-        }
-    };
 
+static void drawOrderedNode(Canvas* canvas, uint8_t expectedDrawOrder,
+        std::function<void(RenderProperties& props, RecordingCanvas& canvas)> setup) {
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [expectedDrawOrder, setup](RenderProperties& props, RecordingCanvas& canvas) {
+        drawOrderedRect(&canvas, expectedDrawOrder);
+        if (setup) {
+             setup(props, canvas);
+        }
+    });
+    canvas->drawRenderNode(node.get()); // canvas takes reference/sole ownership
+}
+
+class ZReorderTestRenderer : public TestRendererBase {
+public:
+    void onRectOp(const RectOp& op, const BakedOpState& state) override {
+        int expectedOrder = SkColorGetB(op.paint->getColor()); // extract order from blue channel
+        EXPECT_EQ(expectedOrder, mIndex++) << "An op was drawn out of order";
+    }
+};
+
+} // end anonymous namespace
+
+RENDERTHREAD_TEST(FrameBuilder, zReorder) {
     auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         drawOrderedNode(&canvas, 0, 10.0f); // in reorder=false at this point, so played inorder
@@ -2236,6 +2253,350 @@ RENDERTHREAD_TEST(FrameBuilder, clip_replace) {
     ClipReplaceTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(1, renderer.getIndex());
+}
+
+TEST(FrameBuilder, projectionReorderProjectedInMiddle) {
+    /* R is backward projected on B
+                A
+               / \
+              B   C
+                  |
+                  R
+    */
+    auto nodeA = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, RecordingCanvas& canvas) {
+            props.setProjectionReceiver(true);
+        } ); //nodeB
+        drawOrderedNode(&canvas, 2, [](RenderProperties& props, RecordingCanvas& canvas) {
+            drawOrderedNode(&canvas, 1, [](RenderProperties& props, RecordingCanvas& canvas) {
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeC
+    }); //nodeA
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(nodeA));
+
+    ZReorderTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(3, renderer.getIndex());
+}
+
+TEST(FrameBuilder, projectionReorderProjectLast) {
+    /* R is backward projected on E
+                  A
+                / | \
+               /  |  \
+              B   C   E
+                  |
+                  R
+    */
+    auto nodeA = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0,  nullptr); //nodeB
+        drawOrderedNode(&canvas, 1, [](RenderProperties& props, RecordingCanvas& canvas) {
+            drawOrderedNode(&canvas, 3, [](RenderProperties& props, RecordingCanvas& canvas) { //drawn as 2
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeC
+        drawOrderedNode(&canvas, 2, [](RenderProperties& props, RecordingCanvas& canvas) { //drawn as 3
+            props.setProjectionReceiver(true);
+        } ); //nodeE
+    }); //nodeA
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(nodeA));
+
+    ZReorderTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(4, renderer.getIndex());
+}
+
+TEST(FrameBuilder, projectionReorderNoReceivable) {
+    /* R is backward projected without receiver
+                A
+               / \
+              B   C
+                  |
+                  R
+    */
+     auto nodeA = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, nullptr); //nodeB
+        drawOrderedNode(&canvas, 1, [](RenderProperties& props, RecordingCanvas& canvas) {
+            drawOrderedNode(&canvas, 255,  [](RenderProperties& props, RecordingCanvas& canvas) {
+                //not having a projection receiver is an undefined behavior
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeC
+    }); //nodeA
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(nodeA));
+
+    ZReorderTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(2, renderer.getIndex());
+}
+
+TEST(FrameBuilder, projectionReorderParentReceivable) {
+    /* R is backward projected on C
+                A
+               / \
+              B   C
+                  |
+                  R
+    */
+     auto nodeA = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, nullptr); //nodeB
+        drawOrderedNode(&canvas, 1, [](RenderProperties& props, RecordingCanvas& canvas) {
+            props.setProjectionReceiver(true);
+            drawOrderedNode(&canvas, 2, [](RenderProperties& props, RecordingCanvas& canvas) {
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeC
+    }); //nodeA
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(nodeA));
+
+    ZReorderTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(3, renderer.getIndex());
+}
+
+TEST(FrameBuilder, projectionReorderSameNodeReceivable) {
+     auto nodeA = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, nullptr); //nodeB
+        drawOrderedNode(&canvas, 1, [](RenderProperties& props, RecordingCanvas& canvas) {
+            drawOrderedNode(&canvas, 255, [](RenderProperties& props, RecordingCanvas& canvas) {
+                //having a node that is projected on itself is an undefined/unexpected behavior
+                props.setProjectionReceiver(true);
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeC
+    }); //nodeA
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(nodeA));
+
+    ZReorderTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(2, renderer.getIndex());
+}
+
+TEST(FrameBuilder, projectionReorderProjectedSibling) {
+    //TODO: this test together with the next "projectionReorderProjectedSibling2" likely expose a
+    //bug in HWUI. First test draws R, while the second test does not draw R for a nearly identical
+    //tree setup. The correct behaviour is to not draw R, because the receiver cannot be a sibling
+    /* R is backward projected on B. R is not expected to be drawn (see Sibling2 outcome below),
+       but for some reason it is drawn.
+                A
+               /|\
+              / | \
+             B  C  R
+    */
+    auto nodeA = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, RecordingCanvas& canvas) {
+            props.setProjectionReceiver(true);
+        } ); //nodeB
+        drawOrderedNode(&canvas, 2, [](RenderProperties& props, RecordingCanvas& canvas) {
+        } ); //nodeC
+        drawOrderedNode(&canvas, 1, [](RenderProperties& props, RecordingCanvas& canvas) {
+            props.setProjectBackwards(true);
+            props.setClipToBounds(false);
+        } ); //nodeR
+    }); //nodeA
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(nodeA));
+
+    ZReorderTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(3, renderer.getIndex());
+}
+
+TEST(FrameBuilder, projectionReorderProjectedSibling2) {
+    /* R is set to project on B, but R is not drawn because projecting on a sibling is not allowed.
+                A
+                |
+                G
+               /|\
+              / | \
+             B  C  R
+    */
+    auto nodeA = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, RecordingCanvas& canvas) { //G
+            drawOrderedNode(&canvas, 1, [](RenderProperties& props, RecordingCanvas& canvas) { //B
+                props.setProjectionReceiver(true);
+            } ); //nodeB
+            drawOrderedNode(&canvas, 2, [](RenderProperties& props, RecordingCanvas& canvas) { //C
+            } ); //nodeC
+            drawOrderedNode(&canvas, 255, [](RenderProperties& props, RecordingCanvas& canvas) { //R
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeG
+    }); //nodeA
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(nodeA));
+
+    ZReorderTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(3, renderer.getIndex());
+}
+
+TEST(FrameBuilder, projectionReorderGrandparentReceivable) {
+    /* R is backward projected on B
+                A
+                |
+                B
+                |
+                C
+                |
+                R
+    */
+    auto nodeA = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, RecordingCanvas& canvas) {
+            props.setProjectionReceiver(true);
+            drawOrderedNode(&canvas, 1, [](RenderProperties& props, RecordingCanvas& canvas) {
+                drawOrderedNode(&canvas, 2, [](RenderProperties& props, RecordingCanvas& canvas) {
+                    props.setProjectBackwards(true);
+                    props.setClipToBounds(false);
+                } ); //nodeR
+            } ); //nodeC
+        } ); //nodeB
+    }); //nodeA
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(nodeA));
+
+    ZReorderTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(3, renderer.getIndex());
+}
+
+TEST(FrameBuilder, projectionReorderTwoReceivables) {
+    /* B and G are receivables, R is backward projected
+                A
+               / \
+              B   C
+                 / \
+                G   R
+    */
+    auto nodeA = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, RecordingCanvas& canvas) { //B
+            props.setProjectionReceiver(true);
+        } ); //nodeB
+        drawOrderedNode(&canvas, 2, [](RenderProperties& props, RecordingCanvas& canvas) { //C
+            drawOrderedNode(&canvas, 3, [](RenderProperties& props, RecordingCanvas& canvas) { //G
+                props.setProjectionReceiver(true);
+            } ); //nodeG
+            drawOrderedNode(&canvas, 1, [](RenderProperties& props, RecordingCanvas& canvas) { //R
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeR
+        } ); //nodeC
+    }); //nodeA
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(nodeA));
+
+    ZReorderTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(4, renderer.getIndex());
+}
+
+TEST(FrameBuilder, projectionReorderTwoReceivablesLikelyScenario) {
+    /* B and G are receivables, G is backward projected
+                A
+               / \
+              B   C
+                 / \
+                G   R
+    */
+    auto nodeA = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, RecordingCanvas& canvas) { //B
+            props.setProjectionReceiver(true);
+        } ); //nodeB
+        drawOrderedNode(&canvas, 2, [](RenderProperties& props, RecordingCanvas& canvas) { //C
+            drawOrderedNode(&canvas, 1, [](RenderProperties& props, RecordingCanvas& canvas) { //G
+                props.setProjectionReceiver(true);
+                props.setProjectBackwards(true);
+                props.setClipToBounds(false);
+            } ); //nodeG
+            drawOrderedNode(&canvas, 3, [](RenderProperties& props, RecordingCanvas& canvas) { //R
+            } ); //nodeR
+        } ); //nodeC
+    }); //nodeA
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(nodeA));
+
+    ZReorderTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(4, renderer.getIndex());
+}
+
+TEST(FrameBuilder, projectionReorderTwoReceivablesDeeper) {
+    /* B and G are receivables, R is backward projected
+                A
+               / \
+              B   C
+                 / \
+                G   D
+                    |
+                    R
+    */
+    auto nodeA = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, [](RenderProperties& props, RecordingCanvas& canvas) { //B
+            props.setProjectionReceiver(true);
+        } ); //nodeB
+        drawOrderedNode(&canvas, 1, [](RenderProperties& props, RecordingCanvas& canvas) { //C
+            drawOrderedNode(&canvas, 2, [](RenderProperties& props, RecordingCanvas& canvas) { //G
+                props.setProjectionReceiver(true);
+            } ); //nodeG
+            drawOrderedNode(&canvas, 4, [](RenderProperties& props, RecordingCanvas& canvas) { //D
+                drawOrderedNode(&canvas, 3, [](RenderProperties& props, RecordingCanvas& canvas) { //R
+                    props.setProjectBackwards(true);
+                    props.setClipToBounds(false);
+                } ); //nodeR
+            } ); //nodeD
+        } ); //nodeC
+    }); //nodeA
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(nodeA));
+
+    ZReorderTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(5, renderer.getIndex());
 }
 
 } // namespace uirenderer

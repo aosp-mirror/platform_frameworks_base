@@ -64,14 +64,29 @@ bool SkiaDisplayList::prepareListAndChildren(TreeInfo& info, bool functorsNeedLa
         info.canvasContext.unpinImages();
     }
 
+    bool hasBackwardProjectedNodesHere = false;
+    bool hasBackwardProjectedNodesSubtree= false;
+
     for (auto& child : mChildNodes) {
+        hasBackwardProjectedNodesHere |= child.getNodeProperties().getProjectBackwards();
         RenderNode* childNode = child.getRenderNode();
         Matrix4 mat4(child.getRecordedMatrix());
         info.damageAccumulator->pushTransform(&mat4);
         // TODO: a layer is needed if the canvas is rotated or has a non-rect clip
-        bool childFunctorsNeedLayer = functorsNeedLayer;
-        childFn(childNode, info, childFunctorsNeedLayer);
+        info.hasBackwardProjectedNodes = false;
+        childFn(childNode, info, functorsNeedLayer);
+        hasBackwardProjectedNodesSubtree |= info.hasBackwardProjectedNodes;
         info.damageAccumulator->popTransform();
+    }
+
+    //The purpose of next block of code is to reset projected display list if there are no
+    //backward projected nodes. This speeds up drawing, by avoiding an extra walk of the tree
+    if (mProjectionReceiver) {
+        mProjectionReceiver->setProjectedDisplayList(hasBackwardProjectedNodesSubtree ? this : nullptr);
+        info.hasBackwardProjectedNodes = hasBackwardProjectedNodesHere;
+    } else {
+        info.hasBackwardProjectedNodes = hasBackwardProjectedNodesSubtree
+                || hasBackwardProjectedNodesHere;
     }
 
     bool isDirty = false;
@@ -86,7 +101,7 @@ bool SkiaDisplayList::prepareListAndChildren(TreeInfo& info, bool functorsNeedLa
 }
 
 void SkiaDisplayList::reset(SkRect bounds) {
-    mIsProjectionReceiver = false;
+    mProjectionReceiver = nullptr;
 
     mDrawable->reset(bounds);
 

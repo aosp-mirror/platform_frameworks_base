@@ -33,7 +33,7 @@ TEST(SkiaDisplayList, create) {
     SkRect bounds = SkRect::MakeWH(200, 200);
     SkiaDisplayList skiaDL(bounds);
     ASSERT_TRUE(skiaDL.isEmpty());
-    ASSERT_FALSE(skiaDL.mIsProjectionReceiver);
+    ASSERT_FALSE(skiaDL.mProjectionReceiver);
     ASSERT_EQ(skiaDL.mDrawable->getBounds(), bounds);
 }
 
@@ -42,12 +42,13 @@ TEST(SkiaDisplayList, reset) {
     SkiaDisplayList skiaDL(bounds);
 
     SkCanvas dummyCanvas;
+    RenderNodeDrawable drawable(nullptr, &dummyCanvas);
     skiaDL.mChildNodes.emplace_back(nullptr, &dummyCanvas);
     skiaDL.mChildFunctors.emplace_back(nullptr, nullptr, &dummyCanvas);
     skiaDL.mMutableImages.push_back(nullptr);
     skiaDL.mVectorDrawables.push_back(nullptr);
     skiaDL.mDrawable->drawAnnotation(bounds, "testAnnotation", nullptr);
-    skiaDL.mIsProjectionReceiver = true;
+    skiaDL.mProjectionReceiver = &drawable;
 
     ASSERT_EQ(skiaDL.mDrawable->getBounds(), bounds);
     ASSERT_FALSE(skiaDL.mChildNodes.empty());
@@ -55,7 +56,7 @@ TEST(SkiaDisplayList, reset) {
     ASSERT_FALSE(skiaDL.mMutableImages.empty());
     ASSERT_FALSE(skiaDL.mVectorDrawables.empty());
     ASSERT_FALSE(skiaDL.isEmpty());
-    ASSERT_TRUE(skiaDL.mIsProjectionReceiver);
+    ASSERT_TRUE(skiaDL.mProjectionReceiver);
 
     bounds = SkRect::MakeWH(100, 100);
     skiaDL.reset(bounds);
@@ -66,7 +67,7 @@ TEST(SkiaDisplayList, reset) {
     ASSERT_TRUE(skiaDL.mMutableImages.empty());
     ASSERT_TRUE(skiaDL.mVectorDrawables.empty());
     ASSERT_TRUE(skiaDL.isEmpty());
-    ASSERT_FALSE(skiaDL.mIsProjectionReceiver);
+    ASSERT_FALSE(skiaDL.mProjectionReceiver);
 }
 
 TEST(SkiaDisplayList, reuseDisplayList) {
