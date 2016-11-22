@@ -323,9 +323,6 @@ public class StackScrollAlgorithm {
         int childHeight = getMaxAllowedChildHeight(child);
         childViewState.yTranslation = currentYPosition;
         boolean isDismissView = child instanceof DismissView;
-        if (i == 0) {
-            updateFirstChildHeight(child, childViewState, childHeight, algorithmState, ambientState);
-        }
 
         childViewState.location = ExpandableViewState.LOCATION_MAIN_AREA;
         if (isDismissView) {
@@ -447,29 +444,6 @@ public class StackScrollAlgorithm {
             return expandableView.getIntrinsicHeight();
         }
         return child == null? mCollapsedSize : child.getHeight();
-    }
-
-    /**
-     * Update the height of the first child i.e clamp it to the bottom stack
-     * @param child the child to update
-     * @param childViewState the viewstate of the child
-     * @param childHeight the height of the child
-     * @param algorithmState the algorithm state
-     * @param ambientState The ambient state of the algorithm
-     */
-    protected void updateFirstChildHeight(ExpandableView child, ExpandableViewState childViewState,
-            int childHeight, StackScrollAlgorithmState algorithmState,
-            AmbientState ambientState) {
-
-        int bottomStart= ambientState.getInnerHeight();
-        if (algorithmState.visibleChildren.size() > 1) {
-            bottomStart -= ambientState.getShelf().getIntrinsicHeight()
-                    - mPaddingBetweenElements;
-        }
-        bottomStart += ambientState.getScrollY();
-            // Collapse and expand the first child while the shade is being expanded
-        childViewState.height = (int) Math.max(Math.min(bottomStart, (float) childHeight),
-                    child.getCollapsedHeight());
     }
 
     /**
