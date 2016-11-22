@@ -46,10 +46,6 @@ import java.util.UUID;
 
 /** @hide */
 public abstract class EphemeralResolver {
-
-    /** TODO b/30204367 remove when the platform fully supports ephemeral applications */
-    public static final boolean USE_DEFAULT_EPHEMERAL_LAUNCHER = false;
-
     public static EphemeralResponse doEphemeralResolutionPhaseOne(Context context,
             EphemeralResolverConnection connection, EphemeralRequest requestObj) {
         final Intent intent = requestObj.origIntent;
@@ -162,16 +158,10 @@ public abstract class EphemeralResolver {
                         new IntentSender(failureIntentTarget));
             } catch (RemoteException ignore) { /* ignore; same process */ }
 
-            final Intent ephemeralIntent;
-            if (EphemeralResolver.USE_DEFAULT_EPHEMERAL_LAUNCHER) {
-                // Force the intent to be directed to the ephemeral package
-                ephemeralIntent = new Intent(origIntent);
-                ephemeralIntent.setPackage(ephemeralPackageName);
-            } else {
-                // Success intent goes back to the installer
-                ephemeralIntent = new Intent(launchIntent);
-            }
-
+            // Success intent goes back to the installer
+            final Intent ephemeralIntent = new Intent(launchIntent)
+                    .setComponent(null)
+                    .setPackage(ephemeralPackageName);
             // Intent that is eventually launched if the ephemeral package was
             // installed successfully. This will actually be launched by a platform
             // broadcast receiver.
