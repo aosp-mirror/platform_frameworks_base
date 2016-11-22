@@ -2106,7 +2106,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 finalTranslationY = (int) ViewState.getFinalTranslationY(lastView);
             }
             int finalHeight = ExpandableViewState.getFinalActualHeight(lastView);
-            int finalBottom = finalTranslationY + finalHeight;
+            int finalBottom = finalTranslationY + finalHeight - lastView.getClipBottomAmount();
             finalBottom = Math.min(finalBottom, getHeight());
             if (mAnimateNextBackgroundBottom
                     || mBottomAnimator == null && mCurrentBounds.bottom == finalBottom
@@ -2114,10 +2114,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // we're ending up at the same location as we are now, lets just skip the animation
                 bottom = finalBottom;
             } else {
-                bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight());
+                bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight()
+                        - lastView.getClipBottomAmount());
                 bottom = Math.min(bottom, getHeight());
             }
-            bottom -= lastView.getClipBottomAmount();
         } else {
             top = mTopPadding;
             bottom = top;
