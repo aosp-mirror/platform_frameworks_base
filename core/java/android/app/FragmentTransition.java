@@ -367,9 +367,11 @@ class FragmentTransition {
             }
 
             if (exitingViews != null) {
-                ArrayList<View> tempExiting = new ArrayList<>();
-                tempExiting.add(nonExistentView);
-                replaceTargets(exitTransition, exitingViews, tempExiting);
+                if (exitTransition != null) {
+                    ArrayList<View> tempExiting = new ArrayList<>();
+                    tempExiting.add(nonExistentView);
+                    replaceTargets(exitTransition, exitingViews, tempExiting);
+                }
                 exitingViews.clear();
                 exitingViews.add(nonExistentView);
             }
@@ -490,9 +492,17 @@ class FragmentTransition {
 
         if (nameOverrides.isEmpty()) {
             sharedElementTransition = null;
+            if (outSharedElements != null) {
+                outSharedElements.clear();
+            }
+            if (inSharedElements != null) {
+                inSharedElements.clear();
+            }
         } else {
-            sharedElementsOut.addAll(outSharedElements.values());
-            sharedElementsIn.addAll(inSharedElements.values());
+            addSharedElementsWithMatchingNames(sharedElementsOut, outSharedElements,
+                    nameOverrides.keySet());
+            addSharedElementsWithMatchingNames(sharedElementsIn, inSharedElements,
+                    nameOverrides.values());
         }
 
         if (enterTransition == null && exitTransition == null && sharedElementTransition == null) {
@@ -535,6 +545,25 @@ class FragmentTransition {
             }
         });
         return sharedElementTransition;
+    }
+
+    /**
+     * Add Views from sharedElements into views that have the transitionName in the
+     * nameOverridesSet.
+     *
+     * @param views               Views list to add shared elements to
+     * @param sharedElements      List of shared elements
+     * @param nameOverridesSet    The transition names for all views to be copied from
+     *                            sharedElements to views.
+     */
+    private static void addSharedElementsWithMatchingNames(ArrayList<View> views,
+            ArrayMap<String, View> sharedElements, Collection<String> nameOverridesSet) {
+        for (int i = sharedElements.size() - 1; i >= 0; i--) {
+            View view = sharedElements.valueAt(i);
+            if (view != null && nameOverridesSet.contains(view.getTransitionName())) {
+                views.add(view);
+            }
+        }
     }
 
     /**

@@ -534,6 +534,12 @@ final class BackStackRecord extends FragmentTransaction implements
         if (mSharedElementSourceNames == null) {
             mSharedElementSourceNames = new ArrayList<String>();
             mSharedElementTargetNames = new ArrayList<String>();
+        } else if (mSharedElementTargetNames.contains(name)) {
+            throw new IllegalArgumentException("A shared element with the target name '"
+                    + name + "' has already been added to the transaction.");
+        } else if (mSharedElementSourceNames.contains(transitionName)) {
+            throw new IllegalArgumentException("A shared element with the source name '"
+                    + transitionName + " has already been added to the transaction.");
         }
         mSharedElementSourceNames.add(transitionName);
         mSharedElementTargetNames.add(name);
