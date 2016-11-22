@@ -79,8 +79,8 @@ class WindowSurfaceController {
 
     private final WindowManagerService mService;
 
-    public WindowSurfaceController(SurfaceSession s,
-            String name, int w, int h, int format, int flags, WindowStateAnimator animator) {
+    public WindowSurfaceController(SurfaceSession s, String name, int w, int h, int format,
+            int flags, WindowStateAnimator animator, int windowType, int ownerUid) {
         mAnimator = animator;
 
         mSurfaceW = w;
@@ -98,13 +98,13 @@ class WindowSurfaceController {
                 animator.mWin.mSubLayer < 0 &&
                 animator.mWin.mAppToken != null) {
             mSurfaceControl = new SurfaceControlWithBackground(s,
-                    name, w, h, format, flags, animator.mWin.mAppToken);
+                    name, w, h, format, flags, animator.mWin.mAppToken, windowType, ownerUid);
         } else if (DEBUG_SURFACE_TRACE) {
             mSurfaceControl = new SurfaceTrace(
-                    s, name, w, h, format, flags);
+                    s, name, w, h, format, flags, windowType, ownerUid);
         } else {
             mSurfaceControl = new SurfaceControl(
-                    s, name, w, h, format, flags);
+                    s, name, w, h, format, flags, windowType, ownerUid);
         }
 
         if (mService.mRoot.mSurfaceTraceEnabled) {
@@ -569,9 +569,21 @@ class WindowSurfaceController {
         private float mDsdx, mDtdx, mDsdy, mDtdy;
         private final String mName;
 
+        public SurfaceTrace(SurfaceSession s, String name, int w, int h, int format, int flags,
+                        int windowType, int ownerUid)
+                    throws OutOfResourcesException {
+            super(s, name, w, h, format, flags, windowType, ownerUid);
+            mName = name != null ? name : "Not named";
+            mSize.set(w, h);
+            if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
+                    + Debug.getCallers(3));
+            synchronized (sSurfaces) {
+                sSurfaces.add(0, this);
+            }
+        }
+
         public SurfaceTrace(SurfaceSession s,
-                       String name, int w, int h, int format, int flags)
-                   throws OutOfResourcesException {
+                        String name, int w, int h, int format, int flags) {
             super(s, name, w, h, format, flags);
             mName = name != null ? name : "Not named";
             mSize.set(w, h);
@@ -806,11 +818,10 @@ class WindowSurfaceController {
         public boolean mVisible = false;
         public int mLayer = -1;
 
-        public SurfaceControlWithBackground(SurfaceSession s,
-                        String name, int w, int h, int format, int flags,
-                        AppWindowToken token)
-                   throws OutOfResourcesException {
-            super(s, name, w, h, format, flags);
+        public SurfaceControlWithBackground(SurfaceSession s, String name, int w, int h, int format,
+                    int flags, AppWindowToken token, int windowType, int ownerUid)
+                throws OutOfResourcesException {
+            super(s, name, w, h, format, flags, windowType, ownerUid);
             mBackgroundControl = new SurfaceControl(s, name, w, h,
                     PixelFormat.OPAQUE, flags | SurfaceControl.FX_SURFACE_DIM);
             mOpaque = (flags & SurfaceControl.OPAQUE) != 0;

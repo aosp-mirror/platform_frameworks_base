@@ -34,7 +34,7 @@ public class SurfaceControl {
     private static final String TAG = "SurfaceControl";
 
     private static native long nativeCreate(SurfaceSession session, String name,
-            int w, int h, int format, int flags, long parentObject)
+            int w, int h, int format, int flags, long parentObject, int windowType, int ownerUid)
             throws OutOfResourcesException;
     private static native void nativeRelease(long nativeObject);
     private static native void nativeDestroy(long nativeObject);
@@ -281,17 +281,25 @@ public class SurfaceControl {
      * @param h The surface initial height.
      * @param flags The surface creation flags.  Should always include {@link #HIDDEN}
      * in the creation flags.
+     * @param windowType The type of the window as specified in WindowManager.java.
+     * @param ownerUid A unique per-app ID.
      *
      * @throws throws OutOfResourcesException If the SurfaceControl cannot be created.
      */
     public SurfaceControl(SurfaceSession session,
-            String name, int w, int h, int format, int flags)
+            String name, int w, int h, int format, int flags, int windowType, int ownerUid)
                     throws OutOfResourcesException {
-        this(session, name, w, h, format, flags, null);
+        this(session, name, w, h, format, flags, null, windowType, ownerUid);
     }
 
     public SurfaceControl(SurfaceSession session,
-            String name, int w, int h, int format, int flags, SurfaceControl parent)
+            String name, int w, int h, int format, int flags)
+                    throws OutOfResourcesException {
+        this(session, name, w, h, format, flags, null, -1, -1);
+    }
+
+    public SurfaceControl(SurfaceSession session, String name, int w, int h, int format, int flags,
+            SurfaceControl parent, int windowType, int ownerUid)
                     throws OutOfResourcesException {
         if (session == null) {
             throw new IllegalArgumentException("session must not be null");
@@ -310,7 +318,8 @@ public class SurfaceControl {
         }
 
         mName = name;
-        mNativeObject = nativeCreate(session, name, w, h, format, flags, parent != null ? parent.mNativeObject : 0);
+        mNativeObject = nativeCreate(session, name, w, h, format, flags,
+            parent != null ? parent.mNativeObject : 0, windowType, ownerUid);
         if (mNativeObject == 0) {
             throw new OutOfResourcesException(
                     "Couldn't allocate SurfaceControl native object");
