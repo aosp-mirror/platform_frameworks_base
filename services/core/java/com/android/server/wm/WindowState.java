@@ -539,17 +539,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Compares two window sub-layers and returns -1 if the first is lesser than the second in terms
      * of z-order and 1 otherwise.
      */
-    private static final Comparator<WindowState> sWindowSubLayerComparator = (w1, w2) -> {
-        final int layer1 = w1.mSubLayer;
-        final int layer2 = w2.mSubLayer;
-        if (layer1 < layer2 || (layer1 == layer2 && layer2 < 0 )) {
-            // We insert the child window into the list ordered by the sub-layer.
-            // For same sub-layers, the negative one should go below others; the positive one should
-            // go above others.
-            return -1;
-        }
-        return 1;
-    };
+    private static final Comparator<WindowState> sWindowSubLayerComparator =
+            new Comparator<WindowState>() {
+                @Override
+                public int compare(WindowState w1, WindowState w2) {
+                    final int layer1 = w1.mSubLayer;
+                    final int layer2 = w2.mSubLayer;
+                    if (layer1 < layer2 || (layer1 == layer2 && layer2 < 0 )) {
+                        // We insert the child window into the list ordered by
+                        // the sub-layer.  For same sub-layers, the negative one
+                        // should go below others; the positive one should go
+                        // above others.
+                        return -1;
+                    }
+                    return 1;
+                };
+            };
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
