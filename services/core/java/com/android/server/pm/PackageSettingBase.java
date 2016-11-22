@@ -76,14 +76,12 @@ abstract class PackageSettingBase extends SettingBase {
     String legacyNativeLibraryPathString;
 
     /**
-     * The primary CPU abi for this package. This value is regenerated at every
-     * boot scan.
+     * The primary CPU abi for this package.
      */
     String primaryCpuAbiString;
 
     /**
-     * The secondary CPU abi for this package. This value is regenerated at every
-     * boot scan.
+     * The secondary CPU abi for this package.
      */
     String secondaryCpuAbiString;
 

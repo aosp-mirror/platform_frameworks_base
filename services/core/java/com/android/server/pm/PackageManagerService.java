@@ -402,8 +402,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_CHECK_ONLY = 1<<13;
     static final int SCAN_DONT_KILL_APP = 1<<14;
     static final int SCAN_IGNORE_FROZEN = 1<<15;
-
     static final int REMOVE_CHATTY = 1<<16;
+    static final int SCAN_FIRST_BOOT_OR_UPGRADE = 1<<17;
 
     private static final int[] EMPTY_INT_ARRAY = new int[0];
 
@@ -2215,10 +2215,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SYSTEM_SCAN_START,
                     startTime);
 
-            // Set flag to monitor and not change apk file paths when
-            // scanning install directories.
-            final int scanFlags = SCAN_BOOTING | SCAN_INITIAL;
-
             final String bootClassPath = System.getenv("BOOTCLASSPATH");
             final String systemServerClassPath = System.getenv("SYSTEMSERVERCLASSPATH");
 
@@ -2301,6 +2297,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                         mExistingSystemPackages.add(ps.name);
                     }
                 }
+            }
+
+            // Set flag to monitor and not change apk file paths when
+            // scanning install directories.
+            int scanFlags = SCAN_BOOTING | SCAN_INITIAL;
+
+            if (mIsUpgrade || mFirstBoot) {
+                scanFlags = scanFlags | SCAN_FIRST_BOOT_OR_UPGRADE;
             }
 
             // Collect vendor overlay packages. (Do this before scanning any apps.)
@@ -8082,6 +8086,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         // old setting to restore at the end.
         PackageSetting nonMutatedPs = null;
 
+        // We keep references to the derived CPU Abis from settings in oder to reuse
+        // them in the case where we're not upgrading or booting for the first time.
+        String primaryCpuAbiFromSettings = null;
+        String secondaryCpuAbiFromSettings = null;
+
         // writer
         synchronized (mPackages) {
             if (pkg.mSharedUserId != null) {
@@ -8158,6 +8167,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
+            if ((scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) == 0) {
+                PackageSetting foundPs = mSettings.getPackageLPr(pkg.packageName);
+                if (foundPs != null) {
+                    primaryCpuAbiFromSettings = foundPs.primaryCpuAbiString;
+                    secondaryCpuAbiFromSettings = foundPs.secondaryCpuAbiString;
+                }
+            }
+
             pkgSetting = mSettings.getPackageLPr(pkg.packageName);
             if (pkgSetting != null && pkgSetting.sharedUser != suid) {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -8190,7 +8207,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 mSettings.addUserToSettingLPw(pkgSetting);
             } else {
-                // REMOVE SharedUserSetting from method; update in a separate call
+                // REMOVE SharedUserSetting from method; update in a separate call.
+                //
+                // TODO(narayan): This update is bogus. nativeLibraryDir & primaryCpuAbi,
+                // secondaryCpuAbi are not known at this point so we always update them
+                // to null here, only to reset them at a later point.
                 Settings.updatePackageSetting(pkgSetting, disabledPkgSetting, suid, destCodeFile,
                         pkg.applicationInfo.nativeLibraryDir, pkg.applicationInfo.primaryCpuAbi,
                         pkg.applicationInfo.secondaryCpuAbi, pkg.applicationInfo.flags,
@@ -8329,18 +8350,34 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String cpuAbiOverride = deriveAbiOverride(pkg.cpuAbiOverride, pkgSetting);
 
         if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
-            derivePackageAbi(
-                    pkg, scanFile, cpuAbiOverride, true /*extractLibs*/, mAppLib32InstallDir);
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            if ((scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0) {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
+                derivePackageAbi(
+                        pkg, scanFile, cpuAbiOverride, true /*extractLibs*/, mAppLib32InstallDir);
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
-            // Some system apps still use directory structure for native libraries
-            // in which case we might end up not detecting abi solely based on apk
-            // structure. Try to detect abi based on directory structure.
-            if (isSystemApp(pkg) && !pkg.isUpdatedSystemApp() &&
-                    pkg.applicationInfo.primaryCpuAbi == null) {
-                setBundledAppAbisAndRoots(pkg, pkgSetting);
+                // Some system apps still use directory structure for native libraries
+                // in which case we might end up not detecting abi solely based on apk
+                // structure. Try to detect abi based on directory structure.
+                if (isSystemApp(pkg) && !pkg.isUpdatedSystemApp() &&
+                        pkg.applicationInfo.primaryCpuAbi == null) {
+                    setBundledAppAbisAndRoots(pkg, pkgSetting);
+                    setNativeLibraryPaths(pkg, mAppLib32InstallDir);
+                }
+            } else {
+                // This is not a first boot or an upgrade, don't bother deriving the
+                // ABI during the scan. Instead, trust the value that was stored in the
+                // package setting.
+                pkg.applicationInfo.primaryCpuAbi = primaryCpuAbiFromSettings;
+                pkg.applicationInfo.secondaryCpuAbi = secondaryCpuAbiFromSettings;
+
                 setNativeLibraryPaths(pkg, mAppLib32InstallDir);
+
+                if (DEBUG_ABI_SELECTION) {
+                    Slog.i(TAG, "Using ABIS and native lib paths from settings : " +
+                        pkg.packageName + " " + pkg.applicationInfo.primaryCpuAbi + ", " +
+                        pkg.applicationInfo.secondaryCpuAbi);
+                }
             }
         } else {
             if ((scanFlags & SCAN_MOVE) != 0) {
@@ -9195,11 +9232,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                                  String cpuAbiOverride, boolean extractLibs,
                                  File appLib32InstallDir)
             throws PackageManagerException {
-        // TODO: We can probably be smarter about this stuff. For installed apps,
-        // we can calculate this information at install time once and for all. For
-        // system apps, we can probably assume that this information doesn't change
-        // after the first boot scan. As things stand, we do lots of unnecessary work.
-
         // Give ourselves some initial paths; we'll come back for another
         // pass once we've determined ABI below.
         setNativeLibraryPaths(pkg, appLib32InstallDir);
