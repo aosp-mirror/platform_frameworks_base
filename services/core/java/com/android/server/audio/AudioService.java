@@ -272,7 +272,8 @@ public class AudioService extends IAudioService.Stub {
         15, // STREAM_BLUETOOTH_SCO
         7,  // STREAM_SYSTEM_ENFORCED
         15, // STREAM_DTMF
-        15  // STREAM_TTS
+        15, // STREAM_TTS
+        15  // STREAM_ACCESSIBILITY
     };
 
     /** Minimum volume index values for audio streams */
@@ -286,7 +287,8 @@ public class AudioService extends IAudioService.Stub {
         0,  // STREAM_BLUETOOTH_SCO
         0,  // STREAM_SYSTEM_ENFORCED
         0,  // STREAM_DTMF
-        0   // STREAM_TTS
+        0,  // STREAM_TTS
+        0   // STREAM_ACCESSIBILITY
     };
 
     /* mStreamVolumeAlias[] indicates for each stream if it uses the volume settings
@@ -308,7 +310,8 @@ public class AudioService extends IAudioService.Stub {
         AudioSystem.STREAM_BLUETOOTH_SCO,   // STREAM_BLUETOOTH_SCO
         AudioSystem.STREAM_RING,            // STREAM_SYSTEM_ENFORCED
         AudioSystem.STREAM_RING,            // STREAM_DTMF
-        AudioSystem.STREAM_MUSIC            // STREAM_TTS
+        AudioSystem.STREAM_MUSIC,           // STREAM_TTS
+        AudioSystem.STREAM_MUSIC            // STREAM_ACCESSIBILITY
     };
     private final int[] STREAM_VOLUME_ALIAS_TELEVISION = new int[] {
         AudioSystem.STREAM_MUSIC,       // STREAM_VOICE_CALL
@@ -320,7 +323,8 @@ public class AudioService extends IAudioService.Stub {
         AudioSystem.STREAM_MUSIC,       // STREAM_BLUETOOTH_SCO
         AudioSystem.STREAM_MUSIC,       // STREAM_SYSTEM_ENFORCED
         AudioSystem.STREAM_MUSIC,       // STREAM_DTMF
-        AudioSystem.STREAM_MUSIC        // STREAM_TTS
+        AudioSystem.STREAM_MUSIC,       // STREAM_TTS
+        AudioSystem.STREAM_MUSIC        // STREAM_ACCESSIBILITY
     };
     private final int[] STREAM_VOLUME_ALIAS_DEFAULT = new int[] {
         AudioSystem.STREAM_VOICE_CALL,      // STREAM_VOICE_CALL
@@ -332,7 +336,8 @@ public class AudioService extends IAudioService.Stub {
         AudioSystem.STREAM_BLUETOOTH_SCO,   // STREAM_BLUETOOTH_SCO
         AudioSystem.STREAM_RING,            // STREAM_SYSTEM_ENFORCED
         AudioSystem.STREAM_RING,            // STREAM_DTMF
-        AudioSystem.STREAM_MUSIC            // STREAM_TTS
+        AudioSystem.STREAM_MUSIC,           // STREAM_TTS
+        AudioSystem.STREAM_MUSIC            // STREAM_ACCESSIBILITY
     };
     private int[] mStreamVolumeAlias;
 
@@ -351,6 +356,7 @@ public class AudioService extends IAudioService.Stub {
         AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_SYSTEM_ENFORCED
         AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_DTMF
         AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_TTS
+        AppOpsManager.OP_AUDIO_ACCESSIBILITY_VOLUME,    // STREAM_ACCESSIBILITY
     };
 
     private final boolean mUseFixedVolume;
