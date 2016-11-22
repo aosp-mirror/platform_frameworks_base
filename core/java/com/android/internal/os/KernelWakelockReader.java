@@ -81,8 +81,8 @@ public class KernelWakelockReader {
                     is = new FileInputStream(sWakeupSourceFile);
                     wakeup_sources = true;
                 } catch (java.io.FileNotFoundException e2) {
-                    Slog.wtf(TAG, "neither " + sWakelockFile + " nor " +
-                            sWakeupSourceFile + " exists");
+                    Slog.w(TAG, "neither " + sWakelockFile + " nor " +
+                            sWakeupSourceFile + " exists, ignoring.");
                     return null;
                 }
             }
@@ -94,7 +94,7 @@ public class KernelWakelockReader {
 
             is.close();
         } catch (java.io.IOException e) {
-            Slog.wtf(TAG, "failed to read kernel wakelocks", e);
+            Slog.w(TAG, "failed to read kernel wakelocks", e);
             return null;
         } finally {
             StrictMode.setThreadPolicyMask(oldMask);
@@ -107,7 +107,7 @@ public class KernelWakelockReader {
 
         if (len > 0) {
             if (len >= buffer.length) {
-                Slog.wtf(TAG, "Kernel wake locks exceeded buffer size " + buffer.length);
+                Slog.w(TAG, "Kernel wake locks exceeded buffer size " + buffer.length);
             }
             int i;
             for (i=0; i<len; i++) {
