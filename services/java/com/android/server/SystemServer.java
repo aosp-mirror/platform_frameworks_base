@@ -41,12 +41,10 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.os.storage.IStorageManager;
-import android.provider.Settings;
+import android.util.BootTimingsTraceLog;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
-import android.util.Pair;
 import android.util.Slog;
 import android.view.WindowManager;
 
@@ -55,7 +53,6 @@ import com.android.internal.app.NightDisplayController;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
-import com.android.internal.os.ZygoteInit;
 import com.android.internal.policy.EmergencyAffordanceManager;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.accessibility.AccessibilityManagerService;
@@ -102,8 +99,8 @@ import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.telecom.TelecomLoaderService;
 import com.android.server.trust.TrustManagerService;
-import com.android.server.tv.TvRemoteService;
 import com.android.server.tv.TvInputManagerService;
+import com.android.server.tv.TvRemoteService;
 import com.android.server.twilight.TwilightService;
 import com.android.server.usage.UsageStatsService;
 import com.android.server.vr.VrManagerService;
@@ -112,8 +109,6 @@ import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
@@ -125,11 +120,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 public final class SystemServer {
     private static final String TAG = "SystemServer";
 
-    private static final boolean LOG_BOOT_TIME = true;
-    // Debug boot time for every step if it's non-user build.
-    private static final boolean DEBUG_BOOT_TIME = LOG_BOOT_TIME && !"user".equals(Build.TYPE);
-    private static final String TAG_BOOT_TIME = "SystemServerTiming";
-    private static final Deque<Pair<String, Long>> START_TIMES = new ArrayDeque<>();
+    private static final BootTimingsTraceLog BOOT_TIMINGS_TRACE_LOG
+            = new BootTimingsTraceLog("SystemServerTiming", Trace.TRACE_TAG_SYSTEM_SERVER);
 
     private static final String ENCRYPTING_STATE = "trigger_restart_min_framework";
     private static final String ENCRYPTED_STATE = "1";
@@ -279,6 +271,11 @@ public final class SystemServer {
             int uptimeMillis = (int) SystemClock.uptimeMillis();
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN, uptimeMillis);
             MetricsLogger.histogram(null, "boot_system_server_init", uptimeMillis);
+            // Also report when first stage of init has started
+            long initStartNs = SystemProperties.getLong("init.start", -1);
+            if (initStartNs >= 0) {
+                MetricsLogger.histogram(null, "boot_android_init", (int)(initStartNs / 1000000));
+            }
 
             // In case the runtime switched since last boot (such as when
             // the old runtime was removed in an OTA), set the system
@@ -1643,24 +1640,11 @@ public final class SystemServer {
     }
 
     private static void traceBeginAndSlog(String name) {
-        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, name);
         Slog.i(TAG, name);
-        if (DEBUG_BOOT_TIME) {
-            START_TIMES.push(Pair.create(name, Long.valueOf(SystemClock.elapsedRealtime())));
-        }
+        BOOT_TIMINGS_TRACE_LOG.traceBegin(name);
     }
 
     private static void traceEnd() {
-        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-        if (!DEBUG_BOOT_TIME) {
-            return;
-        }
-        Pair<String, Long> event = START_TIMES.pollFirst();
-        if (event == null) {
-            Slog.w(TAG, "traceEnd called more times than traceBeginAndSlog");
-            return;
-        }
-        Slog.d(TAG_BOOT_TIME, event.first + " took to complete: "
-                + (SystemClock.elapsedRealtime() - event.second) + "ms");
+        BOOT_TIMINGS_TRACE_LOG.traceEnd();
     }
 }
