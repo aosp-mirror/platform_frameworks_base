@@ -316,6 +316,16 @@ public class FileUtils {
         stringToFile(file.getAbsolutePath(), string);
     }
 
+    /*
+     * Writes the bytes given in {@code content} to the file whose absolute path
+     * is {@code filename}.
+     */
+    public static void bytesToFile(String filename, byte[] content) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(filename)) {
+            fos.write(content);
+        }
+    }
+
     /**
      * Writes string to file. Basically same as "echo -n $string > $filename"
      *

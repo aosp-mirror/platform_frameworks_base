@@ -2470,7 +2470,10 @@ final class Settings {
 
         final File file = new File(dir, "appid");
         try {
-            FileUtils.stringToFile(file, Integer.toString(ps.appId));
+            // Note that the use of US_ASCII here is safe, we're only writing a decimal
+            // number to the file.
+            FileUtils.bytesToFile(file.getAbsolutePath(),
+                    Integer.toString(ps.appId).getBytes(StandardCharsets.US_ASCII));
             mKernelMapping.put(ps.name, ps.appId);
         } catch (IOException ignored) {
         }
