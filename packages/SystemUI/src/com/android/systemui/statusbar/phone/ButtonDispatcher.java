@@ -186,6 +186,16 @@ public class ButtonDispatcher {
         }
     }
 
+    public void setLandscape(boolean landscape) {
+        final int N = mViews.size();
+        for (int i = 0; i < N; i++) {
+            final View view = mViews.get(i);
+            if (view instanceof ButtonInterface) {
+                ((ButtonInterface) view).setLandscape(landscape);
+            }
+        }
+    }
+
     /**
      * Interface for button actions.
      */
