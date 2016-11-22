@@ -219,7 +219,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         return false;
     }
 
-    void getWindowsByName(WindowList output, String name) {
+    void getWindowsByName(ArrayList<WindowState> output, String name) {
         int objectId = 0;
         // See if this is an object ID.
         try {
@@ -231,7 +231,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         getWindowsByName(output, name, objectId);
     }
 
-    private void getWindowsByName(WindowList output, String name, int objectId) {
+    private void getWindowsByName(ArrayList<WindowState> output, String name, int objectId) {
         forAllWindows((w) -> {
             if (name != null) {
                 if (w.mAttrs.getTitle().toString().contains(name)) {
@@ -274,15 +274,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
 
         return null;
-    }
-
-    // TODO: Users would have their own window containers under the display container?
-    void switchUser() {
-        final int count = mChildren.size();
-        for (int i = 0; i < count; ++i) {
-            final DisplayContent dc = mChildren.get(i);
-            dc.switchUser();
-        }
     }
 
     /**
@@ -427,14 +418,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
 
         return hasChanges;
-    }
-
-    void updateInputWindows(InputMonitor inputMonitor, WindowState inputFocus, boolean inDrag) {
-        final int count = mChildren.size();
-        for (int i = 0; i < count; ++i) {
-            final DisplayContent dc = mChildren.get(i);
-            dc.updateInputWindows(inputMonitor, inputFocus, inDrag);
-        }
     }
 
     boolean reclaimSomeSurfaceMemory(WindowStateAnimator winAnimator, String operation,

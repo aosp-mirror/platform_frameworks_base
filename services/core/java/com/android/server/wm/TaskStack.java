@@ -859,7 +859,9 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     // TODO: Should each user have there own stacks?
+    @Override
     void switchUser() {
+        super.switchUser();
         int top = mChildren.size();
         for (int taskNdx = 0; taskNdx < top; ++taskNdx) {
             Task task = mChildren.get(taskNdx);
@@ -1484,30 +1486,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                         "exiting appToken " + appAnimator.mAppToken + " done");
                 if (DEBUG_ANIM) Slog.v(TAG_WM,
                         "updateWindowsApps...: done animating exiting " + appAnimator.mAppToken);
-            }
-        }
-    }
-
-    void getWindowOnDisplayBeforeToken(DisplayContent dc, WindowToken token,
-            DisplayContent.GetWindowOnDisplaySearchResult result) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final Task task = mChildren.get(i);
-            task.getWindowOnDisplayBeforeToken(dc, token, result);
-            if (result.reachedToken) {
-                // We have reach the token we are interested in. End search.
-                return;
-            }
-        }
-    }
-
-    void getWindowOnDisplayAfterToken(DisplayContent dc, WindowToken token,
-            DisplayContent.GetWindowOnDisplaySearchResult result) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final Task task = mChildren.get(i);
-            task.getWindowOnDisplayAfterToken(dc, token, result);
-            if (result.foundWindow != null) {
-                // We have found a window after the token. End search.
-                return;
             }
         }
     }
