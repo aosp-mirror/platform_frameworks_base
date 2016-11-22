@@ -32,7 +32,6 @@ namespace skiapipeline {
 
 void SkiaRecordingCanvas::initDisplayList(uirenderer::RenderNode* renderNode, int width,
         int height) {
-    mBarrierPending = false;
     mCurrentBarrier = nullptr;
     SkASSERT(mDisplayList.get() == nullptr);
 
@@ -76,8 +75,6 @@ void SkiaRecordingCanvas::drawCircle(uirenderer::CanvasPropertyPrimitive* x,
 }
 
 void SkiaRecordingCanvas::insertReorderBarrier(bool enableReorder) {
-    mBarrierPending = enableReorder;
-
     if (nullptr != mCurrentBarrier) {
         // finish off the existing chunk
         SkDrawable* drawable =
@@ -85,6 +82,12 @@ void SkiaRecordingCanvas::insertReorderBarrier(bool enableReorder) {
                 mCurrentBarrier);
         mCurrentBarrier = nullptr;
         drawDrawable(drawable);
+    }
+    if (enableReorder) {
+        mCurrentBarrier = (StartReorderBarrierDrawable*)
+                mDisplayList->allocateDrawable<StartReorderBarrierDrawable>(
+                mDisplayList.get());
+        drawDrawable(mCurrentBarrier);
     }
 }
 
@@ -97,15 +100,6 @@ void SkiaRecordingCanvas::drawLayer(uirenderer::DeferredLayerUpdater* layerUpdat
 }
 
 void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
-    // lazily create the chunk if needed
-    if (mBarrierPending) {
-        mCurrentBarrier = (StartReorderBarrierDrawable*)
-                mDisplayList->allocateDrawable<StartReorderBarrierDrawable>(
-                mDisplayList.get());
-        drawDrawable(mCurrentBarrier);
-        mBarrierPending = false;
-    }
-
     // record the child node
     mDisplayList->mChildNodes.emplace_back(renderNode, asSkCanvas(), true, mCurrentBarrier);
     auto& renderNodeDrawable = mDisplayList->mChildNodes.back();

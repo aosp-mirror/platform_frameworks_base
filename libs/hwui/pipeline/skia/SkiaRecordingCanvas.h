@@ -76,7 +76,6 @@ class SkiaRecordingCanvas : public SkiaCanvas {
 private:
     SkLiteRecorder mRecorder;
     std::unique_ptr<SkiaDisplayList> mDisplayList;
-    bool mBarrierPending;
     StartReorderBarrierDrawable* mCurrentBarrier;
 
     /**

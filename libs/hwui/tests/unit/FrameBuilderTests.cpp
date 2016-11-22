@@ -1542,6 +1542,14 @@ RENDERTHREAD_TEST(FrameBuilder, zReorder) {
         canvas.insertReorderBarrier(false);
         drawOrderedRect(&canvas, 8);
         drawOrderedNode(&canvas, 9, -10.0f); // in reorder=false at this point, so played inorder
+        canvas.insertReorderBarrier(true); //reorder a node ahead of drawrect op
+        drawOrderedRect(&canvas, 11);
+        drawOrderedNode(&canvas, 10, -1.0f);
+        canvas.insertReorderBarrier(false);
+        canvas.insertReorderBarrier(true); //test with two empty reorder sections
+        canvas.insertReorderBarrier(true);
+        canvas.insertReorderBarrier(false);
+        drawOrderedRect(&canvas, 12);
     });
     FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
             sLightGeometry, Caches::getInstance());
@@ -1549,7 +1557,7 @@ RENDERTHREAD_TEST(FrameBuilder, zReorder) {
 
     ZReorderTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
-    EXPECT_EQ(10, renderer.getIndex());
+    EXPECT_EQ(13, renderer.getIndex());
 };
 
 RENDERTHREAD_TEST(FrameBuilder, projectionReorder) {
