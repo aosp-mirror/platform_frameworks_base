@@ -37,6 +37,7 @@ please see styles_device_defaults.xml.
         <item name="windowAnimationStyle">@style/Animation.InputMethod</item>
         <item name="imeFullscreenBackground">?colorBackground</item>
         <item name="imeExtractEnterAnimation">@anim/input_method_extract_enter</item>
+        <item name="windowSwipeToDismiss">false</item>
     </style>
 
     <!-- Override behaviour to set the theme colours for dialogs, keep them the same. -->
