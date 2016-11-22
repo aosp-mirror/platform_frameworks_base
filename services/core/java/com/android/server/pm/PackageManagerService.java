@@ -2925,6 +2925,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                 | (!Build.IS_DEBUGGABLE ? MATCH_SYSTEM_ONLY : 0);
         final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
                 resolveFlags, UserHandle.USER_SYSTEM);
+        Iterator<ResolveInfo> iter = matches.iterator();
+        while (iter.hasNext()) {
+            final ResolveInfo rInfo = iter.next();
+            final PackageSetting ps = mSettings.mPackages.get(rInfo.activityInfo.packageName);
+            if (ps != null) {
+                final PermissionsState permissionsState = ps.getPermissionsState();
+                if (permissionsState.hasPermission(Manifest.permission.INSTALL_PACKAGES, 0)) {
+                    continue;
+                }
+            }
+            iter.remove();
+        }
         if (matches.size() == 0) {
             return null;
         } else if (matches.size() == 1) {
