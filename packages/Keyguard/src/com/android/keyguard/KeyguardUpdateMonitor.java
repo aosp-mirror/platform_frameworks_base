@@ -1112,7 +1112,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mTrustManager.registerTrustListener(this);
         new LockPatternUtils(context).registerStrongAuthTracker(mStrongAuthTracker);
 
-        mFpm = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            mFpm = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
+        }
         updateFingerprintListeningState();
         if (mFpm != null) {
             mFpm.addLockoutResetCallback(mLockoutResetCallback);
