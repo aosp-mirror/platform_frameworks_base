@@ -2747,7 +2747,8 @@ public abstract class Context {
             //@hide: SOUND_TRIGGER_SERVICE,
             SHORTCUT_SERVICE,
             //@hide: CONTEXTHUB_SERVICE,
-            SYSTEM_HEALTH_SERVICE
+            SYSTEM_HEALTH_SERVICE,
+            //@hide: INCIDENT_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -3703,6 +3704,12 @@ public abstract class Context {
      * @hide
      */
     public static final String DEVICE_IDENTIFIERS_SERVICE = "device_identifiers";
+
+    /**
+     * Service to report a system health "incident"
+     * @hide
+     */
+    public static final String INCIDENT_SERVICE = "incident";
 
     /**
      * Determine whether the given permission is allowed for a particular

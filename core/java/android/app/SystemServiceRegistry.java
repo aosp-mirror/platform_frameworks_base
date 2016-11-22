@@ -96,6 +96,7 @@ import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
 import android.os.IRecoverySystem;
 import android.os.IUserManager;
+import android.os.IncidentManager;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RecoverySystem;
@@ -773,6 +774,13 @@ final class SystemServiceRegistry {
             public ContextHubManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 return new ContextHubManager(ctx.getOuterContext(),
                   ctx.mMainThread.getHandler().getLooper());
+            }});
+
+        registerService(Context.INCIDENT_SERVICE, IncidentManager.class,
+                new CachedServiceFetcher<IncidentManager>() {
+            @Override
+            public IncidentManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                return new IncidentManager(ctx);
             }});
     }
 

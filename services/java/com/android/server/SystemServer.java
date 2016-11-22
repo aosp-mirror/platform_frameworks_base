@@ -32,6 +32,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.FactoryTest;
 import android.os.FileUtils;
+import android.os.IIncidentManager;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -1634,6 +1635,19 @@ public final class SystemServer {
                     reportWtf("Notifying NetworkScoreService running", e);
                 }
                 traceEnd();
+
+                traceBeginAndSlog("IncidentDaemonReady");
+                try {
+                    // TODO: Switch from checkService to getService once it's always
+                    // in the build and should reliably be there.
+                    final IIncidentManager incident = IIncidentManager.Stub.asInterface(
+                            ServiceManager.checkService("incident"));
+                    if (incident != null) incident.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying incident daemon running", e);
+                }
+                traceEnd();
+                
 
                 traceEnd();  // PhaseActivityManagerReady
             }

@@ -38,7 +38,9 @@ ifneq ($(ANDROID_BUILD_EMBEDDED),true)
 include $(CLEAR_VARS)
 
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
-LOCAL_SRC_FILES := $(call find-other-java-files,$(FRAMEWORKS_BASE_SUBDIRS))
+LOCAL_SRC_FILES := \
+        $(call find-other-java-files,$(FRAMEWORKS_BASE_SUBDIRS)) \
+        $(call all-proto-files-under, core/proto)
 
 # EventLogTags files.
 LOCAL_SRC_FILES += \
@@ -234,6 +236,9 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IDeviceIdentifiersPolicyService.aidl \
 	core/java/android/os/IDeviceIdleController.aidl \
 	core/java/android/os/IHardwarePropertiesManager.aidl \
+	core/java/android/os/IIncidentManager.aidl \
+	core/java/android/os/IIncidentReportCompletedListener.aidl \
+	core/java/android/os/IIncidentReportStatusListener.aidl \
 	core/java/android/os/IMaintenanceActivityListener.aidl \
 	core/java/android/os/IMessenger.aidl \
 	core/java/android/os/INetworkActivityListener.aidl \
@@ -527,6 +532,10 @@ LOCAL_STATIC_JAVA_LIBRARIES :=                          \
     framework-protos                                    \
     android.hardware.thermal@1.0-java-constants         \
     android.hardware.health@1.0-java-constants          \
+
+LOCAL_PROTOC_OPTIMIZE_TYPE := stream
+LOCAL_PROTOC_FLAGS := \
+    -Iexternal/protobuf/src
 
 LOCAL_MODULE := framework
 
@@ -1384,6 +1393,35 @@ ifneq ($(INCREMENTAL_BUILDS),)
 endif
 
 include $(BUILD_JAVA_LIBRARY)
+
+# ====  c++ proto host library  ==============================
+include $(CLEAR_VARS)
+LOCAL_MODULE := libplatformprotos
+LOCAL_PROTOC_OPTIMIZE_TYPE := full
+LOCAL_PROTOC_FLAGS := \
+    --include_source_info \
+    -Iexternal/protobuf/src
+LOCAL_SRC_FILES := \
+    $(call all-proto-files-under, core/proto) \
+    $(call all-proto-files-under, libs/incident/proto)
+LOCAL_C_INCLUDES := \
+    $(call generated-sources-dir-for,STATIC_LIBRARIES,libplatformprotos,)/proto
+LOCAL_EXPORT_C_INCLUDES := \
+    $(call generated-sources-dir-for,STATIC_LIBRARIES,libplatformprotos,)/proto
+include $(BUILD_HOST_SHARED_LIBRARY)
+
+
+# ====  java proto host library  ==============================
+include $(CLEAR_VARS)
+LOCAL_MODULE := platformprotos
+LOCAL_PROTOC_OPTIMIZE_TYPE := full
+LOCAL_PROTOC_FLAGS := \
+    -Iexternal/protobuf/src
+LOCAL_SOURCE_FILES_ALL_GENERATED := true
+LOCAL_SRC_FILES := \
+    $(call all-proto-files-under, core/proto) \
+    $(call all-proto-files-under, libs/incident/proto)
+include $(BUILD_HOST_JAVA_LIBRARY)
 
 
 # Include subdirectory makefiles
