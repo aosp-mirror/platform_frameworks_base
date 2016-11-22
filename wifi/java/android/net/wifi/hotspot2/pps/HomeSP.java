@@ -53,6 +53,27 @@ public final class HomeSP implements Parcelable {
      */
     public long[] roamingConsortiumOIs = null;
 
+    /**
+     * Constructor for creating HomeSP with default values.
+     */
+    public HomeSP() {}
+
+    /**
+     * Copy constructor.
+     *
+     * @param source The source to copy from
+     */
+    public HomeSP(HomeSP source) {
+        if (source != null) {
+            fqdn = source.fqdn;
+            friendlyName = source.friendlyName;
+            if (source.roamingConsortiumOIs != null) {
+                roamingConsortiumOIs = Arrays.copyOf(source.roamingConsortiumOIs,
+                                                     source.roamingConsortiumOIs.length);
+            }
+        }
+    }
+
     @Override
     public int describeContents() {
         return 0;
