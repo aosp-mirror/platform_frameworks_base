@@ -144,7 +144,7 @@ public class NetworkScoreManager {
      *         scorer.
      */
     public String getActiveScorerPackage() {
-        NetworkScorerAppData app = NetworkScorerAppManager.getActiveScorer(mContext);
+        NetworkScorerAppData app = new NetworkScorerAppManager(mContext).getActiveScorer();
         if (app == null) {
             return null;
         }
