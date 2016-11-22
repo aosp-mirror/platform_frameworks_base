@@ -1837,12 +1837,44 @@ public class NotificationManagerService extends SystemService {
          * @param token The binder for the listener, to check that the caller is allowed
          */
         @Override
-        public void snoozeNotificationFromListener(INotificationListener token, String key,
+        public void snoozeNotificationUntilFromListener(INotificationListener token, String key,
                 long snoozeUntil) {
             long identity = Binder.clearCallingIdentity();
             try {
                 final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
                 snoozeNotificationInt(key, snoozeUntil, info);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        /**
+         * Allow an INotificationListener to snooze a single notification.
+         *
+         * @param token The binder for the listener, to check that the caller is allowed
+         */
+        @Override
+        public void snoozeNotificationFromListener(INotificationListener token, String key) {
+            long identity = Binder.clearCallingIdentity();
+            try {
+                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                snoozeNotificationInt(key, info);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        /**
+         * Allow an INotificationListener to un-snooze a single notification.
+         *
+         * @param token The binder for the listener, to check that the caller is allowed
+         */
+        @Override
+        public void unsnoozeNotificationFromListener(INotificationListener token, String key) {
+            long identity = Binder.clearCallingIdentity();
+            try {
+                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                unsnoozeNotificationInt(key, info);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -2206,7 +2238,6 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public ComponentName getEffectsSuppressor() {
-            enforceSystemOrSystemUIOrVolume("INotificationManager.getEffectsSuppressor");
             return !mEffectsSuppressors.isEmpty() ? mEffectsSuppressors.get(0) : null;
         }
 
@@ -3684,6 +3715,34 @@ public class NotificationManagerService extends SystemService {
                 savePolicyFile();
             }
         }
+    }
+
+    void snoozeNotificationInt(String key, ManagedServiceInfo listener) {
+        String listenerName = listener == null ? null : listener.component.toShortString();
+        // TODO: write to event log
+        if (DBG) {
+            Slog.d(TAG, String.format("snooze event(%s, %s)", key, listenerName));
+        }
+        synchronized (mNotificationList) {
+            final NotificationRecord r = mNotificationsByKey.get(key);
+            if (r != null) {
+                mNotificationList.remove(r);
+                cancelNotificationLocked(r, false, REASON_SNOOZED);
+                updateLightsLocked();
+                mSnoozeHelper.snooze(r, r.getUser().getIdentifier());
+                savePolicyFile();
+            }
+        }
+    }
+
+    void unsnoozeNotificationInt(String key, ManagedServiceInfo listener) {
+        String listenerName = listener == null ? null : listener.component.toShortString();
+        // TODO: write to event log
+        if (DBG) {
+            Slog.d(TAG, String.format("unsnooze event(%s, %s)", key, listenerName));
+        }
+        mSnoozeHelper.repost(key, Binder.getCallingUid());
+                savePolicyFile();
     }
 
     void cancelAllLocked(int callingUid, int callingPid, int userId, int reason,

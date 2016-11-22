@@ -534,7 +534,46 @@ public abstract class NotificationListenerService extends Service {
     public final void snoozeNotification(String key, long snoozeUntil) {
         if (!isBound()) return;
         try {
-            getNotificationInterface().snoozeNotificationFromListener(mWrapper, key, snoozeUntil);
+            getNotificationInterface().snoozeNotificationUntilFromListener(
+                    mWrapper, key, snoozeUntil);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
+    /**
+     * Inform the notification manager about snoozing a specific notification.
+     * <p>
+     * Use this to snooze a notification for an indeterminate time.  Upon being informed, the
+     * notification manager will actually remove the notification and you will get an
+     * {@link #onNotificationRemoved(StatusBarNotification)} callback. When the
+     * snoozing period expires, you will get a
+     * {@link #onNotificationPosted(StatusBarNotification, RankingMap)} callback for the
+     * notification. Use {@link #unsnoozeNotification(String)} to restore the notification.
+     * @param key The key of the notification to snooze
+     */
+    public final void snoozeNotification(String key) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().snoozeNotificationFromListener(mWrapper, key);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
+    /**
+     * Inform the notification manager about un-snoozing a specific notification.
+     * <p>
+     * This should only be used for notifications snoozed by this listener using
+     * {@link #snoozeNotification(String)}. Once un-snoozed, you will get a
+     * {@link #onNotificationPosted(StatusBarNotification, RankingMap)} callback for the
+     * notification.
+     * @param key The key of the notification to snooze
+     */
+    public final void unsnoozeNotification(String key) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().unsnoozeNotificationFromListener(mWrapper, key);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }

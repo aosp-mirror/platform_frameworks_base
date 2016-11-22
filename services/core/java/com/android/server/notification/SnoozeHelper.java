@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -62,6 +63,8 @@ public class SnoozeHelper {
     // User id : package name : notification key : record.
     private ArrayMap<Integer, ArrayMap<String, ArrayMap<String, NotificationRecord>>>
             mSnoozedNotifications = new ArrayMap<>();
+    // notification key : package.
+    private ArrayMap<String, String> mPackages = new ArrayMap<>();
     private Callback mCallback;
 
     public SnoozeHelper(Context context, Callback callback,
@@ -82,10 +85,20 @@ public class SnoozeHelper {
     }
 
     /**
-     * Records a notification that should be snoozed until the given time and schedules an alarm
-     * to repost at that time.
+     * Snoozes a notification and schedules an alarm to repost at that time.
      */
     protected void snooze(NotificationRecord record, int userId, long until) {
+        snooze(record, userId);
+        scheduleRepost(record.sbn.getPackageName(), record.getKey(), userId, until);
+    }
+
+    /**
+     * Records a snoozed notification.
+     */
+    protected void snooze(NotificationRecord record, int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, "Snoozing " + record.getKey());
+        }
         ArrayMap<String, ArrayMap<String, NotificationRecord>> records =
                 mSnoozedNotifications.get(userId);
         if (records == null) {
@@ -98,12 +111,8 @@ public class SnoozeHelper {
         pkgRecords.put(record.getKey(), record);
         records.put(record.sbn.getPackageName(), pkgRecords);
         mSnoozedNotifications.put(userId, records);
-        if (DEBUG) {
-            Slog.d(TAG, "Snoozing " + record.getKey() + " until " + new Date(until));
-        }
-        scheduleRepost(record.sbn.getPackageName(), record.getKey(), userId, until);
+        mPackages.put(record.getKey(), record.sbn.getPackageName());
     }
-
 
     protected boolean cancel(int userId, String pkg, String tag, int id) {
         if (mSnoozedNotifications.containsKey(userId)) {
@@ -121,6 +130,7 @@ public class SnoozeHelper {
                 if (key != null) {
                     recordsForPkg.remove(key);
                     cancelAlarm(userId, pkg, key);
+                    mPackages.remove(key);
                     return true;
                 }
             }
@@ -145,6 +155,7 @@ public class SnoozeHelper {
                         int P = records.size();
                         for (int k = 0; k < P; k++) {
                             cancelAlarm(userId, snoozedPkgs.keyAt(j), records.keyAt(k));
+                            mPackages.remove(records.keyAt(k));
                         }
                     }
                 }
@@ -162,6 +173,7 @@ public class SnoozeHelper {
                 int N = records.size();
                 for (int i = 0; i < N; i++) {
                     cancelAlarm(userId, pkg, records.keyAt(i));
+                    mPackages.remove(records.keyAt(i));
                 }
                 return true;
             }
@@ -190,8 +202,8 @@ public class SnoozeHelper {
         pkgRecords.put(record.getKey(), record);
     }
 
-    @VisibleForTesting
-    void repost(String pkg, String key, int userId) {
+    protected void repost(String key, int userId) {
+        final String pkg = mPackages.remove(key);
         ArrayMap<String, ArrayMap<String, NotificationRecord>> records =
                 mSnoozedNotifications.get(userId);
         if (records == null) {
@@ -202,6 +214,7 @@ public class SnoozeHelper {
             return;
         }
         final NotificationRecord record = pkgRecords.remove(key);
+
         if (record != null) {
             mCallback.repost(userId, record);
         }
@@ -213,7 +226,6 @@ public class SnoozeHelper {
                 new Intent(REPOST_ACTION)
                         .setData(new Uri.Builder().scheme(REPOST_SCHEME).appendPath(key).build())
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-                        .putExtra(EXTRA_PKG, pkg)
                         .putExtra(EXTRA_KEY, key)
                         .putExtra(EXTRA_USER_ID, userId),
                 PendingIntent.FLAG_UPDATE_CURRENT);
@@ -273,8 +285,8 @@ public class SnoozeHelper {
                 Slog.d(TAG, "Reposting notification");
             }
             if (REPOST_ACTION.equals(intent.getAction())) {
-                repost(intent.getStringExtra(EXTRA_PKG), intent.getStringExtra(EXTRA_KEY),
-                        intent.getIntExtra(EXTRA_USER_ID, 0));
+                repost(intent.getStringExtra(EXTRA_KEY), intent.getIntExtra(EXTRA_USER_ID,
+                        UserHandle.USER_SYSTEM));
             }
         }
     };
