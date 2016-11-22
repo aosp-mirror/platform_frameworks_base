@@ -52,12 +52,11 @@ public class BootTimingsTraceLog {
         if (!DEBUG_BOOT_TIME) {
             return;
         }
-        // Pop the top element without throwing NoSuchElementException
-        Pair<String, Long> event = mStartTimes.pollFirst();
-        if (event == null) {
+        if (mStartTimes.peek() == null) {
             Slog.w(mTag, "traceEnd called more times than traceBegin");
             return;
         }
+        Pair<String, Long> event = mStartTimes.pop();
         // Log the duration so it can be parsed by external tools for performance reporting
         Slog.d(mTag, event.first + " took to complete: "
                 + (SystemClock.elapsedRealtime() - event.second) + "ms");
