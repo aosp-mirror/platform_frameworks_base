@@ -1520,7 +1520,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int PERSIST_URI_GRANTS_MSG = 38;
     static final int REQUEST_ALL_PSS_MSG = 39;
     static final int START_PROFILES_MSG = 40;
-    static final int UPDATE_TIME = 41;
+    static final int UPDATE_TIME_PREFERENCE_MSG = 41;
     static final int SYSTEM_USER_START_MSG = 42;
     static final int SYSTEM_USER_CURRENT_MSG = 43;
     static final int ENTER_ANIMATION_COMPLETE_MSG = 44;
@@ -2026,15 +2026,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 break;
             }
-            case UPDATE_TIME: {
+            case UPDATE_TIME_PREFERENCE_MSG: {
+                // The user's time format preference might have changed.
+                // For convenience we re-use the Intent extra values.
                 synchronized (ActivityManagerService.this) {
-                    for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
+                    for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
                         ProcessRecord r = mLruProcesses.get(i);
                         if (r.thread != null) {
                             try {
-                                r.thread.updateTimePrefs(msg.arg1 == 0 ? false : true);
+                                r.thread.updateTimePrefs(msg.arg1);
                             } catch (RemoteException ex) {
-                                Slog.w(TAG, "Failed to update preferences for: " + r.info.processName);
+                                Slog.w(TAG, "Failed to update preferences for: "
+                                        + r.info.processName);
                             }
                         }
                     }
@@ -18169,11 +18172,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mHandler.sendEmptyMessage(UPDATE_TIME_ZONE);
                     break;
                 case Intent.ACTION_TIME_CHANGED:
-                    // If the user set the time, let all running processes know.
-                    final int is24Hour =
-                            intent.getBooleanExtra(Intent.EXTRA_TIME_PREF_24_HOUR_FORMAT, false) ? 1
-                                    : 0;
-                    mHandler.sendMessage(mHandler.obtainMessage(UPDATE_TIME, is24Hour, 0));
+                    // EXTRA_TIME_PREF_24_HOUR_FORMAT is optional so we must distinguish between
+                    // the tri-state value it may contain and "unknown".
+                    // For convenience we re-use the Intent extra values.
+                    final int NO_EXTRA_VALUE_FOUND = -1;
+                    final int timeFormatPreferenceMsgValue = intent.getIntExtra(
+                            Intent.EXTRA_TIME_PREF_24_HOUR_FORMAT,
+                            NO_EXTRA_VALUE_FOUND /* defaultValue */);
+                    // Only send a message if the time preference is available.
+                    if (timeFormatPreferenceMsgValue != NO_EXTRA_VALUE_FOUND) {
+                        Message updateTimePreferenceMsg =
+                                mHandler.obtainMessage(UPDATE_TIME_PREFERENCE_MSG,
+                                        timeFormatPreferenceMsgValue, 0);
+                        mHandler.sendMessage(updateTimePreferenceMsg);
+                    }
                     BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
                     synchronized (stats) {
                         stats.noteCurrentTimeChangedLocked();

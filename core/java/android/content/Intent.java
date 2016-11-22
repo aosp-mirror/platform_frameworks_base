@@ -4186,13 +4186,21 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.extra.SHUTDOWN_USERSPACE_ONLY";
 
     /**
-     * Optional boolean extra for {@link #ACTION_TIME_CHANGED} that indicates the
-     * user has set their time format preferences to the 24 hour format.
+     * Optional int extra for {@link #ACTION_TIME_CHANGED} that indicates the
+     * user has set their time format preference. See {@link #EXTRA_TIME_PREF_VALUE_USE_12_HOUR},
+     * {@link #EXTRA_TIME_PREF_VALUE_USE_24_HOUR} and
+     * {@link #EXTRA_TIME_PREF_VALUE_USE_LOCALE_DEFAULT}. The value must not be negative.
      *
      * @hide for internal use only.
      */
     public static final String EXTRA_TIME_PREF_24_HOUR_FORMAT =
             "android.intent.extra.TIME_PREF_24_HOUR_FORMAT";
+    /** @hide */
+    public static final int EXTRA_TIME_PREF_VALUE_USE_12_HOUR = 0;
+    /** @hide */
+    public static final int EXTRA_TIME_PREF_VALUE_USE_24_HOUR = 1;
+    /** @hide */
+    public static final int EXTRA_TIME_PREF_VALUE_USE_LOCALE_DEFAULT = 2;
 
     /** {@hide} */
     public static final String EXTRA_REASON = "android.intent.extra.REASON";

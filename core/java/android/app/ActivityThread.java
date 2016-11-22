@@ -1309,8 +1309,19 @@ public final class ActivityThread {
         }
 
         @Override
-        public final void updateTimePrefs(boolean is24Hour) {
-            DateFormat.set24HourTimePref(is24Hour);
+        public final void updateTimePrefs(int timeFormatPreference) {
+            final Boolean timeFormatPreferenceBool;
+            // For convenience we are using the Intent extra values.
+            if (timeFormatPreference == Intent.EXTRA_TIME_PREF_VALUE_USE_12_HOUR) {
+                timeFormatPreferenceBool = Boolean.FALSE;
+            } else if (timeFormatPreference == Intent.EXTRA_TIME_PREF_VALUE_USE_24_HOUR) {
+                timeFormatPreferenceBool = Boolean.TRUE;
+            } else {
+                // timeFormatPreference == Intent.EXTRA_TIME_PREF_VALUE_USE_LOCALE_DEFAULT
+                // (or unknown).
+                timeFormatPreferenceBool = null;
+            }
+            DateFormat.set24HourTimePref(timeFormatPreferenceBool);
         }
 
         @Override
