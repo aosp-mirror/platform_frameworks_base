@@ -21,7 +21,9 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -43,6 +45,7 @@ import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -54,11 +57,14 @@ public class TileUtilsTest {
     private Context mContext;
     @Mock
     private PackageManager mPackageManager;
+    @Mock
+    private Resources mResources;
 
     @Before
-    public void setUp() {
+    public void setUp() throws NameNotFoundException {
         MockitoAnnotations.initMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.getResourcesForApplication(anyString())).thenReturn(mResources);
     }
 
     @Test
@@ -82,6 +88,27 @@ public class TileUtilsTest {
     }
 
     @Test
+    public void getTilesForIntent_shouldParseKeyHintForSystemApp() {
+        String keyHint = "key";
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, keyHint);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        assertThat(outTiles.get(0).key).isEqualTo(keyHint);
+    }
+
+    @Test
     public void getTilesForIntent_shouldSkipNonSystemApp() {
         final String testCategory = "category1";
         Intent intent = new Intent();
@@ -100,7 +127,12 @@ public class TileUtilsTest {
         assertThat(outTiles.isEmpty()).isTrue();
     }
 
+
     private ResolveInfo newInfo(boolean systemApp, String category) {
+        return newInfo(systemApp, category, null);
+    }
+
+    private ResolveInfo newInfo(boolean systemApp, String category, String keyHint) {
         ResolveInfo info = new ResolveInfo();
         info.system = systemApp;
         info.activityInfo = new ActivityInfo();
@@ -108,7 +140,13 @@ public class TileUtilsTest {
         info.activityInfo.name = "123";
         info.activityInfo.metaData = new Bundle();
         info.activityInfo.metaData.putString("com.android.settings.category", category);
+        if (keyHint != null) {
+            info.activityInfo.metaData.putString("com.android.settings.keyhint", keyHint);
+        }
         info.activityInfo.applicationInfo = new ApplicationInfo();
+        if (systemApp) {
+            info.activityInfo.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+        }
         return info;
     }
 }
