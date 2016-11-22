@@ -3589,6 +3589,10 @@ public final class ViewRootImpl implements ViewParent,
                         mAttachInfo.mKeyDispatchState.reset();
                         mView.dispatchWindowFocusChanged(hasWindowFocus);
                         mAttachInfo.mTreeObserver.dispatchOnWindowFocusChange(hasWindowFocus);
+
+                        if (mAttachInfo.mTooltipHost != null) {
+                            mAttachInfo.mTooltipHost.hideTooltip();
+                        }
                     }
 
                     // Note: must be done after the focus change callbacks,
@@ -4206,6 +4210,10 @@ public final class ViewRootImpl implements ViewParent,
         private int processKeyEvent(QueuedInputEvent q) {
             final KeyEvent event = (KeyEvent)q.mEvent;
 
+            if (mAttachInfo.mTooltipHost != null) {
+                mAttachInfo.mTooltipHost.handleTooltipKey(event);
+            }
+
             // If the key's purpose is to exit touch mode then we consume it
             // and consider it handled.
             if (checkForLeavingTouchModeAndConsume(event)) {
@@ -4230,6 +4238,10 @@ public final class ViewRootImpl implements ViewParent,
             final int action = event.getAction();
             if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_SCROLL) {
                 ensureTouchMode(true);
+            }
+
+            if (action == MotionEvent.ACTION_DOWN && mAttachInfo.mTooltipHost != null) {
+                mAttachInfo.mTooltipHost.hideTooltip();
             }
 
             // Offset the scroll position.
@@ -4425,6 +4437,7 @@ public final class ViewRootImpl implements ViewParent,
             mAttachInfo.mHandlingPointerEvent = true;
             boolean handled = eventTarget.dispatchPointerEvent(event);
             maybeUpdatePointerIcon(event);
+            maybeUpdateTooltip(event);
             mAttachInfo.mHandlingPointerEvent = false;
             if (mAttachInfo.mUnbufferedDispatchRequested && !mUnbufferedInputDispatch) {
                 mUnbufferedInputDispatch = true;
@@ -4510,6 +4523,27 @@ public final class ViewRootImpl implements ViewParent,
             InputManager.getInstance().setCustomPointerIcon(mCustomPointerIcon);
         }
         return true;
+    }
+
+    private void maybeUpdateTooltip(MotionEvent event) {
+        if (event.getPointerCount() != 1) {
+            return;
+        }
+        final int action = event.getActionMasked();
+        if (action != MotionEvent.ACTION_HOVER_ENTER
+                && action != MotionEvent.ACTION_HOVER_MOVE
+                && action != MotionEvent.ACTION_HOVER_EXIT) {
+            return;
+        }
+        AccessibilityManager manager = AccessibilityManager.getInstance(mContext);
+        if (manager.isEnabled() && manager.isTouchExplorationEnabled()) {
+            return;
+        }
+        if (mView == null) {
+            Slog.d(mTag, "maybeUpdateTooltip called after view was removed");
+            return;
+        }
+        mView.dispatchTooltipHoverEvent(event);
     }
 
     /**

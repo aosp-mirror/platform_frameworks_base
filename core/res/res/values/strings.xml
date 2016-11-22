@@ -4450,4 +4450,7 @@
 
     <!-- Label used by Telephony code, assigned as the display name for conference calls [CHAR LIMIT=60] -->
     <string name="conference_call">Conference Call</string>
+
+    <!-- Title for a tooltip popup window [CHAR LIMIT=NONE] -->
+    <string name="tooltip_popup_title">Tooltip Popup</string>
 </resources>

@@ -128,6 +128,9 @@
     <integer name="config_activityShortDur">150</integer>
     <integer name="config_activityDefaultDur">220</integer>
 
+    <!-- The duration (in milliseconds) of the tooltip show/hide animations. -->
+    <integer name="config_tooltipAnimTime">150</integer>
+
     <!-- Duration for the dim animation behind a dialog.  This may be either
          a percentage, which is relative to the duration of the enter/open
          animation of the window being shown that is dimming behind, or it may

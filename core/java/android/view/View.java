@@ -37,6 +37,7 @@ import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.content.ClipData;
 import android.content.Context;
@@ -111,6 +112,7 @@ import android.widget.ScrollBarDrawable;
 
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
+import com.android.internal.view.TooltipPopup;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.ScrollBarUtils;
 
@@ -1195,6 +1197,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int PARENT_SAVE_DISABLED_MASK = 0x20000000;
 
     private static Paint sDebugPaint;
+
+    /**
+     * <p>Indicates this view can display a tooltip on hover or long press.</p>
+     * {@hide}
+     */
+    static final int TOOLTIP = 0x40000000;
 
     /** @hide */
     @IntDef(flag = true,
@@ -3619,6 +3627,39 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     ListenerInfo mListenerInfo;
 
+    private static class TooltipInfo {
+        /**
+         * Text to be displayed in a tooltip popup.
+         */
+        @Nullable
+        CharSequence mTooltip;
+
+        /**
+         * View-relative position of the tooltip anchor point.
+         */
+        int mAnchorX;
+        int mAnchorY;
+
+        /**
+         * The tooltip popup.
+         */
+        @Nullable
+        TooltipPopup mTooltipPopup;
+
+        /**
+         * Set to true if the tooltip was shown as a result of a long click.
+         */
+        boolean mTooltipFromLongClick;
+
+        /**
+         * Keep these Runnables so that they can be used to reschedule.
+         */
+        Runnable mShowTooltipRunnable;
+        Runnable mHideTooltipRunnable;
+    }
+
+    TooltipInfo mTooltipInfo;
+
     // Temporary values used to hold (x,y) coordinates when delegating from the
     // two-arg performLongClick() method to the legacy no-arg version.
     private float mLongClickX = Float.NaN;
@@ -4576,6 +4617,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                     break;
 
+                case R.styleable.View_tooltip:
+                    setTooltip(a.getText(attr));
+                    break;
             }
         }
 
@@ -5711,6 +5755,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (!handled) {
             final boolean isAnchored = !Float.isNaN(x) && !Float.isNaN(y);
             handled = isAnchored ? showContextMenu(x, y) : showContextMenu();
+        }
+        if ((mViewFlags & TOOLTIP) == TOOLTIP) {
+            if (!handled) {
+                handled = showLongClickTooltip((int) x, (int) y);
+            }
         }
         if (handled) {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
@@ -10603,17 +10652,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return true;
             }
 
-            // Long clickable items don't necessarily have to be clickable.
-            if (((mViewFlags & CLICKABLE) == CLICKABLE
-                    || (mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE)
-                    && (event.getRepeatCount() == 0)) {
-                // For the purposes of menu anchoring and drawable hotspots,
-                // key events are considered to be at the center of the view.
-                final float x = getWidth() / 2f;
-                final float y = getHeight() / 2f;
-                setPressed(true, x, y);
-                checkForLongClick(0, x, y);
-                return true;
+            if (event.getRepeatCount() == 0) {
+                // Long clickable items don't necessarily have to be clickable.
+                final boolean clickable = (mViewFlags & CLICKABLE) == CLICKABLE
+                        || (mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE;
+                if (clickable || (mViewFlags & TOOLTIP) == TOOLTIP) {
+                    // For the purposes of menu anchoring and drawable hotspots,
+                    // key events are considered to be at the center of the view.
+                    final float x = getWidth() / 2f;
+                    final float y = getHeight() / 2f;
+                    if (clickable) {
+                        setPressed(true, x, y);
+                    }
+                    checkForLongClick(0, x, y);
+                    return true;
+                }
             }
         }
 
@@ -11160,15 +11213,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final int viewFlags = mViewFlags;
         final int action = event.getAction();
 
+        final boolean clickable = ((viewFlags & CLICKABLE) == CLICKABLE
+                || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE)
+                || (viewFlags & CONTEXT_CLICKABLE) == CONTEXT_CLICKABLE;
+
         if ((viewFlags & ENABLED_MASK) == DISABLED) {
             if (action == MotionEvent.ACTION_UP && (mPrivateFlags & PFLAG_PRESSED) != 0) {
                 setPressed(false);
             }
             // A disabled view that is clickable still consumes the touch
             // events, it just doesn't respond to them.
-            return (((viewFlags & CLICKABLE) == CLICKABLE
-                    || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE)
-                    || (viewFlags & CONTEXT_CLICKABLE) == CONTEXT_CLICKABLE);
+            return clickable;
         }
         if (mTouchDelegate != null) {
             if (mTouchDelegate.onTouchEvent(event)) {
@@ -11176,11 +11231,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
-        if (((viewFlags & CLICKABLE) == CLICKABLE ||
-                (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) ||
-                (viewFlags & CONTEXT_CLICKABLE) == CONTEXT_CLICKABLE) {
+        if (clickable || (viewFlags & TOOLTIP) == TOOLTIP) {
             switch (action) {
                 case MotionEvent.ACTION_UP:
+                    if ((viewFlags & TOOLTIP) == TOOLTIP) {
+                        handleTooltipUp();
+                    }
+                    if (!clickable) {
+                        removeTapCallback();
+                        removeLongPressCallback();
+                        mInContextButtonPress = false;
+                        mHasPerformedLongPress = false;
+                        mIgnoreNextUpEvent = false;
+                        break;
+                    }
                     boolean prepressed = (mPrivateFlags & PFLAG_PREPRESSED) != 0;
                     if ((mPrivateFlags & PFLAG_PRESSED) != 0 || prepressed) {
                         // take focus if we don't have it already and we should in
@@ -11196,7 +11260,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             // state now (before scheduling the click) to ensure
                             // the user sees it.
                             setPressed(true, x, y);
-                       }
+                        }
 
                         if (!mHasPerformedLongPress && !mIgnoreNextUpEvent) {
                             // This is a tap, so remove the longpress check
@@ -11236,6 +11300,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case MotionEvent.ACTION_DOWN:
                     mHasPerformedLongPress = false;
 
+                    if (!clickable) {
+                        checkForLongClick(0, x, y);
+                        break;
+                    }
+
                     if (performButtonActionOnTouchDown(event)) {
                         break;
                     }
@@ -11261,7 +11330,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
 
                 case MotionEvent.ACTION_CANCEL:
-                    setPressed(false);
+                    if (clickable) {
+                        setPressed(false);
+                    }
                     removeTapCallback();
                     removeLongPressCallback();
                     mInContextButtonPress = false;
@@ -11270,16 +11341,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    drawableHotspotChanged(x, y);
+                    if (clickable) {
+                        drawableHotspotChanged(x, y);
+                    }
 
                     // Be lenient about moving outside of buttons
                     if (!pointInView(x, y, mTouchSlop)) {
                         // Outside button
+                        // Remove any future long press/tap checks
                         removeTapCallback();
+                        removeLongPressCallback();
                         if ((mPrivateFlags & PFLAG_PRESSED) != 0) {
-                            // Remove any future long press/tap checks
-                            removeLongPressCallback();
-
                             setPressed(false);
                         }
                     }
@@ -11311,7 +11383,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private void removeLongPressCallback() {
         if (mPendingCheckForLongPress != null) {
-          removeCallbacks(mPendingCheckForLongPress);
+            removeCallbacks(mPendingCheckForLongPress);
         }
     }
 
@@ -15379,6 +15451,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         cleanupDraw();
         mCurrentAnimation = null;
+
+        if ((mViewFlags & TOOLTIP) == TOOLTIP) {
+            hideTooltip();
+        }
     }
 
     private void cleanupDraw() {
@@ -21031,7 +21107,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void checkForLongClick(int delayOffset, float x, float y) {
-        if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) {
+        if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE || (mViewFlags & TOOLTIP) == TOOLTIP) {
             mHasPerformedLongPress = false;
 
             if (mPendingCheckForLongPress == null) {
@@ -21039,6 +21115,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             mPendingCheckForLongPress.setAnchor(x, y);
             mPendingCheckForLongPress.rememberWindowAttachCount();
+            mPendingCheckForLongPress.rememberPressedState();
             postDelayed(mPendingCheckForLongPress,
                     ViewConfiguration.getLongPressTimeout() - delayOffset);
         }
@@ -22439,10 +22516,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         private int mOriginalWindowAttachCount;
         private float mX;
         private float mY;
+        private boolean mOriginalPressedState;
 
         @Override
         public void run() {
-            if (isPressed() && (mParent != null)
+            if ((mOriginalPressedState == isPressed()) && (mParent != null)
                     && mOriginalWindowAttachCount == mWindowAttachCount) {
                 if (performLongClick(mX, mY)) {
                     mHasPerformedLongPress = true;
@@ -22457,6 +22535,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         public void rememberWindowAttachCount() {
             mOriginalWindowAttachCount = mWindowAttachCount;
+        }
+
+        public void rememberPressedState() {
+            mOriginalPressedState = isPressed();
         }
     }
 
@@ -23246,6 +23328,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         public Surface mDragSurface;
 
+
+        /**
+         * The view that currently has a tooltip displayed.
+         */
+        View mTooltipHost;
+
         /**
          * Creates a new set of attachment information with the specified
          * events handler and thread.
@@ -23981,5 +24069,168 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         getLocationOnScreen(mAttachInfo.mTmpLocation);
         return mAttachInfo.mTmpLocation[0] == insets.getStableInsetLeft()
                 && mAttachInfo.mTmpLocation[1] == insets.getStableInsetTop();
+    }
+
+    /**
+     * Sets the tooltip text which will be displayed in a small popup next to the view.
+     * <p>
+     * The tooltip will be displayed:
+     * <li>On long click, unless is not handled otherwise (by OnLongClickListener or a context
+     * menu). </li>
+     * <li>On hover, after a brief delay since the pointer has stopped moving </li>
+     *
+     * @param tooltip the tooltip text, or null if no tooltip is required
+     */
+    public final void setTooltip(@Nullable CharSequence tooltip) {
+        if (TextUtils.isEmpty(tooltip)) {
+            setFlags(0, TOOLTIP);
+            hideTooltip();
+            mTooltipInfo = null;
+        } else {
+            setFlags(TOOLTIP, TOOLTIP);
+            if (mTooltipInfo == null) {
+                mTooltipInfo = new TooltipInfo();
+                mTooltipInfo.mShowTooltipRunnable = this::showHoverTooltip;
+                mTooltipInfo.mHideTooltipRunnable = this::hideTooltip;
+            }
+            mTooltipInfo.mTooltip = tooltip;
+            if (mTooltipInfo.mTooltipPopup != null && mTooltipInfo.mTooltipPopup.isShowing()) {
+                mTooltipInfo.mTooltipPopup.updateContent(mTooltipInfo.mTooltip);
+            }
+        }
+    }
+
+    /**
+     * Returns the view's tooltip text.
+     *
+     * @return the tooltip text
+     */
+    @Nullable
+    public final CharSequence getTooltip() {
+        return mTooltipInfo != null ? mTooltipInfo.mTooltip : null;
+    }
+
+    private boolean showTooltip(int x, int y, boolean fromLongClick) {
+        if (mAttachInfo == null) {
+            return false;
+        }
+        if ((mViewFlags & ENABLED_MASK) != ENABLED) {
+            return false;
+        }
+        final CharSequence tooltipText = getTooltip();
+        if (TextUtils.isEmpty(tooltipText)) {
+            return false;
+        }
+        hideTooltip();
+        mTooltipInfo.mTooltipFromLongClick = fromLongClick;
+        mTooltipInfo.mTooltipPopup = new TooltipPopup(getContext());
+        mTooltipInfo.mTooltipPopup.show(this, x, y, tooltipText);
+        mAttachInfo.mTooltipHost = this;
+        return true;
+    }
+
+    void hideTooltip() {
+        if (mTooltipInfo == null) {
+            return;
+        }
+        removeCallbacks(mTooltipInfo.mShowTooltipRunnable);
+        if (mTooltipInfo.mTooltipPopup == null) {
+            return;
+        }
+        mTooltipInfo.mTooltipPopup.hide();
+        mTooltipInfo.mTooltipPopup = null;
+        mTooltipInfo.mTooltipFromLongClick = false;
+        if (mAttachInfo != null) {
+            mAttachInfo.mTooltipHost = null;
+        }
+    }
+
+    private boolean showLongClickTooltip(int x, int y) {
+        removeCallbacks(mTooltipInfo.mShowTooltipRunnable);
+        removeCallbacks(mTooltipInfo.mHideTooltipRunnable);
+        return showTooltip(x, y, true);
+    }
+
+    private void showHoverTooltip() {
+        showTooltip(mTooltipInfo.mAnchorX, mTooltipInfo.mAnchorY, false);
+    }
+
+    boolean dispatchTooltipHoverEvent(MotionEvent event) {
+        if (mTooltipInfo == null) {
+            return false;
+        }
+        switch(event.getAction()) {
+            case MotionEvent.ACTION_HOVER_MOVE:
+                if ((mViewFlags & TOOLTIP) != TOOLTIP || (mViewFlags & ENABLED_MASK) != ENABLED) {
+                    break;
+                }
+                if (!mTooltipInfo.mTooltipFromLongClick) {
+                    if (mTooltipInfo.mTooltipPopup == null) {
+                        // Schedule showing the tooltip after a timeout.
+                        mTooltipInfo.mAnchorX = (int) event.getX();
+                        mTooltipInfo.mAnchorY = (int) event.getY();
+                        removeCallbacks(mTooltipInfo.mShowTooltipRunnable);
+                        postDelayed(mTooltipInfo.mShowTooltipRunnable,
+                                ViewConfiguration.getHoverTooltipShowTimeout());
+                    }
+
+                    // Hide hover-triggered tooltip after a period of inactivity.
+                    // Match the timeout used by NativeInputManager to hide the mouse pointer
+                    // (depends on SYSTEM_UI_FLAG_LOW_PROFILE being set).
+                    final int timeout;
+                    if ((getWindowSystemUiVisibility() & SYSTEM_UI_FLAG_LOW_PROFILE)
+                            == SYSTEM_UI_FLAG_LOW_PROFILE) {
+                        timeout = ViewConfiguration.getHoverTooltipHideShortTimeout();
+                    } else {
+                        timeout = ViewConfiguration.getHoverTooltipHideTimeout();
+                    }
+                    removeCallbacks(mTooltipInfo.mHideTooltipRunnable);
+                    postDelayed(mTooltipInfo.mHideTooltipRunnable, timeout);
+                }
+                return true;
+
+            case MotionEvent.ACTION_HOVER_EXIT:
+                if (!mTooltipInfo.mTooltipFromLongClick) {
+                    hideTooltip();
+                }
+                break;
+        }
+        return false;
+    }
+
+    void handleTooltipKey(KeyEvent event) {
+        switch (event.getAction()) {
+            case KeyEvent.ACTION_DOWN:
+                if (event.getRepeatCount() == 0) {
+                    hideTooltip();
+                }
+                break;
+
+            case KeyEvent.ACTION_UP:
+                handleTooltipUp();
+                break;
+        }
+    }
+
+    private void handleTooltipUp() {
+        if (mTooltipInfo == null || mTooltipInfo.mTooltipPopup == null) {
+            return;
+        }
+        removeCallbacks(mTooltipInfo.mHideTooltipRunnable);
+        postDelayed(mTooltipInfo.mHideTooltipRunnable,
+                ViewConfiguration.getLongPressTooltipHideTimeout());
+    }
+
+    /**
+     * @return The content view of the tooltip popup currently being shown, or null if the tooltip
+     * is not showing.
+     * @hide
+     */
+    @TestApi
+    public View getTooltipView() {
+        if (mTooltipInfo == null || mTooltipInfo.mTooltipPopup == null) {
+            return null;
+        }
+        return mTooltipInfo.mTooltipPopup.getContentView();
     }
 }

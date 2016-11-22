@@ -2759,6 +2759,7 @@
         <public name="fontStyle" />
         <public name="font" />
         <public name="fontWeight" />
+        <public name="tooltip" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

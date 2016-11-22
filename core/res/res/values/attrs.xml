@@ -582,7 +582,7 @@
         <!-- Image elements -->
         <!-- ============== -->
         <eat-comment />
-i
+
         <!-- Background that can be used behind parts of a UI that provide
              details on data the user is selecting.  For example, this is
              the background element of PreferenceActivity's embedded
@@ -1007,6 +1007,15 @@ i
 
         <!-- Background to use for toasts -->
         <attr name="toastFrameBackground" format="reference" />
+
+        <!-- Background to use for tooltip popups -->
+        <attr name="tooltipFrameBackground" format="reference" />
+
+        <!-- Foreground color to use for tooltip popups -->
+        <attr name="tooltipForegroundColor" format="reference|color" />
+
+        <!-- Background color to use for tooltip popups -->
+        <attr name="tooltipBackgroundColor" format="reference|color" />
 
         <!-- Theme to use for Search Dialogs -->
         <attr name="searchDialogTheme" format="reference" />
@@ -2864,6 +2873,9 @@ i
         <!-- Whether this view has elements that may overlap when drawn. See
              {@link android.view.View#forceHasOverlappingRendering(boolean)}. -->
         <attr name="forceHasOverlappingRendering" format="boolean" />
+
+        <!-- Defines text displayed in a small popup window on hover or long press. -->
+        <attr name="tooltip" format="string" localization="suggested" />
 
     </declare-styleable>
 

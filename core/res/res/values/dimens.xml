@@ -487,4 +487,19 @@
 
     <!-- Minimum "smallest width" of the display for cascading menus to be enabled. -->
     <dimen name="cascading_menus_min_smallest_width">720dp</dimen>
+
+    <!-- Tooltip dimensions. -->
+    <!-- Vertical offset from the edge of the anchor view. -->
+    <dimen name="tooltip_y_offset">20dp</dimen>
+    <!-- Height of the tooltip. -->
+    <dimen name="tooltip_height">32dp</dimen>
+    <!-- The tooltip does not get closer than this to the window edge -->
+    <dimen name="tooltip_margin">8dp</dimen>
+    <!-- Left/right padding of the tooltip text. -->
+    <dimen name="tooltip_horizontal_padding">16dp</dimen>
+    <!-- Border corner radius of the tooltip window. -->
+    <dimen name="tooltip_corner_radius">2dp</dimen>
+    <!-- View with the height equal or above this threshold will have a tooltip anchored
+    to the mouse/touch position -->
+    <dimen name="tooltip_precise_anchor_threshold">96dp</dimen>
 </resources>
