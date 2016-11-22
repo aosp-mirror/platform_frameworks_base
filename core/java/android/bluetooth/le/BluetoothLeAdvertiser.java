@@ -235,6 +235,7 @@ public final class BluetoothLeAdvertiser {
         // >=0: registered and advertising started
         private int mAdvertiserId;
         private boolean mIsAdvertising = false;
+        private int registrationError = AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR;
 
         public AdvertiseCallbackWrapper(AdvertiseCallback advertiseCallback,
                 AdvertiseData advertiseData, AdvertiseData scanResponse,
@@ -262,12 +263,11 @@ public final class BluetoothLeAdvertiser {
                     mLeAdvertisers.put(mAdvertiseCallback, this);
                 } else if (mAdvertiserId < 0) {
 
-                    // Registration timeout, reset mClientIf to -1 so no subsequent operations can
+                    // Registration timeout, reset mClientIf to -2 so no subsequent operations can
                     // proceed.
-                    if (mAdvertiserId == 0) mAdvertiserId = -2;
+                    if (mAdvertiserId == -1) mAdvertiserId = -2;
                     // Post internal error if registration failed.
-                    postStartFailure(mAdvertiseCallback,
-                            AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR);
+                    postStartFailure(mAdvertiseCallback, registrationError);
                 } else {
                     // Unregister application if it's already registered but advertise failed.
                     try {
@@ -318,6 +318,8 @@ public final class BluetoothLeAdvertiser {
                     } catch (RemoteException e) {
                         Log.e(TAG, "failed to start advertising", e);
                     }
+                } else if (status == AdvertiseCallback.ADVERTISE_FAILED_TOO_MANY_ADVERTISERS) {
+                    registrationError = status;
                 }
                 // Registration failed.
                 mAdvertiserId = -2;
