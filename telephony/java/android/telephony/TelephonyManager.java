@@ -681,42 +681,49 @@ public class TelephonyManager {
     public static final String EXTRA_DATA_FAILURE_CAUSE = PhoneConstants.DATA_FAILURE_CAUSE_KEY;
 
     /**
-     * Broadcast intent action for letting custom component know to show voicemail notification.
-     * @hide
+     * Broadcast intent action for letting the default dialer to know to show voicemail
+     * notification.
+     *
+     * <p>
+     * The {@link #EXTRA_NOTIFICATION_COUNT} extra indicates the total numbers of unheard
+     * voicemails.
+     * The {@link #EXTRA_VOICEMAIL_NUMBER} extra indicates the voicemail number if available.
+     * The {@link #EXTRA_CALL_VOICEMAIL_INTENT} extra is a {@link android.app.PendingIntent} that
+     * will call the voicemail number when sent. This extra will be empty if the voicemail number
+     * is not set, and {@link #EXTRA_LAUNCH_VOICEMAIL_SETTINGS_INTENT} will be set instead.
+     * The {@link #EXTRA_LAUNCH_VOICEMAIL_SETTINGS_INTENT} extra is a
+     * {@link android.app.PendingIntent} that will launch the voicemail settings. This extra is only
+     * available when the voicemail number is not set.
+     *
+     * @see #EXTRA_NOTIFICATION_COUNT
+     * @see #EXTRA_VOICEMAIL_NUMBER
+     * @see #EXTRA_CALL_VOICEMAIL_INTENT
+     * @see #EXTRA_LAUNCH_VOICEMAIL_SETTINGS_INTENT
      */
-    @SystemApi
     public static final String ACTION_SHOW_VOICEMAIL_NOTIFICATION =
             "android.telephony.action.SHOW_VOICEMAIL_NOTIFICATION";
 
     /**
      * The number of voice messages associated with the notification.
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_NOTIFICATION_COUNT =
             "android.telephony.extra.NOTIFICATION_COUNT";
 
     /**
      * The voicemail number.
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_VOICEMAIL_NUMBER =
             "android.telephony.extra.VOICEMAIL_NUMBER";
 
     /**
      * The intent to call voicemail.
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_CALL_VOICEMAIL_INTENT =
             "android.telephony.extra.CALL_VOICEMAIL_INTENT";
 
     /**
      * The intent to launch voicemail settings.
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_LAUNCH_VOICEMAIL_SETTINGS_INTENT =
             "android.telephony.extra.LAUNCH_VOICEMAIL_SETTINGS_INTENT";
 
