@@ -118,4 +118,31 @@ public class HomeSPTest {
         homeSp.roamingConsortiumOIs = new long[] {0x55, 0x66};
         assertTrue(homeSp.validate());
     }
+
+    /**
+     * Verify that copy constructor works when pass in a null source.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateCopyConstructorFromNullSource() throws Exception {
+        HomeSP copySp = new HomeSP(null);
+        HomeSP defaultSp = new HomeSP();
+        assertTrue(copySp.equals(defaultSp));
+    }
+
+    /**
+     * Verify that copy constructor works when pass in a valid source.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateCopyConstructorFromValidSource() throws Exception {
+        HomeSP sourceSp = new HomeSP();
+        sourceSp.fqdn = "fqdn";
+        sourceSp.friendlyName = "friendlyName";
+        sourceSp.roamingConsortiumOIs = new long[] {0x55, 0x66};
+        HomeSP copySp = new HomeSP(sourceSp);
+        assertTrue(copySp.equals(sourceSp));
+    }
 }
