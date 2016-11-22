@@ -27,9 +27,11 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.split.SplitDependencyLoaderHelper;
 import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -41,23 +43,22 @@ import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.system.Os;
-import android.system.OsConstants;
-import android.system.ErrnoException;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayAdjustments;
+
+import com.android.internal.util.ArrayUtils;
 
 import dalvik.system.BaseDexClassLoader;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -65,12 +66,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
-
-import libcore.io.IoUtils;
 
 final class IntentReceiverLeaked extends AndroidRuntimeException {
     public IntentReceiverLeaked(String msg) {
@@ -97,8 +97,6 @@ public final class LoadedApk {
     private ApplicationInfo mApplicationInfo;
     private String mAppDir;
     private String mResDir;
-    private String[] mSplitAppDirs;
-    private String[] mSplitResDirs;
     private String[] mOverlayDirs;
     private String[] mSharedLibraries;
     private String mDataDir;
@@ -116,14 +114,18 @@ public final class LoadedApk {
     private ClassLoader mClassLoader;
     private Application mApplication;
 
+    private String[] mSplitNames;
+    private String[] mSplitAppDirs;
+    private String[] mSplitResDirs;
+
     private final ArrayMap<Context, ArrayMap<BroadcastReceiver, ReceiverDispatcher>> mReceivers
-        = new ArrayMap<Context, ArrayMap<BroadcastReceiver, LoadedApk.ReceiverDispatcher>>();
+        = new ArrayMap<>();
     private final ArrayMap<Context, ArrayMap<BroadcastReceiver, LoadedApk.ReceiverDispatcher>> mUnregisteredReceivers
-        = new ArrayMap<Context, ArrayMap<BroadcastReceiver, LoadedApk.ReceiverDispatcher>>();
+        = new ArrayMap<>();
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mServices
-        = new ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>>();
+        = new ArrayMap<>();
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mUnboundServices
-        = new ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>>();
+        = new ArrayMap<>();
 
     int mClientCount = 0;
 
@@ -300,9 +302,18 @@ public final class LoadedApk {
         synchronized (this) {
             createOrUpdateClassLoaderLocked(addedPaths);
             if (mResources != null) {
-                mResources = mActivityThread.getTopLevelResources(mResDir, mSplitResDirs,
-                        mOverlayDirs, mApplicationInfo.sharedLibraryFiles, Display.DEFAULT_DISPLAY,
-                        this);
+                final String[] splitPaths;
+                try {
+                    splitPaths = getSplitPaths(null);
+                } catch (PackageManager.NameNotFoundException e) {
+                    // This should NEVER fail.
+                    throw new AssertionError("null split not found");
+                }
+
+                mResources = ResourcesManager.getInstance().getResources(null, mResDir,
+                        splitPaths, mOverlayDirs, mSharedLibraries,
+                        Display.DEFAULT_DISPLAY, null, getCompatibilityInfo(),
+                        getClassLoader());
             }
         }
     }
@@ -313,8 +324,6 @@ public final class LoadedApk {
         mApplicationInfo = aInfo;
         mAppDir = aInfo.sourceDir;
         mResDir = aInfo.uid == myUid ? aInfo.sourceDir : aInfo.publicSourceDir;
-        mSplitAppDirs = aInfo.splitSourceDirs;
-        mSplitResDirs = aInfo.uid == myUid ? aInfo.splitSourceDirs : aInfo.splitPublicSourceDirs;
         mOverlayDirs = aInfo.resourceDirs;
         mSharedLibraries = aInfo.sharedLibraryFiles;
         mDataDir = aInfo.dataDir;
@@ -322,19 +331,28 @@ public final class LoadedApk {
         mDataDirFile = FileUtils.newFileOrNull(aInfo.dataDir);
         mDeviceProtectedDataDirFile = FileUtils.newFileOrNull(aInfo.deviceProtectedDataDir);
         mCredentialProtectedDataDirFile = FileUtils.newFileOrNull(aInfo.credentialProtectedDataDir);
+
+        mSplitNames = aInfo.splitNames;
+        mSplitAppDirs = aInfo.splitSourceDirs;
+        mSplitResDirs = aInfo.uid == myUid ? aInfo.splitSourceDirs : aInfo.splitPublicSourceDirs;
+
+        if (aInfo.requestsIsolatedSplitLoading() && !ArrayUtils.isEmpty(mSplitNames)) {
+            mSplitLoader = new SplitDependencyLoader(aInfo.splitDependencies);
+        }
     }
 
     public static void makePaths(ActivityThread activityThread, ApplicationInfo aInfo,
             List<String> outZipPaths, List<String> outLibPaths) {
         final String appDir = aInfo.sourceDir;
-        final String[] splitAppDirs = aInfo.splitSourceDirs;
         final String libDir = aInfo.nativeLibraryDir;
         final String[] sharedLibraries = aInfo.sharedLibraryFiles;
 
         outZipPaths.clear();
         outZipPaths.add(appDir);
-        if (splitAppDirs != null) {
-            Collections.addAll(outZipPaths, splitAppDirs);
+
+        // Do not load all available splits if the app requested isolated split loading.
+        if (aInfo.splitSourceDirs != null && !aInfo.requestsIsolatedSplitLoading()) {
+            Collections.addAll(outZipPaths, aInfo.splitSourceDirs);
         }
 
         if (outLibPaths != null) {
@@ -367,13 +385,18 @@ public final class LoadedApk {
                     || appDir.equals(instrumentedAppDir)) {
                 outZipPaths.clear();
                 outZipPaths.add(instrumentationAppDir);
-                if (instrumentationSplitAppDirs != null) {
-                    Collections.addAll(outZipPaths, instrumentationSplitAppDirs);
-                }
-                if (!instrumentationAppDir.equals(instrumentedAppDir)) {
-                    outZipPaths.add(instrumentedAppDir);
-                    if (instrumentedSplitAppDirs != null) {
-                        Collections.addAll(outZipPaths, instrumentedSplitAppDirs);
+
+                // Only add splits if the app did not request isolated split loading.
+                if (!aInfo.requestsIsolatedSplitLoading()) {
+                    if (instrumentationSplitAppDirs != null) {
+                        Collections.addAll(outZipPaths, instrumentationSplitAppDirs);
+                    }
+
+                    if (!instrumentationAppDir.equals(instrumentedAppDir)) {
+                        outZipPaths.add(instrumentedAppDir);
+                        if (instrumentedSplitAppDirs != null) {
+                            Collections.addAll(outZipPaths, instrumentedSplitAppDirs);
+                        }
                     }
                 }
 
@@ -399,7 +422,7 @@ public final class LoadedApk {
             // will be added to zipPaths that shouldn't be part of the library path.
             if (aInfo.primaryCpuAbi != null) {
                 // Add fake libs into the library search path if we target prior to N.
-                if (aInfo.targetSdkVersion <= 23) {
+                if (aInfo.targetSdkVersion < Build.VERSION_CODES.N) {
                     outLibPaths.add("/system/fake-libs" +
                         (VMRuntime.is64BitAbi(aInfo.primaryCpuAbi) ? "64" : ""));
                 }
@@ -432,6 +455,116 @@ public final class LoadedApk {
                 }
             }
         }
+    }
+
+    private class SplitDependencyLoader
+            extends SplitDependencyLoaderHelper<PackageManager.NameNotFoundException> {
+        private String[] mCachedBaseResourcePath;
+        private final String[][] mCachedResourcePaths;
+        private final ClassLoader[] mCachedSplitClassLoaders;
+
+        SplitDependencyLoader(SparseIntArray dependencies) {
+            super(dependencies);
+            mCachedResourcePaths = new String[mSplitNames.length][];
+            mCachedSplitClassLoaders = new ClassLoader[mSplitNames.length];
+        }
+
+        @Override
+        protected boolean isSplitCached(int splitIdx) {
+            if (splitIdx != -1) {
+                return mCachedSplitClassLoaders[splitIdx] != null;
+            }
+            return mClassLoader != null && mCachedBaseResourcePath != null;
+        }
+
+        private void addAllConfigSplits(String splitName, ArrayList<String> outAssetPaths) {
+            for (int i = 0; i < mSplitNames.length; i++) {
+                if (isConfigurationSplitOf(mSplitNames[i], splitName)) {
+                    outAssetPaths.add(mSplitResDirs[i]);
+                }
+            }
+        }
+
+        @Override
+        protected void constructSplit(int splitIdx, int parentSplitIdx) throws
+                PackageManager.NameNotFoundException {
+            final ArrayList<String> splitPaths = new ArrayList<>();
+            if (splitIdx == -1) {
+                createOrUpdateClassLoaderLocked(null);
+                addAllConfigSplits(null, splitPaths);
+                mCachedBaseResourcePath = splitPaths.toArray(new String[splitPaths.size()]);
+                return;
+            }
+
+            final ClassLoader parent;
+            if (parentSplitIdx == -1) {
+                // The parent is the base APK, so use its ClassLoader as parent
+                // and its configuration splits as part of our own too.
+                parent = mClassLoader;
+                Collections.addAll(splitPaths, mCachedBaseResourcePath);
+            } else {
+                parent = mCachedSplitClassLoaders[parentSplitIdx];
+                Collections.addAll(splitPaths, mCachedResourcePaths[parentSplitIdx]);
+            }
+
+            mCachedSplitClassLoaders[splitIdx] = ApplicationLoaders.getDefault().getClassLoader(
+                    mSplitAppDirs[splitIdx], getTargetSdkVersion(), false, null, null, parent);
+
+            splitPaths.add(mSplitResDirs[splitIdx]);
+            addAllConfigSplits(mSplitNames[splitIdx], splitPaths);
+            mCachedResourcePaths[splitIdx] = splitPaths.toArray(new String[splitPaths.size()]);
+        }
+
+        private int ensureSplitLoaded(String splitName)
+                throws PackageManager.NameNotFoundException {
+            final int idx;
+            if (splitName == null) {
+                idx = -1;
+            } else {
+                idx = Arrays.binarySearch(mSplitNames, splitName);
+                if (idx < 0) {
+                    throw new PackageManager.NameNotFoundException(
+                            "Split name '" + splitName + "' is not installed");
+                }
+            }
+
+            loadDependenciesForSplit(idx);
+            return idx;
+        }
+
+        ClassLoader getClassLoaderForSplit(String splitName)
+                throws PackageManager.NameNotFoundException {
+            final int idx = ensureSplitLoaded(splitName);
+            if (idx < 0) {
+                return mClassLoader;
+            }
+            return mCachedSplitClassLoaders[idx];
+        }
+
+        String[] getSplitPathsForSplit(String splitName)
+                throws PackageManager.NameNotFoundException {
+            final int idx = ensureSplitLoaded(splitName);
+            if (idx < 0) {
+                return mCachedBaseResourcePath;
+            }
+            return mCachedResourcePaths[idx];
+        }
+    }
+
+    private SplitDependencyLoader mSplitLoader;
+
+    ClassLoader getSplitClassLoader(String splitName) throws PackageManager.NameNotFoundException {
+        if (mSplitLoader == null) {
+            return mClassLoader;
+        }
+        return mSplitLoader.getClassLoaderForSplit(splitName);
+    }
+
+    String[] getSplitPaths(String splitName) throws PackageManager.NameNotFoundException {
+        if (mSplitLoader == null) {
+            return mSplitResDirs;
+        }
+        return mSplitLoader.getSplitPathsForSplit(splitName);
     }
 
     private void createOrUpdateClassLoaderLocked(List<String> addedPaths) {
@@ -790,6 +923,10 @@ public final class LoadedApk {
         return mOverlayDirs;
     }
 
+    public String[] getSharedLibraries() {
+        return mSharedLibraries;
+    }
+
     public String getDataDir() {
         return mDataDir;
     }
@@ -806,14 +943,24 @@ public final class LoadedApk {
         return mCredentialProtectedDataDirFile;
     }
 
-    public AssetManager getAssets(ActivityThread mainThread) {
-        return getResources(mainThread).getAssets();
+    public AssetManager getAssets() {
+        return getResources().getAssets();
     }
 
-    public Resources getResources(ActivityThread mainThread) {
+    public Resources getResources() {
         if (mResources == null) {
-            mResources = mainThread.getTopLevelResources(mResDir, mSplitResDirs, mOverlayDirs,
-                    mApplicationInfo.sharedLibraryFiles, Display.DEFAULT_DISPLAY, this);
+            final String[] splitPaths;
+            try {
+                splitPaths = getSplitPaths(null);
+            } catch (PackageManager.NameNotFoundException e) {
+                // This should never fail.
+                throw new AssertionError("null split not found");
+            }
+
+            mResources = ResourcesManager.getInstance().getResources(null, mResDir,
+                    splitPaths, mOverlayDirs, mSharedLibraries,
+                    Display.DEFAULT_DISPLAY, null, getCompatibilityInfo(),
+                    getClassLoader());
         }
         return mResources;
     }
@@ -870,8 +1017,7 @@ public final class LoadedApk {
         }
 
         // Rewrite the R 'constants' for all library apks.
-        SparseArray<String> packageIdentifiers = getAssets(mActivityThread)
-                .getAssignedPackageIdentifiers();
+        SparseArray<String> packageIdentifiers = getAssets().getAssignedPackageIdentifiers();
         final int N = packageIdentifiers.size();
         for (int i = 0; i < N; i++) {
             final int id = packageIdentifiers.keyAt(i);

@@ -2616,9 +2616,10 @@ public final class ActivityThread {
                     r.activityInfo.targetActivity);
         }
 
+        ContextImpl appContext = createBaseContextForActivity(r);
         Activity activity = null;
         try {
-            java.lang.ClassLoader cl = r.packageInfo.getClassLoader();
+            java.lang.ClassLoader cl = appContext.getClassLoader();
             activity = mInstrumentation.newActivity(
                     cl, component.getClassName(), r.intent);
             StrictMode.incrementExpectedActivityCount(activity.getClass());
@@ -2647,7 +2648,6 @@ public final class ActivityThread {
                     + ", dir=" + r.packageInfo.getAppDir());
 
             if (activity != null) {
-                Context appContext = createBaseContextForActivity(r, activity);
                 CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
                 Configuration config = new Configuration(mCompatConfiguration);
                 if (r.overrideConfig != null) {
@@ -2661,6 +2661,7 @@ public final class ActivityThread {
                     r.mPendingRemoveWindow = null;
                     r.mPendingRemoveWindowManager = null;
                 }
+                appContext.setOuterContext(activity);
                 activity.attach(appContext, this, getInstrumentation(), r.token,
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
                         r.embeddedID, r.lastNonConfigurationInstances, config,
@@ -2736,8 +2737,8 @@ public final class ActivityThread {
         return activity;
     }
 
-    private Context createBaseContextForActivity(ActivityClientRecord r, final Activity activity) {
-        int displayId = Display.DEFAULT_DISPLAY;
+    private ContextImpl createBaseContextForActivity(ActivityClientRecord r) {
+        final int displayId;
         try {
             displayId = ActivityManager.getService().getActivityDisplayId(r.token);
         } catch (RemoteException e) {
@@ -2745,9 +2746,7 @@ public final class ActivityThread {
         }
 
         ContextImpl appContext = ContextImpl.createActivityContext(
-                this, r.packageInfo, r.token, displayId, r.overrideConfig);
-        appContext.setOuterContext(activity);
-        Context baseContext = appContext;
+                this, r.packageInfo, r.activityInfo, r.token, displayId, r.overrideConfig);
 
         final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
         // For debugging purposes, if the activity's package name contains the value of
@@ -2760,12 +2759,12 @@ public final class ActivityThread {
                 if (id != Display.DEFAULT_DISPLAY) {
                     Display display =
                             dm.getCompatibleDisplay(id, appContext.getDisplayAdjustments(id));
-                    baseContext = appContext.createDisplayContext(display);
+                    appContext = (ContextImpl) appContext.createDisplayContext(display);
                     break;
                 }
             }
         }
-        return baseContext;
+        return appContext;
     }
 
     private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent, String reason) {
@@ -3119,9 +3118,16 @@ public final class ActivityThread {
 
         IActivityManager mgr = ActivityManager.getService();
 
+        Application app;
         BroadcastReceiver receiver;
+        ContextImpl context;
         try {
-            java.lang.ClassLoader cl = packageInfo.getClassLoader();
+            app = packageInfo.makeApplication(false, mInstrumentation);
+            context = (ContextImpl) app.getBaseContext();
+            if (data.info.splitName != null) {
+                context = (ContextImpl) context.createContextForSplit(data.info.splitName);
+            }
+            java.lang.ClassLoader cl = context.getClassLoader();
             data.intent.setExtrasClassLoader(cl);
             data.intent.prepareToEnterProcess();
             data.setExtrasClassLoader(cl);
@@ -3136,8 +3142,6 @@ public final class ActivityThread {
         }
 
         try {
-            Application app = packageInfo.makeApplication(false, mInstrumentation);
-
             if (localLOGV) Slog.v(
                 TAG, "Performing receive of " + data.intent
                 + ": app=" + app
@@ -3146,7 +3150,6 @@ public final class ActivityThread {
                 + ", comp=" + data.intent.getComponent().toShortString()
                 + ", dir=" + packageInfo.getAppDir());
 
-            ContextImpl context = (ContextImpl)app.getBaseContext();
             sCurrentBroadcastIntent.set(data.intent);
             receiver.setPendingResult(data);
             receiver.onReceive(context.getReceiverRestrictedContext(),
@@ -6031,6 +6034,15 @@ public final class ActivityThread {
                       info.name);
                 return null;
             }
+
+            if (info.splitName != null) {
+                try {
+                    c = c.createContextForSplit(info.splitName);
+                } catch (NameNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
             try {
                 final java.lang.ClassLoader cl = c.getClassLoader();
                 localProvider = (ContentProvider)cl.

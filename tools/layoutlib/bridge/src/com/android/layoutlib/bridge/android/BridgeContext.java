@@ -1325,6 +1325,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public Context createContextForSplit(String splitName) {
+        // pass
+        return null;
+    }
+
+    @Override
     public String[] databaseList() {
         // pass
         return null;

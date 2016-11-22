@@ -26,6 +26,7 @@ import android.util.Size;
 import android.util.SizeF;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 
 import libcore.util.SneakyThrow;
 
@@ -887,6 +888,21 @@ public final class Parcel {
         while (i < N) {
             writeInt(val.keyAt(i));
             writeByte((byte)(val.valueAt(i) ? 1 : 0));
+            i++;
+        }
+    }
+
+    public final void writeSparseIntArray(SparseIntArray val) {
+        if (val == null) {
+            writeInt(-1);
+            return;
+        }
+        int N = val.size();
+        writeInt(N);
+        int i=0;
+        while (i < N) {
+            writeInt(val.keyAt(i));
+            writeInt(val.valueAt(i));
             i++;
         }
     }
@@ -2154,6 +2170,20 @@ public final class Parcel {
     }
 
     /**
+     * Read and return a new SparseIntArray object from the parcel at the current
+     * dataPosition(). Returns null if the previously written array object was null.
+     */
+    public final SparseIntArray readSparseIntArray() {
+        int N = readInt();
+        if (N < 0) {
+            return null;
+        }
+        SparseIntArray sa = new SparseIntArray(N);
+        readSparseIntArrayInternal(sa, N);
+        return sa;
+    }
+
+    /**
      * Read and return a new ArrayList containing a particular object type from
      * the parcel that was written with {@link #writeTypedList} at the
      * current dataPosition().  Returns null if the
@@ -2917,6 +2947,15 @@ public final class Parcel {
             int key = readInt();
             boolean value = this.readByte() == 1;
             //Log.i(TAG, "Unmarshalling key=" + key + " value=" + value);
+            outVal.append(key, value);
+            N--;
+        }
+    }
+
+    private void readSparseIntArrayInternal(SparseIntArray outVal, int N) {
+        while (N > 0) {
+            int key = readInt();
+            int value = readInt();
             outVal.append(key, value);
             N--;
         }

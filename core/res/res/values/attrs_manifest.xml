@@ -1001,6 +1001,13 @@
         <enum name="preferExternal" value="2" />
     </attr>
 
+    <!-- If set to <code>true</code>, indicates to the platform that any split APKs
+         installed for this application should be loaded into their own Context
+         objects and not appear in the base application's Context.
+
+         <p>The default value of this attribute is <code>false</code>. -->
+    <attr name="isolatedSplits" format="boolean" />
+
     <!-- Extra options for an activity's UI. Applies to either the {@code <activity>} or
          {@code <application>} tag. If specified on the {@code <application>}
          tag these will be considered defaults for all activities in the
@@ -1266,6 +1273,7 @@
         <attr name="sharedUserId" />
         <attr name="sharedUserLabel" />
         <attr name="installLocation" />
+        <attr name="isolatedSplits" />
     </declare-styleable>
 
     <!-- The <code>application</code> tag describes application-level components
@@ -2460,6 +2468,10 @@
              <p>NOTE: This is only applicable to system packages.
              @hide -->
         <attr name="hash" format="string" />
+    </declare-styleable>
+
+    <declare-styleable name="AndroidManifestUsesSplit" parent="AndroidManifest">
+        <attr name="name" format="string" />
     </declare-styleable>
 
 </resources>

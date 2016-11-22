@@ -162,7 +162,7 @@ class PackageManagerShellCommand extends ShellCommand {
             if (file.isFile()) {
                 try {
                     ApkLite baseApk = PackageParser.parseApkLite(file, 0);
-                    PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null);
+                    PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null, null);
                     params.sessionParams.setSize(PackageHelper.calculateInstalledSize(
                             pkgLite, false, params.sessionParams.abiOverride));
                 } catch (PackageParserException | IOException e) {

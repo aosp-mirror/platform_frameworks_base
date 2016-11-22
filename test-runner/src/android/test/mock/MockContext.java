@@ -692,6 +692,13 @@ public class MockContext extends Context {
         return null;
     }
 
+    /** @hide */
+    @Override
+    public Context createContextForSplit(String splitName)
+            throws PackageManager.NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
     /** {@hide} */
     @Override
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)

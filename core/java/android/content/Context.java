@@ -4253,6 +4253,20 @@ public abstract class Context {
             int flags) throws PackageManager.NameNotFoundException;
 
     /**
+     * Return a new Context object for the given split name. The new Context has a ClassLoader and
+     * Resources object that can access the split's and all of its dependencies' code/resources.
+     * Each call to this method returns a new instance of a Context object;
+     * Context objects are not shared, however common state (ClassLoader, other Resources for
+     * the same split) may be so the Context itself can be fairly lightweight.
+     *
+     * @param splitName The name of the split to include, as declared in the split's
+     *                  <code>AndroidManifest.xml</code>.
+     * @return A {@link Context} with the given split's code and/or resources loaded.
+     */
+    public abstract Context createContextForSplit(String splitName)
+            throws PackageManager.NameNotFoundException;
+
+    /**
      * Get the userId associated with this context
      * @return user id
      *

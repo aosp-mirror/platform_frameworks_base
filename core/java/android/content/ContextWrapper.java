@@ -16,7 +16,6 @@
 
 package android.content;
 
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
@@ -822,6 +821,13 @@ public class ContextWrapper extends Context {
     public Context createApplicationContext(ApplicationInfo application,
             int flags) throws PackageManager.NameNotFoundException {
         return mBase.createApplicationContext(application, flags);
+    }
+
+    /** @hide */
+    @Override
+    public Context createContextForSplit(String splitName)
+            throws PackageManager.NameNotFoundException {
+        return mBase.createContextForSplit(splitName);
     }
 
     /** @hide */

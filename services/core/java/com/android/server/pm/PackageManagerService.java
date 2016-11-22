@@ -10101,8 +10101,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 a.info.packageName = pkg.applicationInfo.packageName;
                 a.info.sourceDir = pkg.applicationInfo.sourceDir;
                 a.info.publicSourceDir = pkg.applicationInfo.publicSourceDir;
+                a.info.splitNames = pkg.splitNames;
                 a.info.splitSourceDirs = pkg.applicationInfo.splitSourceDirs;
                 a.info.splitPublicSourceDirs = pkg.applicationInfo.splitPublicSourceDirs;
+                a.info.splitDependencies = pkg.applicationInfo.splitDependencies;
                 a.info.dataDir = pkg.applicationInfo.dataDir;
                 a.info.deviceProtectedDataDir = pkg.applicationInfo.deviceProtectedDataDir;
                 a.info.credentialProtectedDataDir = pkg.applicationInfo.credentialProtectedDataDir;
