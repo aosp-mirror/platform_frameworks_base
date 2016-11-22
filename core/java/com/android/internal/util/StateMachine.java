@@ -1175,6 +1175,26 @@ public class StateMachine {
         }
 
         /**
+         * Remove a state from the state machine. Will not remove the state if it is currently
+         * active or if it has any children in the hierarchy.
+         * @param state the state to remove
+         */
+        private void removeState(State state) {
+            StateInfo stateInfo = mStateInfo.get(state);
+            if (stateInfo == null || stateInfo.active) {
+                return;
+            }
+            boolean isParent = mStateInfo.values().stream()
+                    .filter(si -> si.parentStateInfo == stateInfo)
+                    .findAny()
+                    .isPresent();
+            if (isParent) {
+                return;
+            }
+            mStateInfo.remove(state);
+        }
+
+        /**
          * Constructor
          *
          * @param looper for dispatching messages
@@ -1315,6 +1335,14 @@ public class StateMachine {
      */
     protected final void addState(State state) {
         mSmHandler.addState(state, null);
+    }
+
+    /**
+     * Removes a state from the state machine, unless it is currently active or if it has children.
+     * @param state state to remove
+     */
+    public final void removeState(State state) {
+        mSmHandler.removeState(state);
     }
 
     /**
