@@ -589,6 +589,46 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         }
     }
 
+    void getWindowOnDisplayBeforeToken(DisplayContent dc, WindowToken token,
+            DisplayContent.GetWindowOnDisplaySearchResult result) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final AppWindowToken current = mChildren.get(i);
+            if (current == token) {
+                // We have reach the token we are interested in. End search.
+                result.reachedToken = true;
+                return;
+            }
+
+            // We haven't reached the token yet; if this token is not going to the bottom and
+            // has windows on this display, then it is a candidate for what we are looking for.
+            final WindowList tokenWindowList = dc.getTokenWindowsOnDisplay(current);
+            if (!current.sendingToBottom && tokenWindowList.size() > 0) {
+                result.foundWindow = tokenWindowList.get(0);
+            }
+        }
+    }
+
+    void getWindowOnDisplayAfterToken(DisplayContent dc, WindowToken token,
+            DisplayContent.GetWindowOnDisplaySearchResult result) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final AppWindowToken current = mChildren.get(i);
+            if (!result.reachedToken) {
+                if (current == token) {
+                    // We have reached the token we are interested in. Get whichever window occurs
+                    // after it that is on the same display.
+                    result.reachedToken = true;
+                }
+                continue;
+            }
+
+            final WindowList tokenWindowList = dc.getTokenWindowsOnDisplay(current);
+            if (tokenWindowList.size() > 0) {
+                result.foundWindow = tokenWindowList.get(tokenWindowList.size() - 1);
+                return;
+            }
+        }
+    }
+
     @Override
     boolean fillsParent() {
         return mFillsParent || !StackId.isTaskResizeAllowed(mStack.mStackId);

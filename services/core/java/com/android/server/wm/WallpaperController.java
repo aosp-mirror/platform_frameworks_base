@@ -683,6 +683,24 @@ class WallpaperController {
         }
     }
 
+    void dumpTokens(PrintWriter pw, String prefix, boolean dumpAll) {
+        if (!mWallpaperTokens.isEmpty()) {
+            pw.println();
+            pw.print(prefix); pw.println("Wallpaper tokens:");
+            for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
+                WindowToken token = mWallpaperTokens.get(i);
+                pw.print(prefix); pw.print("Wallpaper #"); pw.print(i);
+                pw.print(' '); pw.print(token);
+                if (dumpAll) {
+                    pw.println(':');
+                    token.dump(pw, "    ");
+                } else {
+                    pw.println();
+                }
+            }
+        }
+    }
+
     /** Helper class for storing the results of a wallpaper target find operation. */
     final private static class FindWallpaperTargetResult {
         WindowState topWallpaper = null;

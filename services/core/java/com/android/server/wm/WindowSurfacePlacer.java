@@ -239,8 +239,7 @@ class WindowSurfacePlacer {
         mService.mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
 
         final DisplayContent displayContent = mService.getDefaultDisplayContentLocked();
-        // TODO: Don't believe this is really needed...
-        //mService.mWindowsChanged = true;
+        displayContent.rebuildAppWindowList();
 
         mService.mRoot.mWallpaperMayChange = false;
 
@@ -357,8 +356,12 @@ class WindowSurfacePlacer {
         displayContent.setLayoutNeeded();
 
         // TODO(multidisplay): IMEs are only supported on the default display.
+        // TODO: Probably not needed once the window list always has the right z-ordering
+        // when the window hierarchy is updated.
         final DisplayContent dc = mService.getDefaultDisplayContentLocked();
-        dc.computeImeTarget(true /* updateImeTarget */);
+        if (!dc.moveInputMethodWindowsIfNeeded(true)) {
+            dc.assignWindowLayers(false /*setLayoutNeeded*/);
+        }
         mService.updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
                 true /*updateInputWindows*/);
         mService.mFocusMayChange = false;
