@@ -178,8 +178,12 @@ public final class BitmapRegionDecoder {
      *             inPurgeable is not supported.
      * @return The decoded bitmap, or null if the image data could not be
      *         decoded.
+     * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
+     *         is {@link android.graphics.Bitmap.Config#HARDWARE}
+     *         and {@link BitmapFactory.Options#inMutable} is set.
      */
     public Bitmap decodeRegion(Rect rect, BitmapFactory.Options options) {
+        BitmapFactory.Options.validate(options);
         synchronized (mNativeLock) {
             checkRecycled("decodeRegion called on recycled region decoder");
             if (rect.right <= 0 || rect.bottom <= 0 || rect.left >= getWidth()
