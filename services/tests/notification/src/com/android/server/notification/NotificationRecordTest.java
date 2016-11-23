@@ -81,6 +81,7 @@ public class NotificationRecordTest {
             300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
             300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
             300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400 };
+    private static final long[] CUSTOM_CHANNEL_VIBRATION = new long[] {300, 400, 300, 400 };
     private static final Uri CUSTOM_SOUND = Settings.System.DEFAULT_ALARM_ALERT_URI;
     private static final AudioAttributes CUSTOM_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
@@ -124,6 +125,7 @@ public class NotificationRecordTest {
                 defaults |= Notification.DEFAULT_VIBRATE;
             } else {
                 builder.setVibrate(CUSTOM_VIBRATION);
+                channel.setVibrationPattern(CUSTOM_CHANNEL_VIBRATION);
             }
         }
         builder.setDefaults(defaults);
@@ -193,7 +195,7 @@ public class NotificationRecordTest {
 
     @Test
     public void testVibration_default_preUpgradeUsesNotification() throws Exception {
-        defaultChannel.setVibration(false);
+        defaultChannel.enableVibration(false);
         // pre upgrade, default vibration.
         StatusBarNotification sbn = getNotification(true /*preO */, false /* noisy */,
                 false /* defaultSound */, true /* buzzy */, true /* defaultBuzz */);
@@ -204,7 +206,7 @@ public class NotificationRecordTest {
 
     @Test
     public void testVibration_custom_preUpgradeUsesNotification() throws Exception {
-        defaultChannel.setVibration(false);
+        defaultChannel.enableVibration(false);
         // pre upgrade, custom vibration.
         StatusBarNotification sbn = getNotification(true /*preO */, false /* noisy */,
                 false /* defaultSound */, true /* buzzy */, false /* defaultBuzz */);
@@ -215,7 +217,7 @@ public class NotificationRecordTest {
 
     @Test
     public void testVibration_custom_userLocked_preUpgrade() throws Exception {
-        defaultChannel.setVibration(true);
+        defaultChannel.enableVibration(true);
         defaultChannel.lockFields(NotificationChannel.USER_LOCKED_VIBRATION);
         // pre upgrade, custom vibration.
         StatusBarNotification sbn = getNotification(true /*preO */, false /* noisy */,
@@ -227,13 +229,13 @@ public class NotificationRecordTest {
 
     @Test
     public void testVibration_custom_upgradeUsesChannel() throws Exception {
-        channel.setVibration(true);
+        channel.enableVibration(true);
         // post upgrade, custom vibration.
         StatusBarNotification sbn = getNotification(false /*preO */, false /* noisy */,
                 false /* defaultSound */, true /* buzzy */, false /* defaultBuzz */);
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn);
-        assertTrue(!Objects.equals(CUSTOM_VIBRATION, record.getVibration()));
+        assertEquals(CUSTOM_CHANNEL_VIBRATION, record.getVibration());
     }
 
     @Test

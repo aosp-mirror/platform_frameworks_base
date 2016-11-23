@@ -501,7 +501,8 @@ public class RankingHelper implements RankingConfig {
             channel.setSound(updatedChannel.getSound());
         }
         if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_VIBRATION) == 0) {
-            channel.setVibration(updatedChannel.shouldVibrate());
+            channel.enableVibration(updatedChannel.shouldVibrate());
+            channel.setVibrationPattern(updatedChannel.getVibrationPattern());
         }
         if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_VISIBILITY) == 0) {
             if (updatedChannel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {

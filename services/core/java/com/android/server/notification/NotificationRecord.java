@@ -169,7 +169,8 @@ public final class NotificationRecord {
                 NotificationManagerService.VIBRATE_PATTERN_MAXLEN,
                 NotificationManagerService.DEFAULT_VIBRATE_PATTERN);
         if (getChannel().shouldVibrate()) {
-            vibration = defaultVibration;
+            vibration = getChannel().getVibrationPattern() == null
+                    ? defaultVibration : getChannel().getVibrationPattern();
         } else {
             vibration = null;
         }

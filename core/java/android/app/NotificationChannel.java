@@ -28,6 +28,7 @@ import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * A representation of settings that apply to a collection of similarly themed notifications.
@@ -48,10 +49,12 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_IMPORTANCE = "importance";
     private static final String ATT_LIGHTS = "lights";
     private static final String ATT_VIBRATION = "vibration";
+    private static final String ATT_VIBRATION_ENABLED = "vibration_enabled";
     private static final String ATT_SOUND = "sound";
     //TODO: add audio attributes support
     private static final String ATT_AUDIO_ATTRIBUTES = "audio_attributes";
     private static final String ATT_USER_LOCKED = "locked";
+    private static final String DELIMITER = ",";
 
     /**
      * @hide
@@ -96,8 +99,9 @@ public final class NotificationChannel implements Parcelable {
     private int mLockscreenVisibility = DEFAULT_VISIBILITY;
     private Uri mSound;
     private boolean mLights;
-    private boolean mVibration;
+    private long[] mVibration;
     private int mUserLockedFields;
+    private boolean mVibrationEnabled;
 
     /**
      * Creates a notification channel.
@@ -130,8 +134,9 @@ public final class NotificationChannel implements Parcelable {
             mSound = null;
         }
         mLights = in.readByte() != 0;
-        mVibration = in.readByte() != 0;
+        mVibration = in.createLongArray();
         mUserLockedFields = in.readInt();
+        mVibrationEnabled = in.readByte() != 0;
     }
 
     @Override
@@ -153,8 +158,9 @@ public final class NotificationChannel implements Parcelable {
             dest.writeByte((byte) 0);
         }
         dest.writeByte(mLights ? (byte) 1 : (byte) 0);
-        dest.writeByte(mVibration ? (byte) 1 : (byte) 0);
+        dest.writeLongArray(mVibration);
         dest.writeInt(mUserLockedFields);
+        dest.writeByte(mVibrationEnabled ? (byte) 1 : (byte) 0);
     }
 
     /**
@@ -221,12 +227,20 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * Sets whether notification posted to this channel should vibrate, even if individual
-     * notifications are marked as having vibration only modifiable before the channel is submitted
-     * to the NotificationManager.
+     * Sets whether notification posted to this channel should vibrate. The vibration pattern can
+     * be set with {@link #setVibrationPattern(long[])}. Only modifiable before the channel is
+     * submitted to the NotificationManager.
      */
-    public void setVibration(boolean vibration) {
-        this.mVibration = vibration;
+    public void enableVibration(boolean vibration) {
+        this.mVibrationEnabled = vibration;
+    }
+
+    /**
+     * Sets whether notification posted to this channel should vibrate. Only modifiable before the
+     * channel is submitted to the NotificationManager.
+     */
+    public void setVibrationPattern(long[] vibrationPattern) {
+        this.mVibration = vibrationPattern;
     }
 
     /**
@@ -277,6 +291,14 @@ public final class NotificationChannel implements Parcelable {
      * Returns whether notifications posted to this channel always vibrate.
      */
     public boolean shouldVibrate() {
+        return mVibrationEnabled;
+    }
+
+    /**
+     * Returns the vibration pattern for notifications posted to this channel. Will be ignored if
+     * vibration is not enabled ({@link #shouldVibrate()}.
+     */
+    public long[] getVibrationPattern() {
         return mVibration;
     }
 
@@ -307,7 +329,8 @@ public final class NotificationChannel implements Parcelable {
         setLockscreenVisibility(safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY));
         setSound(safeUri(parser, ATT_SOUND));
         setLights(safeBool(parser, ATT_LIGHTS, false));
-        setVibration(safeBool(parser, ATT_VIBRATION, false));
+        enableVibration(safeBool(parser, ATT_VIBRATION_ENABLED, false));
+        setVibrationPattern(safeLongArray(parser, ATT_VIBRATION, null));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
     }
 
@@ -338,7 +361,10 @@ public final class NotificationChannel implements Parcelable {
             out.attribute(null, ATT_LIGHTS, Boolean.toString(shouldShowLights()));
         }
         if (shouldVibrate()) {
-            out.attribute(null, ATT_VIBRATION, Boolean.toString(shouldVibrate()));
+            out.attribute(null, ATT_VIBRATION_ENABLED, Boolean.toString(shouldVibrate()));
+        }
+        if (getVibrationPattern() != null) {
+            out.attribute(null, ATT_VIBRATION, longArrayToString(getVibrationPattern()));
         }
         if (getUserLockedFields() != 0) {
             out.attribute(null, ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
@@ -369,8 +395,9 @@ public final class NotificationChannel implements Parcelable {
             record.put(ATT_SOUND, getSound().toString());
         }
         record.put(ATT_LIGHTS, Boolean.toString(shouldShowLights()));
-        record.put(ATT_VIBRATION, Boolean.toString(shouldVibrate()));
+        record.put(ATT_VIBRATION_ENABLED, Boolean.toString(shouldVibrate()));
         record.put(ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
+        record.put(ATT_VIBRATION, longArrayToString(getVibrationPattern()));
 
         return record;
     }
@@ -400,6 +427,30 @@ public final class NotificationChannel implements Parcelable {
         return Boolean.parseBoolean(value);
     }
 
+    private static long[] safeLongArray(XmlPullParser parser, String att, long[] defValue) {
+        final String attributeValue = parser.getAttributeValue(null, att);
+        if (TextUtils.isEmpty(attributeValue)) return defValue;
+        String[] values = attributeValue.split(DELIMITER);
+        long[] longValues = new long[values.length];
+        for (int i = 0; i < values.length; i++) {
+            try {
+                longValues[i] = Long.parseLong(values[i]);
+            } catch (NumberFormatException e) {
+                longValues[i] = 0;
+            }
+        }
+        return longValues;
+    }
+
+    private static String longArrayToString(long[] values) {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < values.length - 1; i++) {
+            sb.append(values[i]).append(DELIMITER);
+        }
+        sb.append(values[values.length - 1]);
+        return sb.toString();
+    }
+
     public static final Creator<NotificationChannel> CREATOR = new Creator<NotificationChannel>() {
         @Override
         public NotificationChannel createFromParcel(Parcel in) {
@@ -424,33 +475,34 @@ public final class NotificationChannel implements Parcelable {
 
         NotificationChannel that = (NotificationChannel) o;
 
-        if (getImportance() != that.getImportance()) return false;
+        if (mImportance != that.mImportance) return false;
         if (mBypassDnd != that.mBypassDnd) return false;
-        if (getLockscreenVisibility() != that.getLockscreenVisibility()) return false;
+        if (mLockscreenVisibility != that.mLockscreenVisibility) return false;
         if (mLights != that.mLights) return false;
-        if (mVibration != that.mVibration) return false;
-        if (getUserLockedFields() != that.getUserLockedFields()) return false;
-        if (getId() != null ? !getId().equals(that.getId()) : that.getId() != null) return false;
-        if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null)
-            return false;
-        return getSound() != null ? getSound().equals(
-                that.getSound()) : that.getSound() == null;
+        if (mUserLockedFields != that.mUserLockedFields) return false;
+        if (mVibrationEnabled != that.mVibrationEnabled) return false;
+        if (mId != null ? !mId.equals(that.mId) : that.mId != null) return false;
+        if (mName != null ? !mName.equals(that.mName) : that.mName != null) return false;
+        if (mSound != null ? !mSound.equals(that.mSound) : that.mSound != null) return false;
+        return Arrays.equals(mVibration, that.mVibration);
 
     }
 
     @Override
     public int hashCode() {
-        int result = getId() != null ? getId().hashCode() : 0;
-        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
-        result = 31 * result + getImportance();
+        int result = mId != null ? mId.hashCode() : 0;
+        result = 31 * result + (mName != null ? mName.hashCode() : 0);
+        result = 31 * result + mImportance;
         result = 31 * result + (mBypassDnd ? 1 : 0);
-        result = 31 * result + getLockscreenVisibility();
-        result = 31 * result + (getSound() != null ? getSound().hashCode() : 0);
+        result = 31 * result + mLockscreenVisibility;
+        result = 31 * result + (mSound != null ? mSound.hashCode() : 0);
         result = 31 * result + (mLights ? 1 : 0);
-        result = 31 * result + (mVibration ? 1 : 0);
-        result = 31 * result + getUserLockedFields();
+        result = 31 * result + Arrays.hashCode(mVibration);
+        result = 31 * result + mUserLockedFields;
+        result = 31 * result + (mVibrationEnabled ? 1 : 0);
         return result;
     }
+
 
     @Override
     public String toString() {
@@ -462,8 +514,9 @@ public final class NotificationChannel implements Parcelable {
                 ", mLockscreenVisibility=" + mLockscreenVisibility +
                 ", mSound=" + mSound +
                 ", mLights=" + mLights +
-                ", mVibration=" + mVibration +
+                ", mVibration=" + Arrays.toString(mVibration) +
                 ", mUserLockedFields=" + mUserLockedFields +
+                ", mVibrationEnabled=" + mVibrationEnabled +
                 '}';
     }
 }
