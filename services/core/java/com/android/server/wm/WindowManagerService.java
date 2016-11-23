@@ -214,6 +214,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
@@ -6470,7 +6471,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 case SEND_NEW_CONFIGURATION: {
                     removeMessages(SEND_NEW_CONFIGURATION, msg.obj);
                     final int displayId = (Integer) msg.obj;
-                    sendNewConfiguration(displayId);
+                    if (mRoot.getDisplayContent(displayId) != null) {
+                        sendNewConfiguration(displayId);
+                    } else {
+                        // Message could come after display has already been removed.
+                        if (DEBUG_CONFIGURATION) {
+                            Slog.w(TAG, "Trying to send configuration to non-existing displayId="
+                                    + displayId);
+                        }
+                    }
                     break;
                 }
 

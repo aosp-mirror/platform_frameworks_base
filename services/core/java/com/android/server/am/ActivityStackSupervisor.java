@@ -3561,6 +3561,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer
         }
     }
 
+    /** Check if display with specified id is added to the list. */
+    boolean isDisplayAdded(int displayId) {
+        return mActivityDisplays.get(displayId) != null;
+    }
+
     private void calculateDefaultMinimalSizeOfResizeableTasks(ActivityDisplay display) {
         mDefaultMinSizeOfResizeableTask =
                 mService.mContext.getResources().getDimensionPixelSize(
