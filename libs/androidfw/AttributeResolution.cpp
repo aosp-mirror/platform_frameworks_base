@@ -193,9 +193,9 @@ bool ResolveAttrs(ResTable::Theme* theme, uint32_t def_style_attr, uint32_t def_
   return true;
 }
 
-bool ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
-                uint32_t def_style_res, uint32_t* attrs, size_t attrs_length, uint32_t* out_values,
-                uint32_t* out_indices) {
+void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
+                uint32_t def_style_res, const uint32_t* attrs, size_t attrs_length,
+                uint32_t* out_values, uint32_t* out_indices) {
   if (kDebugStyles) {
     ALOGI("APPLY STYLE: theme=0x%p defStyleAttr=0x%x defStyleRes=0x%x xml=0x%p", theme,
           def_style_attr, def_style_res, xml_parser);
@@ -376,7 +376,7 @@ bool ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_s
     out_values[STYLE_CHANGING_CONFIGURATIONS] = type_set_flags;
     out_values[STYLE_DENSITY] = config.density;
 
-    if (out_indices != NULL && value.dataType != Res_value::TYPE_NULL) {
+    if (value.dataType != Res_value::TYPE_NULL) {
       indices_idx++;
       out_indices[indices_idx] = ii;
     }
@@ -386,10 +386,7 @@ bool ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_s
 
   res.unlock();
 
-  if (out_indices != NULL) {
-    out_indices[0] = indices_idx;
-  }
-  return true;
+  out_indices[0] = indices_idx;
 }
 
 bool RetrieveAttributes(const ResTable* res, ResXMLParser* xml_parser, uint32_t* attrs,

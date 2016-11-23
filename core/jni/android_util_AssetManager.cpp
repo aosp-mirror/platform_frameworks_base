@@ -1179,67 +1179,17 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject clazz,
-                                                        jlong themeToken,
-                                                        jint defStyleAttr,
-                                                        jint defStyleRes,
-                                                        jlong xmlParserToken,
-                                                        jintArray attrs,
-                                                        jintArray outValues,
-                                                        jintArray outIndices)
-{
-    if (themeToken == 0) {
-        jniThrowNullPointerException(env, "theme token");
-        return JNI_FALSE;
-    }
-    if (attrs == NULL) {
-        jniThrowNullPointerException(env, "attrs");
-        return JNI_FALSE;
-    }
-    if (outValues == NULL) {
-        jniThrowNullPointerException(env, "out values");
-        return JNI_FALSE;
-    }
-
-    const jsize NI = env->GetArrayLength(attrs);
-    const jsize NV = env->GetArrayLength(outValues);
-    if (NV < (NI*STYLE_NUM_ENTRIES)) {
-        jniThrowException(env, "java/lang/IndexOutOfBoundsException", "out values too small");
-        return JNI_FALSE;
-    }
-
-    jint* src = (jint*)env->GetPrimitiveArrayCritical(attrs, 0);
-    if (src == NULL) {
-        return JNI_FALSE;
-    }
-
-    jint* baseDest = (jint*)env->GetPrimitiveArrayCritical(outValues, 0);
-    if (baseDest == NULL) {
-        env->ReleasePrimitiveArrayCritical(attrs, src, 0);
-        return JNI_FALSE;
-    }
-
-    jint* indices = NULL;
-    if (outIndices != NULL) {
-        if (env->GetArrayLength(outIndices) > NI) {
-            indices = (jint*)env->GetPrimitiveArrayCritical(outIndices, 0);
-        }
-    }
-
+static void android_content_AssetManager_applyStyle(JNIEnv* env, jobject, jlong themeToken,
+        jint defStyleAttr, jint defStyleRes, jlong xmlParserToken, jintArray attrsObj, jint length,
+        jlong outValuesAddress, jlong outIndicesAddress) {
+    jint* attrs = env->GetIntArrayElements(attrsObj, 0);
     ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeToken);
     ResXMLParser* xmlParser = reinterpret_cast<ResXMLParser*>(xmlParserToken);
-    bool result = ApplyStyle(theme, xmlParser,
-                             defStyleAttr, defStyleRes,
-                             (uint32_t*) src, NI,
-                             (uint32_t*) baseDest,
-                             (uint32_t*) indices);
-
-    if (indices != NULL) {
-        env->ReleasePrimitiveArrayCritical(outIndices, indices, 0);
-    }
-    env->ReleasePrimitiveArrayCritical(outValues, baseDest, 0);
-    env->ReleasePrimitiveArrayCritical(attrs, src, 0);
-    return result ? JNI_TRUE : JNI_FALSE;
+    uint32_t* outValues = reinterpret_cast<uint32_t*>(static_cast<uintptr_t>(outValuesAddress));
+    uint32_t* outIndices = reinterpret_cast<uint32_t*>(static_cast<uintptr_t>(outIndicesAddress));
+    ApplyStyle(theme, xmlParser, defStyleAttr, defStyleRes,
+            reinterpret_cast<const uint32_t*>(attrs), length, outValues, outIndices);
+    env->ReleaseIntArrayElements(attrsObj, attrs, JNI_ABORT);
 }
 
 static jboolean android_content_AssetManager_retrieveAttributes(JNIEnv* env, jobject clazz,
@@ -1795,7 +1745,7 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     { "dumpTheme", "(JILjava/lang/String;Ljava/lang/String;)V",
         (void*) android_content_AssetManager_dumpTheme },
     // @FastNative
-    { "applyStyle","(JIIJ[I[I[I)Z",
+    { "applyStyle","(JIIJ[IIJJ)V",
         (void*) android_content_AssetManager_applyStyle },
     // @FastNative
     { "resolveAttrs","(JII[I[I[I[I)Z",

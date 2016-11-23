@@ -815,9 +815,9 @@ public final class AssetManager implements AutoCloseable {
 
     /*package*/ static final int STYLE_DENSITY = 5;
     @FastNative
-    /*package*/ native static final boolean applyStyle(long theme,
+    /*package*/ native static final void applyStyle(long theme,
             int defStyleAttr, int defStyleRes, long xmlParser,
-            int[] inAttrs, int[] outValues, int[] outIndices);
+            int[] inAttrs, int length, long outValuesAddress, long outIndicesAddress);
     @FastNative
     /*package*/ native static final boolean resolveAttrs(long theme,
             int defStyleAttr, int defStyleRes, int[] inValues,

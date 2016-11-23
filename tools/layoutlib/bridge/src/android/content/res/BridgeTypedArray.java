@@ -80,7 +80,7 @@ public final class BridgeTypedArray extends TypedArray {
 
     public BridgeTypedArray(Resources resources, BridgeContext context, int len,
             boolean platformFile) {
-        super(resources, null, null, 0);
+        super(resources);
         mBridgeResources = resources;
         mContext = context;
         mPlatformFile = platformFile;

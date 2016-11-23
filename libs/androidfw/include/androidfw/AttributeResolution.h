@@ -44,9 +44,9 @@ bool ResolveAttrs(ResTable::Theme* theme, uint32_t def_style_attr, uint32_t def_
                   uint32_t* src_values, size_t src_values_length, uint32_t* attrs,
                   size_t attrs_length, uint32_t* out_values, uint32_t* out_indices);
 
-bool ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
-                uint32_t def_style_res, uint32_t* attrs, size_t attrs_length, uint32_t* out_values,
-                uint32_t* out_indices);
+void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
+                uint32_t def_style_res, const uint32_t* attrs, size_t attrs_length,
+                uint32_t* out_values, uint32_t* out_indices);
 
 bool RetrieveAttributes(const ResTable* res, ResXMLParser* xml_parser, uint32_t* attrs,
                         size_t attrs_length, uint32_t* out_values, uint32_t* out_indices);

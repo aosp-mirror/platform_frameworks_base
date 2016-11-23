@@ -161,9 +161,9 @@ TEST_F(AttributeResolutionXmlTest, ThemeAndXmlParser) {
   std::vector<uint32_t> values;
   values.resize(arraysize(attrs) * 6);
 
-  ASSERT_TRUE(ApplyStyle(&theme, &xml_parser_, 0 /*def_style_attr*/,
-                         0 /*def_style_res*/, attrs, arraysize(attrs),
-                         values.data(), nullptr /*out_indices*/));
+  ApplyStyle(&theme, &xml_parser_, 0 /*def_style_attr*/,
+             0 /*def_style_res*/, attrs, arraysize(attrs),
+             values.data(), nullptr /*out_indices*/);
 
   const uint32_t public_flag = ResTable_typeSpec::SPEC_PUBLIC;
 
