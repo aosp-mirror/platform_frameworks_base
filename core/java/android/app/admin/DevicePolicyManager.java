@@ -151,6 +151,7 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_SKIP_USER_CONSENT}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION}, optional</li>
      * </ul>
      *
      * <p>When managed provisioning has completed, broadcasts are sent to the application specified
@@ -511,6 +512,19 @@ public class DevicePolicyManager {
 
     public static final String EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE
         = "android.app.extra.PROVISIONING_ACCOUNT_TO_MIGRATE";
+
+    /**
+     * Boolean extra that is used in conjunction with
+     * {@link #EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE}. If it's set to {@code true}, the account will
+     * not be removed from the primary user after it is migrated to the newly created user or
+     * profile.
+     *
+     * <p> Defaults to {@code false}
+     *
+     * <p> Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}.
+     */
+    public static final String EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION
+            = "android.app.extra.PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION";
 
     /**
      * A String extra that, holds the email address of the account which a managed profile is
