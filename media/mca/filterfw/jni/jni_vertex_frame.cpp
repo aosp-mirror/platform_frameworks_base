@@ -24,7 +24,8 @@ using android::filterfw::VertexFrame;
 jboolean Java_android_filterfw_core_VertexFrame_nativeAllocate(JNIEnv* env,
                                                                jobject thiz,
                                                                jint size) {
-  return ToJBool(WrapObjectInJava(new VertexFrame(size), env, thiz, true));
+  std::unique_ptr<VertexFrame> frame(new VertexFrame(size));
+  return ToJBool(WrapOwnedObjectInJava(std::move(frame), env, thiz, true));
 }
 
 jboolean Java_android_filterfw_core_VertexFrame_nativeDeallocate(JNIEnv* env, jobject thiz) {
