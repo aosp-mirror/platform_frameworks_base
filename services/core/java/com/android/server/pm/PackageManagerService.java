@@ -391,19 +391,17 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_FORCE_DEX = 1<<2;
     static final int SCAN_UPDATE_SIGNATURE = 1<<3;
     static final int SCAN_NEW_INSTALL = 1<<4;
-    static final int SCAN_NO_PATHS = 1<<5;
-    static final int SCAN_UPDATE_TIME = 1<<6;
-    static final int SCAN_DEFER_DEX = 1<<7;
-    static final int SCAN_BOOTING = 1<<8;
-    static final int SCAN_TRUSTED_OVERLAY = 1<<9;
-    static final int SCAN_DELETE_DATA_ON_FAILURES = 1<<10;
-    static final int SCAN_REPLACING = 1<<11;
-    static final int SCAN_REQUIRE_KNOWN = 1<<12;
-    static final int SCAN_MOVE = 1<<13;
-    static final int SCAN_INITIAL = 1<<14;
-    static final int SCAN_CHECK_ONLY = 1<<15;
-    static final int SCAN_DONT_KILL_APP = 1<<17;
-    static final int SCAN_IGNORE_FROZEN = 1<<18;
+    static final int SCAN_UPDATE_TIME = 1<<5;
+    static final int SCAN_BOOTING = 1<<6;
+    static final int SCAN_TRUSTED_OVERLAY = 1<<7;
+    static final int SCAN_DELETE_DATA_ON_FAILURES = 1<<8;
+    static final int SCAN_REPLACING = 1<<9;
+    static final int SCAN_REQUIRE_KNOWN = 1<<10;
+    static final int SCAN_MOVE = 1<<11;
+    static final int SCAN_INITIAL = 1<<12;
+    static final int SCAN_CHECK_ONLY = 1<<13;
+    static final int SCAN_DONT_KILL_APP = 1<<14;
+    static final int SCAN_IGNORE_FROZEN = 1<<15;
 
     static final int REMOVE_CHATTY = 1<<16;
 
@@ -2219,7 +2217,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Set flag to monitor and not change apk file paths when
             // scanning install directories.
-            final int scanFlags = SCAN_NO_PATHS | SCAN_DEFER_DEX | SCAN_BOOTING | SCAN_INITIAL;
+            final int scanFlags = SCAN_BOOTING | SCAN_INITIAL;
 
             final String bootClassPath = System.getenv("BOOTCLASSPATH");
             final String systemServerClassPath = System.getenv("SYSTEMSERVERCLASSPATH");
@@ -16223,7 +16221,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final PackageParser.Package newPkg;
         try {
-            newPkg = scanPackageTracedLI(disabledPs.codePath, parseFlags, SCAN_NO_PATHS, 0, null);
+            newPkg = scanPackageTracedLI(disabledPs.codePath, parseFlags, 0 /* scanFlags */,
+                0 /* currentTime */, null);
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to restore system package:" + deletedPkg.packageName + ": "
                     + e.getMessage());
