@@ -4765,10 +4765,19 @@ public class TelephonyManager {
         return false;
     }
 
-    /** @hide */
-    @SystemApi
+    /**
+     * Turns mobile data on or off.
+     *
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the
+     *     calling app has carrier privileges.
+     *
+     * @param enable Whether to enable mobile data.
+     *
+     * @see #hasCarrierPrivileges
+     */
     public void setDataEnabled(boolean enable) {
-        setDataEnabled(SubscriptionManager.getDefaultDataSubscriptionId(), enable);
+        setDataEnabled(getSubId(), enable);
     }
 
     /** @hide */
@@ -4784,10 +4793,20 @@ public class TelephonyManager {
         }
     }
 
-    /** @hide */
-    @SystemApi
+    /**
+     * Returns whether mobile data is enabled or not.
+     *
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#ACCESS_NETWORK_STATE ACCESS_NETWORK_STATE},
+     *     {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}, or that the
+     *     calling app has carrier privileges.
+     *
+     * @return true if mobile data is enabled.
+     *
+     * @see #hasCarrierPrivileges
+     */
     public boolean getDataEnabled() {
-        return getDataEnabled(SubscriptionManager.getDefaultDataSubscriptionId());
+        return getDataEnabled(getSubId());
     }
 
     /** @hide */
