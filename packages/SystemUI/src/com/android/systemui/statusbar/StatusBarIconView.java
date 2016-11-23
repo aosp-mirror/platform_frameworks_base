@@ -37,6 +37,7 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Interpolator;
@@ -102,6 +103,7 @@ public class StatusBarIconView extends AnimatedImageView {
     private ObjectAnimator mIconAppearAnimator;
     private ObjectAnimator mDotAnimator;
     private float mDotAppearAmount;
+    private OnVisibilityChangedListener mOnVisibilityChangedListener;
 
     public StatusBarIconView(Context context, String slot, Notification notification) {
         this(context, slot, notification, false);
@@ -525,7 +527,23 @@ public class StatusBarIconView extends AnimatedImageView {
         invalidate();
     }
 
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        if (mOnVisibilityChangedListener != null) {
+            mOnVisibilityChangedListener.onVisibilityChanged(visibility);
+        }
+    }
+
     public float getDotAppearAmount() {
         return mDotAppearAmount;
+    }
+
+    public void setOnVisibilityChangedListener(OnVisibilityChangedListener listener) {
+        mOnVisibilityChangedListener = listener;
+    }
+
+    public interface OnVisibilityChangedListener {
+        void onVisibilityChanged(int newVisibility);
     }
 }

@@ -40,6 +40,7 @@ import java.util.WeakHashMap;
 public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private static final String TAG = "NotificationIconContainer";
     private static final boolean DEBUG = false;
+    private static final int CANNED_ANIMATION_DURATION = 100;
     private static final AnimationProperties DOT_ANIMATION_PROPERTIES = new AnimationProperties() {
         private AnimationFilter mAnimationFilter = new AnimationFilter().animateX();
 
@@ -48,6 +49,26 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             return mAnimationFilter;
         }
     }.setDuration(200);
+
+    private static final AnimationProperties ICON_ANIMATION_PROPERTIES = new AnimationProperties() {
+        private AnimationFilter mAnimationFilter = new AnimationFilter().animateY().animateAlpha();
+        // TODO: add scale
+
+        @Override
+        public AnimationFilter getAnimationFilter() {
+            return mAnimationFilter;
+        }
+    }.setDuration(CANNED_ANIMATION_DURATION);
+
+    private static final AnimationProperties mTempProperties = new AnimationProperties() {
+        private AnimationFilter mAnimationFilter = new AnimationFilter();
+        // TODO: add scale
+
+        @Override
+        public AnimationFilter getAnimationFilter() {
+            return mAnimationFilter;
+        }
+    }.setDuration(CANNED_ANIMATION_DURATION);
 
     private static final AnimationProperties ADD_ICON_PROPERTIES = new AnimationProperties() {
         private AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();
@@ -66,7 +87,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private float mActualPaddingEnd = -1;
     private float mActualPaddingStart = -1;
     private boolean mChangingViewPositions;
-    private int mAnimationStartIndex = -1;
+    private int mAddAnimationStartIndex = -1;
+    private int mCannedAnimationStartIndex = -1;
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -121,7 +143,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 childState.applyToView(child);
             }
         }
-        mAnimationStartIndex = -1;
+        mAddAnimationStartIndex = -1;
+        mCannedAnimationStartIndex = -1;
     }
 
     @Override
@@ -133,10 +156,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         int childIndex = indexOfChild(child);
         if (childIndex < getChildCount() - 1
             && mIconStates.get(getChildAt(childIndex + 1)).iconAppearAmount > 0.0f) {
-            if (mAnimationStartIndex < 0) {
-                mAnimationStartIndex = childIndex;
+            if (mAddAnimationStartIndex < 0) {
+                mAddAnimationStartIndex = childIndex;
             } else {
-                mAnimationStartIndex = Math.min(mAnimationStartIndex, childIndex);
+                mAddAnimationStartIndex = Math.min(mAddAnimationStartIndex, childIndex);
             }
         }
     }
@@ -149,10 +172,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             if (icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
                     && child.getVisibility() == VISIBLE) {
                 int animationStartIndex = findFirstViewIndexAfter(icon.getTranslationX());
-                if (mAnimationStartIndex < 0) {
-                    mAnimationStartIndex = animationStartIndex;
+                if (mAddAnimationStartIndex < 0) {
+                    mAddAnimationStartIndex = animationStartIndex;
                 } else {
-                    mAnimationStartIndex = Math.min(mAnimationStartIndex, animationStartIndex);
+                    mAddAnimationStartIndex = Math.min(mAddAnimationStartIndex, animationStartIndex);
                 }
             }
             if (!mChangingViewPositions) {
@@ -305,28 +328,64 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mChangingViewPositions = changingViewPositions;
     }
 
+    public IconState getIconState(StatusBarIconView icon) {
+        return mIconStates.get(icon);
+    }
+
     public class IconState extends ViewState {
         public float iconAppearAmount = 1.0f;
+        public float clampedAppearAmount = 1.0f;
         public int visibleState;
         public boolean justAdded = true;
+        public boolean needsCannedAnimation;
+        public boolean keepClampedPosition;
+        public boolean useFullTransitionAmount;
 
         @Override
         public void applyToView(View view) {
             if (view instanceof StatusBarIconView) {
                 StatusBarIconView icon = (StatusBarIconView) view;
-                AnimationProperties animationProperties = DOT_ANIMATION_PROPERTIES;
+                boolean animate = false;
+                AnimationProperties animationProperties = null;
                 if (justAdded) {
                     super.applyToView(icon);
                     icon.setAlpha(0.0f);
                     icon.setVisibleState(StatusBarIconView.STATE_HIDDEN, false /* animate */);
                     animationProperties = ADD_ICON_PROPERTIES;
+                    animate = true;
+                } else if (visibleState != icon.getVisibleState()) {
+                    animationProperties = DOT_ANIMATION_PROPERTIES;
+                    animate = true;
                 }
-                boolean animate = visibleState != icon.getVisibleState() || justAdded;
-                if (!animate && mAnimationStartIndex >= 0
+                if (!animate && mAddAnimationStartIndex >= 0
+                        && indexOfChild(view) >= mAddAnimationStartIndex
                         && (icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
                             || visibleState != StatusBarIconView.STATE_HIDDEN)) {
-                    int viewIndex = indexOfChild(view);
-                    animate = viewIndex >= mAnimationStartIndex;
+                    animationProperties = DOT_ANIMATION_PROPERTIES;
+                    animate = true;
+                }
+                if (needsCannedAnimation) {
+                    AnimationFilter animationFilter = mTempProperties.getAnimationFilter();
+                    animationFilter.reset();
+                    animationFilter.combineFilter(ICON_ANIMATION_PROPERTIES.getAnimationFilter());
+                    if (animationProperties != null) {
+                        animationFilter.combineFilter(animationProperties.getAnimationFilter());
+                    }
+                    animationProperties = mTempProperties;
+                    animationProperties.setDuration(CANNED_ANIMATION_DURATION);
+                    animate = true;
+                    mCannedAnimationStartIndex = indexOfChild(view);
+                }
+                if (!animate && mCannedAnimationStartIndex >= 0
+                        && indexOfChild(view) > mCannedAnimationStartIndex
+                        && (icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
+                        || visibleState != StatusBarIconView.STATE_HIDDEN)) {
+                    AnimationFilter animationFilter = mTempProperties.getAnimationFilter();
+                    animationFilter.reset();
+                    animationFilter.animateX();
+                    animationProperties = mTempProperties;
+                    animationProperties.setDuration(CANNED_ANIMATION_DURATION);
+                    animate = true;
                 }
                 icon.setVisibleState(visibleState);
                 if (animate) {
@@ -336,6 +395,13 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 }
             }
             justAdded = false;
+            needsCannedAnimation = false;
+        }
+
+        protected void onYTranslationAnimationFinished(View view) {
+            if (hidden) {
+                view.setVisibility(INVISIBLE);
+            }
         }
     }
 }

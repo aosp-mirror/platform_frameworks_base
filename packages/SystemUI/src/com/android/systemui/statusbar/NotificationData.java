@@ -208,6 +208,12 @@ public class NotificationData {
                 expandedIcon = null;
                 throw new IconException("Couldn't create icon: " + ic);
             }
+            expandedIcon.setOnVisibilityChangedListener(
+                    newVisibility -> {
+                        if (row != null) {
+                            row.setIconsVisible(newVisibility != View.VISIBLE);
+                        }
+                    });
         }
 
         public void setIconTag(int key, Object tag) {

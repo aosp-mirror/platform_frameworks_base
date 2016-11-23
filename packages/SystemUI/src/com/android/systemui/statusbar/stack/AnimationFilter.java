@@ -120,7 +120,7 @@ public class AnimationFilter {
         }
     }
 
-    private void combineFilter(AnimationFilter filter) {
+    public void combineFilter(AnimationFilter filter) {
         animateAlpha |= filter.animateAlpha;
         animateX |= filter.animateX;
         animateY |= filter.animateY;
@@ -134,7 +134,7 @@ public class AnimationFilter {
         hasDelays |= filter.hasDelays;
     }
 
-    private void reset() {
+    public void reset() {
         animateAlpha = false;
         animateX = false;
         animateY = false;

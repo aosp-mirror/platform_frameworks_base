@@ -99,36 +99,6 @@ public class ViewState {
             // don't do anything with it
             return;
         }
-        boolean becomesInvisible = this.alpha == 0.0f || this.hidden;
-        boolean animatingAlpha = isAnimating(view, TAG_ANIMATOR_ALPHA);
-        if (animatingAlpha) {
-            updateAlphaAnimation(view);
-        } else if (view.getAlpha() != this.alpha) {
-            // apply layer type
-            boolean becomesFullyVisible = this.alpha == 1.0f;
-            boolean newLayerTypeIsHardware = !becomesInvisible && !becomesFullyVisible
-                    && view.hasOverlappingRendering();
-            int layerType = view.getLayerType();
-            int newLayerType = newLayerTypeIsHardware
-                    ? View.LAYER_TYPE_HARDWARE
-                    : View.LAYER_TYPE_NONE;
-            if (layerType != newLayerType) {
-                view.setLayerType(newLayerType, null);
-            }
-
-            // apply alpha
-            view.setAlpha(this.alpha);
-        }
-
-        // apply visibility
-        int oldVisibility = view.getVisibility();
-        int newVisibility = becomesInvisible ? View.INVISIBLE : View.VISIBLE;
-        if (newVisibility != oldVisibility) {
-            if (!(view instanceof ExpandableView) || !((ExpandableView) view).willBeGone()) {
-                // We don't want views to change visibility when they are animating to GONE
-                view.setVisibility(newVisibility);
-            }
-        }
 
         // apply xTranslation
         boolean animatingX = isAnimating(view, TAG_ANIMATOR_TRANSLATION_X);
@@ -163,6 +133,53 @@ public class ViewState {
         if (view.getScaleY() != this.scaleY) {
             view.setScaleY(this.scaleY);
         }
+
+        boolean becomesInvisible = this.alpha == 0.0f || (this.hidden && !isAnimating(view));
+        boolean animatingAlpha = isAnimating(view, TAG_ANIMATOR_ALPHA);
+        if (animatingAlpha) {
+            updateAlphaAnimation(view);
+        } else if (view.getAlpha() != this.alpha) {
+            // apply layer type
+            boolean becomesFullyVisible = this.alpha == 1.0f;
+            boolean newLayerTypeIsHardware = !becomesInvisible && !becomesFullyVisible
+                    && view.hasOverlappingRendering();
+            int layerType = view.getLayerType();
+            int newLayerType = newLayerTypeIsHardware
+                    ? View.LAYER_TYPE_HARDWARE
+                    : View.LAYER_TYPE_NONE;
+            if (layerType != newLayerType) {
+                view.setLayerType(newLayerType, null);
+            }
+
+            // apply alpha
+            view.setAlpha(this.alpha);
+        }
+
+        // apply visibility
+        int oldVisibility = view.getVisibility();
+        int newVisibility = becomesInvisible ? View.INVISIBLE : View.VISIBLE;
+        if (newVisibility != oldVisibility) {
+            if (!(view instanceof ExpandableView) || !((ExpandableView) view).willBeGone()) {
+                // We don't want views to change visibility when they are animating to GONE
+                view.setVisibility(newVisibility);
+            }
+        }
+    }
+
+    protected boolean isAnimating(View view) {
+        if (isAnimating(view, TAG_ANIMATOR_TRANSLATION_X)) {
+            return true;
+        }
+        if (isAnimating(view, TAG_ANIMATOR_TRANSLATION_Y)) {
+            return true;
+        }
+        if (isAnimating(view, TAG_ANIMATOR_TRANSLATION_Z)) {
+            return true;
+        }
+        if (isAnimating(view, TAG_ANIMATOR_ALPHA)) {
+            return true;
+        }
+        return false;
     }
 
     private boolean isAnimating(View view, int tag) {
@@ -482,7 +499,7 @@ public class ViewState {
                 child.setTag(TAG_ANIMATOR_TRANSLATION_Y, null);
                 child.setTag(TAG_START_TRANSLATION_Y, null);
                 child.setTag(TAG_END_TRANSLATION_Y, null);
-                onYTranslationAnimationFinished();
+                onYTranslationAnimationFinished(child);
             }
         });
         startAnimator(animator, listener);
@@ -491,7 +508,10 @@ public class ViewState {
         child.setTag(TAG_END_TRANSLATION_Y, newEndValue);
     }
 
-    protected void onYTranslationAnimationFinished() {
+    protected void onYTranslationAnimationFinished(View view) {
+        if (hidden) {
+            view.setVisibility(View.INVISIBLE);
+        }
     }
 
     protected void startAnimator(Animator animator, AnimatorListenerAdapter listener) {
