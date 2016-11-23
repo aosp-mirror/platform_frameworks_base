@@ -16,13 +16,6 @@
 
 package com.android.server.location;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -43,8 +36,11 @@ import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 /**
  * @hide

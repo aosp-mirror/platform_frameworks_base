@@ -278,7 +278,7 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_SHARED_LIBRARIES += \
     libhwui \
-    libdl
+    libdl \
 
 # we need to access the private Bionic header
 # <bionic_tls.h> in com_google_android_gles_jni_GLImpl.cpp
