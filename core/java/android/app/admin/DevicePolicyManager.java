@@ -2372,8 +2372,6 @@ public class DevicePolicyManager {
      *         {@link #KEYGUARD_DISABLE_TRUST_AGENTS}.
      *
      * @throws SecurityException if {@code admin} is not a device or profile owner.
-     *
-     * @hide
      */
     public void setRequiredStrongAuthTimeout(@NonNull ComponentName admin,
             long timeoutMs) {
@@ -2398,8 +2396,6 @@ public class DevicePolicyManager {
      * @param admin The name of the admin component to check, or {@code null} to aggregate
      *         accross all participating admins.
      * @return The timeout or 0 if not configured for the provided admin.
-     *
-     * @hide
      */
     public long getRequiredStrongAuthTimeout(@Nullable ComponentName admin) {
         return getRequiredStrongAuthTimeout(admin, myUserId());
@@ -6159,6 +6155,8 @@ public class DevicePolicyManager {
      * <li>{@link #setKeyguardDisabledFeatures}</li>
      * <li>{@link #getTrustAgentConfiguration}</li>
      * <li>{@link #setTrustAgentConfiguration}</li>
+     * <li>{@link #getRequiredStrongAuthTimeout}</li>
+     * <li>{@link #setRequiredStrongAuthTimeout}</li>
      * </ul>
      *
      * @return a new instance of {@link DevicePolicyManager} that acts on the parent profile.
