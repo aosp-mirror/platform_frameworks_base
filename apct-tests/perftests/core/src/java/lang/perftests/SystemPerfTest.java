@@ -20,6 +20,9 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
+
+import dalvik.annotation.optimization.FastNative;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +32,11 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class SystemPerfTest {
+
+    static {
+        System.loadLibrary("perftestscore_jni");
+    }
+
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
@@ -60,4 +68,49 @@ public class SystemPerfTest {
             state.resumeTiming();
         }
     }
+
+    @Test
+    public void testJniArrayNoop() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final int[] data = new int[450];
+        while (state.keepRunning()) {
+            jintarrayArgumentNoop(data, data.length);
+        }
+    }
+
+    @Test
+    public void testJniArrayGetLength() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final int[] data = new int[450];
+        while (state.keepRunning()) {
+            jintarrayGetLength(data);
+        }
+    }
+
+    @Test
+    public void testJniArrayCriticalAccess() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final int[] data = new int[450];
+        while (state.keepRunning()) {
+            jintarrayCriticalAccess(data, 50);
+        }
+    }
+
+    @Test
+    public void testJniArrayBasicAccess() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final int[] data = new int[450];
+        while (state.keepRunning()) {
+            jintarrayBasicAccess(data, 50);
+        }
+    }
+
+    @FastNative
+    private static native void jintarrayArgumentNoop(int[] array, int length);
+    @FastNative
+    private static native int jintarrayGetLength(int[] array);
+    @FastNative
+    private static native int jintarrayCriticalAccess(int[] array, int index);
+    @FastNative
+    private static native int jintarrayBasicAccess(int[] array, int index);
 }
