@@ -3818,12 +3818,35 @@
        "Raise volume above recommended level?\n\nListening at high volume for long periods may damage your hearing."
     </string>
 
-    <!-- Text spoken when the user is performing a gesture that will enable accessibility. [CHAR LIMIT=none] -->
-    <string name="continue_to_enable_accessibility">Keep holding down two fingers to enable accessibility.</string>
-    <!-- Text spoken when the user enabled accessibility. [CHAR LIMIT=none] -->
-    <string name="accessibility_enabled">Accessibility enabled.</string>
-    <!-- Text spoken when the user stops preforming a gesture that would enable accessibility. [CHAR LIMIT=none] -->
-    <string name="enable_accessibility_canceled">Accessibility canceled.</string>
+    <!-- Dialog title for dialog shown when the accessibility shortcut is activated, and we want
+     to confirm that the user understands what's going to happen-->
+    <string name="accessibility_shortcut_warning_dialog_title">Accessibility Shortcut is ON</string>
+
+    <!-- Message shown in dialog when user is in the process of enabling the accessibility
+    service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_toogle_warning">
+        Turn <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> on or off by holding down
+        both volume buttons for 3 seconds.\n\nYou can change the service in
+        Settings > Accessibility.
+    </string>
+
+    <!-- Text in button that turns off the accessibility shortcut -->
+    <string name="disable_accessibility_shortcut">Turn Off Shortcut</string>
+
+    <!-- Text in button that closes the warning dialog about the accessibility shortcut, leaving the
+    shortcut enabled.-->
+    <string name="leave_accessibility_shortcut_on">Leave on</string>
+
+    <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility
+    service.-->
+    <string name="accessibility_shortcut_enabling_service">Accessibility Shortcut turned
+        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> on</string>
+
+    <!-- Text in toast to alert the user that the accessibility shortcut turned off an accessibility
+    service.-->
+    <string name="accessibility_shortcut_disabling_service">Accessibility Shortcut turned
+        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> off</string>
+
     <!-- Text spoken when the current user is switched if accessibility is enabled. [CHAR LIMIT=none] -->
     <string name="user_switched">Current user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
     <!-- Message shown when switching to a user [CHAR LIMIT=none] -->

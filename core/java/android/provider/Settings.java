@@ -5313,6 +5313,21 @@ public final class Settings {
         public static final String ACCESSIBILITY_ENABLED = "accessibility_enabled";
 
         /**
+         * Setting specifying if the accessibility shortcut dialog has been shown to this user.
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN =
+                "accessibility_shortcut_dialog_shown";
+
+        /**
+         * Setting specifying the the accessibility service to be toggled via the accessibility
+         * shortcut. Must be its flattened {@link ComponentName}.
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SHORTCUT_TARGET_SERVICE =
+                "accessibility_shortcut_target_service";
+
+        /**
          * If touch exploration is enabled.
          */
         public static final String TOUCH_EXPLORATION_ENABLED = "touch_exploration_enabled";
@@ -6782,6 +6797,8 @@ public final class Settings {
             TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
             TOUCH_EXPLORATION_ENABLED,
             ACCESSIBILITY_ENABLED,
+            ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+            ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
             ACCESSIBILITY_SPEAK_PASSWORD,
             ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
             ACCESSIBILITY_CAPTIONING_PRESET,
@@ -7071,7 +7088,9 @@ public final class Settings {
          * Setting whether the global gesture for enabling accessibility is enabled.
          * If this gesture is enabled the user will be able to perfrom it to enable
          * the accessibility state without visiting the settings app.
+         *
          * @hide
+         * No longer used. Should be removed once all dependencies have been updated.
          */
         public static final String ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED =
                 "enable_accessibility_global_gesture_enabled";
@@ -9372,7 +9391,6 @@ public final class Settings {
             DOCK_SOUNDS_ENABLED,
             CHARGING_SOUNDS_ENABLED,
             USB_MASS_STORAGE_ENABLED,
-            ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
             WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
             WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
             WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,

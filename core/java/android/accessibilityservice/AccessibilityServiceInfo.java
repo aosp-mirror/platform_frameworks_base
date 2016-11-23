@@ -414,9 +414,9 @@ public class AccessibilityServiceInfo implements Parcelable {
     public int flags;
 
     /**
-     * The unique string Id to identify the accessibility service.
+     * The component name the accessibility service.
      */
-    private String mId;
+    private ComponentName mComponentName;
 
     /**
      * The Service that implements this accessibility service component.
@@ -464,7 +464,7 @@ public class AccessibilityServiceInfo implements Parcelable {
     public AccessibilityServiceInfo(ResolveInfo resolveInfo, Context context)
             throws XmlPullParserException, IOException {
         ServiceInfo serviceInfo = resolveInfo.serviceInfo;
-        mId = new ComponentName(serviceInfo.packageName, serviceInfo.name).flattenToShortString();
+        mComponentName = new ComponentName(serviceInfo.packageName, serviceInfo.name);
         mResolveInfo = resolveInfo;
 
         XmlResourceParser parser = null;
@@ -574,7 +574,14 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @hide
      */
     public void setComponentName(ComponentName component) {
-        mId = component.flattenToShortString();
+        mComponentName = component;
+    }
+
+    /**
+     * @hide
+     */
+    public ComponentName getComponentName() {
+        return mComponentName;
     }
 
     /**
@@ -585,7 +592,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @return The id.
      */
     public String getId() {
-        return mId;
+        return mComponentName.flattenToShortString();
     }
 
     /**
@@ -715,7 +722,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeInt(feedbackType);
         parcel.writeLong(notificationTimeout);
         parcel.writeInt(flags);
-        parcel.writeString(mId);
+        parcel.writeParcelable(mComponentName, flagz);
         parcel.writeParcelable(mResolveInfo, 0);
         parcel.writeString(mSettingsActivityName);
         parcel.writeInt(mCapabilities);
@@ -729,7 +736,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         feedbackType = parcel.readInt();
         notificationTimeout = parcel.readLong();
         flags = parcel.readInt();
-        mId = parcel.readString();
+        mComponentName = parcel.readParcelable(this.getClass().getClassLoader());
         mResolveInfo = parcel.readParcelable(null);
         mSettingsActivityName = parcel.readString();
         mCapabilities = parcel.readInt();
@@ -739,7 +746,7 @@ public class AccessibilityServiceInfo implements Parcelable {
 
     @Override
     public int hashCode() {
-        return 31 * 1 + ((mId == null) ? 0 : mId.hashCode());
+        return 31 * 1 + ((mComponentName == null) ? 0 : mComponentName.hashCode());
     }
 
     @Override
@@ -754,11 +761,11 @@ public class AccessibilityServiceInfo implements Parcelable {
             return false;
         }
         AccessibilityServiceInfo other = (AccessibilityServiceInfo) obj;
-        if (mId == null) {
-            if (other.mId != null) {
+        if (mComponentName == null) {
+            if (other.mComponentName != null) {
                 return false;
             }
-        } else if (!mId.equals(other.mId)) {
+        } else if (!mComponentName.equals(other.mComponentName)) {
             return false;
         }
         return true;
@@ -777,7 +784,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         stringBuilder.append(", ");
         appendFlags(stringBuilder, flags);
         stringBuilder.append(", ");
-        stringBuilder.append("id: ").append(mId);
+        stringBuilder.append("id: ").append(getId());
         stringBuilder.append(", ");
         stringBuilder.append("resolveInfo: ").append(mResolveInfo);
         stringBuilder.append(", ");

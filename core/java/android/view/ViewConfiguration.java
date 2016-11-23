@@ -83,6 +83,13 @@ public class ViewConfiguration {
     private static final int GLOBAL_ACTIONS_KEY_TIMEOUT = 500;
 
     /**
+     * Defines the duration in milliseconds a user needs to hold down the
+     * appropriate button to bring up the accessibility shortcut (first time) or enable it
+     * (once shortcut is configured).
+     */
+    private static final int A11Y_SHORTCUT_KEY_TIMEOUT = 3000;
+
+    /**
      * Defines the duration in milliseconds we will wait to see if a touch event
      * is a tap or a scroll. If the user does not move within this interval, it is
      * considered to be a tap.
@@ -782,6 +789,18 @@ public class ViewConfiguration {
      */
     public long getDeviceGlobalActionKeyTimeout() {
         return mGlobalActionsKeyTimeout;
+    }
+
+    /**
+     * The amount of time a user needs to press the relevant keys to activate the accessibility
+     * shortcut.
+     *
+     * @return how long a user needs to press the relevant keys to activate the accessibility
+     *   shortcut.
+     * @hide
+     */
+    public long getAccessibilityShortcutKeyTimeout() {
+        return A11Y_SHORTCUT_KEY_TIMEOUT;
     }
 
     /**

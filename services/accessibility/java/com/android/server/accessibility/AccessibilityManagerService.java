@@ -97,6 +97,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.server.LocalServices;
 
+import com.android.server.policy.AccessibilityShortcutController;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -1489,6 +1490,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         mInitialized = true;
         updateLegacyCapabilitiesLocked(userState);
         updateServicesLocked(userState);
+        updateAccessibilityShortcutLocked(userState);
         updateWindowsForAccessibilityCallbackLocked(userState);
         updateAccessibilityFocusBehaviorLocked(userState);
         updateFilterKeyEventsLocked(userState);
@@ -1613,7 +1615,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         somethingChanged |= readEnhancedWebAccessibilityEnabledChangedLocked(userState);
         somethingChanged |= readDisplayMagnificationEnabledSettingLocked(userState);
         somethingChanged |= readAutoclickEnabledSettingLocked(userState);
-
+        somethingChanged |= readAccessibilityShortcutSettingLocked(userState);
         return somethingChanged;
     }
 
@@ -1719,6 +1721,50 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+    }
+
+    private boolean readAccessibilityShortcutSettingLocked(UserState userState) {
+        String componentNameToEnableString = AccessibilityShortcutController
+                .getTargetServiceComponentNameString(mContext, userState.mUserId);
+        if ((componentNameToEnableString == null) || componentNameToEnableString.isEmpty()) {
+            if (userState.mServiceToEnableWithShortcut == null) {
+                return false;
+            }
+            userState.mServiceToEnableWithShortcut = null;
+            return true;
+        }
+        ComponentName componentNameToEnable =
+            ComponentName.unflattenFromString(componentNameToEnableString);
+        if (componentNameToEnable.equals(userState.mServiceToEnableWithShortcut)) {
+            return false;
+        }
+        userState.mServiceToEnableWithShortcut = componentNameToEnable;
+        return true;
+    }
+
+    /**
+     * Check if the service that will be enabled by the shortcut is installed. If it isn't,
+     * clear the value and the associated setting so a sideloaded service can't spoof the
+     * package name of the default service.
+     *
+     * @param userState
+     */
+    private void updateAccessibilityShortcutLocked(UserState userState) {
+        if (userState.mServiceToEnableWithShortcut == null) {
+            return;
+        }
+        boolean shortcutServiceIsInstalled = false;
+        for (int i = 0; i < userState.mInstalledServices.size(); i++) {
+            if (userState.mInstalledServices.get(i).getComponentName()
+                    .equals(userState.mServiceToEnableWithShortcut)) {
+                shortcutServiceIsInstalled = true;
+            }
+        }
+        if (!shortcutServiceIsInstalled) {
+            userState.mServiceToEnableWithShortcut = null;
+            Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "", userState.mUserId);
         }
     }
 
@@ -1895,44 +1941,63 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     /**
+     * AIDL-exposed method to be called when the accessibility shortcut is enabled. Requires
+     * permission to write secure settings, since someone with that permission can enable
+     * accessibility services themselves.
+     */
+    public void performAccessibilityShortcut() {
+        if ((UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID)
+                && (mContext.checkCallingPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED)) {
+            throw new SecurityException(
+                    "performAccessibilityShortcut requires the WRITE_SECURE_SETTINGS permission");
+        }
+        synchronized(mLock) {
+            UserState userState = getUserStateLocked(mCurrentUserId);
+            ComponentName serviceName = userState.mServiceToEnableWithShortcut;
+            if (serviceName == null) {
+                return;
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (userState.mComponentNameToServiceMap.get(serviceName) == null) {
+                    enableAccessibilityServiceLocked(serviceName, mCurrentUserId);
+                } else {
+                    disableAccessibilityServiceLocked(serviceName, mCurrentUserId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    };
+
+    /**
      * Enables accessibility service specified by {@param componentName} for the {@param userId}.
      */
-    public void enableAccessibilityService(ComponentName componentName, int userId) {
-        synchronized(mLock) {
-            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-                throw new SecurityException("only SYSTEM can call enableAccessibilityService.");
-            }
+    private void enableAccessibilityServiceLocked(ComponentName componentName, int userId) {
+        SettingsStringHelper settingsHelper = new SettingsStringHelper(
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, userId);
+        settingsHelper.addService(componentName);
+        settingsHelper.writeToSettings();
 
-            SettingsStringHelper settingsHelper = new SettingsStringHelper(
-                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, userId);
-            settingsHelper.addService(componentName);
-            settingsHelper.writeToSettings();
-
-            UserState userState = getUserStateLocked(userId);
-            if (userState.mEnabledServices.add(componentName)) {
-                onUserStateChangedLocked(userState);
-            }
+        UserState userState = getUserStateLocked(userId);
+        if (userState.mEnabledServices.add(componentName)) {
+            onUserStateChangedLocked(userState);
         }
     }
 
     /**
      * Disables accessibility service specified by {@param componentName} for the {@param userId}.
      */
-    public void disableAccessibilityService(ComponentName componentName, int userId) {
-        synchronized(mLock) {
-            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-                throw new SecurityException("only SYSTEM can call disableAccessibility");
-            }
+    private void disableAccessibilityServiceLocked(ComponentName componentName, int userId) {
+        SettingsStringHelper settingsHelper = new SettingsStringHelper(
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, userId);
+        settingsHelper.deleteService(componentName);
+        settingsHelper.writeToSettings();
 
-            SettingsStringHelper settingsHelper = new SettingsStringHelper(
-                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, userId);
-            settingsHelper.deleteService(componentName);
-            settingsHelper.writeToSettings();
-
-            UserState userState = getUserStateLocked(userId);
-            if (userState.mEnabledServices.remove(componentName)) {
-                onUserStateChangedLocked(userState);
-            }
+        UserState userState = getUserStateLocked(userId);
+        if (userState.mEnabledServices.remove(componentName)) {
+            onUserStateChangedLocked(userState);
         }
     }
 
@@ -4307,6 +4372,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public ComponentName mServiceChangingSoftKeyboardMode;
 
+        public ComponentName mServiceToEnableWithShortcut;
+
         public int mLastSentClientState = -1;
 
         public int mSoftKeyboardShowMode = 0;
@@ -4439,6 +4506,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         private final Uri mAccessibilitySoftKeyboardModeUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE);
 
+        private final Uri mAccessibilityShortcutServiceIdUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE);
+
         public AccessibilityContentObserver(Handler handler) {
             super(handler);
         }
@@ -4467,6 +4537,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     mHighTextContrastUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mAccessibilitySoftKeyboardModeUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mAccessibilityShortcutServiceIdUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -4517,6 +4589,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 } else if (mAccessibilitySoftKeyboardModeUri.equals(uri)) {
                     if (readSoftKeyboardShowModeChangedLocked(userState)) {
                         notifySoftKeyboardShowModeChangedLocked(userState.mSoftKeyboardShowMode);
+                        onUserStateChangedLocked(userState);
+                    }
+                } else if (mAccessibilityShortcutServiceIdUri.equals(uri)) {
+                    if (readAccessibilityShortcutSettingLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
                 }

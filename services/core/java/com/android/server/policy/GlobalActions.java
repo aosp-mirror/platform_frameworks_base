@@ -44,7 +44,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -59,12 +58,9 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -1194,21 +1190,14 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private static final class GlobalActionsDialog extends Dialog implements DialogInterface {
         private final Context mContext;
-        private final int mWindowTouchSlop;
         private final AlertController mAlert;
         private final MyAdapter mAdapter;
-
-        private EnableAccessibilityController mEnableAccessibilityController;
-
-        private boolean mIntercepted;
-        private boolean mCancelOnUp;
 
         public GlobalActionsDialog(Context context, AlertParams params) {
             super(context, getDialogTheme(context));
             mContext = getContext();
             mAlert = AlertController.create(mContext, this, getWindow());
             mAdapter = (MyAdapter) params.mAdapter;
-            mWindowTouchSlop = ViewConfiguration.get(context).getScaledWindowTouchSlop();
             params.apply(mAlert);
         }
 
@@ -1221,74 +1210,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         @Override
         protected void onStart() {
-            // If global accessibility gesture can be performed, we will take care
-            // of dismissing the dialog on touch outside. This is because the dialog
-            // is dismissed on the first down while the global gesture is a long press
-            // with two fingers anywhere on the screen.
-            if (EnableAccessibilityController.canEnableAccessibilityViaGesture(mContext)) {
-                mEnableAccessibilityController = new EnableAccessibilityController(mContext,
-                        new Runnable() {
-                    @Override
-                    public void run() {
-                        dismiss();
-                    }
-                });
-                super.setCanceledOnTouchOutside(false);
-            } else {
-                mEnableAccessibilityController = null;
-                super.setCanceledOnTouchOutside(true);
-            }
-
+            super.setCanceledOnTouchOutside(true);
             super.onStart();
-        }
-
-        @Override
-        protected void onStop() {
-            if (mEnableAccessibilityController != null) {
-                mEnableAccessibilityController.onDestroy();
-            }
-            super.onStop();
-        }
-
-        @Override
-        public boolean dispatchTouchEvent(MotionEvent event) {
-            if (mEnableAccessibilityController != null) {
-                final int action = event.getActionMasked();
-                if (action == MotionEvent.ACTION_DOWN) {
-                    View decor = getWindow().getDecorView();
-                    final int eventX = (int) event.getX();
-                    final int eventY = (int) event.getY();
-                    if (eventX < -mWindowTouchSlop
-                            || eventY < -mWindowTouchSlop
-                            || eventX >= decor.getWidth() + mWindowTouchSlop
-                            || eventY >= decor.getHeight() + mWindowTouchSlop) {
-                        mCancelOnUp = true;
-                    }
-                }
-                try {
-                    if (!mIntercepted) {
-                        mIntercepted = mEnableAccessibilityController.onInterceptTouchEvent(event);
-                        if (mIntercepted) {
-                            final long now = SystemClock.uptimeMillis();
-                            event = MotionEvent.obtain(now, now,
-                                    MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
-                            event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
-                            mCancelOnUp = true;
-                        }
-                    } else {
-                        return mEnableAccessibilityController.onTouchEvent(event);
-                    }
-                } finally {
-                    if (action == MotionEvent.ACTION_UP) {
-                        if (mCancelOnUp) {
-                            cancel();
-                        }
-                        mCancelOnUp = false;
-                        mIntercepted = false;
-                    }
-                }
-            }
-            return super.dispatchTouchEvent(event);
         }
 
         public ListView getListView() {

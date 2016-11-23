@@ -21,6 +21,7 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
@@ -241,7 +242,26 @@ public final class AccessibilityManager {
      * @hide
      */
     public AccessibilityManager(Context context, IAccessibilityManager service, int userId) {
+        // Constructor can't be chained because we can't create an instance of an inner class
+        // before calling another constructor.
         mHandler = new MyHandler(context.getMainLooper());
+        mUserId = userId;
+        synchronized (mLock) {
+            tryConnectToServiceLocked(service);
+        }
+    }
+
+    /**
+     * Create an instance.
+     *
+     * @param handler The handler to use
+     * @param service An interface to the backing service.
+     * @param userId User id under which to run.
+     *
+     * @hide
+     */
+    public AccessibilityManager(Handler handler, IAccessibilityManager service, int userId) {
+        mHandler = handler;
         mUserId = userId;
         synchronized (mLock) {
             tryConnectToServiceLocked(service);
@@ -647,6 +667,30 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Find an installed service with the specified {@link ComponentName}.
+     *
+     * @param componentName The name to match to the service.
+     *
+     * @return The info corresponding to the installed service, or {@code null} if no such service
+     * is installed.
+     * @hide
+     */
+    public AccessibilityServiceInfo getInstalledServiceInfoWithComponentName(
+            ComponentName componentName) {
+        final List<AccessibilityServiceInfo> installedServiceInfos =
+                getInstalledAccessibilityServiceList();
+        if ((installedServiceInfos == null) || (componentName == null)) {
+            return null;
+        }
+        for (int i = 0; i < installedServiceInfos.size(); i++) {
+            if (componentName.equals(installedServiceInfos.get(i).getComponentName())) {
+                return installedServiceInfos.get(i);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Adds an accessibility interaction connection interface for a given window.
      * @param windowToken The window token to which a connection is added.
      * @param connection The connection.
@@ -690,6 +734,26 @@ public final class AccessibilityManager {
             service.removeAccessibilityInteractionConnection(windowToken);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while removing an accessibility interaction connection. ", re);
+        }
+    }
+
+    /**
+     * Perform the accessibility shortcut if the caller has permission.
+     *
+     * @hide
+     */
+    public void performAccessibilityShortcut() {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.performAccessibilityShortcut();
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error performing accessibility shortcut. ", re);
         }
     }
 
