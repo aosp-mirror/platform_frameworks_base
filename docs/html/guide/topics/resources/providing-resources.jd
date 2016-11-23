@@ -905,20 +905,25 @@ PNG file and two small XML files that point to it. (An example XML file is shown
 
 <h4>Drawable</h4>
 
-<p>To create an alias to an existing drawable, use the {@code <bitmap>} element.
-For example:</p>
+<p>
+  To create an alias to an existing drawable, use the {@code <drawable>}
+  element. For example:
+</p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
-&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/icon_ca" />
+&lt;resources&gt;
+    &lt;drawable name="icon"&gt;&#64;drawable/icon_ca&lt;/drawable&gt;
+&lt;/resources&gt;
 </pre>
 
-<p>If you save this file as {@code icon.xml} (in an alternative resource directory, such as
-{@code res/drawable-en-rCA/}), it is compiled into a resource that you
-can reference as {@code R.drawable.icon}, but is actually an alias for the {@code
-R.drawable.icon_ca} resource (which is saved in {@code res/drawable/}).</p>
-
+<p>
+  If you save this file as {@code drawables.xml} (in an alternative resource
+  directory, such as {@code res/values-en-rCA/}), it is compiled into a
+  resource that you can reference as {@code R.drawable.icon}, but is actually
+  an alias for the {@code R.drawable.icon_ca} resource (which is saved in
+  {@code res/drawable/}).
+</p>
 
 <h4>Layout</h4>
 

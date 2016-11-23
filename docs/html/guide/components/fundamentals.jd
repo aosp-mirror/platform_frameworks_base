@@ -6,28 +6,29 @@ page.title=Application Fundamentals
 
 <h2>In this document</h2>
 <ol>
-<li><a href="#Components">App Components</a>
+<li><a href="#Components">App components</a>
   <ol>
     <li><a href="#ActivatingComponents">Activating components</a></li>
   </ol>
 </li>
-<li><a href="#Manifest">The Manifest File</a>
+<li><a href="#Manifest">The manifest file</a>
   <ol>
     <li><a href="#DeclaringComponents">Declaring components</a></li>
     <li><a href="#DeclaringRequirements">Declaring app requirements</a></li>
   </ol>
 </li>
-<li><a href="#Resources">App Resources</a></li>
+<li><a href="#Resources">App resources</a></li>
 </ol>
 </div>
 </div>
 
 <p>Android apps are written in the Java programming language. The Android SDK tools compile
-your code&mdash;along with any data and resource files&mdash;into an APK: an <i>Android package</i>,
+your code along with any data and resource files into an APK, an <i>Android package</i>,
 which is an archive file with an {@code .apk} suffix. One APK file contains all the contents
 of an Android app and is the file that Android-powered devices use to install the app.</p>
 
-<p>Once installed on a device, each Android app lives in its own security sandbox: </p>
+<p>Each Android app lives in its own security sandbox, protected by
+ the following Android security features: </p>
 
 <ul>
  <li>The Android operating system is a multi-user Linux system in which each app is a
@@ -40,54 +41,61 @@ app so that only the user ID assigned to that app can access them. </li>
 <li>Each process has its own virtual machine (VM), so an app's code runs in isolation from
 other apps.</li>
 
-<li>By default, every app runs in its own Linux process. Android starts the process when any
-of the app's components need to be executed, then shuts down the process when it's no longer
+<li>By default, every app runs in its own Linux process. The Android system starts
+ the process when any
+of the app's components need to be executed, and then shuts down the process
+ when it's no longer
 needed or when the system must recover memory for other apps.</li>
 </ul>
 
-<p>In this way, the Android system implements the <em>principle of least privilege</em>. That is,
+<p>The Android system implements the <em>principle of least privilege</em>. That is,
 each app, by default, has access only to the components that it requires to do its work and
 no more. This creates a very secure environment in which an app cannot access parts of
-the system for which it is not given permission.</p>
-
-<p>However, there are ways for an app to share data with other apps and for an
+the system for which it is not given permission. However, there are ways for an app to share
+ data with other apps and for an
 app to access system services:</p>
 
 <ul>
   <li>It's possible to arrange for two apps to share the same Linux user ID, in which case
 they are able to access each other's files.  To conserve system resources, apps with the
-same user ID can also arrange to run in the same Linux process and share the same VM (the
-apps must also be signed with the same certificate).</li>
+same user ID can also arrange to run in the same Linux process and share the same VM. The
+apps must also be signed with the same certificate.</li>
   <li>An app can request permission to access device data such as the user's
-contacts, SMS messages, the mountable storage (SD card), camera, Bluetooth, and more. The user has
+contacts, SMS messages, the mountable storage (SD card), camera, and Bluetooth. The user has
 to explicitly grant these permissions. For more information, see
 <a href="{@docRoot}training/permissions/index.html">Working with System Permissions</a>.</li>
 </ul>
 
-<p>That covers the basics regarding how an Android app exists within the system. The rest of
-this document introduces you to:</p>
+<p>The rest of this document introduces the following concepts:</p>
 <ul>
   <li>The core framework components that define your app.</li>
-  <li>The manifest file in which you declare components and required device features for your
+  <li>The manifest file in which you declare the components and the required device
+  features for your
 app.</li>
-  <li>Resources that are separate from the app code and allow your app to
+  <li>Resources that are separate from the app code and that allow your app to
 gracefully optimize its behavior for a variety of device configurations.</li>
 </ul>
 
 
 
-<h2 id="Components">App Components</h2>
+<h2 id="Components">App components</h2>
 
 <p>App components are the essential building blocks of an Android app. Each
 component is a different point through which the system can enter your app. Not all
-components are actual entry points for the user and some depend on each other, but each one exists
-as its own entity and plays a specific role&mdash;each one is a unique building block that
-helps define your app's overall behavior.</p>
+components are actual entry points for the user and some depend on each other,
+ but each one exists
+as its own entity and plays a specific role.</p>
 
-<p>There are four different types of app components. Each type serves a distinct purpose
-and has a distinct lifecycle that defines how the component is created and destroyed.</p>
-
-<p>Here are the four types of app components:</p>
+<p>There are four different types of app components:
+<ul>
+<li>Activities.</li>
+<li>Services.</li>
+<li>Content providers.</li>
+<li>Broadcast receivers.</li>
+</ul></p>
+Each type serves a distinct purpose
+and has a distinct lifecycle that defines how the component is created and destroyed.
+ The following sections describe the four types of app components.</p>
 
 <dl>
 
@@ -98,11 +106,12 @@ an email app might have one activity that shows a list of new
 emails, another activity to compose an email, and another activity for reading emails. Although
 the activities work together to form a cohesive user experience in the email app, each one
 is independent of the others. As such, a different app can start any one of these
-activities (if the email app allows it). For example, a camera app can start the
-activity in the email app that composes new mail, in order for the user to share a picture.
+activities if the email app allows it. For example, a camera app can start the
+activity in the email app that composes new mail to allow the user to share a picture.
 
-<p>An activity is implemented as a subclass of {@link android.app.Activity} and you can learn more
-about it in the <a href="{@docRoot}guide/components/activities.html">Activities</a>
+<p>An activity is implemented as a subclass of {@link android.app.Activity}. You can learn more
+about  {@link android.app.Activity} in the
+ <a href="{@docRoot}guide/components/activities.html">Activities</a>
 developer guide.</p>
 </dd>
 
@@ -111,13 +120,16 @@ developer guide.</p>
 
 <dd>A <i>service</i> is a component that runs in the background to perform long-running
 operations or to perform work for remote processes. A service
-does not provide a user interface. For example, a service might play music in the background while
+does not provide a user interface. For example, a service might play music in the
+ background while
 the user is in a different app, or it might fetch data over the network without
-blocking user interaction with an activity. Another component, such as an activity, can start the
+blocking user interaction with an activity. Another component, such as an activity,
+ can start the
 service and let it run or bind to it in order to interact with it.
 
-<p>A service is implemented as a subclass of {@link android.app.Service} and you can learn more
-about it in the <a href="{@docRoot}guide/components/services.html">Services</a> developer
+<p>A service is implemented as a subclass of {@link android.app.Service}. You can learn more
+about  {@link android.app.Service} in the <a href="{@docRoot}guide/components/services.html">
+Services</a> developer
 guide.</p>
 </dd>
 
@@ -125,12 +137,14 @@ guide.</p>
 <dt><b>Content providers</b></dt>
 
 <dd>A <i>content provider</i> manages a shared set of app data. You can store the data in
-the file system, an SQLite database, on the web, or any other persistent storage location your
-app can access. Through the content provider, other apps can query or even modify
-the data (if the content provider allows it). For example, the Android system provides a content
+the file system, in a SQLite database, on the web, or on any other persistent storage
+ location that your
+app can access. Through the content provider, other apps can query or modify
+the data if the content provider allows it. For example, the Android system provides a content
 provider that manages the user's contact information. As such, any app with the proper
-permissions can query part of the content provider (such as {@link
-android.provider.ContactsContract.Data}) to read and write information about a particular person.
+permissions can query part of the content provider, such as {@link
+android.provider.ContactsContract.Data}, to read and write information about
+ a particular person.
 
 <p>Content providers are also useful for reading and writing data that is private to your
 app and not shared. For example, the <a
@@ -148,15 +162,17 @@ guide.</p>
 <dt><b>Broadcast receivers</b></dt>
 
 <dd>A <i>broadcast receiver</i> is a component that responds to system-wide broadcast
-announcements.  Many broadcasts originate from the system&mdash;for example, a broadcast announcing
+announcements.  Many broadcasts originate from the system&mdash;for example,
+ a broadcast announcing
 that the screen has turned off, the battery is low, or a picture was captured.
 Apps can also initiate broadcasts&mdash;for example, to let other apps know that
-some data has been downloaded to the device and is available for them to use. Although broadcast
+some data has been downloaded to the device and is available for them to use.
+ Although broadcast
 receivers don't display a user interface, they may <a
 href="{@docRoot}guide/topics/ui/notifiers/notifications.html">create a status bar notification</a>
 to alert the user when a broadcast event occurs. More commonly, though, a broadcast receiver is
-just a "gateway" to other components and is intended to do a very minimal amount of work. For
-instance, it might initiate a service to perform some work based on the event.
+just a <em>gateway</em> to other components and is intended to do a very minimal amount of work.
+ For instance, it might initiate a service to perform some work based on the event.
 
 <p>A broadcast receiver is implemented as a subclass of {@link android.content.BroadcastReceiver}
 and each broadcast is delivered as an {@link android.content.Intent} object. For more information,
@@ -170,52 +186,59 @@ see the {@link android.content.BroadcastReceiver} class.</p>
 <p>A unique aspect of the Android system design is that any app can start another
 app’s component. For example, if you want the user to capture a
 photo with the device camera, there's probably another app that does that and your
-app can use it, instead of developing an activity to capture a photo yourself. You don't
+app can use it instead of developing an activity to capture a photo yourself. You don't
 need to incorporate or even link to the code from the camera app.
 Instead, you can simply start the activity in the camera app that captures a
 photo. When complete, the photo is even returned to your app so you can use it. To the user,
 it seems as if the camera is actually a part of your app.</p>
 
-<p>When the system starts a component, it starts the process for that app (if it's not
-already running) and instantiates the classes needed for the component. For example, if your
+<p>When the system starts a component, it starts the process for that app if it's not
+already running and instantiates the classes needed for the component. For example, if your
 app starts the activity in the camera app that captures a photo, that activity
 runs in the process that belongs to the camera app, not in your app's process.
 Therefore, unlike apps on most other systems, Android apps don't have a single entry
-point (there's no {@code main()} function, for example).</p>
+point (there's no {@code main()} function).</p>
 
 <p>Because the system runs each app in a separate process with file permissions that
 restrict access to other apps, your app cannot directly activate a component from
-another app. The Android system, however, can. So, to activate a component in
-another app, you must deliver a message to the system that specifies your <em>intent</em> to
+another app. However, the Android system can. To activate a component in
+another app, deliver a message to the system that specifies your <em>intent</em> to
 start a particular component. The system then activates the component for you.</p>
 
 
-<h3 id="ActivatingComponents">Activating Components</h3>
+<h3 id="ActivatingComponents">Activating components</h3>
 
 <p>Three of the four component types&mdash;activities, services, and
 broadcast receivers&mdash;are activated by an asynchronous message called an <em>intent</em>.
-Intents bind individual components to each other at runtime (you can think of them
-as the messengers that request an action from other components), whether the component belongs
+Intents bind individual components to each other at runtime. You can think of them
+as the messengers that request an action from other components, whether the component belongs
 to your app or another.</p>
 
-<p>An intent is created with an {@link android.content.Intent} object, which defines a message to
-activate either a specific component or a specific <em>type</em> of component&mdash;an intent
-can be either explicit or implicit, respectively.</p>
+<p class="note"><strong>Note:</strong> If your app targets Android 5.0 (API level 21) or later,
+ use the {@link android.app.job.JobScheduler} to execute background
+ services. For more information about using this class, see the
+ {@link android.app.job.JobScheduler} reference documentation.</p>
 
-<p>For activities and services, an intent defines the action to perform (for example, to "view" or
-"send" something) and may specify the URI of the data to act on (among other things that the
-component being started might need to know). For example, an intent might convey a request for an
+<p>An intent is created with an {@link android.content.Intent} object, which defines a message to
+activate either a specific component (explicit intent) or a specific <em>type</em> of component
+ (implicit intent).</p>
+
+<p>For activities and services, an intent defines the action to perform (for example, to
+ <em>view</em> or
+<em>send</em> something) and may specify the URI of the data to act on, among other things that the
+component being started might need to know. For example, an intent might convey a request for an
 activity to show an image or to open a web page. In some cases, you can start an
-activity to receive a result, in which case, the activity also returns
-the result in an {@link android.content.Intent} (for example, you can issue an intent to let
-the user pick a personal contact and have it returned to you&mdash;the return intent includes a
-URI pointing to the chosen contact).</p>
+activity to receive a result, in which case the activity also returns
+the result in an {@link android.content.Intent}. For example, you can issue an intent to let
+the user pick a personal contact and have it returned to you. The return intent includes a
+URI pointing to the chosen contact.</p>
 
 <p>For broadcast receivers, the intent simply defines the
-announcement being broadcast (for example, a broadcast to indicate the device battery is low
-includes only a known action string that indicates "battery is low").</p>
+announcement being broadcast. For example, a broadcast to indicate the device battery is low
+includes only a known action string that indicates <em>battery is low</em>.</p>
 
-<p>The other component type, content provider, is not activated by intents. Rather, it is
+<p>Unlike activities, services, and broadcast receivers, content providers are not activated
+ by intents. Rather, they are
 activated when targeted by a request from a {@link android.content.ContentResolver}. The content
 resolver handles all direct transactions with the content provider so that the component that's
 performing transactions with the provider doesn't need to and instead calls methods on the {@link
@@ -224,15 +247,19 @@ provider and the component requesting information (for security).</p>
 
 <p>There are separate methods for activating each type of component:</p>
 <ul>
-  <li>You can start an activity (or give it something new to do) by
+  <li>You can start an activity or give it something new to do by
 passing an {@link android.content.Intent} to {@link android.content.Context#startActivity
 startActivity()} or {@link android.app.Activity#startActivityForResult startActivityForResult()}
 (when you want the activity to return a result).</li>
-  <li>You can start a service (or give new instructions to an ongoing service) by
+
+
+  <li>With Android 5.0 (API level 21) and later, you can start a service with
+  {@link android.app.job.JobScheduler}. For earlier Android versions, you can start
+  a service (or give new instructions to an ongoing service) by
 passing an {@link android.content.Intent} to {@link android.content.Context#startService
-startService()}. Or you can bind to the service by passing an {@link android.content.Intent} to
-{@link android.content.Context#bindService bindService()}.</li>
-  <li>You can initiate a broadcast by passing an {@link android.content.Intent} to methods like
+startService()}. You can bind to the service by passing an {@link android.content.Intent} to
+{@link android.content.Context#bindService bindService()}. </li>
+  <li>You can initiate a broadcast by passing an {@link android.content.Intent} to methods such as
 {@link android.content.Context#sendBroadcast(Intent) sendBroadcast()}, {@link
 android.content.Context#sendOrderedBroadcast(Intent, String) sendOrderedBroadcast()}, or {@link
 android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</li>
@@ -242,35 +269,35 @@ android.content.ContentProvider#query query()} on a {@link android.content.Conte
 
 <p>For more information about using intents, see the <a
 href="{@docRoot}guide/components/intents-filters.html">Intents and
-Intent Filters</a> document. More information about activating specific components is also provided
-in the following documents: <a
-href="{@docRoot}guide/components/activities.html">Activities</a>, <a
-href="{@docRoot}guide/components/services.html">Services</a>, {@link
-android.content.BroadcastReceiver} and <a
-href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.</p>
+Intent Filters</a> document.
+ The following documents provide more information about activating specifc components:
+ <a href="{@docRoot}guide/components/activities.html">Activities</a>,
+ <a href="{@docRoot}guide/components/services.html">Services
+ {@link android.content.BroadcastReceiver}, and
+ <a ref="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.</p>
 
-
-<h2 id="Manifest">The Manifest File</h2>
+<h2 id="Manifest">The manifest file</h2>
 
 <p>Before the Android system can start an app component, the system must know that the
-component exists by reading the app's {@code AndroidManifest.xml} file (the "manifest"
-file). Your app must declare all its components in this file, which must be at the root of
-the app project directory.</p>
+component exists by reading the app's <em>manifest file</em>, {@code AndroidManifest.xml}.
+ Your app must declare all its components in this file, which must be at the root of the
+ app project directory.</p>
 
 <p>The manifest does a number of things in addition to declaring the app's components,
-such as:</p>
+such as the following:</p>
 <ul>
-  <li>Identify any user permissions the app requires, such as Internet access or
+  <li>Identifies any user permissions the app requires, such as Internet access or
 read-access to the user's contacts.</li>
-  <li>Declare the minimum <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a>
+  <li>Declares the minimum
+  <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a>
 required by the app, based on which APIs the app uses.</li>
-  <li>Declare hardware and software features used or required by the app, such as a camera,
+  <li>Declares hardware and software features used or required by the app, such as a camera,
 bluetooth services, or a multitouch screen.</li>
-  <li>API libraries the app needs to be linked against (other than the Android framework
+  <li>Declares API libraries the app needs to be linked against (other than the Android framework
 APIs), such as the <a
-href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">Google Maps
-library</a>.</li>
-  <li>And more</li>
+href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">
+Google Maps library</a>.</li>
+
 </ul>
 
 
@@ -301,47 +328,59 @@ the {@code android:name} attribute specifies the fully qualified class name of t
 android.app.Activity} subclass and the {@code android:label} attribute specifies a string
 to use as the user-visible label for the activity.</p>
 
-<p>You must declare all app components this way:</p>
+<p>You must declare all app components using the following elements:</p>
 <ul>
   <li><code><a
 href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> elements
-for activities</li>
+for activities.</li>
   <li><code><a
 href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code> elements for
-services</li>
+services.</li>
   <li><code><a
 href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code> elements
-for broadcast receivers</li>
+for broadcast receivers.</li>
   <li><code><a
 href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> elements
-for content providers</li>
+for content providers.</li>
 </ul>
 
 <p>Activities, services, and content providers that you include in your source but do not declare
 in the manifest are not visible to the system and, consequently, can never run.  However,
 broadcast
-receivers can be either declared in the manifest or created dynamically in code (as
-{@link android.content.BroadcastReceiver} objects) and registered with the system by calling
+receivers can be either declared in the manifest or created dynamically in code as
+{@link android.content.BroadcastReceiver} objects and registered with the system by calling
 {@link android.content.Context#registerReceiver registerReceiver()}.</p>
 
 <p>For more about how to structure the manifest file for your app, see <a
 href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml File</a>
 documentation. </p>
 
-
-
 <h3 id="DeclaringComponentCapabilities">Declaring component capabilities</h3>
 
-<p>As discussed above, in <a href="#ActivatingComponents">Activating Components</a>, you can use an
-{@link android.content.Intent} to start activities, services, and broadcast receivers. You can do so
-by explicitly naming the target component (using the component class name) in the intent. However,
-the real power of intents lies in the concept of <em>implicit intents</em>. An implicit intent
-simply describes the type of action to perform (and, optionally, the data upon which you’d like to
-perform the action) and allows the system to find a component on the device that can perform the
-action and start it. If there are multiple components that can perform the action described by the
-intent, then the user selects which one to use.</p>
+<p>As discussed above, in <a href="#ActivatingComponents">Activating components</a>, you can use an
+{@link android.content.Intent} to start activities, services, and broadcast receivers.
 
-<p>The way the system identifies the components that can respond to an intent is by comparing the
+
+
+You can use an {@link android.content.Intent}
+ by explicitly naming the target component (using the component class name) in the intent.
+ You can also use an implicit intent, which
+describes the type of action to perform and, optionally, the data upon which you’d like to
+perform the action. The implicit intent allows the system to find a component on the device
+ that can perform the
+action and start it. If there are multiple components that can perform the action described by the
+intent, the user selects which one to use.</p>
+
+<p class="caution"><strong>Caution:</strong> If you use an intent to start a
+ {@link android.app.Service}, ensure that your app is secure by using an
+ <a href="{@docRoot}guide/components/intents-filters.html#Types">explicit</a>
+intent. Using an implicit intent to start a service is a
+security hazard because you cannot be certain what service will respond to the intent,
+and the user cannot see which service starts. Beginning with Android 5.0 (API level 21), the system
+throws an exception if you call {@link android.content.Context#bindService bindService()}
+with an implicit intent. Do not declare intent filters for your services. </p>
+
+<p>The system identifies the components that can respond to an intent by comparing the
 intent received to the <i>intent filters</i> provided in the manifest file of other apps on
 the device.</p>
 
@@ -351,8 +390,9 @@ from other apps. You can declare an intent filter for your component by
 adding an <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
 <intent-filter>}</a> element as a child of the component's declaration element.</p>
 
-<p>For example, if you've built an email app with an activity for composing a new email, you can
-declare an intent filter to respond to "send" intents (in order to send a new email) like this:</p>
+<p>For example, if you build an email app with an activity for composing a new email, you can
+declare an intent filter to respond to "send" intents (in order to send a new email),
+ as shown in the following example:</p>
 <pre>
 &lt;manifest ... >
     ...
@@ -368,8 +408,9 @@ declare an intent filter to respond to "send" intents (in order to send a new em
 &lt;/manifest>
 </pre>
 
-<p>Then, if another app creates an intent with the {@link
-android.content.Intent#ACTION_SEND} action and passes it to {@link android.app.Activity#startActivity
+<p>If another app creates an intent with the {@link
+android.content.Intent#ACTION_SEND} action and passes it to
+ {@link android.app.Activity#startActivity
 startActivity()}, the system may start your activity so the user can draft and send an
 email.</p>
 
@@ -382,7 +423,7 @@ href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filter
 <h3 id="DeclaringRequirements">Declaring app requirements</h3>
 
 <p>There are a variety of devices powered by Android and not all of them provide the
-same features and capabilities. In order to prevent your app from being installed on devices
+same features and capabilities. To prevent your app from being installed on devices
 that lack features needed by your app, it's important that you clearly define a profile for
 the types of devices your app supports by declaring device and software requirements in your
 manifest file. Most of these declarations are informational only and the system does not read
@@ -391,7 +432,7 @@ for users when they search for apps from their device.</p>
 
 <p>For example, if your app requires a camera and uses APIs introduced in Android 2.1 (<a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a> 7),
-you should declare these as requirements in your manifest file like this:</p>
+you must declare these as requirements in your manifest file as shown in the following example:</p>
 
 <pre>
 &lt;manifest ... >
@@ -402,10 +443,10 @@ you should declare these as requirements in your manifest file like this:</p>
 &lt;/manifest>
 </pre>
 
-<p>Now, devices that do <em>not</em> have a camera and have an
-Android version <em>lower</em> than 2.1 cannot install your app from Google Play.</p>
-
-<p>However, you can also declare that your app uses the camera, but does not
+<p>With the declarations shown in the example, devices that do <em>not</em> have a
+ camera and have an
+Android version <em>lower</em> than 2.1 cannot install your app from Google Play.
+ However, you can declare that your app uses the camera, but does not
 <em>require</em> it. In that case, your app must set the <a href=
 "{@docRoot}guide/topics/manifest/uses-feature-element.html#required">{@code required}</a>
 attribute to {@code "false"} and check at runtime whether
@@ -417,15 +458,15 @@ document.</p>
 
 
 
-<h2 id="Resources">App Resources</h2>
+<h2 id="Resources">App resources</h2>
 
 <p>An Android app is composed of more than just code&mdash;it requires resources that are
 separate from the source code, such as images, audio files, and anything relating to the visual
-presentation of the app. For example, you should define animations, menus, styles, colors,
+presentation of the app. For example, you can define animations, menus, styles, colors,
 and the layout of activity user interfaces with XML files. Using app resources makes it easy
-to update various characteristics of your app without modifying code and&mdash;by providing
-sets of alternative resources&mdash;enables you to optimize your app for a  variety of
-device configurations (such as different languages and screen sizes).</p>
+to update various characteristics of your app without modifying code. Providing
+sets of alternative resources enables you to optimize your app for a variety of
+device configurations, such as different languages and screen sizes.</p>
 
 <p>For every resource that you include in your Android project, the SDK build tools define a unique
 integer ID, which you can use to reference the resource from your app code or from
@@ -435,20 +476,22 @@ named {@code R.drawable.logo}, which you can use to reference the image and inse
 user interface.</p>
 
 <p>One of the most important aspects of providing resources separate from your source code
-is the ability for you to provide alternative resources for different device
-configurations. For example, by defining UI strings in XML, you can translate the strings into other
-languages and save those strings in separate files. Then, based on a language <em>qualifier</em>
+is the ability to provide alternative resources for different device
+configurations. For example, by defining UI strings in XML, you can translate
+ the strings into other
+languages and save those strings in separate files. Then Android applies the
+ appropriate language strings
+to your UI based on a language <em>qualifier</em>
 that you append to the resource directory's name (such as {@code res/values-fr/} for French string
-values) and the user's language setting, the Android system applies the appropriate language strings
-to your UI.</p>
+values) and the user's language setting.</p>
 
 <p>Android supports many different <em>qualifiers</em> for your alternative resources. The
 qualifier is a short string that you include in the name of your resource directories in order to
-define the device configuration for which those resources should be used. As another
-example, you should often create different layouts for your activities, depending on the
-device's screen orientation and size. For example, when the device screen is in portrait
+define the device configuration for which those resources should be used. For
+example, you should create different layouts for your activities, depending on the
+device's screen orientation and size. When the device screen is in portrait
 orientation (tall), you might want a layout with buttons to be vertical, but when the screen is in
-landscape orientation (wide), the buttons should be aligned horizontally. To change the layout
+landscape orientation (wide), the buttons could be aligned horizontally. To change the layout
 depending on the orientation, you can define two different layouts and apply the appropriate
 qualifier to each layout's directory name. Then, the system automatically applies the appropriate
 layout depending on the current device orientation.</p>
@@ -465,15 +508,15 @@ create alternative resources for different device configurations, read <a href=
   <dl>
     <dt><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
     </dt>
-    <dd>Information about how to use the {@link android.content.Intent} APIs to
+    <dd>How to use the {@link android.content.Intent} APIs to
     activate app components, such as activities and services, and how to make your app components
     available for use by other apps.</dd>
     <dt><a href="{@docRoot}guide/components/activities.html">Activities</a></dt>
-    <dd>Information about how to create an instance of the {@link android.app.Activity} class,
+    <dd>How to create an instance of the {@link android.app.Activity} class,
     which provides a distinct screen in your application with a user interface.</dd>
     <dt><a
 href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resources</a></dt>
-    <dd>Information about how Android apps are structured to separate app resources from the
+    <dd>How Android apps are structured to separate app resources from the
    app code, including how you can provide alternative resources for specific device
    configurations.
     </dd>
@@ -484,14 +527,13 @@ href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resou
   <dl>
     <dt><a href="{@docRoot}guide/practices/compatibility.html"
         >Device Compatibility</a></dt>
-    <dd>Information about Android works on different types of devices and an introduction
+    <dd>How Android works on different types of devices and an introduction
     to how you can optimize your app for each device or restrict your app's availability
     to different devices.</dd>
     <dt><a href="{@docRoot}guide/topics/security/permissions.html"
         >System Permissions</a></dt>
-    <dd>Information about how Android restricts app access to certain APIs with a permission
+    <dd>How Android restricts app access to certain APIs with a permission
     system that requires the user's consent for your app to use those APIs.</dd>
   </dl>
 </div>
 </div>
-

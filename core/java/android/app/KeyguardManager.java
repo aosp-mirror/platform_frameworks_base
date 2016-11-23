@@ -21,6 +21,7 @@ import android.annotation.RequiresPermission;
 import android.app.trust.ITrustManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -44,6 +45,7 @@ public class KeyguardManager {
     private IWindowManager mWM;
     private ITrustManager mTrustManager;
     private IUserManager mUserManager;
+    private Context mContext;
 
     /**
      * Intent used to prompt user for device credentials.
@@ -86,8 +88,12 @@ public class KeyguardManager {
         Intent intent = new Intent(ACTION_CONFIRM_DEVICE_CREDENTIAL);
         intent.putExtra(EXTRA_TITLE, title);
         intent.putExtra(EXTRA_DESCRIPTION, description);
-        // For security reasons, only allow this to come from system settings.
-        intent.setPackage("com.android.settings");
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            intent.setPackage("com.google.android.apps.wearable.settings");
+        } else {
+            // For security reasons, only allow this to come from system settings.
+            intent.setPackage("com.android.settings");
+        }
         return intent;
     }
 
@@ -108,8 +114,12 @@ public class KeyguardManager {
         intent.putExtra(EXTRA_TITLE, title);
         intent.putExtra(EXTRA_DESCRIPTION, description);
         intent.putExtra(Intent.EXTRA_USER_ID, userId);
-        // For security reasons, only allow this to come from system settings.
-        intent.setPackage("com.android.settings");
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            intent.setPackage("com.google.android.apps.wearable.settings");
+        } else {
+            // For security reasons, only allow this to come from system settings.
+            intent.setPackage("com.android.settings");
+        }
         return intent;
     }
 
@@ -191,7 +201,8 @@ public class KeyguardManager {
     }
 
 
-    KeyguardManager() {
+    KeyguardManager(Context context) {
+        mContext = context;
         mWM = WindowManagerGlobal.getWindowManagerService();
         mTrustManager = ITrustManager.Stub.asInterface(
                 ServiceManager.getService(Context.TRUST_SERVICE));

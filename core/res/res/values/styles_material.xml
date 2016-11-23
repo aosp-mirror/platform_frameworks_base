@@ -739,6 +739,10 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.ProgressBar" parent="Widget.ProgressBar">
         <item name="indeterminateDrawable">@drawable/progress_medium_material</item>
+        <item name="minWidth">@dimen/progress_bar_size_medium</item>
+        <item name="maxWidth">@dimen/progress_bar_size_medium</item>
+        <item name="minHeight">@dimen/progress_bar_size_medium</item>
+        <item name="maxHeight">@dimen/progress_bar_size_medium</item>
     </style>
 
     <style name="Widget.Material.ProgressBar.Inverse"/>
@@ -752,6 +756,10 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.ProgressBar.Small" parent="Widget.ProgressBar.Small">
         <item name="indeterminateDrawable">@drawable/progress_small_material</item>
+        <item name="minWidth">@dimen/progress_bar_size_small</item>
+        <item name="maxWidth">@dimen/progress_bar_size_small</item>
+        <item name="minHeight">@dimen/progress_bar_size_small</item>
+        <item name="maxHeight">@dimen/progress_bar_size_small</item>
     </style>
 
     <style name="Widget.Material.ProgressBar.Small.Inverse"/>
@@ -759,6 +767,10 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.ProgressBar.Large" parent="Widget.ProgressBar.Large">
         <item name="indeterminateDrawable">@drawable/progress_large_material</item>
+        <item name="minWidth">@dimen/progress_bar_size_large</item>
+        <item name="maxWidth">@dimen/progress_bar_size_large</item>
+        <item name="minHeight">@dimen/progress_bar_size_large</item>
+        <item name="maxHeight">@dimen/progress_bar_size_large</item>
     </style>
 
     <style name="Widget.Material.ProgressBar.Large.Inverse"/>

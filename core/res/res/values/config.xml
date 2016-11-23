@@ -1056,6 +1056,12 @@
     <integer name="config_autoBrightnessBrighteningLightDebounce">4000</integer>
     <integer name="config_autoBrightnessDarkeningLightDebounce">8000</integer>
 
+    <!-- Initial light sensor event rate in milliseconds for automatic brightness control. This is
+         used for obtaining the first light sample when the device stops dozing.
+
+         Set this to 0 to disable this feature. -->
+    <integer name="config_autoBrightnessInitialLightSensorRate">0</integer>
+
     <!-- Light sensor event rate in milliseconds for automatic brightness control. -->
     <integer name="config_autoBrightnessLightSensorRate">250</integer>
 
@@ -1935,6 +1941,12 @@
     <!-- When true, local displays that do not contain any of their own content will automatically
          mirror the content of the default display. -->
     <bool name="config_localDisplaysMirrorContent">true</bool>
+
+    <!-- The default mode for the default display. One of the following values (See Display.java):
+             0 - COLOR_MODE_DEFAULT
+             7 - COLOR_MODE_SRGB
+    -->
+    <integer name="config_defaultDisplayDefaultColorMode">0</integer>
 
     <!-- When true use the linux /dev/input/event subsystem to detect the switch changes
          on the headphone/microphone jack. When false use the older uevent framework. -->

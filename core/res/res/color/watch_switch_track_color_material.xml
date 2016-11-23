@@ -14,12 +14,9 @@
      limitations under the License.
 -->
 
-<!-- These resources are around just to allow their values to be customized
-     for different hardware and product builds, only for Material theme.  Do not translate.
-
-     NOTE: The naming convention is "config_camelCaseValue".  -->
-
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Gravity that should be used for dialog text styles. Equivalent to: Gravity.START | Gravity.TOP -->
-    <integer name="config_dialogTextGravity">0x00800033</integer>
-</resources>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false"
+          android:alpha="?attr/disabledAlpha"
+          android:color="?android:colorPrimary" />
+    <item android:color="?android:colorPrimary" />
+</selector>

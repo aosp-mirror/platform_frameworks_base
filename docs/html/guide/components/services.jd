@@ -5,11 +5,11 @@ page.title=Services
 <ol id="qv">
 <h2>In this document</h2>
 <ol>
-<li><a href="#Basics">The Basics</a></li>
+<li><a href="#Basics">The basics</a></li>
 <ol>
   <li><a href="#Declaring">Declaring a service in the manifest</a></li>
 </ol>
-<li><a href="#CreatingAService">Creating a Started Service</a>
+<li><a href="#CreatingAService">Creating a started service</a>
   <ol>
     <li><a href="#ExtendingIntentService">Extending the IntentService class</a></li>
     <li><a href="#ExtendingService">Extending the Service class</a></li>
@@ -17,10 +17,10 @@ page.title=Services
     <li><a href="#Stopping">Stopping a service</a></li>
   </ol>
 </li>
-<li><a href="#CreatingBoundService">Creating a Bound Service</a></li>
-<li><a href="#Notifications">Sending Notifications to the User</a></li>
-<li><a href="#Foreground">Running a Service in the Foreground</a></li>
-<li><a href="#Lifecycle">Managing the Lifecycle of a Service</a>
+<li><a href="#CreatingBoundService">Creating a bound service</a></li>
+<li><a href="#Notifications">Sending notifications to the user</a></li>
+<li><a href="#Foreground">Running a service in the foreground</a></li>
+<li><a href="#Lifecycle">Managing the lifecycle of a service</a>
 <ol>
   <li><a href="#LifecycleCallbacks">Implementing the lifecycle callbacks</a></li>
 </ol>
@@ -48,70 +48,80 @@ page.title=Services
 
 </div>
 
-
 <p>A {@link android.app.Service} is an application component that can perform
-long-running operations in the background and does not provide a user interface. Another
-application component can start a service and it will continue to run in the background even if the
+long-running operations in the background, and it does not provide a user interface. Another
+application component can start a service, and it continues to run in the background even if the
 user switches to another application. Additionally, a component can bind to a service to
-interact with it and even perform interprocess communication (IPC). For example, a service might
+interact with it and even perform interprocess communication (IPC). For example, a service can
 handle network transactions, play music, perform file I/O, or interact with a content provider, all
 from the background.</p>
 
-<p>A service can essentially take two forms:</p>
+<p>These are the three different types of services:</p>
 
 <dl>
+  <dt>Scheduled</dt>
+  <dd>A service is <em>scheduled</em> when an API such as the {@link android.app.job.JobScheduler},
+  introduced in Android 5.0 (API level 21), launches the service. You can use the
+  {@link android.app.job.JobScheduler} by registering jobs and specifying their requirements for
+  network and timing. The system then gracefully schedules the jobs for execution at the
+  appropriate times. The {@link android.app.job.JobScheduler} provides many methods to define
+  service-execution conditions.
+    <p class="note"><strong>Note:</strong> If your app targets Android 5.0 (API level 21), Google
+    recommends that you use the {@link android.app.job.JobScheduler} to execute background
+    services. For more information about using this class, see the
+    {@link android.app.job.JobScheduler} reference documentation.</p></dd>
   <dt>Started</dt>
-  <dd>A service is "started" when an application component (such as an activity) starts it by
-calling {@link android.content.Context#startService startService()}. Once started, a service
-can run in the background indefinitely, even if the component that started it is destroyed. Usually,
-a started service performs a single operation and does not return a result to the caller.
-For example, it might download or upload a file over the network. When the operation is done, the
-service should stop itself.</dd>
+  <dd>A service is <em>started</em> when an application component (such as an activity)
+  calls {@link android.content.Context#startService startService()}. After it's started, a
+  service can run in the background indefinitely, even if the component that started it is
+  destroyed. Usually, a started service performs a single operation and does not return a result to
+  the caller. For example, it can download or upload a file over the network. When the operation is
+  complete, the service should stop itself.</dd>
   <dt>Bound</dt>
-  <dd>A service is "bound" when an application component binds to it by calling {@link
-android.content.Context#bindService bindService()}. A bound service offers a client-server
-interface that allows components to interact with the service, send requests, get results, and even
-do so across processes with interprocess communication (IPC). A bound service runs only as long as
-another application component is bound to it. Multiple components can bind to the service at once,
-but when all of them unbind, the service is destroyed.</dd>
+  <dd>A service is <em>bound</em> when an application component binds to it by calling {@link
+  android.content.Context#bindService bindService()}. A bound service offers a client-server
+  interface that allows components to interact with the service, send requests, receive results,
+  and even do so across processes with interprocess communication (IPC). A bound service runs only
+  as long as another application component is bound to it. Multiple components can bind to the
+  service at once, but when all of them unbind, the service is destroyed.</dd>
 </dl>
 
-<p>Although this documentation generally discusses these two types of services separately, your
-service can work both ways&mdash;it can be started (to run indefinitely) and also allow binding.
-It's simply a matter of whether you implement a couple callback methods: {@link
+<p>Although this documentation generally discusses started and bound services separately,
+your service can work both ways&mdash;it can be started (to run indefinitely) and also allow
+binding. It's simply a matter of whether you implement a couple of callback methods: {@link
 android.app.Service#onStartCommand onStartCommand()} to allow components to start it and {@link
 android.app.Service#onBind onBind()} to allow binding.</p>
 
 <p>Regardless of whether your application is started, bound, or both, any application component
-can use the service (even from a separate application), in the same way that any component can use
+can use the service (even from a separate application) in the same way that any component can use
 an activity&mdash;by starting it with an {@link android.content.Intent}. However, you can declare
-the service as private, in the manifest file, and block access from other applications. This is
-discussed more in the section about <a href="#Declaring">Declaring the service in the
+the service as <em>private</em> in the manifest file and block access from other applications.
+This is discussed more in the section about <a href="#Declaring">Declaring the service in the
 manifest</a>.</p>
 
 <p class="caution"><strong>Caution:</strong> A service runs in the
-main thread of its hosting process&mdash;the service does <strong>not</strong> create its own thread
-and does <strong>not</strong> run in a separate process (unless you specify otherwise). This means
-that, if your service is going to do any CPU intensive work or blocking operations (such as MP3
-playback or networking), you should create a new thread within the service to do that work. By using
-a separate thread, you will reduce the risk of Application Not Responding (ANR) errors and the
-application's main thread can remain dedicated to user interaction with your activities.</p>
+main thread of its hosting process; the service does <strong>not</strong> create its own
+thread and does <strong>not</strong> run in a separate process unless you specify otherwise. If
+your service is going to perform any CPU-intensive work or blocking operations, such as MP3
+playback or networking, you should create a new thread within the service to complete that work.
+By using a separate thread, you can reduce the risk of Application Not Responding (ANR) errors,
+and the application's main thread can remain dedicated to user interaction with your
+activities.</p>
 
-
-<h2 id="Basics">The Basics</h2>
+<h2 id="Basics">The basics</h2>
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
   <h3>Should you use a service or a thread?</h3>
-  <p>A service is simply a component that can run in the background even when the user is not
-interacting with your application. Thus, you should create a service only if that is what you
+  <p>A service is simply a component that can run in the background, even when the user is not
+interacting with your application, so you should create a service only if that is what you
 need.</p>
-  <p>If you need to perform work outside your main thread, but only while the user is interacting
-with your application, then you should probably instead create a new thread and not a service. For
-example, if you want to play some music, but only while your activity is running, you might create
+  <p>If you must perform work outside of your main thread, but only while the user is interacting
+with your application, you should instead create a new thread. For example, if you want to
+play some music, but only while your activity is running, you might create
 a thread in {@link android.app.Activity#onCreate onCreate()}, start running it in {@link
-android.app.Activity#onStart onStart()}, then stop it in {@link android.app.Activity#onStop
-onStop()}. Also consider using {@link android.os.AsyncTask} or {@link android.os.HandlerThread},
+android.app.Activity#onStart onStart()}, and stop it in {@link android.app.Activity#onStop
+onStop()}. Also consider using {@link android.os.AsyncTask} or {@link android.os.HandlerThread}
 instead of the traditional {@link java.lang.Thread} class. See the <a
 href="{@docRoot}guide/components/processes-and-threads.html#Threads">Processes and
 Threading</a> document for more information about threads.</p>
@@ -121,78 +131,81 @@ blocking operations.</p>
 </div>
 </div>
 
-<p>To create a service, you must create a subclass of {@link android.app.Service} (or one
-of its existing subclasses). In your implementation, you need to override some callback methods that
-handle key aspects of the service lifecycle and provide a mechanism for components to bind to
-the service, if appropriate. The most important callback methods you should override are:</p>
+<p>To create a service, you must create a subclass of {@link android.app.Service} or use one
+of its existing subclasses. In your implementation, you must override some callback methods that
+handle key aspects of the service lifecycle and provide a mechanism that allows the components to
+bind to the service, if appropriate. These are the most important callback methods that you should
+override:</p>
 
 <dl>
   <dt>{@link android.app.Service#onStartCommand onStartCommand()}</dt>
-    <dd>The system calls this method when another component, such as an activity,
-requests that the service be started, by calling {@link android.content.Context#startService
-startService()}. Once this method executes, the service is started and can run in the
+    <dd>The system invokes this method by calling {@link android.content.Context#startService
+startService()} when another component (such as an activity) requests that the service be started.
+When this method executes, the service is started and can run in the
 background indefinitely. If you implement this, it is your responsibility to stop the service when
-its work is done, by calling {@link android.app.Service#stopSelf stopSelf()} or {@link
-android.content.Context#stopService stopService()}. (If you only want to provide binding, you don't
-need to implement this method.)</dd>
+its work is complete by calling {@link android.app.Service#stopSelf stopSelf()} or {@link
+android.content.Context#stopService stopService()}. If you only want to provide binding, you don't
+need to implement this method.</dd>
   <dt>{@link android.app.Service#onBind onBind()}</dt>
-    <dd>The system calls this method when another component wants to bind with the
-service (such as to perform RPC), by calling {@link android.content.Context#bindService
-bindService()}. In your implementation of this method, you must provide an interface that clients
-use to communicate with the service, by returning an {@link android.os.IBinder}. You must always
-implement this method, but if you don't want to allow binding, then you should return null.</dd>
+    <dd>The system invokes this method by calling {@link android.content.Context#bindService
+bindService()} when another component wants to bind with the service (such as to perform RPC).
+In your implementation of this method, you must provide an interface that clients
+use to communicate with the service by returning an {@link android.os.IBinder}. You must always
+implement this method; however, if you don't want to allow binding, you should return
+null.</dd>
   <dt>{@link android.app.Service#onCreate()}</dt>
-    <dd>The system calls this method when the service is first created, to perform one-time setup
-procedures (before it calls either {@link android.app.Service#onStartCommand onStartCommand()} or
+    <dd>The system invokes this method to perform one-time setup procedures when the service is
+initially created (before it calls either
+{@link android.app.Service#onStartCommand onStartCommand()} or
 {@link android.app.Service#onBind onBind()}). If the service is already running, this method is not
 called.</dd>
   <dt>{@link android.app.Service#onDestroy()}</dt>
-    <dd>The system calls this method when the service is no longer used and is being destroyed.
+    <dd>The system invokes this method when the service is no longer used and is being destroyed.
 Your service should implement this to clean up any resources such as threads, registered
-listeners, receivers, etc. This is the last call the service receives.</dd>
+listeners, or receivers. This is the last call that the service receives.</dd>
 </dl>
 
 <p>If a component starts the service by calling {@link
 android.content.Context#startService startService()} (which results in a call to {@link
-android.app.Service#onStartCommand onStartCommand()}), then the service
-remains running until it stops itself with {@link android.app.Service#stopSelf()} or another
+android.app.Service#onStartCommand onStartCommand()}), the service
+continues to run until it stops itself with {@link android.app.Service#stopSelf()} or another
 component stops it by calling {@link android.content.Context#stopService stopService()}.</p>
 
 <p>If a component calls
-{@link android.content.Context#bindService bindService()} to create the service (and {@link
-android.app.Service#onStartCommand onStartCommand()} is <em>not</em> called), then the service runs
-only as long as the component is bound to it. Once the service is unbound from all clients, the
-system destroys it.</p>
+{@link android.content.Context#bindService bindService()} to create the service and {@link
+android.app.Service#onStartCommand onStartCommand()} is <em>not</em> called, the service runs
+only as long as the component is bound to it. After the service is unbound from all of its clients,
+the system destroys it.</p>
 
-<p>The Android system will force-stop a service only when memory is low and it must recover system
+<p>The Android system force-stops a service only when memory is low and it must recover system
 resources for the activity that has user focus. If the service is bound to an activity that has user
-focus, then it's less likely to be killed, and if the service is declared to <a
-href="#Foreground">run in the foreground</a> (discussed later), then it will almost never be killed.
-Otherwise, if the service was started and is long-running, then the system will lower its position
-in the list of background tasks over time and the service will become highly susceptible to
-killing&mdash;if your service is started, then you must design it to gracefully handle restarts
+focus, it's less likely to be killed; if the service is declared to <a
+href="#Foreground">run in the foreground</a>, it's rarely killed.
+If the service is started and is long-running, the system lowers its position
+in the list of background tasks over time, and the service becomes highly susceptible to
+killing&mdash;if your service is started, you must design it to gracefully handle restarts
 by the system. If the system kills your service, it restarts it as soon as resources become
-available again (though this also depends on the value you return from {@link
-android.app.Service#onStartCommand onStartCommand()}, as discussed later). For more information
+available, but this also depends on the value that you return from {@link
+android.app.Service#onStartCommand onStartCommand()}. For more information
 about when the system might destroy a service, see the <a
 href="{@docRoot}guide/components/processes-and-threads.html">Processes and Threading</a>
 document.</p>
 
-<p>In the following sections, you'll see how you can create each type of service and how to use
-it from other application components.</p>
-
-
+<p>In the following sections, you'll see how you can create the
+{@link android.content.Context#startService startService()} and
+{@link android.content.Context#bindService bindService()} service methods, as well as how to use
+them from other application components.</p>
 
 <h3 id="Declaring">Declaring a service in the manifest</h3>
 
-<p>Like activities (and other components), you must declare all services in your application's
-manifest file.</p>
+<p>You must declare all services in your application's
+manifest file, just as you do for activities and other components.</p>
 
 <p>To declare your service, add a <a
-href="{@docRoot}guide/topics/manifest/service-element.html">{@code <service>}</a> element
+href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> element
 as a child of the <a
-href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
-element. For example:</p>
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+element. Here is an example:</p>
 
 <pre>
 &lt;manifest ... &gt;
@@ -205,48 +218,44 @@ element. For example:</p>
 </pre>
 
 <p>See the <a
-href="{@docRoot}guide/topics/manifest/service-element.html">{@code <service>}</a> element
+href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> element
 reference for more information about declaring your service in the manifest.</p>
 
-<p>There are other attributes you can include in the <a
-href="{@docRoot}guide/topics/manifest/service-element.html">{@code <service>}</a> element to
-define properties such as permissions required to start the service and the process in
+<p>There are other attributes that you can include in the <a
+href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> element to
+define properties such as the permissions that are required to start the service and the process in
 which the service should run. The <a
 href="{@docRoot}guide/topics/manifest/service-element.html#nm">{@code android:name}</a>
-attribute is the only required attribute&mdash;it specifies the class name of the service. Once
-you publish your application, you should not change this name, because if you do, you risk breaking
+attribute is the only required attribute&mdash;it specifies the class name of the service. After
+you publish your application, leave this name unchanged to avoid the risk of breaking
 code due to dependence on explicit intents to start or bind the service (read the blog post, <a
 href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Things
 That Cannot Change</a>).
 
-<p>To ensure your app is secure, <strong>always use an explicit intent when starting or binding
-your {@link android.app.Service}</strong> and do not declare intent filters for the service. If
-it's critical that you allow for some amount of ambiguity as to which service starts, you can
-supply intent filters for your services and exclude the component name from the {@link
-android.content.Intent}, but you then must set the package for the intent with {@link
-android.content.Intent#setPackage setPackage()}, which provides sufficient disambiguation for the
-target service.</p>
+<p class="caution"><strong>Caution</strong>: To ensure that your app is secure, always use an
+explicit intent when starting a {@link android.app.Service} and do not declare intent filters for
+your services. Using an implicit intent to start a service is a security hazard because you cannot
+be certain of the service that will respond to the intent, and the user cannot see which service
+starts. Beginning with Android 5.0 (API level 21), the system throws an exception if you call
+{@link android.content.Context#bindService bindService()} with an implicit intent.</p>
 
-<p>Additionally, you can ensure that your service is available to only your app by
+<p>You can ensure that your service is available to only your app by
 including the <a
 href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code android:exported}</a>
-attribute and setting it to {@code "false"}. This effectively stops other apps from starting your
+attribute and setting it to {@code false}. This effectively stops other apps from starting your
 service, even when using an explicit intent.</p>
 
-
-
-
-<h2 id="CreatingStartedService">Creating a Started Service</h2>
+<h2 id="CreatingStartedService">Creating a started service</h2>
 
 <p>A started service is one that another component starts by calling {@link
-android.content.Context#startService startService()}, resulting in a call to the service's
+android.content.Context#startService startService()}, which results in a call to the service's
 {@link android.app.Service#onStartCommand onStartCommand()} method.</p>
 
 <p>When a service is started, it has a lifecycle that's independent of the
-component that started it and the service can run in the background indefinitely, even if
+component that started it. The service can run in the background indefinitely, even if
 the component that started it is destroyed. As such, the service should stop itself when its job
-is done by calling {@link android.app.Service#stopSelf stopSelf()}, or another component can stop it
-by calling {@link android.content.Context#stopService stopService()}.</p>
+is complete by calling {@link android.app.Service#stopSelf stopSelf()}, or another component can
+stop it by calling {@link android.content.Context#stopService stopService()}.</p>
 
 <p>An application component such as an activity can start the service by calling {@link
 android.content.Context#startService startService()} and passing an {@link android.content.Intent}
@@ -254,65 +263,65 @@ that specifies the service and includes any data for the service to use. The ser
 this {@link android.content.Intent} in the {@link android.app.Service#onStartCommand
 onStartCommand()} method.</p>
 
-<p>For instance, suppose an activity needs to save some data to an online database. The activity can
-start a companion service and deliver it the data to save by passing an intent to {@link
+<p>For instance, suppose an activity needs to save some data to an online database. The activity
+can start a companion service and deliver it the data to save by passing an intent to {@link
 android.content.Context#startService startService()}. The service receives the intent in {@link
-android.app.Service#onStartCommand onStartCommand()}, connects to the Internet and performs the
-database transaction. When the transaction is done, the service stops itself and it is
+android.app.Service#onStartCommand onStartCommand()}, connects to the Internet, and performs the
+database transaction. When the transaction is complete, the service stops itself and is
 destroyed.</p>
 
 <p class="caution"><strong>Caution:</strong> A service runs in the same process as the application
-in which it is declared and in the main thread of that application, by default. So, if your service
+in which it is declared and in the main thread of that application by default. If your service
 performs intensive or blocking operations while the user interacts with an activity from the same
-application, the service will slow down activity performance. To avoid impacting application
-performance, you should start a new thread inside the service.</p>
+application, the service slows down activity performance. To avoid impacting application
+performance, start a new thread inside the service.</p>
 
 <p>Traditionally, there are two classes you can extend to create a started service:</p>
+
 <dl>
   <dt>{@link android.app.Service}</dt>
-  <dd>This is the base class for all services. When you extend this class, it's important that
-you create a new thread in which to do all the service's work, because the service uses your
-application's main thread, by default, which could slow the performance of any activity your
+  <dd>This is the base class for all services. When you extend this class, it's important to
+create a new thread in which the service can complete all of its work; the service uses your
+application's main thread by default, which can slow the performance of any activity that your
 application is running.</dd>
   <dt>{@link android.app.IntentService}</dt>
-  <dd>This is a subclass of {@link android.app.Service} that uses a worker thread to handle all
-start requests, one at a time. This is the best option if you don't require that your service
-handle multiple requests simultaneously. All you need to do is implement {@link
+  <dd>This is a subclass of {@link android.app.Service} that uses a worker thread to handle all of
+the start requests, one at a time. This is the best option if you don't require that your service
+handle multiple requests simultaneously. Implement {@link
 android.app.IntentService#onHandleIntent onHandleIntent()}, which receives the intent for each
-start request so you can do the background work.</dd>
+start request so that you can complete the background work.</dd>
 </dl>
 
 <p>The following sections describe how you can implement your service using either one for these
 classes.</p>
 
-
 <h3 id="ExtendingIntentService">Extending the IntentService class</h3>
 
-<p>Because most started services don't need to handle multiple requests simultaneously
-(which can actually be a dangerous multi-threading scenario), it's probably best if you
+<p>Because most of the started services don't need to handle multiple requests simultaneously
+(which can actually be a dangerous multi-threading scenario), it's best that you
 implement your service using the {@link android.app.IntentService} class.</p>
 
-<p>The {@link android.app.IntentService} does the following:</p>
+<p>The {@link android.app.IntentService} class does the following:</p>
 
 <ul>
-  <li>Creates a default worker thread that executes all intents delivered to {@link
-android.app.Service#onStartCommand onStartCommand()} separate from your application's main
+  <li>It creates a default worker thread that executes all of the intents that are delivered to
+{@link android.app.Service#onStartCommand onStartCommand()}, separate from your application's main
 thread.</li>
   <li>Creates a work queue that passes one intent at a time to your {@link
 android.app.IntentService#onHandleIntent onHandleIntent()} implementation, so you never have to
 worry about multi-threading.</li>
-  <li>Stops the service after all start requests have been handled, so you never have to call
+  <li>Stops the service after all of the start requests are handled, so you never have to call
 {@link android.app.Service#stopSelf}.</li>
-  <li>Provides default implementation of {@link android.app.IntentService#onBind onBind()} that
-returns null.</li>
+  <li>Provides a default implementation of {@link android.app.IntentService#onBind onBind()}
+  that returns null.</li>
   <li>Provides a default implementation of {@link android.app.IntentService#onStartCommand
 onStartCommand()} that sends the intent to the work queue and then to your {@link
 android.app.IntentService#onHandleIntent onHandleIntent()} implementation.</li>
 </ul>
 
-<p>All this adds up to the fact that all you need to do is implement {@link
-android.app.IntentService#onHandleIntent onHandleIntent()} to do the work provided by the
-client. (Though, you also need to provide a small constructor for the service.)</p>
+<p>To complete the work that is provided by the client, implement {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}.
+However, you also need to provide a small constructor for the service.</p>
 
 <p>Here's an example implementation of {@link android.app.IntentService}:</p>
 
@@ -352,12 +361,12 @@ android.app.IntentService#onHandleIntent onHandleIntent()}.</p>
 <p>If you decide to also override other callback methods, such as {@link
 android.app.IntentService#onCreate onCreate()}, {@link
 android.app.IntentService#onStartCommand onStartCommand()}, or {@link
-android.app.IntentService#onDestroy onDestroy()}, be sure to call the super implementation, so
+android.app.IntentService#onDestroy onDestroy()}, be sure to call the super implementation so
 that the {@link android.app.IntentService} can properly handle the life of the worker thread.</p>
 
 <p>For example, {@link android.app.IntentService#onStartCommand onStartCommand()} must return
-the default implementation (which is how the intent gets delivered to {@link
-android.app.IntentService#onHandleIntent onHandleIntent()}):</p>
+the default implementation, which is how the intent is delivered to {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}:</p>
 
 <pre>
 &#64;Override
@@ -369,22 +378,21 @@ public int onStartCommand(Intent intent, int flags, int startId) {
 
 <p>Besides {@link android.app.IntentService#onHandleIntent onHandleIntent()}, the only method
 from which you don't need to call the super class is {@link android.app.IntentService#onBind
-onBind()} (but you only need to implement that if your service allows binding).</p>
+onBind()}. You need to implement this only if your service allows binding.</p>
 
 <p>In the next section, you'll see how the same kind of service is implemented when extending
-the base {@link android.app.Service} class, which is a lot more code, but which might be
+the base {@link android.app.Service} class, which uses more code, but might be
 appropriate if you need to handle simultaneous start requests.</p>
-
 
 <h3 id="ExtendingService">Extending the Service class</h3>
 
-<p>As you saw in the previous section, using {@link android.app.IntentService} makes your
+<p>Using {@link android.app.IntentService} makes your
 implementation of a started service very simple. If, however, you require your service to
-perform multi-threading (instead of processing start requests through a work queue), then you
+perform multi-threading (instead of processing start requests through a work queue), you
 can extend the {@link android.app.Service} class to handle each intent.</p>
 
-<p>For comparison, the following example code is an implementation of the {@link
-android.app.Service} class that performs the exact same work as the example above using {@link
+<p>For comparison, the following example code shows an implementation of the {@link
+android.app.Service} class that performs the same work as the previous example using {@link
 android.app.IntentService}. That is, for each start request, it uses a worker thread to perform the
 job and processes only one request at a time.</p>
 
@@ -460,20 +468,20 @@ public class HelloService extends Service {
 
 <p>However, because you handle each call to {@link android.app.Service#onStartCommand
 onStartCommand()} yourself, you can perform multiple requests simultaneously. That's not what
-this example does, but if that's what you want, then you can create a new thread for each
-request and run them right away (instead of waiting for the previous request to finish).</p>
+this example does, but if that's what you want, you can create a new thread for each
+request and run them right away instead of waiting for the previous request to finish.</p>
 
 <p>Notice that the {@link android.app.Service#onStartCommand onStartCommand()} method must return an
 integer. The integer is a value that describes how the system should continue the service in the
-event that the system kills it (as discussed above, the default implementation for {@link
-android.app.IntentService} handles this for you, though you are able to modify it). The return value
+event that the system kills it. The default implementation for {@link
+android.app.IntentService} handles this for you, but you are able to modify it. The return value
 from {@link android.app.Service#onStartCommand onStartCommand()} must be one of the following
 constants:</p>
 
 <dl>
   <dt>{@link android.app.Service#START_NOT_STICKY}</dt>
     <dd>If the system kills the service after {@link android.app.Service#onStartCommand
-onStartCommand()} returns, <em>do not</em> recreate the service, unless there are pending
+onStartCommand()} returns, <em>do not</em> recreate the service unless there are pending
 intents to deliver. This is the safest option to avoid running your service when not necessary
 and when your application can simply restart any unfinished jobs.</dd>
   <dt>{@link android.app.Service#START_STICKY}</dt>
@@ -481,9 +489,9 @@ and when your application can simply restart any unfinished jobs.</dd>
 onStartCommand()} returns, recreate the service and call {@link
 android.app.Service#onStartCommand onStartCommand()}, but <em>do not</em> redeliver the last intent.
 Instead, the system calls {@link android.app.Service#onStartCommand onStartCommand()} with a
-null intent, unless there were pending intents to start the service, in which case,
+null intent unless there are pending intents to start the service. In that case,
 those intents are delivered. This is suitable for media players (or similar services) that are not
-executing commands, but running indefinitely and waiting for a job.</dd>
+executing commands but are running indefinitely and waiting for a job.</dd>
   <dt>{@link android.app.Service#START_REDELIVER_INTENT}</dt>
     <dd>If the system kills the service after {@link android.app.Service#onStartCommand
 onStartCommand()} returns, recreate the service and call {@link
@@ -494,35 +502,35 @@ actively performing a job that should be immediately resumed, such as downloadin
 <p>For more details about these return values, see the linked reference documentation for each
 constant.</p>
 
-
-
-<h3 id="StartingAService">Starting a Service</h3>
+<h3 id="StartingAService">Starting a service</h3>
 
 <p>You can start a service from an activity or other application component by passing an
 {@link android.content.Intent} (specifying the service to start) to {@link
 android.content.Context#startService startService()}. The Android system calls the service's {@link
 android.app.Service#onStartCommand onStartCommand()} method and passes it the {@link
-android.content.Intent}. (You should never call {@link android.app.Service#onStartCommand
-onStartCommand()} directly.)</p>
+android.content.Intent}.
+
+<p class="note"><strong>Note</strong>: Never call
+{@link android.app.Service#onStartCommand onStartCommand()} directly.</p>
 
 <p>For example, an activity can start the example service in the previous section ({@code
 HelloService}) using an explicit intent with {@link android.content.Context#startService
-startService()}:</p>
+startService()}, as shown here:</p>
 
 <pre>
 Intent intent = new Intent(this, HelloService.class);
 startService(intent);
 </pre>
 
-<p>The {@link android.content.Context#startService startService()} method returns immediately and
+<p>The {@link android.content.Context#startService startService()} method returns immediately, and
 the Android system calls the service's {@link android.app.Service#onStartCommand
 onStartCommand()} method. If the service is not already running, the system first calls {@link
-android.app.Service#onCreate onCreate()}, then calls {@link android.app.Service#onStartCommand
-onStartCommand()}.</p>
+android.app.Service#onCreate onCreate()}, and then it calls
+{@link android.app.Service#onStartCommand onStartCommand()}.</p>
 
-<p>If the service does not also provide binding, the intent delivered with {@link
+<p>If the service does not also provide binding, the intent that is delivered with {@link
 android.content.Context#startService startService()} is the only mode of communication between the
-application component and the service. However, if you want the service to send a result back, then
+application component and the service. However, if you want the service to send a result back,
 the client that starts the service can create a {@link android.app.PendingIntent} for a broadcast
 (with {@link android.app.PendingIntent#getBroadcast getBroadcast()}) and deliver it to the service
 in the {@link android.content.Intent} that starts the service. The service can then use the
@@ -533,109 +541,102 @@ broadcast to deliver a result.</p>
 the service (with {@link android.app.Service#stopSelf stopSelf()} or {@link
 android.content.Context#stopService stopService()}) is required to stop it.</p>
 
-
 <h3 id="Stopping">Stopping a service</h3>
 
 <p>A started service must manage its own lifecycle. That is, the system does not stop or
 destroy the service unless it must recover system memory and the service
-continues to run after {@link android.app.Service#onStartCommand onStartCommand()} returns. So,
-the service must stop itself by calling {@link android.app.Service#stopSelf stopSelf()} or another
+continues to run after {@link android.app.Service#onStartCommand onStartCommand()} returns. The
+service must stop itself by calling {@link android.app.Service#stopSelf stopSelf()}, or another
 component can stop it by calling {@link android.content.Context#stopService stopService()}.</p>
 
 <p>Once requested to stop with {@link android.app.Service#stopSelf stopSelf()} or {@link
 android.content.Context#stopService stopService()}, the system destroys the service as soon as
 possible.</p>
 
-<p>However, if your service handles multiple requests to {@link
-android.app.Service#onStartCommand onStartCommand()} concurrently, then you shouldn't stop the
-service when you're done processing a start request, because you might have since received a new
+<p>If your service handles multiple requests to {@link
+android.app.Service#onStartCommand onStartCommand()} concurrently, you shouldn't stop the
+service when you're done processing a start request, as you might have received a new
 start request (stopping at the end of the first request would terminate the second one). To avoid
 this problem, you can use {@link android.app.Service#stopSelf(int)} to ensure that your request to
 stop the service is always based on the most recent start request. That is, when you call {@link
 android.app.Service#stopSelf(int)}, you pass the ID of the start request (the <code>startId</code>
 delivered to {@link android.app.Service#onStartCommand onStartCommand()}) to which your stop request
-corresponds. Then if the service received a new start request before you were able to call {@link
-android.app.Service#stopSelf(int)}, then the ID will not match and the service will not stop.</p>
+corresponds. Then, if the service receives a new start request before you are able to call {@link
+android.app.Service#stopSelf(int)}, the ID does not match and the service does not stop.</p>
 
-<p class="caution"><strong>Caution:</strong> It's important that your application stops its services
-when it's done working, to avoid wasting system resources and consuming battery power. If necessary,
-other components can stop the service by calling {@link
+<p class="caution"><strong>Caution:</strong> To avoid wasting system resources and consuming
+battery power, ensure that your application stops its services when it's done working.
+If necessary, other components can stop the service by calling {@link
 android.content.Context#stopService stopService()}. Even if you enable binding for the service,
-you must always stop the service yourself if it ever received a call to {@link
+you must always stop the service yourself if it ever receives a call to {@link
 android.app.Service#onStartCommand onStartCommand()}.</p>
 
 <p>For more information about the lifecycle of a service, see the section below about <a
 href="#Lifecycle">Managing the Lifecycle of a Service</a>.</p>
 
-
-
-<h2 id="CreatingBoundService">Creating a Bound Service</h2>
+<h2 id="CreatingBoundService">Creating a bound service</h2>
 
 <p>A bound service is one that allows application components to bind to it by calling {@link
-android.content.Context#bindService bindService()} in order to create a long-standing connection
-(and generally does not allow components to <em>start</em> it by calling {@link
-android.content.Context#startService startService()}).</p>
+android.content.Context#bindService bindService()} to create a long-standing connection.
+It generally doesn't allow components to <em>start</em> it by calling {@link
+android.content.Context#startService startService()}.</p>
 
-<p>You should create a bound service when you want to interact with the service from activities
+<p>Create a bound service when you want to interact with the service from activities
 and other components in your application or to expose some of your application's functionality to
-other applications, through interprocess communication (IPC).</p>
+other applications through interprocess communication (IPC).</p>
 
-<p>To create a bound service, you must implement the {@link
+<p>To create a bound service, implement the {@link
 android.app.Service#onBind onBind()} callback method to return an {@link android.os.IBinder} that
 defines the interface for communication with the service. Other application components can then call
 {@link android.content.Context#bindService bindService()} to retrieve the interface and
 begin calling methods on the service. The service lives only to serve the application component that
-is bound to it, so when there are no components bound to the service, the system destroys it
-(you do <em>not</em> need to stop a bound service in the way you must when the service is started
-through {@link android.app.Service#onStartCommand onStartCommand()}).</p>
+is bound to it, so when there are no components bound to the service, the system destroys it.
+You do <em>not</em> need to stop a bound service in the same way that you must when the service is
+started through {@link android.app.Service#onStartCommand onStartCommand()}.</p>
 
-<p>To create a bound service, the first thing you must do is define the interface that specifies
-how a client can communicate with the service. This interface between the service
+<p>To create a bound service, you must define the interface that specifies how a client can
+communicate with the service. This interface between the service
 and a client must be an implementation of {@link android.os.IBinder} and is what your service must
 return from the {@link android.app.Service#onBind
-onBind()} callback method. Once the client receives the {@link android.os.IBinder}, it can begin
+onBind()} callback method. After the client receives the {@link android.os.IBinder}, it can begin
 interacting with the service through that interface.</p>
 
-<p>Multiple clients can bind to the service at once. When a client is done interacting with the
-service, it calls {@link android.content.Context#unbindService unbindService()} to unbind. Once
-there are no clients bound to the service, the system destroys the service.</p>
+<p>Multiple clients can bind to the service simultaneously. When a client is done interacting with
+the service, it calls {@link android.content.Context#unbindService unbindService()} to unbind.
+When there are no clients bound to the service, the system destroys the service.</p>
 
-<p>There are multiple ways to implement a bound service and the implementation is more
-complicated than a started service, so the bound service discussion appears in a separate
-document about <a
+<p>There are multiple ways to implement a bound service, and the implementation is more
+complicated than a started service. For these reasons, the bound service discussion appears in a
+separate document about <a
 href="{@docRoot}guide/components/bound-services.html">Bound Services</a>.</p>
 
+<h2 id="Notifications">Sending notifications to the user</h2>
 
-
-<h2 id="Notifications">Sending Notifications to the User</h2>
-
-<p>Once running, a service can notify the user of events using <a
+<p>When a service is running, it can notify the user of events using <a
 href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Toast Notifications</a> or <a
 href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Status Bar Notifications</a>.</p>
 
-<p>A toast notification is a message that appears on the surface of the current window for a
-moment then disappears, while a status bar notification provides an icon in the status bar with a
+<p>A toast notification is a message that appears on the surface of the current window for only a
+moment before disappearing. A status bar notification provides an icon in the status bar with a
 message, which the user can select in order to take an action (such as start an activity).</p>
 
-<p>Usually, a status bar notification is the best technique when some background work has completed
-(such as a file completed
-downloading) and the user can now act on it. When the user selects the notification from the
-expanded view, the notification can start an activity (such as to view the downloaded file).</p>
+<p>Usually, a status bar notification is the best technique to use when background work such as
+a file download has completed, and the user can now act on it. When the user
+selects the notification from the expanded view, the notification can start an activity
+(such as to display the downloaded file).</p>
 
 <p>See the <a
 href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Toast Notifications</a> or <a
 href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Status Bar Notifications</a>
 developer guides for more information.</p>
 
+<h2 id="Foreground">Running a service in the foreground</h2>
 
-
-<h2 id="Foreground">Running a Service in the Foreground</h2>
-
-<p>A foreground service is a service that's considered to be something the
-user is actively aware of and thus not a candidate for the system to kill when low on memory. A
+<p>A foreground service is a service that the
+user is actively aware of and is not a candidate for the system to kill when low on memory. A
 foreground service must provide a notification for the status bar, which is placed under the
-"Ongoing" heading, which means that the notification cannot be dismissed unless the service is
-either stopped or removed from the foreground.</p>
+<em>Ongoing</em> heading. This means that the notification cannot be dismissed unless the service
+is either stopped or removed from the foreground.</p>
 
 <p>For example, a music player that plays music from a service should be set to run in the
 foreground, because the user is explicitly aware
@@ -643,9 +644,9 @@ of its operation. The notification in the status bar might indicate the current 
 the user to launch an activity to interact with the music player.</p>
 
 <p>To request that your service run in the foreground, call {@link
-android.app.Service#startForeground startForeground()}. This method takes two parameters: an integer
-that uniquely identifies the notification and the {@link
-android.app.Notification} for the status bar. For example:</p>
+android.app.Service#startForeground startForeground()}. This method takes two parameters: an
+integer that uniquely identifies the notification and the {@link
+android.app.Notification} for the status bar. Here is an example:</p>
 
 <pre>
 Notification notification = new Notification(R.drawable.icon, getText(R.string.ticker_text),
@@ -657,30 +658,27 @@ notification.setLatestEventInfo(this, getText(R.string.notification_title),
 startForeground(ONGOING_NOTIFICATION_ID, notification);
 </pre>
 
-<p class="caution"><strong>Caution:</strong> The integer ID you give to {@link
+<p class="caution"><strong>Caution:</strong> The integer ID that you give to {@link
 android.app.Service#startForeground startForeground()} must not be 0.</p>
 
-
 <p>To remove the service from the foreground, call {@link
-android.app.Service#stopForeground stopForeground()}. This method takes a boolean, indicating
+android.app.Service#stopForeground stopForeground()}. This method takes a boolean, which indicates
 whether to remove the status bar notification as well. This method does <em>not</em> stop the
-service. However, if you stop the service while it's still running in the foreground, then the
+service. However, if you stop the service while it's still running in the foreground, the
 notification is also removed.</p>
 
 <p>For more information about notifications, see <a
 href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Creating Status Bar
 Notifications</a>.</p>
 
+<h2 id="Lifecycle">Managing the lifecycle of a service</h2>
 
+<p>The lifecycle of a service is much simpler than that of an activity. However, it's even more
+important that you pay close attention to how your service is created and destroyed because a
+service can run in the background without the user being aware.</p>
 
-<h2 id="Lifecycle">Managing the Lifecycle of a Service</h2>
-
-<p>The lifecycle of a service is much simpler than that of an activity. However, it's even more important
-that you pay close attention to how your service is created and destroyed, because a service
-can run in the background without the user being aware.</p>
-
-<p>The service lifecycle&mdash;from when it's created to when it's destroyed&mdash;can follow two
-different paths:</p>
+<p>The service lifecycle&mdash;from when it's created to when it's destroyed&mdash;can follow
+either of these two paths:</p>
 
 <ul>
 <li>A started service
@@ -689,27 +687,26 @@ android.content.Context#startService startService()}. The service then runs inde
 stop itself by calling {@link
 android.app.Service#stopSelf() stopSelf()}. Another component can also stop the
 service by calling {@link android.content.Context#stopService
-stopService()}. When the service is stopped, the system destroys it..</p></li>
+stopService()}. When the service is stopped, the system destroys it.</p></li>
 
 <li>A bound service
   <p>The service is created when another component (a client) calls {@link
 android.content.Context#bindService bindService()}. The client then communicates with the service
 through an {@link android.os.IBinder} interface. The client can close the connection by calling
 {@link android.content.Context#unbindService unbindService()}. Multiple clients can bind to
-the same service and when all of them unbind, the system destroys the service. (The service
-does <em>not</em> need to stop itself.)</p></li>
+the same service and when all of them unbind, the system destroys the service. The service
+does <em>not</em> need to stop itself.</p></li>
 </ul>
 
-<p>These two paths are not entirely separate. That is, you can bind to a service that was already
-started with {@link android.content.Context#startService startService()}. For example, a background
-music service could be started by calling {@link android.content.Context#startService
+<p>These two paths are not entirely separate. You can bind to a service that is already
+started with {@link android.content.Context#startService startService()}. For example, you can
+start a background music service by calling {@link android.content.Context#startService
 startService()} with an {@link android.content.Intent} that identifies the music to play. Later,
 possibly when the user wants to exercise some control over the player or get information about the
 current song, an activity can bind to the service by calling {@link
-android.content.Context#bindService bindService()}. In cases like this, {@link
+android.content.Context#bindService bindService()}. In cases such as this, {@link
 android.content.Context#stopService stopService()} or {@link android.app.Service#stopSelf
-stopSelf()} does not actually stop the service until all clients unbind. </p>
-
+stopSelf()} doesn't actually stop the service until all of the clients unbind.</p>
 
 <h3 id="LifecycleCallbacks">Implementing the lifecycle callbacks</h3>
 
@@ -763,20 +760,30 @@ shows the lifecycle when the service is created with {@link android.content.Cont
 startService()} and the diagram on the right shows the lifecycle when the service is created
 with {@link android.content.Context#bindService bindService()}.</p>
 
-<p>By implementing these methods, you can monitor two nested loops of the service's lifecycle: </p>
+<p>Figure 2 illustrates the typical callback methods for a service. Although the figure separates
+services that are created by {@link android.content.Context#startService startService()} from those
+created by {@link android.content.Context#bindService bindService()}, keep
+in mind that any service, no matter how it's started, can potentially allow clients to bind to it.
+A service that was initially started with {@link android.app.Service#onStartCommand
+onStartCommand()} (by a client calling {@link android.content.Context#startService startService()})
+can still receive a call to {@link android.app.Service#onBind onBind()} (when a client calls
+{@link android.content.Context#bindService bindService()}).</p>
+
+<p>By implementing these methods, you can monitor these two nested loops of the service's
+lifecycle:</p>
 
 <ul>
-<li>The <strong>entire lifetime</strong> of a service happens between the time {@link
-android.app.Service#onCreate onCreate()} is called and the time {@link
+<li>The <strong>entire lifetime</strong> of a service occurs between the time that {@link
+android.app.Service#onCreate onCreate()} is called and the time that {@link
 android.app.Service#onDestroy} returns. Like an activity, a service does its initial setup in
 {@link android.app.Service#onCreate onCreate()} and releases all remaining resources in {@link
-android.app.Service#onDestroy onDestroy()}.  For example, a
-music playback service could create the thread where the music will be played in {@link
-android.app.Service#onCreate onCreate()}, then stop the thread in {@link
+android.app.Service#onDestroy onDestroy()}. For example, a
+music playback service can create the thread where the music is played in {@link
+android.app.Service#onCreate onCreate()}, and then it can stop the thread in {@link
 android.app.Service#onDestroy onDestroy()}.
 
-<p>The {@link android.app.Service#onCreate onCreate()} and {@link android.app.Service#onDestroy
-onDestroy()} methods are called for all services, whether
+<p class="note"><strong>Note</strong>: The {@link android.app.Service#onCreate onCreate()}
+and {@link android.app.Service#onDestroy onDestroy()} methods are called for all services, whether
 they're created by {@link android.content.Context#startService startService()} or {@link
 android.content.Context#bindService bindService()}.</p></li>
 
@@ -784,8 +791,8 @@ android.content.Context#bindService bindService()}.</p></li>
 android.app.Service#onStartCommand onStartCommand()} or {@link android.app.Service#onBind onBind()}.
 Each method is handed the {@link
 android.content.Intent} that was passed to either {@link android.content.Context#startService
-startService()} or {@link android.content.Context#bindService bindService()}, respectively.
-<p>If the service is started, the active lifetime ends the same time that the entire lifetime
+startService()} or {@link android.content.Context#bindService bindService()}.
+<p>If the service is started, the active lifetime ends at the same time that the entire lifetime
 ends (the service is still active even after {@link android.app.Service#onStartCommand
 onStartCommand()} returns). If the service is bound, the active lifetime ends when {@link
 android.app.Service#onUnbind onUnbind()} returns.</p>
@@ -795,26 +802,16 @@ android.app.Service#onUnbind onUnbind()} returns.</p>
 <p class="note"><strong>Note:</strong> Although a started service is stopped by a call to
 either {@link android.app.Service#stopSelf stopSelf()} or {@link
 android.content.Context#stopService stopService()}, there is not a respective callback for the
-service (there's no {@code onStop()} callback). So, unless the service is bound to a client,
+service (there's no {@code onStop()} callback). Unless the service is bound to a client,
 the system destroys it when the service is stopped&mdash;{@link
 android.app.Service#onDestroy onDestroy()} is the only callback received.</p>
-
-<p>Figure 2 illustrates the typical callback methods for a service. Although the figure separates
-services that are created by {@link android.content.Context#startService startService()} from those
-created by {@link android.content.Context#bindService bindService()}, keep
-in mind that any service, no matter how it's started, can potentially allow clients to bind to it.
-So, a service that was initially started with {@link android.app.Service#onStartCommand
-onStartCommand()} (by a client calling {@link android.content.Context#startService startService()})
-can still receive a call to {@link android.app.Service#onBind onBind()} (when a client calls
-{@link android.content.Context#bindService bindService()}).</p>
 
 <p>For more information about creating a service that provides binding, see the <a
 href="{@docRoot}guide/components/bound-services.html">Bound Services</a> document,
 which includes more information about the {@link android.app.Service#onRebind onRebind()}
 callback method in the section about <a
-href="{@docRoot}guide/components/bound-services.html#Lifecycle">Managing the Lifecycle of
-a Bound Service</a>.</p>
-
+href="{@docRoot}guide/components/bound-services.html#Lifecycle">Managing the lifecycle of
+a bound service</a>.</p>
 
 <!--
 <h2>Beginner's Path</h2>

@@ -220,4 +220,7 @@
 
     <!-- Default setting for ability to add users from the lock screen -->
     <bool name="def_add_users_from_lockscreen">false</bool>
+
+    <!-- Default setting for disable animations when accessibility is turned on. -->
+    <bool name="def_accessibility_disable_animations">false</bool>
 </resources>

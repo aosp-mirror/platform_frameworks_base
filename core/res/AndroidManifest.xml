@@ -710,6 +710,7 @@
         android:priority="400" />
 
     <!-- Allows an app to access precise location.
+         Alternatively, you might want {@link #ACCESS_COARSE_LOCATION}.
          <p>Protection level: dangerous
     -->
     <permission android:name="android.permission.ACCESS_FINE_LOCATION"
@@ -719,6 +720,7 @@
         android:protectionLevel="dangerous" />
 
     <!-- Allows an app to access approximate location.
+         Alternatively, you might want {@link #ACCESS_FINE_LOCATION}.
          <p>Protection level: dangerous
     -->
     <permission android:name="android.permission.ACCESS_COARSE_LOCATION"

@@ -418,7 +418,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"충전 중이 아닌 경우 상태 표시줄 아이콘 내에 배터리 잔량 비율 표시"</string>
     <string name="quick_settings" msgid="10042998191725428">"빠른 설정"</string>
     <string name="status_bar" msgid="4877645476959324760">"상태 표시줄"</string>
-    <string name="overview" msgid="4018602013895926956">"개요"</string>
+    <string name="overview" msgid="4018602013895926956">"최근 사용"</string>
     <string name="demo_mode" msgid="2389163018533514619">"데모 모드"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"데모 모드 사용"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"데모 모드 표시"</string>

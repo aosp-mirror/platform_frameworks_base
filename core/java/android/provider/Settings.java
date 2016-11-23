@@ -5164,6 +5164,16 @@ public final class Settings {
                 "accessibility_soft_keyboard_mode";
 
         /**
+         * Should we disable all animations when accessibility is turned on. On low-power devices
+         * like Android Wear, the performance makes the device unusable. Turning off animations
+         * is a partial fix.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_DISABLE_ANIMATIONS =
+                "accessibility_disable_animations";
+
+        /**
          * Default soft keyboard behavior.
          *
          * @hide
@@ -6441,6 +6451,7 @@ public final class Settings {
             ACCESSIBILITY_CAPTIONING_TYPEFACE,
             ACCESSIBILITY_CAPTIONING_FONT_SCALE,
             ACCESSIBILITY_CAPTIONING_WINDOW_COLOR,
+            ACCESSIBILITY_DISABLE_ANIMATIONS,
             TTS_USE_DEFAULTS,
             TTS_DEFAULT_RATE,
             TTS_DEFAULT_PITCH,

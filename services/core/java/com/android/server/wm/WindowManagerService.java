@@ -350,11 +350,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // Enums for animation scale update types.
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({WINDOW_ANIMATION_SCALE, TRANSITION_ANIMATION_SCALE, ANIMATION_DURATION_SCALE})
+    @IntDef({WINDOW_ANIMATION_SCALE, TRANSITION_ANIMATION_SCALE, ANIMATION_DURATION_SCALE,
+            ACCESSIBILITY_CHANGED})
     private @interface UpdateAnimationScaleMode {};
     private static final int WINDOW_ANIMATION_SCALE = 0;
     private static final int TRANSITION_ANIMATION_SCALE = 1;
     private static final int ANIMATION_DURATION_SCALE = 2;
+    private static final int ACCESSIBILITY_CHANGED = 3;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
 
@@ -669,6 +671,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Settings.Global.getUriFor(Settings.Global.TRANSITION_ANIMATION_SCALE);
         private final Uri mAnimationDurationScaleUri =
                 Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE);
+        private final Uri mAccessibilityEnabledUri =
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_ENABLED);
 
         public SettingsObserver() {
             super(new Handler());
@@ -680,6 +684,8 @@ public class WindowManagerService extends IWindowManager.Stub
             resolver.registerContentObserver(mTransitionAnimationScaleUri, false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mAnimationDurationScaleUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mAccessibilityEnabledUri, false, this,
                     UserHandle.USER_ALL);
         }
 
@@ -700,6 +706,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     mode = TRANSITION_ANIMATION_SCALE;
                 } else if (mAnimationDurationScaleUri.equals(uri)) {
                     mode = ANIMATION_DURATION_SCALE;
+                } else if (mAccessibilityEnabledUri.equals(uri)) {
+                    // Change all of them.
+                    mode = ACCESSIBILITY_CHANGED;
                 } else {
                     // Ignoring unrecognized content changes
                     return;
@@ -998,13 +1007,12 @@ public class WindowManagerService extends IWindowManager.Stub
             public void onLowPowerModeChanged(boolean enabled) {
                 synchronized (mWindowMap) {
                     if (mAnimationsDisabled != enabled && !mAllowAnimationsInLowPowerMode) {
-                        mAnimationsDisabled = enabled;
-                        dispatchNewAnimatorScaleLocked(null);
+                        setShouldAnimationsDisabled(enabled);
                     }
                 }
             }
         });
-        mAnimationsDisabled = mPowerManagerInternal.getLowPowerModeEnabled();
+        setShouldAnimationsDisabled(mPowerManagerInternal.getLowPowerModeEnabled());
         mScreenFrozenLock = mPowerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
         mScreenFrozenLock.setReferenceCounted(false);
@@ -1085,6 +1093,18 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             throw e;
         }
+    }
+
+    private void setShouldAnimationsDisabled(boolean isLowPowerEnabled) {
+        boolean accessibilityEnabled = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_ENABLED, 0) == 1;
+        boolean disableAnimationsWhenAccessibility = Settings.Secure.getInt(
+                mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_DISABLE_ANIMATIONS, 0) == 1;
+
+        mAnimationsDisabled = isLowPowerEnabled ||
+                (accessibilityEnabled && disableAnimationsWhenAccessibility);
+        dispatchNewAnimatorScaleLocked(null);
     }
 
     private void placeWindowAfter(WindowState pos, WindowState window) {
@@ -8590,6 +8610,11 @@ public class WindowManagerService extends IWindowManager.Stub
                             dispatchNewAnimatorScaleLocked(null);
                             break;
                         }
+                        case ACCESSIBILITY_CHANGED: {
+                            setShouldAnimationsDisabled(
+                                    mPowerManagerInternal.getLowPowerModeEnabled());
+                        }
+                        break;
                     }
                     break;
                 }
