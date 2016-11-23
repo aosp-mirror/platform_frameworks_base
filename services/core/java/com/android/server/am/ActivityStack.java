@@ -1825,11 +1825,10 @@ final class ActivityStack extends ConfigurationContainer {
             // If keyguard is showing, nothing is visible, except if we are able to dismiss Keyguard
             // right away.
             return shouldBeVisible && mStackSupervisor.mKeyguardController
-                    .canShowActivityWhileKeyguardShowing(dismissKeyguard);
+                    .canShowActivityWhileKeyguardShowing(r, dismissKeyguard);
         } else if (keyguardLocked) {
-
-            // Show when locked windows above keyguard.
-            return shouldBeVisible && showWhenLocked;
+            return shouldBeVisible && mStackSupervisor.mKeyguardController.canShowWhileOccluded(
+                    dismissKeyguard, showWhenLocked);
         } else {
             return shouldBeVisible;
         }
