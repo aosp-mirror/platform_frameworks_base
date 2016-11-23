@@ -40,6 +40,8 @@ import com.android.systemui.statusbar.RemoteInputController;
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 import static com.android.systemui.statusbar.phone.FingerprintUnlockController.*;
 
+import java.util.ArrayList;
+
 /**
  * Manages creating, showing, hiding and resetting the keyguard within the status bar. Calls back
  * via {@link ViewMediatorCallback} to poke the wake lock and report that the keyguard is done,
@@ -90,6 +92,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     protected boolean mLastRemoteInputActive;
 
     private OnDismissAction mAfterKeyguardGoneAction;
+    private final ArrayList<Runnable> mAfterKeyguardGoneRunnables = new ArrayList<>();
     private boolean mDeviceWillWakeUp;
     private boolean mDeferScrimFadeOut;
 
@@ -162,6 +165,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
         }
         updateStates();
+    }
+
+    /**
+     * Adds a {@param runnable} to be executed after Keyguard is gone.
+     */
+    public void addAfterKeyguardGoneRunnable(Runnable runnable) {
+        mAfterKeyguardGoneRunnables.add(runnable);
     }
 
     /**
@@ -418,6 +428,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mAfterKeyguardGoneAction.onDismiss();
             mAfterKeyguardGoneAction = null;
         }
+        for (int i = 0; i < mAfterKeyguardGoneRunnables.size(); i++) {
+            mAfterKeyguardGoneRunnables.get(i).run();
+        }
+        mAfterKeyguardGoneRunnables.clear();
     }
 
     /**
