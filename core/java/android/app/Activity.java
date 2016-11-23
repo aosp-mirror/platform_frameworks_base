@@ -74,6 +74,7 @@ import android.service.autofill.AutoFillService;
 import android.service.autofill.IAutoFillCallback;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
+import android.text.TextAssistant;
 import android.text.TextUtils;
 import android.text.method.TextKeyListener;
 import android.transition.Scene;
@@ -783,6 +784,8 @@ public class Activity extends ContextThemeWrapper
 
     private VoiceInteractor mVoiceInteractor;
 
+    private TextAssistant mTextAssistant;
+
     private CharSequence mTitle;
     private int mTitleColor = 0;
 
@@ -1382,6 +1385,24 @@ public class Activity extends ContextThemeWrapper
             ActivityManager.getService().stopLocalVoiceInteraction(mToken);
         } catch (RemoteException re) {
         }
+    }
+
+    /**
+     * Sets the default {@link TextAssistant} for {@link android.widget.TextView}s in this Activity.
+     */
+    public void setTextAssistant(TextAssistant textAssistant) {
+        mTextAssistant = textAssistant;
+    }
+
+    /**
+     * Returns the default {@link TextAssistant} for {@link android.widget.TextView}s
+     * in this Activity.
+     */
+    public TextAssistant getTextAssistant() {
+        if (mTextAssistant != null) {
+            return mTextAssistant;
+        }
+        return TextAssistant.NO_OP;
     }
 
     /**
