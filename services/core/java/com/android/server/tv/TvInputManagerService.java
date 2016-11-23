@@ -2833,4 +2833,9 @@ public final class TvInputManagerService extends SystemService {
             super(name);
         }
     }
+    
+    @Override
+    public void onSwitchUser(int userHandle) {
+        switchUser(userHandle);
+    }
 }
