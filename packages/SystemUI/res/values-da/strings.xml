@@ -432,7 +432,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"på <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Hurtigindstillinger <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Hurtige indstillinger <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Arbejdsprofil"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Sjovt for nogle, men ikke for alle"</string>

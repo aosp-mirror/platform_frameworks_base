@@ -584,6 +584,20 @@ public class LockSettingsService extends ILockSettings.Stub {
                     Slog.e(TAG, "Unable to remove tied profile key", e);
                 }
             }
+
+            boolean isWatch = mContext.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_WATCH);
+            // Wear used to set DISABLE_LOCKSCREEN to 'true', but because Wear now allows accounts
+            // and device management the lockscreen must be re-enabled now for users that upgrade.
+            if (isWatch && getString("migrated_wear_lockscreen_disabled", null, 0) == null) {
+                final int userCount = users.size();
+                for (int i = 0; i < userCount; i++) {
+                    int id = users.get(i).id;
+                    setBoolean(LockPatternUtils.DISABLE_LOCKSCREEN_KEY, false, id);
+                }
+                setString("migrated_wear_lockscreen_disabled", "true", 0);
+                Slog.i(TAG, "Migrated lockscreen_disabled for Wear devices");
+            }
         } catch (RemoteException re) {
             Slog.e(TAG, "Unable to migrate old data", re);
         }

@@ -152,6 +152,7 @@ private:
     sp<Surface> mFlingerSurface;
     bool        mClockEnabled;
     bool        mTimeIsAccurate;
+    bool        mTimeFormat12Hour;
     bool        mSystemBoot;
     String8     mZipFileName;
     SortedVector<String8> mLoadedFiles;

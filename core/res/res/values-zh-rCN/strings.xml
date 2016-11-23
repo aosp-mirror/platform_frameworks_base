@@ -189,7 +189,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"振铃器开启"</string>
     <string name="reboot_to_update_title" msgid="6212636802536823850">"Android 系统更新"</string>
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"正在准备更新…"</string>
-    <string name="reboot_to_update_package" msgid="3871302324500927291">"正在处理更新文件包…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"正在处理更新软件包…"</string>
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"正在重新启动…"</string>
     <string name="reboot_to_reset_title" msgid="4142355915340627490">"恢复出厂设置"</string>
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"正在重新启动…"</string>

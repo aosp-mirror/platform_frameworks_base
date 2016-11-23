@@ -635,7 +635,11 @@ class ShortcutPackage extends ShortcutPackageItem {
                 return false; // Shouldn't happen.
             }
 
-            if (!isNewApp && !forceRescan) {
+            // Always scan the settings app, since its version code is the same for DR and MR1.
+            // TODO Fix it properly: b/32554059
+            final boolean isSettings = "com.android.settings".equals(getPackageName());
+
+            if (!isNewApp && !forceRescan && !isSettings) {
                 // Return if the package hasn't changed, ie:
                 // - version code hasn't change
                 // - lastUpdateTime hasn't change
@@ -650,6 +654,11 @@ class ShortcutPackage extends ShortcutPackageItem {
                         && (getPackageInfo().getLastUpdateTime() == pi.lastUpdateTime)
                         && areAllActivitiesStillEnabled()) {
                     return false;
+                }
+            }
+            if (isSettings) {
+                if (ShortcutService.DEBUG) {
+                    Slog.d(TAG, "Always scan settings.");
                 }
             }
         } finally {

@@ -7,21 +7,21 @@ page.tags="IntentFilter"
 
 <h2>In this document</h2>
 <ol>
-  <li><a href="#Types">Intent Types</a></li>
-  <li><a href="#Building">Building an Intent</a>
+  <li><a href="#Types">Intent types</a></li>
+  <li><a href="#Building">Building an intent</a>
     <ol>
       <li><a href="#ExampleExplicit">Example explicit intent</a></li>
       <li><a href="#ExampleSend">Example implicit intent</a></li>
       <li><a href="#ForceChooser">Forcing an app chooser</a></li>
     </ol>
   </li>
-  <li><a href="#Receiving">Receiving an Implicit Intent</a>
+  <li><a href="#Receiving">Receiving an implicit intent</a>
     <ol>
       <li><a href="#ExampleFilters">Example filters</a></li>
     </ol>
   </li>
-  <li><a href="#PendingIntent">Using a Pending Intent</a></li>
-  <li><a href="#Resolution">Intent Resolution</a>
+  <li><a href="#PendingIntent">Using a pending intent</a></li>
+  <li><a href="#Resolution">Intent resolution</a>
     <ol>
       <li><a href="#ActionTest">Action test</a></li>
       <li><a href="#CategoryTest">Category test</a></li>
@@ -46,13 +46,14 @@ page.tags="IntentFilter"
 <p>An {@link android.content.Intent} is a messaging object you can use to request an action
 from another <a href="{@docRoot}guide/components/fundamentals.html#Components">app component</a>.
 Although intents facilitate communication between components in several ways, there are three
-fundamental use-cases:</p>
+fundamental use cases:</p>
 
 <ul>
-<li><b>To start an activity:</b>
+<li><b>Starting an activity</b>
 <p>An {@link android.app.Activity} represents a single screen in an app. You can start a new
 instance of an {@link android.app.Activity} by passing an {@link android.content.Intent}
-to {@link android.content.Context#startActivity startActivity()}. The {@link android.content.Intent}
+to {@link android.content.Context#startActivity startActivity()}.
+ The {@link android.content.Intent}
 describes the activity to start and carries any necessary data.</p>
 
 <p>If you want to receive a result from the activity when it finishes,
@@ -63,10 +64,16 @@ android.app.Activity#onActivityResult onActivityResult()} callback.
 For more information, see the <a
 href="{@docRoot}guide/components/activities.html">Activities</a> guide.</p></li>
 
-<li><b>To start a service:</b>
+<li><b>Starting a service</b>
 <p>A {@link android.app.Service} is a component that performs operations in the background
-without a user interface. You can start a service to perform a one-time operation
-(such as download a file) by passing an {@link android.content.Intent}
+without a user interface. With Android 5.0 (API level 21) and later, you can start a service
+ with {@link android.app.job.JobScheduler}. For more information
+ about {@link android.app.job.JobScheduler}, see its
+    {@link android.app.job.JobScheduler API-reference documentation}.</p>
+<p>For versions earlier than Android 5.0 (API level 21), you can start a service by using
+methods of the  {@link android.app.Service} class. You can start a service
+ to perform a one-time operation
+(such as downloading a file) by passing an {@link android.content.Intent}
 to {@link android.content.Context#startService startService()}. The {@link android.content.Intent}
 describes the service to start and carries any necessary data.</p>
 
@@ -75,7 +82,7 @@ from another component by passing an {@link android.content.Intent} to {@link
 android.content.Context#bindService bindService()}</code>. For more information, see the <a
 href="{@docRoot}guide/components/services.html">Services</a> guide.</p></li>
 
-<li><b>To deliver a broadcast:</b>
+<li><b>Delivering a broadcast</b>
 <p>A broadcast is a message that any app can receive. The system delivers various
 broadcasts for system events, such as when the system boots up or the device starts charging.
 You can deliver a broadcast to other apps by passing an {@link android.content.Intent}
@@ -89,7 +96,7 @@ android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</p>
 
 
 
-<h2 id="Types">Intent Types</h2>
+<h2 id="Types">Intent types</h2>
 
 <p>There are two types of intents:</p>
 
@@ -97,7 +104,7 @@ android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</p>
 <li><b>Explicit intents</b> specify the component to start by name (the
 fully-qualified class name). You'll typically use an explicit intent to start a component in
 your own app, because you know the class name of the activity or service you want to start. For
-example, start a new activity in response to a user action or start a service to download
+example, you can start a new activity in response to a user action or start a service to download
 a file in the background.</li>
 
 <li><b>Implicit intents</b> do not name a specific component, but instead declare a general action
@@ -106,12 +113,13 @@ show the user a location on a map, you can use an implicit intent to request tha
 app show a specified location on a map.</li>
 </ul>
 
-<p>When you create an explicit intent to start an activity or service, the system immediately
+<p>Figure 1 shows how an intent is delivered to start an activity. When you create an
+ explicit intent to start an activity or service, the system immediately
 starts the app component specified in the {@link android.content.Intent} object.</p>
 
 <div class="figure" style="width:446px">
 <img src="{@docRoot}images/components/intent-filters@2x.png" width="446" alt=""/>
-<p class="img-caption"><strong>Figure 1.</strong> Illustration of how an implicit intent is
+<p class="img-caption"><strong>Figure 1.</strong> How an implicit intent is
 delivered through the system to start another activity: <b>[1]</b> <em>Activity A</em> creates an
 {@link android.content.Intent} with an action description and passes it to {@link
 android.content.Context#startActivity startActivity()}. <b>[2]</b> The Android System searches all
@@ -135,11 +143,12 @@ you make it possible for other apps to directly start your activity with a certa
 Likewise, if you do <em>not</em> declare any intent filters for an activity, then it can be started
 only with an explicit intent.</p>
 
-<p class="caution"><strong>Caution:</strong> To ensure your app is secure, always use an explicit
+<p class="caution"><strong>Caution:</strong> To ensure that your app is secure, always
+ use an explicit
 intent when starting a {@link android.app.Service} and do not
 declare intent filters for your services. Using an implicit intent to start a service is a
-security hazard because you cannot be certain what service will respond to the intent,
-and the user cannot see which service starts. Beginning with Android 5.0 (API level 21), the system
+security hazard because you can't be certain what service will respond to the intent,
+and the user can't see which service starts. Beginning with Android 5.0 (API level 21), the system
 throws an exception if you call {@link android.content.Context#bindService bindService()}
 with an implicit intent.</p>
 
@@ -147,7 +156,7 @@ with an implicit intent.</p>
 
 
 
-<h2 id="Building">Building an Intent</h2>
+<h2 id="Building">Building an intent</h2>
 
 <p>An {@link android.content.Intent} object carries information that the Android system uses
 to determine which component to start (such as the exact component name or component
@@ -163,22 +172,23 @@ order to properly perform the action (such as the action to take and the data to
 <dd>The name of the component to start.
 
 <p>This is optional, but it's the critical piece of information that makes an intent
-<b>explicit</b>, meaning that the intent should be delivered only to the app component
-defined by the component name. Without a component name, the intent is <b>implicit</b> and the
+<em>explicit</em>, meaning that the intent should be delivered only to the app component
+defined by the component name. Without a component name, the intent is <em>implicit</em> and the
 system decides which component should receive the intent based on the other intent information
-(such as the action, data, and category&mdash;described below). So if you need to start a specific
+(such as the action, data, and category&mdash;described below). If you need to start a specific
 component in your app, you should specify the component name.</p>
 
-<p class="note"><strong>Note:</strong> When starting a {@link android.app.Service}, you should
-<strong>always specify the component name</strong>. Otherwise, you cannot be certain what service
+<p class="note"><strong>Note:</strong> When starting a {@link android.app.Service},
+ <em>always specify the component name</em>. Otherwise, you cannot be certain what service
 will respond to the intent, and the user cannot see which service starts.</p>
 
 <p>This field of the {@link android.content.Intent} is a
 {@link android.content.ComponentName} object, which you can specify using a fully
-qualified class name of the target component, including the package name of the app. For example,
+qualified class name of the target component, including the package name of the app, for example,
 {@code com.example.ExampleActivity}. You can set the component name with {@link
 android.content.Intent#setComponent setComponent()}, {@link android.content.Intent#setClass
-setClass()}, {@link android.content.Intent#setClassName(String, String) setClassName()}, or with the
+setClass()}, {@link android.content.Intent#setClassName(String, String) setClassName()},
+ or with the
 {@link android.content.Intent} constructor.</p>
 
 </dd>
@@ -188,10 +198,10 @@ setClass()}, {@link android.content.Intent#setClassName(String, String) setClass
 
 <p>In the case of a broadcast intent, this is the action that took place and is being reported.
 The action largely determines how the rest of the intent is structured&mdash;particularly
-what is contained in the data and extras.
+the information that is contained in the data and extras.
 
 <p>You can specify your own actions for use by intents within your app (or for use by other
-apps to invoke components in your app), but you should usually use action constants
+apps to invoke components in your app), but you usually specify action constants
 defined by the {@link android.content.Intent} class or other framework classes. Here are some
 common actions for starting an activity:</p>
 
@@ -203,7 +213,7 @@ common actions for starting an activity:</p>
    view in a map app.</dd>
 
 <dt>{@link android.content.Intent#ACTION_SEND}</dt>
-   <dd>Also known as the "share" intent, you should use this in an intent with {@link
+   <dd>Also known as the <em>share</em> intent, you should use this in an intent with {@link
    android.content.Context#startActivity startActivity()} when you have some data that the user can
    share through another app, such as an email app or social sharing app.</dd>
 </dl>
@@ -217,12 +227,13 @@ that open specific screens in the system's Settings app.</p>
 setAction()} or with an {@link android.content.Intent} constructor.</p>
 
 <p>If you define your own actions, be sure to include your app's package name
-as a prefix. For example:</p>
+as a prefix, as shown in the following example:</p>
 <pre>static final String ACTION_TIMETRAVEL = "com.example.action.TIMETRAVEL";</pre>
 </dd>
 
 <dt><b>Data</b></dt>
-<dd>The URI (a {@link android.net.Uri} object) that references the data to be acted on and/or the
+<dd>The URI (a {@link android.net.Uri} object) that references the data to
+ be acted on and/or the
 MIME type of that data. The type of data supplied is generally dictated by the intent's action. For
 example, if the action is {@link android.content.Intent#ACTION_EDIT}, the data should contain the
 URI of the document to edit.
@@ -231,10 +242,11 @@ URI of the document to edit.
 it's often important to specify the type of data (its MIME type) in addition to its URI.
 For example, an activity that's able to display images probably won't be able
 to play an audio file, even though the URI formats could be similar.
-So specifying the MIME type of your data helps the Android
+Specifying the MIME type of your data helps the Android
 system find the best component to receive your intent.
 However, the MIME type can sometimes be inferred from the URI&mdash;particularly when the data is a
-{@code content:} URI, which indicates the data is located on the device and controlled by a
+{@code content:} URI. A {@code content:} URI indicates the data is located on the device
+ and controlled by a
 {@link android.content.ContentProvider}, which makes the data MIME type visible to the system.</p>
 
 <p>To set only the data URI, call {@link android.content.Intent#setData setData()}.
@@ -243,7 +255,7 @@ can set both explicitly with {@link
 android.content.Intent#setDataAndType setDataAndType()}.</p>
 
 <p class="caution"><strong>Caution:</strong> If you want to set both the URI and MIME type,
-<strong>do not</strong> call {@link android.content.Intent#setData setData()} and
+<em>don't</em> call {@link android.content.Intent#setData setData()} and
 {@link android.content.Intent#setType setType()} because they each nullify the value of the other.
 Always use {@link android.content.Intent#setDataAndType setDataAndType()} to set both
 URI and MIME type.</p>
@@ -258,7 +270,7 @@ Here are some common categories:
 <dl>
 <dt>{@link android.content.Intent#CATEGORY_BROWSABLE}</dt>
   <dd>The target activity allows itself to be started by a web browser to display data
-       referenced by a link&mdash;such as an image or an e-mail message.
+       referenced by a link, such as an image or an e-mail message.
   </dd>
 <dt>{@link android.content.Intent#CATEGORY_LAUNCHER}</dt>
   <dd>The activity is the initial activity of a task and is listed in
@@ -276,14 +288,14 @@ categories.</p>
 
 <p>These properties listed above (component name, action, data, and category) represent the
 defining characteristics of an intent. By reading these properties, the Android system
-is able to resolve which app component it should start.</p>
-
-<p>However, an intent can carry additional information that does not affect
-how it is resolved to an app component. An intent can also supply:</p>
+is able to resolve which app component it should start. However, an intent can carry
+ additional information that does not affect
+how it is resolved to an app component. An intent can also supply the following information:</p>
 
 <dl>
 <dt><b>Extras</b></dt>
-<dd>Key-value pairs that carry additional information required to accomplish the requested action.
+<dd>Key-value pairs that carry additional information required to accomplish
+ the requested action.
 Just as some actions use particular kinds of data URIs, some actions also use particular extras.
 
 <p>You can add extra data with various {@link android.content.Intent#putExtra putExtra()} methods,
@@ -293,21 +305,22 @@ the {@link android.os.Bundle} in the {@link android.content.Intent} with {@link
 android.content.Intent#putExtras putExtras()}.</p>
 
 <p>For example, when creating an intent to send an email with
-{@link android.content.Intent#ACTION_SEND}, you can specify the "to" recipient with the
-{@link android.content.Intent#EXTRA_EMAIL} key, and specify the "subject" with the
+{@link android.content.Intent#ACTION_SEND}, you can specify the <em>to</em> recipient with the
+{@link android.content.Intent#EXTRA_EMAIL} key, and specify the <em>subject</em> with the
 {@link android.content.Intent#EXTRA_SUBJECT} key.</p>
 
 <p>The {@link android.content.Intent} class specifies many {@code EXTRA_*} constants
 for standardized data types. If you need to declare your own extra keys (for intents that
 your app receives), be sure to include your app's package name
-as a prefix. For example:</p>
+as a prefix, as shown in the following example:</p>
 <pre>static final String EXTRA_GIGAWATTS = "com.example.EXTRA_GIGAWATTS";</pre>
 </dd>
 
 <dt><b>Flags</b></dt>
-<dd>Flags defined in the {@link android.content.Intent} class that function as metadata for the
+<dd>Flags are defined in the {@link android.content.Intent} class that function as metadata for the
 intent. The flags may instruct the Android system how to launch an activity (for example, which
-<a href="{@docRoot}guide/components/tasks-and-back-stack.html">task</a> the activity should belong
+<a href="{@docRoot}guide/components/tasks-and-back-stack.html">task</a>
+ the activity should belong
 to) and how to treat it after it's launched (for example, whether it belongs in the list of recent
 activities).
 
@@ -354,7 +367,8 @@ this intent explicitly starts the {@code DownloadService} class in the app.</p>
 to perform the action. Using an implicit intent is useful when your app cannot perform the
 action, but other apps probably can and you'd like the user to pick which app to use.</p>
 
-<p>For example, if you have content you want the user to share with other people, create an intent
+<p>For example, if you have content that you want the user to share with other people,
+ create an intent
 with the {@link android.content.Intent#ACTION_SEND} action
 and add extras that specify the content to share. When you call
 {@link android.content.Context#startActivity startActivity()} with that intent, the user can
@@ -362,13 +376,15 @@ pick an app through which to share the content.</p>
 
 <p class="caution"><strong>Caution:</strong> It's possible that a user won't have <em>any</em>
 apps that handle the implicit intent you send to {@link android.content.Context#startActivity
-startActivity()}. If that happens, the call will fail and your app will crash. To verify
+startActivity()}. If that happens, the call fails and your app crashes. To verify
 that an activity will receive the intent, call {@link android.content.Intent#resolveActivity
 resolveActivity()} on your {@link android.content.Intent} object. If the result is non-null,
-then there is at least one app that can handle the intent and it's safe to call
+ there is at least one app that can handle the intent and it's safe to call
 {@link android.content.Context#startActivity startActivity()}. If the result is null,
-you should not use the intent and, if possible, you should disable the feature that issues
-the intent.</p>
+ do not use the intent and, if possible, you should disable the feature that issues
+the intent. The following example shows how to verify that the intent resolves
+to an activity. This example doesn't use a URI, but the intent's data type
+is declared to specify the content carried by the extras.</p>
 
 
 <pre>
@@ -384,8 +400,7 @@ if (sendIntent.resolveActivity(getPackageManager()) != null) {
 }
 </pre>
 
-<p class="note"><strong>Note:</strong> In this case, a URI is not used, but the intent's data type
-is declared to specify the content carried by the extras.</p>
+
 
 
 <p>When {@link android.content.Context#startActivity startActivity()} is called, the system
@@ -393,7 +408,7 @@ examines all of the installed apps to determine which ones can handle this kind 
 intent with the {@link android.content.Intent#ACTION_SEND} action and that carries "text/plain"
 data). If there's only one app that can handle it, that app opens immediately and is given the
 intent. If multiple activities accept the intent, the system
-displays a dialog so the user can pick which app to use..</p>
+displays a dialog such as the one shown in Figure 2, so the user can pick which app to use.</p>
 
 
 <div class="figure" style="width:200px">
@@ -405,23 +420,26 @@ displays a dialog so the user can pick which app to use..</p>
 
 <p>When there is more than one app that responds to your implicit intent,
 the user can select which app to use and make that app the default choice for the
-action. This is nice when performing an action for which the user
-probably wants to use the same app from now on, such as when opening a web page (users
-often prefer just one web browser) .</p>
+action. The ability to select a default is helpful when performing an action for which the user
+probably wants to use the same app every time, such as when opening a web page (users
+often prefer just one web browser).</p>
 
 <p>However, if multiple apps can respond to the intent and the user might want to use a different
 app each time, you should explicitly show a chooser dialog. The chooser dialog asks the
-user to select which app to use for the action every time (the user cannot select a default app for
+user to select which app to use for the action (the user cannot select a default app for
 the action). For example, when your app performs "share" with the {@link
 android.content.Intent#ACTION_SEND} action, users may want to share using a different app depending
-on their current situation, so you should always use the chooser dialog, as shown in figure 2.</p>
+on their current situation, so you should always use the chooser dialog, as shown in Figure 2.</p>
 
 
 
 
 <p>To show the chooser, create an {@link android.content.Intent} using {@link
 android.content.Intent#createChooser createChooser()} and pass it to {@link
-android.app.Activity#startActivity startActivity()}. For example:</p>
+android.app.Activity#startActivity startActivity()}, as shown in the following example.
+ This example displays a dialog with a list of apps that respond to the intent passed to the {@link
+android.content.Intent#createChooser createChooser()} method and uses the supplied text as the
+dialog title.</p>
 
 <pre>
 Intent sendIntent = new Intent(Intent.ACTION_SEND);
@@ -439,26 +457,16 @@ if (sendIntent.resolveActivity(getPackageManager()) != null) {
 }
 </pre>
 
-<p>This displays a dialog with a list of apps that respond to the intent passed to the {@link
-android.content.Intent#createChooser createChooser()} method and uses the supplied text as the
-dialog title.</p>
 
 
-
-
-
-
-
-
-
-<h2 id="Receiving">Receiving an Implicit Intent</h2>
+<h2 id="Receiving">Receiving an implicit intent</h2>
 
 <p>To advertise which implicit intents your app can receive, declare one or more intent filters for
 each of your app components with an <a href=
-"{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a>
+"{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
 element in your <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest file</a>.
 Each intent filter specifies the type of intents it accepts based on the intent's action,
-data, and category. The system will deliver an implicit intent to your app component only if the
+data, and category. The system delivers an implicit intent to your app component only if the
 intent can pass through one of your intent filters.</p>
 
 <p class="note"><strong>Note:</strong> An explicit intent is always delivered to its target,
@@ -471,28 +479,28 @@ it inspects the {@link android.content.Intent} and decides how to behave based o
 in the {@link android.content.Intent} (such as to show the editor controls or not).</p>
 
 <p>Each intent filter is defined by an <a
-href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a>
+href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter>}</a>
 element in the app's manifest file, nested in the corresponding app component (such
-as an <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
+as an <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity>}</a>
 element). Inside the <a
-href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a>,
+href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter>}</a>,
 you can specify the type of intents to accept using one or more
 of these three elements:</p>
 
 <dl>
-<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code <action>}</a></dt>
+<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action>}</a></dt>
   <dd>Declares the intent action accepted, in the {@code name} attribute. The value
   must be the literal string value of an action, not the class constant.</dd>
-<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a></dt>
+<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data>}</a></dt>
   <dd>Declares the type of data accepted, using one or more attributes that specify various
   aspects of the data URI (<code>scheme</code>, <code>host</code>, <code>port</code>,
-  <code>path</code>, etc.) and MIME type.</dd>
-<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code <category>}</a></dt>
+  <code>path</code>) and MIME type.</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category>}</a></dt>
   <dd>Declares the intent category accepted, in the {@code name} attribute. The value
   must be the literal string value of an action, not the class constant.
 
-  <p class="note"><strong>Note:</strong> In order to receive implicit intents, you
-  <strong>must include</strong> the
+  <p class="note"><strong>Note:</strong> To receive implicit intents, you
+  <em>must include</em> the
   {@link android.content.Intent#CATEGORY_DEFAULT} category in the intent filter. The methods
   {@link android.app.Activity#startActivity startActivity()} and
   {@link android.app.Activity#startActivityForResult startActivityForResult()} treat all intents
@@ -515,12 +523,12 @@ of these three elements:</p>
 &lt;/activity>
 </pre>
 
-<p>It's okay to create a filter that includes more than one instance of
-<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code <action>}</a>,
-<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a>, or
-<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code <category>}</a>.
-If you do, you simply need to be certain that the component can handle any and all combinations
-of those filter elements.</p>
+<p>You can create a filter that includes more than one instance of
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action>}</a>,
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data>}</a>, or
+<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category>}</a>.
+If you do, you need to be certain that the component can handle any and all
+combinations of those filter elements.</p>
 
 <p>When you want to handle multiple kinds of intents, but only in specific combinations of
 action, data, and category type, then you need to create multiple intent filters.</p>
@@ -569,8 +577,8 @@ is running.</p>
 
 <h3 id="ExampleFilters">Example filters</h3>
 
-<p>To better understand some of the intent filter behaviors, look at the following snippet
-from the manifest file of a social-sharing app.</p>
+<p>To demonstrate some of the intent filter behaviors, here is an example
+from the manifest file of a social-sharing app:</p>
 
 <pre>
 &lt;activity android:name="MainActivity">
@@ -607,9 +615,9 @@ opens when the user initially launches the app with the launcher icon:</p>
   indicates this is the main entry point and does not expect any intent data.</li>
   <li>The {@link android.content.Intent#CATEGORY_LAUNCHER} category indicates that this activity's
   icon should be placed in the system's app launcher. If the <a
-  href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> element
+  href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity>}</a> element
   does not specify an icon with {@code icon}, then the system uses the icon from the <a
-  href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
+  href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application>}</a>
   element.</li>
 </ul>
 <p>These two must be paired together in order for the activity to appear in the app launcher.</p>
@@ -620,7 +628,7 @@ they can also enter {@code ShareActivity} directly from another app that issues 
 intent matching one of the two intent filters.</p>
 
 <p class="note"><strong>Note:</strong> The MIME type,
-<a href="https://developers.google.com/panorama/android/">{@code
+<a href="https://developers.google.com/panorama/android/" class="external-link">{@code
 application/vnd.google.panorama360+jpg}</a>, is a special data type that specifies
 panoramic photos, which you can handle with the <a
 href="{@docRoot}reference/com/google/android/gms/panorama/package-summary.html">Google
@@ -638,7 +646,7 @@ panorama</a> APIs.</p>
 
 
 
-<h2 id="PendingIntent">Using a Pending Intent</h2>
+<h2 id="PendingIntent">Using a pending intent</h2>
 
 <p>A {@link android.app.PendingIntent} object is a wrapper around an {@link
 android.content.Intent} object. The primary purpose of a {@link android.app.PendingIntent}
@@ -646,25 +654,25 @@ is to grant permission to a foreign application
 to use the contained {@link android.content.Intent} as if it were executed from your
 app's own process.</p>
 
-<p>Major use cases for a pending intent include:</p>
+<p>Major use cases for a pending intent include the following:</p>
 <ul>
-  <li>Declare an intent to be executed when the user performs an action with your <a
+  <li>Declaring an intent to be executed when the user performs an action with your <a
   href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notification</a>
   (the Android system's {@link android.app.NotificationManager}
   executes the {@link android.content.Intent}).
-  <li>Declare an intent to be executed when the user performs an action with your
+  <li>Declaring an intent to be executed when the user performs an action with your
   <a href="{@docRoot}guide/topics/appwidgets/index.html">App Widget</a>
   (the Home screen app executes the {@link android.content.Intent}).
-  <li>Declare an intent to be executed at a specified time in the future (the Android
+  <li>Declaring an intent to be executed at a specified future time (the Android
   system's {@link android.app.AlarmManager} executes the {@link android.content.Intent}).
 </ul>
 
-<p>Because each {@link android.content.Intent} object is designed to be handled by a specific
+<p>Just as each {@link android.content.Intent} object is designed to be handled by a specific
 type of app component (either an {@link android.app.Activity}, a {@link android.app.Service}, or
 a {@link android.content.BroadcastReceiver}), so too must a {@link android.app.PendingIntent} be
-created with the same consideration. When using a pending intent, your app will not
+created with the same consideration. When using a pending intent, your app doesn't
 execute the intent with a call such as {@link android.content.Context#startActivity
-startActivity()}. You must instead declare the intended component type when you create the
+startActivity()}. Instead, you must declare the intended component type when you create the
 {@link android.app.PendingIntent} by calling the respective creator method:</p>
 
 <ul>
@@ -677,14 +685,14 @@ startActivity()}. You must instead declare the intended component type when you 
 </ul>
 
 <p>Unless your app is <em>receiving</em> pending intents from other apps,
-the above methods to create a {@link android.app.PendingIntent} are the only
-{@link android.app.PendingIntent} methods you'll probably ever need.</p>
+the above methods to create a {@link android.app.PendingIntent} are probably the only
+{@link android.app.PendingIntent} methods you'll ever need.</p>
 
 <p>Each method takes the current app {@link android.content.Context}, the
 {@link android.content.Intent} you want to wrap, and one or more flags that specify
 how the intent should be used (such as whether the intent can be used more than once).</p>
 
-<p>More information about using pending intents is provided with the documentation for each
+<p>For more information about using pending intents, see the documentation for each
 of the respective use cases, such as in the <a
 href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notifications</a>
 and <a href="{@docRoot}guide/topics/appwidgets/index.html">App Widgets</a> API guides.</p>
@@ -695,27 +703,27 @@ and <a href="{@docRoot}guide/topics/appwidgets/index.html">App Widgets</a> API g
 
 
 
-<h2 id="Resolution">Intent Resolution</h2>
+<h2 id="Resolution">Intent resolution</h2>
 
 
 <p>When the system receives an implicit intent to start an activity, it searches for the
-best activity for the intent by comparing the intent to intent filters based on three aspects:</p>
+best activity for the intent by comparing the it to intent filters based on three aspects:</p>
 
 <ul>
-  <li>The intent action
-  <li>The intent data (both URI and data type)
-  <li>The intent category
+  <li>Action.
+  <li>Data (both URI and data type).
+  <li>Category.
 </ul>
 
-<p>The following sections describe how intents are matched to the appropriate component(s)
-in terms of how the intent filter is declared in an app's manifest file.</p>
+<p>The following sections describe how intents are matched to the appropriate components
+according to the intent filter declaration in an app's manifest file.</p>
 
 
 <h3 id="ActionTest">Action test</h3>
 
 <p>To specify accepted intent actions, an intent filter can declare zero or more
 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
-<action>}</a> elements.  For example:</p>
+&lt;action&gt;}</a> elements, as shown in the following example:</p>
 
 <pre>
 &lt;intent-filter&gt;
@@ -725,13 +733,13 @@ in terms of how the intent filter is declared in an app's manifest file.</p>
 &lt;/intent-filter&gt;
 </pre>
 
-<p>To get through this filter, the action specified in the {@link android.content.Intent}
+<p>To pass this filter, the action specified in the {@link android.content.Intent}
   must match one of the actions listed in the filter.</p>
 
 <p>If the filter does not list any actions, there is nothing for an
 intent to match, so all intents fail the test. However, if an {@link android.content.Intent}
-does not specify an action, it will pass the test (as long as the filter
-contains at least one action).</p>
+does not specify an action, it passes the test as long as the filter
+contains at least one action.</p>
 
 
 
@@ -739,7 +747,7 @@ contains at least one action).</p>
 
 <p>To specify accepted intent categories, an intent filter can declare zero or more
 <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
-<category>}</a> elements.  For example:</p>
+<category>}</a> elements, as shown in the following example:</p>
 
 <pre>
 &lt;intent-filter&gt;
@@ -752,17 +760,17 @@ contains at least one action).</p>
 <p>For an intent to pass the category test, every category in the {@link android.content.Intent}
 must match a category in the filter. The reverse is not necessary&mdash;the intent filter may
 declare more categories than are specified in the {@link android.content.Intent} and the
-{@link android.content.Intent} will still pass. Therefore, an intent with no categories should
-always pass this test, regardless of what categories are declared in the filter.</p>
+{@link android.content.Intent} still passes. Therefore, an intent with no categories
+always passes this test, regardless of what categories are declared in the filter.</p>
 
 <p class="note"><strong>Note:</strong>
-Android automatically applies the the {@link android.content.Intent#CATEGORY_DEFAULT} category
+Android automatically applies the {@link android.content.Intent#CATEGORY_DEFAULT} category
 to all implicit intents passed to {@link
 android.content.Context#startActivity startActivity()} and {@link
 android.app.Activity#startActivityForResult startActivityForResult()}.
-So if you want your activity to receive implicit intents, it must
-include a category for {@code "android.intent.category.DEFAULT"} in its intent filters (as
-shown in the previous {@code <intent-filter>} example.</p>
+If you want your activity to receive implicit intents, it must
+include a category for {@code "android.intent.category.DEFAULT"} in its intent filters, as
+shown in the previous {@code &lt;intent-filter>} example.</p>
 
 
 
@@ -770,7 +778,7 @@ shown in the previous {@code <intent-filter>} example.</p>
 
 <p>To specify accepted intent data, an intent filter can declare zero or more
 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
-<data>}</a> elements.  For example:</p>
+&lt;data&gt;}</a> elements, as shown in the following example:</p>
 
 <pre>
 &lt;intent-filter&gt;
@@ -781,15 +789,16 @@ shown in the previous {@code <intent-filter>} example.</p>
 </pre>
 
 <p>Each <code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code>
-element can specify a URI structure and a data type (MIME media type).  There are separate
-attributes &mdash; {@code scheme}, {@code host}, {@code port},
-and {@code path} &mdash; for each part of the URI:
+element can specify a URI structure and a data type (MIME media type).
+ Each part of the URI is a separate
+attribute: {@code scheme}, {@code host}, {@code port},
+and {@code path}:
 </p>
 
-<p style="margin-left: 2em">{@code <scheme>://<host>:<port>/<path>}</p>
+<p style="margin-left: 2em">{@code &lt;scheme>://&lt;host>:&lt;port>/&lt;path>}</p>
 
 <p>
-For example:
+The following example shows possible values for these attributes:
 </p>
 
 <p style="margin-left: 2em">{@code content://com.example.project:200/folder/subfolder/etc}</p>
@@ -799,7 +808,7 @@ the port is {@code 200}, and the path is {@code folder/subfolder/etc}.
 </p>
 
 <p>Each of these attributes is optional in a <a
-href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a> element,
+href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data>}</a> element,
 but there are linear dependencies:</p>
 <ul>
   <li>If a scheme is not specified, the host is ignored.</li>
@@ -842,17 +851,17 @@ type matches a type listed in the filter.  It passes the URI part of the test
 either if its URI matches a URI in the filter or if it has a {@code content:}
 or {@code file:} URI and the filter does not specify a URI.  In other words,
 a component is presumed to support {@code content:} and {@code file:} data if
-its filter lists <em>only</em> a MIME type.</p></li>
+its filter lists <em>only</em> a MIME type.</li>
 </ol>
 
 <p>
 This last rule, rule (d), reflects the expectation
 that components are able to get local data from a file or content provider.
-Therefore, their filters can list just a data type and do not need to explicitly
+Therefore, their filters can list just a data type and don't need to explicitly
 name the {@code content:} and {@code file:} schemes.
-This is a typical case.  A <a
-href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a> element
-like the following, for example, tells Android that the component can get image data from a content
+The following example shows a typical case in which a <a
+href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data>}</a> element
+ tells Android that the component can get image data from a content
 provider and display it:
 </p>
 
@@ -863,14 +872,15 @@ provider and display it:
 &lt;/intent-filter&gt;</pre>
 
 <p>
-Because most available data is dispensed by content providers, filters that
-specify a data type but not a URI are perhaps the most common.
+Filters that
+specify a data type but not a URI are perhaps the most common because most available
+ data is dispensed by content providers.
 </p>
 
 <p>
-Another common configuration is filters with a scheme and a data type.  For
+Another common configuration is a filter with a scheme and a data type.  For
 example, a <a
-href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a>
+href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data>}</a>
 element like the following tells Android that
 the component can retrieve video data from the network in order to perform the action:
 </p>
@@ -894,7 +904,7 @@ by finding all the  activities with intent filters that specify the
 
 <p>Your application can use intent matching in a similar way.
 The {@link android.content.pm.PackageManager} has a set of {@code query...()}
-methods that return all components that can accept a particular intent, and
+methods that return all components that can accept a particular intent and
 a similar series of {@code resolve...()} methods that determine the best
 component to respond to an intent.  For example,
 {@link android.content.pm.PackageManager#queryIntentActivities
@@ -907,7 +917,3 @@ can respond.  There's a similar method,
 {@link android.content.pm.PackageManager#queryBroadcastReceivers
 queryBroadcastReceivers()}, for broadcast receivers.
 </p>
-
-
-
-

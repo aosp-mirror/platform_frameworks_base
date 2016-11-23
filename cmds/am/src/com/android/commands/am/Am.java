@@ -48,7 +48,9 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Build;
@@ -64,6 +66,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArrayMap;
+import android.util.DisplayMetrics;
 import android.view.IWindowManager;
 
 import com.android.internal.os.BaseCommand;
@@ -361,6 +364,8 @@ public class Am extends BaseCommand {
                 "am send-trim-memory: send a memory trim event to a <PROCESS>.\n" +
                 "\n" +
                 "am get-current-user: returns id of the current foreground user.\n" +
+                "\n" +
+                "am supports-multiwindow: returns true if the device supports multiwindow.\n" +
                 "\n"
         );
         Intent.printIntentArgsHelp(pw, "");
@@ -458,6 +463,8 @@ public class Am extends BaseCommand {
             runSendTrimMemory();
         } else if (op.equals("get-current-user")) {
             runGetCurrentUser();
+        } else if (op.equals("supports-multiwindow")) {
+            runSupportsMultiwindow();
         } else {
             showError("Error: unknown command '" + op + "'");
         }
@@ -2532,6 +2539,21 @@ public class Am extends BaseCommand {
         UserInfo currentUser = Preconditions.checkNotNull(mAm.getCurrentUser(),
                 "Current user not set");
         System.out.println(currentUser.id);
+    }
+
+    private void runSupportsMultiwindow() throws Exception {
+        // system resources does not contain all the device configuration, construct it manually.
+        Configuration config = mAm.getConfiguration();
+        if (config == null) {
+            throw new AndroidException("Activity manager has no configuration");
+        }
+
+        final DisplayMetrics metrics = new DisplayMetrics();
+        metrics.setToDefaults();
+
+        Resources res = new Resources(AssetManager.getSystem(), metrics, config);
+
+        System.out.println(res.getBoolean(com.android.internal.R.bool.config_supportsMultiWindow));
     }
 
     /**

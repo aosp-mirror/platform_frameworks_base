@@ -9,18 +9,18 @@ page.tags="inapp, billing, iap"
   <h2>In this document</h2>
   <ol>
     <li><a href="#billing-add-aidl">Adding the AIDL file</a></li>
-    <li><a href="#billing-permission">Updating Your Manifest</a></li>
+    <li><a href="#billing-permission">Updating your manifest</a></li>
     <li><a href="#billing-service">Creating a ServiceConnection</a></li>
-    <li><a href="#billing-requests">Making In-app Billing Requests</a>
+    <li><a href="#billing-requests">Making In-app Billing requests</a>
        <ol>
-       <li><a href="#QueryDetails">Querying Items Available for Purchase</a><li>
-       <li><a href="#Purchase">Purchasing an Item</a></li>
-       <li><a href="#QueryPurchases">Querying Purchased Items</a></li>
-       <li><a href="#Consume">Consuming a Purchase</a></li>
-       <li><a href="#Subs">Implementing Subscriptions</a></li>
+       <li><a href="#QueryDetails">Querying items available for purchase</a><li>
+       <li><a href="#Purchase">Purchasing an item</a></li>
+       <li><a href="#QueryPurchases">Querying purchased items</a></li>
+       <li><a href="#Consume">Consuming a purchase</a></li>
+       <li><a href="#Subs">Implementing subscriptions</a></li>
        </ol>
     </li>
-    <li><a href="#billing-security">Securing Your App</a>
+    <li><a href="#billing-security">Securing your app</a>
   </ol>
   <h2>Reference</h2>
   <ol>
@@ -42,7 +42,7 @@ page.tags="inapp, billing, iap"
   In-app Billing on Google Play provides a straightforward, simple interface
   for sending In-app Billing requests and managing In-app Billing transactions
   using Google Play. The information below covers the basics of how to make
-  calls from your application to the In-app Billing service using the Version 3
+  calls from your application to the In-app Billing service using the In-app Billing Version 3
   API.
 </p>
 
@@ -51,26 +51,25 @@ page.tags="inapp, billing, iap"
   your application, see the <a href=
   "{@docRoot}training/in-app-billing/index.html">Selling In-app Products</a>
   training class. The training class provides a complete sample In-app Billing
-  application, including convenience classes to handle key tasks related to
-  setting up your connection, sending billing requests and processing responses
+  application, including convenience classes to handle key tasks that are related to
+  setting up your connection, sending billing requests, processing responses
   from Google Play, and managing background threading so that you can make
   In-app Billing calls from your main activity.
 </p>
 
 <p>
-  Before you start, be sure that you read the <a href=
+  Before you start, read the <a href=
   "{@docRoot}google/play/billing/billing_overview.html">In-app Billing
-  Overview</a> to familiarize yourself with concepts that will make it easier
+  Overview</a> to familiarize yourself with concepts that make it easier
   for you to implement In-app Billing.
 </p>
 
-<p>To implement In-app Billing in your application, you need to do the
-following:</p>
+<p>Complete these steps to implement In-app Billing in your application:</p>
 
 <ol>
   <li>Add the In-app Billing library to your project.</li>
   <li>Update your {@code AndroidManifest.xml} file.</li>
-  <li>Create a {@code ServiceConnection} and bind it to
+  <li>Create a {@code ServiceConnection} and bind it to the
 {@code IInAppBillingService}.</li>
   <li>Send In-app Billing requests from your application to
 {@code IInAppBillingService}.</li>
@@ -79,55 +78,56 @@ following:</p>
 
 <h2 id="billing-add-aidl">Adding the AIDL file to your project</h2>
 
-<p>{@code IInAppBillingService.aidl} is an Android Interface Definition
+<p>The {@code IInAppBillingService.aidl} is an Android Interface Definition
 Language (AIDL) file that defines the interface to the In-app Billing Version
-3 service. You will use this interface to make billing requests by invoking IPC
+3 service. You can use this interface to make billing requests by invoking IPC
 method calls.</p>
-<p>To get the AIDL file:</p>
+
+<p>Complete these steps to get the AIDL file:</p>
 <ol>
 <li>Open the <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>.</li>
 <li>In the SDK Manager, expand the {@code Extras} section.</li>
 <li>Select <strong>Google Play Billing Library</strong>.</li>
 <li>Click <strong>Install packages</strong> to complete the download.</li>
 </ol>
-<p>The {@code IInAppBillingService.aidl} file will be installed to {@code <sdk>/extras/google/play_billing/}.</p>
+<p>The {@code IInAppBillingService.aidl} file will be installed to {@code &lt;sdk&gt;/extras/google/play_billing/}.</p>
 
-<p>To add the AIDL to your project:</p>
+<p>Complete these steps to add the AIDL to your project:</p>
 
 <ol>
-  <li>First, download the Google Play Billing Library to your Android project:
+  <li>Download the Google Play Billing Library to your Android project:
       <ol type="a">
       <li>Select <strong>Tools > Android > SDK Manager</strong>.</li>
       <li>Under <strong>Appearance & Behavior > System Settings > Android SDK</strong>,
           select the <em>SDK Tools</em> tab to select and download <em>Google Play Billing
           Library</em>.</li></ol>
 
-  <li>Next, copy the {@code IInAppBillingService.aidl} file to your project.
+  <li>Copy the {@code IInAppBillingService.aidl} file to your project.
     <ul>
-      <li>If you are using Android Studio:
+      <li>If you are using Android Studio, complete these steps to copy the file:
         <ol type="a">
           <li>Navigate to {@code src/main} in the Project tool window.</li>
 
-          <li>Select <strong>File > New > Directory</strong> and enter {@code aidl} in the
-          <em>New Directory</em> window, then select <strong>OK</strong>.
+          <li>Select <strong>File > New > Directory</strong>, enter {@code aidl} in the
+          <em>New Directory</em> window, and select <strong>OK</strong>.
 
-          <li>Select <strong>File > New > Package</strong> and enter
-          {@code com.android.vending.billing} in the <em>New Package</em> window, then select
+          <li>Select <strong>File > New > Package</strong>, enter
+          {@code com.android.vending.billing} in the <em>New Package</em> window, and select
           <strong>OK</strong>.</li>
 
           <li>Using your operating system file explorer, navigate to
-          {@code <sdk>/extras/google/play_billing/}, copy the
+          {@code &lt;sdk&gt;/extras/google/play_billing/}, copy the
           {@code IInAppBillingService.aidl} file, and paste it into the
           {@code com.android.vending.billing} package in your project.
           </li>
         </ol>
       </li>
 
-      <li>If you are developing in a non-Android Studio environment: Create the
-      following directory {@code /src/com/android/vending/billing} and copy the
-      {@code IInAppBillingService.aidl} file into this directory. Put the AIDL
-      file into your project and use the Gradle tool to build your project so that
-      the <code>IInAppBillingService.java</code> file gets generated.
+      <li>If you are developing in a non-Android Studio environment, create the
+      following directory: {@code /src/com/android/vending/billing}. Copy the
+      {@code IInAppBillingService.aidl} file into this directory. Place the AIDL
+      file in your project and use the Gradle tool to build your project so that
+      the <code>IInAppBillingService.java</code> file is generated.
       </li>
     </ul>
   </li>
@@ -137,16 +137,16 @@ method calls.</p>
   </li>
 </ol>
 
-<h2 id="billing-permission">Updating Your App's Manifest</h2>
+<h2 id="billing-permission">Updating your app's manifest</h2>
 
 <p>
   In-app billing relies on the Google Play application, which handles all
-  communication between your application and the Google Play server. To use the
+  of the communication between your application and the Google Play server. To use the
   Google Play application, your application must request the proper permission.
   You can do this by adding the {@code com.android.vending.BILLING} permission
   to your AndroidManifest.xml file. If your application does not declare the
   In-app Billing permission, but attempts to send billing requests, Google Play
-  will refuse the requests and respond with an error.
+  refuses the requests and responds with an error.
 </p>
 
 <p>
@@ -182,7 +182,7 @@ method calls.</p>
   onServiceDisconnected} and {@link
   android.content.ServiceConnection#onServiceConnected onServiceConnected}
   methods to get a reference to the {@code IInAppBillingService} instance after
-  a connection has been established.
+  a connection is established.
 </p>
 
 <pre>
@@ -208,18 +208,23 @@ ServiceConnection mServiceConn = new ServiceConnection() {
   bindService} method. Pass the method an {@link android.content.Intent} that
   references the In-app Billing service and an instance of the {@link
   android.content.ServiceConnection} that you created, and explicitly set the
-  Intent's target package name to <code>com.android.vending</code> — the
+  Intent's target package name to <code>com.android.vending</code>&mdash;the
   package name of Google Play app.
 </p>
 
 <p class="caution">
   <strong>Caution:</strong> To protect the security of billing transactions,
-  always make sure to explicitly set the intent's target package name to
+  always explicitly set the intent's target package name to
   <code>com.android.vending</code>, using {@link
-  android.content.Intent#setPackage(java.lang.String) setPackage()} as shown in
-  the example below. Setting the package name explicitly ensures that
+  android.content.Intent#setPackage(java.lang.String) setPackage()}.
+  Setting the package name explicitly ensures that
   <em>only</em> the Google Play app can handle billing requests from your app,
   preventing other apps from intercepting those requests.
+</p>
+
+<p>
+  The following code sample demonstrates how to set the intent's target package
+  to protect the security of transactions:
 </p>
 
 <pre>&#64;Override
@@ -233,6 +238,13 @@ public void onCreate(Bundle savedInstanceState) {
 }
 </pre>
 
+<p class="caution"><strong>Caution</strong>: To ensure that your app is secure, always use an
+explicit intent when starting a {@link android.app.Service} and do not declare intent filters for
+your services. Using an implicit intent to start a service is a security hazard because you cannot
+be certain of the service that will respond to the intent, and the user cannot see which service
+starts. Beginning with Android 5.0 (API level 21), the system throws an exception if you call
+{@link android.content.Context#bindService bindService()} with an implicit intent.</p>
+
 <p>
   You can now use the mService reference to communicate with the Google Play
   service.
@@ -242,10 +254,14 @@ public void onCreate(Bundle savedInstanceState) {
   <strong>Important:</strong> Remember to unbind from the In-app Billing
   service when you are done with your {@link android.app.Activity}. If you
   don’t unbind, the open service connection could cause your device’s
-  performance to degrade. This example shows how to perform the unbind
+  performance to degrade.
+</p>
+
+<p>
+  This example shows how to perform the unbind
   operation on a service connection to In-app Billing called {@code
   mServiceConn} by overriding the activity’s {@link
-  android.app.Activity#onDestroy onDestroy} method.
+  android.app.Activity#onDestroy onDestroy} method:
 </p>
 
 <pre>
@@ -264,29 +280,29 @@ public void onDestroy() {
   "{@docRoot}training/in-app-billing/preparing-iab-app.html">Selling In-app
   Products</a> training class and associated sample.
 </p>
-<h2 id="billing-requests">Making In-app Billing Requests</h2>
+<h2 id="billing-requests">Making In-app Billing requests</h2>
 <p>
-  Once your application is connected to Google Play, you can initiate purchase
+  After your application is connected to Google Play, you can initiate purchase
   requests for in-app products. Google Play provides a checkout interface for
-  users to enter their payment method, so your application does not need to
+  users to enter their payment method, so your application doesn't need to
   handle payment transactions directly. When an item is purchased, Google Play
   recognizes that the user has ownership of that item and prevents the user
   from purchasing another item with the same product ID until it is consumed.
-  You can control how the item is consumed in your application, and notify
+  You can control how the item is consumed in your application and notify
   Google Play to make the item available for purchase again. You can also query
-  Google Play to quickly retrieve the list of purchases that were made by the
-  user. This is useful, for example, when you want to restore the user's
+  Google Play to quickly retrieve the list of purchases that the
+  user made. This is useful, for example, when you want to restore the user's
   purchases when your user launches your app.
 </p>
 
-<h3 id="QueryDetails">Querying for Items Available for Purchase</h3>
+<h3 id="QueryDetails">Querying for items available for purchase</h3>
 
 <p>
   In your application, you can query the item details from Google Play using
   the In-app Billing Version 3 API. To pass a request to the In-app Billing
-  service, first create a {@link android.os.Bundle} that contains a String
+  service, create a {@link android.os.Bundle} that contains a String
   {@link java.util.ArrayList} of product IDs with key "ITEM_ID_LIST", where
-  each string is a product ID for an purchasable item.
+  each string is a product ID for an purchasable item. Here is an example:
 </p>
 
 <pre>
@@ -299,9 +315,9 @@ querySkus.putStringArrayList(“ITEM_ID_LIST”, skuList);
 
 <p>
   To retrieve this information from Google Play, call the {@code getSkuDetails}
-  method on the In-app Billing Version 3 API, and pass the method the In-app
+  method on the In-app Billing Version 3 API and pass the In-app
   Billing API version (“3”), the package name of your calling app, the purchase
-  type (“inapp”), and the {@link android.os.Bundle} that you created.
+  type (“inapp”), and the {@link android.os.Bundle} that you created, into the method:
 </p>
 
 <pre>
@@ -310,35 +326,35 @@ Bundle skuDetails = mService.getSkuDetails(3,
 </pre>
 
 <p>
-  If the request is successful, the returned {@link android.os.Bundle}has a
+  If the request is successful, the returned {@link android.os.Bundle} has a
   response code of {@code BILLING_RESPONSE_RESULT_OK} (0).
 </p>
 
 <p class="note">
-  <strong>Warning:</strong> Do not call the {@code getSkuDetails} method on the
-  main thread. Calling this method triggers a network request which could block
+  <strong>Warning:</strong> Don't call the {@code getSkuDetails} method on the
+  main thread. Calling this method triggers a network request that could block
   your main thread. Instead, create a separate thread and call the {@code
-  getSkuDetails} method from inside that thread.
+  getSkuDetails} method from inside of that thread.
 </p>
 
 <p>
-  To see all the possible response codes from Google Play, see <a href=
+  To view all of the possible response codes from Google Play, see <a href=
   "{@docRoot}google/play/billing/billing_reference.html#billing-codes">In-app
   Billing Reference</a>.
 </p>
 
 <p>
   The query results are stored in a String ArrayList with key {@code
-  DETAILS_LIST}. The purchase information is stored in the String in JSON
-  format. To see the types of product detail information that are returned, see
+  DETAILS_LIST}. The purchase information is stored within the String in JSON
+  format. To view the types of product detail information that are returned, see
   <a href=
   "{@docRoot}google/play/billing/billing_reference.html#getSkuDetails">In-app
   Billing Reference</a>.
 </p>
 
 <p>
-  In this example, you are retrieving the prices for your in-app items from the
-  skuDetails {@link android.os.Bundle} returned from the previous code snippet.
+  In this example shows how to retrieve the prices for your in-app items from the
+  skuDetails {@link android.os.Bundle} that is returned from the previous code snippet:
 </p>
 
 <pre>
@@ -357,15 +373,15 @@ if (response == 0) {
 }
 </pre>
 
-<h3 id="Purchase">Purchasing an Item</h3>
+<h3 id="Purchase">Purchasing an item</h3>
 <p>
   To start a purchase request from your app, call the {@code getBuyIntent}
-  method on the In-app Billing service. Pass in to the method the In-app
+  method on the In-app Billing service. Pass the In-app
   Billing API version (“3”), the package name of your calling app, the product
   ID for the item to purchase, the purchase type (“inapp” or "subs"), and a
-  {@code developerPayload} String. The {@code developerPayload} String is used
+  {@code developerPayload} String into the method. The {@code developerPayload} String is used
   to specify any additional arguments that you want Google Play to send back
-  along with the purchase information.
+  along with the purchase information. Here is an example:
 </p>
 
 <pre>
@@ -377,10 +393,13 @@ Bundle buyIntentBundle = mService.getBuyIntent(3, getPackageName(),
   If the request is successful, the returned {@link android.os.Bundle} has a
   response code of {@code BILLING_RESPONSE_RESULT_OK} (0) and a {@link
   android.app.PendingIntent} that you can use to start the purchase flow. To
-  see all the possible response codes from Google Play, see <a href=
+  view all of the possible response codes from Google Play, see <a href=
   "{@docRoot}google/play/billing/billing_reference.html#billing-codes">In-app
-  Billing Reference</a>. Next, extract a {@link android.app.PendingIntent} from
-  the response {@link android.os.Bundle} with key {@code BUY_INTENT}.
+  Billing Reference</a>.
+
+<p>
+  The next step is to extract a {@link android.app.PendingIntent} from
+  the response {@link android.os.Bundle} with key {@code BUY_INTENT}, as shown here:
 </p>
 
 <pre>
@@ -390,8 +409,8 @@ PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
 <p>
   To complete the purchase transaction, call the {@link
   android.app.Activity#startIntentSenderForResult startIntentSenderForResult}
-  method and use the {@link android.app.PendingIntent} that you created. In
-  this example, you are using an arbitrary value of 1001 for the request code.
+  method and use the {@link android.app.PendingIntent} that you created. This
+  example uses an arbitrary value of 1001 for the request code:
 </p>
 
 <pre>
@@ -404,9 +423,9 @@ startIntentSenderForResult(pendingIntent.getIntentSender(),
   Google Play sends a response to your {@link android.app.PendingIntent} to the
   {@link android.app.Activity#onActivityResult onActivityResult} method of your
   application. The {@link android.app.Activity#onActivityResult
-  onActivityResult} method will have a result code of {@code
-  Activity.RESULT_OK} (1) or {@code Activity.RESULT_CANCELED} (0). To see the
-  types of order information that is returned in the response {@link
+  onActivityResult} method has a result code of {@code
+  Activity.RESULT_OK} (1) or {@code Activity.RESULT_CANCELED} (0). To view the
+  types of order information that are returned in the response {@link
   android.content.Intent}, see <a href=
   "{@docRoot}google/play/billing/billing_reference.html#getBuyIntent">In-app
   Billing Reference</a>.
@@ -415,7 +434,7 @@ startIntentSenderForResult(pendingIntent.getIntentSender(),
 <p>
   The purchase data for the order is a String in JSON format that is mapped to
   the {@code INAPP_PURCHASE_DATA} key in the response {@link
-  android.content.Intent}, for example:
+  android.content.Intent}. Here is an example:
 </p>
 
 <pre>
@@ -436,13 +455,13 @@ startIntentSenderForResult(pendingIntent.getIntentSender(),
   long. Pass this entire token to other methods, such as when you consume the
   purchase, as described in <a href=
   "{@docRoot}training/in-app-billing/purchase-iab-products.html#Consume">Consume
-  a Purchase</a>. Do not abbreviate or truncate this token; you must save and
+  a Purchase</a>. Don't abbreviate or truncate this token; you must save and
   return the entire token.
 </p>
 
 <p>
-  Continuing from the previous example, you get the response code, purchase
-  data, and signature from the response {@link android.content.Intent}.
+  Continuing from the previous example, you receive the response code, purchase
+  data, and signature from the response {@link android.content.Intent}:
 </p>
 
 <pre>
@@ -472,23 +491,23 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 <p class="note">
   <strong>Security Recommendation:</strong> When you send a purchase request,
   create a String token that uniquely identifies this purchase request and
-  include this token in the {@code developerPayload}.You can use a randomly
-  generated string as the token. When you receive the purchase response from
-  Google Play, make sure to check the returned data signature, the {@code
+  include this token in the {@code developerPayload}. You can use a randomly-generated
+  string as the token. When you receive the purchase response from
+  Google Play, ensure that you check the returned data signature, the {@code
   orderId}, and the {@code developerPayload} String. For added security, you
-  should perform the checking on your own secure server. Make sure to verify
+  should perform the checking on your own secure server. Verify
   that the {@code orderId} is a unique value that you have not previously
-  processed, and the {@code developerPayload} String matches the token that you
+  processed and that the {@code developerPayload} String matches the token that you
   sent previously with the purchase request.
 </p>
 
-<h3 id="QueryPurchases">Querying for Purchased Items</h3>
+<h3 id="QueryPurchases">Querying for purchased items</h3>
 
 <p>
-  To retrieve information about purchases made by a user from your app, call
+  To retrieve information about purchases that are made by a user from your app, call
   the {@code getPurchases} method on the In-app Billing Version 3 service. Pass
-  in to the method the In-app Billing API version (“3”), the package name of
-  your calling app, and the purchase type (“inapp” or "subs").
+  the In-app Billing API version (“3”), the package name of
+  your calling app, and the purchase type (“inapp” or "subs") into the method. Here is an example:
 </p>
 
 <pre>
@@ -507,18 +526,18 @@ Bundle ownedItems = mService.getPurchases(3, getPackageName(), "inapp", null);
   To improve performance, the In-app Billing service returns only up to 700
   products that are owned by the user when {@code getPurchase} is first called.
   If the user owns a large number of products, Google Play includes a String
-  token mapped to the key {@code INAPP_CONTINUATION_TOKEN} in the response
+  token that is mapped to the key {@code INAPP_CONTINUATION_TOKEN} in the response
   {@link android.os.Bundle} to indicate that more products can be retrieved.
-  Your application can then make a subsequent {@code getPurchases} call, and
+  Your application can then make a subsequent {@code getPurchases} call and
   pass in this token as an argument. Google Play continues to return a
   continuation token in the response {@link android.os.Bundle} until all
-  products that are owned by the user has been sent to your app.
+  of the products that are owned by the user are sent to your app.
 </p>
 
-<p>For more information about the data returned by {@code getPurchases}, see
+<p>For more information about the data that is returned by {@code getPurchases}, see
   <a href="{@docRoot}google/play/billing/billing_reference.html#getPurchases">
   In-app Billing Reference</a>. The following example shows how you can
-  retrieve this data from the response.
+  retrieve this data from the response:
 </p>
 
 <pre>
@@ -548,26 +567,26 @@ if (response == 0) {
 </pre>
 
 
-<h3 id="Consume">Consuming a Purchase</h3>
+<h3 id="Consume">Consuming a purchase</h3>
 
 <p>
   You can use the In-app Billing Version 3 API to track the ownership of
   purchased in-app products in Google Play. Once an in-app product is
-  purchased, it is considered to be "owned" and cannot be purchased from Google
+  purchased, it is considered to be <em>owned</em> and cannot be purchased from Google
   Play. You must send a consumption request for the in-app product before
   Google Play makes it available for purchase again.
 </p>
 
-<p class="caution">
+<p class="note">
   <strong>Important</strong>: Managed in-app products are consumable, but
   subscriptions are not.
 </p>
 
 <p>
-  How you use the consumption mechanism in your app is up to you. Typically,
-  you would implement consumption for in-app products with temporary benefits
+  The way that you use the consumption mechanism in your app is up to you. Typically,
+  you implement consumption for in-app products with temporary benefits
   that users may want to purchase multiple times (for example, in-game currency
-  or equipment). You would typically not want to implement consumption for
+  or equipment). You typically don't want to implement consumption for
   in-app products that are purchased once and provide a permanent effect (for
   example, a premium upgrade).
 </p>
@@ -576,21 +595,21 @@ if (response == 0) {
   To record a purchase consumption, send the {@code consumePurchase} method to
   the In-app Billing service and pass in the {@code purchaseToken} String value
   that identifies the purchase to be removed. The {@code purchaseToken} is part
-  of the data returned in the {@code INAPP_PURCHASE_DATA} String by the Google
-  Play service following a successful purchase request. In this example, you
-  are recording the consumption of a product that is identified with the {@code
-  purchaseToken} in the {@code token} variable.
+  of the data that is returned in the {@code INAPP_PURCHASE_DATA} String by the Google
+  Play service following a successful purchase request. This example
+  records the consumption of a product that is identified with the {@code
+  purchaseToken} in the {@code token} variable:
 </p>
 
 <pre>
 int response = mService.consumePurchase(3, getPackageName(), token);
 </pre>
 
-<p class="note">
-  <strong>Warning:</strong> Do not call the {@code consumePurchase} method on
-  the main thread. Calling this method triggers a network request which could
+<p class="caution">
+  <strong>Warning:</strong> Don't call the {@code consumePurchase} method on
+  the main thread. Calling this method triggers a network request that could
   block your main thread. Instead, create a separate thread and call the {@code
-  consumePurchase} method from inside that thread.
+  consumePurchase} method from inside of that thread.
 </p>
 
 <p>
@@ -600,20 +619,20 @@ int response = mService.consumePurchase(3, getPackageName(), token);
   purchased.
 </p>
 
-<p class="note">
-  <strong>Security Recommendation:</strong> You must send a consumption request
+<p class="caution">
+  <strong>Security Recommendation:</strong> Send a consumption request
   before provisioning the benefit of the consumable in-app purchase to the
-  user. Make sure that you have received a successful consumption response from
+  user. Ensure that you receive a successful consumption response from
   Google Play before you provision the item.
 </p>
 
-<h3 id="Subs">Implementing Subscriptions</h3>
+<h3 id="Subs">Implementing subscriptions</h3>
 
 <p>Launching a purchase flow for a subscription is similar to launching the
 purchase flow for a product, with the exception that the product type must be set
 to "subs". The purchase result is delivered to your Activity's
 {@link android.app.Activity#onActivityResult onActivityResult} method, exactly
-as in the case of in-app products.</p>
+as in the case of in-app products. Here is an example:</p>
 
 <pre>
 Bundle bundle = mService.getBuyIntent(3, "com.example.myapp",
@@ -629,18 +648,18 @@ if (bundle.getInt(RESPONSE_CODE) == BILLING_RESPONSE_RESULT_OK) {
 </pre>
 
 <p>To query for active subscriptions, use the {@code getPurchases} method, again
-with the product type parameter set to "subs".</p>
+with the product type parameter set to "subs":</p>
 
 <pre>
 Bundle activeSubs = mService.getPurchases(3, "com.example.myapp",
                    "subs", continueToken);
 </pre>
 
-<p>The call returns a {@code Bundle} with all the active subscriptions owned by
-the user. Once a subscription expires without renewal, it will no longer appear
+<p>The call returns a {@code Bundle} with all of the active subscriptions that are owned by
+the user. When a subscription expires without renewal, it no longer appears
 in the returned {@code Bundle}.</p>
 
-<h2 id="billing-security">Securing Your Application</h2>
+<h2 id="billing-security">Securing your application</h2>
 
 <p>To help ensure the integrity of the transaction information that is sent to
 your application, Google Play signs the JSON string that contains the response
@@ -648,21 +667,21 @@ data for a purchase order. Google Play uses the private key that is associated
 with your application in the Developer Console to create this signature. The
 Developer Console generates an RSA key pair for each application.<p>
 
-<p class="note"><strong>Note:</strong>To find the public key portion of this key
-pair, open your application's details in the Developer Console, then click on
-<strong>Services &amp; APIs</strong>, and look at the field titled
+<p class="note"><strong>Note:</strong> To find the public key portion of this key
+pair, open your application's details in the Developer Console, click
+<strong>Services &amp; APIs</strong>, and review the field titled
 <strong>Your License Key for This Application</strong>.</p>
 
-<p>The Base64-encoded RSA public key generated by Google Play is in binary
+<p>The Base64-encoded RSA public key that is generated by Google Play is in binary
 encoded, X.509 subjectPublicKeyInfo DER SEQUENCE format. It is the same public
 key that is used with Google Play licensing.</p>
 
-<p>When your application receives this signed response you can
+<p>When your application receives this signed response, you can
 use the public key portion of your RSA key pair to verify the signature.
-By performing signature verification you can detect responses that have
+By performing signature verification, you can detect any responses that have
 been tampered with or that have been spoofed. You can perform this signature
 verification step in your application; however, if your application connects
-to a secure remote server then we recommend that you perform the signature
+to a secure remote server, Google recommends that you perform the signature
 verification on that server.</p>
 
 <p>For more information about best practices for security and design, see <a

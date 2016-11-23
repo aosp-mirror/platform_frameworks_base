@@ -39,4 +39,9 @@
     <!-- Date and time picker legacy dimens -->
     <dimen name="picker_top_margin">1dip</dimen>
     <dimen name="picker_bottom_margin">1dip</dimen>
+
+    <!-- Progress bar dimens -->
+    <dimen name="progress_bar_size_small">16dip</dimen>
+    <dimen name="progress_bar_size_medium">32dip</dimen>
+    <dimen name="progress_bar_size_large">64dip</dimen>
 </resources>

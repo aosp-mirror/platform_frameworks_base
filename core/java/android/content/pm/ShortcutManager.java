@@ -193,7 +193,11 @@ import java.util.List;
  * The following list includes descriptions for the different attributes within a static shortcut:
  * <dl>
  *   <dt>{@code android:shortcutId}</dt>
- *   <dd>Mandatory shortcut ID</dd>
+ *   <dd>Mandatory shortcut ID.
+ *   <p>
+ *   This must be a string literal.
+ *   A resource string, such as <code>@string/foo</code>, cannot be used.
+ *   </dd>
  *
  *   <dt>{@code android:enabled}</dt>
  *   <dd>Default is {@code true}.  Can be set to {@code false} in order
@@ -206,15 +210,24 @@ import java.util.List;
  *
  *   <dt>{@code android:shortcutShortLabel}</dt>
  *   <dd>Mandatory shortcut short label.
- *   See {@link ShortcutInfo.Builder#setShortLabel(CharSequence)}.</dd>
+ *   See {@link ShortcutInfo.Builder#setShortLabel(CharSequence)}.
+ *   <p>
+ *   This must be a resource string, such as <code>@string/shortcut_label</code>.
+ *   </dd>
  *
  *   <dt>{@code android:shortcutLongLabel}</dt>
  *   <dd>Shortcut long label.
- *   See {@link ShortcutInfo.Builder#setLongLabel(CharSequence)}.</dd>
+ *   See {@link ShortcutInfo.Builder#setLongLabel(CharSequence)}.
+ *   <p>
+ *   This must be a resource string, such as <code>@string/shortcut_long_label</code>.
+ *   </dd>
  *
  *   <dt>{@code android:shortcutDisabledMessage}</dt>
  *   <dd>When {@code android:enabled} is set to
- *   {@code false}, this attribute is used to display a custom disabled message.</dd>
+ *   {@code false}, this attribute is used to display a custom disabled message.
+ *   <p>
+ *   This must be a resource string, such as <code>@string/shortcut_disabled_message</code>.
+ *   </dd>
  *
  *   <dt>{@code intent}</dt>
  *   <dd>Intent to launch when the user selects the shortcut.

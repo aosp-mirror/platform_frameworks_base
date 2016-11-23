@@ -143,17 +143,24 @@ class PackageManagerShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         final InstallParams params = makeInstallParams();
         final String inPath = getNextArg();
+        boolean installExternal =
+                (params.sessionParams.installFlags & PackageManager.INSTALL_EXTERNAL) != 0;
         if (params.sessionParams.sizeBytes < 0 && inPath != null) {
             File file = new File(inPath);
             if (file.isFile()) {
-                try {
-                    ApkLite baseApk = PackageParser.parseApkLite(file, 0);
-                    PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null);
-                    params.sessionParams.setSize(
-                            PackageHelper.calculateInstalledSize(pkgLite,false, params.sessionParams.abiOverride));
-                } catch (PackageParserException | IOException e) {
-                    pw.println("Error: Failed to parse APK file : " + e);
-                    return 1;
+                if (installExternal) {
+                    try {
+                        ApkLite baseApk = PackageParser.parseApkLite(file, 0);
+                        PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null);
+                        params.sessionParams.setSize(
+                                PackageHelper.calculateInstalledSize(pkgLite, false,
+                                        params.sessionParams.abiOverride));
+                    } catch (PackageParserException | IOException e) {
+                        pw.println("Error: Failed to parse APK file : " + e);
+                        return 1;
+                    }
+                } else {
+                    params.sessionParams.setSize(file.length());
                 }
             }
         }

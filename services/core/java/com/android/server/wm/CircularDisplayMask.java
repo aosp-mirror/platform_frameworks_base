@@ -242,7 +242,7 @@ class CircularDisplayMask {
         }
 
         double cx = (maskWidth - 1.0) / 2.0;
-        double cy = (maskHeight - 1.0) / 2.0;
+        double cy = (maskHeight - 1.0 + mScreenOffset) / 2.0;
         double radius = maskWidth / 2.0;
         int[] pixels = new int[maskWidth * maskHeight];
 
