@@ -121,7 +121,7 @@ public class Main {
     private static final String PLATFORM_DIR;
     private static final String TEST_RES_DIR;
     /** Location of the app to test inside {@link #TEST_RES_DIR}*/
-    private static final String APP_TEST_DIR = "/testApp/MyApplication";
+    private static final String APP_TEST_DIR = "testApp/MyApplication";
     /** Location of the app's res dir inside {@link #TEST_RES_DIR}*/
     private static final String APP_TEST_RES = APP_TEST_DIR + "/src/main/res";
     private static final String APP_CLASSES_LOCATION =
@@ -138,8 +138,7 @@ public class Main {
 
     // Default class loader with access to the app classes
     private ClassLoader mDefaultClassLoader =
-            new URLClassLoader(new URL[]{this.getClass().getResource(APP_CLASSES_LOCATION)},
-                    getClass().getClassLoader());
+            new ModuleClassLoader(APP_CLASSES_LOCATION, getClass().getClassLoader());
 
     @Rule
     public TestWatcher sRenderMessageWatcher = new TestWatcher() {
@@ -313,7 +312,8 @@ public class Main {
         sFrameworkRepo.loadPublicResources(getLogger());
 
         sProjectResources =
-                new ResourceRepository(new FolderWrapper(TEST_RES_DIR + APP_TEST_RES), false) {
+                new ResourceRepository(new FolderWrapper(TEST_RES_DIR + "/" + APP_TEST_RES),
+                        false) {
             @NonNull
             @Override
             protected ResourceItem createResourceItem(@NonNull String name) {

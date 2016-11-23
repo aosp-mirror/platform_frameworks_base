@@ -64,7 +64,7 @@ public class ImageUtils {
         double scale = THUMBNAIL_SIZE / (double)maxDimension;
         BufferedImage thumbnail = scale(image, scale, scale);
 
-        InputStream is = ImageUtils.class.getResourceAsStream(relativePath);
+        InputStream is = ImageUtils.class.getClassLoader().getResourceAsStream(relativePath);
         if (is == null) {
             String message = "Unable to load golden thumbnail: " + relativePath + "\n";
             message = saveImageAndAppendMessage(thumbnail, message, relativePath);
