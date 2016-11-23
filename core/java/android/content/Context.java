@@ -3309,6 +3309,15 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.text.TextClassificationManager} for text classification services.
+     *
+     * @see #getSystemService
+     * @see android.text.TextClassificationManager
+     */
+    public static final String TEXT_CLASSIFICATION_SERVICE = "textclassification";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.view.inputmethod.InputMethodManager} for accessing input
      * methods.
      *
