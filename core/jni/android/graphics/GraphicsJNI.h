@@ -68,6 +68,8 @@ public:
     */
     static SkColorType getNativeBitmapColorType(JNIEnv*, jobject jconfig);
 
+    static bool isHardwareConfig(JNIEnv* env, jobject jconfig);
+
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);

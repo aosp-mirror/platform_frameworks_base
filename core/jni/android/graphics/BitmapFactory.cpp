@@ -235,6 +235,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     int sampleSize = 1;
     bool onlyDecodeSize = false;
     SkColorType prefColorType = kN32_SkColorType;
+    bool isHardware = false;
     bool isMutable = false;
     float scale = 1.0f;
     bool requireUnpremultiplied = false;
@@ -260,6 +261,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
         jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
         prefColorType = GraphicsJNI::getNativeBitmapColorType(env, jconfig);
+        isHardware = GraphicsJNI::isHardwareConfig(env, jconfig);
         isMutable = env->GetBooleanField(options, gOptions_mutableFieldID);
         requireUnpremultiplied = !env->GetBooleanField(options, gOptions_premultipliedFieldID);
         javaBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
@@ -352,9 +354,10 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         decodeAllocator = &scaleCheckingAllocator;
     } else if (javaBitmap != nullptr) {
         decodeAllocator = &recyclingAllocator;
-    } else if (willScale) {
-        // This will allocate pixels using a HeapAllocator, since there will be an extra
-        // scaling step.
+    } else if (willScale || isHardware) {
+        // This will allocate pixels using a HeapAllocator,
+        // for scale case: there will be an extra scaling step.
+        // for hardware case: there will be extra swizzling & upload to gralloc step.
         decodeAllocator = &heapAllocator;
     } else {
         decodeAllocator = &defaultAllocator;
@@ -538,6 +541,12 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     int bitmapCreateFlags = 0x0;
     if (isMutable) bitmapCreateFlags |= android::bitmap::kBitmapCreateFlag_Mutable;
     if (isPremultiplied) bitmapCreateFlags |= android::bitmap::kBitmapCreateFlag_Premultiplied;
+
+    if (isHardware) {
+        sk_sp<Bitmap> hardwareBitmap = Bitmap::allocateHardwareBitmap(outputBitmap);
+        return bitmap::createBitmap(env, hardwareBitmap.release(), bitmapCreateFlags,
+                ninePatchChunk, ninePatchInsets, -1);
+    }
 
     // now create the java bitmap
     return bitmap::createBitmap(env, defaultAllocator.getStorageObjAndReset(),
