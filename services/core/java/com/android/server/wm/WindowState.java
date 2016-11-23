@@ -76,7 +76,6 @@ import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
-import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
@@ -116,7 +115,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIO
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
@@ -141,6 +139,9 @@ import static com.android.server.wm.WindowStateAnimator.COMMIT_DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
+
+class WindowList extends ArrayList<WindowState> {
+}
 
 /** A window in the window manager. */
 class WindowState extends WindowContainer<WindowState> implements WindowManagerPolicy.WindowState {
@@ -446,6 +447,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * TODO: We should either have different booleans for the removal reason or use a bit-field.
      */
     boolean mWindowRemovalAllowed;
+
+    /**
+     * Temp for keeping track of windows that have been removed when
+     * rebuilding window list.
+     */
+    boolean mRebuilding;
 
     // Input channel and input window handle used by the input dispatcher.
     final InputWindowHandle mInputWindowHandle;
@@ -1714,7 +1721,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         final DisplayContent dc = getDisplayContent();
         if (mService.mInputMethodTarget == this) {
-            dc.computeImeTarget(true /* updateImeTarget */);
+            dc.moveInputMethodWindowsIfNeeded(false);
         }
 
         final int type = mAttrs.type;
@@ -1924,33 +1931,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mLayer + specialAdjustment;
     }
 
-    boolean canBeImeTarget() {
-        final int fl = mAttrs.flags & (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM);
-        final int type = mAttrs.type;
-
-        if (fl != 0 && fl != (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM)
-                && type != TYPE_APPLICATION_STARTING) {
-            return false;
-        }
-
-        if (DEBUG_INPUT_METHOD) {
-            Slog.i(TAG_WM, "isVisibleOrAdding " + this + ": " + isVisibleOrAdding());
-            if (!isVisibleOrAdding()) {
-                Slog.i(TAG_WM, "  mSurfaceController=" + mWinAnimator.mSurfaceController
-                        + " relayoutCalled=" + mRelayoutCalled
-                        + " viewVis=" + mViewVisibility
-                        + " policyVis=" + mPolicyVisibility
-                        + " policyVisAfterAnim=" + mPolicyVisibilityAfterAnim
-                        + " parentHidden=" + isParentWindowHidden()
-                        + " exiting=" + mAnimatingExit + " destroying=" + mDestroying);
-                if (mAppToken != null) {
-                    Slog.i(TAG_WM, "  mAppToken.hiddenRequested=" + mAppToken.hiddenRequested);
-                }
-            }
-        }
-        return isVisibleOrAdding();
-    }
-
     void scheduleAnimationIfDimming() {
         final DisplayContent dc = getDisplayContent();
         if (dc == null) {
@@ -2105,7 +2085,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return false;
     }
 
-    private void removeReplacedWindow() {
+    void removeReplacedWindow() {
         if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replaced window: " + this);
         if (isDimming()) {
             transferDimToReplacement();
@@ -2155,16 +2135,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final Task task = getTask();
         if (task != null && task.mStack != null && task.mStack.isAdjustedForIme()) {
             task.mStack.applyAdjustForImeIfNeeded(task);
-        }
-    }
-
-    @Override
-    void switchUser() {
-        super.switchUser();
-        if (isHiddenFromUserLocked()) {
-            if (DEBUG_VISIBILITY) Slog.w(TAG_WM, "user changing, hiding " + this
-                    + ", attrs=" + mAttrs.type + ", belonging to " + mOwnerUid);
-            hideLw(false);
         }
     }
 
@@ -3529,6 +3499,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mIsChildWindow;
     }
 
+    /**
+     * Returns the bottom child window in regards to z-order of this window or null if no children.
+     */
+    WindowState getBottomChild() {
+        // Child windows are z-ordered based on sub-layer using {@link #sWindowSubLayerComparator}
+        // and the child with the lowest z-order will be at the head of the list.
+        WindowState c = mChildren.peekFirst();
+        return c == null ? null : c;
+    }
+
     boolean layoutInParentFrame() {
         return mIsChildWindow
                 && (mAttrs.privateFlags & PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME) != 0;
@@ -3812,6 +3792,44 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
         return highestAnimLayer;
+    }
+
+    @Override
+    int rebuildWindowList(int addIndex) {
+        return reAddWindow(addIndex);
+    }
+
+    // TODO: come-up with a better name for this method that represents what it does.
+    // Or, it is probably not going to matter anyways if we are successful in getting rid of
+    // the WindowList concept.
+    int reAddWindow(int index) {
+        final DisplayContent dc = getDisplayContent();
+        // Adding child windows relies on child windows being ordered by mSubLayer using
+        // {@link #sWindowSubLayerComparator}.
+        final int childCount = mChildren.size();
+        boolean winAdded = false;
+        for (int j = 0; j < childCount; j++) {
+            final WindowState child = mChildren.get(j);
+            if (!winAdded && child.mSubLayer >= 0) {
+                if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM,
+                        "Re-adding child window at " + index + ": " + child);
+                mRebuilding = false;
+                dc.addToWindowList(this, index);
+                index++;
+                winAdded = true;
+            }
+            if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Re-adding window at " + index + ": " + child);
+            child.mRebuilding = false;
+            dc.addToWindowList(child, index);
+            index++;
+        }
+        if (!winAdded) {
+            if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Re-adding window at " + index + ": " + this);
+            mRebuilding = false;
+            dc.addToWindowList(this, index);
+            index++;
+        }
+        return index;
     }
 
     @Override

@@ -411,7 +411,7 @@ public class AppWindowAnimator {
         }
         if (mService.mInputMethodTarget != null
                 && mService.mInputMethodTarget.mAppToken == mAppToken) {
-            mAppToken.getDisplayContent().computeImeTarget(true /* updateImeTarget */);
+            mAppToken.getDisplayContent().moveInputMethodWindowsIfNeeded(true);
         }
 
         if (DEBUG_ANIM) Slog.v(TAG, "Animation done in " + mAppToken
