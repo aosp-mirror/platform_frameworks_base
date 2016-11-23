@@ -117,6 +117,35 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
+    public void testGetBottomChild() throws Exception {
+        final WindowState parentWindow =
+                createWindow(null, TYPE_APPLICATION, mWindowToken, "parentWindow");
+        assertNull(parentWindow.getBottomChild());
+
+        final WindowState child1 =
+                createWindow(parentWindow, TYPE_APPLICATION_PANEL, mWindowToken, "child1");
+        assertEquals(child1, parentWindow.getBottomChild());
+
+        final WindowState child2 =
+                createWindow(parentWindow, TYPE_APPLICATION_PANEL, mWindowToken, "child2");
+        // Since child1 and child2 are at the same layer, then child2 is expect to be added on top
+        // on child1
+        assertEquals(child1, parentWindow.getBottomChild());
+
+        final WindowState child3 =
+                createWindow(parentWindow, TYPE_APPLICATION_MEDIA_OVERLAY, mWindowToken, "child3");
+        // Since child3 is a negative layer, we would expect it to be added below current children
+        // with positive layers.
+        assertEquals(child3, parentWindow.getBottomChild());
+
+        final WindowState child4 =
+                createWindow(parentWindow, TYPE_APPLICATION_MEDIA_OVERLAY, mWindowToken, "child4");
+        // We would also expect additional negative layers to be added below existing negative
+        // layers.
+        assertEquals(child4, parentWindow.getBottomChild());
+    }
+
+    @Test
     public void testGetParentWindow() throws Exception {
         final WindowState parentWindow =
                 createWindow(null, TYPE_APPLICATION, mWindowToken, "parentWindow");
