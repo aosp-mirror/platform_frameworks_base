@@ -131,12 +131,13 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     SkColorType colorType = kN32_SkColorType;
     bool requireUnpremul = false;
     jobject javaBitmap = NULL;
-
+    bool isHardware = false;
     // Update the default options with any options supplied by the client.
     if (NULL != options) {
         sampleSize = env->GetIntField(options, gOptions_sampleSizeFieldID);
         jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
         colorType = GraphicsJNI::getNativeBitmapColorType(env, jconfig);
+        isHardware = GraphicsJNI::isHardwareConfig(env, jconfig);
         requireUnpremul = !env->GetBooleanField(options, gOptions_premultipliedFieldID);
         javaBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
         // The Java options of ditherMode and preferQualityOverSpeed are deprecated.  We will
@@ -201,6 +202,10 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     int bitmapCreateFlags = 0;
     if (!requireUnpremul) {
         bitmapCreateFlags |= android::bitmap::kBitmapCreateFlag_Premultiplied;
+    }
+    if (isHardware) {
+        sk_sp<Bitmap> hardwareBitmap = Bitmap::allocateHardwareBitmap(bitmap);
+        return bitmap::createBitmap(env, hardwareBitmap.release(), bitmapCreateFlags);
     }
     return android::bitmap::createBitmap(env, heapAlloc.getStorageObjAndReset(), bitmapCreateFlags);
 }

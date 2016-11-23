@@ -463,12 +463,18 @@ public final class Bitmap implements Parcelable {
          * This configuration is very flexible and offers the best
          * quality. It should be used whenever possible.
          */
-        ARGB_8888   (5);
+        ARGB_8888   (5),
+
+
+        /**
+          * @hide
+         */
+        HARDWARE    (6);
 
         final int nativeInt;
 
         private static Config sConfigs[] = {
-            null, ALPHA_8, null, RGB_565, ARGB_4444, ARGB_8888
+            null, ALPHA_8, null, RGB_565, ARGB_4444, ARGB_8888, HARDWARE
         };
 
         Config(int ni) {

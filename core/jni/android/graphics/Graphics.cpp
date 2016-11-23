@@ -297,8 +297,9 @@ enum LegacyBitmapConfig {
     kRGB_565_LegacyBitmapConfig     = 3,
     kARGB_4444_LegacyBitmapConfig   = 4,
     kARGB_8888_LegacyBitmapConfig   = 5,
+    kHardware_LegacyBitmapConfig    = 6,
 
-    kLastEnum_LegacyBitmapConfig = kARGB_8888_LegacyBitmapConfig
+    kLastEnum_LegacyBitmapConfig = kHardware_LegacyBitmapConfig
 };
 
 jint GraphicsJNI::colorTypeToLegacyBitmapConfig(SkColorType colorType) {
@@ -327,6 +328,7 @@ SkColorType GraphicsJNI::legacyBitmapConfigToColorType(jint legacyConfig) {
         kIndex_8_SkColorType,
         kRGB_565_SkColorType,
         kARGB_4444_SkColorType,
+        kN32_SkColorType,
         kN32_SkColorType
     };
 
@@ -353,6 +355,15 @@ SkColorType GraphicsJNI::getNativeBitmapColorType(JNIEnv* env, jobject jconfig) 
     SkASSERT(env->IsInstanceOf(jconfig, gBitmapConfig_class));
     int c = env->GetIntField(jconfig, gBitmapConfig_nativeInstanceID);
     return legacyBitmapConfigToColorType(c);
+}
+
+bool GraphicsJNI::isHardwareConfig(JNIEnv* env, jobject jconfig) {
+    SkASSERT(env);
+    if (NULL == jconfig) {
+        return false;
+    }
+    int c = env->GetIntField(jconfig, gBitmapConfig_nativeInstanceID);
+    return c == kHardware_LegacyBitmapConfig;
 }
 
 android::Canvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
