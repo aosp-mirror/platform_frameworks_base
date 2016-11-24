@@ -39,4 +39,16 @@
         android:src="@drawable/ic_qs_vpn"
         android:visibility="invisible" />
 
+    <!-- Only shown if both images are visible -->
+    <ImageView
+        android:id="@+id/footer_icon2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="8dp"
+        android:layout_toStartOf="@id/footer_icon"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_qs_network_logging"
+        android:visibility="invisible" />
+
 </RelativeLayout>

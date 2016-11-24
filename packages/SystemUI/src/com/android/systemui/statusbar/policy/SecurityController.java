@@ -24,6 +24,7 @@ public interface SecurityController extends CallbackController<SecurityControlle
     String getDeviceOwnerName();
     String getProfileOwnerName();
     CharSequence getDeviceOwnerOrganizationName();
+    boolean isNetworkLoggingEnabled();
     boolean isVpnEnabled();
     boolean isVpnRestricted();
     /** Whether the VPN app should use branded VPN iconography.  */

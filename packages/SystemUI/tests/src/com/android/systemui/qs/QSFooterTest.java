@@ -35,9 +35,11 @@ import org.junit.runner.RunWith;
 
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -53,6 +55,8 @@ public class QSFooterTest extends SysuiTestCase {
 
     private ViewGroup mRootView = mock(ViewGroup.class);
     private TextView mFooterText = mock(TextView.class);
+    private ImageView mFooterIcon = mock(ImageView.class);
+    private ImageView mFooterIcon2 = mock(ImageView.class);
     private QSFooter mFooter;
     private Resources mResources;
     private SecurityController mSecurityController = mock(SecurityController.class);
@@ -60,7 +64,8 @@ public class QSFooterTest extends SysuiTestCase {
     @Before
     public void setUp() {
         when(mRootView.findViewById(R.id.footer_text)).thenReturn(mFooterText);
-        when(mRootView.findViewById(R.id.footer_icon)).thenReturn(mock(ImageView.class));
+        when(mRootView.findViewById(R.id.footer_icon)).thenReturn(mFooterIcon);
+        when(mRootView.findViewById(R.id.footer_icon2)).thenReturn(mFooterIcon2);
         final LayoutInflater layoutInflater = mock(LayoutInflater.class);
         when(layoutInflater.inflate(eq(R.layout.quick_settings_footer), anyObject(), anyBoolean()))
                 .thenReturn(mRootView);
@@ -111,6 +116,48 @@ public class QSFooterTest extends SysuiTestCase {
         verifyNoMoreInteractions(mFooterText);
         verify(mRootView).setVisibility(View.VISIBLE);
         verifyNoMoreInteractions(mRootView);
+    }
+
+    @Test
+    public void testNetworkLoggingEnabled() {
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.isNetworkLoggingEnabled()).thenReturn(true);
+        when(mSecurityController.isVpnEnabled()).thenReturn(false);
+        mFooter.refreshState();
+
+        waitForIdleSync(mFooter.mHandler);
+        verify(mFooterIcon).setVisibility(View.VISIBLE);
+        verify(mFooterIcon).setImageResource(R.drawable.ic_qs_network_logging);
+        verify(mFooterIcon2).setVisibility(View.INVISIBLE);
+    }
+
+    @Test
+    public void testVpnEnabled() {
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.isNetworkLoggingEnabled()).thenReturn(false);
+        when(mSecurityController.isVpnEnabled()).thenReturn(true);
+        when(mSecurityController.isVpnBranded()).thenReturn(false);
+        mFooter.refreshState();
+
+        waitForIdleSync(mFooter.mHandler);
+        verify(mFooterIcon).setVisibility(View.VISIBLE);
+        verify(mFooterIcon, never()).setImageResource(anyInt());
+        verify(mFooterIcon2).setVisibility(View.INVISIBLE);
+    }
+
+    @Test
+    public void testNetworkLoggingAndVpnEnabled() {
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.isNetworkLoggingEnabled()).thenReturn(true);
+        when(mSecurityController.isVpnEnabled()).thenReturn(true);
+        when(mSecurityController.isVpnBranded()).thenReturn(false);
+        mFooter.refreshState();
+
+        waitForIdleSync(mFooter.mHandler);
+        verify(mFooterIcon).setVisibility(View.VISIBLE);
+        verify(mFooterIcon, never()).setImageResource(anyInt());
+        verify(mFooterIcon2).setVisibility(View.VISIBLE);
+        verify(mFooterIcon2, never()).setImageResource(anyInt());
     }
 
     @Test

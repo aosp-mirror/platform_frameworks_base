@@ -159,6 +159,11 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     @Override
+    public boolean isNetworkLoggingEnabled() {
+        return mDevicePolicyManager.isNetworkLoggingEnabled(null);
+    }
+
+    @Override
     public boolean isVpnEnabled() {
         for (int profileId : mUserManager.getProfileIdsWithDisabled(mVpnUserId)) {
             if (mCurrentVpns.get(profileId) != null) {
