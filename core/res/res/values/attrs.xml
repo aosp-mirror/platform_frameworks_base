@@ -4624,6 +4624,23 @@
             screens with limited space for text. -->
             <enum name="full" value="2" />
         </attr>
+        <!-- Specify the type of auto-size. -->
+        <attr name="autoSizeText" format="enum">
+            <!-- No auto-sizing (default). -->
+            <enum name="none" value="0" />
+            <!-- Uniform horizontal and vertical scaling. -->
+            <enum name="xy" value="1" />
+        </attr>
+        <!-- Specify the auto-size step size if <code>autoSizeText</code> is set to
+        <code>xy</code>. The default is 1px. Overwrites
+        <code>autoSizeStepSizeSet</code> if set. -->
+        <attr name="autoSizeStepGranularity" format="dimension" />
+        <!-- Array of dimensions to be used in conjunction with
+        <code>autoSizeText</code> set to <code>xy</code>. Overwrites
+        <code>autoSizeStepGranularity</code> if set. -->
+        <attr name="autoSizeStepSizeSet"/>
+        <!-- The minimum text size constraint to be used when auto-sizing text -->
+        <attr name="autoSizeMinTextSize" format="dimension" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->
