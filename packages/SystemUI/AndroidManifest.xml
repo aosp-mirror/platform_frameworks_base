@@ -297,7 +297,7 @@
                   android:screenOrientation="behind"
                   android:resizeableActivity="true"
                   android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
-                  android:theme="@style/RecentsTheme.Wallpaper">
+                  android:theme="@style/RecentsTheme.Grid">
             <intent-filter>
                 <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
             </intent-filter>

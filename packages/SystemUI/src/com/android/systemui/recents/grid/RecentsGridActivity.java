@@ -20,16 +20,22 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
@@ -61,17 +67,23 @@ import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.TaskView;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * The main grid recents activity started by the RecentsImpl.
  */
-public class RecentsGridActivity extends Activity implements ViewTreeObserver.OnPreDrawListener {
+public class RecentsGridActivity extends Activity {
+    public final static int MAX_VISIBLE_TASKS = 9;
+
     private final static String TAG = "RecentsGridActivity";
+    private final static int TITLE_BAR_HEIGHT_DP = 64;
+
+    private ArrayList<Integer> mMargins = new ArrayList<>();
 
     private TaskStack mTaskStack;
-    private List<Task> mTasks = new ArrayList<>();
-    private List<TaskView> mTaskViews = new ArrayList<>();
+    private ArrayList<Task> mTasks = new ArrayList<>();
+    private ArrayList<TaskView> mTaskViews = new ArrayList<>();
+    private ArrayList<Rect> mTaskViewRects;
     private FrameLayout mRecentsView;
     private TextView mEmptyView;
     private View mClearAllButton;
@@ -80,6 +92,10 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
     private Rect mDisplayRect = new Rect();
     private LayoutInflater mInflater;
     private boolean mTouchExplorationEnabled;
+    private Point mScreenSize;
+    private int mTitleBarHeightPx;
+    private int mStatusBarHeightPx;
+    private int mNavigationBarHeightPx;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,12 +103,28 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
         setContentView(R.layout.recents_grid);
         SystemServicesProxy ssp = Recents.getSystemServices();
 
+        Resources res = getResources();
+        Integer[] margins = {
+                res.getDimensionPixelSize(R.dimen.recents_grid_margin_left),
+                res.getDimensionPixelSize(R.dimen.recents_grid_margin_top),
+                res.getDimensionPixelSize(R.dimen.recents_grid_margin_right),
+                res.getDimensionPixelSize(R.dimen.recents_grid_margin_bottom),
+        };
+        mMargins.addAll(Arrays.asList(margins));
+
         mInflater = LayoutInflater.from(this);
         Configuration appConfiguration = Utilities.getAppConfiguration(this);
         mDisplayRect = ssp.getDisplayRect();
         mLastDisplayOrientation = appConfiguration.orientation;
         mLastDisplayDensity = appConfiguration.densityDpi;
         mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
+        mScreenSize = new Point();
+        getWindowManager().getDefaultDisplay().getRealSize(mScreenSize);
+        DisplayMetrics metrics = res.getDisplayMetrics();
+        mTitleBarHeightPx = (int) (TITLE_BAR_HEIGHT_DP *
+                ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT));
+        mStatusBarHeightPx = res.getDimensionPixelSize(R.dimen.status_bar_height);
+        mNavigationBarHeightPx = res.getDimensionPixelSize(R.dimen.navigation_bar_height);
 
         mRecentsView = (FrameLayout) findViewById(R.id.recents_view);
         mRecentsView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
@@ -100,8 +132,7 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         getWindow().getAttributes().privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
-        LinearLayout recentsContainer = (LinearLayout) findViewById(R.id.recents_container);
-        mEmptyView = (TextView) mInflater.inflate(R.layout.recents_empty, recentsContainer, false);
+        mEmptyView = (TextView) mInflater.inflate(R.layout.recents_empty, mRecentsView, false);
         mClearAllButton = findViewById(R.id.button);
 
         FrameLayout.LayoutParams emptyViewLayoutParams = new FrameLayout.LayoutParams(
@@ -111,8 +142,8 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
         mRecentsView.addView(mEmptyView);
 
         mClearAllButton.setVisibility(View.VISIBLE);
-        LinearLayout.LayoutParams lp =
-                (LinearLayout.LayoutParams) mClearAllButton.getLayoutParams();
+        FrameLayout.LayoutParams lp =
+                (FrameLayout.LayoutParams) mClearAllButton.getLayoutParams();
         lp.gravity = Gravity.END;
 
         mClearAllButton.setOnClickListener(v -> {
@@ -154,6 +185,57 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
         return null;
     }
 
+    /**
+     * Starts animations for each task view to either enlarge it to the size of the screen (when
+     * launching a task), or (if {@code reverse} is true, to reduce it from the size of the screen
+     * back to its place in the recents layout (when opening recents).
+     * @param animationListener An animation listener for executing code before or after the
+     *         animations run.
+     * @param reverse Whether the blow-up animations should be run in reverse.
+     */
+    private void startBlowUpAnimations(Animation.AnimationListener animationListener,
+            boolean reverse) {
+        if (mTaskViews.size() == 0) {
+            return;
+        }
+        int screenWidth = mLastDisplayOrientation == Configuration.ORIENTATION_LANDSCAPE
+                ? mScreenSize.x : mScreenSize.y;
+        int screenHeight = mLastDisplayOrientation == Configuration.ORIENTATION_LANDSCAPE
+                ? mScreenSize.y : mScreenSize.x;
+        screenHeight -= mStatusBarHeightPx + mNavigationBarHeightPx;
+        for (int i = 0; i < mTaskViews.size(); i++) {
+            View tv = mTaskViews.get(i);
+            AnimationSet animations = new AnimationSet(true /* shareInterpolator */);
+            animations.setInterpolator(new DecelerateInterpolator());
+            if (i == 0 && animationListener != null) {
+                animations.setAnimationListener(animationListener);
+            }
+            animations.setFillBefore(reverse);
+            animations.setFillAfter(!reverse);
+            Rect initialRect = mTaskViewRects.get(mTaskViewRects.size() - 1 - i);
+            int xDelta = - initialRect.left;
+            int yDelta = - initialRect.top - mTitleBarHeightPx + mStatusBarHeightPx;
+            TranslateAnimation translate = new TranslateAnimation(
+                    reverse ? xDelta : 0, reverse ? 0 : xDelta,
+                    reverse ? yDelta : 0, reverse ? 0 : yDelta);
+            translate.setDuration(250);
+            animations.addAnimation(translate);
+
+
+            float xScale = (float) screenWidth / (float) initialRect.width();
+            float yScale = (float) screenHeight /
+                    ((float) initialRect.height() - mTitleBarHeightPx);
+            ScaleAnimation scale = new ScaleAnimation(
+                    reverse ? xScale : 1, reverse ? 1 : xScale,
+                    reverse ? yScale : 1, reverse ? 1 : yScale,
+                    Animation.ABSOLUTE, 0, Animation.ABSOLUTE, mStatusBarHeightPx);
+            scale.setDuration(300);
+            animations.addAnimation(scale);
+
+            tv.startAnimation(animations);
+        }
+    }
+
     private void updateControlVisibility() {
         boolean empty = (mTasks.size() == 0);
         mClearAllButton.setVisibility(empty ? View.INVISIBLE : View.VISIBLE);
@@ -163,7 +245,7 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
         }
     }
 
-    private void updateRecentsTasks() {
+    private void updateModel() {
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = RecentsImpl.consumeInstanceLoadPlan();
         if (plan == null) {
@@ -174,29 +256,66 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
         if (!plan.hasTasks()) {
             loader.preloadTasks(plan, -1, !launchState.launchedFromHome);
         }
-        int numVisibleTasks = 9;
         mTaskStack = plan.getTaskStack();
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
         loadOpts.runningTaskId = launchState.launchedToTaskId;
-        loadOpts.numVisibleTasks = numVisibleTasks;
-        loadOpts.numVisibleTaskThumbnails = numVisibleTasks;
+        loadOpts.numVisibleTasks = MAX_VISIBLE_TASKS;
+        loadOpts.numVisibleTaskThumbnails = MAX_VISIBLE_TASKS;
         loader.loadTasks(this, plan, loadOpts);
 
         mTasks = mTaskStack.getStackTasks();
+    }
 
-        updateControlVisibility();
-
-        clearTaskViews();
+    private void updateViews() {
+        int screenWidth = mLastDisplayOrientation == Configuration.ORIENTATION_LANDSCAPE
+                ? mScreenSize.x : mScreenSize.y;
+        int screenHeight = mLastDisplayOrientation == Configuration.ORIENTATION_LANDSCAPE
+                ? mScreenSize.y : mScreenSize.x;
+        int paddingPixels = getResources().getDimensionPixelSize(
+                R.dimen.recents_grid_inter_task_padding);
+        mTaskViewRects = TaskGridLayoutAlgorithm.getRectsForTaskCount(
+                mTasks.size(), screenWidth, screenHeight, getAppRectRatio(), paddingPixels,
+                mMargins, mTitleBarHeightPx);
+        boolean recycleViews = (mTaskViews.size() == mTasks.size());
+        if (!recycleViews) {
+            clearTaskViews();
+        }
         for (int i = 0; i < mTasks.size(); i++) {
             Task task = mTasks.get(i);
-            TaskView taskView = createView();
+            // We keep the same ordering in the model as other Recents flavors (older tasks are
+            // first in the stack) so that the logic can be similar, but we reverse the order
+            // when placing views on the screen so that most recent tasks are displayed first.
+            Rect rect = mTaskViewRects.get(mTaskViewRects.size() - 1 - i);
+            TaskView taskView;
+            if (recycleViews) {
+                taskView = mTaskViews.get(i);
+            } else {
+                taskView = createView();
+            }
             taskView.onTaskBound(task, mTouchExplorationEnabled, mLastDisplayOrientation,
                     mDisplayRect);
             Recents.getTaskLoader().loadTaskData(task);
             taskView.setTouchEnabled(true);
             // Show dismiss button right away.
             taskView.startNoUserInteractionAnimation();
-            mTaskViews.add(taskView);
+            taskView.setLayoutParams(new FrameLayout.LayoutParams(rect.width(), rect.height()));
+            taskView.setTranslationX(rect.left);
+            taskView.setTranslationY(rect.top);
+            if (!recycleViews) {
+                mRecentsView.addView(taskView);
+                mTaskViews.add(taskView);
+            }
+        }
+        updateControlVisibility();
+    }
+
+    private float getAppRectRatio() {
+        if (mLastDisplayOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            return (float) mScreenSize.x /
+                    (float) (mScreenSize.y - mStatusBarHeightPx - mNavigationBarHeightPx);
+        } else {
+            return (float) mScreenSize.y /
+                    (float) (mScreenSize.x - mStatusBarHeightPx - mNavigationBarHeightPx);
         }
     }
 
@@ -204,13 +323,23 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
     protected void onStart() {
         super.onStart();
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, true));
-        mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
-    }
+        updateModel();
+        updateViews();
+        if (mTaskViews.size() > 0) {
+            mTaskViews.get(mTaskViews.size() - 1).bringToFront();
+        }
+        startBlowUpAnimations(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) { }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateRecentsTasks();
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                updateViews();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) { }
+        }, true /* reverse */);
     }
 
     @Override
@@ -237,37 +366,13 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
         // Notify of the config change.
         Configuration newDeviceConfiguration = Utilities.getAppConfiguration(this);
         mDisplayRect = Recents.getSystemServices().getDisplayRect();
-        mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
-        mRecentsView.requestLayout();
         int numStackTasks = mTaskStack.getStackTaskCount();
         EventBus.getDefault().send(new ConfigurationChangedEvent(false /* fromMultiWindow */,
                 mLastDisplayOrientation != newDeviceConfiguration.orientation,
                 mLastDisplayDensity != newDeviceConfiguration.densityDpi, numStackTasks > 0));
         mLastDisplayOrientation = newDeviceConfiguration.orientation;
         mLastDisplayDensity = newDeviceConfiguration.densityDpi;
-    }
-
-    @Override
-    public boolean onPreDraw() {
-        mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
-        int width = mRecentsView.getWidth();
-        int height = mRecentsView.getHeight();
-
-        List<Rect> rects = TaskGridLayoutAlgorithm.getRectsForTaskCount(
-            mTasks.size(), width, height, false /* allowLineOfThree */, 30 /* padding */);
-        removeTaskViews();
-        for (int i = 0; i < rects.size(); i++) {
-            Rect rect = rects.get(i);
-            // We keep the same ordering in the model as other Recents flavors (older tasks are
-            // first in the stack) so that the logic can be similar, but we reverse the order
-            // when placing views on the screen so that most recent tasks are displayed first.
-            View taskView = mTaskViews.get(rects.size() - 1 - i);
-            taskView.setLayoutParams(new FrameLayout.LayoutParams(rect.width(), rect.height()));
-            taskView.setTranslationX(rect.left);
-            taskView.setTranslationY(rect.top);
-            mRecentsView.addView(taskView);
-        }
-        return true;
+        updateViews();
     }
 
     void dismissRecentsToHome() {
@@ -360,7 +465,8 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
             EventBus.getDefault().send(new DeleteTaskDataEvent(tasks.get(i)));
         }
         mTasks = new ArrayList<>();
-        updateRecentsTasks();
+        updateModel();
+        updateViews();
 
         MetricsLogger.action(this, MetricsEvent.OVERVIEW_DISMISS_ALL);
     }
@@ -390,6 +496,9 @@ public class RecentsGridActivity extends Activity implements ViewTreeObserver.On
     }
 
     public final void onBusEvent(LaunchTaskEvent event) {
+        event.taskView.bringToFront();
         startActivity(event.task.key.baseIntent);
+        // Eventually we should start blow-up animations here, but we need to make sure it's done
+        // in parallel with starting the activity so that we don't introduce unneeded latency.
     }
 }

@@ -33,4 +33,5 @@
     android:fontFamily="sans-serif-medium"
     android:background="@drawable/recents_stack_action_background"
     android:visibility="invisible"
-    android:forceHasOverlappingRendering="false" />
+    android:forceHasOverlappingRendering="false"
+    style="?attr/clearAllStyle" />
