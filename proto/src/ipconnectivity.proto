@@ -27,6 +27,12 @@ enum Transport {
   WIFI      = 4;
 };
 
+// A pair of (key, value) integers for describing histogram-like statistics.
+message Pair {
+  optional int32 key = 1;
+  optional int32 value = 2;
+};
+
 // Logs changes in the system default network. Changes can be 1) acquiring a
 // default network with no previous default, 2) a switch of the system default
 // network to a new default network, 3) a loss of the system default network.
@@ -104,6 +110,7 @@ message ValidationProbeEvent {
 
 // Logs DNS lookup latencies. Repeated fields must have the same length.
 // This message is associated to android.net.metrics.DnsEvent.
+// Deprecated since version 2.
 message DNSLookupBatch {
   // The id of the network on which the DNS lookups took place.
   optional NetworkId network_id = 1;
@@ -116,6 +123,54 @@ message DNSLookupBatch {
 
   // The time it took for each DNS lookups to complete.
   repeated int32 latencies_ms = 4;
+};
+
+// Represents a collections of DNS lookup latencies and counters for a
+// particular combination of DNS query type and return code.
+// Since version 2.
+message DNSLatencies {
+  // The type of the DNS lookups, as defined in android.net.metrics.DnsEvent.
+  // Acts as a key for a set of DNS query results.
+  // Possible values are: 0 for getaddrinfo, 1 for gethostbyname.
+  optional int32 type = 1;
+
+  // The return value of the DNS resolver for the DNS lookups.
+  // Acts as a key for a set of DNS query results.
+  // Possible values are: 0 for success, or errno code for failures.
+  optional int32 return_code = 2;
+
+  // The number of query operations recorded.
+  optional int32 query_count = 3;
+
+  // The number of query operations returning A IPv4 records.
+  optional int32 a_count = 4;
+
+  // The number of query operations returning AAAA IPv6 records.
+  optional int32 aaaa_count = 5;
+
+  // The time it took for each DNS lookup to complete. The number of repeated
+  // values can be less than query_count in case of event rate-limiting.
+  repeated int32 latencies_ms = 6;
+};
+
+// Represents latency and errno statistics of the connect() system call.
+// Since version 2.
+message ConnectStatistics {
+  // The number of connect() operations recorded.
+  optional int32 connect_count = 1;
+
+  // The number of connect() operations with IPv6 socket address.
+  optional int32 ipv6_addr_count = 2;
+
+  // The time it took for each successful connect() operation to complete.
+  // The number of repeated values can be less than connect_count in case of
+  // event rate-limiting.
+  repeated int32 latencies_ms = 3;
+
+  // Counts of all error values returned by failed connect() operations.
+  // The Pair key field is the errno code. The Pair value field is the count
+  // for that errno code.
+  repeated Pair errnos_counters = 4;
 };
 
 // Represents a DHCP event on a single interface, which can be a DHCPClient
@@ -241,7 +296,7 @@ message IpProvisioningEvent {
 }
 
 // Represents one of the IP connectivity event defined in this file.
-// Next tag: 13
+// Next tag: 15
 message IpConnectivityEvent {
   // Time in ms when the event was recorded.
   optional int64 time_ms = 1;
@@ -263,7 +318,14 @@ message IpConnectivityEvent {
     NetworkEvent network_event = 4;
 
     // A batch of DNS lookups.
-    DNSLookupBatch dns_lookup_batch = 5;
+    // Deprecated in the nyc-mr2 release since version 2, and replaced by dns_latencies.
+    DNSLookupBatch dns_lookup_batch = 5 [deprecated = true];
+
+    // DNS lookup latency statistics.
+    DNSLatencies dns_latencies = 13;
+
+    // Connect latency and errno statistics.
+    ConnectStatistics connect_statistics = 14;
 
     // A DHCP client event or DHCP receive error.
     DHCPEvent dhcp_event = 6;
