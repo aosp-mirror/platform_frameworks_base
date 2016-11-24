@@ -24,12 +24,13 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter_Delegate;
 import android.graphics.Paint;
 import android.graphics.Paint_Delegate;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Region_Delegate;
 import android.graphics.Shader_Delegate;
-import android.graphics.Xfermode_Delegate;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -827,28 +828,9 @@ public class GcSnapshot {
             g.setComposite(AlphaComposite.getInstance(forceMode, (float) alpha / 255.f));
             return;
         }
-        Xfermode_Delegate xfermodeDelegate = paint.getXfermode();
-        if (xfermodeDelegate != null) {
-            if (xfermodeDelegate.isSupported()) {
-                Composite composite = xfermodeDelegate.getComposite(alpha);
-                assert composite != null;
-                if (composite != null) {
-                    g.setComposite(composite);
-                    return;
-                }
-            } else {
-                Bridge.getLog().fidelityWarning(LayoutLog.TAG_XFERMODE,
-                        xfermodeDelegate.getSupportMessage(),
-                        null /*throwable*/, null /*data*/);
-            }
-        }
-        // if there was no custom xfermode, but we have alpha (due to a shader and a non
-        // opaque alpha channel in the paint color), then we create an AlphaComposite anyway
-        // that will handle the alpha.
-        if (alpha != 0xFF) {
-            g.setComposite(AlphaComposite.getInstance(
-                    AlphaComposite.SRC_OVER, (float) alpha / 255.f));
-        }
+        Mode mode = PorterDuff.intToMode(paint.getPorterDuffMode());
+        Composite composite = PorterDuffUtility.getComposite(mode, alpha);
+        g.setComposite(composite);
     }
 
     private void mapRect(AffineTransform matrix, RectF dst, RectF src) {

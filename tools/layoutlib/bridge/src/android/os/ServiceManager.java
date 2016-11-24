@@ -31,6 +31,13 @@ public final class ServiceManager {
     }
 
     /**
+     * Is not supposed to return null, but that is fine for layoutlib.
+     */
+    public static IBinder getServiceOrThrow(String name) throws ServiceNotFoundException {
+        return null;
+    }
+
+    /**
      * Place a new @a service called @a name into the service
      * manager.
      *

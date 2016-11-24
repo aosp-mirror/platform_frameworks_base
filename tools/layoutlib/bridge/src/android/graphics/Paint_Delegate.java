@@ -90,10 +90,11 @@ public class Paint_Delegate {
     private int mHintingMode = Paint.HINTING_ON;
     private int mHyphenEdit;
     private float mLetterSpacing;  // not used in actual text rendering.
+    private float mWordSpacing;  // not used in actual text rendering.
     // Variant of the font. A paint's variant can only be compact or elegant.
     private FontVariant mFontVariant = FontVariant.COMPACT;
 
-    private Xfermode_Delegate mXfermode;
+    private int mPorterDuffMode = Xfermode.DEFAULT;
     private ColorFilter_Delegate mColorFilter;
     private Shader_Delegate mShader;
     private PathEffect_Delegate mPathEffect;
@@ -206,12 +207,10 @@ public class Paint_Delegate {
     }
 
     /**
-     * Returns the {@link Xfermode} delegate or null if none have been set
-     *
-     * @return the delegate or null.
+     * Returns the {@link PorterDuff.Mode} as an int
      */
-    public Xfermode_Delegate getXfermode() {
-        return mXfermode;
+    public int getPorterDuffMode() {
+        return mPorterDuffMode;
     }
 
     /**
@@ -841,16 +840,12 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long nSetXfermode(long native_object, long xfermode) {
-        // get the delegate from the native int.
+    /*package*/ static void nSetXfermode(long native_object, int xfermode) {
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
-            return xfermode;
+            return;
         }
-
-        delegate.mXfermode = Xfermode_Delegate.getDelegate(xfermode);
-
-        return xfermode;
+        delegate.mPorterDuffMode = xfermode;
     }
 
     @LayoutlibDelegate
@@ -998,7 +993,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nGetTextRunCursor(long native_object, char[] text,
+    /*package*/ static int nGetTextRunCursor(Paint paint, long native_object, char[] text,
             int contextStart, int contextLength, int flags, int offset, int cursorOpt) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
@@ -1007,7 +1002,7 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nGetTextRunCursor(long native_object, String text,
+    /*package*/ static int nGetTextRunCursor(Paint paint, long native_object, String text,
             int contextStart, int contextEnd, int flags, int offset, int cursorOpt) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
@@ -1083,6 +1078,26 @@ public class Paint_Delegate {
             return;
         }
         delegate.mLetterSpacing = letterSpacing;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static float nGetWordSpacing(long nativePaint) {
+        Paint_Delegate delegate = sManager.getDelegate(nativePaint);
+        if (delegate == null) {
+            return 0;
+        }
+        return delegate.mWordSpacing;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nSetWordSpacing(long nativePaint, float wordSpacing) {
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_TEXT_RENDERING,
+                "Paint.setWordSpacing() not supported.", null, null);
+        Paint_Delegate delegate = sManager.getDelegate(nativePaint);
+        if (delegate == null) {
+            return;
+        }
+        delegate.mWordSpacing = wordSpacing;
     }
 
     @LayoutlibDelegate
@@ -1215,7 +1230,7 @@ public class Paint_Delegate {
 
         mStrokeWidth = paint.mStrokeWidth;
         mStrokeMiter = paint.mStrokeMiter;
-        mXfermode = paint.mXfermode;
+        mPorterDuffMode = paint.mPorterDuffMode;
         mColorFilter = paint.mColorFilter;
         mShader = paint.mShader;
         mPathEffect = paint.mPathEffect;
@@ -1242,7 +1257,7 @@ public class Paint_Delegate {
         mTextSize = 20.f;
         mTextScaleX = 1.f;
         mTextSkewX = 0.f;
-        mXfermode = null;
+        mPorterDuffMode = Xfermode.DEFAULT;
         mColorFilter = null;
         mShader = null;
         mPathEffect = null;

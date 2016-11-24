@@ -24,14 +24,12 @@ import android.graphics.BlendComposite.BlendingMode;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter_Delegate;
-import android.graphics.PorterDuffXfermode_Delegate;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 
 /**
- * Provides various utility methods for {@link PorterDuffColorFilter_Delegate} and {@link
- * PorterDuffXfermode_Delegate}.
+ * Provides various utility methods for {@link PorterDuffColorFilter_Delegate}.
  */
 public final class PorterDuffUtility {
 
