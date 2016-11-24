@@ -6634,7 +6634,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean isManagedProfile(int userHandle) {
-        return getUserInfo(userHandle).isManagedProfile();
+        final UserInfo user = getUserInfo(userHandle);
+        return user != null && user.isManagedProfile();
     }
 
     private void enableIfNecessary(String packageName, int userId) {
@@ -8903,9 +8904,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
         }
-        final int callingUserId = mInjector.userHandleGetCallingUserId();
-        final UserInfo user = getUserInfo(callingUserId);
-        return user != null && user.isManagedProfile();
+        return isManagedProfile(mInjector.userHandleGetCallingUserId());
     }
 
     @Override
@@ -9537,63 +9536,95 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(caller);
         Preconditions.checkNotNull(serviceIntent);
         Preconditions.checkNotNull(connection);
-        final int callingUserId = mInjector.userHandleGetCallingUserId();
-        Preconditions.checkArgument(callingUserId != targetUserId,
+        Preconditions.checkArgument(mInjector.userHandleGetCallingUserId() != targetUserId,
                 "target user id must be different from the calling user id");
 
-        synchronized (this) {
-            final ActiveAdmin callingAdmin = getActiveAdminForCallerLocked(admin,
-                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            // Ensure the target user is valid.
-            if (isDeviceOwner(callingAdmin)) {
-                enforceManagedProfile(targetUserId, "Target user must be a managed profile");
-            } else {
-                // Further lock down to profile owner in managed profile.
-                enforceManagedProfile(callingUserId,
-                        "Only support profile owner in managed profile.");
-                if (mOwners.getDeviceOwnerUserId() != targetUserId) {
-                    throw new SecurityException("Target user must be a device owner.");
-                }
-            }
+        if (!getBindDeviceAdminTargetUsers(admin).contains(UserHandle.of(targetUserId))) {
+            throw new SecurityException("Not allowed to bind to target user id");
         }
+
+        final String targetPackage;
+        synchronized (this) {
+            targetPackage = getOwnerPackageNameForUserLocked(targetUserId);
+        }
+
         final long callingIdentity = mInjector.binderClearCallingIdentity();
         try {
-            if (!mUserManager.isSameProfileGroup(callingUserId, targetUserId)) {
-                throw new SecurityException(
-                        "Can only bind service across users under the same profile group");
-            }
-            final String targetPackage;
-            synchronized (this) {
-                targetPackage = getOwnerPackageNameForUserLocked(targetUserId);
-            }
-            // STOPSHIP(b/31952368): Add policy to control which packages can talk.
-            if (TextUtils.isEmpty(targetPackage) || !targetPackage.equals(admin.getPackageName())) {
-                throw new SecurityException("Device owner and profile owner must be the same " +
-                        "package in order to communicate.");
-            }
             // Validate and sanitize the incoming service intent.
             final Intent sanitizedIntent =
-                    createCrossUserServiceIntent(serviceIntent, targetPackage);
+                    createCrossUserServiceIntent(serviceIntent, targetPackage, targetUserId);
             if (sanitizedIntent == null) {
                 // Fail, cannot lookup the target service.
                 throw new SecurityException("Invalid intent or failed to look up the service");
             }
+
             // Ask ActivityManager to bind it. Notice that we are binding the service with the
             // caller app instead of DevicePolicyManagerService.
-            try {
-                return mInjector.getIActivityManager().bindService(
-                        caller, activtiyToken, serviceIntent,
-                        serviceIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                        connection, flags, mContext.getOpPackageName(),
-                        targetUserId) != 0;
-            } catch (RemoteException ex) {
-                // Same process, should not happen.
-            }
+            return mInjector.getIActivityManager().bindService(
+                    caller, activtiyToken, serviceIntent,
+                    serviceIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                    connection, flags, mContext.getOpPackageName(),
+                    targetUserId) != 0;
+        } catch (RemoteException ex) {
+            // Same process, should not happen.
         } finally {
             mInjector.binderRestoreCallingIdentity(callingIdentity);
         }
-        // Fail to bind.
+
+        // Failed to bind.
         return false;
+    }
+
+    @Override
+    public @NonNull List<UserHandle> getBindDeviceAdminTargetUsers(@NonNull ComponentName admin) {
+        if (!mHasFeature) {
+            return Collections.emptyList();
+        }
+        Preconditions.checkNotNull(admin);
+        ArrayList<UserHandle> targetUsers = new ArrayList<>();
+
+        synchronized (this) {
+            ActiveAdmin callingOwner = getActiveAdminForCallerLocked(
+                    admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            final int callingUserId = mInjector.userHandleGetCallingUserId();
+            final boolean isCallerDeviceOwner = isDeviceOwner(callingOwner);
+            final boolean isCallerManagedProfile = isManagedProfile(callingUserId);
+            if (!isCallerDeviceOwner && !isCallerManagedProfile
+                    /* STOPSHIP(b/32326223) Reinstate when setAffiliationIds is public
+                    ||   !isAffiliatedUser(callingUserId) */) {
+                return targetUsers;
+            }
+
+            final long callingIdentity = mInjector.binderClearCallingIdentity();
+            try {
+                String callingOwnerPackage = callingOwner.info.getComponent().getPackageName();
+                for (int userId : mUserManager.getProfileIds(
+                        callingUserId, /* enabledOnly= */ false)) {
+                    if (userId == callingUserId) {
+                        continue;
+                    }
+
+                    // We only allow the device owner and a managed profile owner to bind to each
+                    // other.
+                    if ((isCallerManagedProfile && userId == mOwners.getDeviceOwnerUserId())
+                            || (isCallerDeviceOwner && isManagedProfile(userId))) {
+                        String targetOwnerPackage = getOwnerPackageNameForUserLocked(userId);
+
+                        // Both must be the same package and be affiliated in order to bind.
+                        if (callingOwnerPackage.equals(targetOwnerPackage)
+                            /* STOPSHIP(b/32326223) Reinstate when setAffiliationIds is public
+                               && isAffiliatedUser(userId)*/) {
+                            targetUsers.add(UserHandle.of(userId));
+                        }
+                    }
+                }
+            } finally {
+                mInjector.binderRestoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        return targetUsers;
     }
 
     /**
@@ -9776,7 +9807,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Return the package name of owner in a given user.
      */
     private String getOwnerPackageNameForUserLocked(int userId) {
-        return getDeviceOwnerUserId() == userId
+        return mOwners.getDeviceOwnerUserId() == userId
                 ? mOwners.getDeviceOwnerPackageName()
                 : mOwners.getProfileOwnerPackage(userId);
     }
@@ -9787,14 +9818,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * @return Intent that have component explicitly set. {@code null} if the incoming intent
      *         or target service is invalid.
      */
-    private Intent createCrossUserServiceIntent (
-            @NonNull Intent rawIntent, @NonNull String expectedPackageName) {
+    private Intent createCrossUserServiceIntent(
+            @NonNull Intent rawIntent, @NonNull String expectedPackageName,
+            @UserIdInt int targetUserId) throws RemoteException {
         if (rawIntent.getComponent() == null && rawIntent.getPackage() == null) {
             Log.e(LOG_TAG, "Service intent must be explicit (with a package name or component): "
                     + rawIntent);
             return null;
         }
-        ResolveInfo info = mInjector.getPackageManager().resolveService(rawIntent, 0);
+        ResolveInfo info = mIPackageManager.resolveService(
+                rawIntent,
+                rawIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                0,  // flags
+                targetUserId);
         if (info == null || info.serviceInfo == null) {
             Log.e(LOG_TAG, "Fail to look up the service: " + rawIntent);
             return null;
