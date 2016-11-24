@@ -79,6 +79,9 @@ public class PersistentDataBlockManager {
      * Returns the number of bytes written or -1 on error. If the block is too big
      * to fit on the partition, returns -MAX_BLOCK_SIZE.
      *
+     * {@link #wipe} will block any further {@link #write} operation until reboot,
+     * in which case -1 will be returned.
+     *
      * @param data the data to write
      */
     public int write(byte[] data) {
@@ -129,6 +132,8 @@ public class PersistentDataBlockManager {
     /**
      * Zeroes the previously written block in its entirety. Calling this method
      * will erase all data written to the persistent data partition.
+     * It will also prevent any further {@link #write} operation until reboot,
+     * in order to prevent a potential race condition. See b/30352311.
      */
     public void wipe() {
         try {
