@@ -46,6 +46,7 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     private final View mRootView;
     private final TextView mFooterText;
     private final ImageView mFooterIcon;
+    private final ImageView mFooterIcon2;
     private final Context mContext;
     private final Callback mCallback = new Callback();
 
@@ -57,8 +58,10 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
 
     private boolean mIsVisible;
     private boolean mIsIconVisible;
+    private boolean mIsIcon2Visible;
     private int mFooterTextId;
     private int mFooterIconId;
+    private int mFooterIcon2Id;
 
     public QSFooter(QSPanel qsPanel, Context context) {
         mRootView = LayoutInflater.from(context)
@@ -66,7 +69,9 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         mRootView.setOnClickListener(this);
         mFooterText = (TextView) mRootView.findViewById(R.id.footer_text);
         mFooterIcon = (ImageView) mRootView.findViewById(R.id.footer_icon);
+        mFooterIcon2 = (ImageView) mRootView.findViewById(R.id.footer_icon2);
         mFooterIconId = R.drawable.ic_qs_vpn;
+        mFooterIcon2Id = R.drawable.ic_qs_network_logging;
         mContext = context;
         mMainHandler = new Handler();
     }
@@ -113,17 +118,29 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     }
 
     private void handleRefreshState() {
-        mIsIconVisible = mSecurityController.isVpnEnabled();
         // If the device has device owner, show "Device may be monitored", but --
         // TODO See b/25779452 -- device owner doesn't actually have monitoring power.
+        boolean isVpnEnabled = mSecurityController.isVpnEnabled();
+        boolean isNetworkLoggingEnabled = mSecurityController.isNetworkLoggingEnabled();
+        mIsIconVisible = isVpnEnabled || isNetworkLoggingEnabled;
+        mIsIcon2Visible = isVpnEnabled && isNetworkLoggingEnabled;
         if (mSecurityController.isDeviceManaged()) {
             mFooterTextId = R.string.device_owned_footer;
             mIsVisible = true;
+            int footerIconId = isVpnEnabled
+                    ? R.drawable.ic_qs_vpn
+                    : R.drawable.ic_qs_network_logging;
+            if (mFooterIconId != footerIconId) {
+                mFooterIconId = footerIconId;
+                mMainHandler.post(mUpdateIcon);
+            }
         } else {
             boolean isBranded = mSecurityController.isVpnBranded();
             mFooterTextId = isBranded ? R.string.branded_vpn_footer : R.string.vpn_footer;
             // Update the VPN footer icon, if needed.
-            int footerIconId = isBranded ? R.drawable.ic_qs_branded_vpn : R.drawable.ic_qs_vpn;
+            int footerIconId = isVpnEnabled
+                    ? (isBranded ? R.drawable.ic_qs_branded_vpn : R.drawable.ic_qs_vpn)
+                    : R.drawable.ic_qs_network_logging;
             if (mFooterIconId != footerIconId) {
                 mFooterIconId = footerIconId;
                 mMainHandler.post(mUpdateIcon);
@@ -219,6 +236,7 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         @Override
         public void run() {
             mFooterIcon.setImageResource(mFooterIconId);
+            mFooterIcon2.setImageResource(mFooterIcon2Id);
         }
     };
 
@@ -230,6 +248,7 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
             }
             mRootView.setVisibility(mIsVisible ? View.VISIBLE : View.GONE);
             mFooterIcon.setVisibility(mIsIconVisible ? View.VISIBLE : View.INVISIBLE);
+            mFooterIcon2.setVisibility(mIsIcon2Visible ? View.VISIBLE : View.INVISIBLE);
         }
     };
 

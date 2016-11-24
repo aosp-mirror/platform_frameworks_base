@@ -6531,6 +6531,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private void enforceDeviceOwnerOrManageUsers() {
+        synchronized (this) {
+            if (getActiveAdminWithPolicyForUidLocked(null, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER,
+                    mInjector.binderGetCallingUid()) != null) {
+                return;
+            }
+        }
+        enforceManageUsers();
+    }
+
     private void ensureCallerPackage(@Nullable String packageName) {
         if (packageName == null) {
             Preconditions.checkState(isCallerWithSystemUid(),
@@ -9488,9 +9498,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        Preconditions.checkNotNull(admin);
         synchronized (this) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            enforceDeviceOwnerOrManageUsers();
             return isNetworkLoggingEnabledInternalLocked();
         }
     }
