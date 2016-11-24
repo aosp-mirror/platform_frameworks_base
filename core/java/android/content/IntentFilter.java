@@ -1883,7 +1883,8 @@ public class IntentFilter implements Parcelable {
         */
     }
 
-    private IntentFilter(Parcel source) {
+    /** @hide */
+    public IntentFilter(Parcel source) {
         mActions = new ArrayList<String>();
         source.readStringList(mActions);
         if (source.readInt() != 0) {

@@ -16,6 +16,8 @@
 
 package android.content.pm;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -65,6 +67,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -80,6 +83,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
@@ -307,14 +311,16 @@ public class PackageParser {
         }
     }
 
-    static class ParseComponentArgs extends ParsePackageItemArgs {
+    /** @hide */
+    @VisibleForTesting
+    public static class ParseComponentArgs extends ParsePackageItemArgs {
         final String[] sepProcesses;
         final int processRes;
         final int descriptionRes;
         final int enabledRes;
         int flags;
 
-        ParseComponentArgs(Package _owner, String[] _outError,
+        public ParseComponentArgs(Package _owner, String[] _outError,
                 int _nameRes, int _labelRes, int _iconRes, int _roundIconRes, int _logoRes,
                 int _bannerRes,
                 String[] _sepProcesses, int _processRes,
@@ -874,12 +880,24 @@ public class PackageParser {
 
     @VisibleForTesting
     protected Package fromCacheEntry(byte[] bytes) throws IOException {
-        return null;
+        Parcel p = Parcel.obtain();
+        p.unmarshall(bytes, 0, bytes.length);
+        p.setDataPosition(0);
+
+        PackageParser.Package pkg = new PackageParser.Package(p);
+        p.recycle();
+
+        return pkg;
     }
 
     @VisibleForTesting
     protected byte[] toCacheEntry(Package pkg) throws IOException {
-        return null;
+        Parcel p = Parcel.obtain();
+        pkg.writeToParcel(p, 0 /* flags */);
+        byte[] serialized = p.marshall();
+        p.recycle();
+
+        return serialized;
     }
 
     /**
@@ -1516,7 +1534,7 @@ public class PackageParser {
             final Certificate[][] certificates;
             if ((flags & PARSE_COLLECT_CERTIFICATES) != 0) {
                 // TODO: factor signature related items out of Package object
-                final Package tempPkg = new Package(null);
+                final Package tempPkg = new Package((String) null);
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
                 try {
                     collectCertificates(tempPkg, apkFile, 0 /*parseFlags*/);
@@ -3623,6 +3641,13 @@ public class PackageParser {
     private static boolean parsePackageItemInfo(Package owner, PackageItemInfo outInfo,
             String[] outError, String tag, TypedArray sa, boolean nameRequired,
             int nameRes, int labelRes, int iconRes, int roundIconRes, int logoRes, int bannerRes) {
+        // This case can only happen in unit tests where we sometimes need to create fakes
+        // of various package parser data structures.
+        if (sa == null) {
+            outError[0] = tag + " does not contain any attributes";
+            return false;
+        }
+
         String name = sa.getNonConfigurationString(nameRes, 0);
         if (name == null) {
             if (nameRequired) {
@@ -5113,7 +5138,7 @@ public class PackageParser {
      * Representation of a full package parsed from APK files on disk. A package
      * consists of a single base APK, and zero or more split APKs.
      */
-    public final static class Package {
+    public final static class Package implements Parcelable {
 
         public String packageName;
 
@@ -5154,7 +5179,7 @@ public class PackageParser {
         public boolean baseHardwareAccelerated;
 
         // For now we only support one application per package.
-        public final ApplicationInfo applicationInfo = new ApplicationInfo();
+        public ApplicationInfo applicationInfo = new ApplicationInfo();
 
         public final ArrayList<Permission> permissions = new ArrayList<Permission>(0);
         public final ArrayList<PermissionGroup> permissionGroups = new ArrayList<PermissionGroup>(0);
@@ -5578,13 +5603,296 @@ public class PackageParser {
                 + Integer.toHexString(System.identityHashCode(this))
                 + " " + packageName + "}";
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public Package(Parcel dest) {
+            // We use the boot classloader for all classes that we load.
+            final ClassLoader boot = Object.class.getClassLoader();
+
+            packageName = dest.readString();
+            splitNames = dest.readStringArray();
+            volumeUuid = dest.readString();
+            codePath = dest.readString();
+            baseCodePath = dest.readString();
+            splitCodePaths = dest.readStringArray();
+            baseRevisionCode = dest.readInt();
+            splitRevisionCodes = dest.createIntArray();
+            splitFlags = dest.createIntArray();
+            splitPrivateFlags = dest.createIntArray();
+            baseHardwareAccelerated = (dest.readInt() == 1);
+            applicationInfo = dest.readParcelable(boot);
+
+            // We don't serialize the "owner" package and the application info object for each of
+            // these components, in order to save space and to avoid circular dependencies while
+            // serialization. We need to fix them all up here.
+            dest.readParcelableList(permissions, boot);
+            fixupOwner(permissions);
+            dest.readParcelableList(permissionGroups, boot);
+            fixupOwner(permissionGroups);
+            dest.readParcelableList(activities, boot);
+            fixupOwner(activities);
+            dest.readParcelableList(receivers, boot);
+            fixupOwner(receivers);
+            dest.readParcelableList(providers, boot);
+            fixupOwner(providers);
+            dest.readParcelableList(services, boot);
+            fixupOwner(services);
+            dest.readParcelableList(instrumentation, boot);
+            fixupOwner(instrumentation);
+
+            dest.readStringList(requestedPermissions);
+            protectedBroadcasts = dest.createStringArrayList();
+            parentPackage = dest.readParcelable(boot);
+
+            childPackages = new ArrayList<>();
+            dest.readParcelableList(childPackages, boot);
+            if (childPackages.size() == 0) {
+                childPackages = null;
+            }
+
+            libraryNames = dest.createStringArrayList();
+            usesLibraries = dest.createStringArrayList();
+            usesOptionalLibraries = dest.createStringArrayList();
+            usesLibraryFiles = dest.readStringArray();
+
+            preferredActivityFilters = new ArrayList<>();
+            dest.readParcelableList(preferredActivityFilters, boot);
+            if (preferredActivityFilters.size() == 0) {
+                preferredActivityFilters = null;
+            }
+
+            mOriginalPackages = dest.createStringArrayList();
+            mRealPackage = dest.readString();
+            mAdoptPermissions = dest.createStringArrayList();
+            mAppMetaData = dest.readBundle();
+            mVersionCode = dest.readInt();
+            mVersionName = dest.readString();
+            mSharedUserId = dest.readString();
+            mSharedUserLabel = dest.readInt();
+
+            mSignatures = (Signature[]) dest.readParcelableArray(boot, Signature.class);
+            mCertificates = (Certificate[][]) dest.readSerializable();
+
+            mPreferredOrder = dest.readInt();
+
+            // long[] packageUsageTimeMillis is not persisted because it isn't information that
+            // is parsed from the APK.
+
+            // Object mExtras is not persisted because it is not information that is read from
+            // the APK, rather, it is supplied by callers.
+
+
+            configPreferences = new ArrayList<>();
+            dest.readParcelableList(configPreferences, boot);
+            if (configPreferences.size() == 0) {
+                configPreferences = null;
+            }
+
+            reqFeatures = new ArrayList<>();
+            dest.readParcelableList(reqFeatures, boot);
+            if (reqFeatures.size() == 0) {
+                reqFeatures = null;
+            }
+
+            featureGroups = new ArrayList<>();
+            dest.readParcelableList(featureGroups, boot);
+            if (featureGroups.size() == 0) {
+                featureGroups = null;
+            }
+
+            installLocation = dest.readInt();
+            coreApp = (dest.readInt() == 1);
+            mRequiredForAllUsers = (dest.readInt() == 1);
+            mRestrictedAccountType = dest.readString();
+            mRequiredAccountType = dest.readString();
+            mOverlayTarget = dest.readString();
+            mOverlayPriority = dest.readInt();
+            mTrustedOverlay = (dest.readInt() == 1);
+            mSigningKeys = (ArraySet<PublicKey>) dest.readArraySet(boot);
+            mUpgradeKeySets = (ArraySet<String>) dest.readArraySet(boot);
+
+            mKeySetMapping = readKeySetMapping(dest);
+
+            cpuAbiOverride = dest.readString();
+            use32bitAbi = (dest.readInt() == 1);
+            restrictUpdateHash = dest.createByteArray();
+        }
+
+        /**
+         * Sets the package owner and the the {@code applicationInfo} for every component
+         * owner by this package.
+         */
+        private void fixupOwner(List<? extends Component<?>> list) {
+            if (list != null) {
+                for (Component<?> c : list) {
+                    c.owner = this;
+                    if (c instanceof Activity) {
+                        ((Activity) c).info.applicationInfo = this.applicationInfo;
+                    } else if (c instanceof Service) {
+                        ((Service) c).info.applicationInfo = this.applicationInfo;
+                    } else if (c instanceof Provider) {
+                        ((Provider) c).info.applicationInfo = this.applicationInfo;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(packageName);
+            dest.writeStringArray(splitNames);
+            dest.writeString(volumeUuid);
+            dest.writeString(codePath);
+            dest.writeString(baseCodePath);
+            dest.writeStringArray(splitCodePaths);
+            dest.writeInt(baseRevisionCode);
+            dest.writeIntArray(splitRevisionCodes);
+            dest.writeIntArray(splitFlags);
+            dest.writeIntArray(splitPrivateFlags);
+            dest.writeInt(baseHardwareAccelerated ? 1 : 0);
+            dest.writeParcelable(applicationInfo, flags);
+
+            dest.writeParcelableList(permissions, flags);
+            dest.writeParcelableList(permissionGroups, flags);
+            dest.writeParcelableList(activities, flags);
+            dest.writeParcelableList(receivers, flags);
+            dest.writeParcelableList(providers, flags);
+            dest.writeParcelableList(services, flags);
+            dest.writeParcelableList(instrumentation, flags);
+
+            dest.writeStringList(requestedPermissions);
+            dest.writeStringList(protectedBroadcasts);
+            dest.writeParcelable(parentPackage, flags);
+            dest.writeParcelableList(childPackages, flags);
+            dest.writeStringList(libraryNames);
+            dest.writeStringList(usesLibraries);
+            dest.writeStringList(usesOptionalLibraries);
+            dest.writeStringArray(usesLibraryFiles);
+
+            dest.writeParcelableList(preferredActivityFilters, flags);
+
+            dest.writeStringList(mOriginalPackages);
+            dest.writeString(mRealPackage);
+            dest.writeStringList(mAdoptPermissions);
+            dest.writeBundle(mAppMetaData);
+            dest.writeInt(mVersionCode);
+            dest.writeString(mVersionName);
+            dest.writeString(mSharedUserId);
+            dest.writeInt(mSharedUserLabel);
+
+            dest.writeParcelableArray(mSignatures, flags);
+            dest.writeSerializable(mCertificates);
+
+            dest.writeInt(mPreferredOrder);
+
+            // long[] packageUsageTimeMillis is not persisted because it isn't information that
+            // is parsed from the APK.
+
+            // Object mExtras is not persisted because it is not information that is read from
+            // the APK, rather, it is supplied by callers.
+
+            dest.writeParcelableList(configPreferences, flags);
+            dest.writeParcelableList(reqFeatures, flags);
+            dest.writeParcelableList(featureGroups, flags);
+
+            dest.writeInt(installLocation);
+            dest.writeInt(coreApp ? 1 : 0);
+            dest.writeInt(mRequiredForAllUsers ? 1 : 0);
+            dest.writeString(mRestrictedAccountType);
+            dest.writeString(mRequiredAccountType);
+            dest.writeString(mOverlayTarget);
+            dest.writeInt(mOverlayPriority);
+            dest.writeInt(mTrustedOverlay ? 1 : 0);
+            dest.writeArraySet(mSigningKeys);
+            dest.writeArraySet(mUpgradeKeySets);
+            writeKeySetMapping(dest, mKeySetMapping);
+            dest.writeString(cpuAbiOverride);
+            dest.writeInt(use32bitAbi ? 1 : 0);
+            dest.writeByteArray(restrictUpdateHash);
+        }
+
+
+        /**
+         * Writes the keyset mapping to the provided package. {@code null} mappings are permitted.
+         */
+        private static void writeKeySetMapping(
+                Parcel dest, ArrayMap<String, ArraySet<PublicKey>> keySetMapping) {
+            if (keySetMapping == null) {
+                dest.writeInt(-1);
+                return;
+            }
+
+            final int N = keySetMapping.size();
+            dest.writeInt(N);
+
+            for (int i = 0; i < N; i++) {
+                dest.writeString(keySetMapping.keyAt(i));
+                ArraySet<PublicKey> keys = keySetMapping.valueAt(i);
+                if (keys == null) {
+                    dest.writeInt(-1);
+                    continue;
+                }
+
+                final int M = keys.size();
+                dest.writeInt(M);
+                for (int j = 0; j < M; j++) {
+                    dest.writeSerializable(keys.valueAt(j));
+                }
+            }
+        }
+
+        /**
+         * Reads a keyset mapping from the given parcel at the given data position. May return
+         * {@code null} if the serialized mapping was {@code null}.
+         */
+        private static ArrayMap<String, ArraySet<PublicKey>> readKeySetMapping(Parcel in) {
+            final int N = in.readInt();
+            if (N == -1) {
+                return null;
+            }
+
+            ArrayMap<String, ArraySet<PublicKey>> keySetMapping = new ArrayMap<>();
+            for (int i = 0; i < N; ++i) {
+                String key = in.readString();
+                final int M = in.readInt();
+                if (M == -1) {
+                    keySetMapping.put(key, null);
+                    continue;
+                }
+
+                ArraySet<PublicKey> keys = new ArraySet<>(M);
+                for (int j = 0; j < M; ++j) {
+                    PublicKey pk = (PublicKey) in.readSerializable();
+                    keys.add(pk);
+                }
+
+                keySetMapping.put(key, keys);
+            }
+
+            return keySetMapping;
+        }
+
+        public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Package>() {
+            public Package createFromParcel(Parcel in) {
+                return new Package(in);
+            }
+
+            public Package[] newArray(int size) {
+                return new Package[size];
+            }
+        };
     }
 
-    public static class Component<II extends IntentInfo> {
-        public final Package owner;
+    public static abstract class Component<II extends IntentInfo> {
         public final ArrayList<II> intents;
         public final String className;
+
         public Bundle metaData;
+        public Package owner;
 
         ComponentName componentName;
         String componentShortName;
@@ -5655,6 +5963,83 @@ public class PackageParser {
             return componentName;
         }
 
+        protected Component(Parcel in) {
+            className = in.readString();
+            metaData = in.readBundle();
+            intents = createIntentsList(in);
+
+            owner = null;
+        }
+
+        protected void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(className);
+            dest.writeBundle(metaData);
+
+            writeIntentsList(intents, dest, flags);
+        }
+
+        /**
+         * <p>
+         * Implementation note: The serialized form for the intent list also contains the name
+         * of the concrete class that's stored in the list, and assumes that every element of the
+         * list is of the same type. This is very similar to the original parcelable mechanism.
+         * We cannot use that directly because IntentInfo extends IntentFilter, which is parcelable
+         * and is public API. It also declares Parcelable related methods as final which means
+         * we can't extend them. The approach of using composition instead of inheritance leads to
+         * a large set of cascading changes in the PackageManagerService, which seem undesirable.
+         *
+         * <p>
+         * <b>WARNING: </b> The list of objects returned by this function might need to be fixed up
+         * to make sure their owner fields are consistent. See {@code fixupOwner}.
+         */
+        private static void writeIntentsList(ArrayList<? extends IntentInfo> list, Parcel out,
+                                             int flags) {
+            if (list == null) {
+                out.writeInt(-1);
+                return;
+            }
+
+            final int N = list.size();
+            out.writeInt(N);
+
+            // Don't bother writing the component name if the list is empty.
+            if (N > 0) {
+                IntentInfo info = list.get(0);
+                out.writeString(info.getClass().getName());
+
+                for (int i = 0; i < N;i++) {
+                    list.get(i).writeIntentInfoToParcel(out, flags);
+                }
+            }
+        }
+
+        private static <T extends IntentInfo> ArrayList<T> createIntentsList(Parcel in) {
+            int N = in.readInt();
+            if (N == -1) {
+                return null;
+            }
+
+            if (N == 0) {
+                return new ArrayList<>(0);
+            }
+
+            String componentName = in.readString();
+            final ArrayList<T> intentsList;
+            try {
+                final Class<T> cls = (Class<T>) Class.forName(componentName);
+                final Constructor<T> cons = cls.getConstructor(Parcel.class);
+
+                intentsList = new ArrayList<>(N);
+                for (int i = 0; i < N; ++i) {
+                    intentsList.add(cons.newInstance(in));
+                }
+            } catch (ReflectiveOperationException ree) {
+                throw new AssertionError("Unable to construct intent list for: " + componentName);
+            }
+
+            return intentsList;
+        }
+
         public void appendComponentShortName(StringBuilder sb) {
             ComponentName.appendShortString(sb, owner.applicationInfo.packageName, className);
         }
@@ -5669,7 +6054,7 @@ public class PackageParser {
         }
     }
 
-    public final static class Permission extends Component<IntentInfo> {
+    public final static class Permission extends Component<IntentInfo> implements Parcelable {
         public final PermissionInfo info;
         public boolean tree;
         public PermissionGroup group;
@@ -5694,9 +6079,40 @@ public class PackageParser {
                 + Integer.toHexString(System.identityHashCode(this))
                 + " " + info.name + "}";
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeParcelable(info, flags);
+            dest.writeInt(tree ? 1 : 0);
+            dest.writeParcelable(group, flags);
+        }
+
+        private Permission(Parcel in) {
+            super(in);
+            final ClassLoader boot = Object.class.getClassLoader();
+            info = in.readParcelable(boot);
+            tree = (in.readInt() == 1);
+            group = in.readParcelable(boot);
+        }
+
+        public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Permission>() {
+            public Permission createFromParcel(Parcel in) {
+                return new Permission(in);
+            }
+
+            public Permission[] newArray(int size) {
+                return new Permission[size];
+            }
+        };
     }
 
-    public final static class PermissionGroup extends Component<IntentInfo> {
+    public final static class PermissionGroup extends Component<IntentInfo> implements Parcelable {
         public final PermissionGroupInfo info;
 
         public PermissionGroup(Package _owner) {
@@ -5719,6 +6135,32 @@ public class PackageParser {
                 + Integer.toHexString(System.identityHashCode(this))
                 + " " + info.name + "}";
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeParcelable(info, flags);
+        }
+
+        private PermissionGroup(Parcel in) {
+            super(in);
+            info = in.readParcelable(Object.class.getClassLoader());
+        }
+
+        public static final Parcelable.Creator CREATOR = new Parcelable.Creator<PermissionGroup>() {
+            public PermissionGroup createFromParcel(Parcel in) {
+                return new PermissionGroup(in);
+            }
+
+            public PermissionGroup[] newArray(int size) {
+                return new PermissionGroup[size];
+            }
+        };
     }
 
     private static boolean copyNeeded(int flags, Package p,
@@ -5871,7 +6313,7 @@ public class PackageParser {
         return pgi;
     }
 
-    public final static class Activity extends Component<ActivityIntentInfo> {
+    public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {
         public final ActivityInfo info;
 
         public Activity(final ParseComponentArgs args, final ActivityInfo _info) {
@@ -5894,6 +6336,36 @@ public class PackageParser {
             sb.append('}');
             return sb.toString();
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeParcelable(info, flags | Parcelable.PARCELABLE_ELIDE_DUPLICATES);
+        }
+
+        private Activity(Parcel in) {
+            super(in);
+            info = in.readParcelable(Object.class.getClassLoader());
+
+            for (ActivityIntentInfo aii : intents) {
+                aii.activity = this;
+            }
+        }
+
+        public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Activity>() {
+            public Activity createFromParcel(Parcel in) {
+                return new Activity(in);
+            }
+
+            public Activity[] newArray(int size) {
+                return new Activity[size];
+            }
+        };
     }
 
     public static final ActivityInfo generateActivityInfo(Activity a, int flags,
@@ -5925,7 +6397,7 @@ public class PackageParser {
         return ai;
     }
 
-    public final static class Service extends Component<ServiceIntentInfo> {
+    public final static class Service extends Component<ServiceIntentInfo> implements Parcelable {
         public final ServiceInfo info;
 
         public Service(final ParseComponentArgs args, final ServiceInfo _info) {
@@ -5948,6 +6420,36 @@ public class PackageParser {
             sb.append('}');
             return sb.toString();
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeParcelable(info, flags | Parcelable.PARCELABLE_ELIDE_DUPLICATES);
+        }
+
+        private Service(Parcel in) {
+            super(in);
+            info = in.readParcelable(Object.class.getClassLoader());
+
+            for (ServiceIntentInfo aii : intents) {
+                aii.service = this;
+            }
+        }
+
+        public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Service>() {
+            public Service createFromParcel(Parcel in) {
+                return new Service(in);
+            }
+
+            public Service[] newArray(int size) {
+                return new Service[size];
+            }
+        };
     }
 
     public static final ServiceInfo generateServiceInfo(Service s, int flags,
@@ -5966,7 +6468,7 @@ public class PackageParser {
         return si;
     }
 
-    public final static class Provider extends Component<ProviderIntentInfo> {
+    public final static class Provider extends Component<ProviderIntentInfo> implements Parcelable {
         public final ProviderInfo info;
         public boolean syncable;
 
@@ -5997,6 +6499,38 @@ public class PackageParser {
             sb.append('}');
             return sb.toString();
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeParcelable(info, flags | Parcelable.PARCELABLE_ELIDE_DUPLICATES);
+            dest.writeInt((syncable) ? 1 : 0);
+        }
+
+        private Provider(Parcel in) {
+            super(in);
+            info = in.readParcelable(Object.class.getClassLoader());
+            syncable = (in.readInt() == 1);
+
+            for (ProviderIntentInfo aii : intents) {
+                aii.provider = this;
+            }
+        }
+
+        public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Provider>() {
+            public Provider createFromParcel(Parcel in) {
+                return new Provider(in);
+            }
+
+            public Provider[] newArray(int size) {
+                return new Provider[size];
+            }
+        };
     }
 
     public static final ProviderInfo generateProviderInfo(Provider p, int flags,
@@ -6020,7 +6554,8 @@ public class PackageParser {
         return pi;
     }
 
-    public final static class Instrumentation extends Component<IntentInfo> {
+    public final static class Instrumentation extends Component<IntentInfo> implements
+            Parcelable {
         public final InstrumentationInfo info;
 
         public Instrumentation(final ParsePackageItemArgs args, final InstrumentationInfo _info) {
@@ -6042,6 +6577,32 @@ public class PackageParser {
             sb.append('}');
             return sb.toString();
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeParcelable(info, flags);
+        }
+
+        private Instrumentation(Parcel in) {
+            super(in);
+            info = in.readParcelable(Object.class.getClassLoader());
+        }
+
+        public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Instrumentation>() {
+            public Instrumentation createFromParcel(Parcel in) {
+                return new Instrumentation(in);
+            }
+
+            public Instrumentation[] newArray(int size) {
+                return new Instrumentation[size];
+            }
+        };
     }
 
     public static final InstrumentationInfo generateInstrumentationInfo(
@@ -6055,7 +6616,7 @@ public class PackageParser {
         return ii;
     }
 
-    public static class IntentInfo extends IntentFilter {
+    public static abstract class IntentInfo extends IntentFilter {
         public boolean hasDefault;
         public int labelRes;
         public CharSequence nonLocalizedLabel;
@@ -6063,10 +6624,36 @@ public class PackageParser {
         public int logo;
         public int banner;
         public int preferred;
+
+        protected IntentInfo() {
+        }
+
+        protected IntentInfo(Parcel dest) {
+            super(dest);
+            hasDefault = (dest.readInt() == 1);
+            labelRes = dest.readInt();
+            nonLocalizedLabel = dest.readCharSequence();
+            icon = dest.readInt();
+            logo = dest.readInt();
+            banner = dest.readInt();
+            preferred = dest.readInt();
+        }
+
+
+        public void writeIntentInfoToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeInt(hasDefault ? 1 : 0);
+            dest.writeInt(labelRes);
+            dest.writeCharSequence(nonLocalizedLabel);
+            dest.writeInt(icon);
+            dest.writeInt(logo);
+            dest.writeInt(banner);
+            dest.writeInt(preferred);
+        }
     }
 
     public final static class ActivityIntentInfo extends IntentInfo {
-        public final Activity activity;
+        public Activity activity;
 
         public ActivityIntentInfo(Activity _activity) {
             activity = _activity;
@@ -6081,10 +6668,14 @@ public class PackageParser {
             sb.append('}');
             return sb.toString();
         }
+
+        public ActivityIntentInfo(Parcel in) {
+            super(in);
+        }
     }
 
     public final static class ServiceIntentInfo extends IntentInfo {
-        public final Service service;
+        public Service service;
 
         public ServiceIntentInfo(Service _service) {
             service = _service;
@@ -6099,10 +6690,14 @@ public class PackageParser {
             sb.append('}');
             return sb.toString();
         }
+
+        public ServiceIntentInfo(Parcel in) {
+            super(in);
+        }
     }
 
     public static final class ProviderIntentInfo extends IntentInfo {
-        public final Provider provider;
+        public Provider provider;
 
         public ProviderIntentInfo(Provider provider) {
             this.provider = provider;
@@ -6116,6 +6711,10 @@ public class PackageParser {
             provider.appendComponentShortName(sb);
             sb.append('}');
             return sb.toString();
+        }
+
+        public ProviderIntentInfo(Parcel in) {
+            super(in);
         }
     }
 
