@@ -120,7 +120,8 @@ public abstract class UserManagerInternal {
     public abstract void onEphemeralUserStop(int userId);
 
     /**
-     * Same as UserManager.createUser(), but bypasses the check for DISALLOW_ADD_USER.
+     * Same as UserManager.createUser(), but bypasses the check for
+     * {@link UserManager#DISALLOW_ADD_USER} and {@link UserManager#DISALLOW_ADD_MANAGED_PROFILE}
      *
      * <p>Called by the {@link com.android.server.devicepolicy.DevicePolicyManagerService} when
      * createAndManageUser is called by the device owner.
@@ -129,7 +130,8 @@ public abstract class UserManagerInternal {
 
     /**
      * Same as {@link UserManager#removeUser(int userHandle)}, but bypasses the check for
-     * {@link UserManager#DISALLOW_REMOVE_USER} and does not require the
+     * {@link UserManager#DISALLOW_REMOVE_USER} and
+     * {@link UserManager#DISALLOW_REMOVE_MANAGED_PROFILE} and does not require the
      * {@link android.Manifest.permission#MANAGE_USERS} permission.
      */
     public abstract boolean removeUserEvenWhenDisallowed(int userId);

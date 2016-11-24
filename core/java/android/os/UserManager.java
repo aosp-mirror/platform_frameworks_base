@@ -253,6 +253,20 @@ public class UserManager {
     public static final String DISALLOW_REMOVE_USER = "no_remove_user";
 
     /**
+     * Specifies if managed profiles of this user can be removed, other than by its profile owner.
+     * The default value is <code>false</code>.
+     * <p>
+     * This restriction can only be set by device owners.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_REMOVE_MANAGED_PROFILE = "no_remove_managed_profile";
+
+    /**
      * Specifies if a user is disallowed from enabling or
      * accessing debugging features. The default value is <code>false</code>.
      *
@@ -322,8 +336,8 @@ public class UserManager {
     public static final String DISALLOW_FACTORY_RESET = "no_factory_reset";
 
     /**
-     * Specifies if a user is disallowed from adding new users and
-     * profiles. This can only be set by device owners and profile owners on the primary user.
+     * Specifies if a user is disallowed from adding new users. This can only be set by device
+     * owners and profile owners on the primary user.
      * The default value is <code>false</code>.
      * <p>This restriction has no effect on secondary users and managed profiles since only the
      * primary user can add other users.
@@ -335,6 +349,20 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_ADD_USER = "no_add_user";
+
+    /**
+     * Specifies if a user is disallowed from adding managed profiles.
+     * <p>The default value for an unmanaged user is <code>false</code>.
+     * For users with a device owner set, the default is <code>true</code>
+     * <p>This restriction can only be set by device owners.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_ADD_MANAGED_PROFILE = "no_add_managed_profile";
 
     /**
      * Specifies if a user is disallowed from disabling application
@@ -1403,7 +1431,7 @@ public class UserManager {
 
     /**
      * Similar to {@link #createProfileForUser(String, int, int, String[])}
-     * except bypassing the checking of {@link UserManager#DISALLOW_ADD_USER}.
+     * except bypassing the checking of {@link UserManager#DISALLOW_ADD_MANAGED_PROFILE}.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
      * @see #createProfileForUser(String, int, int, String[])

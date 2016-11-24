@@ -241,15 +241,14 @@ public class UserManagerTest extends AndroidTestCase {
         }
     }
 
-    // Make sure createProfile would fail if we have DISALLOW_ADD_USER.
+    // Make sure createUser would fail if we have DISALLOW_ADD_USER.
     @MediumTest
-    public void testCreateProfileForUser_disallowAddUser() throws Exception {
+    public void testCreateUser_disallowAddUser() throws Exception {
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         final UserHandle primaryUserHandle = new UserHandle(primaryUserId);
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, primaryUserHandle);
         try {
-            UserInfo userInfo = createProfileForUser("Managed",
-                    UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+            UserInfo userInfo = createUser("SecondaryUser", /*flags=*/ 0);
             assertNull(userInfo);
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false,
@@ -257,14 +256,48 @@ public class UserManagerTest extends AndroidTestCase {
         }
     }
 
-    // Make sure createProfileEvenWhenDisallowedForUser bypass DISALLOW_ADD_USER.
+    // Make sure createProfile would fail if we have DISALLOW_ADD_MANAGED_PROFILE.
+    @MediumTest
+    public void testCreateProfileForUser_disallowAddManagedProfile() throws Exception {
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        final UserHandle primaryUserHandle = new UserHandle(primaryUserId);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
+                primaryUserHandle);
+        try {
+            UserInfo userInfo = createProfileForUser("Managed",
+                    UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+            assertNull(userInfo);
+        } finally {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, false,
+                    primaryUserHandle);
+        }
+    }
+
+    // Make sure createProfileEvenWhenDisallowedForUser bypass DISALLOW_ADD_MANAGED_PROFILE.
     @MediumTest
     public void testCreateProfileForUserEvenWhenDisallowed() throws Exception {
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         final UserHandle primaryUserHandle = new UserHandle(primaryUserId);
-        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, primaryUserHandle);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
+                primaryUserHandle);
         try {
             UserInfo userInfo = createProfileEvenWhenDisallowedForUser("Managed",
+                    UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+            assertNotNull(userInfo);
+        } finally {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, false,
+                    primaryUserHandle);
+        }
+    }
+
+    // createProfile succeeds even if DISALLOW_ADD_USER is set
+    @MediumTest
+    public void testCreateProfileForUser_disallowAddUser() throws Exception {
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        final UserHandle primaryUserHandle = new UserHandle(primaryUserId);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, primaryUserHandle);
+        try {
+            UserInfo userInfo = createProfileForUser("Managed",
                     UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
             assertNotNull(userInfo);
         } finally {

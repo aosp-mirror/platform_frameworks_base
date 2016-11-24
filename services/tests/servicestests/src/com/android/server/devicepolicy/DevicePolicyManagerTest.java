@@ -49,6 +49,7 @@ import android.util.Pair;
 import com.android.internal.R;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.UserRestrictionsUtils;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -1190,6 +1191,22 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.setDeviceOwner(admin1, "owner-name",
                 UserHandle.USER_SYSTEM));
 
+        // Check that the user restrictions that are enabled by default are set. Then unset them.
+        String[] defaultRestrictions = UserRestrictionsUtils
+                        .getDefaultEnabledForDeviceOwner().toArray(new String[0]);
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(defaultRestrictions),
+                dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
+        );
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(defaultRestrictions),
+                dpm.getUserRestrictions(admin1)
+        );
+
+        for (String restriction : defaultRestrictions) {
+            dpm.clearUserRestriction(admin1, restriction);
+        }
+
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(),
                 dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
@@ -2188,7 +2205,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE,
                 DevicePolicyManager.CODE_OK);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+                DevicePolicyManager.CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER);
         assertCheckProvisioningPreCondition(
                 DevicePolicyManager.ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE,
                 DevicePolicyManager.CODE_OK);
@@ -2226,7 +2243,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE,
                 DevicePolicyManager.CODE_OK);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+                DevicePolicyManager.CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER);
         assertCheckProvisioningPreCondition(
                 DevicePolicyManager.ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE,
                 DevicePolicyManager.CODE_OK);
@@ -2368,7 +2385,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(mContext.ipackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0))
                 .thenReturn(true);
         when(mContext.userManagerForMock.isSplitSystemUser()).thenReturn(true);
-        when(mContext.userManager.hasUserRestriction(UserManager.DISALLOW_REMOVE_USER))
+        when(mContext.userManager.hasUserRestriction(
+                UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
+                UserHandle.of(DpmMockContext.CALLER_USER_HANDLE)))
                 .thenReturn(true);
         when(mContext.userManager.canAddMoreManagedProfiles(DpmMockContext.CALLER_USER_HANDLE,
                 false /* we can't remove a managed profile */)).thenReturn(false);

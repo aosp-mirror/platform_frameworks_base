@@ -1254,8 +1254,8 @@ public class DevicePolicyManager {
     /**
      * Result code for {@link checkProvisioningPreCondition}.
      *
-     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} when the device has a device owner
-     * and the user is a system user on a split system user device.
+     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} when the device the user is a
+     * system user on a split system user device.
      *
      * @hide
      */

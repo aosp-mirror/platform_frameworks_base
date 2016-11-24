@@ -153,7 +153,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.ParcelableString;
@@ -4806,6 +4805,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long ident = mInjector.binderClearCallingIdentity();
             try {
+                final String restriction;
+                if (userHandle == UserHandle.USER_SYSTEM) {
+                    restriction = UserManager.DISALLOW_FACTORY_RESET;
+                } else if (isManagedProfile(userHandle)) {
+                    restriction = UserManager.DISALLOW_REMOVE_MANAGED_PROFILE;
+                } else {
+                    restriction = UserManager.DISALLOW_REMOVE_USER;
+                }
+                if (isAdminAffectedByRestriction(
+                        admin.info.getComponent(), restriction, userHandle)) {
+                    throw new SecurityException("Cannot wipe data. " + restriction
+                            + " restriction is set for user " + userHandle);
+                }
+
                 if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
                     if (!isDeviceOwner(admin.info.getComponent(), userHandle)) {
                         throw new SecurityException(
@@ -4817,34 +4830,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         manager.wipe();
                     }
                 }
+
                 boolean wipeExtRequested = (flags & WIPE_EXTERNAL_STORAGE) != 0;
-                // If the admin is the only one who has set the restriction: force wipe, even if
-                // {@link UserManager.DISALLOW_FACTORY_RESET} is set. Reason is that the admin
-                // could remove this user restriction anyway.
-                boolean force = (userHandle == UserHandle.USER_SYSTEM)
-                        && isAdminOnlyOneWhoSetRestriction(admin,
-                                UserManager.DISALLOW_FACTORY_RESET, UserHandle.USER_SYSTEM);
                 wipeDeviceOrUserLocked(wipeExtRequested, userHandle,
-                        "DevicePolicyManager.wipeData() from " + source, force);
+                        "DevicePolicyManager.wipeData() from " + source, /*force=*/ true);
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
         }
     }
 
-    private boolean isAdminOnlyOneWhoSetRestriction(ActiveAdmin admin, String userRestriction,
-            int userId) {
-        int source = mUserManager.getUserRestrictionSource(userRestriction, UserHandle.of(userId));
-        if (isDeviceOwner(admin.info.getComponent(), userId)) {
-            return source == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER;
-        } else if (isProfileOwner(admin.info.getComponent(), userId)) {
-            return source == UserManager.RESTRICTION_SOURCE_PROFILE_OWNER;
-        }
-        return false;
-    }
-
-    private void wipeDeviceOrUserLocked(boolean wipeExtRequested, final int userHandle,
-            String reason, boolean force) {
+    private void wipeDeviceOrUserLocked(
+            boolean wipeExtRequested, final int userHandle, String reason, boolean force) {
+        // TODO If split user is enabled and the device owner is set in the primary user (rather
+        // than system), we should probably trigger factory reset. Current code just remove
+        // that user (but still clears FRP...)
         if (userHandle == UserHandle.USER_SYSTEM) {
             wipeDataLocked(wipeExtRequested, reason, force);
         } else {
@@ -4857,10 +4857,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             am.switchUser(UserHandle.USER_SYSTEM);
                         }
 
-                        boolean isManagedProfile = isManagedProfile(userHandle);
-                        if (!mUserManager.removeUser(userHandle)) {
+                        boolean userRemoved = force
+                                ? mUserManagerInternal.removeUserEvenWhenDisallowed(userHandle)
+                                : mUserManager.removeUser(userHandle);
+                        if (!userRemoved) {
                             Slog.w(LOG_TAG, "Couldn't remove user " + userHandle);
-                        } else if (isManagedProfile) {
+                        } else if (isManagedProfile(userHandle)) {
                             sendWipeProfileNotification();
                         }
                     } catch (RemoteException re) {
@@ -5948,7 +5950,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         synchronized (this) {
             enforceCanSetDeviceOwnerLocked(admin, userId);
-            if (getActiveAdminUncheckedLocked(admin, userId) == null
+            final ActiveAdmin activeAdmin = getActiveAdminUncheckedLocked(admin, userId);
+            if (activeAdmin == null
                     || getUserData(userId).mRemovingAdmins.contains(admin)) {
                 throw new IllegalArgumentException("Not active admin: " + admin);
             }
@@ -5975,12 +5978,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mOwners.writeDeviceOwner();
             updateDeviceOwnerLocked();
             setDeviceOwnerSystemPropertyLocked();
-            Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED);
+
+            // STOPSHIP(b/31952368) Also set this restriction for existing DOs on OTA to Android OC.
+            final Set<String> restrictions =
+                    UserRestrictionsUtils.getDefaultEnabledForDeviceOwner();
+            if (!restrictions.isEmpty()) {
+                for (String restriction : restrictions) {
+                    activeAdmin.ensureUserRestrictions().putBoolean(restriction, true);
+                }
+                saveUserRestrictionsLocked(userId);
+            }
 
             ident = mInjector.binderClearCallingIdentity();
             try {
                 // TODO Send to system too?
-                mContext.sendBroadcastAsUser(intent, new UserHandle(userId));
+                mContext.sendBroadcastAsUser(
+                        new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED),
+                        UserHandle.of(userId));
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
@@ -6176,6 +6190,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mOwners.setProfileOwner(who, ownerName, userHandle);
             mOwners.writeProfileOwner(userHandle);
             Slog.i(LOG_TAG, "Profile owner set: " + who + " on user " + userHandle);
+
             return true;
         }
     }
@@ -7486,25 +7501,38 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean removeUser(ComponentName who, UserHandle userHandle) {
         Preconditions.checkNotNull(who, "ComponentName is null");
-        UserHandle callingUserHandle = mInjector.binderGetCallingUserHandle();
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
         }
+
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            int restrictionSource = mUserManager.getUserRestrictionSource(
-                    UserManager.DISALLOW_REMOVE_USER, callingUserHandle);
-            if (restrictionSource != UserManager.RESTRICTION_NOT_SET
-                    && restrictionSource != UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) {
+            String restriction = isManagedProfile(userHandle.getIdentifier())
+                    ? UserManager.DISALLOW_REMOVE_MANAGED_PROFILE
+                    : UserManager.DISALLOW_REMOVE_USER;
+            if (isAdminAffectedByRestriction(who, restriction, callingUserId)) {
                 Log.w(LOG_TAG, "The device owner cannot remove a user because "
-                        + "DISALLOW_REMOVE_USER is enabled, and was not set by the device "
-                        + "owner");
+                        + restriction + " is enabled, and was not set by the device owner");
                 return false;
             }
-            return mUserManagerInternal.removeUserEvenWhenDisallowed(
-                    userHandle.getIdentifier());
+            return mUserManagerInternal.removeUserEvenWhenDisallowed(userHandle.getIdentifier());
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    private boolean isAdminAffectedByRestriction(
+            ComponentName admin, String userRestriction, int userId) {
+        switch(mUserManager.getUserRestrictionSource(userRestriction, UserHandle.of(userId))) {
+            case UserManager.RESTRICTION_NOT_SET:
+                return false;
+            case UserManager.RESTRICTION_SOURCE_DEVICE_OWNER:
+                return !isDeviceOwner(admin, userId);
+            case UserManager.RESTRICTION_SOURCE_PROFILE_OWNER:
+                return !isProfileOwner(admin, userId);
+            default:
+                return true;
         }
     }
 
@@ -7613,12 +7641,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             // Save the restriction to ActiveAdmin.
             activeAdmin.ensureUserRestrictions().putBoolean(key, enabledFromThisOwner);
-            saveSettingsLocked(userHandle);
-
-            pushUserRestrictions(userHandle);
-
-            sendChangedNotification(userHandle);
+            saveUserRestrictionsLocked(userHandle);
         }
+    }
+
+    private void saveUserRestrictionsLocked(int userId) {
+        saveSettingsLocked(userId);
+        pushUserRestrictions(userId);
+        sendChangedNotification(userId);
     }
 
     private void pushUserRestrictions(int userId) {
@@ -8862,26 +8892,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!hasFeatureManagedUsers()) {
             return CODE_MANAGED_USERS_NOT_SUPPORTED;
         }
-        synchronized (this) {
-            if (mOwners.hasDeviceOwner()) {
-                // STOPSHIP Only allow creating a managed profile if allowed by the device
-                // owner. http://b/31952368
-                if (mInjector.userManagerIsSplitSystemUser()) {
-                    if (callingUserId == UserHandle.USER_SYSTEM) {
-                        // Managed-profiles cannot be setup on the system user.
-                        return CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER;
-                    }
-                }
-            }
+        if (callingUserId == UserHandle.USER_SYSTEM
+                && mInjector.userManagerIsSplitSystemUser()) {
+            // Managed-profiles cannot be setup on the system user.
+            return CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER;
         }
         if (getProfileOwner(callingUserId) != null) {
             // Managed user cannot have a managed profile.
             return CODE_USER_HAS_PROFILE_OWNER;
         }
-        boolean canRemoveProfile =
-                !mUserManager.hasUserRestriction(UserManager.DISALLOW_REMOVE_USER);
         final long ident = mInjector.binderClearCallingIdentity();
         try {
+             /* STOPSHIP(b/31952368) Reinstate a check similar to this once ManagedProvisioning
+                   uses checkProvisioningPreCondition (see ag/1607846) and passes the packageName
+                   there. In isProvisioningAllowed we should check isCallerDeviceOwner, but for
+                   managed provisioning we need to check the package that is going to be set as PO
+                if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE)) {
+                    if (!isCallerDeviceOwner(callingUid)
+                            || isAdminAffectedByRestriction(mOwners.getDeviceOwnerComponent(),
+                                    UserManager.DISALLOW_ADD_MANAGED_PROFILE, callingUserId)) {
+                    // Caller is not DO or the restriction was set by the system.
+                    return false;
+                    }
+                } */
+            // TODO: Allow it if the caller is the DO? DO could just call removeUser() before
+            // provisioning, so not strictly required...
+            boolean canRemoveProfile = !mUserManager.hasUserRestriction(
+                        UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, UserHandle.of(callingUserId));
             if (!mUserManager.canAddMoreManagedProfiles(callingUserId, canRemoveProfile)) {
                 return CODE_CANNOT_ADD_MANAGED_PROFILE;
             }

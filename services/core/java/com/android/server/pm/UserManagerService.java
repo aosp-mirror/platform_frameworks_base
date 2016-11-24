@@ -2269,8 +2269,11 @@ public class UserManagerService extends IUserManager.Stub {
 
     private UserInfo createUserInternal(String name, int flags, int parentId,
             String[] disallowedPackages) {
-        if (hasUserRestriction(UserManager.DISALLOW_ADD_USER, UserHandle.getCallingUserId())) {
-            Log.w(LOG_TAG, "Cannot add user. DISALLOW_ADD_USER is enabled.");
+        String restriction = ((flags & UserInfo.FLAG_MANAGED_PROFILE) != 0)
+                ? UserManager.DISALLOW_ADD_MANAGED_PROFILE
+                : UserManager.DISALLOW_ADD_USER;
+        if (hasUserRestriction(restriction, UserHandle.getCallingUserId())) {
+            Log.w(LOG_TAG, "Cannot add user. " + restriction + " is enabled.");
             return null;
         }
         return createUserInternalUnchecked(name, flags, parentId, disallowedPackages);
@@ -2541,9 +2544,16 @@ public class UserManagerService extends IUserManager.Stub {
     public boolean removeUser(int userHandle) {
         Slog.i(LOG_TAG, "removeUser u" + userHandle);
         checkManageOrCreateUsersPermission("Only the system can remove users");
-        if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(
-                UserManager.DISALLOW_REMOVE_USER, false)) {
-            Log.w(LOG_TAG, "Cannot remove user. DISALLOW_REMOVE_USER is enabled.");
+
+        final boolean isManagedProfile;
+        synchronized (mUsersLock) {
+            UserInfo userInfo = getUserInfoLU(userHandle);
+            isManagedProfile = userInfo != null && userInfo.isManagedProfile();
+        }
+        String restriction = isManagedProfile
+                ? UserManager.DISALLOW_REMOVE_MANAGED_PROFILE : UserManager.DISALLOW_REMOVE_USER;
+        if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
+            Log.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
             return false;
         }
         return removeUserUnchecked(userHandle);
