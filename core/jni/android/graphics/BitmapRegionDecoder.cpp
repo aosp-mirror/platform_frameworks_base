@@ -187,7 +187,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
         env->SetIntField(options, gOptions_widthFieldID, bitmap.width());
         env->SetIntField(options, gOptions_heightFieldID, bitmap.height());
         env->SetObjectField(options, gOptions_mimeFieldID,
-                encodedFormatToString(env, brd->getEncodedFormat()));
+                encodedFormatToString(env, (SkEncodedImageFormat)brd->getEncodedFormat()));
         if (env->ExceptionCheck()) {
             return nullObjectReturn("OOM in encodedFormatToString()");
         }

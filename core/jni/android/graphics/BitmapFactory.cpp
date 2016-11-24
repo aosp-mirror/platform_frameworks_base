@@ -48,31 +48,31 @@ jmethodID gInsetStruct_constructorMethodID;
 
 using namespace android;
 
-jstring encodedFormatToString(JNIEnv* env, SkEncodedFormat format) {
+jstring encodedFormatToString(JNIEnv* env, SkEncodedImageFormat format) {
     const char* mimeType;
     switch (format) {
-        case SkEncodedFormat::kBMP_SkEncodedFormat:
+        case SkEncodedImageFormat::kBMP:
             mimeType = "image/bmp";
             break;
-        case SkEncodedFormat::kGIF_SkEncodedFormat:
+        case SkEncodedImageFormat::kGIF:
             mimeType = "image/gif";
             break;
-        case SkEncodedFormat::kICO_SkEncodedFormat:
+        case SkEncodedImageFormat::kICO:
             mimeType = "image/x-ico";
             break;
-        case SkEncodedFormat::kJPEG_SkEncodedFormat:
+        case SkEncodedImageFormat::kJPEG:
             mimeType = "image/jpeg";
             break;
-        case SkEncodedFormat::kPNG_SkEncodedFormat:
+        case SkEncodedImageFormat::kPNG:
             mimeType = "image/png";
             break;
-        case SkEncodedFormat::kWEBP_SkEncodedFormat:
+        case SkEncodedImageFormat::kWEBP:
             mimeType = "image/webp";
             break;
-        case SkEncodedFormat::kWBMP_SkEncodedFormat:
+        case SkEncodedImageFormat::kWBMP:
             mimeType = "image/vnd.wap.wbmp";
             break;
-        case SkEncodedFormat::kDNG_SkEncodedFormat:
+        case SkEncodedImageFormat::kDNG:
             mimeType = "image/x-adobe-dng";
             break;
         default:
@@ -309,7 +309,8 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     // Set the options and return if the client only wants the size.
     if (options != NULL) {
-        jstring mimeType = encodedFormatToString(env, codec->getEncodedFormat());
+        jstring mimeType = encodedFormatToString(
+                env, (SkEncodedImageFormat)codec->getEncodedFormat());
         if (env->ExceptionCheck()) {
             return nullObjectReturn("OOM in encodedFormatToString()");
         }

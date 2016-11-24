@@ -175,13 +175,20 @@ int main(int argc, char** argv)
 
     if (base != NULL) {
         if (png) {
-            const SkImageInfo info = SkImageInfo::Make(w, h, flinger2skia(f),
-                                                       kPremul_SkAlphaType);
-            sk_sp<SkData> data(SkImageEncoder::EncodeData(info, base, s*bytesPerPixel(f),
-                    SkImageEncoder::kPNG_Type, SkImageEncoder::kDefaultQuality));
-            if (data.get()) {
-                write(fd, data->data(), data->size());
-            }
+            const SkImageInfo info =
+                SkImageInfo::Make(w, h, flinger2skia(f), kPremul_SkAlphaType);
+            SkPixmap pixmap(info, base, s * bytesPerPixel(f));
+            struct FDWStream final : public SkWStream {
+              size_t fBytesWritten = 0;
+              int fFd;
+              FDWStream(int f) : fFd(f) {}
+              size_t bytesWritten() const override { return fBytesWritten; }
+              bool write(const void* buffer, size_t size) override {
+                fBytesWritten += size;
+                return size == 0 || ::write(fFd, buffer, size) > 0;
+              }
+            } fdStream(fd);
+            (void)SkEncodeImage(&fdStream, pixmap, SkEncodedImageFormat::kPNG, 100);
             if (fn != NULL) {
                 notifyMediaScanner(fn);
             }

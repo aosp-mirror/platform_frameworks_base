@@ -17,6 +17,7 @@
 #include "SkiaPipeline.h"
 
 #include "utils/TraceUtils.h"
+#include <SkImageEncoder.h>
 #include <SkOSFile.h>
 #include <SkOverdrawCanvas.h>
 #include <SkOverdrawColorFilter.h>
@@ -166,8 +167,10 @@ class PngPixelSerializer : public SkPixelSerializer {
 public:
     bool onUseEncodedData(const void*, size_t) override { return true; }
     SkData* onEncode(const SkPixmap& pixmap) override {
-        return SkImageEncoder::EncodeData(pixmap.info(), pixmap.addr(), pixmap.rowBytes(),
-                                          SkImageEncoder::kPNG_Type, 100);
+        SkDynamicMemoryWStream buf;
+        return SkEncodeImage(&buf, pixmap, SkEncodedImageFormat::kPNG, 100)
+               ? buf.detachAsData().release()
+               : nullptr;
     }
 };
 

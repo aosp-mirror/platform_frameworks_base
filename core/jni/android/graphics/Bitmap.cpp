@@ -668,42 +668,34 @@ enum JavaEncodeFormat {
 static jboolean Bitmap_compress(JNIEnv* env, jobject clazz, jlong bitmapHandle,
                                 jint format, jint quality,
                                 jobject jstream, jbyteArray jstorage) {
-
-    LocalScopedBitmap bitmap(bitmapHandle);
-    SkImageEncoder::Type fm;
-
+    SkEncodedImageFormat fm;
     switch (format) {
     case kJPEG_JavaEncodeFormat:
-        fm = SkImageEncoder::kJPEG_Type;
+        fm = SkEncodedImageFormat::kJPEG;
         break;
     case kPNG_JavaEncodeFormat:
-        fm = SkImageEncoder::kPNG_Type;
+        fm = SkEncodedImageFormat::kPNG;
         break;
     case kWEBP_JavaEncodeFormat:
-        fm = SkImageEncoder::kWEBP_Type;
+        fm = SkEncodedImageFormat::kWEBP;
         break;
     default:
         return JNI_FALSE;
     }
 
+    LocalScopedBitmap bitmap(bitmapHandle);
     if (!bitmap.valid()) {
         return JNI_FALSE;
     }
-
-    bool success = false;
 
     std::unique_ptr<SkWStream> strm(CreateJavaOutputStreamAdaptor(env, jstream, jstorage));
     if (!strm.get()) {
         return JNI_FALSE;
     }
 
-    std::unique_ptr<SkImageEncoder> encoder(SkImageEncoder::Create(fm));
-    if (encoder.get()) {
-        SkBitmap skbitmap;
-        bitmap->getSkBitmap(&skbitmap);
-        success = encoder->encodeStream(strm.get(), skbitmap, quality);
-    }
-    return success ? JNI_TRUE : JNI_FALSE;
+    SkBitmap skbitmap;
+    bitmap->getSkBitmap(&skbitmap);
+    return SkEncodeImage(strm.get(), skbitmap, fm, quality) ? JNI_TRUE : JNI_FALSE;
 }
 
 static void Bitmap_erase(JNIEnv* env, jobject, jlong bitmapHandle, jint color) {
