@@ -47,6 +47,7 @@ class ParallelPackageParser implements AutoCloseable {
     private final String[] mSeparateProcesses;
     private final boolean mOnlyCore;
     private final DisplayMetrics mMetrics;
+    private final File mCacheDir;
     private volatile String mInterruptedInThread;
 
     private final BlockingQueue<ParseResult> mQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
@@ -68,10 +69,11 @@ class ParallelPackageParser implements AutoCloseable {
             });
 
     ParallelPackageParser(String[] separateProcesses, boolean onlyCoreApps,
-            DisplayMetrics metrics) {
+            DisplayMetrics metrics, File cacheDir) {
         mSeparateProcesses = separateProcesses;
         mOnlyCore = onlyCoreApps;
         mMetrics = metrics;
+        mCacheDir = cacheDir;
     }
 
     static class ParseResult {
@@ -122,6 +124,7 @@ class ParallelPackageParser implements AutoCloseable {
                 pp.setSeparateProcesses(mSeparateProcesses);
                 pp.setOnlyCoreApps(mOnlyCore);
                 pp.setDisplayMetrics(mMetrics);
+                pp.setCacheDir(mCacheDir);
                 pr.scanFile = scanFile;
                 pr.pkg = parsePackage(pp, scanFile, parseFlags);
             } catch (Throwable e) {
@@ -144,7 +147,7 @@ class ParallelPackageParser implements AutoCloseable {
     @VisibleForTesting
     protected PackageParser.Package parsePackage(PackageParser packageParser, File scanFile,
             int parseFlags) throws PackageParser.PackageParserException {
-        return packageParser.parsePackage(scanFile, parseFlags);
+        return packageParser.parsePackage(scanFile, parseFlags, true /* useCaches */);
     }
 
     @Override

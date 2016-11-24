@@ -762,4 +762,19 @@ public class FileUtils {
     public static @Nullable File newFileOrNull(@Nullable String path) {
         return (path != null) ? new File(path) : null;
     }
+
+    /**
+     * Creates a directory with name {@code name} under an existing directory {@code baseDir}.
+     * Returns a {@code File} object representing the directory on success, {@code null} on
+     * failure.
+     */
+    public static @Nullable File createDir(File baseDir, String name) {
+        final File dir = new File(baseDir, name);
+
+        if (dir.exists()) {
+            return dir.isDirectory() ? dir : null;
+        }
+
+        return dir.mkdir() ? dir : null;
+    }
 }
