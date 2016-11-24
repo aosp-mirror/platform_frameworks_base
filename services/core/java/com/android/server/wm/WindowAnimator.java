@@ -114,6 +114,7 @@ public class WindowAnimator {
     static final int KEYGUARD_SHOWN         = 1;
     static final int KEYGUARD_ANIMATING_OUT = 2;
     int mForceHiding = KEYGUARD_NOT_SHOWN;
+    int offsetLayer = 0;
 
     // When set to true the animator will go over all windows after an animation frame is posted and
     // check if some got replaced and can be removed.
@@ -705,6 +706,7 @@ public class WindowAnimator {
         mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
         boolean wasAnimating = mAnimating;
         setAnimating(false);
+        boolean isSingleHandAnimating = false;
         mAppWindowAnimating = false;
         if (DEBUG_WINDOW_TRACE) {
             Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
@@ -751,6 +753,8 @@ public class WindowAnimator {
                 final int N = windows.size();
                 for (int j = 0; j < N; j++) {
                     windows.get(j).mWinAnimator.prepareSurfaceLocked(true);
+                    if (windows.get(j).mWinAnimator.mIsSingleHandExiting || windows.get(j).mWinAnimator.mIsSingleHandEntering)
+                        isSingleHandAnimating = true;
                 }
             }
 
@@ -779,7 +783,7 @@ public class WindowAnimator {
                 mAnimating |= mService.mDragState.stepAnimationLocked(mCurrentTime);
             }
 
-            if (mAnimating) {
+            if (mAnimating || isSingleHandAnimating) {
                 mService.scheduleAnimationLocked();
             }
 
