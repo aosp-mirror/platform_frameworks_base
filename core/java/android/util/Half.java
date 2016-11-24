@@ -543,9 +543,9 @@ public final class Half {
 
     /**
      * <p>Converts the specified half-precision float value into a
-     * single-precision float value with the following special cases:</p>
+     * single-precision float value. The following special cases are handled:</p>
      * <ul>
-     * <li>If the input is {@link #NaN}, the returned* value is {@link Float#NaN}</li>
+     * <li>If the input is {@link #NaN}, the returned value is {@link Float#NaN}</li>
      * <li>If the input is {@link #POSITIVE_INFINITY} or
      * {@link #NEGATIVE_INFINITY}, the returned value is respectively
      * {@link Float#POSITIVE_INFINITY} or {@link Float#NEGATIVE_INFINITY}</li>
@@ -587,7 +587,7 @@ public final class Half {
 
     /**
      * <p>Converts the specified single-precision float value into a
-     * half-precision float value with the following special cases:</p>
+     * half-precision float value. The following special cases are handled:</p>
      * <ul>
      * <li>If the input is NaN (see {@link Float#isNaN(float)}), the returned
      * value is {@link #NaN}</li>
