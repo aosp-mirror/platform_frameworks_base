@@ -90,6 +90,7 @@ public interface WindowManagerPolicy {
 
     public final static int FLAG_INTERACTIVE = 0x20000000;
     public final static int FLAG_PASS_TO_USER = 0x40000000;
+    public final static int POLICY_FLAG_REMOVE_HANDYMODE = 0x80000000;
 
     // Flags for IActivityManager.keyguardGoingAway()
     public final static int KEYGUARD_GOING_AWAY_FLAG_TO_SHADE = 1 << 0;
@@ -1442,4 +1443,11 @@ public interface WindowManagerPolicy {
     public void onConfigurationChanged();
 
     public boolean shouldRotateSeamlessly(int oldRotation, int newRotation);
+
+    /**
+     * Lock the device orientation to the specified rotation,
+     * Sensor input or hdmi will be ignored until
+     * freezeOrThawRotation(-1) is called or reboot the devcie.
+     */
+    public void freezeOrThawRotation(int rotation);
 }

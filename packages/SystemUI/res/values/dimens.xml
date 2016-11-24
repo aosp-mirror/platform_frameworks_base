@@ -680,4 +680,7 @@
 
     <!-- The alpha to apply to the recents row when it doesn't have focus -->
     <item name="recents_recents_row_dim_alpha" format="float" type="dimen">0.5</item>
+
+    <dimen name="navbar_single_hand_mode_horizontal_threshhold">90dp</dimen>
+    <dimen name="navbar_single_hand_mode_vertical_threshhold">48dp</dimen>
 </resources>

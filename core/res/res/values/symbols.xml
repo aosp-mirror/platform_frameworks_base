@@ -213,6 +213,15 @@
   <java-symbol type="id" name="selection_start_handle" />
   <java-symbol type="id" name="selection_end_handle" />
   <java-symbol type="id" name="insertion_handle" />
+  <java-symbol type="id" name="relative_top" />
+  <java-symbol type="id" name="hint_info" />
+  <java-symbol type="id" name="single_hand_window_title" />
+  <java-symbol type="id" name="click_hint" />
+  <java-symbol type="id" name="hint_section" />
+  <java-symbol type="id" name="relative_bottom" />
+  <java-symbol type="id" name="singlehandmode_slide_hint_text" />
+  <java-symbol type="id" name="slide_hint" />
+  <java-symbol type="id" name="slide_hint_area" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -309,6 +318,7 @@
   <java-symbol type="bool" name="config_localDisplaysMirrorContent" />
   <java-symbol type="integer" name="config_defaultDisplayDefaultColorMode" />
   <java-symbol type="bool" name="config_enableAppWidgetService" />
+  <java-symbol type="bool" name="single_hand_mode" />
   <java-symbol type="string" name="config_defaultPictureInPictureBounds" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_boost_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_boost_factor" />
@@ -1125,6 +1135,8 @@
   <java-symbol type="string" name="demo_restarting_message" />
   <java-symbol type="string" name="conference_call" />
 
+  <java-symbol type="string" name="singlehandmode_click_hint_message" />
+  <java-symbol type="string" name="singlehandmode_slide_hint_message" />
 
   <java-symbol type="plurals" name="bugreport_countdown" />
   <java-symbol type="plurals" name="duration_hours" />
@@ -1394,6 +1406,7 @@
   <java-symbol type="layout" name="immersive_mode_cling" />
   <java-symbol type="layout" name="user_switching_dialog" />
   <java-symbol type="layout" name="common_tab_settings" />
+  <java-symbol type="layout" name="single_hand_window" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />

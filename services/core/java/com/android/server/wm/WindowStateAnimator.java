@@ -46,10 +46,12 @@ import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_TURN_ON_SCREEN;
 
+import android.view.Display;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -65,6 +67,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerPolicy;
+import android.content.pm.ActivityInfo;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
@@ -241,6 +244,22 @@ class WindowStateAnimator {
 
     private final Rect mTmpSize = new Rect();
 
+    boolean mIsLeftSingleHand;
+    boolean mIsRightSingleHand;
+    int mOpenSingleHandMode;
+    float mSingleHandScale;
+    final boolean mIsSingleHandWindow;
+    private Display mDefaultDisplay;
+    private DisplayInfo mDefaultDisplayInfo = new DisplayInfo();
+    private final WindowManager mWindowManager;
+    int mWidth;
+    int mHeight;
+    boolean mIsSingleHandEntering;
+    boolean mIsSingleHandExiting;
+    private static final int TYPE_NORMAL = 0;
+    private static final int TYPE_LEFT = 1;
+    private static final int TYPE_RIGHT = 2;
+
     WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mService;
 
@@ -266,6 +285,23 @@ class WindowStateAnimator {
         mAttrType = win.mAttrs.type;
         mIsWallpaper = win.mIsWallpaper;
         mWallpaperControllerLocked = mService.mWallpaperControllerLocked;
+        mIsSingleHandWindow = win.toString().contains("SingleMode_window");
+        mOpenSingleHandMode = mService.getSingleHandMode();
+        mSingleHandScale = 1.0f;
+        mIsSingleHandExiting = false;
+        mIsSingleHandEntering = false;
+        mWindowManager = (WindowManager)mContext.getSystemService(
+                Context.WINDOW_SERVICE);
+        updatedisplayinfo();
+    }
+
+    public void updatedisplayinfo() {
+        mDefaultDisplay = mWindowManager.getDefaultDisplay();
+        mDefaultDisplay.getDisplayInfo(mDefaultDisplayInfo);
+        //cause single hand only use in portrait
+        boolean isPortrait = mDefaultDisplayInfo.logicalHeight > mDefaultDisplayInfo.logicalWidth;
+        mWidth = isPortrait ? mDefaultDisplayInfo.logicalWidth : mDefaultDisplayInfo.logicalHeight;
+        mHeight = isPortrait ? mDefaultDisplayInfo.logicalHeight : mDefaultDisplayInfo.logicalWidth;
     }
 
     public void setAnimation(Animation anim, long startTime, int stackClip) {
@@ -940,7 +976,7 @@ class WindowStateAnimator {
         }
     }
 
-    void computeShownFrameLocked() {
+    void computeShownFrameLocked(int type) {
         final boolean selfTransformation = mHasLocalTransformation;
         Transformation attachedTransformation =
                 (mAttachedWinAnimator != null && mAttachedWinAnimator.mHasLocalTransformation)
@@ -948,6 +984,9 @@ class WindowStateAnimator {
         Transformation appTransformation = (mAppAnimator != null && mAppAnimator.hasTransformation)
                 ? mAppAnimator.transformation : null;
 
+        if (type == TYPE_LEFT || type == TYPE_RIGHT) {
+            updatedisplayinfo();
+        }
         // Wallpapers are animated based on the "real" window they
         // are currently targeting.
         final WindowState wallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget();
@@ -978,6 +1017,18 @@ class WindowStateAnimator {
                 mAnimator.getScreenRotationAnimationLocked(displayId);
         final boolean screenAnimation =
                 screenRotationAnimation != null && screenRotationAnimation.isAnimating();
+
+        float ratio = 1.0f;
+        float pendingX = 0.0f;
+        float pendingY = 0.0f;
+        if (type == TYPE_LEFT) {
+            ratio = mSingleHandScale;
+            pendingY = (float)mHeight * (1-mSingleHandScale);
+        } else if (type == TYPE_RIGHT){
+            ratio = mSingleHandScale;
+            pendingX = (float)mWidth * (1-mSingleHandScale);
+            pendingY = (float)mHeight * (1-mSingleHandScale);
+        }
 
         mHasClipRect = false;
         if (selfTransformation || attachedTransformation != null
@@ -1036,12 +1087,12 @@ class WindowStateAnimator {
 
             mHaveMatrix = true;
             tmpMatrix.getValues(tmpFloats);
-            mDsDx = tmpFloats[Matrix.MSCALE_X];
-            mDtDx = tmpFloats[Matrix.MSKEW_Y];
-            mDsDy = tmpFloats[Matrix.MSKEW_X];
-            mDtDy = tmpFloats[Matrix.MSCALE_Y];
-            float x = tmpFloats[Matrix.MTRANS_X];
-            float y = tmpFloats[Matrix.MTRANS_Y];
+            mDsDx = tmpFloats[Matrix.MSCALE_X] * ratio;
+            mDtDx = tmpFloats[Matrix.MSKEW_Y] * ratio;
+            mDsDy = tmpFloats[Matrix.MSKEW_X] * ratio;
+            mDtDy = tmpFloats[Matrix.MSCALE_Y] * ratio;
+            float x = tmpFloats[Matrix.MTRANS_X] * ratio + pendingX;
+            float y = tmpFloats[Matrix.MTRANS_Y] * ratio + pendingY;
             mWin.mShownPosition.set(Math.round(x), Math.round(y));
 
             // Now set the alpha...  but because our current hardware
@@ -1053,7 +1104,7 @@ class WindowStateAnimator {
             if (!mService.mLimitedAlphaCompositing
                     || (!PixelFormat.formatHasAlpha(mWin.mAttrs.format)
                     || (mWin.isIdentityMatrix(mDsDx, mDtDx, mDsDy, mDtDy)
-                            && x == frame.left && y == frame.top))) {
+                    && floatEqualCompare(x, frame.left) && floatEqualCompare(y, frame.top)))) {
                 //Slog.i(TAG_WM, "Applying alpha transform");
                 if (selfTransformation) {
                     mShownAlpha *= mTransformation.getAlpha();
@@ -1129,26 +1180,28 @@ class WindowStateAnimator {
             tmpMatrix.getValues(tmpFloats);
 
             mHaveMatrix = true;
-            mDsDx = tmpFloats[Matrix.MSCALE_X];
-            mDtDx = tmpFloats[Matrix.MSKEW_Y];
-            mDsDy = tmpFloats[Matrix.MSKEW_X];
-            mDtDy = tmpFloats[Matrix.MSCALE_Y];
-            float x = tmpFloats[Matrix.MTRANS_X];
-            float y = tmpFloats[Matrix.MTRANS_Y];
+            mDsDx = tmpFloats[Matrix.MSCALE_X] * ratio;
+            mDtDx = tmpFloats[Matrix.MSKEW_Y] * ratio;
+            mDsDy = tmpFloats[Matrix.MSKEW_X] * ratio;
+            mDtDy = tmpFloats[Matrix.MSCALE_Y] * ratio;
+            float x = tmpFloats[Matrix.MTRANS_X] * ratio + pendingX;
+            float y = tmpFloats[Matrix.MTRANS_Y]* ratio + pendingY;
             mWin.mShownPosition.set(Math.round(x), Math.round(y));
 
             mShownAlpha = mAlpha;
         } else {
-            mWin.mShownPosition.set(mWin.mFrame.left, mWin.mFrame.top);
+            float x = mWin.mFrame.left * ratio + pendingX;
+            float y = mWin.mFrame.top * ratio + pendingY;
+            mWin.mShownPosition.set((int) x, (int) y);
             if (mWin.mXOffset != 0 || mWin.mYOffset != 0) {
-                mWin.mShownPosition.offset(mWin.mXOffset, mWin.mYOffset);
+                mWin.mShownPosition.offset((int)(mWin.mXOffset * mSingleHandScale), (int)(mWin.mYOffset * mSingleHandScale));
             }
             mShownAlpha = mAlpha;
             mHaveMatrix = false;
-            mDsDx = mWin.mGlobalScale;
+            mDsDx = mWin.mGlobalScale * ratio;
             mDtDx = 0;
             mDsDy = 0;
-            mDtDy = mWin.mGlobalScale;
+            mDtDy = mWin.mGlobalScale * ratio;
         }
     }
 
@@ -2149,6 +2202,201 @@ class WindowStateAnimator {
                     DtDx * w.mVScale,
                     DsDy * w.mHScale,
                     DtDy * w.mVScale, false);
+        }
+    }
+
+    private boolean floatEqualCompare(float f) {
+        return Math.abs(mSingleHandScale - f) < 1e-6;
+    }
+
+    private boolean floatEqualCompare(float f1, float f2) {
+        return Math.abs(f1 - f2) < 1e-6;
+    }
+
+    void computeShownFrameLocked() {
+        int openSingleHandMode = mService.getSingleHandMode();
+        int requestedOrientation = -1;
+        if(mWin.mAppToken != null) {
+           requestedOrientation = mWin.mAppToken.requestedOrientation;
+        }
+
+        if(mIsSingleHandWindow) {
+            computeShownFrameNormalLocked();
+            if (mWin.toString().contains("SingleMode_windowbg")) mAnimLayer = 10000 + mAnimator.offsetLayer;
+            if (mWin.toString().contains("SingleMode_windowbg_hint")) mAnimLayer = 810000;
+        } else if(isOrientationLandscape(requestedOrientation)) {
+            computeShownFrameNormalLocked();
+            mOpenSingleHandMode = 0;
+        } else {
+            computeShownFrameLockedByMode(openSingleHandMode);
+        }
+        if (mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_STATUS_BAR
+            && mOpenSingleHandMode != 0 && openSingleHandMode != 0
+            && (mIsLeftSingleHand || mIsRightSingleHand)) {
+            float extraScale = 2.0f / mWin.mFrame.height();
+            mDtDy += extraScale;
+        }
+        traceLogForSingleHandMode(openSingleHandMode);
+    }
+
+    private boolean isOrientationLandscape(int requestedOrientation) {
+        return (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+                || (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE)
+                || (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE)
+                || (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
+    }
+
+    private void computeShownFrameLockedByMode(int openSingleHandMode) {
+        if(openSingleHandMode == 0 && mOpenSingleHandMode == 1) {
+            mOpenSingleHandMode = 0;
+            mIsSingleHandExiting = true;
+            mIsSingleHandEntering = false;
+            mAnimator.offsetLayer = 0;
+            mSingleHandScale = 0.8f;
+            computeShownFrameLeftLocked();
+        } else if(openSingleHandMode == 0 && mOpenSingleHandMode == 2) {
+            mOpenSingleHandMode = 0;
+            mIsSingleHandExiting = true;
+            mIsSingleHandEntering = false;
+            mSingleHandScale = 0.8f;
+            mAnimator.offsetLayer = 0;
+            computeShownFrameRightLocked();
+        } else if(openSingleHandMode == 0 && mIsSingleHandExiting && mOpenSingleHandMode == 0) {
+            if(mIsLeftSingleHand) {
+                setLeftScale();
+            } else if (mIsRightSingleHand) {
+                setRightScale();
+            } else {
+                mSingleHandScale = 1.0f;
+                mIsSingleHandExiting = false;
+                mIsSingleHandEntering = false;
+                mIsRightSingleHand = false;
+                mIsLeftSingleHand = false;
+                mOpenSingleHandMode = 0;
+                computeShownFrameNormalLocked();
+            }
+        } else if (openSingleHandMode == 1) {
+            handleLeftScale();
+        } else if (openSingleHandMode == 2) {
+            handleRightScale();
+        } else {
+            computeShownFrameNormalLocked();
+        }
+    }
+
+    private void setLeftScale() {
+        if (floatEqualCompare(0.8f)) {
+            mSingleHandScale = 0.85f;
+            computeShownFrameLeftLocked();
+        } else if (floatEqualCompare(0.85f)) {
+            mSingleHandScale = 0.9f;
+            computeShownFrameLeftLocked();
+        } else if (floatEqualCompare(0.9f)) {
+            mSingleHandScale = 0.95f;
+            computeShownFrameLeftLocked();
+        } else if (floatEqualCompare(0.95f)) {
+            mSingleHandScale = 1.0f;
+            mIsSingleHandExiting = false;
+            mIsLeftSingleHand = false;
+            computeShownFrameNormalLocked();
+        }
+    }
+
+    private void setRightScale() {
+        if (floatEqualCompare(0.8f)) {
+            mSingleHandScale = 0.85f;
+            computeShownFrameRightLocked();
+        } else if (floatEqualCompare(0.85f)) {
+            mSingleHandScale = 0.9f;
+            computeShownFrameRightLocked();
+        } else if (floatEqualCompare(0.9f)) {
+            mSingleHandScale = 0.95f;
+            computeShownFrameRightLocked();
+        } else if (floatEqualCompare(0.95f)) {
+            mSingleHandScale = 1.0f;
+            mIsSingleHandExiting = false;
+            mIsRightSingleHand = false;
+            computeShownFrameNormalLocked();
+        }
+    }
+
+    private void handleLeftScale() {
+        if(mOpenSingleHandMode == 0) {
+            mOpenSingleHandMode = 1;
+            mIsSingleHandEntering = true;
+            mIsSingleHandExiting = false;
+            mSingleHandScale = 0.95f;
+            computeShownFrameLeftLocked();
+        } else if(mOpenSingleHandMode ==1 && mIsSingleHandEntering) {
+            if (floatEqualCompare(0.95f)) {
+                mSingleHandScale = 0.9f;
+            } else if (floatEqualCompare(0.9f)) {
+                mSingleHandScale = 0.85f;
+            } else if (floatEqualCompare(0.85f)) {
+                mSingleHandScale = 0.8f;
+            } else if (floatEqualCompare(0.8f)) {
+                mAnimator.offsetLayer = 800000;
+                mSingleHandScale = 0.75f;
+                mIsSingleHandEntering = false;
+                mIsLeftSingleHand = true;
+            }
+            computeShownFrameLeftLocked();
+        } else {
+            mSingleHandScale = 0.75f;
+            mIsLeftSingleHand = true;
+            computeShownFrameLeftLocked();
+        }
+    }
+
+    private void handleRightScale() {
+        if(mOpenSingleHandMode == 0) {
+            mOpenSingleHandMode = 2;
+            mIsSingleHandEntering = true;
+            mIsSingleHandExiting = false;
+            mSingleHandScale = 0.95f;
+            computeShownFrameRightLocked();
+        } else if(mOpenSingleHandMode == 2 && mIsSingleHandEntering) {
+            if (floatEqualCompare(0.95f)) {
+                mSingleHandScale = 0.9f;
+            } else if (floatEqualCompare(0.9f)) {
+                mSingleHandScale = 0.85f;
+            } else if (floatEqualCompare(0.85f)) {
+                mSingleHandScale = 0.8f;
+            } else if (floatEqualCompare(0.8f)) {
+                mAnimator.offsetLayer = 800000;
+                mSingleHandScale = 0.75f;
+                mIsSingleHandEntering = false;
+                mIsRightSingleHand = true;
+            }
+            computeShownFrameRightLocked();
+        } else {
+            mSingleHandScale = 0.75f;
+            mIsRightSingleHand = true;
+            computeShownFrameRightLocked();
+        }
+    }
+
+    void computeShownFrameRightLocked() {
+        computeShownFrameLocked(TYPE_RIGHT);
+    }
+
+    void computeShownFrameLeftLocked() {
+        computeShownFrameLocked(TYPE_LEFT);
+    }
+
+    void computeShownFrameNormalLocked() {
+        computeShownFrameLocked(TYPE_NORMAL);
+    }
+
+    private void traceLogForSingleHandMode(int openSingleHandMode) {
+        if (mWin.mAppToken != null && openSingleHandMode != 0
+                && floatEqualCompare(0.75f)) {
+            Slog.i(TAG, "win="+mWin+",openSingleHandMode="+openSingleHandMode
+                            +",mOpenSingleHandMode="+mOpenSingleHandMode
+                            +",shownPosition="+mWin.mShownPosition
+                            +",mIsSingleHandEntering="+mIsSingleHandEntering+",mIsSingleHandExiting="+mIsSingleHandExiting
+                            +",mIsLeftSingleHand="+mIsLeftSingleHand+",mIsRightSingleHand="+mIsRightSingleHand
+                            +",MATRIX [" + mDsDx + "," + mDtDx + "," + mDsDy + "," + mDtDy + "]");
         }
     }
 }

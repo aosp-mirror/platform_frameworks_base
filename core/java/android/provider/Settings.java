@@ -9418,6 +9418,8 @@ public final class Settings {
          */
         public static final String ALARM_MANAGER_CONSTANTS = "alarm_manager_constants";
 
+        public static final String SINGLE_HAND_MODE = "single_hand_mode";
+
         /**
          * Job scheduler specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:

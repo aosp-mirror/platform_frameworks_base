@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2012 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+  <RelativeLayout android:layout_width="match_parent"
+                  android:layout_height="0px"
+                  android:background="#FF000000"
+                  android:id="@+id/relative_top">
+    <FrameLayout android:id="@+id/hint_section"
+        android:layout_width="60dp"
+        android:layout_height="70dp"
+        android:clickable="true">
+       <ImageView
+              android:id="@+id/hint_info"
+              android:visibility="invisible"
+              android:layout_width="32dp"
+              android:layout_height="32dp"
+              android:layout_marginTop="16dip"
+              android:layout_marginStart="10dip"
+              android:focusable="true"
+              android:clickable="true"
+              android:background="@android:drawable/singlehandmode_hintinfo" />
+    </FrameLayout>
+    <TextView android:id="@+id/single_hand_window_title"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="32dip"
+              android:layout_marginStart="18dip"
+              android:layout_marginEnd="18dip"
+              android:textSize="14dp"
+              android:textColor="#d9ffffff"
+              android:text="@android:string/singlehandmode_click_hint_message"
+              android:visibility="invisible"
+              android:gravity="center" />
+    <ImageView
+              android:id="@+id/click_hint"
+              android:layout_below="@id/single_hand_window_title"
+              android:visibility="invisible"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="2dip"
+              android:layout_centerHorizontal="true"
+              android:src="@android:drawable/singlehandmode_click_hint" />
+  </RelativeLayout>
+  <RelativeLayout android:layout_width="0px"
+                  android:layout_height="0px"
+                  android:background="#FF000000"
+                  android:id="@+id/relative_bottom" />
+  <LinearLayout android:id="@+id/slide_hint_area"
+                android:visibility="invisible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:orientation="vertical">
+    <TextView android:id="@+id/singlehandmode_slide_hint_text"
+              android:layout_width="240dip"
+              android:layout_height="wrap_content"
+              android:visibility="invisible"
+              android:textSize="14dp"
+              android:textColor="#d9ffffff"
+              android:text="@android:string/singlehandmode_slide_hint_message"
+              android:layout_gravity="center_horizontal"
+              android:gravity="center" />
+    <ImageView
+              android:id="@+id/slide_hint"
+              android:visibility="invisible"
+              android:layout_width="0px"
+              android:layout_height="0px"
+              android:layout_marginTop="12dip"
+              android:background="@android:drawable/singlehandmode_slide_hint" />
+ </LinearLayout>
+</RelativeLayout>

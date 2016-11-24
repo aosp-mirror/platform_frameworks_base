@@ -1006,6 +1006,8 @@
     <string name="aerr_close" msgid="2991640326563991340">"关闭"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"忽略（直到设备重启）"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"等待"</string>
+    <string name="singlehandmode_click_hint_message">"点击屏幕外区域可退出小屏模式"</string>
+    <string name="singlehandmode_slide_hint_message">"在虚拟导航栏区域内左右滑动，可切换小屏模式和正常模式，方便单手使用"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"关闭应用"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g>没有响应"</string>
