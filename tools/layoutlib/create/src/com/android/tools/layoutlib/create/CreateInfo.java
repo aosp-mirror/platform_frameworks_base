@@ -232,6 +232,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.RenderNode#nSetScaleY",
         "android.view.RenderNode#nGetScaleY",
         "android.view.RenderNode#nIsPivotExplicitlySet",
+        "android.view.PointerIcon#loadResource",
         "android.view.ViewGroup#drawChild",
         "com.android.internal.view.menu.MenuBuilder#createNewMenuItem",
         "com.android.internal.util.XmlUtils#convertValueToInt",
