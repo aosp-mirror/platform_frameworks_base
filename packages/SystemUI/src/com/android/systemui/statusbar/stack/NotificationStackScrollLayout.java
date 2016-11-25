@@ -431,19 +431,33 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateBackgroundDimming() {
-        float alpha = BACKGROUND_ALPHA_DIMMED + (1 - BACKGROUND_ALPHA_DIMMED) * (1.0f - mDimAmount);
-        alpha *= mBackgroundFadeAmount;
-        // We need to manually blend in the background color
-        int scrimColor = mScrimController.getScrimBehindColor();
-        // SRC_OVER blending Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc
-        float alphaInv = 1 - alpha;
-        int color = Color.argb((int) (alpha * 255 + alphaInv * Color.alpha(scrimColor)),
-                (int) (mBackgroundFadeAmount * Color.red(mBgColor)
-                        + alphaInv * Color.red(scrimColor)),
-                (int) (mBackgroundFadeAmount * Color.green(mBgColor)
-                        + alphaInv * Color.green(scrimColor)),
-                (int) (mBackgroundFadeAmount * Color.blue(mBgColor)
-                        + alphaInv * Color.blue(scrimColor)));
+        int color;
+        if(Color.alpha(mBgColor) == 255) {
+            float alpha = BACKGROUND_ALPHA_DIMMED +
+                    (1 - BACKGROUND_ALPHA_DIMMED) * (1.0f - mDimAmount);
+            alpha *= mBackgroundFadeAmount;
+            // We need to manually blend in the background color
+            int scrimColor = mScrimController.getScrimBehindColor();
+            // SRC_OVER blending Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc
+            float alphaInv = 1 - alpha;
+            color = Color.argb(
+                    (int) (alpha * 255 + alphaInv * Color.alpha(scrimColor)),
+                    (int) (mBackgroundFadeAmount * Color.red(mBgColor)
+                            + alphaInv * Color.red(scrimColor)),
+                    (int) (mBackgroundFadeAmount * Color.green(mBgColor)
+                            + alphaInv * Color.green(scrimColor)),
+                    (int) (mBackgroundFadeAmount * Color.blue(mBgColor)
+                            + alphaInv * Color.blue(scrimColor)));
+        } else {
+            int a = Color.alpha(mBgColor) +
+                Color.alpha(mScrimController.getScrimBehindColor());
+            if(a > 255) a = 255;
+            else if(a < 0) /* shouldn't happen */ a = 0;
+            color = Color.argb(
+                a,
+                Color.red(mBgColor), Color.green(mBgColor), Color.blue(mBgColor)
+            );
+        }
         mBackgroundPaint.setColor(color);
         invalidate();
     }
