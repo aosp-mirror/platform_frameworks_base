@@ -19,24 +19,26 @@ package com.android.server.connectivity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
-import android.net.Network;
 import android.net.INetdEventCallback;
+import android.net.Network;
 import android.net.NetworkRequest;
 import android.net.metrics.DnsEvent;
 import android.net.metrics.INetdEventListener;
 import android.net.metrics.IpConnectivityLog;
 import android.os.RemoteException;
+import android.text.format.DateUtils;
 import android.util.Log;
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
-
+import com.android.internal.util.TokenBucket;
+import com.android.server.connectivity.metrics.IpConnectivityLogClass.ConnectStatistics;
+import com.android.server.connectivity.metrics.IpConnectivityLogClass.IpConnectivityEvent;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 
 /**
  * Implementation of the INetdEventListener interface.
@@ -51,6 +53,12 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
 
     // TODO: read this constant from system property
     private static final int MAX_LOOKUPS_PER_DNS_EVENT = 100;
+
+    // Rate limit connect latency logging to 1 measurement per 15 seconds (5760 / day) with maximum
+    // bursts of 5000 measurements.
+    private static final int CONNECT_LATENCY_BURST_LIMIT  = 5000;
+    private static final int CONNECT_LATENCY_FILL_RATE    = 15 * (int) DateUtils.SECOND_IN_MILLIS;
+    private static final int CONNECT_LATENCY_MAXIMUM_RECORDS = 20000;
 
     // Stores the results of a number of consecutive DNS lookups on the same network.
     // This class is not thread-safe and it is the responsibility of the service to call its methods
@@ -121,6 +129,12 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         }
     };
 
+    @GuardedBy("this")
+    private final TokenBucket mConnectTb =
+            new TokenBucket(CONNECT_LATENCY_FILL_RATE, CONNECT_LATENCY_BURST_LIMIT);
+    @GuardedBy("this")
+    private ConnectStats mConnectStats = makeConnectStats();
+
     // Callback should only be registered/unregistered when logging is being enabled/disabled in DPM
     // by the device owner. It's DevicePolicyManager's responsibility to ensure that.
     @GuardedBy("this")
@@ -175,11 +189,26 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     // This method must not block or perform long-running operations.
     public synchronized void onConnectEvent(int netId, int error, int latencyMs, String ipAddr, int port,
             int uid) throws RemoteException {
-        maybeVerboseLog("onConnectEvent(%d, %d, %dms)", netId, error, latencyMs);
+        maybeVerboseLog("onConnectEvent(%d, %d)", netId, latencyMs);
+
+        mConnectStats.addEvent(error, latencyMs, ipAddr);
 
         if (mNetdEventCallback != null) {
             mNetdEventCallback.onConnectEvent(ipAddr, port, System.currentTimeMillis(), uid);
         }
+    }
+
+    public synchronized void flushStatistics(List<IpConnectivityEvent> events) {
+        events.add(flushConnectStats());
+        // TODO: migrate DnsEventBatch to IpConnectivityLogClass.DNSLatencies
+    }
+
+    private IpConnectivityEvent flushConnectStats() {
+        IpConnectivityEvent ev = new IpConnectivityEvent();
+        ev.connectStatistics = mConnectStats.toProto();
+        // TODO: add transport information
+        mConnectStats = makeConnectStats();
+        return ev;
     }
 
     public synchronized void dump(PrintWriter writer) {
@@ -189,7 +218,12 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         for (DnsEventBatch batch : mEventBatches.values()) {
             pw.println(batch.toString());
         }
+        // TODO: also dump ConnectStats
         pw.decreaseIndent();
+    }
+
+    private ConnectStats makeConnectStats() {
+        return new ConnectStats(mConnectTb, CONNECT_LATENCY_MAXIMUM_RECORDS);
     }
 
     private static void maybeLog(String s, Object... args) {
