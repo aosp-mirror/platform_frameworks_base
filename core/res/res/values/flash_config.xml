@@ -54,4 +54,7 @@
     <!-- If this is true, key chords can be used to take a screen record on the device. -->
     <bool name="config_enableScreenrecordChord">true</bool>
 
+    <!-- Quick settings tiles columns and rows config -->
+    <integer name="config_qs_num_rows_landscape_default">2</integer>
+
 </resources>
