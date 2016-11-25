@@ -159,6 +159,11 @@ public class DevicePolicyManager {
      * managed profile and the {@link #ACTION_MANAGED_PROFILE_PROVISIONED} broadcast is sent in
      * the primary profile.
      *
+     * <p>From version {@link android.os.Build.VERSION_CODES#O}, when managed provisioning has
+     * completed, along with the above broadcast, activity intent
+     * {@link #ACTION_PROVISIONING_SUCCESSFUL} will also be sent to the application specified in
+     * the provisioning intent.
+     *
      * <p>If provisioning fails, the managedProfile is removed so the device returns to its
      * previous state.
      *
@@ -232,6 +237,10 @@ public class DevicePolicyManager {
      * <p>When device owner provisioning has completed, an intent of the type
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcast to the
      * device owner.
+     *
+     * <p>From version {@link android.os.Build.VERSION_CODES#O}, when device owner provisioning has
+     * completed, along with the above broadcast, activity intent
+     * {@link #ACTION_PROVISIONING_SUCCESSFUL} will also be sent to the device owner.
      *
      * <p>If provisioning fails, the device is factory reset.
      *
@@ -321,6 +330,10 @@ public class DevicePolicyManager {
      * <p>When device owner provisioning has completed, an intent of the type
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcast to the
      * device owner.
+     *
+     * <p>From version {@link android.os.Build.VERSION_CODES#O}, when device owner provisioning has
+     * completed, along with the above broadcast, activity intent
+     * {@link #ACTION_PROVISIONING_SUCCESSFUL} will also be sent to the device owner.
      *
      * <p>If provisioning fails, the device is factory reset.
      *
@@ -732,6 +745,22 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGED_PROFILE_PROVISIONED
         = "android.app.action.MANAGED_PROFILE_PROVISIONED";
+
+    /**
+     * Activity action: This activity action is sent to indicate that provisioning of a managed
+     * profile or managed device has completed successfully. It'll be sent at the same time as
+     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} broadcast but this will be
+     * delivered faster as it's an activity intent.
+     *
+     * <p>The intent is only sent to the application on the profile that requested provisioning. In
+     * the device owner case the profile is the primary user.
+     *
+     * @see #ACTION_PROVISION_MANAGED_PROFILE
+     * @see #ACTION_PROVISION_MANAGED_DEVICE
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PROVISIONING_SUCCESSFUL =
+            "android.app.action.PROVISIONING_SUCCESSFUL";
 
     /**
      * A boolean extra indicating whether device encryption can be skipped as part of device owner
