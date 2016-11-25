@@ -801,8 +801,8 @@ public class AudioManager {
      * management of audio settings or the main telephony application.
      *
      * @param streamType The stream type to adjust. One of {@link #STREAM_VOICE_CALL},
-     * {@link #STREAM_SYSTEM}, {@link #STREAM_RING}, {@link #STREAM_MUSIC} or
-     * {@link #STREAM_ALARM}
+     * {@link #STREAM_SYSTEM}, {@link #STREAM_RING}, {@link #STREAM_MUSIC},
+     * {@link #STREAM_ALARM} or {@link #STREAM_ACCESSIBILITY}.
      * @param direction The direction to adjust the volume. One of
      *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
      *            {@link #ADJUST_SAME}.
@@ -3195,7 +3195,8 @@ public class AudioManager {
      *            {@link #STREAM_MUSIC},
      *            {@link #STREAM_ALARM},
      *            {@link #STREAM_NOTIFICATION},
-     *            {@link #STREAM_DTMF}.
+     *            {@link #STREAM_DTMF},
+     *            {@link #STREAM_ACCESSIBILITY}.
      *
      * @return The bit-mask "or" of audio output device codes for all enabled devices on this
      *         stream. Zero or more of
@@ -3238,6 +3239,7 @@ public class AudioManager {
         case STREAM_ALARM:
         case STREAM_NOTIFICATION:
         case STREAM_DTMF:
+        case STREAM_ACCESSIBILITY:
             return AudioSystem.getDevicesForStream(streamType);
         default:
             return 0;
