@@ -95,6 +95,11 @@ public final class DnsEvent extends NetworkEvent implements Parcelable {
     };
 
     @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         // write parcel token first
         out.writeInt(PARCEL_TOKEN_DNS_EVENT);

@@ -75,6 +75,11 @@ public final class ConnectEvent extends NetworkEvent implements Parcelable {
     };
 
     @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         // write parcel token first
         out.writeInt(PARCEL_TOKEN_CONNECT_EVENT);
