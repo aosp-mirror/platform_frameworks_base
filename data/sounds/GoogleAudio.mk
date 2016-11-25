@@ -80,3 +80,4 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)material/ringtones/Titania.ogg:system/media/audio/ringtones/Titania.ogg \
     $(LOCAL_PATH)material/ringtones/Triton.ogg:system/media/audio/ringtones/Triton.ogg \
     $(LOCAL_PATH)material/ringtones/Umbriel.ogg:system/media/audio/ringtones/Umbriel.ogg \
+    $(LOCAL_PATH)material/ringtones/Yafarkencaaaarnt.ogg:system/media/audio/ringtones/Yafarkencaaaarnt.ogg \

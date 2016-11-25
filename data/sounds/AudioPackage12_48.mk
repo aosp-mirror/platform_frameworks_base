@@ -10,7 +10,7 @@ LOCAL_PATH := frameworks/base/data/sounds
 # Simple files that do not require renaming
 ALARM_FILES := Argon Carbon Helium Krypton Neon Oxygen Osmium Platinum
 NOTIFICATION_FILES := Ariel Ceres Carme Elara Europa Iapetus Io Rhea Salacia Titan Tethys
-RINGTONE_FILES := Callisto Dione Ganymede Luna Oberon Phobos Sedna Titania Triton Umbriel
+RINGTONE_FILES := Callisto Dione Ganymede Luna Oberon Phobos Sedna Titania Triton Umbriel Yafarkencaaaarnt
 EFFECT_FILES := Effect_Tick KeypressReturn KeypressInvalid KeypressDelete KeypressSpacebar KeypressStandard \
 	Lock Unlock Trusted
 MATERIAL_EFFECT_FILES := camera_click VideoRecord LowBattery WirelessChargingStarted VideoStop
