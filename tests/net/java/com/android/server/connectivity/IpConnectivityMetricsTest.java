@@ -292,10 +292,5 @@ public class IpConnectivityMetricsTest extends TestCase {
     }
 
     static final Comparator<ConnectivityMetricsEvent> EVENT_COMPARATOR =
-        new Comparator<ConnectivityMetricsEvent>() {
-            @Override
-            public int compare(ConnectivityMetricsEvent ev1, ConnectivityMetricsEvent ev2) {
-                return (int) (ev1.timestamp - ev2.timestamp);
-            }
-        };
+        Comparator.comparingLong((ev) -> ev.timestamp);
 }
