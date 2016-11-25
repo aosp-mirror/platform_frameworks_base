@@ -244,6 +244,17 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (DEBUG) Slog.v(TAG, "Parent does not have a screen lock");
             return;
         }
+        // Do not tie when the parent has no SID (but does have a screen lock).
+        // This can only happen during an upgrade path where SID is yet to be
+        // generated when the user unlocks for the first time.
+        try {
+            if (getGateKeeperService().getSecureUserId(parentId) == 0) {
+                return;
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to talk to GateKeeper service", e);
+            return;
+        }
         if (DEBUG) Slog.v(TAG, "Tie managed profile to parent now!");
         byte[] randomLockSeed = new byte[] {};
         try {
