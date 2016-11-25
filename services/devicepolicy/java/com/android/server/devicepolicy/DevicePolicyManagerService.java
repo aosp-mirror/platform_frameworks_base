@@ -6097,6 +6097,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             admin.userRestrictions = null;
             admin.forceEphemeralUsers = false;
             mUserManagerInternal.setForceEphemeralUsers(admin.forceEphemeralUsers);
+            final DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
+            policyData.mLastSecurityLogRetrievalTime = -1;
+            policyData.mLastBugReportRequestTime = -1;
+            policyData.mLastNetworkLogsRetrievalTime = -1;
+            saveSettingsLocked(UserHandle.USER_SYSTEM);
         }
         clearUserPoliciesLocked(userId);
 
@@ -6581,10 +6586,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void enforceSystemUid() {
-        if (!isCallerWithSystemUid()) {
-            throw new SecurityException("Only the system can call this method.");
+    private void enforceDeviceOwnerOrManageUsers() {
+        synchronized (this) {
+            if (getActiveAdminWithPolicyForUidLocked(null, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER,
+                    mInjector.binderGetCallingUid()) != null) {
+                return;
+            }
         }
+        enforceManageUsers();
     }
 
     private void ensureCallerPackage(@Nullable String packageName) {
@@ -9852,19 +9861,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public long getLastSecurityLogRetrievalTime() {
-        enforceSystemUid();
+        enforceDeviceOwnerOrManageUsers();
         return getUserData(UserHandle.USER_SYSTEM).mLastSecurityLogRetrievalTime;
      }
 
     @Override
     public long getLastBugReportRequestTime() {
-        enforceSystemUid();
+        enforceDeviceOwnerOrManageUsers();
         return getUserData(UserHandle.USER_SYSTEM).mLastBugReportRequestTime;
      }
 
     @Override
     public long getLastNetworkLogRetrievalTime() {
-        enforceSystemUid();
+        enforceDeviceOwnerOrManageUsers();
         return getUserData(UserHandle.USER_SYSTEM).mLastNetworkLogsRetrievalTime;
     }
 }

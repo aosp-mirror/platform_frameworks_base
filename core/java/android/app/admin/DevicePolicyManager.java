@@ -24,6 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
@@ -6784,9 +6785,12 @@ public class DevicePolicyManager {
      *
      * @return the time at which the device owner most recently retrieved security logging entries,
      *         in milliseconds since epoch; -1 if security logging entries were never retrieved.
+     * @throws SecurityException if the caller is not the device owner, does not hold the
+     *         MANAGE_USERS permission and is not the system.
      *
      * @hide
      */
+    @TestApi
     public long getLastSecurityLogRetrievalTime() {
         try {
             return mService.getLastSecurityLogRetrievalTime();
@@ -6800,9 +6804,12 @@ public class DevicePolicyManager {
      *
      * @return the time at which the device owner most recently requested a bug report, in
      *         milliseconds since epoch; -1 if a bug report was never requested.
+     * @throws SecurityException if the caller is not the device owner, does not hold the
+     *         MANAGE_USERS permission and is not the system.
      *
      * @hide
      */
+    @TestApi
     public long getLastBugReportRequestTime() {
         try {
             return mService.getLastBugReportRequestTime();
@@ -6817,9 +6824,12 @@ public class DevicePolicyManager {
      *
      * @return the time at which the device owner most recently retrieved network logging events, in
      *         milliseconds since epoch; -1 if network logging events were never retrieved.
+     * @throws SecurityException if the caller is not the device owner, does not hold the
+     *         MANAGE_USERS permission and is not the system.
      *
      * @hide
      */
+    @TestApi
     public long getLastNetworkLogRetrievalTime() {
         try {
             return mService.getLastNetworkLogRetrievalTime();

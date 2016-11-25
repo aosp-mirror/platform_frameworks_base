@@ -2273,11 +2273,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertFalse(dpms.hasUserSetupCompleted());
     }
 
-    private long getLastSecurityLogRetrievalTime() {
+    private void clearDeviceOwner() throws Exception {
         final long ident = mContext.binder.clearCallingIdentity();
-        final long lastSecurityLogRetrievalTime = dpm.getLastSecurityLogRetrievalTime();
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        doReturn(DpmMockContext.CALLER_SYSTEM_USER_UID).when(mContext.packageManager)
+                .getPackageUidAsUser(eq(admin1.getPackageName()), anyInt());
+        dpm.clearDeviceOwnerApp(admin1.getPackageName());
         mContext.binder.restoreCallingIdentity(ident);
-        return lastSecurityLogRetrievalTime;
     }
 
     public void testGetLastSecurityLogRetrievalTime() throws Exception {
@@ -2288,16 +2290,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(true);
 
         // No logs were retrieved so far.
-        assertEquals(-1, getLastSecurityLogRetrievalTime());
+        assertEquals(-1, dpm.getLastSecurityLogRetrievalTime());
 
         // Enabling logging should not change the timestamp.
         dpm.setSecurityLoggingEnabled(admin1, true);
-        assertEquals(-1, getLastSecurityLogRetrievalTime());
+        assertEquals(-1, dpm.getLastSecurityLogRetrievalTime());
 
         // Retrieving the logs should update the timestamp.
         final long beforeRetrieval = System.currentTimeMillis();
         dpm.retrieveSecurityLogs(admin1);
-        final long firstSecurityLogRetrievalTime = getLastSecurityLogRetrievalTime();
+        final long firstSecurityLogRetrievalTime = dpm.getLastSecurityLogRetrievalTime();
         final long afterRetrieval = System.currentTimeMillis();
         assertTrue(firstSecurityLogRetrievalTime >= beforeRetrieval);
         assertTrue(firstSecurityLogRetrievalTime <= afterRetrieval);
@@ -2305,33 +2307,40 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Retrieving the pre-boot logs should update the timestamp.
         Thread.sleep(2);
         dpm.retrievePreRebootSecurityLogs(admin1);
-        final long secondSecurityLogRetrievalTime = getLastSecurityLogRetrievalTime();
+        final long secondSecurityLogRetrievalTime = dpm.getLastSecurityLogRetrievalTime();
         assertTrue(secondSecurityLogRetrievalTime > firstSecurityLogRetrievalTime);
 
         // Checking the timestamp again should not change it.
         Thread.sleep(2);
-        assertEquals(secondSecurityLogRetrievalTime, getLastSecurityLogRetrievalTime());
+        assertEquals(secondSecurityLogRetrievalTime, dpm.getLastSecurityLogRetrievalTime());
 
         // Retrieving the logs again should update the timestamp.
         dpm.retrieveSecurityLogs(admin1);
-        final long thirdSecurityLogRetrievalTime = getLastSecurityLogRetrievalTime();
+        final long thirdSecurityLogRetrievalTime = dpm.getLastSecurityLogRetrievalTime();
         assertTrue(thirdSecurityLogRetrievalTime > secondSecurityLogRetrievalTime);
 
         // Disabling logging should not change the timestamp.
         Thread.sleep(2);
         dpm.setSecurityLoggingEnabled(admin1, false);
-        assertEquals(thirdSecurityLogRetrievalTime, getLastSecurityLogRetrievalTime());
+        assertEquals(thirdSecurityLogRetrievalTime, dpm.getLastSecurityLogRetrievalTime());
 
         // Restarting the DPMS should not lose the timestamp.
         initializeDpms();
-        assertEquals(thirdSecurityLogRetrievalTime, getLastSecurityLogRetrievalTime());
-    }
+        assertEquals(thirdSecurityLogRetrievalTime, dpm.getLastSecurityLogRetrievalTime());
 
-    private long getLastBugReportRequestTime() {
-        final long ident = mContext.binder.clearCallingIdentity();
-        final long lastBugRequestTime = dpm.getLastBugReportRequestTime();
-        mContext.binder.restoreCallingIdentity(ident);
-        return lastBugRequestTime;
+        // Any uid holding MANAGE_USERS permission can retrieve the timestamp.
+        mContext.binder.callingUid = 1234567;
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
+        assertEquals(thirdSecurityLogRetrievalTime, dpm.getLastSecurityLogRetrievalTime());
+        mContext.callerPermissions.remove(permission.MANAGE_USERS);
+
+        // System can retrieve the timestamp.
+        mContext.binder.clearCallingIdentity();
+        assertEquals(thirdSecurityLogRetrievalTime, dpm.getLastSecurityLogRetrievalTime());
+
+        // Removing the device owner should clear the timestamp.
+        clearDeviceOwner();
+        assertEquals(-1, dpm.getLastSecurityLogRetrievalTime());
     }
 
     public void testGetLastBugReportRequestTime() throws Exception {
@@ -2346,30 +2355,37 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 anyObject())).thenReturn(Color.WHITE);
 
         // No bug reports were requested so far.
-        assertEquals(-1, getLastSecurityLogRetrievalTime());
+        assertEquals(-1, dpm.getLastBugReportRequestTime());
 
         // Requesting a bug report should update the timestamp.
         final long beforeRequest = System.currentTimeMillis();
         dpm.requestBugreport(admin1);
-        final long bugReportRequestTime = getLastBugReportRequestTime();
+        final long bugReportRequestTime = dpm.getLastBugReportRequestTime();
         final long afterRequest = System.currentTimeMillis();
         assertTrue(bugReportRequestTime >= beforeRequest);
         assertTrue(bugReportRequestTime <= afterRequest);
 
         // Checking the timestamp again should not change it.
         Thread.sleep(2);
-        assertEquals(bugReportRequestTime, getLastBugReportRequestTime());
+        assertEquals(bugReportRequestTime, dpm.getLastBugReportRequestTime());
 
         // Restarting the DPMS should not lose the timestamp.
         initializeDpms();
-        assertEquals(bugReportRequestTime, getLastBugReportRequestTime());
-    }
+        assertEquals(bugReportRequestTime, dpm.getLastBugReportRequestTime());
 
-    private long getLastNetworkLogRetrievalTime() {
-        final long ident = mContext.binder.clearCallingIdentity();
-        final long lastNetworkLogRetrievalTime = dpm.getLastNetworkLogRetrievalTime();
-        mContext.binder.restoreCallingIdentity(ident);
-        return lastNetworkLogRetrievalTime;
+        // Any uid holding MANAGE_USERS permission can retrieve the timestamp.
+        mContext.binder.callingUid = 1234567;
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
+        assertEquals(bugReportRequestTime, dpm.getLastBugReportRequestTime());
+        mContext.callerPermissions.remove(permission.MANAGE_USERS);
+
+        // System can retrieve the timestamp.
+        mContext.binder.clearCallingIdentity();
+        assertEquals(bugReportRequestTime, dpm.getLastBugReportRequestTime());
+
+        // Removing the device owner should clear the timestamp.
+        clearDeviceOwner();
+        assertEquals(-1, dpm.getLastBugReportRequestTime());
     }
 
     public void testGetLastNetworkLogRetrievalTime() throws Exception {
@@ -2380,41 +2396,55 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(true);
 
         // No logs were retrieved so far.
-        assertEquals(-1, getLastNetworkLogRetrievalTime());
+        assertEquals(-1, dpm.getLastNetworkLogRetrievalTime());
 
         // Attempting to retrieve logs without enabling logging should not change the timestamp.
         dpm.retrieveNetworkLogs(admin1, 0 /* batchToken */);
-        assertEquals(-1, getLastNetworkLogRetrievalTime());
+        assertEquals(-1, dpm.getLastNetworkLogRetrievalTime());
 
         // Enabling logging should not change the timestamp.
         dpm.setNetworkLoggingEnabled(admin1, true);
-        assertEquals(-1, getLastNetworkLogRetrievalTime());
+        assertEquals(-1, dpm.getLastNetworkLogRetrievalTime());
 
         // Retrieving the logs should update the timestamp.
         final long beforeRetrieval = System.currentTimeMillis();
         dpm.retrieveNetworkLogs(admin1, 0 /* batchToken */);
-        final long firstNetworkLogRetrievalTime = getLastNetworkLogRetrievalTime();
+        final long firstNetworkLogRetrievalTime = dpm.getLastNetworkLogRetrievalTime();
         final long afterRetrieval = System.currentTimeMillis();
         assertTrue(firstNetworkLogRetrievalTime >= beforeRetrieval);
         assertTrue(firstNetworkLogRetrievalTime <= afterRetrieval);
 
         // Checking the timestamp again should not change it.
         Thread.sleep(2);
-        assertEquals(firstNetworkLogRetrievalTime, getLastNetworkLogRetrievalTime());
+        assertEquals(firstNetworkLogRetrievalTime, dpm.getLastNetworkLogRetrievalTime());
 
         // Retrieving the logs again should update the timestamp.
         dpm.retrieveNetworkLogs(admin1, 0 /* batchToken */);
-        final long secondNetworkLogRetrievalTime = getLastNetworkLogRetrievalTime();
+        final long secondNetworkLogRetrievalTime = dpm.getLastNetworkLogRetrievalTime();
         assertTrue(secondNetworkLogRetrievalTime > firstNetworkLogRetrievalTime);
 
         // Disabling logging should not change the timestamp.
         Thread.sleep(2);
         dpm.setNetworkLoggingEnabled(admin1, false);
-        assertEquals(secondNetworkLogRetrievalTime, getLastNetworkLogRetrievalTime());
+        assertEquals(secondNetworkLogRetrievalTime, dpm.getLastNetworkLogRetrievalTime());
 
         // Restarting the DPMS should not lose the timestamp.
         initializeDpms();
-        assertEquals(secondNetworkLogRetrievalTime, getLastNetworkLogRetrievalTime());
+        assertEquals(secondNetworkLogRetrievalTime, dpm.getLastNetworkLogRetrievalTime());
+
+        // Any uid holding MANAGE_USERS permission can retrieve the timestamp.
+        mContext.binder.callingUid = 1234567;
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
+        assertEquals(secondNetworkLogRetrievalTime, dpm.getLastNetworkLogRetrievalTime());
+        mContext.callerPermissions.remove(permission.MANAGE_USERS);
+
+        // System can retrieve the timestamp.
+        mContext.binder.clearCallingIdentity();
+        assertEquals(secondNetworkLogRetrievalTime, dpm.getLastNetworkLogRetrievalTime());
+
+        // Removing the device owner should clear the timestamp.
+        clearDeviceOwner();
+        assertEquals(-1, dpm.getLastNetworkLogRetrievalTime());
     }
 
     private void setUserSetupCompleteForUser(boolean isUserSetupComplete, int userhandle) {
