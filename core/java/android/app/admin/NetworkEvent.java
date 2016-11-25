@@ -26,14 +26,14 @@ import android.os.ParcelFormatException;
  */
 public abstract class NetworkEvent implements Parcelable {
 
-    protected static final int PARCEL_TOKEN_DNS_EVENT = 1;
-    protected static final int PARCEL_TOKEN_CONNECT_EVENT = 2;
+    static final int PARCEL_TOKEN_DNS_EVENT = 1;
+    static final int PARCEL_TOKEN_CONNECT_EVENT = 2;
 
     /** The package name of the UID that performed the query. */
-    protected String packageName;
+    String packageName;
 
     /** The timestamp of the event being reported in milliseconds. */
-    protected long timestamp;
+    long timestamp;
 
     protected NetworkEvent() {
         //empty constructor
@@ -81,5 +81,8 @@ public abstract class NetworkEvent implements Parcelable {
             return new NetworkEvent[size];
         }
     };
+
+    @Override
+    public abstract void writeToParcel(Parcel out, int flags);
 }
 
