@@ -702,8 +702,6 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param batchToken The token representing the current batch of network logs.
      * @param networkLogsCount The total count of events in the current batch of network logs.
      * @see DevicePolicyManager#retrieveNetworkLogs(ComponentName)
-     *
-     * @hide
      */
     public void onNetworkLogsAvailable(Context context, Intent intent, long batchToken,
             int networkLogsCount) {

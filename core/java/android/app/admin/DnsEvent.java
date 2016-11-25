@@ -21,7 +21,6 @@ import android.os.Parcelable;
 
 /**
  * A class that represents a DNS lookup event.
- * @hide
  */
 public final class DnsEvent extends NetworkEvent implements Parcelable {
 

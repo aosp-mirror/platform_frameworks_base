@@ -6695,8 +6695,6 @@ public class DevicePolicyManager {
      * @param enabled whether network logging should be enabled or not.
      * @throws {@link SecurityException} if {@code admin} is not a device owner.
      * @see #retrieveNetworkLogs
-     *
-     * @hide
      */
     public void setNetworkLoggingEnabled(@NonNull ComponentName admin, boolean enabled) {
         throwIfParentInstance("setNetworkLoggingEnabled");
@@ -6713,8 +6711,6 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return {@code true} if network logging is enabled by device owner, {@code false} otherwise.
      * @throws {@link SecurityException} if {@code admin} is not a device owner.
-     *
-     * @hide
      */
     public boolean isNetworkLoggingEnabled(@NonNull ComponentName admin) {
         throwIfParentInstance("isNetworkLoggingEnabled");
@@ -6746,8 +6742,6 @@ public class DevicePolicyManager {
      *        logging is disabled.
      * @throws {@link SecurityException} if {@code admin} is not a device owner.
      * @see DeviceAdminReceiver#onNetworkLogsAvailable
-     *
-     * @hide
      */
     public @Nullable List<NetworkEvent> retrieveNetworkLogs(@NonNull ComponentName admin,
             long batchToken) {
