@@ -4440,11 +4440,6 @@
     <!-- Text of button to allow user to abort countdown and immediately start another session in retail demo mode [CHAR LIMIT=40] -->
     <string name="demo_user_inactivity_timeout_right_button">Reset now</string>
 
-    <!-- Title of notification shown when device has been forced to safe mode after a security compromise. -->
-    <string name="audit_safemode_notification">Factory reset to use this device without restrictions</string>
-    <!-- Description of notification shown when device has been forced to safe mode after a security compromise. -->
-    <string name="audit_safemode_notification_details">Touch to learn more.</string>
-
     <!-- Accessibilty string added to a widget that has been suspended [CHAR LIMIT=20] -->
     <string name="suspended_widget_accessibility">Disabled <xliff:g id="label" example="Calendar">%1$s</xliff:g></string>
 
