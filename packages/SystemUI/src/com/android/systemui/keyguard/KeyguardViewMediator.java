@@ -63,6 +63,8 @@ import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardStateCallback;
@@ -335,6 +337,7 @@ public class KeyguardViewMediator extends SystemUI {
 
     private boolean mWakeAndUnlocking;
     private IKeyguardDrawnCallback mDrawnCallback;
+    private boolean mLockWhenSimRemoved;
 
     private boolean mIsPerUserLock;
 
@@ -429,7 +432,7 @@ public class KeyguardViewMediator extends SystemUI {
                 case ABSENT:
                     // only force lock screen in case of missing sim if user hasn't
                     // gone through setup wizard
-                    synchronized (this) {
+                    synchronized (KeyguardViewMediator.this) {
                         if (shouldWaitForProvisioning()) {
                             if (!mShowing) {
                                 if (DEBUG_SIM_STATES) Log.d(TAG, "ICC_ABSENT isn't showing,"
@@ -440,11 +443,12 @@ public class KeyguardViewMediator extends SystemUI {
                                 resetStateLocked();
                             }
                         }
+                        onSimNotReadyLocked();
                     }
                     break;
                 case PIN_REQUIRED:
                 case PUK_REQUIRED:
-                    synchronized (this) {
+                    synchronized (KeyguardViewMediator.this) {
                         if (!mShowing) {
                             if (DEBUG_SIM_STATES) Log.d(TAG,
                                     "INTENT_VALUE_ICC_LOCKED and keygaurd isn't "
@@ -456,7 +460,7 @@ public class KeyguardViewMediator extends SystemUI {
                     }
                     break;
                 case PERM_DISABLED:
-                    synchronized (this) {
+                    synchronized (KeyguardViewMediator.this) {
                         if (!mShowing) {
                             if (DEBUG_SIM_STATES) Log.d(TAG, "PERM_DISABLED and "
                                   + "keygaurd isn't showing.");
@@ -466,18 +470,37 @@ public class KeyguardViewMediator extends SystemUI {
                                   + "show permanently disabled message in lockscreen.");
                             resetStateLocked();
                         }
+                        onSimNotReadyLocked();
                     }
                     break;
                 case READY:
-                    synchronized (this) {
+                    synchronized (KeyguardViewMediator.this) {
                         if (mShowing) {
                             resetStateLocked();
                         }
+                        mLockWhenSimRemoved = true;
                     }
                     break;
                 default:
-                    if (DEBUG_SIM_STATES) Log.v(TAG, "Ignoring state: " + simState);
+                    if (DEBUG_SIM_STATES) Log.v(TAG, "Unspecific state: " + simState);
+                    synchronized (KeyguardViewMediator.this) {
+                        onSimNotReadyLocked();
+                    }
                     break;
+            }
+        }
+
+        private void onSimNotReadyLocked() {
+            if (isSecure() && mLockWhenSimRemoved) {
+                mLockWhenSimRemoved = false;
+                MetricsLogger.action(mContext,
+                        MetricsEvent.ACTION_LOCK_BECAUSE_SIM_REMOVED, mShowing);
+                if (!mShowing) {
+                    if (DEBUG_SIM_STATES) Log.d(TAG, "SIM removed, showing keyguard");
+                    doKeyguardLocked(null);
+                } else {
+                    resetStateLocked();
+                }
             }
         }
 
