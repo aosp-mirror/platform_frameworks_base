@@ -6670,7 +6670,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void scanDirLI(File dir, final int parseFlags, int scanFlags, long currentTime) {
+    private void scanDirLI(File dir, int parseFlags, int scanFlags, long currentTime) {
         final File[] files = dir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
             Log.d(TAG, "No files in app dir " + dir);
@@ -6681,7 +6681,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             Log.d(TAG, "Scanning app dir " + dir + " scanFlags=" + scanFlags
                     + " flags=0x" + Integer.toHexString(parseFlags));
         }
+        ParallelPackageParser parallelPackageParser = new ParallelPackageParser(
+                mSeparateProcesses, mOnlyCore, mMetrics);
 
+        // Submit files for parsing in parallel
+        int fileCount = 0;
         for (File file : files) {
             final boolean isPackage = (isApkFile(file) || file.isDirectory())
                     && !PackageInstallerService.isStageName(file.getName());
@@ -6689,20 +6693,43 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Ignore entries which are not packages
                 continue;
             }
-            try {
-                scanPackageTracedLI(file, parseFlags | PackageParser.PARSE_MUST_BE_APK,
-                        scanFlags, currentTime, null);
-            } catch (PackageManagerException e) {
-                Slog.w(TAG, "Failed to parse " + file + ": " + e.getMessage());
+            parallelPackageParser.submit(file, parseFlags);
+            fileCount++;
+        }
 
-                // Delete invalid userdata apps
-                if ((parseFlags & PackageParser.PARSE_IS_SYSTEM) == 0 &&
-                        e.error == PackageManager.INSTALL_FAILED_INVALID_APK) {
-                    logCriticalInfo(Log.WARN, "Deleting invalid package at " + file);
-                    removeCodePathLI(file);
+        // Process results one by one
+        for (; fileCount > 0; fileCount--) {
+            ParallelPackageParser.ParseResult parseResult = parallelPackageParser.take();
+            Throwable throwable = parseResult.throwable;
+            int errorCode = PackageManager.INSTALL_SUCCEEDED;
+
+            if (throwable == null) {
+                try {
+                    scanPackageLI(parseResult.pkg, parseResult.scanFile, parseFlags, scanFlags,
+                            currentTime, null);
+                } catch (PackageManagerException e) {
+                    errorCode = e.error;
+                    Slog.w(TAG, "Failed to scan " + parseResult.scanFile + ": " + e.getMessage());
                 }
+            } else if (throwable instanceof PackageParser.PackageParserException) {
+                PackageParser.PackageParserException e = (PackageParser.PackageParserException)
+                        throwable;
+                errorCode = e.error;
+                Slog.w(TAG, "Failed to parse " + parseResult.scanFile + ": " + e.getMessage());
+            } else {
+                throw new IllegalStateException("Unexpected exception occurred while parsing "
+                        + parseResult.scanFile, throwable);
+            }
+
+            // Delete invalid userdata apps
+            if ((parseFlags & PackageParser.PARSE_IS_SYSTEM) == 0 &&
+                    errorCode == PackageManager.INSTALL_FAILED_INVALID_APK) {
+                logCriticalInfo(Log.WARN,
+                        "Deleting invalid package at " + parseResult.scanFile);
+                removeCodePathLI(parseResult.scanFile);
             }
         }
+        parallelPackageParser.close();
     }
 
     private static File getSettingsProblemFile() {
