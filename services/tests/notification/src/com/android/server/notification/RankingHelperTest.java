@@ -15,6 +15,8 @@
  */
 package com.android.server.notification;
 
+import static junit.framework.Assert.fail;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -345,6 +347,19 @@ public class RankingHelperTest {
         assertFalse(updated2.canBypassDnd());
         assertEquals(Notification.VISIBILITY_PRIVATE, updated2.getLockscreenVisibility());
         assertEquals(NotificationChannel.USER_LOCKED_VISIBILITY, updated2.getUserLockedFields());
+    }
+
+    @Test
+    public void testCreateChannel_blocked() throws Exception {
+        mHelper.setImportance(pkg, uid, NotificationManager.IMPORTANCE_NONE);
+
+        try {
+            mHelper.createNotificationChannel(pkg, uid,
+                    new NotificationChannel(pkg, "", NotificationManager.IMPORTANCE_LOW));
+            fail("Channel creation should fail");
+        } catch (IllegalArgumentException e) {
+            // pass
+        }
     }
 
     @Test
