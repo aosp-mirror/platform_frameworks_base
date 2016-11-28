@@ -2232,6 +2232,14 @@ message MetricsEvent {
 
     // ---- End N-MR1 Constants, all N-MR1 constants go above this line ----
 
+    // ACTION: The lockscreen gets shown because the SIM card was removed
+    // SUBTYPE: false: device was previously unlocked, true: device was previously locked
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N-MR2
+    ACTION_LOCK_BECAUSE_SIM_REMOVED = 496;
+
+    // ---- End N-MR2 Constants, all N-MR2 constants go above this line ----
+
     // ------- Begin N Keyboard Shortcuts Helper -----
     // Keyboard Shortcuts Helper is opened/closed.
     KEYBOARD_SHORTCUTS_HELPER = 500;
