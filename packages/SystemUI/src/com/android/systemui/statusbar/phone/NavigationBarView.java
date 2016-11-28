@@ -577,6 +577,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
         mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
+        mDeadZone.setDisplayRotation(mCurrentRotation);
 
         // force the low profile & disabled states into compliance
         mBarTransitions.init();
