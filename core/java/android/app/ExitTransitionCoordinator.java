@@ -236,7 +236,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             delayCancel();
             moveSharedElementsToOverlay();
             if (decorView != null && decorView.getBackground() == null) {
-                getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
+                getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             }
             final boolean targetsM = decorView == null || decorView.getContext()
                     .getApplicationInfo().targetSdkVersion >= VERSION_CODES.M;
