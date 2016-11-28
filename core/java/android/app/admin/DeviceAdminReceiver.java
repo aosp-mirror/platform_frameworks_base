@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.security.KeyChain;
 
 import java.lang.annotation.Retention;
@@ -304,6 +305,24 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     public static final String EXTRA_NETWORK_LOGS_COUNT =
             "android.app.extra.EXTRA_NETWORK_LOGS_COUNT";
+
+    /**
+     * Broadcast action: notify the device owner that a user or profile has been added.
+     * Carries an extra {@link Intent#EXTRA_USER} that has the {@link UserHandle} of
+     * the new user.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_USER_ADDED  = "android.app.action.USER_ADDED";
+
+    /**
+     * Broadcast action: notify the device owner that a user or profile has been removed.
+     * Carries an extra {@link Intent#EXTRA_USER} that has the {@link UserHandle} of
+     * the new user.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_USER_REMOVED = "android.app.action.USER_REMOVED";
 
     /**
      * A string containing the SHA-256 hash of the bugreport file.
@@ -690,6 +709,30 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             int networkLogsCount) {
     }
 
+     /**
+      * Called when a user or profile is created.
+      *
+      * <p>This callback is only applicable to device owners.
+      *
+      * @param context The running context as per {@link #onReceive}.
+      * @param intent The received intent as per {@link #onReceive}.
+      * @param newUser The {@link UserHandle} of the user that has just been added.
+      */
+     public void onUserAdded(Context context, Intent intent, UserHandle newUser) {
+     }
+
+     /**
+      * Called when a user or profile is removed.
+      *
+      * <p>This callback is only applicable to device owners.
+      *
+      * @param context The running context as per {@link #onReceive}.
+      * @param intent The received intent as per {@link #onReceive}.
+      * @param removedUser The {@link UserHandle} of the user that has just been removed.
+      */
+     public void onUserRemoved(Context context, Intent intent, UserHandle removedUser) {
+     }
+
     /**
      * Intercept standard device administrator broadcasts.  Implementations
      * should not override this method; it is better to implement the
@@ -748,6 +791,10 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             long batchToken = intent.getLongExtra(EXTRA_NETWORK_LOGS_TOKEN, -1);
             int networkLogsCount = intent.getIntExtra(EXTRA_NETWORK_LOGS_COUNT, 0);
             onNetworkLogsAvailable(context, intent, batchToken, networkLogsCount);
+        } else if (ACTION_USER_ADDED.equals(action)) {
+            onUserAdded(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+        } else if (ACTION_USER_REMOVED.equals(action)) {
+            onUserRemoved(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
         }
     }
 }
