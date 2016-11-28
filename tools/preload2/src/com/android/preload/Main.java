@@ -32,7 +32,8 @@ import com.android.preload.actions.ShowDataAction;
 import com.android.preload.classdataretrieval.ClassDataRetriever;
 import com.android.preload.classdataretrieval.hprof.Hprof;
 import com.android.preload.classdataretrieval.jdwp.JDWPClassDataRetriever;
-import com.android.preload.ui.UI;
+import com.android.preload.ui.IUI;
+import com.android.preload.ui.SwingUI;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,7 +67,7 @@ public class Main {
     private DumpTableModel dataTableModel;
     private DefaultListModel<Client> clientListModel;
 
-    private UI ui;
+    private IUI ui;
 
     // Actions that need to be updated once a device is selected.
     private Collection<DeviceSpecific> deviceSpecificActions;
@@ -89,13 +90,15 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) {
-        Main m = new Main();
+        Main m = new Main(new SwingUI());
         top = m;
 
         m.startUp();
     }
 
-    public Main() {
+    public Main(IUI ui) {
+        this.ui = ui;
+
         clientListModel = new DefaultListModel<Client>();
         dataTableModel = new DumpTableModel();
 
@@ -124,11 +127,10 @@ public class Main {
             }
         }
 
-        ui = new UI(clientListModel, dataTableModel, actions);
-        ui.setVisible(true);
+        ui.prepare(clientListModel, dataTableModel, actions);
     }
 
-    public static UI getUI() {
+    public static IUI getUI() {
         return top.ui;
     }
 
@@ -176,6 +178,7 @@ public class Main {
         new ReloadListAction(clientUtils, getDevice(), clientListModel).run();
 
         getUI().hideWaitDialog();
+        getUI().ready();
     }
 
     private void initDevice() {
