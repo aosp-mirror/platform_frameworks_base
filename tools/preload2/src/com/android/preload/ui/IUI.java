@@ -18,6 +18,8 @@ public interface IUI {
 
     void ready();
 
+    boolean isSingleThreaded();
+
     Client getSelectedClient();
 
     int getSelectedDataTableRow();
