@@ -78,6 +78,7 @@ public class VolumeDialogController {
         AudioSystem.STREAM_SYSTEM_ENFORCED,
         AudioSystem.STREAM_TTS,
         AudioSystem.STREAM_VOICE_CALL,
+        AudioSystem.STREAM_ACCESSIBILITY,
     };
 
     private final HandlerThread mWorkerThread;
@@ -561,6 +562,22 @@ public class VolumeDialogController {
             mWorker.obtainMessage(W.DISMISS_REQUESTED, Events.DISMISS_REASON_VOLUME_CONTROLLER, 0)
                     .sendToTarget();
             mWorker.sendEmptyMessage(W.DISMISS_REQUESTED);
+        }
+
+        @Override
+        public void setA11yMode(int mode) {
+            if (D.BUG) Log.d(TAG, "setA11yMode to " + mode);
+            if (mDestroyed) return;
+            switch (mode) {
+                case VolumePolicy.A11Y_MODE_MEDIA_A11Y_VOLUME:
+                    // "legacy" mode
+                    break;
+                case VolumePolicy.A11Y_MODE_INDEPENDENT_A11Y_VOLUME:
+                    break;
+                default:
+                    Log.e(TAG, "Invalid accessibility mode " + mode);
+                    break;
+            }
         }
     }
 
