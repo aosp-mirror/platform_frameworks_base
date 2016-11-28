@@ -21,6 +21,8 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.Matrix;
 
+import libcore.util.NativeAllocationRegistry_Delegate;
+
 /**
  * Delegate implementing the native methods of {@link RenderNode}
  * <p/>
@@ -35,7 +37,7 @@ public class RenderNode_Delegate {
     // ---- delegate manager ----
     private static final DelegateManager<RenderNode_Delegate> sManager =
             new DelegateManager<RenderNode_Delegate>(RenderNode_Delegate.class);
-
+    private static long sFinalizer = -1;
 
     private float mLift;
     private float mTranslationX;
@@ -62,8 +64,13 @@ public class RenderNode_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nDestroyRenderNode(long renderNode) {
-        sManager.removeJavaReferenceFor(renderNode);
+    /*package*/ static long nGetNativeFinalizer() {
+        synchronized (RenderNode_Delegate.class) {
+            if (sFinalizer == -1) {
+                sFinalizer = NativeAllocationRegistry_Delegate.createFinalizer(sManager::removeJavaReferenceFor);
+            }
+        }
+        return sFinalizer;
     }
 
     @LayoutlibDelegate

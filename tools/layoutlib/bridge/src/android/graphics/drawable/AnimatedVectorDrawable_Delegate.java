@@ -58,8 +58,13 @@ public class AnimatedVectorDrawable_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static void nSetVectorDrawableTarget(long animatorPtr, long vectorDrawablePtr) {
+        // TODO: implement
+    }
+    @LayoutlibDelegate
     /*package*/ static void nAddAnimator(long setPtr, long propertyValuesHolder,
-            long nativeInterpolator, long startDelay, long duration, int repeatCount) {
+            long nativeInterpolator, long startDelay, long duration, int repeatCount,
+            int repeatMode) {
         PropertySetter holder = sHolders.getDelegate(propertyValuesHolder);
         if (holder == null || holder.getValues() == null) {
             return;
@@ -72,6 +77,7 @@ public class AnimatedVectorDrawable_Delegate {
         animator.setStartDelay(startDelay);
         animator.setDuration(duration);
         animator.setRepeatCount(repeatCount);
+        animator.setRepeatMode(repeatMode);
         animator.setTarget(holder);
         animator.setPropertyName(holder.getValues().getPropertyName());
 
@@ -130,6 +136,14 @@ public class AnimatedVectorDrawable_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nSetPropertyHolderData(long nativePtr, float[] data, int length) {
+        PropertySetter setter = sHolders.getDelegate(nativePtr);
+        assert setter != null;
+
+        setter.setValues(data);
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nSetPropertyHolderData(long nativePtr, int[] data, int length) {
         PropertySetter setter = sHolders.getDelegate(nativePtr);
         assert setter != null;
 
