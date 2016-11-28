@@ -114,13 +114,21 @@ TEST(RenderNodeDrawable, zReorder) {
         canvas.insertReorderBarrier(false);
         drawOrderedRect(&canvas, 8);
         drawOrderedNode(&canvas, 9, -10.0f); // in reorder=false at this point, so played inorder
+        canvas.insertReorderBarrier(true); //reorder a node ahead of drawrect op
+        drawOrderedRect(&canvas, 11);
+        drawOrderedNode(&canvas, 10, -1.0f);
+        canvas.insertReorderBarrier(false);
+        canvas.insertReorderBarrier(true); //test with two empty reorder sections
+        canvas.insertReorderBarrier(true);
+        canvas.insertReorderBarrier(false);
+        drawOrderedRect(&canvas, 12);
     });
 
     //create a canvas not backed by any device/pixels, but with dimensions to avoid quick rejection
     ZReorderCanvas canvas(100, 100);
     RenderNodeDrawable drawable(parent.get(), &canvas, false);
     canvas.drawDrawable(&drawable);
-    EXPECT_EQ(10, canvas.getIndex());
+    EXPECT_EQ(13, canvas.getIndex());
 }
 
 TEST(RenderNodeDrawable, composeOnLayer)
