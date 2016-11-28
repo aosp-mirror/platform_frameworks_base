@@ -667,7 +667,7 @@ public class RippleDrawable extends LayerDrawable {
     public void getOutline(@NonNull Outline outline) {
         final LayerState state = mLayerState;
         final ChildDrawable[] children = state.mChildren;
-        final int N = state.mNum;
+        final int N = state.mNumChildren;
         for (int i = 0; i < N; i++) {
             if (children[i].mId != R.id.mask) {
                 children[i].mDrawable.getOutline(outline);
@@ -815,7 +815,7 @@ public class RippleDrawable extends LayerDrawable {
 
         // Check for non-opaque, non-mask content.
         final ChildDrawable[] array = mLayerState.mChildren;
-        final int count = mLayerState.mNum;
+        final int count = mLayerState.mNumChildren;
         for (int i = 0; i < count; i++) {
             if (array[i].mDrawable.getOpacity() != PixelFormat.OPAQUE) {
                 return MASK_CONTENT;
@@ -829,7 +829,7 @@ public class RippleDrawable extends LayerDrawable {
     private void drawContent(Canvas canvas) {
         // Draw everything except the mask.
         final ChildDrawable[] array = mLayerState.mChildren;
-        final int count = mLayerState.mNum;
+        final int count = mLayerState.mNumChildren;
         for (int i = 0; i < count; i++) {
             if (array[i].mId != R.id.mask) {
                 array[i].mDrawable.draw(canvas);
@@ -1045,7 +1045,7 @@ public class RippleDrawable extends LayerDrawable {
         mLayerState = mState;
         mDensity = Drawable.resolveDensity(res, mState.mDensity);
 
-        if (mState.mNum > 0) {
+        if (mState.mNumChildren > 0) {
             ensurePadding();
             refreshPadding();
         }

@@ -1128,8 +1128,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
             createAllFutures();
 
-            mCheckedOpacity = true;
-
             final int N = mNumChildren;
             final Drawable[] drawables = mDrawables;
             int op = (N > 0) ? drawables[0].getOpacity() : PixelFormat.TRANSPARENT;
@@ -1138,6 +1136,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             }
 
             mOpacity = op;
+            mCheckedOpacity = true;
             return op;
         }
 
@@ -1148,19 +1147,19 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
             createAllFutures();
 
-            mCheckedStateful = true;
-
             final int N = mNumChildren;
             final Drawable[] drawables = mDrawables;
+            boolean isStateful = false;
             for (int i = 0; i < N; i++) {
                 if (drawables[i].isStateful()) {
-                    mStateful = true;
-                    return true;
+                    isStateful = true;
+                    break;
                 }
             }
 
-            mStateful = false;
-            return false;
+            mStateful = isStateful;
+            mCheckedStateful = true;
+            return isStateful;
         }
 
         public void growArray(int oldSize, int newSize) {
