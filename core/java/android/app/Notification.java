@@ -1022,6 +1022,7 @@ public class Notification implements Parcelable
     private Icon mLargeIcon;
 
     private String mChannelId;
+    private long mTimeout;
 
     /**
      * Structure to encapsulate a named action that can be shown as part of this notification.
@@ -1766,6 +1767,7 @@ public class Notification implements Parcelable
         if (parcel.readInt() != 0) {
             mChannelId = parcel.readString();
         }
+        mTimeout = parcel.readLong();
     }
 
     @Override
@@ -1872,6 +1874,7 @@ public class Notification implements Parcelable
         that.color = this.color;
 
         that.mChannelId = this.mChannelId;
+        that.mTimeout = this.mTimeout;
 
         if (!heavy) {
             that.lightenPayload(); // will clean out extras
@@ -2128,6 +2131,7 @@ public class Notification implements Parcelable
         } else {
             parcel.writeInt(0);
         }
+        parcel.writeLong(mTimeout);
     }
 
     /**
@@ -2322,6 +2326,13 @@ public class Notification implements Parcelable
      */
     public String getChannel() {
         return mChannelId;
+    }
+
+    /**
+     * Returns the time at which this notification should be canceled, if it's not canceled already.
+     */
+    public long getTimeout() {
+        return mTimeout;
     }
 
     /**
@@ -2528,6 +2539,15 @@ public class Notification implements Parcelable
          */
         public Builder setChannel(String channelId) {
             mN.mChannelId = channelId;
+            return this;
+        }
+
+        /**
+         * Specifies the time at which this notification should be canceled, if it is not already
+         * canceled.
+         */
+        public Builder setTimeout(long when) {
+            mN.mTimeout = when;
             return this;
         }
 
