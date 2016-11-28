@@ -33,6 +33,8 @@ import static android.app.admin.DevicePolicyManager.CODE_SYSTEM_USER;
 import static android.app.admin.DevicePolicyManager.CODE_USER_HAS_PROFILE_OWNER;
 import static android.app.admin.DevicePolicyManager.CODE_USER_NOT_RUNNING;
 import static android.app.admin.DevicePolicyManager.CODE_USER_SETUP_COMPLETED;
+import static android.app.admin.DevicePolicyManager.DELEGATION_APP_RESTRICTIONS;
+import static android.app.admin.DevicePolicyManager.DELEGATION_CERT_INSTALL;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
@@ -259,6 +261,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String ATTR_APPLICATION_RESTRICTIONS_MANAGER
             = "application-restrictions-manager";
 
+    // Comprehensive list of delegations.
+    private static final String DELEGATIONS[] = {
+        DELEGATION_CERT_INSTALL,
+        DELEGATION_APP_RESTRICTIONS
+    };
+
     /**
      *  System property whose value is either "true" or "false", indicating whether
      *  device owner is present.
@@ -468,11 +476,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         ComponentName mRestrictionsProvider;
 
-        String mDelegatedCertInstallerPackage;
+        // Map of delegate package to delegation scopes
+        final ArrayMap<String, List<String>> mDelegationMap = new ArrayMap<>();
 
         boolean doNotAskCredentialsOnBoot = false;
-
-        String mApplicationRestrictionsManagingPackage;
 
         Set<String> mAffiliationIds = new ArraySet<>();
 
@@ -1397,7 +1404,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void handlePackagesChanged(String packageName, int userHandle) {
-        boolean removed = false;
+        boolean removedAdmin = false;
         if (VERBOSE_LOG) Slog.d(LOG_TAG, "Handling package changes for user " + userHandle);
         DevicePolicyData policy = getUserData(userHandle);
         synchronized (this) {
@@ -1413,32 +1420,36 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                                         userHandle) == null) {
-                            removed = true;
+                            removedAdmin = true;
                             policy.mAdminList.remove(i);
                             policy.mAdminMap.remove(aa.info.getComponent());
                         }
                     }
                 } catch (RemoteException re) {
-                    // Shouldn't happen
+                    // Shouldn't happen.
                 }
             }
-            if (removed) {
+            if (removedAdmin) {
                 validatePasswordOwnerLocked(policy);
-                saveSettingsLocked(policy.mUserHandle);
             }
 
-            // Check if delegated cert installer or app restrictions managing packages are removed.
-            if (isRemovedPackage(packageName, policy.mDelegatedCertInstallerPackage, userHandle)) {
-                policy.mDelegatedCertInstallerPackage = null;
-                saveSettingsLocked(policy.mUserHandle);
+            boolean removedDelegate = false;
+
+            // Check if a delegate was removed.
+            for (int i = policy.mDelegationMap.size() - 1; i >= 0; i--) {
+                final String delegatePackage = policy.mDelegationMap.keyAt(i);
+                if (isRemovedPackage(packageName, delegatePackage, userHandle)) {
+                    policy.mDelegationMap.removeAt(i);
+                    removedDelegate = true;
+                }
             }
-            if (isRemovedPackage(
-                    packageName, policy.mApplicationRestrictionsManagingPackage, userHandle)) {
-                policy.mApplicationRestrictionsManagingPackage = null;
+
+            // Persist updates if the removed package was an admin or delegate.
+            if (removedAdmin || removedDelegate) {
                 saveSettingsLocked(policy.mUserHandle);
             }
         }
-        if (removed) {
+        if (removedAdmin) {
             // The removed admin might have disabled camera, so update user restrictions.
             pushUserRestrictions(userHandle);
         }
@@ -2372,13 +2383,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_PERMISSION_POLICY,
                         Integer.toString(policy.mPermissionPolicy));
             }
-            if (policy.mDelegatedCertInstallerPackage != null) {
-                out.attribute(null, ATTR_DELEGATED_CERT_INSTALLER,
-                        policy.mDelegatedCertInstallerPackage);
-            }
-            if (policy.mApplicationRestrictionsManagingPackage != null) {
-                out.attribute(null, ATTR_APPLICATION_RESTRICTIONS_MANAGER,
-                        policy.mApplicationRestrictionsManagingPackage);
+
+            // Serialize delegations.
+            for (int i = 0; i < policy.mDelegationMap.size(); ++i) {
+                final String delegatePackage = policy.mDelegationMap.keyAt(i);
+                final List<String> scopes = policy.mDelegationMap.valueAt(i);
+
+                // Every "delegation" tag serializes the information of one delegate-scope pair.
+                for (String scope : scopes) {
+                    out.startTag(null, "delegation");
+                    out.attribute(null, "delegatePackage", delegatePackage);
+                    out.attribute(null, "scope", scope);
+                    out.endTag(null, "delegation");
+                }
             }
 
             final int N = policy.mAdminList.size();
@@ -2562,10 +2579,36 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (!TextUtils.isEmpty(permissionPolicy)) {
                 policy.mPermissionPolicy = Integer.parseInt(permissionPolicy);
             }
-            policy.mDelegatedCertInstallerPackage = parser.getAttributeValue(null,
-                    ATTR_DELEGATED_CERT_INSTALLER);
-            policy.mApplicationRestrictionsManagingPackage = parser.getAttributeValue(null,
-                    ATTR_APPLICATION_RESTRICTIONS_MANAGER);
+            // Check for delegation compatibility with pre-O.
+            // TODO(edmanp) remove in P.
+            {
+                final String certDelegate = parser.getAttributeValue(null,
+                        ATTR_DELEGATED_CERT_INSTALLER);
+                if (certDelegate != null) {
+                    List<String> scopes = policy.mDelegationMap.get(certDelegate);
+                    if (scopes == null) {
+                        scopes = new ArrayList<>();
+                        policy.mDelegationMap.put(certDelegate, scopes);
+                    }
+                    if (!scopes.contains(DELEGATION_CERT_INSTALL)) {
+                        scopes.add(DELEGATION_CERT_INSTALL);
+                        needsRewrite = true;
+                    }
+                }
+                final String appRestrictionsDelegate = parser.getAttributeValue(null,
+                        ATTR_APPLICATION_RESTRICTIONS_MANAGER);
+                if (appRestrictionsDelegate != null) {
+                    List<String> scopes = policy.mDelegationMap.get(appRestrictionsDelegate);
+                    if (scopes == null) {
+                        scopes = new ArrayList<>();
+                        policy.mDelegationMap.put(appRestrictionsDelegate, scopes);
+                    }
+                    if (!scopes.contains(DELEGATION_APP_RESTRICTIONS)) {
+                        scopes.add(DELEGATION_APP_RESTRICTIONS);
+                        needsRewrite = true;
+                    }
+                }
+            }
 
             type = parser.next();
             int outerDepth = parser.getDepth();
@@ -2599,6 +2642,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         }
                     } catch (RuntimeException e) {
                         Slog.w(LOG_TAG, "Failed loading admin " + name, e);
+                    }
+                } else if ("delegation".equals(tag)) {
+                    // Parse delegation info.
+                    final String delegatePackage = parser.getAttributeValue(null,
+                            "delegatePackage");
+                    final String scope = parser.getAttributeValue(null, "scope");
+
+                    // Get a reference to the scopes list for the delegatePackage.
+                    List<String> scopes = policy.mDelegationMap.get(delegatePackage);
+                    // Or make a new list if none was found.
+                    if (scopes == null) {
+                        scopes = new ArrayList<>();
+                        policy.mDelegationMap.put(delegatePackage, scopes);
+                    }
+                    // Add the new scope to the list of delegatePackage if it's not already there.
+                    if (!scopes.contains(scope)) {
+                        scopes.add(scope);
                     }
                 } else if ("failed-password-attempts".equals(tag)) {
                     policy.mFailedPasswordAttempts = Integer.parseInt(
@@ -4522,9 +4582,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void enforceCanManageCaCerts(ComponentName who) {
+    public void enforceCanManageCaCerts(ComponentName who, String callerPackage) {
         if (who == null) {
-            if (!isCallerDelegatedCertInstaller()) {
+            if (!isCallerDelegate(callerPackage, DELEGATION_CERT_INSTALL)) {
                 mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
             }
         } else {
@@ -4535,35 +4595,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void enforceProfileOrDeviceOwner(ComponentName who) {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-        }
-    }
-
-    private void enforceCanManageInstalledKeys(ComponentName who) {
-        if (who == null) {
-            if (!isCallerDelegatedCertInstaller()) {
-                throw new SecurityException("who == null, but caller is not cert installer");
-            }
-        } else {
-            enforceProfileOrDeviceOwner(who);
-        }
-    }
-
-    private boolean isCallerDelegatedCertInstaller() {
-        final int callingUid = mInjector.binderGetCallingUid();
-        final int userHandle = UserHandle.getUserId(callingUid);
-        synchronized (this) {
-            final DevicePolicyData policy = getUserData(userHandle);
-            if (policy.mDelegatedCertInstallerPackage == null) {
-                return false;
-            }
-
-            try {
-                int uid = mInjector.getPackageManager().getPackageUidAsUser(
-                        policy.mDelegatedCertInstallerPackage, userHandle);
-                return uid == callingUid;
-            } catch (NameNotFoundException e) {
-                return false;
-            }
         }
     }
 
@@ -4608,8 +4639,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean installCaCert(ComponentName admin, byte[] certBuffer) throws RemoteException {
-        enforceCanManageCaCerts(admin);
+    public boolean installCaCert(ComponentName admin, String callerPackage, byte[] certBuffer)
+            throws RemoteException {
+        enforceCanManageCaCerts(admin, callerPackage);
 
         byte[] pemCert;
         try {
@@ -4651,8 +4683,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void uninstallCaCerts(ComponentName admin, String[] aliases) {
-        enforceCanManageCaCerts(admin);
+    public void uninstallCaCerts(ComponentName admin, String callerPackage, String[] aliases) {
+        enforceCanManageCaCerts(admin, callerPackage);
 
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
         final long id = mInjector.binderClearCallingIdentity();
@@ -4676,9 +4708,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean installKeyPair(ComponentName who, byte[] privKey, byte[] cert, byte[] chain,
-            String alias, boolean requestAccess) {
-        enforceCanManageInstalledKeys(who);
+    public boolean installKeyPair(ComponentName who, String callerPackage, byte[] privKey,
+            byte[] cert, byte[] chain, String alias, boolean requestAccess) {
+        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
+                DELEGATION_CERT_INSTALL);
+
 
         final int callingUid = mInjector.binderGetCallingUid();
         final long id = mInjector.binderClearCallingIdentity();
@@ -4709,8 +4743,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean removeKeyPair(ComponentName who, String alias) {
-        enforceCanManageInstalledKeys(who);
+    public boolean removeKeyPair(ComponentName who, String callerPackage, String alias) {
+        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
+                DELEGATION_CERT_INSTALL);
 
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
         final long id = Binder.clearCallingIdentity();
@@ -4795,33 +4830,267 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }.execute();
     }
 
+    /**
+     * Set the scopes of a device owner or profile owner delegate.
+     *
+     * @param who the device owner or profile owner.
+     * @param delegatePackage the name of the delegate package.
+     * @param scopes the list of delegation scopes to be given to the delegate package.
+     */
     @Override
-    public void setCertInstallerPackage(ComponentName who, String installerPackage)
-            throws SecurityException {
-        int userHandle = UserHandle.getCallingUserId();
+    public void setDelegatedScopes(ComponentName who, String delegatePackage,
+            List<String> scopes) throws SecurityException {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkStringNotEmpty(delegatePackage, "Delegate package is null or empty");
+        Preconditions.checkCollectionElementsNotNull(scopes, "Scopes");
+        // Remove possible duplicates.
+        scopes = new ArrayList(new ArraySet(scopes));
+        // Ensure given scopes are valid.
+        if (scopes.retainAll(Arrays.asList(DELEGATIONS))) {
+            throw new IllegalArgumentException("Unexpected delegation scopes");
+        }
+
+        // Retrieve the user ID of the calling process.
+        final int userId = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
+            // Ensure calling process is device/profile owner.
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (getTargetSdk(who.getPackageName(), userHandle) >= Build.VERSION_CODES.N) {
-                if (installerPackage != null &&
-                        !isPackageInstalledForUser(installerPackage, userHandle)) {
-                    throw new IllegalArgumentException("Package " + installerPackage
+            // Ensure the delegate is installed (skip this for DELEGATION_CERT_INSTALL in pre-N).
+            if (scopes.size() == 1 && scopes.get(0).equals(DELEGATION_CERT_INSTALL) ||
+                    getTargetSdk(who.getPackageName(), userId) >= Build.VERSION_CODES.N) {
+                // Throw when the delegate package is not installed.
+                if (!isPackageInstalledForUser(delegatePackage, userId)) {
+                    throw new IllegalArgumentException("Package " + delegatePackage
                             + " is not installed on the current user");
                 }
             }
-            DevicePolicyData policy = getUserData(userHandle);
-            policy.mDelegatedCertInstallerPackage = installerPackage;
-            saveSettingsLocked(userHandle);
+
+            // Set the new delegate in user policies.
+            final DevicePolicyData policy = getUserData(userId);
+            if (!scopes.isEmpty()) {
+                policy.mDelegationMap.put(delegatePackage, new ArrayList<>(scopes));
+            } else {
+                // Remove any delegation info if the given scopes list is empty.
+                policy.mDelegationMap.remove(delegatePackage);
+            }
+
+            // Notify delegate package of updates.
+            final Intent intent = new Intent(
+                    DevicePolicyManager.ACTION_APPLICATION_DELEGATION_SCOPES_CHANGED);
+            // Only call receivers registered in the manifest (don’t wake app if not running).
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            // Limit components this intent resolves to to the delegate package.
+            intent.setPackage(delegatePackage);
+            // Include the list of delegated scopes as an extra.
+            intent.putExtra(DevicePolicyManager.EXTRA_DELEGATION_SCOPES, scopes.toArray());
+            // Send the broadcast.
+            mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+
+            // Persist updates.
+            saveSettingsLocked(userId);
+        }
+    }
+
+    /**
+     * Get the delegation scopes given to a delegate package by a device owner or profile owner.
+     *
+     * A DO/PO can get the scopes of any package. A non DO/PO package can get its own scopes by
+     * passing in {@code null} as the {@code who} parameter and its own name as the
+     * {@code delegatepackage}.
+     *
+     * @param who the device owner or profile owner, or {@code null} if the caller is
+     *            {@code delegatePackage}.
+     * @param delegatePackage the name of the delegate package whose scopes are to be retrieved.
+     * @return a list of the delegation scopes currently given to {@code delegatePackage}.
+     */
+    @Override
+    @NonNull
+    public List<String> getDelegatedScopes(ComponentName who,
+            String delegatePackage) throws SecurityException {
+        Preconditions.checkNotNull(delegatePackage, "Delegate package is null");
+
+        // Retrieve the user ID of the calling process.
+        final int callingUid = mInjector.binderGetCallingUid();
+        final int userId = UserHandle.getUserId(callingUid);
+        synchronized (this) {
+            // Ensure calling process is device/profile owner.
+            if (who != null) {
+                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            // Or ensure calling process is delegatePackage itself.
+            } else {
+                int uid = 0;
+                try {
+                  uid = mInjector.getPackageManager()
+                          .getPackageUidAsUser(delegatePackage, userId);
+                } catch(NameNotFoundException e) {
+                }
+                if (uid != callingUid) {
+                    throw new SecurityException("Caller with uid " + callingUid + " is not "
+                            + delegatePackage);
+                }
+            }
+            final DevicePolicyData policy = getUserData(userId);
+            // Retrieve the scopes assigned to delegatePackage, or null if no scope was given.
+            final List<String> scopes = policy.mDelegationMap.get(delegatePackage);
+            return scopes == null ? Collections.EMPTY_LIST : scopes;
+        }
+    }
+
+    /**
+     * Get a list of  packages that were given a specific delegation scopes by a device owner or
+     * profile owner.
+     *
+     * @param who the device owner or profile owner.
+     * @param scope the scope whose delegates are to be retrieved.
+     * @return a list of the delegate packages currently given the {@code scope} delegation.
+     */
+    @NonNull
+    public List<String> getDelegatePackages(ComponentName who, String scope)
+            throws SecurityException {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkNotNull(scope, "Scope is null");
+        if (!Arrays.asList(DELEGATIONS).contains(scope)) {
+            throw new IllegalArgumentException("Unexpected delegation scope: " + scope);
+        }
+
+        // Retrieve the user ID of the calling process.
+        final int userId = mInjector.userHandleGetCallingUserId();
+        synchronized (this) {
+            // Ensure calling process is device/profile owner.
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            final DevicePolicyData policy = getUserData(userId);
+
+            // Create a list to hold the resulting delegate packages.
+            final List<String> delegatePackagesWithScope = new ArrayList<>();
+            // Add all delegations containing scope to the result list.
+            for (int i = 0; i < policy.mDelegationMap.size(); i++) {
+                if (policy.mDelegationMap.valueAt(i).contains(scope)) {
+                    delegatePackagesWithScope.add(policy.mDelegationMap.keyAt(i));
+                }
+            }
+            return delegatePackagesWithScope;
+        }
+    }
+
+    /**
+     * Check whether a caller application has been delegated a given scope via
+     * {@link #setDelegatedScopes} to access privileged APIs on the behalf of a profile owner or
+     * device owner.
+     * <p>
+     * This is done by checking that {@code callerPackage} was granted {@code scope} delegation and
+     * then comparing the calling UID with the UID of {@code callerPackage} as reported by
+     * {@link PackageManager#getPackageUidAsUser}.
+     *
+     * @param callerPackage the name of the package that is trying to invoke a function in the DPMS.
+     * @param scope the delegation scope to be checked.
+     * @return {@code true} if the calling process is a delegate of {@code scope}.
+     */
+    private boolean isCallerDelegate(String callerPackage, String scope) {
+        Preconditions.checkNotNull(callerPackage, "callerPackage is null");
+        if (!Arrays.asList(DELEGATIONS).contains(scope)) {
+            throw new IllegalArgumentException("Unexpected delegation scope: " + scope);
+        }
+
+        // Retrieve the UID and user ID of the calling process.
+        final int callingUid = mInjector.binderGetCallingUid();
+        final int userId = UserHandle.getUserId(callingUid);
+        synchronized (this) {
+            // Retrieve user policy data.
+            final DevicePolicyData policy = getUserData(userId);
+            // Retrieve the list of delegation scopes granted to callerPackage.
+            final List<String> scopes = policy.mDelegationMap.get(callerPackage);
+            // Check callingUid only if callerPackage has the required scope delegation.
+            if (scopes != null && scopes.contains(scope)) {
+                try {
+                    // Retrieve the expected UID for callerPackage.
+                    final int uid = mInjector.getPackageManager()
+                            .getPackageUidAsUser(callerPackage, userId);
+                    // Return true if the caller is actually callerPackage.
+                    return uid == callingUid;
+                } catch (NameNotFoundException e) {
+                    // Ignore.
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Throw a security exception if a ComponentName is given and it is not a device/profile owner
+     * or if the calling process is not a delegate of the given scope.
+     *
+     * @param who the device owner of profile owner, or null if {@code callerPackage} is a
+     *            {@code scope} delegate.
+     * @param callerPackage the name of the calling package. Required if {@code who} is
+     *            {@code null}.
+     * @param reqPolicy the policy used in the API whose access permission is being checked.
+     * @param scoppe the delegation scope corresponding to the API being checked.
+     * @throws SecurityException if {@code who} is given and is not an owner for {@code reqPolicy};
+     *            or when {@code who} is {@code null} and {@code callerPackage} is not a delegate
+     *            of {@code scope}.
+     */
+    private void enforceCanManageScope(ComponentName who, String callerPackage, int reqPolicy,
+            String scope) {
+        // If a ComponentName is given ensure it is a device or profile owner according to policy.
+        if (who != null) {
+            synchronized (this) {
+                getActiveAdminForCallerLocked(who, reqPolicy);
+            }
+        // If no ComponentName is given ensure calling process has scope delegation.
+        } else if (!isCallerDelegate(callerPackage, scope)) {
+            throw new SecurityException("Caller with uid " + mInjector.binderGetCallingUid()
+                    + " is not a delegate of scope " + scope + ".");
+        }
+    }
+
+    /**
+     * Helper function to preserve delegation behavior pre-O when using the deprecated functions
+     * {@code #setCertInstallerPackage} and {@code #setApplicationRestrictionsManagingPackage}.
+     */
+    private void setDelegatedScopePreO(ComponentName who,
+            String delegatePackage, String scope) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+
+        final int userId = mInjector.userHandleGetCallingUserId();
+        synchronized(this) {
+            // Ensure calling process is device/profile owner.
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            final DevicePolicyData policy = getUserData(userId);
+
+            if (delegatePackage != null) {
+                // Set package as a delegate for scope if it is not already one.
+                List<String> scopes = policy.mDelegationMap.get(delegatePackage);
+                if (scopes == null) {
+                    scopes = new ArrayList<>();
+                }
+                if (!scopes.contains(scope)) {
+                    scopes.add(scope);
+                    setDelegatedScopes(who, delegatePackage, scopes);
+                }
+            }
+
+            // Clear any existing scope delegates.
+            for (int i = 0; i < policy.mDelegationMap.size(); i++) {
+                final String currentPackage = policy.mDelegationMap.keyAt(i);
+                final List<String> currentScopes = policy.mDelegationMap.valueAt(i);
+
+                if (!currentPackage.equals(delegatePackage) && currentScopes.remove(scope)) {
+                    setDelegatedScopes(who, currentPackage, currentScopes);
+                }
+            }
         }
     }
 
     @Override
+    public void setCertInstallerPackage(ComponentName who, String installerPackage)
+            throws SecurityException {
+        setDelegatedScopePreO(who, installerPackage, DELEGATION_CERT_INSTALL);
+    }
+
+    @Override
     public String getCertInstallerPackage(ComponentName who) throws SecurityException {
-        int userHandle = UserHandle.getCallingUserId();
-        synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            DevicePolicyData policy = getUserData(userHandle);
-            return policy.mDelegatedCertInstallerPackage;
-        }
+        final List<String> delegatePackages = getDelegatePackages(who, DELEGATION_CERT_INSTALL);
+        return delegatePackages.size() > 0 ? delegatePackages.get(0) : null;
     }
 
     /**
@@ -6394,11 +6663,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void clearUserPoliciesLocked(int userId) {
-        // Reset some of the user-specific policies
-        DevicePolicyData policy = getUserData(userId);
+        // Reset some of the user-specific policies.
+        final DevicePolicyData policy = getUserData(userId);
         policy.mPermissionPolicy = DevicePolicyManager.PERMISSION_POLICY_PROMPT;
-        policy.mDelegatedCertInstallerPackage = null;
-        policy.mApplicationRestrictionsManagingPackage = null;
+        // Clear delegations.
+        policy.mDelegationMap.clear();
         policy.mStatusBarDisabled = false;
         policy.mUserProvisioningState = DevicePolicyManager.STATE_USER_UNMANAGED;
         saveSettingsLocked(userId);
@@ -6982,66 +7251,31 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean setApplicationRestrictionsManagingPackage(ComponentName admin,
             String packageName) {
-        Preconditions.checkNotNull(admin, "ComponentName is null");
-
-        final int userHandle = mInjector.userHandleGetCallingUserId();
-        synchronized (this) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (packageName != null && !isPackageInstalledForUser(packageName, userHandle)) {
-                return false;
-            }
-            DevicePolicyData policy = getUserData(userHandle);
-            policy.mApplicationRestrictionsManagingPackage = packageName;
-            saveSettingsLocked(userHandle);
-            return true;
+        try {
+            setDelegatedScopePreO(admin, packageName, DELEGATION_APP_RESTRICTIONS);
+        } catch (IllegalArgumentException e) {
+            return false;
         }
+        return true;
     }
 
     @Override
     public String getApplicationRestrictionsManagingPackage(ComponentName admin) {
-        Preconditions.checkNotNull(admin, "ComponentName is null");
-
-        final int userHandle = mInjector.userHandleGetCallingUserId();
-        synchronized (this) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            DevicePolicyData policy = getUserData(userHandle);
-            return policy.mApplicationRestrictionsManagingPackage;
-        }
+        final List<String> delegatePackages = getDelegatePackages(admin,
+                DELEGATION_APP_RESTRICTIONS);
+        return delegatePackages.size() > 0 ? delegatePackages.get(0) : null;
     }
 
     @Override
-    public boolean isCallerApplicationRestrictionsManagingPackage() {
-        final int callingUid = mInjector.binderGetCallingUid();
-        final int userHandle = UserHandle.getUserId(callingUid);
-        synchronized (this) {
-            final DevicePolicyData policy = getUserData(userHandle);
-            if (policy.mApplicationRestrictionsManagingPackage == null) {
-                return false;
-            }
-
-            try {
-                int uid = mInjector.getPackageManager().getPackageUidAsUser(
-                        policy.mApplicationRestrictionsManagingPackage, userHandle);
-                return uid == callingUid;
-            } catch (NameNotFoundException e) {
-                return false;
-            }
-        }
-    }
-
-    private void enforceCanManageApplicationRestrictions(ComponentName who) {
-        if (who != null) {
-            enforceProfileOrDeviceOwner(who);
-        } else if (!isCallerApplicationRestrictionsManagingPackage()) {
-            throw new SecurityException(
-                    "No admin component given, and caller cannot manage application restrictions "
-                    + "for other apps.");
-        }
+    public boolean isCallerApplicationRestrictionsManagingPackage(String callerPackage) {
+        return isCallerDelegate(callerPackage, DELEGATION_APP_RESTRICTIONS);
     }
 
     @Override
-    public void setApplicationRestrictions(ComponentName who, String packageName, Bundle settings) {
-        enforceCanManageApplicationRestrictions(who);
+    public void setApplicationRestrictions(ComponentName who, String callerPackage,
+            String packageName, Bundle settings) {
+        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
+                DELEGATION_APP_RESTRICTIONS);
 
         final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
         final long id = mInjector.binderClearCallingIdentity();
@@ -7731,8 +7965,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public Bundle getApplicationRestrictions(ComponentName who, String packageName) {
-        enforceCanManageApplicationRestrictions(who);
+    public Bundle getApplicationRestrictions(ComponentName who, String callerPackage,
+            String packageName) {
+        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
+                DELEGATION_APP_RESTRICTIONS);
 
         final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
         final long id = mInjector.binderClearCallingIdentity();

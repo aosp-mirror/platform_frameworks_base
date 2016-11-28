@@ -1132,6 +1132,23 @@ public class DevicePolicyManager {
             = "android.app.action.SHOW_DEVICE_MONITORING_DIALOG";
 
     /**
+     * Broadcast Action: Sent after application delegation scopes are changed. The new list of
+     * delegation scopes will be sent in an extra identified by the {@link #EXTRA_DELEGATION_SCOPES}
+     * key.
+     *
+     * <p class=”note”> Note: This is a protected intent that can only be sent by the system.</p>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_APPLICATION_DELEGATION_SCOPES_CHANGED =
+            "android.app.action.APPLICATION_DELEGATION_SCOPES_CHANGED";
+
+    /**
+     * A list of Strings corresponding to the delegation scopes given to an app in the
+     * {@link #ACTION_APPLICATION_DELEGATION_SCOPES_CHANGED} broadcast.
+     */
+    public static final String EXTRA_DELEGATION_SCOPES = "android.app.extra.DELEGATION_SCOPES";
+
+    /**
      * Flag used by {@link #addCrossProfileIntentFilter} to allow activities in
      * the parent profile to access intents sent from the managed profile.
      * That is, when an app in the managed profile calls
@@ -1192,6 +1209,19 @@ public class DevicePolicyManager {
      * and the user cannot manage the permission through the UI.
      */
     public static final int PERMISSION_GRANT_STATE_DENIED = 2;
+
+    /**
+     * Delegation of certificate installation and management. This scope grants access to the
+     * {@link #getInstalledCaCerts}, {@link #hasCaCertInstalled}, {@link #installCaCert},
+     * {@link #uninstallCaCert}, {@link #uninstallAllUserCaCerts} and {@link #installKeyPair} APIs.
+     */
+    public static final String DELEGATION_CERT_INSTALL = "delegation-cert-install";
+
+    /**
+     * Delegation of application restrictions management. This scope grants access to the
+     * {@link #setApplicationRestrictions} and {@link #getApplicationRestrictions} APIs.
+     */
+    public static final String DELEGATION_APP_RESTRICTIONS = "delegation-app-restrictions";
 
     /**
      * No management for current user in-effect. This is the default.
@@ -3246,6 +3276,10 @@ public class DevicePolicyManager {
     /**
      * Installs the given certificate as a user CA.
      *
+     * The caller must be a profile or device owner on that user, or a delegate package given the
+     * {@link #DELEGATION_CERT_INSTALL} scope via {@link #setDelegatedScopes}; otherwise a
+     * security exception will be thrown.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *              {@code null} if calling from a delegated certificate installer.
      * @param certBuffer encoded form of the certificate to install.
@@ -3254,12 +3288,14 @@ public class DevicePolicyManager {
      *         interrupted, true otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
      *         owner.
+     * @see #setDelegatedScopes
+     * @see #DELEGATION_CERT_INSTALL
      */
     public boolean installCaCert(@Nullable ComponentName admin, byte[] certBuffer) {
         throwIfParentInstance("installCaCert");
         if (mService != null) {
             try {
-                return mService.installCaCert(admin, certBuffer);
+                return mService.installCaCert(admin, mContext.getPackageName(), certBuffer);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -3270,18 +3306,24 @@ public class DevicePolicyManager {
     /**
      * Uninstalls the given certificate from trusted user CAs, if present.
      *
+     * The caller must be a profile or device owner on that user, or a delegate package given the
+     * {@link #DELEGATION_CERT_INSTALL} scope via {@link #setDelegatedScopes}; otherwise a
+     * security exception will be thrown.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *              {@code null} if calling from a delegated certificate installer.
      * @param certBuffer encoded form of the certificate to remove.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
      *         owner.
+     * @see #setDelegatedScopes
+     * @see #DELEGATION_CERT_INSTALL
      */
     public void uninstallCaCert(@Nullable ComponentName admin, byte[] certBuffer) {
         throwIfParentInstance("uninstallCaCert");
         if (mService != null) {
             try {
                 final String alias = getCaCertAlias(certBuffer);
-                mService.uninstallCaCerts(admin, new String[] {alias});
+                mService.uninstallCaCerts(admin, mContext.getPackageName(), new String[] {alias});
             } catch (CertificateException e) {
                 Log.w(TAG, "Unable to parse certificate", e);
             } catch (RemoteException e) {
@@ -3306,7 +3348,7 @@ public class DevicePolicyManager {
         throwIfParentInstance("getInstalledCaCerts");
         if (mService != null) {
             try {
-                mService.enforceCanManageCaCerts(admin);
+                mService.enforceCanManageCaCerts(admin, mContext.getPackageName());
                 final TrustedCertificateStore certStore = new TrustedCertificateStore();
                 for (String alias : certStore.userAliases()) {
                     try {
@@ -3335,8 +3377,8 @@ public class DevicePolicyManager {
         throwIfParentInstance("uninstallAllUserCaCerts");
         if (mService != null) {
             try {
-                mService.uninstallCaCerts(admin, new TrustedCertificateStore().userAliases()
-                        .toArray(new String[0]));
+                mService.uninstallCaCerts(admin, mContext.getPackageName(),
+                        new TrustedCertificateStore().userAliases() .toArray(new String[0]));
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -3356,7 +3398,7 @@ public class DevicePolicyManager {
         throwIfParentInstance("hasCaCertInstalled");
         if (mService != null) {
             try {
-                mService.enforceCanManageCaCerts(admin);
+                mService.enforceCanManageCaCerts(admin, mContext.getPackageName());
                 return getCaCertAlias(certBuffer) != null;
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
@@ -3388,6 +3430,8 @@ public class DevicePolicyManager {
      * @return {@code true} if the keys were installed, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
      *         owner.
+     * @see #setDelegatedScopes
+     * @see #DELEGATION_CERT_INSTALL
      */
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate cert, @NonNull String alias) {
@@ -3419,6 +3463,8 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
      *         owner.
      * @see android.security.KeyChain#getCertificateChain
+     * @see #setDelegatedScopes
+     * @see #DELEGATION_CERT_INSTALL
      */
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate[] certs, @NonNull String alias, boolean requestAccess) {
@@ -3431,8 +3477,8 @@ public class DevicePolicyManager {
             }
             final byte[] pkcs8Key = KeyFactory.getInstance(privKey.getAlgorithm())
                     .getKeySpec(privKey, PKCS8EncodedKeySpec.class).getEncoded();
-            return mService.installKeyPair(admin, pkcs8Key, pemCert, pemChain, alias,
-                    requestAccess);
+            return mService.installKeyPair(admin, mContext.getPackageName(), pkcs8Key, pemCert,
+                    pemChain, alias, requestAccess);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
@@ -3453,11 +3499,13 @@ public class DevicePolicyManager {
      * @return {@code true} if the private key alias no longer exists, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
      *         owner.
+     * @see #setDelegatedScopes
+     * @see #DELEGATION_CERT_INSTALL
      */
     public boolean removeKeyPair(@Nullable ComponentName admin, @NonNull String alias) {
         throwIfParentInstance("removeKeyPair");
         try {
-            return mService.removeKeyPair(admin, alias);
+            return mService.removeKeyPair(admin, mContext.getPackageName(), alias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3493,7 +3541,11 @@ public class DevicePolicyManager {
      * @param installerPackage The package name of the certificate installer which will be given
      *            access. If {@code null} is given the current package will be cleared.
      * @throws SecurityException if {@code admin} is not a device or a profile owner.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}. Use {@link #setDelegatedScopes}
+     * with the {@link #DELEGATION_CERT_INSTALL} scope instead.
      */
+    @Deprecated
     public void setCertInstallerPackage(@NonNull ComponentName admin, @Nullable String
             installerPackage) throws SecurityException {
         throwIfParentInstance("setCertInstallerPackage");
@@ -3507,20 +3559,102 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner or device owner to retrieve the certificate installer for the user.
-     * null if none is set.
+     * Called by a profile owner or device owner to retrieve the certificate installer for the user,
+     * or {@code null} if none is set. If there are multiple delegates this function will return one
+     * of them.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return The package name of the current delegated certificate installer, or {@code null} if
      *         none is set.
      * @throws SecurityException if {@code admin} is not a device or a profile owner.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}. Use {@link #getDelegatePackages}
+     * with the {@link #DELEGATION_CERT_INSTALL} scope instead.
      */
+    @Deprecated
     public @Nullable String getCertInstallerPackage(@NonNull ComponentName admin)
             throws SecurityException {
         throwIfParentInstance("getCertInstallerPackage");
         if (mService != null) {
             try {
                 return mService.getCertInstallerPackage(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Called by a profile owner or device owner to grant access to privileged APIs to another app.
+     * Granted APIs are determined by {@code scopes}, which is a list of the {@code DELEGATION_*}
+     * constants.
+     * <p>
+     * Delegated scopes are a per-user state. The delegated access is persistent until it is later
+     * cleared by calling this method with an empty {@code scopes} list or uninstalling the
+     * {@code delegatePackage}.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param delegatePackage The package name of the app which will be given access.
+     * @param scopes The groups of privileged APIs whose access should be granted to
+     *            {@code delegatedPackage}.
+     * @throws SecurityException if {@code admin} is not a device or a profile owner.
+     */
+     public void setDelegatedScopes(@NonNull ComponentName admin, @NonNull String delegatePackage,
+            @NonNull List<String> scopes) {
+        throwIfParentInstance("setDelegatedScopes");
+        if (mService != null) {
+            try {
+                mService.setDelegatedScopes(admin, delegatePackage, scopes);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by a profile owner or device owner to retrieve a list of the scopes given to a
+     * delegate package. Other apps can use this method to retrieve their own delegated scopes by
+     * passing {@code null} for {@code admin} and their own package name as
+     * {@code delegatedPackage}.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
+     *            {@code null} if the caller is {@code delegatedPackage}.
+     * @param delegatedPackage The package name of the app whose scopes should be retrieved.
+     * @return A list containing the scopes given to {@code delegatedPackage}.
+     * @throws SecurityException if {@code admin} is not a device or a profile owner.
+     */
+     @NonNull
+     public List<String> getDelegatedScopes(@NonNull ComponentName admin,
+             @NonNull String delegatedPackage) {
+         throwIfParentInstance("getDelegatedScopes");
+         if (mService != null) {
+             try {
+                 return mService.getDelegatedScopes(admin, delegatedPackage);
+             } catch (RemoteException e) {
+                 throw e.rethrowFromSystemServer();
+             }
+         }
+         return null;
+    }
+
+    /**
+     * Called by a profile owner or device owner to retrieve a list of delegate packages that were
+     * granted a delegation scope.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param delegationScope The scope whose delegates should be retrieved.
+     * @return A list of package names of the current delegated packages for
+               {@code delegationScope}.
+     * @throws SecurityException if {@code admin} is not a device or a profile owner.
+     */
+     @Nullable
+     public List<String> getDelegatePackages(@NonNull ComponentName admin,
+             @NonNull String delegationScope) {
+        throwIfParentInstance("getDelegatePackages");
+        if (mService != null) {
+            try {
+                return mService.getDelegatePackages(admin, delegationScope);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -4686,7 +4820,11 @@ public class DevicePolicyManager {
      *            APIs. If {@code null} is given the current package will be cleared.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      * @throws NameNotFoundException if {@code packageName} is not found
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}. Use {@link #setDelegatedScopes}
+     * with the {@link #DELEGATION_APP_RESTRICTIONS} scope instead.
      */
+    @Deprecated
     public void setApplicationRestrictionsManagingPackage(@NonNull ComponentName admin,
             @Nullable String packageName) throws NameNotFoundException {
         throwIfParentInstance("setApplicationRestrictionsManagingPackage");
@@ -4703,14 +4841,20 @@ public class DevicePolicyManager {
 
     /**
      * Called by a profile owner or device owner to retrieve the application restrictions managing
-     * package for the current user, or {@code null} if none is set.
+     * package for the current user, or {@code null} if none is set. If there are multiple
+     * delegates this function will return one of them.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return The package name allowed to manage application restrictions on the current user, or
      *         {@code null} if none is set.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}. Use {@link #getDelegatePackages}
+     * with the {@link #DELEGATION_APP_RESTRICTIONS} scope instead.
      */
-    public @Nullable String getApplicationRestrictionsManagingPackage(
+    @Deprecated
+    @Nullable
+    public String getApplicationRestrictionsManagingPackage(
             @NonNull ComponentName admin) {
         throwIfParentInstance("getApplicationRestrictionsManagingPackage");
         if (mService != null) {
@@ -4730,12 +4874,17 @@ public class DevicePolicyManager {
      *
      * <p>This is done by comparing the calling Linux uid with the uid of the package specified by
      * that method.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}. Use {@link #getDelegatedScopes}
+     * instead.
      */
+    @Deprecated
     public boolean isCallerApplicationRestrictionsManagingPackage() {
         throwIfParentInstance("isCallerApplicationRestrictionsManagingPackage");
         if (mService != null) {
             try {
-                return mService.isCallerApplicationRestrictionsManagingPackage();
+                return mService.isCallerApplicationRestrictionsManagingPackage(
+                        mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -4747,8 +4896,8 @@ public class DevicePolicyManager {
      * Sets the application restrictions for a given target application running in the calling user.
      * <p>
      * The caller must be a profile or device owner on that user, or the package allowed to manage
-     * application restrictions via {@link #setApplicationRestrictionsManagingPackage}; otherwise a
-     * security exception will be thrown.
+     * application restrictions via {@link #setDelegatedScopes} with the
+     * {@link #DELEGATION_APP_RESTRICTIONS} scope; otherwise a security exception will be thrown.
      * <p>
      * The provided {@link Bundle} consists of key-value pairs, where the types of values may be:
      * <ul>
@@ -4775,7 +4924,8 @@ public class DevicePolicyManager {
      * @param settings A {@link Bundle} to be parsed by the receiving application, conveying a new
      *            set of active restrictions.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
-     * @see #setApplicationRestrictionsManagingPackage
+     * @see #setDelegatedScopes
+     * @see #DELEGATION_APP_RESTRICTIONS
      * @see UserManager#KEY_RESTRICTIONS_PENDING
      */
     @WorkerThread
@@ -4784,7 +4934,8 @@ public class DevicePolicyManager {
         throwIfParentInstance("setApplicationRestrictions");
         if (mService != null) {
             try {
-                mService.setApplicationRestrictions(admin, packageName, settings);
+                mService.setApplicationRestrictions(admin, mContext.getPackageName(), packageName,
+                        settings);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -5523,8 +5674,8 @@ public class DevicePolicyManager {
      * user.
      * <p>
      * The caller must be a profile or device owner on that user, or the package allowed to manage
-     * application restrictions via {@link #setApplicationRestrictionsManagingPackage}; otherwise a
-     * security exception will be thrown.
+     * application restrictions via {@link #setDelegatedScopes} with the
+     * {@link #DELEGATION_APP_RESTRICTIONS} scope; otherwise a security exception will be thrown.
      *
      * <p>NOTE: The method performs disk I/O and shouldn't be called on the main thread
      *
@@ -5535,7 +5686,8 @@ public class DevicePolicyManager {
      *         {@link DevicePolicyManager#setApplicationRestrictions} was called, or an empty
      *         {@link Bundle} if no restrictions have been set.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
-     * @see #setApplicationRestrictionsManagingPackage
+     * @see #setDelegatedScopes
+     * @see #DELEGATION_APP_RESTRICTIONS
      */
     @WorkerThread
     public @NonNull Bundle getApplicationRestrictions(
@@ -5543,7 +5695,8 @@ public class DevicePolicyManager {
         throwIfParentInstance("getApplicationRestrictions");
         if (mService != null) {
             try {
-                return mService.getApplicationRestrictions(admin, packageName);
+                return mService.getApplicationRestrictions(admin, mContext.getPackageName(),
+                        packageName);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

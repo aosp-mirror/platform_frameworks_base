@@ -153,16 +153,20 @@ interface IDevicePolicyManager {
     String[] setPackagesSuspended(in ComponentName admin, in String[] packageNames, boolean suspended);
     boolean isPackageSuspended(in ComponentName admin, String packageName);
 
-    boolean installCaCert(in ComponentName admin, in byte[] certBuffer);
-    void uninstallCaCerts(in ComponentName admin, in String[] aliases);
-    void enforceCanManageCaCerts(in ComponentName admin);
+    boolean installCaCert(in ComponentName admin, String callerPackage, in byte[] certBuffer);
+    void uninstallCaCerts(in ComponentName admin, String callerPackage, in String[] aliases);
+    void enforceCanManageCaCerts(in ComponentName admin, in String callerPackage);
     boolean approveCaCert(in String alias, int userHandle, boolean approval);
     boolean isCaCertApproved(in String alias, int userHandle);
 
-    boolean installKeyPair(in ComponentName who, in byte[] privKeyBuffer, in byte[] certBuffer,
-            in byte[] certChainBuffer, String alias, boolean requestAccess);
-    boolean removeKeyPair(in ComponentName who, String alias);
+    boolean installKeyPair(in ComponentName who, in String callerPackage, in byte[] privKeyBuffer,
+            in byte[] certBuffer, in byte[] certChainBuffer, String alias, boolean requestAccess);
+    boolean removeKeyPair(in ComponentName who, in String callerPackage, String alias);
     void choosePrivateKeyAlias(int uid, in Uri uri, in String alias, IBinder aliasCallback);
+
+    void setDelegatedScopes(in ComponentName who, in String delegatePackage, in List<String> scopes);
+    List<String> getDelegatedScopes(in ComponentName who, String delegatePackage);
+    List<String> getDelegatePackages(in ComponentName who, String scope);
 
     void setCertInstallerPackage(in ComponentName who, String installerPackage);
     String getCertInstallerPackage(in ComponentName who);
@@ -173,11 +177,11 @@ interface IDevicePolicyManager {
     void addPersistentPreferredActivity(in ComponentName admin, in IntentFilter filter, in ComponentName activity);
     void clearPackagePersistentPreferredActivities(in ComponentName admin, String packageName);
 
-    void setApplicationRestrictions(in ComponentName who, in String packageName, in Bundle settings);
-    Bundle getApplicationRestrictions(in ComponentName who, in String packageName);
+    void setApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName, in Bundle settings);
+    Bundle getApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName);
     boolean setApplicationRestrictionsManagingPackage(in ComponentName admin, in String packageName);
     String getApplicationRestrictionsManagingPackage(in ComponentName admin);
-    boolean isCallerApplicationRestrictionsManagingPackage();
+    boolean isCallerApplicationRestrictionsManagingPackage(in String callerPackage);
 
     void setRestrictionsProvider(in ComponentName who, in ComponentName provider);
     ComponentName getRestrictionsProvider(int userHandle);
