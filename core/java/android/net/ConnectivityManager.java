@@ -1532,6 +1532,9 @@ public class ConnectivityManager {
         }
 
         public void stop() {
+            if (mSlot == null) {
+                return;
+            }
             try {
                 mService.stopKeepalive(mNetwork, mSlot);
             } catch (RemoteException e) {
