@@ -25,9 +25,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -330,8 +327,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final boolean ALWAYS_KEEP_CURRENT = true;
 
     private static final float DRAG_SHADOW_ALPHA_TRANSPARENT = .7071f;
-
-    private static final String PROPERTY_BUILD_DATE_UTC = "ro.build.date.utc";
 
     // Enums for animation scale update types.
     @Retention(RetentionPolicy.SOURCE)
@@ -5974,35 +5969,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 mFocusedApp.mTask.mStack : null;
     }
 
-    private void showAuditSafeModeNotification() {
-        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0,
-                new Intent(Intent.ACTION_VIEW,
-                           Uri.parse("https://support.google.com/nexus/answer/2852139")), 0);
-
-        String title = mContext.getString(R.string.audit_safemode_notification);
-
-        Notification notification = new Notification.Builder(mContext)
-                .setSmallIcon(com.android.internal.R.drawable.stat_sys_warning)
-                .setWhen(0)
-                .setOngoing(true)
-                .setTicker(title)
-                .setLocalOnly(true)
-                .setPriority(Notification.PRIORITY_HIGH)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setColor(mContext.getColor(
-                        com.android.internal.R.color.system_notification_accent_color))
-                .setContentTitle(title)
-                .setContentText(mContext.getString(R.string.audit_safemode_notification_details))
-                .setContentIntent(pendingIntent)
-                .build();
-
-        NotificationManager notificationManager = (NotificationManager) mContext
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        notificationManager.notifyAsUser(null, R.string.audit_safemode_notification, notification,
-                UserHandle.ALL);
-    }
-
     public boolean detectSafeMode() {
         if (!mInputMonitor.waitForInputDevicesReady(
                 INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS)) {
@@ -6030,23 +5996,8 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             if (SystemProperties.getInt(ShutdownThread.REBOOT_SAFEMODE_PROPERTY, 0) != 0
                     || SystemProperties.getInt(ShutdownThread.RO_SAFEMODE_PROPERTY, 0) != 0) {
-                int auditSafeMode = SystemProperties.getInt(ShutdownThread.AUDIT_SAFEMODE_PROPERTY, 0);
-
-                if (auditSafeMode == 0) {
-                    mSafeMode = true;
-                    SystemProperties.set(ShutdownThread.REBOOT_SAFEMODE_PROPERTY, "");
-                } else {
-                    // stay in safe mode until we have updated to a newer build
-                    int buildDate = SystemProperties.getInt(PROPERTY_BUILD_DATE_UTC, 0);
-
-                    if (auditSafeMode >= buildDate) {
-                        mSafeMode = true;
-                        showAuditSafeModeNotification();
-                    } else {
-                        SystemProperties.set(ShutdownThread.REBOOT_SAFEMODE_PROPERTY, "");
-                        SystemProperties.set(ShutdownThread.AUDIT_SAFEMODE_PROPERTY, "");
-                    }
-                }
+                mSafeMode = true;
+                SystemProperties.set(ShutdownThread.REBOOT_SAFEMODE_PROPERTY, "");
             }
         } catch (IllegalArgumentException e) {
         }
