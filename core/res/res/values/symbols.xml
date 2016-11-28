@@ -379,6 +379,11 @@
   <java-symbol type="integer" name="config_bluetooth_operating_voltage_mv" />
   <java-symbol type="bool" name="config_bluetooth_reload_supported_profiles_when_enabled" />
   <java-symbol type="integer" name="config_cursorWindowSize" />
+  <java-symbol type="array"   name="config_defaultOomAdj" />
+  <java-symbol type="array"   name="config_defaultOomMinFreeLow32" />
+  <java-symbol type="array"   name="config_defaultOomMinFreeHigh32" />
+  <java-symbol type="array"   name="config_defaultOomMinFreeLow64" />
+  <java-symbol type="array"   name="config_defaultOomMinFreeHigh64" />
   <java-symbol type="integer" name="config_drawLockTimeoutMillis" />
   <java-symbol type="integer" name="config_doublePressOnPowerBehavior" />
   <java-symbol type="integer" name="config_extraFreeKbytesAdjust" />

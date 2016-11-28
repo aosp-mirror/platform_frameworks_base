@@ -155,6 +155,83 @@
          off features. -->
     <bool name="config_avoidGfxAccel">false</bool>
 
+    <!-- These are the various interesting memory levels that we will give to
+         the OOM killer.  Note that the OOM killer only supports 6 slots, so we
+         can't give it a different value for every possible kind of process.
+         Values are defined on
+         services/core/java/com/android/server/am/ProcessList.java as follows:
+            FOREGROUND_APP_ADJ = 0;
+            VISIBLE_APP_ADJ = 1;
+            PERCEPTIBLE_APP_ADJ = 2;
+            BACKUP_APP_ADJ = 3;
+            HEAVY_WEIGHT_APP_ADJ = 4;
+            SERVICE_ADJ = 5;
+            HOME_APP_ADJ = 6;
+            PREVIOUS_APP_ADJ = 7;
+            SERVICE_B_ADJ = 8;
+            CACHED_APP_MIN_ADJ = 9;
+            CACHED_APP_MAX_ADJ = 15; -->
+    <integer-array translatable="false" name="config_defaultOomAdj">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>9</item>
+        <item>15</item>
+    </integer-array>
+
+    <!-- Device configuration setting the default value of lowmemorykiller.
+         These are the low-end OOM level limits for 32 bit device.
+         This is appropriate for an HVGA or smaller phone with less than 512MB.
+         Values are in KB. -->
+    <integer-array translatable="false" name="config_defaultOomMinFreeLow32">
+        <item>12288</item>
+        <item>18432</item>
+        <item>24576</item>
+        <item>36864</item>
+        <item>43008</item>
+        <item>49152</item>
+    </integer-array>
+
+    <!-- Device configuration setting the default value of lowmemorykiller.
+         These are the high-end OOM level limits for 32 bit device.
+         This is appropriate for a 1280x800 or larger screen with around 1GB RAM.
+         Values are in KB. -->
+    <integer-array translatable="false" name="config_defaultOomMinFreeHigh32">
+        <item>73728</item>
+        <item>92160</item>
+        <item>110592</item>
+        <item>129024</item>
+        <item>147456</item>
+        <item>184320</item>
+    </integer-array>
+
+    <!-- Device configuration setting the default value of lowmemorykiller.
+         These are the low-end OOM level limits for 64 bit device.
+         This is appropriate for an HVGA or smaller phone with less than 512MB.
+         Values are in KB. -->
+    <integer-array translatable="false" name="config_defaultOomMinFreeLow64">
+        <item>12288</item>
+        <item>18432</item>
+        <item>24576</item>
+        <item>36864</item>
+        <item>43008</item>
+        <item>49152</item>
+    </integer-array>
+
+    <!-- Device configuration setting the default value of lowmemorykiller.
+         These are the high-end OOM level limits for 64 bit device.
+         This is appropriate for a 1280x800 or larger screen with around 1GB RAM.
+         Values are in KB. -->
+    <integer-array translatable="false" name="config_defaultOomMinFreeHigh64">
+        <item>73728</item>
+        <item>92160</item>
+        <item>110592</item>
+        <item>129024</item>
+        <item>221184</item>
+        <item>322560</item>
+    </integer-array>
+
     <!-- Device configuration setting the minfree tunable in the lowmemorykiller in the kernel.
          A high value will cause the lowmemorykiller to fire earlier, keeping more memory
          in the file cache and preventing I/O thrashing, but allowing fewer processes to
