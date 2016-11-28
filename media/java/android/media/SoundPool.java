@@ -24,6 +24,7 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.media.PlayerBase;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -146,6 +147,7 @@ public class SoundPool extends PlayerBase {
     public SoundPool(int maxStreams, int streamType, int srcQuality) {
         this(maxStreams,
                 new AudioAttributes.Builder().setInternalLegacyStreamType(streamType).build());
+        PlayerBase.deprecateStreamTypeForPlayback(streamType, "SoundPool", "SoundPool()");
     }
 
     private SoundPool(int maxStreams, AudioAttributes attributes) {

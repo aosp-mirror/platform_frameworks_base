@@ -297,7 +297,7 @@ public class RingtoneManager {
     }
 
     /**
-     * Infers the playback stream type based on what type of ringtones this
+     * Infers the volume stream type based on what type of ringtones this
      * manager is returning.
      * 
      * @return The stream type.
@@ -616,6 +616,7 @@ public class RingtoneManager {
         return getRingtone(context, ringtoneUri, -1);
     }
 
+    //FIXME bypass the notion of stream types within the class
     /**
      * Returns a {@link Ringtone} for a given sound URI on the given stream
      * type. Normally, if you change the stream type on the returned
@@ -630,6 +631,7 @@ public class RingtoneManager {
         try {
             final Ringtone r = new Ringtone(context, true);
             if (streamType >= 0) {
+                //FIXME deprecated call
                 r.setStreamType(streamType);
             }
             r.setUri(ringtoneUri);

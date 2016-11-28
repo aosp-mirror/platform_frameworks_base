@@ -236,4 +236,28 @@ public abstract class PlayerBase {
      */
     abstract void playerSetVolume(boolean muting, float leftVolume, float rightVolume);
     abstract int playerSetAuxEffectSendLevel(boolean muting, float level);
+
+    //=====================================================================
+    // Utilities
+
+    /**
+     * Use to generate warning or exception in legacy code paths that allowed passing stream types
+     * to qualify audio playback.
+     * @param streamType the stream type to check
+     * @throws IllegalArgumentException
+     */
+    public static void deprecateStreamTypeForPlayback(int streamType, String className,
+            String opName) throws IllegalArgumentException {
+        // STREAM_ACCESSIBILITY was introduced at the same time the use of stream types
+        // for audio playback was deprecated, so it is not allowed at all to qualify a playback
+        // use case
+        if (streamType == AudioManager.STREAM_ACCESSIBILITY) {
+            throw new IllegalArgumentException("Use of STREAM_ACCESSIBILITY is reserved for "
+                    + "volume control");
+        }
+        Log.e(className, "Use of stream types is deprecated for operations other than " +
+                "volume control.");
+        Log.e(className, "See the documentation of " + opName + " for what to use instead with " +
+                "android.media.AudioAttributes to qualify your playback use case");
+    }
 }

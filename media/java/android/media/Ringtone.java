@@ -103,6 +103,7 @@ public class Ringtone {
      */
     @Deprecated
     public void setStreamType(int streamType) {
+        PlayerBase.deprecateStreamTypeForPlayback(streamType, "Ringtone", "setStreamType()");
         setAudioAttributes(new AudioAttributes.Builder()
                 .setInternalLegacyStreamType(streamType)
                 .build());
