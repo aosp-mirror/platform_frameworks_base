@@ -79,6 +79,11 @@ public class Tile implements Parcelable {
      */
     public Bundle metaData;
 
+    /**
+     * Optional key to use for this tile.
+     */
+    public String key;
+
     public Tile() {
         // Empty
     }
@@ -113,6 +118,7 @@ public class Tile implements Parcelable {
         dest.writeString(category);
         dest.writeInt(priority);
         dest.writeBundle(metaData);
+        dest.writeString(key);
     }
 
     public void readFromParcel(Parcel in) {
@@ -132,6 +138,7 @@ public class Tile implements Parcelable {
         category = in.readString();
         priority = in.readInt();
         metaData = in.readBundle();
+        key = in.readString();
     }
 
     Tile(Parcel in) {

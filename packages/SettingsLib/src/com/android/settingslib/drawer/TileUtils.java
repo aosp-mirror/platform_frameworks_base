@@ -102,6 +102,12 @@ public class TileUtils {
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
+     * to specify the key that should be used for the preference.
+     */
+    public static final String META_DATA_PREFERENCE_KEYHINT = "com.android.settings.keyhint";
+
+    /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml
      * to specify the icon that should be displayed for the preference.
      */
     public static final String META_DATA_PREFERENCE_ICON = "com.android.settings.icon";
@@ -292,6 +298,7 @@ public class TileUtils {
             int icon = 0;
             CharSequence title = null;
             String summary = null;
+            String keyHint = null;
 
             // Get the activity's meta-data
             try {
@@ -317,6 +324,13 @@ public class TileUtils {
                             summary = metaData.getString(META_DATA_PREFERENCE_SUMMARY);
                         }
                     }
+                    if (metaData.containsKey(META_DATA_PREFERENCE_KEYHINT)) {
+                        if (metaData.get(META_DATA_PREFERENCE_KEYHINT) instanceof Integer) {
+                            keyHint = res.getString(metaData.getInt(META_DATA_PREFERENCE_KEYHINT));
+                        } else {
+                            keyHint = metaData.getString(META_DATA_PREFERENCE_KEYHINT);
+                        }
+                    }
                 }
             } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
                 if (DEBUG) Log.d(LOG_TAG, "Couldn't find info", e);
@@ -338,6 +352,8 @@ public class TileUtils {
             // Replace the intent with this specific activity
             tile.intent = new Intent().setClassName(activityInfo.packageName,
                     activityInfo.name);
+            // Suggest a key for this tile
+            tile.key = keyHint;
 
             return true;
         }
