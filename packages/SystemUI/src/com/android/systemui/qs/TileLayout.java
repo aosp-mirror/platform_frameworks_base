@@ -145,6 +145,14 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         int columns = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.QS_LAYOUT_COLUMNS, mDefaultColumns,
                 UserHandle.USER_CURRENT);
+
+        if (Settings.System.getInt(mContext.getContentResolver(),
+             Settings.System.QS_TILE_TITLE_VISIBILITY, 1) == 1) {
+            mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
+        } else {
+            mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height_wo_label);
+        }
+
         if (mColumns != columns) {
             mColumns = columns;
             requestLayout();
