@@ -142,6 +142,12 @@ public class EditText extends TextView {
 
     /** @hide */
     @Override
+    protected boolean supportsAutoSizeText() {
+        return false;
+    }
+
+    /** @hide */
+    @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
         if (isEnabled()) {
