@@ -235,7 +235,6 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.ViewGroup#drawChild",
         "com.android.internal.view.menu.MenuBuilder#createNewMenuItem",
         "com.android.internal.util.XmlUtils#convertValueToInt",
-        "com.android.internal.textservice.ITextServicesManager$Stub#asInterface",
         "dalvik.system.VMRuntime#newUnpaddedArray",
         "libcore.io.MemoryMappedFile#mmapRO",
         "libcore.io.MemoryMappedFile#close",
@@ -304,6 +303,7 @@ public final class CreateInfo implements ICreateInfo {
     private final static String[] RENAMED_CLASSES =
         new String[] {
             "android.os.ServiceManager",                       "android.os._Original_ServiceManager",
+            "android.view.textservice.TextServicesManager",    "android.view.textservice._Original_TextServicesManager",
             "android.util.LruCache",                           "android.util._Original_LruCache",
             "android.view.SurfaceView",                        "android.view._Original_SurfaceView",
             "android.view.accessibility.AccessibilityManager", "android.view.accessibility._Original_AccessibilityManager",
