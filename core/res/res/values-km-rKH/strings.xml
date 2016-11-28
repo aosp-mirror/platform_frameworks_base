@@ -1683,8 +1683,8 @@
     <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"អ្នកនឹងបាត់បង់ការផ្លាស់ប្តូរណាមួយ ហើយការបង្ហាញសាកល្បងនឹងចាប់ផ្តើមម្តងទៀតក្នុងរយៈពេល <xliff:g id="TIMEOUT">%1$s</xliff:g> វិនាទីទៀត…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"បោះបង់"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"កំណត់ឡើងវិញឥឡូវនេះ"</string>
-    <string name="audit_safemode_notification" msgid="6416076898350685856">"កំណត់ដូចចេញពីរោងចក្រឡើងវិញដើម្បីប្រើឧបករណ៍នេះដោយគ្មានការរឹតបន្តឹង"</string>
-    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"ប៉ះ​ ដើម្បី​​ស្វែងយល់​បន្ថែម។"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> ដែលបានបិទដំណើរការ"</string>
     <string name="conference_call" msgid="3751093130790472426">"ការហៅជាក្រុម"</string>
+    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <skip />
 </resources>

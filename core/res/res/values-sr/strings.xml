@@ -1717,8 +1717,8 @@
     <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Изгубићете све промене и демонстрација ће поново почети за <xliff:g id="TIMEOUT">%1$s</xliff:g> сек…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Откажи"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Ресетуј"</string>
-    <string name="audit_safemode_notification" msgid="6416076898350685856">"Ресетујте уређај на фабричка подешавања да бисте га користили без ограничења"</string>
-    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Додирните да бисте сазнали више."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Виџет <xliff:g id="LABEL">%1$s</xliff:g> је онемогућен"</string>
     <string name="conference_call" msgid="3751093130790472426">"Конференцијски позив"</string>
+    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <skip />
 </resources>
