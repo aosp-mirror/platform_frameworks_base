@@ -37,6 +37,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -65,11 +66,21 @@ public class SnoozeHelperTest {
     }
 
     @Test
-    public void testSnooze() throws Exception {
+    public void testSnoozeForTime() throws Exception {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
         mSnoozeHelper.snooze(r , UserHandle.USER_SYSTEM, 1000);
         verify(mAm, times(1)).setExactAndAllowWhileIdle(
                 anyInt(), eq((long) 1000), any(PendingIntent.class));
+        assertTrue(mSnoozeHelper.isSnoozed(
+                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+    }
+
+    @Test
+    public void testSnooze() throws Exception {
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r , UserHandle.USER_SYSTEM);
+        verify(mAm, never()).setExactAndAllowWhileIdle(
+                anyInt(), anyLong(), any(PendingIntent.class));
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
     }
@@ -152,7 +163,7 @@ public class SnoozeHelperTest {
         mSnoozeHelper.snooze(r , UserHandle.USER_SYSTEM, 1000);
         NotificationRecord r2 = getNotificationRecord("pkg", 2, "one", UserHandle.ALL);
         mSnoozeHelper.snooze(r2 , UserHandle.USER_ALL, 1000);
-        mSnoozeHelper.repost(r.sbn.getPackageName(), r.getKey(), UserHandle.USER_SYSTEM);
+        mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM);
         verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r);
     }
 
@@ -165,7 +176,7 @@ public class SnoozeHelperTest {
         mSnoozeHelper.update(UserHandle.USER_SYSTEM, r);
         verify(mCallback, never()).repost(anyInt(), any(NotificationRecord.class));
 
-        mSnoozeHelper.repost(r.sbn.getPackageName(), r.getKey(), UserHandle.USER_SYSTEM);
+        mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM);
         verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r);
     }
 
