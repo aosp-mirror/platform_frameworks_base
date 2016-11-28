@@ -1485,7 +1485,7 @@ public abstract class BaseStatusBar extends SystemUI implements
      */
     @Override  // NotificationData.Environment
     public boolean shouldHideNotifications(int userId) {
-        return isLockscreenPublicMode(mCurrentUserId) && !userAllowsNotificationsInPublic(userId)
+        return isLockscreenPublicMode(userId) && !userAllowsNotificationsInPublic(userId)
                 || (userId != mCurrentUserId && shouldHideNotifications(mCurrentUserId));
     }
 
