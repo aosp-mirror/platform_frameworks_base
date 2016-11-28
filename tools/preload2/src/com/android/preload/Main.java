@@ -33,10 +33,13 @@ import com.android.preload.classdataretrieval.ClassDataRetriever;
 import com.android.preload.classdataretrieval.hprof.Hprof;
 import com.android.preload.classdataretrieval.jdwp.JDWPClassDataRetriever;
 import com.android.preload.ui.IUI;
+import com.android.preload.ui.SequenceUI;
 import com.android.preload.ui.SwingUI;
-
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -90,9 +93,14 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) {
-        Main m = new Main(new SwingUI());
-        top = m;
+        Main m;
+        if (args.length > 0 && args[0].equals("--seq")) {
+            m = createSequencedMain(args);
+        } else {
+            m = new Main(new SwingUI());
+        }
 
+        top = m;
         m.startUp();
     }
 
@@ -128,6 +136,27 @@ public class Main {
         }
 
         ui.prepare(clientListModel, dataTableModel, actions);
+    }
+
+    /**
+     * @param args
+     * @return
+     */
+    private static Main createSequencedMain(String[] args) {
+        SequenceUI ui = new SequenceUI();
+        Main main = new Main(ui);
+
+        Iterator<String> it = Arrays.asList(args).iterator();
+        it.next();  // --seq
+
+        ui.choice("#" + it.next());  // Device.
+        ui.confirmNo();              // Prepare: no.
+        ui.action(ScanPackageAction.class);                 // Take hprof dump.
+        ui.client("system_process");                        // Select system server.
+        ui.action(ExportAction.class);                      // Export data.
+        ui.output(new File("/tmp/system_server.data"));     // Write to file.
+
+        return main;
     }
 
     public static IUI getUI() {
