@@ -35,6 +35,8 @@ import com.android.systemui.statusbar.policy.AccessibilityController;
  */
 public class LockIcon extends KeyguardAffordanceView {
 
+    private static final int FP_DRAW_OFF_TIMEOUT = 800;
+
     private static final int STATE_LOCKED = 0;
     private static final int STATE_LOCK_OPEN = 1;
     private static final int STATE_FACE_UNLOCK = 2;
@@ -52,6 +54,8 @@ public class LockIcon extends KeyguardAffordanceView {
     private AccessibilityController mAccessibilityController;
     private boolean mHasFingerPrintIcon;
     private int mDensity;
+
+    private final Runnable mDrawOffTimeout = () -> update(true /* forceUpdate */);
 
     public LockIcon(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -116,7 +120,6 @@ public class LockIcon extends KeyguardAffordanceView {
         } else {
             mTrustDrawable.stop();
         }
-        // TODO: Real icon for facelock.
         int state = getState();
         boolean anyFingerprintIcon = state == STATE_FINGERPRINT || state == STATE_FINGERPRINT_ERROR;
         boolean useAdditionalPadding = anyFingerprintIcon;
@@ -171,6 +174,14 @@ public class LockIcon extends KeyguardAffordanceView {
                 animation.forceAnimationOnUI();
                 animation.start();
             }
+
+            if (iconRes == R.drawable.lockscreen_fingerprint_draw_off_animation) {
+                removeCallbacks(mDrawOffTimeout);
+                postDelayed(mDrawOffTimeout, FP_DRAW_OFF_TIMEOUT);
+            } else {
+                removeCallbacks(mDrawOffTimeout);
+            }
+
             mLastState = state;
             mLastDeviceInteractive = mDeviceInteractive;
             mLastScreenOn = mScreenOn;
