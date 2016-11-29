@@ -3075,6 +3075,12 @@ message MetricsEvent {
     // PACKAGE: The package name of the app the permission was revoked for
     ACTION_PERMISSION_REVOKE_WRITE_EXTERNAL_STORAGE = 733;
 
+    // ACTION: Logged when a provisioning session has started
+    PROVISIONING_SESSION_STARTED = 734;
+
+    // ACTION: Logged when a provisioning session has completed
+    PROVISIONING_SESSION_COMPLETED = 735;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
