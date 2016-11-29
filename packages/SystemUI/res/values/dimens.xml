@@ -201,7 +201,7 @@
     <dimen name="qs_detail_margin_top">28dp</dimen>
     <dimen name="qs_data_usage_text_size">14sp</dimen>
     <dimen name="qs_data_usage_usage_text_size">36sp</dimen>
-    <dimen name="qs_battery_padding">2dp</dimen>
+    <dimen name="qs_battery_padding">0dp</dimen>
     <dimen name="qs_detail_items_padding_top">4dp</dimen>
 
     <dimen name="segmented_button_spacing">0dp</dimen>
