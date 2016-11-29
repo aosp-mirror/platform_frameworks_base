@@ -109,6 +109,8 @@ public class UserInfo implements Parcelable {
      */
     public int profileGroupId;
     public int restrictedProfileParentId;
+    /** Which profile badge color/label to use. */
+    public int profileBadge;
 
     /** User is only partially created. */
     public boolean partial;
@@ -233,6 +235,7 @@ public class UserInfo implements Parcelable {
         profileGroupId = orig.profileGroupId;
         restrictedProfileParentId = orig.restrictedProfileParentId;
         guestToRemove = orig.guestToRemove;
+        profileBadge = orig.profileBadge;
     }
 
     public UserHandle getUserHandle() {
@@ -261,6 +264,7 @@ public class UserInfo implements Parcelable {
         dest.writeInt(profileGroupId);
         dest.writeInt(guestToRemove ? 1 : 0);
         dest.writeInt(restrictedProfileParentId);
+        dest.writeInt(profileBadge);
     }
 
     public static final Parcelable.Creator<UserInfo> CREATOR
@@ -286,5 +290,6 @@ public class UserInfo implements Parcelable {
         profileGroupId = source.readInt();
         guestToRemove = source.readInt() != 0;
         restrictedProfileParentId = source.readInt();
+        profileBadge = source.readInt();
     }
 }

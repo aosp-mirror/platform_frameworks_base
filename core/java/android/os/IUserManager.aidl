@@ -86,4 +86,5 @@ interface IUserManager {
     UserInfo createProfileForUserEvenWhenDisallowed(in String name, int flags, int userHandle,
             in String[] disallowedPackages);
     boolean isUserUnlockingOrUnlocked(int userId);
+    int getManagedProfileBadge(int userId);
 }

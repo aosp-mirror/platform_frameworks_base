@@ -1017,6 +1017,8 @@
   <java-symbol type="string" name="action_bar_home_subtitle_description_format" />
   <java-symbol type="string" name="wireless_display_route_description" />
   <java-symbol type="string" name="managed_profile_label_badge" />
+  <java-symbol type="string" name="managed_profile_label_badge_2" />
+  <java-symbol type="string" name="managed_profile_label_badge_3" />
   <java-symbol type="string" name="mediasize_unknown_portrait" />
   <java-symbol type="string" name="mediasize_unknown_landscape" />
   <java-symbol type="string" name="mediasize_iso_a0" />
@@ -1269,12 +1271,15 @@
   <java-symbol type="drawable" name="cling_button" />
   <java-symbol type="drawable" name="cling_arrow_up" />
   <java-symbol type="drawable" name="cling_bg" />
-  <java-symbol type="drawable" name="ic_corp_badge" />
+  <java-symbol type="drawable" name="ic_corp_badge_color" />
+  <java-symbol type="drawable" name="ic_corp_badge_case" />
+  <java-symbol type="drawable" name="ic_corp_icon" />
   <java-symbol type="drawable" name="ic_corp_badge_off" />
-  <java-symbol type="drawable" name="ic_corp_icon_badge" />
+  <java-symbol type="drawable" name="ic_corp_icon_badge_shadow" />
+  <java-symbol type="drawable" name="ic_corp_icon_badge_color" />
+  <java-symbol type="drawable" name="ic_corp_icon_badge_case" />
   <java-symbol type="drawable" name="ic_corp_user_badge" />
   <java-symbol type="drawable" name="ic_corp_badge_no_background" />
-  <java-symbol type="drawable" name="ic_corp_icon" />
   <java-symbol type="drawable" name="ic_corp_statusbar_icon" />
   <java-symbol type="drawable" name="emulator_circular_window_overlay" />
 
@@ -1301,6 +1306,9 @@
   <java-symbol type="color" name="user_icon_8" />
   <java-symbol type="color" name="user_icon_default_gray" />
   <java-symbol type="color" name="user_icon_default_white" />
+  <java-symbol type="color" name="profile_badge_1" />
+  <java-symbol type="color" name="profile_badge_2" />
+  <java-symbol type="color" name="profile_badge_3" />
 
   <java-symbol type="layout" name="action_bar_home" />
   <java-symbol type="layout" name="action_bar_title_item" />

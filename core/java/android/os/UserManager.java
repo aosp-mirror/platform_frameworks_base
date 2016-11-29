@@ -948,6 +948,23 @@ public class UserManager {
     }
 
     /**
+     * Gets badge for a managed profile.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission, otherwise the caller
+     * must be in the same profile group of specified user.
+     *
+     * @return which badge to use for the managed profile badge id will be less than
+     *         UserManagerService.getMaxManagedProfiles()
+     * @hide
+     */
+    public int getManagedProfileBadge(@UserIdInt int userId) {
+        try {
+            return mService.getManagedProfileBadge(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Checks if the calling app is running as an ephemeral user.
      *
      * @return whether the caller is an ephemeral user.
