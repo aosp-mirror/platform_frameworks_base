@@ -4194,6 +4194,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int endPadding = UNDEFINED_PADDING;
 
         int padding = -1;
+        int paddingHorizontal = -1;
+        int paddingVertical = -1;
 
         int viewFlagValues = 0;
         int viewFlagMasks = 0;
@@ -4239,6 +4241,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mUserPaddingRightInitial = padding;
                     leftPaddingDefined = true;
                     rightPaddingDefined = true;
+                    break;
+                case com.android.internal.R.styleable.View_paddingHorizontal:
+                    paddingHorizontal = a.getDimensionPixelSize(attr, -1);
+                    mUserPaddingLeftInitial = paddingHorizontal;
+                    mUserPaddingRightInitial = paddingHorizontal;
+                    leftPaddingDefined = true;
+                    rightPaddingDefined = true;
+                    break;
+                case com.android.internal.R.styleable.View_paddingVertical:
+                    paddingVertical = a.getDimensionPixelSize(attr, -1);
                     break;
                  case com.android.internal.R.styleable.View_paddingLeft:
                     leftPadding = a.getDimensionPixelSize(attr, -1);
@@ -4647,6 +4659,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             bottomPadding = padding;
             mUserPaddingLeftInitial = padding;
             mUserPaddingRightInitial = padding;
+        } else {
+            if (paddingHorizontal >= 0) {
+                leftPadding = paddingHorizontal;
+                rightPadding = paddingHorizontal;
+                mUserPaddingLeftInitial = paddingHorizontal;
+                mUserPaddingRightInitial = paddingHorizontal;
+            }
+            if (paddingVertical >= 0) {
+                topPadding = paddingVertical;
+                bottomPadding = paddingVertical;
+            }
         }
 
         if (isRtlCompatibilityMode()) {

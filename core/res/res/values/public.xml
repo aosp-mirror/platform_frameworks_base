@@ -2752,6 +2752,11 @@
            <public name="exampleAttr1" />
            <public name="exampleAttr2" />
        </public-group>
+
+       To add a new public-group block, choose an id value that is 1 greater
+       than the last of that item above. For example, the last "attr" id
+       value above is 0x01010530, so the public-group of attrs below has
+       the id value of 0x01010531.
        =============================================================== -->
     <eat-comment />
 
@@ -2764,6 +2769,12 @@
         <public name="autoSizeStepGranularity" />
         <public name="autoSizeStepSizeSet" />
         <public name="autoSizeMinTextSize" />
+        <public name="min" />
+        <public name="rotationAnimation" />
+        <public name="layout_marginHorizontal" />
+        <public name="layout_marginVertical" />
+        <public name="paddingHorizontal" />
+        <public name="paddingVertical" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
@@ -2772,6 +2783,12 @@
     <public-group type="id" first-id="0x01020041">
     </public-group>
 
-    <public type="attr" name="min" />
-    <public type="attr" name="rotationAnimation" />
+  <!-- ===============================================================
+       DO NOT ADD UN-GROUPED ITEMS HERE
+
+       Any new items (attrs, styles, ids, etc.) *must* be added in a
+       public-group block, as the preceding comment explains.
+       Items added outside of a group may have their value recalculated
+       every time something new is added to this file.
+       =============================================================== -->
 </resources>

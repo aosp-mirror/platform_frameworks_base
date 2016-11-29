@@ -2239,13 +2239,23 @@
             (black). -->
         <attr name="background" format="reference|color" />
 
-        <!-- Sets the padding, in pixels, of all four edges.  Padding is defined as
-             space between the edges of the view and the view's content. A views size
-             will include it's padding.  If a {@link android.R.attr#background}
+        <!-- Sets the padding, in pixels, of all four edges. Padding is defined as
+             space between the edges of the view and the view's content. This value will take
+             precedence over any of the edge-specific values, including
+             paddingHorizontal and paddingVertical, if set. A view's size
+             will include its padding. If a {@link android.R.attr#background}
              is provided, the padding will initially be set to that (0 if the
-             drawable does not have padding).  Explicitly setting a padding value
+             drawable does not have padding). Explicitly setting a padding value
              will override the corresponding padding found in the background. -->
         <attr name="padding" format="dimension" />
+        <!-- Sets the padding, in pixels, of the left and right edges; see
+             {@link android.R.attr#padding}. This value will take precedence over
+             paddingLeft, paddingRight, paddingStart, and paddingEnd, if set. -->
+        <attr name="paddingHorizontal" format="dimension" />
+        <!-- Sets the padding, in pixels, of the top and bottom edges; see
+             {@link android.R.attr#padding}. This value will take precedence over
+             paddingTop and paddingBottom, if set. -->
+        <attr name="paddingVertical" format="dimension" />
         <!-- Sets the padding, in pixels, of the left edge; see {@link android.R.attr#padding}. -->
         <attr name="paddingLeft" format="dimension" />
         <!-- Sets the padding, in pixels, of the top edge; see {@link android.R.attr#padding}. -->
@@ -3059,7 +3069,11 @@
         <attr name="layout_width" />
         <attr name="layout_height" />
         <!--  Specifies extra space on the left, top, right and bottom
-              sides of this view. This space is outside this view's bounds.
+              sides of this view.  If both layout_margin and any of layout_marginLeft,
+              layout_marginRight, layout_marginStart, layout_marginEnd,
+              layout_marginTop, and layout_marginBottom are
+              also specified, the layout_margin value will take precedence over the
+              edge-specific values. This space is outside this view's bounds.
               Margin values should be positive. -->
         <attr name="layout_margin" format="dimension"  />
         <!--  Specifies extra space on the left side of this view.
@@ -3086,6 +3100,29 @@
               This space is outside this view's bounds.
               Margin values should be positive.-->
         <attr name="layout_marginEnd" format="dimension"  />
+        <!--  Specifies extra space on the left and right sides of this view.
+              Specifying layout_marginHorizontal is equivalent to specifying
+              either layout_marginLeft and layout_marginRight or
+              layout_marginStart and layout_marginEnd with that same value.
+              If both layout_marginHorizontal and any of layout_marginLeft,
+              layout_marginRight, layout_marginStart, and layout_marginEnd are
+              also specified, the layout_marginHorizontal value will take precedence over the
+              edge-specific values. Also, layout_margin will always take precendent over
+              any of these values, including layout_marginHorizontal.
+              This space is outside this view's bounds.
+              Margin values should be positive.-->
+        <attr name="layout_marginHorizontal" format="dimension"  />
+        <!--  Specifies extra space on the tyop and bottom sides of this view.
+              Specifying layout_marginVertical is equivalent to specifying
+              layout_marginTop and layout_marginBottom with that same value.
+              If both layout_marginVertical and either/both layout_marginTop and
+              layout_marginBottom are also specified, the layout_marginVertical value
+              will take precedence over the edge-specific values.
+              Also, layout_margin will always take precendent over
+              any of these values, including layout_marginHorizontal.
+              This space is outside this view's bounds.
+              Margin values should be positive.-->
+        <attr name="layout_marginVertical" format="dimension"  />
     </declare-styleable>
 
     <!-- Use <code>input-method</code> as the root tag of the XML resource that
