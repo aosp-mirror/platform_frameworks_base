@@ -27,7 +27,7 @@ import java.util.Collection;
 
 import javax.swing.AbstractAction;
 
-public class ImportAction extends AbstractAction implements Runnable {
+public class ImportAction extends AbstractThreadedAction {
     private File[] lastOpenFiles;
     private DumpTableModel dataTableModel;
 
@@ -40,7 +40,7 @@ public class ImportAction extends AbstractAction implements Runnable {
     public void actionPerformed(ActionEvent e) {
         lastOpenFiles = Main.getUI().showOpenDialog(true);
         if (lastOpenFiles != null) {
-            new Thread(this).start();
+            super.actionPerformed(e);
         }
     }
 
