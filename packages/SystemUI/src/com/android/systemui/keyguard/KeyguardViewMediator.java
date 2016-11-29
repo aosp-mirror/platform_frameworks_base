@@ -1777,7 +1777,6 @@ public class KeyguardViewMediator extends SystemUI {
                 // (like recents). Temporary enable/disable (e.g. the "back" button) are
                 // done in KeyguardHostView.
                 flags |= StatusBarManager.DISABLE_RECENT;
-                flags |= StatusBarManager.DISABLE_SEARCH;
             }
             if (isShowingAndNotOccluded()) {
                 flags |= StatusBarManager.DISABLE_HOME;
