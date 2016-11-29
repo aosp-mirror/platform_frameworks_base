@@ -1129,7 +1129,9 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
 		-sdkvalues $(OUT_DOCS) \
 		-hdf android.whichdoc offline \
-		-referenceonly
+		-referenceonly \
+		-resourcesdir $(LOCAL_PATH)/docs/html/reference/images/ \
+		-resourcesoutdir reference/android/images/
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 
