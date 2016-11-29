@@ -19,6 +19,7 @@ package android.graphics;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Size;
+import android.annotation.Nullable;
 
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
@@ -207,6 +208,11 @@ public abstract class ColorSpace {
      * ColorSpace cs = ColorSpace.get(ColorSpace.Named.DCI_P3);
      * </pre>
      *
+     * <p>The properties of each color space are described below (see {@link #SRGB sRGB}
+     * for instance). When applicable, the color gamut of each color space is compared
+     * to the color gamut of sRGB using a CIE 1931 xy chromaticity diagram. This diagram
+     * shows the location of the color space's primaries and white point.</p>
+     *
      * @see ColorSpace#get(Named)
      */
     public enum Named {
@@ -240,6 +246,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_srgb.png" />
+         *     <figcaption style="text-align: center;">sRGB</figcaption>
+         * </p>
          */
         SRGB,
         /**
@@ -263,6 +273,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_srgb.png" />
+         *     <figcaption style="text-align: center;">sRGB</figcaption>
+         * </p>
          */
         LINEAR_SRGB,
         /**
@@ -298,6 +312,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([-0.5..7.5[\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_scrgb.png" />
+         *     <figcaption style="text-align: center;">Extended RGB (orange) vs sRGB (white)</figcaption>
+         * </p>
          */
         EXTENDED_SRGB,
         /**
@@ -321,6 +339,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([-0.5..7.5[\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_scrgb.png" />
+         *     <figcaption style="text-align: center;">Extended RGB (orange) vs sRGB (white)</figcaption>
+         * </p>
          */
         LINEAR_EXTENDED_SRGB,
         /**
@@ -352,6 +374,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_bt709.png" />
+         *     <figcaption style="text-align: center;">BT.709</figcaption>
+         * </p>
          */
         BT709,
         /**
@@ -383,6 +409,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_bt2020.png" />
+         *     <figcaption style="text-align: center;">BT.2020 (orange) vs sRGB (white)</figcaption>
+         * </p>
          */
         BT2020,
         /**
@@ -406,6 +436,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_dci_p3.png" />
+         *     <figcaption style="text-align: center;">DCI-P3 (orange) vs sRGB (white)</figcaption>
+         * </p>
          */
         DCI_P3,
         /**
@@ -437,6 +471,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_display_p3.png" />
+         *     <figcaption style="text-align: center;">Display P3 (orange) vs sRGB (white)</figcaption>
+         * </p>
          */
         DISPLAY_P3,
         /**
@@ -468,6 +506,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_ntsc_1953.png" />
+         *     <figcaption style="text-align: center;">NTSC 1953 (orange) vs sRGB (white)</figcaption>
+         * </p>
          */
         NTSC_1953,
         /**
@@ -499,6 +541,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_smpte_c.png" />
+         *     <figcaption style="text-align: center;">SMPTE-C (orange) vs sRGB (white)</figcaption>
+         * </p>
          */
         SMPTE_C,
         /**
@@ -522,6 +568,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_adobe_rgb.png" />
+         *     <figcaption style="text-align: center;">Adobe RGB (orange) vs sRGB (white)</figcaption>
+         * </p>
          */
         ADOBE_RGB,
         /**
@@ -553,6 +603,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_pro_photo_rgb.png" />
+         *     <figcaption style="text-align: center;">ProPhoto RGB (orange) vs sRGB (white)</figcaption>
+         * </p>
          */
         PRO_PHOTO_RGB,
         /**
@@ -576,6 +630,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([-65504.0, 65504.0]\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_aces.png" />
+         *     <figcaption style="text-align: center;">ACES (orange) vs sRGB (white)</figcaption>
+         * </p>
          */
         ACES,
         /**
@@ -599,6 +657,10 @@ public abstract class ColorSpace {
          *     </tr>
          *     <tr><td>Range</td><td colspan="4">\([-65504.0, 65504.0]\)</td></tr>
          * </table>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_acescg.png" />
+         *     <figcaption style="text-align: center;">ACEScg (orange) vs sRGB (white)</figcaption>
+         * </p>
          */
         ACESCG,
         /**
@@ -1110,7 +1172,7 @@ public abstract class ColorSpace {
         if (source.equals(destination)) return Connector.identity(source);
 
         if (source.getModel() == Model.RGB && destination.getModel() == Model.RGB) {
-            return new Connector.RGB((Rgb) source, (Rgb) destination, intent);
+            return new Connector.Rgb((Rgb) source, (Rgb) destination, intent);
         }
 
         return new Connector(source, destination, intent);
@@ -1162,7 +1224,7 @@ public abstract class ColorSpace {
         if (source.isSrgb()) return Connector.identity(source);
 
         if (source.getModel() == Model.RGB) {
-            return new Connector.RGB((Rgb) source, (Rgb) get(Named.SRGB), intent);
+            return new Connector.Rgb((Rgb) source, (Rgb) get(Named.SRGB), intent);
         }
 
         return new Connector(source, get(Named.SRGB), intent);
@@ -1740,6 +1802,11 @@ public abstract class ColorSpace {
      * primaries and white point in the CIE XYZ space. The tristimulus XYZ values
      * are internally converted to xyY.</p>
      *
+     * <p>
+     *     <img src="{@docRoot}reference/android/images/graphics/colorspace_srgb.png" />
+     *     <figcaption style="text-align: center;">sRGB primaries and white point</figcaption>
+     * </p>
+     *
      * <h3>Transfer functions</h3>
      * <p>A transfer function is a color component conversion function, defined as
      * a single variable, monotonic mathematical function. It is applied to each
@@ -1787,6 +1854,11 @@ public abstract class ColorSpace {
      * instance, {@link Named#EXTENDED_SRGB scRGB} is used to manipulate the
      * range \([-0.5..7.5]\) while {@link Named#ACES ACES} can be used throughout
      * the range \([-65504, 65504]\).</p>
+     *
+     * <p>
+     *     <img src="{@docRoot}reference/android/images/graphics/colorspace_scrgb.png" />
+     *     <figcaption style="text-align: center;">Extended sRGB and its large range</figcaption>
+     * </p>
      *
      * <h3>Converting between RGB color spaces</h3>
      * <p>Conversion between two color spaces is achieved by using an intermediate
@@ -1854,7 +1926,7 @@ public abstract class ColorSpace {
                 @NonNull @Size(9) float[] toXYZ,
                 @NonNull DoubleUnaryOperator oetf,
                 @NonNull DoubleUnaryOperator eotf) {
-            this(name,computePrimaries(toXYZ, eotf), computeWhitePoint(toXYZ, eotf),
+            this(name, computePrimaries(toXYZ, eotf), computeWhitePoint(toXYZ, eotf),
                     oetf, eotf, 0.0f, 1.0f, MIN_ID);
         }
 
@@ -1996,8 +2068,8 @@ public abstract class ColorSpace {
 
             // A color space is wide-gamut if its area is >90% of NTSC 1953 and
             // if it entirely contains the Color space definition in xyY
-            mIsWideGamut = isWideGamut(primaries, min, max);
-            mIsSrgb = isSrgb(primaries, whitePoint, oetf, eotf, min, max, id);
+            mIsWideGamut = isWideGamut(mPrimaries, min, max);
+            mIsSrgb = isSrgb(mPrimaries, mWhitePoint, oetf, eotf, min, max, id);
         }
 
         /**
@@ -2450,7 +2522,7 @@ public abstract class ColorSpace {
          * If the conditions above are not met, the color space is considered as having
          * a wide color gamut if its range is larger than [0..1].
          *
-         * @param primaries RGB primaries in CIE xyY or XYZ as an array of 6 or 9 floats
+         * @param primaries RGB primaries in CIE xyY as an array of 6 floats
          * @param min The minimum value of the color space's range
          * @param max The minimum value of the color space's range
          * @return True if the color space has a wide gamut, false otherwise
@@ -2458,7 +2530,7 @@ public abstract class ColorSpace {
          * @see #isWideGamut()
          * @see #area(float[])
          */
-        private static boolean isWideGamut(@NonNull @Size(min = 6, max = 9) float[] primaries,
+        private static boolean isWideGamut(@NonNull @Size(6) float[] primaries,
                 float min, float max) {
             return (area(primaries) / area(NTSC_1953_PRIMARIES) > 0.9f &&
                             contains(primaries, SRGB_PRIMARIES)) || (min < 0.0f && max > 1.0f);
@@ -2643,7 +2715,7 @@ public abstract class ColorSpace {
          * @return A new array of 6 floats containing the primaries in xyY
          */
         @NonNull
-        @Size(2)
+        @Size(6)
         private static float[] xyPrimaries(@NonNull @Size(min = 6, max = 9) float[] primaries) {
             float[] xyPrimaries = new float[6];
 
@@ -2818,7 +2890,7 @@ public abstract class ColorSpace {
         private Connector(
                 @NonNull ColorSpace source, @NonNull ColorSpace destination,
                 @NonNull ColorSpace transformSource, @NonNull ColorSpace transformDestination,
-                @NonNull RenderIntent intent, @NonNull @Size(3) float[] transform) {
+                @NonNull RenderIntent intent, @Nullable @Size(3) float[] transform) {
             mSource = source;
             mDestination = destination;
             mTransformSource = transformSource;
@@ -2938,13 +3010,12 @@ public abstract class ColorSpace {
         /**
          * Optimized connector for RGB->RGB conversions.
          */
-        private static class RGB extends Connector {
+        private static class Rgb extends Connector {
             @NonNull private final ColorSpace.Rgb mSource;
             @NonNull private final ColorSpace.Rgb mDestination;
             @NonNull private final float[] mTransform;
 
-            RGB(@NonNull ColorSpace.Rgb source,
-                    @NonNull ColorSpace.Rgb destination,
+            Rgb(@NonNull ColorSpace.Rgb source, @NonNull ColorSpace.Rgb destination,
                     @NonNull RenderIntent intent) {
                 super(source, destination, source, destination, intent, null);
                 mSource = source;
