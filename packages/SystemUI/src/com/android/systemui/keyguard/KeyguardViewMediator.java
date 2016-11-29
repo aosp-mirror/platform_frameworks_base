@@ -20,6 +20,7 @@ import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -600,7 +601,7 @@ public class KeyguardViewMediator extends SystemUI {
 
             if (any && !strongAuthTracker.hasUserAuthenticatedSinceBoot()) {
                 return KeyguardSecurityView.PROMPT_REASON_RESTART;
-            } else if (fingerprint && mUpdateMonitor.hasFingerprintUnlockTimedOut(currentUser)) {
+            } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_TIMEOUT) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
             } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;

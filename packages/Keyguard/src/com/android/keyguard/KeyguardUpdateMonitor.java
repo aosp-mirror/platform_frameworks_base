@@ -26,6 +26,7 @@ import static android.os.BatteryManager.EXTRA_MAX_CHARGING_CURRENT;
 import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_STATUS;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
 
 import android.app.ActivityManager;
 import android.app.AlarmManager;
@@ -191,8 +192,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     // Password attempts
     private SparseIntArray mFailedAttempts = new SparseIntArray();
 
-    /** Tracks whether strong authentication hasn't been used since quite some time per user. */
-    private ArraySet<Integer> mStrongAuthNotTimedOut = new ArraySet<>();
     private final StrongAuthTracker mStrongAuthTracker;
 
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
@@ -209,6 +208,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private TrustManager mTrustManager;
     private UserManager mUserManager;
     private int mFingerprintRunningState = FINGERPRINT_STATE_STOPPED;
+    private LockPatternUtils mLockPatternUtils;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -576,8 +576,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public boolean isUnlockingWithFingerprintAllowed() {
-        return mStrongAuthTracker.isUnlockingWithFingerprintAllowed()
-                && !hasFingerprintUnlockTimedOut(sCurrentUser);
+        return mStrongAuthTracker.isUnlockingWithFingerprintAllowed();
     }
 
     public boolean needsSlowUnlockTransition() {
@@ -588,16 +587,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return mStrongAuthTracker;
     }
 
-    /**
-     * @return true if the user hasn't use strong authentication (pattern, PIN, password) since a
-     *         while and thus can't unlock with fingerprint, false otherwise
-     */
-    public boolean hasFingerprintUnlockTimedOut(int userId) {
-        return !mStrongAuthNotTimedOut.contains(userId);
-    }
-
     public void reportSuccessfulStrongAuthUnlockAttempt() {
-        mStrongAuthNotTimedOut.add(sCurrentUser);
         scheduleStrongAuthTimeout();
         if (mFpm != null) {
             byte[] token = null; /* TODO: pass real auth token once fp HAL supports it */
@@ -738,7 +728,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         public void onReceive(Context context, Intent intent) {
             if (ACTION_STRONG_AUTH_TIMEOUT.equals(intent.getAction())) {
                 int userId = intent.getIntExtra(USER_ID, -1);
-                mStrongAuthNotTimedOut.remove(userId);
+                mLockPatternUtils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_TIMEOUT, userId);
                 notifyStrongAuthStateChanged(userId);
             }
         }
@@ -1110,7 +1100,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 PERMISSION_SELF, null /* handler */);
         mTrustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
         mTrustManager.registerTrustListener(this);
-        new LockPatternUtils(context).registerStrongAuthTracker(mStrongAuthTracker);
+        mLockPatternUtils = new LockPatternUtils(context);
+        mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
 
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
             mFpm = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
@@ -1839,7 +1830,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             pw.println("    disabled(DPM)=" + isFingerprintDisabled(userId));
             pw.println("    possible=" + isUnlockWithFingerprintPossible(userId));
             pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
-            pw.println("    timedout=" + hasFingerprintUnlockTimedOut(userId));
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
         }
     }
