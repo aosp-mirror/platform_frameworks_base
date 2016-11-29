@@ -325,12 +325,13 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mLockPatternView.clearPattern();
         mLockPatternView.setEnabled(false);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
-
-        mCountdownTimer = new CountDownTimer(elapsedRealtimeDeadline - elapsedRealtime, 1000) {
+        final long secondsInFuture = (long) Math.ceil(
+                (elapsedRealtimeDeadline - elapsedRealtime) / 1000.0);
+        mCountdownTimer = new CountDownTimer(secondsInFuture * 1000, 1000) {
 
             @Override
             public void onTick(long millisUntilFinished) {
-                final int secondsRemaining = (int) (millisUntilFinished / 1000);
+                final int secondsRemaining = (int) Math.round(millisUntilFinished / 1000.0);
                 mSecurityMessageDisplay.formatMessage(
                         R.string.kg_too_many_failed_attempts_countdown, secondsRemaining);
             }
