@@ -1681,8 +1681,8 @@
     <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Vous perdrez vos modifications, et la démo recommencera dans <xliff:g id="TIMEOUT">%1$s</xliff:g> secondes…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Annuler"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Réinitialiser maintenant"</string>
-    <string name="audit_safemode_notification" msgid="6416076898350685856">"Rétablissez la configuration d\'usine de cet appareil pour l\'utiliser sans restrictions"</string>
-    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Touchez ici pour en savoir plus."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Désactivé : <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Conférence téléphonique"</string>
+    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <skip />
 </resources>

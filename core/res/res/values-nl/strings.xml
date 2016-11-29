@@ -1530,8 +1530,8 @@
     <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
-    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"Onbekend portret"</string>
-    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"Onbekend landschap"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"Onbekend staand"</string>
+    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"Onbekend liggend"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Geannuleerd"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Fout bij schrijven van content"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"onbekend"</string>
@@ -1681,8 +1681,8 @@
     <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Je wijzigingen gaan verloren. De demo wordt opnieuw gestart over <xliff:g id="TIMEOUT">%1$s</xliff:g> seconden…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Annuleren"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Nu resetten"</string>
-    <string name="audit_safemode_notification" msgid="6416076898350685856">"Zet dit apparaat terug op de fabrieksinstellingen om het zonder beperkingen te gebruiken"</string>
-    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Tik voor meer informatie."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> uitgeschakeld"</string>
     <string name="conference_call" msgid="3751093130790472426">"Telefonische vergadering"</string>
+    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <skip />
 </resources>
