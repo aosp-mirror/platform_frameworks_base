@@ -3779,6 +3779,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             findTaskToMoveToFrontLocked(task, 0, null, reason,
                     lockTaskModeState != LOCK_TASK_MODE_NONE);
             resumeFocusedStackTopActivityLocked();
+            mWindowManager.executeAppTransition();
         } else if (lockTaskModeState != LOCK_TASK_MODE_NONE) {
             handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, task.getStackId(),
                     true /* forceNonResizable */);
