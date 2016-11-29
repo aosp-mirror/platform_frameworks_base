@@ -150,6 +150,7 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_SKIP_USER_CONSENT}, optional</li>
      * </ul>
      *
      * <p>When managed provisioning has completed, broadcasts are sent to the application specified
@@ -810,6 +811,16 @@ public class DevicePolicyManager {
      */
     public static final String EXTRA_PROVISIONING_SKIP_USER_SETUP =
             "android.app.extra.PROVISIONING_SKIP_USER_SETUP";
+
+    /**
+     * A boolean extra indicating if the user consent steps from the provisioning flow should be
+     * skipped. If unspecified, defaults to {@code false}.
+     *
+     * It can only be used by an existing device owner trying to create a managed profile via
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE}. Otherwise it is ignored.
+     */
+    public static final String EXTRA_PROVISIONING_SKIP_USER_CONSENT =
+            "android.app.extra.PROVISIONING_SKIP_USER_CONSENT";
 
     /**
      * This MIME type is used for starting the device owner provisioning.
