@@ -84,6 +84,9 @@
     <!-- Height of a the shelf with the notification icons -->
     <dimen name="notification_shelf_height">32dp</dimen>
 
+    <!-- the padding of the shelf icon container -->
+    <dimen name="shelf_icon_container_padding">13dp</dimen>
+
     <!-- The padding of a notification icon on top to the start of the notification. Used for custom
          views where the distance can't be measured -->
     <dimen name="notification_icon_appear_padding">15dp</dimen>
