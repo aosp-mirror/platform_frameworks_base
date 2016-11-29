@@ -78,7 +78,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private boolean mWakeAndUnlocking;
     protected boolean mAnimateChange;
     private boolean mUpdatePending;
-    private boolean mExpanding;
+    private boolean mTracking;
     private boolean mAnimateKeyguardFadingOut;
     protected long mDurationOverride = -1;
     private long mAnimationDelay;
@@ -122,12 +122,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     public void onTrackingStarted() {
-        mExpanding = true;
+        mTracking = true;
         mDarkenWhileDragging = !mUnlockMethodCache.canSkipBouncer();
     }
 
     public void onExpandingFinished() {
-        mExpanding = false;
+        mTracking = false;
     }
 
     public void setPanelExpansion(float fraction) {
@@ -137,7 +137,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             if (mPinnedHeadsUpCount != 0) {
                 updateHeadsUpScrim(false);
             }
-            if (mKeyguardFadeoutAnimation != null) {
+            if (mKeyguardFadeoutAnimation != null && mTracking) {
                 mKeyguardFadeoutAnimation.cancel();
             }
         }
@@ -145,7 +145,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     public void setBouncerShowing(boolean showing) {
         mBouncerShowing = showing;
-        mAnimateChange = !mExpanding && !mDontAnimateBouncerChanges;
+        mAnimateChange = !mTracking && !mDontAnimateBouncerChanges;
         scheduleUpdate();
     }
 
@@ -268,7 +268,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private void updateScrimKeyguard() {
-        if (mExpanding && mDarkenWhileDragging) {
+        if (mTracking && mDarkenWhileDragging) {
             float behindFraction = Math.max(0, Math.min(mFraction, 1));
             float fraction = 1 - behindFraction;
             fraction = (float) Math.pow(fraction, 0.8f);
@@ -277,7 +277,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             setScrimBehindColor(behindFraction * mScrimBehindAlphaKeyguard);
         } else if (mBouncerShowing && !mBouncerIsKeyguard) {
             setScrimInFrontColor(getScrimInFrontAlpha());
-            setScrimBehindColor(0f);
+            updateScrimNormal();
         } else if (mBouncerShowing) {
             setScrimInFrontColor(0f);
             setScrimBehindColor(mScrimBehindAlpha);
@@ -473,7 +473,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private void updateScrim(boolean animate, View scrim, float alpha, float currentAlpha) {
-        if (mKeyguardFadingOutInProgress) {
+        if (mKeyguardFadingOutInProgress && mKeyguardFadeoutAnimation.getCurrentPlayTime() != 0) {
             return;
         }
 
