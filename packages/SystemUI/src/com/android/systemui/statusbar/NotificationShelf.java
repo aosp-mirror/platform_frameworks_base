@@ -37,8 +37,6 @@ import com.android.systemui.statusbar.stack.ExpandableViewState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackScrollState;
 
-import java.util.WeakHashMap;
-
 /**
  * A notification shelf view that is placed inside the notification scroller. It manages the
  * overflow icons that don't fit into the regular list anymore.
@@ -165,6 +163,7 @@ public class NotificationShelf extends ActivatableNotificationView {
                 mShelfState.notGoneIndex = Math.min(mShelfState.notGoneIndex, mNotGoneIndex);
             }
             mShelfState.hasItemsInStableShelf = lastViewState.inShelf;
+            mShelfState.hidden = !mAmbientState.isShadeExpanded();
         } else {
             mShelfState.hidden = true;
             mShelfState.location = ExpandableViewState.LOCATION_GONE;
@@ -177,15 +176,15 @@ public class NotificationShelf extends ActivatableNotificationView {
      * the icons from the notification area into the shelf.
      */
     public void updateAppearance() {
-        WeakHashMap<View, NotificationIconContainer.IconState> iconStates =
-                mShelfIcons.resetViewStates();
+        mShelfIcons.resetViewStates();
+        float shelfStart = getTranslationY();
         float numViewsInShelf = 0.0f;
         View lastChild = mAmbientState.getLastVisibleBackgroundChild();
         mNotGoneIndex = -1;
         float interpolationStart = mMaxLayoutHeight - getIntrinsicHeight() * 2;
         float expandAmount = 0.0f;
-        if (getTranslationY() >= interpolationStart) {
-            expandAmount = (getTranslationY() - interpolationStart) / getIntrinsicHeight();
+        if (shelfStart >= interpolationStart) {
+            expandAmount = (shelfStart - interpolationStart) / getIntrinsicHeight();
             expandAmount = Math.min(1.0f, expandAmount);
         }
         //  find the first view that doesn't overlap with the shelf
@@ -199,6 +198,7 @@ public class NotificationShelf extends ActivatableNotificationView {
         int colorTwoBefore = NO_COLOR;
         int previousColor = NO_COLOR;
         float transitionAmount = 0.0f;
+        int baseZHeight = mAmbientState.getBaseZHeight();
         while (notificationIndex < mHostLayout.getChildCount()) {
             ExpandableView child = (ExpandableView) mHostLayout.getChildAt(notificationIndex);
             notificationIndex++;
@@ -208,26 +208,26 @@ public class NotificationShelf extends ActivatableNotificationView {
             }
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             float notificationClipEnd;
-            float shelfStart = getTranslationY();
-            boolean aboveShelf = row.getTranslationZ() > mAmbientState.getBaseZHeight();
+            boolean aboveShelf = row.getTranslationZ() > baseZHeight;
             boolean isLastChild = child == lastChild;
+            float rowTranslationY = row.getTranslationY();
             if (isLastChild || aboveShelf || backgroundForceHidden) {
                 notificationClipEnd = shelfStart + getIntrinsicHeight();
             } else {
                 notificationClipEnd = shelfStart - mPaddingBetweenElements;
-                float height = notificationClipEnd - row.getTranslationY();
+                float height = notificationClipEnd - rowTranslationY;
                 if (!row.isBelowSpeedBump() && height <= getNotificationMergeSize()) {
                     // We want the gap to close when we reached the minimum size and only shrink
                     // before
                     notificationClipEnd = Math.min(shelfStart,
-                            row.getTranslationY() + getNotificationMergeSize());
+                            rowTranslationY + getNotificationMergeSize());
                 }
             }
             updateNotificationClipHeight(row, notificationClipEnd);
             float inShelfAmount = updateIconAppearance(row, expandAmount, isLastChild);
             numViewsInShelf += inShelfAmount;
             int ownColorUntinted = row.getBackgroundColorWithoutTint();
-            if (row.getTranslationY() >= getTranslationY() && mNotGoneIndex == -1) {
+            if (rowTranslationY >= shelfStart && mNotGoneIndex == -1) {
                 mNotGoneIndex = notGoneIndex;
                 setTintColor(previousColor);
                 setOverrideTintColor(colorTwoBefore, transitionAmount);
@@ -250,9 +250,6 @@ public class NotificationShelf extends ActivatableNotificationView {
         }
         mShelfIcons.calculateIconTranslations();
         mShelfIcons.applyIconStates();
-        setVisibility(mAmbientState.isShadeExpanded()
-                ? VISIBLE
-                : INVISIBLE);
         boolean hideBackground = numViewsInShelf < 1.0f;
         setHideBackground(hideBackground || backgroundForceHidden);
         if (mNotGoneIndex == -1) {
@@ -441,9 +438,11 @@ public class NotificationShelf extends ActivatableNotificationView {
     }
 
     private void setHideBackground(boolean hideBackground) {
-        mHideBackground = hideBackground;
-        updateBackground();
-        updateOutline();
+        if (mHideBackground != hideBackground) {
+            mHideBackground = hideBackground;
+            updateBackground();
+            updateOutline();
+        }
     }
 
     public boolean hidesBackground() {

@@ -31,7 +31,7 @@ import com.android.systemui.statusbar.stack.AnimationFilter;
 import com.android.systemui.statusbar.stack.AnimationProperties;
 import com.android.systemui.statusbar.stack.ViewState;
 
-import java.util.WeakHashMap;
+import java.util.HashMap;
 
 /**
  * A container for notification icons. It handles overflowing icons properly and positions them
@@ -80,7 +80,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     }.setDuration(200).setDelay(50);
 
     private boolean mShowAllIcons = true;
-    private WeakHashMap<View, IconState> mIconStates = new WeakHashMap<>();
+    private final HashMap<View, IconState> mIconStates = new HashMap<>();
     private int mDotPadding;
     private int mStaticDotRadius;
     private int mActualLayoutWidth = -1;
@@ -200,14 +200,13 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         return getChildCount();
     }
 
-    public WeakHashMap<View, IconState> resetViewStates() {
+    public void resetViewStates() {
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
             ViewState iconState = mIconStates.get(view);
             iconState.initFrom(view);
             iconState.alpha = 1.0f;
         }
-        return mIconStates;
     }
 
     /**

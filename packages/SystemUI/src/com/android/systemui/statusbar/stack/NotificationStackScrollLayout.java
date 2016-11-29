@@ -715,7 +715,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             requestChildrenUpdate();
         }
         setStackTranslation(translationY);
-        requestChildrenUpdate();
     }
 
     private void setRequestedClipBounds(Rect clipRect) {

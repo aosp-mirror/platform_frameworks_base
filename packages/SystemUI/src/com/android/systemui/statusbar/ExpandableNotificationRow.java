@@ -1685,13 +1685,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public void setClipBottomAmount(int clipBottomAmount) {
-        super.setClipBottomAmount(clipBottomAmount);
-        mPrivateLayout.setClipBottomAmount(clipBottomAmount);
-        mPublicLayout.setClipBottomAmount(clipBottomAmount);
-        if (mGuts != null) {
-            mGuts.setClipBottomAmount(clipBottomAmount);
+        if (clipBottomAmount != mClipBottomAmount) {
+            super.setClipBottomAmount(clipBottomAmount);
+            mPrivateLayout.setClipBottomAmount(clipBottomAmount);
+            mPublicLayout.setClipBottomAmount(clipBottomAmount);
+            if (mGuts != null) {
+                mGuts.setClipBottomAmount(clipBottomAmount);
+            }
         }
         if (mChildrenContainer != null) {
+            // We have to update this even if it hasn't changed, since the children locations can
+            // have changed
             mChildrenContainer.setClipBottomAmount(clipBottomAmount);
         }
     }

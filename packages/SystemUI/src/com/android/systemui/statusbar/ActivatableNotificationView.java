@@ -103,7 +103,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private boolean mDimmed;
     private boolean mDark;
 
-    private int mBgTint = 0;
+    private int mBgTint = NO_COLOR;
     private float mBgAlpha = 1f;
 
     /**
@@ -481,8 +481,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      * Sets the tint color of the background
      */
     public void setTintColor(int color, boolean animated) {
-        mBgTint = color;
-        updateBackgroundTint(animated);
+        if (color != mBgTint) {
+            mBgTint = color;
+            updateBackgroundTint(animated);
+        }
     }
 
     /**
@@ -541,13 +543,15 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private void setBackgroundTintColor(int color) {
-        mCurrentBackgroundTint = color;
-        if (color == mNormalColor) {
-            // We don't need to tint a normal notification
-            color = 0;
+        if (color != mCurrentBackgroundTint) {
+            mCurrentBackgroundTint = color;
+            if (color == mNormalColor) {
+                // We don't need to tint a normal notification
+                color = 0;
+            }
+            mBackgroundDimmed.setTint(color);
+            mBackgroundNormal.setTint(color);
         }
-        mBackgroundDimmed.setTint(color);
-        mBackgroundNormal.setTint(color);
     }
 
     /**
