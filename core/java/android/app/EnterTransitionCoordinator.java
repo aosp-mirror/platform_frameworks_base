@@ -19,6 +19,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.app.SharedElementCallback.OnSharedElementsReadyListener;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -61,6 +63,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private Transition mEnterViewsTransition;
     private OneShotPreDrawListener mViewsReadyListener;
     private final boolean mIsCrossTask;
+    private Drawable mReplacedBackground;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
             ArrayList<String> sharedElementNames, boolean isReturning, boolean isCrossTask) {
@@ -332,12 +335,15 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         if (!mIsReturning) {
             mWasOpaque = mActivity.convertToTranslucent(null, null);
             Drawable background = decorView.getBackground();
-            if (background != null) {
+            if (background == null) {
+                background = new ColorDrawable(Color.TRANSPARENT);
+                mReplacedBackground = background;
+            } else {
                 getWindow().setBackgroundDrawable(null);
                 background = background.mutate();
                 background.setAlpha(0);
-                getWindow().setBackgroundDrawable(background);
             }
+            getWindow().setBackgroundDrawable(background);
         } else {
             mActivity = null; // all done with it now.
         }
@@ -553,6 +559,11 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         final ViewGroup decorView = getDecor();
         if (decorView != null) {
             decorView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+
+            Window window = getWindow();
+            if (window != null && mReplacedBackground == decorView.getBackground()) {
+                window.setBackgroundDrawable(null);
+            }
         }
     }
 
