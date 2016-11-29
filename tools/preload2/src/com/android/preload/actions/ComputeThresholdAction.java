@@ -38,7 +38,7 @@ import javax.swing.AbstractAction;
  * appears in at least the number of threshold given packages. An optional blacklist can be
  * used to filter classes from the intersection.
  */
-public class ComputeThresholdAction extends AbstractAction implements Runnable {
+public class ComputeThresholdAction extends AbstractThreadedAction {
     protected int threshold;
     private Pattern blacklist;
     private DumpTableModel dataTableModel;
@@ -71,7 +71,7 @@ public class ComputeThresholdAction extends AbstractAction implements Runnable {
             return;
         }
 
-        new Thread(this).start();
+        super.actionPerformed(e);
     }
 
     @Override
