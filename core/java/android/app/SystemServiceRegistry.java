@@ -514,7 +514,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<WifiAwareManager>() {
             @Override
             public WifiAwareManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getService(Context.WIFI_AWARE_SERVICE);
+                IBinder b = ServiceManager.getServiceOrThrow(Context.WIFI_AWARE_SERVICE);
                 IWifiAwareManager service = IWifiAwareManager.Stub.asInterface(b);
                 if (service == null) {
                     return null;
@@ -831,7 +831,7 @@ final class SystemServiceRegistry {
                         service = createService(ctx);
                         cache[mCacheIndex] = service;
                     } catch (ServiceNotFoundException e) {
-                        Log.wtf(TAG, e.getMessage(), e);
+                        onServiceNotFound(e);
                     }
                 }
                 return (T)service;
@@ -849,13 +849,13 @@ final class SystemServiceRegistry {
         private T mCachedInstance;
 
         @Override
-        public final T getService(ContextImpl unused) {
+        public final T getService(ContextImpl ctx) {
             synchronized (StaticServiceFetcher.this) {
                 if (mCachedInstance == null) {
                     try {
                         mCachedInstance = createService();
                     } catch (ServiceNotFoundException e) {
-                        Log.wtf(TAG, e.getMessage(), e);
+                        onServiceNotFound(e);
                     }
                 }
                 return mCachedInstance;
@@ -888,7 +888,7 @@ final class SystemServiceRegistry {
                     try {
                         mCachedInstance = createService(appContext != null ? appContext : ctx);
                     } catch (ServiceNotFoundException e) {
-                        Log.wtf(TAG, e.getMessage(), e);
+                        onServiceNotFound(e);
                     }
                 }
                 return mCachedInstance;
@@ -896,5 +896,16 @@ final class SystemServiceRegistry {
         }
 
         public abstract T createService(Context applicationContext) throws ServiceNotFoundException;
+    }
+
+    public static void onServiceNotFound(ServiceNotFoundException e) {
+        // We're mostly interested in tracking down long-lived core system
+        // components that might stumble if they obtain bad references; just
+        // emit a tidy log message for normal apps
+        if (android.os.Process.myUid() < android.os.Process.FIRST_APPLICATION_UID) {
+            Log.wtf(TAG, e.getMessage(), e);
+        } else {
+            Log.w(TAG, e.getMessage());
+        }
     }
 }
