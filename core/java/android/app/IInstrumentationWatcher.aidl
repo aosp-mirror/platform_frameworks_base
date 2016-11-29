@@ -21,7 +21,7 @@ import android.content.ComponentName;
 import android.os.Bundle;
 
 /** @hide */
-oneway interface IInstrumentationWatcher
+interface IInstrumentationWatcher
 {
     void instrumentationStatus(in ComponentName name, int resultCode,
             in Bundle results);
