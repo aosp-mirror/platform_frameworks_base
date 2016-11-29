@@ -591,7 +591,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         updateTaskSwitchHelper();
         setNavigationIconHints(mNavigationIconHints, true);
 
-        getHomeButton().setLandscape(mVertical);
+        getHomeButton().setVertical(mVertical);
     }
 
     public void onKeyguardOccludedChanged(boolean keyguardOccluded) {
