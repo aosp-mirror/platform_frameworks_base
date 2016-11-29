@@ -8,7 +8,7 @@ import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
@@ -73,16 +73,18 @@ public class NotificationIconAreaController {
 
     public void onDensityOrFontScaleChanged(Context context) {
         reloadDimens(context);
-        final LinearLayout.LayoutParams params = generateIconLayoutParams();
+        final FrameLayout.LayoutParams params = generateIconLayoutParams();
         for (int i = 0; i < mNotificationIcons.getChildCount(); i++) {
             View child = mNotificationIcons.getChildAt(i);
+            child.setLayoutParams(params);
+            child = mShelfIcons.getChildAt(i);
             child.setLayoutParams(params);
         }
     }
 
     @NonNull
-    private LinearLayout.LayoutParams generateIconLayoutParams() {
-        return new LinearLayout.LayoutParams(
+    private FrameLayout.LayoutParams generateIconLayoutParams() {
+        return new FrameLayout.LayoutParams(
                 mIconSize + 2 * mIconHPadding, getHeight());
     }
 
@@ -203,7 +205,7 @@ public class NotificationIconAreaController {
             hostLayout.removeView(toRemove.get(i));
         }
 
-        final LinearLayout.LayoutParams params = generateIconLayoutParams();
+        final FrameLayout.LayoutParams params = generateIconLayoutParams();
         for (int i = 0; i < toShow.size(); i++) {
             View v = toShow.get(i);
             // The view might still be transiently added if it was just removed and added again

@@ -3961,12 +3961,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void setShelf(NotificationShelf shelf) {
-        mShelf = shelf;
         int index = -1;
         if (mShelf != null) {
             index = indexOfChild(mShelf);
             removeView(mShelf);
         }
+        mShelf = shelf;
         addView(mShelf, index);
         mAmbientState.setShelf(shelf);
         mStateAnimator.setShelf(shelf);

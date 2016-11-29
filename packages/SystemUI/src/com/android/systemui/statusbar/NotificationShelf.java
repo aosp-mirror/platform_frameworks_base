@@ -95,6 +95,12 @@ public class NotificationShelf extends ActivatableNotificationView {
                 R.dimen.status_bar_padding_start);
         mPaddingBetweenElements = getResources().getDimensionPixelSize(
                 R.dimen.notification_divider_height);
+        ViewGroup.LayoutParams layoutParams = getLayoutParams();
+        layoutParams.height = getResources().getDimensionPixelOffset(
+                R.dimen.notification_shelf_height);
+        setLayoutParams(layoutParams);
+        int padding = getResources().getDimensionPixelOffset(R.dimen.shelf_icon_container_padding);
+        mShelfIcons.setPadding(padding, 0, padding, 0);
     }
 
     @Override
