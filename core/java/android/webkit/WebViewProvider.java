@@ -311,6 +311,11 @@ public interface WebViewProvider {
 
         public void onProvideVirtualStructure(android.view.ViewStructure structure);
 
+        @SuppressWarnings("unused")
+        public default void onProvideVirtualStructure(android.view.ViewStructure structure,
+                int flags) {
+        }
+
         public AccessibilityNodeProvider getAccessibilityNodeProvider();
 
         public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info);

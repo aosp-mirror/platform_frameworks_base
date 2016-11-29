@@ -3083,14 +3083,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Dispatch creation of {@link ViewStructure} down the hierarchy.  This implementation
-     * adds in all child views of the view group, in addition to calling the default View
-     * implementation.
+     * {@inheritDoc}
+     *
+     * <p>This implementation adds in all child views of the view group, in addition to calling the
+     * default {@link View} implementation.
      */
     @Override
-    public void dispatchProvideStructure(ViewStructure structure) {
-        super.dispatchProvideStructure(structure);
-        if (!isAssistBlocked()) {
+    public void dispatchProvideStructure(ViewStructure structure, int flags) {
+        super.dispatchProvideStructure(structure, flags);
+
+        boolean forAutoFill = (flags
+                & (View.ASSIST_FLAG_SANITIZED_TEXT
+                        | View.ASSIST_FLAG_NON_SANITIZED_TEXT)) != 0;
+
+        boolean blocked = forAutoFill ? isAutoFillBlocked() : isAssistBlocked();
+
+        if (!blocked) {
             if (structure.getChildCount() == 0) {
                 final int childrenCount = getChildCount();
                 if (childrenCount > 0) {
@@ -3151,7 +3159,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         final View child = getAndVerifyPreorderedView(
                                 preorderedList, children, childIndex);
                         final ViewStructure cstructure = structure.newChild(i);
-                        child.dispatchProvideStructure(cstructure);
+
+                        // Must explicitly check which recursive method to call because child might
+                        // not be overriding the new, flags-based version
+                        if (flags == 0) {
+                            child.dispatchProvideStructure(cstructure);
+                        } else {
+                            child.dispatchProvideStructure(cstructure, flags);
+                        }
                     }
                     if (preorderedList != null) preorderedList.clear();
                 }

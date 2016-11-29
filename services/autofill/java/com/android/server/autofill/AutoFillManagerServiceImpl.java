@@ -47,7 +47,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,13 +69,13 @@ final class AutoFillManagerServiceImpl {
     private final AutoFillServiceInfo mInfo;
     private final AutoFillManagerService mManagerService;
 
-    // TODO: improve its usage
+    // TODO(b/33197203): improve its usage
     // - set maximum number of entries
     // - disable on low-memory devices.
     private final List<String> mRequestHistory = new LinkedList<>();
 
     @GuardedBy("mLock")
-    private final List<IBinder> mQueuedRequests = new LinkedList<>();
+    private final List<QueuedRequest> mQueuedRequests = new LinkedList<>();
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -84,7 +83,8 @@ final class AutoFillManagerServiceImpl {
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 final String reason = intent.getStringExtra("reason");
                 if (DEBUG) Slog.d(TAG, "close system dialogs: " + reason);
-                // TODO: close any pending UI like account selection (or remove this receiver)
+                // TODO(b/33197203): close any pending UI like account selection (or remove this
+                // receiver)
             }
         }
     };
@@ -104,8 +104,8 @@ final class AutoFillManagerServiceImpl {
                 if (!mQueuedRequests.isEmpty()) {
                     if (DEBUG) Log.d(TAG, "queued requests:" + mQueuedRequests.size());
                 }
-                for (IBinder activityToken : mQueuedRequests) {
-                    requestAutoFillLocked(activityToken, false);
+                for (final QueuedRequest request: mQueuedRequests) {
+                    requestAutoFillLocked(request.activityToken, request.flags, false);
                 }
             }
         }
@@ -180,7 +180,7 @@ final class AutoFillManagerServiceImpl {
         if (DEBUG) Slog.d(TAG, "Bound to " + mComponent);
     }
 
-    void requestAutoFill(IBinder activityToken) {
+    void requestAutoFill(IBinder activityToken, int flags) {
         synchronized (mLock) {
             if (!mBound) {
                 Slog.w(TAG, "requestAutoFill() failed because it's not bound to service");
@@ -188,14 +188,14 @@ final class AutoFillManagerServiceImpl {
             }
         }
 
-        // TODO: activityToken should probably not be null, but we need to wait until the UI is
-        // triggering the call (for now it's trough 'adb shell cmd autofill request'
+        // TODO(b/33197203): activityToken should probably not be null, but we need to wait until
+        // the UI is triggering the call (for now it's trough 'adb shell cmd autofill request'
         if (activityToken == null) {
             // Let's get top activities from all visible stacks.
 
-            // TODO: overload getTopVisibleActivities() to take userId, otherwise it could return
-            // activities for different users when a work profile app is displayed in another
-            // window (in a multi-window environment).
+            // TODO(b/33197203): overload getTopVisibleActivities() to take userId, otherwise it
+            // could return activities for different users when a work profile app is displayed in
+            // another window (in a multi-window environment).
             final List<IBinder> topActivities = LocalServices
                     .getService(ActivityManagerInternal.class).getTopVisibleActivities();
             if (DEBUG)
@@ -211,32 +211,34 @@ final class AutoFillManagerServiceImpl {
                 DateFormat.getDateTimeInstance().format(new Date()) + " - " + activityToken;
         synchronized (mLock) {
             mRequestHistory.add(historyItem);
-            requestAutoFillLocked(activityToken, true);
+            requestAutoFillLocked(activityToken, flags, true);
         }
     }
 
-    private void requestAutoFillLocked(IBinder activityToken, boolean queueIfNecessary) {
+    private void requestAutoFillLocked(IBinder activityToken, int flags, boolean queueIfNecessary) {
         if (mService == null) {
             if (!queueIfNecessary) {
                 Slog.w(TAG, "requestAutoFillLocked(): service is null");
                 return;
             }
             if (DEBUG) Slog.d(TAG, "requestAutoFill(): service not set yet, queuing it");
-            mQueuedRequests.add(activityToken);
+            mQueuedRequests.add(new QueuedRequest(activityToken, flags));
             return;
         }
 
         /*
-         * TODO: apply security checks below:
+         * TODO(b/33197203): apply security checks below:
          * - checks if disabled by secure settings / device policy
          * - log operation using noteOp()
          * - check flags
          * - display disclosure if needed
          */
         try {
-            // TODO: add MetricsLogger call
-            if (!mAm.requestAutoFillData(mService.getAssistReceiver(), null, activityToken)) {
-                // TODO: might need a way to warn user (perhaps a new method on AutoFillService).
+            // TODO(b/33197203): add MetricsLogger call
+            if (!mAm.requestAutoFillData(mService.getAssistReceiver(), null, activityToken,
+                    flags)) {
+                // TODO(b/33197203): might need a way to warn user (perhaps a new method on
+                // AutoFillService).
                 Slog.w(TAG, "failed to request auto-fill data for " + activityToken);
             }
         } catch (RemoteException e) {
@@ -321,5 +323,20 @@ final class AutoFillManagerServiceImpl {
     public String toString() {
         return "[AutoFillManagerServiceImpl: userId=" + mUserId + ", uid=" + mUid
                 + ", component=" + mComponent.flattenToShortString() + "]";
+    }
+
+    private static final class QueuedRequest {
+        final IBinder activityToken;
+        final int flags;
+
+        QueuedRequest(IBinder activityToken, int flags) {
+            this.activityToken = activityToken;
+            this.flags = flags;
+        }
+
+        @Override
+        public String toString() {
+            return "flags: " + flags + " token: " + activityToken;
+        }
     }
 }

@@ -18,10 +18,13 @@ package com.android.server.autofill;
 
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTO_FILL_MANAGER_SERVICE;
+import static android.view.View.ASSIST_FLAG_SANITIZED_TEXT;
+import static android.view.View.ASSIST_FLAG_NON_SANITIZED_TEXT;
 
 import android.Manifest;
 import android.app.AppGlobals;
 import android.app.Notification;
+import android.app.Notification.Action;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -248,13 +251,14 @@ public final class AutoFillManagerService extends SystemService {
     final class AutoFillManagerServiceStub extends IAutoFillManagerService.Stub {
 
         @Override
-        public void requestAutoFill(int userId, IBinder activityToken) {
+        public void requestAutoFill(IBinder activityToken, int userId, int flags) {
+            if (DEBUG) Slog.d(TAG, "requestAutoFill: flags=" + flags + ", userId=" + userId);
             mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
             synchronized (mLock) {
                 final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
                 if (service != null) {
-                    service.requestAutoFill(activityToken);
+                    service.requestAutoFill(activityToken, flags);
                 }
             }
         }
@@ -307,7 +311,7 @@ public final class AutoFillManagerService extends SystemService {
             synchronized (mLock) {
                 removeCachedServiceForUserLocked(userId);
                 final ComponentName serviceComponent = getProviderForUser(userId);
-                if (serviceComponent== null) {
+                if (serviceComponent == null) {
                     cancelNotificationLocked(userId);
                 } else {
                     showNotification(serviceComponent, userId);
@@ -322,9 +326,10 @@ public final class AutoFillManagerService extends SystemService {
     ////////////////////////////////////////////////////////////////////////////
 
     // TODO: remove from frameworks/base/core/res/AndroidManifest.xml once it's not used anymore
-    private static final String NOTIFICATION_INTENT =
+    private static final String NOTIFICATION_AUTO_FILL_INTENT =
             "com.android.internal.autofill.action.REQUEST_AUTOFILL";
     private static final String EXTRA_USER_ID = "user_id";
+    private static final String EXTRA_FLAGS = "flags";
 
     private static final int MSG_SHOW_ALL_NOTIFICATIONS = 42;
     private static final int SHOW_ALL_NOTIFICATIONS_DELAY_MS = 5000;
@@ -335,13 +340,14 @@ public final class AutoFillManagerService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             final int userId = intent.getIntExtra(EXTRA_USER_ID, -1);
+            final int flags = intent.getIntExtra(EXTRA_FLAGS, 0);
             if (DEBUG) Slog.d(TAG, "Requesting autofill by notification for user " + userId);
             synchronized (mLock) {
                 final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
                 if (service == null) {
                     Slog.w(TAG, "no auto-fill service for user " + userId);
                 } else {
-                    service.requestAutoFill(null);
+                    service.requestAutoFill(null, flags);
                 }
             }
         }
@@ -393,14 +399,23 @@ public final class AutoFillManagerService extends SystemService {
             if (mNotificationReceiver == null) {
                 mNotificationReceiver = new NotificationReceiver();
                 mContext.registerReceiver(mNotificationReceiver,
-                        new IntentFilter(NOTIFICATION_INTENT));
+                        new IntentFilter(NOTIFICATION_AUTO_FILL_INTENT));
             }
         }
 
-        final Intent intent = new Intent(NOTIFICATION_INTENT);
-        intent.putExtra(EXTRA_USER_ID, userId);
-        final PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        final Intent fillIntent = new Intent(NOTIFICATION_AUTO_FILL_INTENT);
+        fillIntent.putExtra(EXTRA_USER_ID, userId);
+        fillIntent.putExtra(EXTRA_FLAGS, ASSIST_FLAG_SANITIZED_TEXT);
+        final PendingIntent fillPendingIntent = PendingIntent.getBroadcast(mContext,
+                ASSIST_FLAG_SANITIZED_TEXT, fillIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        final Action fillAction = new Action.Builder(null, "FILL", fillPendingIntent).build();
+
+        final Intent saveIntent = new Intent(NOTIFICATION_AUTO_FILL_INTENT);
+        saveIntent.putExtra(EXTRA_USER_ID, userId);
+        saveIntent.putExtra(EXTRA_FLAGS, ASSIST_FLAG_NON_SANITIZED_TEXT);
+        final PendingIntent savePendingIntent = PendingIntent.getBroadcast(mContext,
+                ASSIST_FLAG_NON_SANITIZED_TEXT, saveIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        final Action saveAction = new Action.Builder(null, "SAVE", savePendingIntent).build();
 
         final String packageName = serviceComponent.getPackageName();
         String providerName = null;
@@ -413,8 +428,8 @@ public final class AutoFillManagerService extends SystemService {
         } catch (Exception e) {
             providerName = packageName;
         }
-        final String title = "AutoFill by '" + providerName + "'";
-        final String subTitle = "Tap notification to auto-fill top activity for user " + userId;
+        final String title = "AutoFill actions";
+        final String subTitle = "Provider: " + providerName + "\n" + "User: " + userId;
 
         final Notification notification = new Notification.Builder(mContext)
                 .setCategory(Notification.CATEGORY_SYSTEM)
@@ -425,7 +440,7 @@ public final class AutoFillManagerService extends SystemService {
                         com.android.internal.R.color.system_notification_accent_color))
                 .setContentTitle(title)
                 .setStyle(new Notification.BigTextStyle().bigText(subTitle))
-                .setContentIntent(pi)
+                .setActions(fillAction, saveAction)
                 .build();
         NotificationManager.from(mContext).notify(userId, notification);
     }

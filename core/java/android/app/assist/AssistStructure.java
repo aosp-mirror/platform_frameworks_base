@@ -400,7 +400,7 @@ public class AssistStructure implements Parcelable {
         final int mDisplayId;
         final ViewNode mRoot;
 
-        WindowNode(AssistStructure assist, ViewRootImpl root) {
+        WindowNode(AssistStructure assist, ViewRootImpl root, int flags) {
             View view = root.getView();
             Rect rect = new Rect();
             view.getBoundsOnScreen(rect);
@@ -415,11 +415,22 @@ public class AssistStructure implements Parcelable {
             if ((root.getWindowFlags()& WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                 // This is a secure window, so it doesn't want a screenshot, and that
                 // means we should also not copy out its view hierarchy.
-                view.onProvideStructure(builder);
+
+                // Must explicitly set which method to calls since View subclasses might
+                // have implemented the deprecated method.
+                if (flags == 0) {
+                    view.onProvideStructure(builder);
+                } else {
+                    view.onProvideStructure(builder, flags);
+                }
                 builder.setAssistBlocked(true);
                 return;
             }
-            view.dispatchProvideStructure(builder);
+            if (flags == 0) {
+                view.dispatchProvideStructure(builder);
+            } else {
+                view.dispatchProvideStructure(builder, flags);
+            }
         }
 
         WindowNode(ParcelTransferReader reader) {
@@ -1351,14 +1362,14 @@ public class AssistStructure implements Parcelable {
     }
 
     /** @hide */
-    public AssistStructure(Activity activity) {
+    public AssistStructure(Activity activity, int flags) {
         mHaveData = true;
         mActivityComponent = activity.getComponentName();
         ArrayList<ViewRootImpl> views = WindowManagerGlobal.getInstance().getRootViews(
                 activity.getActivityToken());
         for (int i=0; i<views.size(); i++) {
             ViewRootImpl root = views.get(i);
-            mWindowNodes.add(new WindowNode(this, root));
+            mWindowNodes.add(new WindowNode(this, root, flags));
         }
     }
 
