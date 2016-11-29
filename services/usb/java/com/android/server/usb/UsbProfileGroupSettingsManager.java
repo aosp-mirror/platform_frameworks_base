@@ -16,6 +16,8 @@
 
 package com.android.server.usb;
 
+import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ActivityNotFoundException;
@@ -41,6 +43,8 @@ import android.os.UserManager;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -49,6 +53,8 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
+
+import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -65,10 +71,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import libcore.io.IoUtils;
-
-import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 
 class UsbProfileGroupSettingsManager {
     private static final String TAG = UsbProfileGroupSettingsManager.class.getSimpleName();
@@ -873,6 +875,56 @@ class UsbProfileGroupSettingsManager {
         return resolveInfos;
     }
 
+    /**
+     * Only return those matches with the highest priority.
+     *
+     * @param matches All matches, some might have lower priority
+     *
+     * @return The matches with the highest priority
+     */
+    @NonNull
+    private ArrayList<ResolveInfo> preferHighPriority(
+            @NonNull ArrayList<ResolveInfo> matches) {
+        SparseArray<ArrayList<ResolveInfo>> highestPriorityMatchesByUserId = new SparseArray<>();
+        SparseIntArray highestPriorityByUserId = new SparseIntArray();
+
+        // Create list of highest priority matches per user in highestPriorityMatchesByUserId
+        int numMatches = matches.size();
+        for (int matchNum = 0; matchNum < numMatches; matchNum++) {
+            ResolveInfo match = matches.get(matchNum);
+
+            // If this a previously unknown user?
+            if (highestPriorityByUserId.indexOfKey(match.targetUserId) < 0) {
+                highestPriorityByUserId.put(match.targetUserId, Integer.MIN_VALUE);
+                highestPriorityMatchesByUserId.put(match.targetUserId, new ArrayList<>());
+            }
+
+            // Find current highest priority matches for the current user
+            int highestPriority = highestPriorityByUserId.get(match.targetUserId);
+            ArrayList<ResolveInfo> highestPriorityMatches = highestPriorityMatchesByUserId.get(
+                    match.targetUserId);
+
+            if (match.priority == highestPriority) {
+                highestPriorityMatches.add(match);
+            } else if (match.priority > highestPriority) {
+                highestPriorityByUserId.put(match.targetUserId, match.priority);
+
+                highestPriorityMatches.clear();
+                highestPriorityMatches.add(match);
+            }
+        }
+
+        // Combine all users back together. This means that all matches have the same priority for a
+        // user. Matches for different users might have different priority.
+        ArrayList<ResolveInfo> combinedMatches = new ArrayList<>();
+        int numMatchArrays = highestPriorityMatchesByUserId.size();
+        for (int matchArrayNum = 0; matchArrayNum < numMatchArrays; matchArrayNum++) {
+            combinedMatches.addAll(highestPriorityMatchesByUserId.valueAt(matchArrayNum));
+        }
+
+        return combinedMatches;
+    }
+
     private final ArrayList<ResolveInfo> getDeviceMatchesLocked(UsbDevice device, Intent intent) {
         ArrayList<ResolveInfo> matches = new ArrayList<ResolveInfo>();
         List<ResolveInfo> resolveInfos = queryIntentActivitiesForAllProfiles(intent);
@@ -883,7 +935,7 @@ class UsbProfileGroupSettingsManager {
                 matches.add(resolveInfo);
             }
         }
-        return matches;
+        return preferHighPriority(matches);
     }
 
     private final ArrayList<ResolveInfo> getAccessoryMatchesLocked(
@@ -897,7 +949,7 @@ class UsbProfileGroupSettingsManager {
                 matches.add(resolveInfo);
             }
         }
-        return matches;
+        return preferHighPriority(matches);
     }
 
     public void deviceAttached(UsbDevice device) {
