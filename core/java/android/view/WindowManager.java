@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.app.KeyguardManager;
 import android.app.Presentation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -911,16 +912,17 @@ public interface WindowManager extends ViewManager {
         public static final int FLAG_TURN_SCREEN_ON = 0x00200000;
 
         /** Window flag: when set the window will cause the keyguard to
-         * be dismissed, only if it is not a secure lock keyguard.  Because such
+         * be dismissed, only if it is not a secure lock keyguard. Because such
          * a keyguard is not needed for security, it will never re-appear if
          * the user navigates to another window (in contrast to
          * {@link #FLAG_SHOW_WHEN_LOCKED}, which will only temporarily
          * hide both secure and non-secure keyguards but ensure they reappear
          * when the user moves to another UI that doesn't hide them).
          * If the keyguard is currently active and is secure (requires an
-         * unlock pattern) than the user will still need to confirm it before
+         * unlock credential) than the user will still need to confirm it before
          * seeing this window, unless {@link #FLAG_SHOW_WHEN_LOCKED} has
          * also been set.
+         * @see KeyguardManager#dismissKeyguard
          */
         public static final int FLAG_DISMISS_KEYGUARD = 0x00400000;
 

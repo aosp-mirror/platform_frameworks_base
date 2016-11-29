@@ -22,6 +22,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
@@ -73,9 +74,9 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     }
 
     @Override // Binder interface
-    public void dismiss(boolean allowWhileOccluded) {
+    public void dismiss(IKeyguardDismissCallback callback) {
         try {
-            mService.dismiss(allowWhileOccluded);
+            mService.dismiss(callback);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }

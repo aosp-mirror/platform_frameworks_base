@@ -1660,13 +1660,15 @@ final class ActivityStack extends ConfigurationContainer {
                     aboveTop = false;
 
                     // Check whether activity should be visible without Keyguard influence
-                    final boolean shouldBeVisible = r.shouldBeVisible(behindTranslucentActivity,
-                            stackVisibleBehind, visibleBehind, behindFullscreenActivity);
+                    final boolean visibleIgnoringKeyguard = r.shouldBeVisibleIgnoringKeyguard(
+                            behindTranslucentActivity, stackVisibleBehind, visibleBehind,
+                            behindFullscreenActivity);
+                    r.visibleIgnoringKeyguard = visibleIgnoringKeyguard;
 
                     // Now check whether it's really visible depending on Keyguard state.
-                    final boolean reallyVisible = checkKeyguardVisibility(r, shouldBeVisible,
-                            isTop);
-                    if (shouldBeVisible) {
+                    final boolean reallyVisible = checkKeyguardVisibility(r,
+                            visibleIgnoringKeyguard, isTop);
+                    if (visibleIgnoringKeyguard) {
                         behindFullscreenActivity = updateBehindFullscreen(stackInvisible,
                                 behindFullscreenActivity, task, r);
                         if (behindFullscreenActivity && !r.fullscreen) {

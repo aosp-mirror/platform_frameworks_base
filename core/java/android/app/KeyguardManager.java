@@ -17,23 +17,31 @@
 package android.app;
 
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.trust.ITrustManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.os.Binder;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.IUserManager;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.UserHandle;
-import android.os.UserManager;
+import android.util.Log;
 import android.view.IWindowManager;
 import android.view.IOnKeyguardExitResult;
+import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
+
+import com.android.internal.policy.IKeyguardDismissCallback;
 
 /**
  * Class that can be used to lock and unlock the keyboard. Get an instance of this
@@ -43,10 +51,13 @@ import android.view.WindowManagerGlobal;
  * {@link android.app.KeyguardManager.KeyguardLock}.
  */
 public class KeyguardManager {
-    private IWindowManager mWM;
-    private ITrustManager mTrustManager;
-    private IUserManager mUserManager;
-    private Context mContext;
+
+    private static final String TAG = "KeyguardManager";
+
+    private final Context mContext;
+    private final IWindowManager mWM;
+    private final IActivityManager mAm;
+    private final ITrustManager mTrustManager;
 
     /**
      * Intent used to prompt user for device credentials.
@@ -125,8 +136,8 @@ public class KeyguardManager {
     }
 
     /**
-     * @deprecated Use {@link android.view.WindowManager.LayoutParams#FLAG_DISMISS_KEYGUARD}
-     * and/or {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED}
+     * @deprecated Use {@link LayoutParams#FLAG_DISMISS_KEYGUARD}
+     * and/or {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED}
      * instead; this allows you to seamlessly hide the keyguard as your application
      * moves in and out of the foreground and does not require that any special
      * permissions be requested.
@@ -190,9 +201,11 @@ public class KeyguardManager {
     }
 
     /**
+     * @deprecated Use {@link KeyguardDismissCallback}
      * Callback passed to {@link KeyguardManager#exitKeyguardSecurely} to notify
      * caller of result.
      */
+    @Deprecated
     public interface OnKeyguardExitResult {
 
         /**
@@ -202,19 +215,41 @@ public class KeyguardManager {
         void onKeyguardExitResult(boolean success);
     }
 
+    /**
+     * Callback passed to {@link KeyguardManager#dismissKeyguard} to notify caller of result.
+     */
+    public static abstract class KeyguardDismissCallback {
+
+        /**
+         * Called when dismissing Keyguard is currently not feasible, i.e. when Keyguard is not
+         * available, not showing or when the activity requesting the Keyguard dismissal isn't
+         * showing or isn't showing behind Keyguard.
+         */
+        public void onDismissError() { }
+
+        /**
+         * Called when dismissing Keyguard has succeeded and the device is now unlocked.
+         */
+        public void onDismissSucceeded() { }
+
+        /**
+         * Called when dismissing Keyguard has been cancelled, i.e. when the user cancelled the
+         * operation or the bouncer was hidden for some other reason.
+         */
+        public void onDismissCancelled() { }
+    }
 
     KeyguardManager(Context context) throws ServiceNotFoundException {
         mContext = context;
         mWM = WindowManagerGlobal.getWindowManagerService();
+        mAm = ActivityManager.getService();
         mTrustManager = ITrustManager.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TRUST_SERVICE));
-        mUserManager = IUserManager.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.USER_SERVICE));
     }
 
     /**
-     * @deprecated Use {@link android.view.WindowManager.LayoutParams#FLAG_DISMISS_KEYGUARD}
-     * and/or {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED}
+     * @deprecated Use {@link LayoutParams#FLAG_DISMISS_KEYGUARD}
+     * and/or {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED}
      * instead; this allows you to seamlessly hide the keyguard as your application
      * moves in and out of the foreground and does not require that any special
      * permissions be requested.
@@ -296,9 +331,8 @@ public class KeyguardManager {
      * @hide
      */
     public boolean isDeviceLocked(int userId) {
-        ITrustManager trustManager = getTrustManager();
         try {
-            return trustManager.isDeviceLocked(userId);
+            return mTrustManager.isDeviceLocked(userId);
         } catch (RemoteException e) {
             return false;
         }
@@ -322,25 +356,63 @@ public class KeyguardManager {
      * @hide
      */
     public boolean isDeviceSecure(int userId) {
-        ITrustManager trustManager = getTrustManager();
         try {
-            return trustManager.isDeviceSecure(userId);
+            return mTrustManager.isDeviceSecure(userId);
         } catch (RemoteException e) {
             return false;
         }
     }
 
-    private synchronized ITrustManager getTrustManager() {
-        if (mTrustManager == null) {
-            mTrustManager = ITrustManager.Stub.asInterface(
-                    ServiceManager.getService(Context.TRUST_SERVICE));
+    /**
+     * If the device is currently locked (see {@link #isKeyguardLocked()}, requests the Keyguard to
+     * be dismissed.
+     * <p>
+     * If the Keyguard is not secure or the device is currently in a trusted state, calling this
+     * method will immediately dismiss the Keyguard without any user interaction.
+     * <p>
+     * If the Keyguard is secure and the device is not in a trusted state, this will bring up the
+     * UI so the user can enter their credentials.
+     *
+     * @param activity The activity requesting the dismissal. The activity must be either visible
+     *                 by using {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} or must be in a state in
+     *                 which it would be visible if Keyguard would not be hiding it. If that's not
+     *                 the case, the request will fail immediately and
+     *                 {@link KeyguardDismissCallback#onDismissError} will be invoked.
+     * @param callback The callback to be called if the request to dismiss Keyguard was successful
+     *                 or {@code null} if the caller isn't interested in knowing the result.
+     * @param handler The handler to invoke the callback on, or {@code null} to use the main
+     *                handler.
+     */
+    public void dismissKeyguard(@NonNull Activity activity,
+            @Nullable KeyguardDismissCallback callback, @Nullable Handler handler) {
+        try {
+            final Handler actualHandler = handler != null
+                    ? handler
+                    : new Handler(Looper.getMainLooper());
+            mAm.dismissKeyguard(activity.getActivityToken(), new IKeyguardDismissCallback.Stub() {
+                @Override
+                public void onDismissError() throws RemoteException {
+                    actualHandler.post(callback::onDismissError);
+                }
+
+                @Override
+                public void onDismissSucceeded() throws RemoteException {
+                    actualHandler.post(callback::onDismissSucceeded);
+                }
+
+                @Override
+                public void onDismissCancelled() throws RemoteException {
+                    actualHandler.post(callback::onDismissCancelled);
+                }
+            });
+        } catch (RemoteException e) {
+            Log.i(TAG, "Failed to dismiss keyguard: " + e);
         }
-        return mTrustManager;
     }
 
     /**
-     * @deprecated Use {@link android.view.WindowManager.LayoutParams#FLAG_DISMISS_KEYGUARD}
-     * and/or {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED}
+     * @deprecated Use {@link LayoutParams#FLAG_DISMISS_KEYGUARD}
+     * and/or {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED}
      * instead; this allows you to seamlessly hide the keyguard as your application
      * moves in and out of the foreground and does not require that any special
      * permissions be requested.

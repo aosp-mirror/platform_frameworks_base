@@ -20,6 +20,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
@@ -516,11 +517,7 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void dismissKeyguard() {
-    }
-
-    @Override
-    public void keyguardGoingAway(int flags) throws RemoteException {
+    public void dismissKeyguard(IKeyguardDismissCallback callback) throws RemoteException {
     }
 
     @Override

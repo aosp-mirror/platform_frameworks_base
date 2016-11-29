@@ -216,6 +216,7 @@ import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
@@ -6631,12 +6632,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void dismissKeyguardLw() {
+    public void dismissKeyguardLw(IKeyguardDismissCallback callback) {
         if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "PWM.dismissKeyguardLw");
 
             // ask the keyguard to prompt the user to authenticate if necessary
-            mKeyguardDelegate.dismiss(true /* allowWhileOccluded */);
+            mKeyguardDelegate.dismiss(callback);
+        } else if (callback != null) {
+            try {
+                callback.onDismissError();
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to call callback", e);
+            }
         }
     }
 

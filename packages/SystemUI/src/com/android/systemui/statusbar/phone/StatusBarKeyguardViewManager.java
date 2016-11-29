@@ -33,6 +33,7 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
 import com.android.keyguard.LatencyTracker;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.RemoteInputController;
 
@@ -102,14 +103,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void registerStatusBar(PhoneStatusBar phoneStatusBar,
             ViewGroup container, StatusBarWindowManager statusBarWindowManager,
             ScrimController scrimController,
-            FingerprintUnlockController fingerprintUnlockController) {
+            FingerprintUnlockController fingerprintUnlockController,
+            DismissCallbackRegistry dismissCallbackRegistry) {
         mPhoneStatusBar = phoneStatusBar;
         mContainer = container;
         mStatusBarWindowManager = statusBarWindowManager;
         mScrimController = scrimController;
         mFingerprintUnlockController = fingerprintUnlockController;
         mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,
-                mViewMediatorCallback, mLockPatternUtils, mStatusBarWindowManager, container);
+                mViewMediatorCallback, mLockPatternUtils, container, dismissCallbackRegistry);
     }
 
     /**

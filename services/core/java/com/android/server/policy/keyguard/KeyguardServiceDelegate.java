@@ -15,6 +15,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManagerPolicy.OnKeyguardExitResult;
 
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
@@ -244,9 +245,9 @@ public class KeyguardServiceDelegate {
         mKeyguardState.occluded = isOccluded;
     }
 
-    public void dismiss(boolean allowWhileOccluded) {
+    public void dismiss(IKeyguardDismissCallback callback) {
         if (mKeyguardService != null) {
-            mKeyguardService.dismiss(allowWhileOccluded);
+            mKeyguardService.dismiss(callback);
         }
     }
 

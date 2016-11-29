@@ -92,20 +92,6 @@ public class KeyguardMonitor extends KeyguardUpdateMonitorCallback
         return mCanSkipBouncer;
     }
 
-    public void unlock() {
-        try {
-            WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
-        } catch (RemoteException e) {
-        }
-    }
-
-    public void lock() {
-        try {
-            WindowManagerGlobal.getWindowManagerService().lockNow(null /* options */);
-        } catch (RemoteException e) {
-        }
-    }
-
     public void notifyKeyguardState(boolean showing, boolean secure, boolean occluded) {
         if (mShowing == showing && mSecure == secure && mOccluded == occluded) return;
         mShowing = showing;

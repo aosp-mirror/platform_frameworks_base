@@ -31,6 +31,7 @@ import android.app.IStopUserCallback;
 import android.app.ITaskStackListener;
 import android.app.IUiAutomationConnection;
 import android.app.IUidObserver;
+
 import android.app.IUserSwitchObserver;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -65,6 +66,7 @@ import android.os.StrictMode;
 import android.service.voice.IVoiceInteractionSession;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.policy.IKeyguardDismissCallback;
 
 import java.util.List;
 
@@ -571,6 +573,7 @@ interface IActivityManager {
     void setPictureInPictureAspectRatio(in IBinder token, float aspectRatio);
     boolean requestAutoFillData(in IResultReceiver receiver, in Bundle receiverExtras,
             in IBinder activityToken);
+    void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback);
 
     // WARNING: when these transactions are updated, check if they are any callers on the native
     // side. If so, make sure they are using the correct transaction ids.

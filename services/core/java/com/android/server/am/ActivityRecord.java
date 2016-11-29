@@ -207,6 +207,8 @@ final class ActivityRecord {
     boolean keysPaused;     // has key dispatching been paused for it?
     int launchMode;         // the launch mode activity attribute.
     boolean visible;        // does this activity's window need to be shown?
+    boolean visibleIgnoringKeyguard; // is this activity visible, ignoring the fact that Keyguard
+                                     // might hide this activity?
     boolean sleeping;       // have we told the activity to sleep?
     boolean nowVisible;     // is this activity's window visible?
     boolean idle;           // has the activity gone idle?
@@ -1248,9 +1250,15 @@ final class ActivityRecord {
         mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
     }
 
-    /** Return true if the input activity should be made visible */
-    boolean shouldBeVisible(boolean behindTranslucentActivity, boolean stackVisibleBehind,
-            ActivityRecord visibleBehind, boolean behindFullscreenActivity) {
+    /**
+     * @return true if the input activity should be made visible, ignoring any effect Keyguard
+     * might have on the visibility
+     *
+     * @see {@link ActivityStack#checkKeyguardVisibility}
+     */
+    boolean shouldBeVisibleIgnoringKeyguard(boolean behindTranslucentActivity,
+            boolean stackVisibleBehind, ActivityRecord visibleBehind,
+            boolean behindFullscreenActivity) {
         if (!okToShowLocked()) {
             return false;
         }
