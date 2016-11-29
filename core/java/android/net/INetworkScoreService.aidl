@@ -17,6 +17,8 @@
 package android.net;
 
 import android.net.INetworkScoreCache;
+import android.net.RecommendationRequest;
+import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
 
 /**
@@ -63,5 +65,15 @@ interface INetworkScoreService
      * @hide
      */
     void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache);
+
+    /**
+     * Request a recommendation for the best network to connect to
+     * taking into account the inputs from the {@link RecommendationRequest}.
+     *
+     * @param request a {@link RecommendationRequest} instance containing the details of the request
+     * @return a {@link RecommendationResult} containing the recommended network to connect to
+     * @throws SecurityException if the caller is not the system
+     */
+    RecommendationResult requestRecommendation(in RecommendationRequest request);
 
 }

@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.SystemApi;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -29,6 +30,20 @@ import java.util.Objects;
  */
 @SystemApi
 public class ScoredNetwork implements Parcelable {
+    /**
+     * Extra used with {@link #attributes} to specify whether the
+     * network is believed to have a captive portal.
+     * <p>
+     * This data may be used, for example, to display a visual indicator
+     * in a network selection list.
+     * <p>
+     * Note that the this extra conveys the possible presence of a
+     * captive portal, not its state or the user's ability to open
+     * the portal.
+     * <p>
+     * If no value is associated with this key then it's unknown.
+     */
+    public static final String EXTRA_HAS_CAPTIVE_PORTAL = "android.net.extra.HAS_CAPTIVE_PORTAL";
 
     /** A {@link NetworkKey} uniquely identifying this network. */
     public final NetworkKey networkKey;
@@ -51,6 +66,14 @@ public class ScoredNetwork implements Parcelable {
      * be a wifi connection where the user would be charged for usage.
      */
     public final boolean meteredHint;
+
+    /**
+     * An additional collection of optional attributes set by
+     * the Network Recommendation Provider.
+     *
+     * @see #EXTRA_HAS_CAPTIVE_PORTAL
+     */
+    public final Bundle attributes;
 
     /**
      * Construct a new {@link ScoredNetwork}.
@@ -81,9 +104,29 @@ public class ScoredNetwork implements Parcelable {
      *     metered.
      */
     public ScoredNetwork(NetworkKey networkKey, RssiCurve rssiCurve, boolean meteredHint) {
+        this(networkKey, rssiCurve, false /* meteredHint */, null /* attributes */);
+    }
+
+    /**
+     * Construct a new {@link ScoredNetwork}.
+     *
+     * @param networkKey the {@link NetworkKey} uniquely identifying this network
+     * @param rssiCurve the {@link RssiCurve} representing the scores for this network based on the
+     *     RSSI. This field is optional, and may be skipped to represent a network which the scorer
+     *     has opted not to score at this time. Passing a null value here is strongly preferred to
+     *     not returning any {@link ScoredNetwork} for a given {@link NetworkKey} because it
+     *     indicates to the system not to request scores for this network in the future, although
+     *     the scorer may choose to issue an out-of-band update at any time.
+     * @param meteredHint a boolean value indicating whether or not the network is believed to be
+     *                    metered
+     * @param attributes optional provider specific attributes
+     */
+    public ScoredNetwork(NetworkKey networkKey, RssiCurve rssiCurve, boolean meteredHint,
+            Bundle attributes) {
         this.networkKey = networkKey;
         this.rssiCurve = rssiCurve;
         this.meteredHint = meteredHint;
+        this.attributes = attributes;
     }
 
     private ScoredNetwork(Parcel in) {
@@ -94,6 +137,7 @@ public class ScoredNetwork implements Parcelable {
             rssiCurve = null;
         }
         meteredHint = in.readByte() != 0;
+        attributes = in.readBundle();
     }
 
     @Override
@@ -111,6 +155,8 @@ public class ScoredNetwork implements Parcelable {
             out.writeByte((byte) 0);
         }
         out.writeByte((byte) (meteredHint ? 1 : 0));
+        out.writeBundle(attributes);
+
     }
 
     @Override
@@ -121,19 +167,24 @@ public class ScoredNetwork implements Parcelable {
         ScoredNetwork that = (ScoredNetwork) o;
 
         return Objects.equals(networkKey, that.networkKey)
-            && Objects.equals(rssiCurve, that.rssiCurve)
-            && Objects.equals(meteredHint, that.meteredHint);
+                && Objects.equals(rssiCurve, that.rssiCurve)
+                && Objects.equals(meteredHint, that.meteredHint)
+                && Objects.equals(attributes, that.attributes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(networkKey, rssiCurve, meteredHint);
+        return Objects.hash(networkKey, rssiCurve, meteredHint, attributes);
     }
 
     @Override
     public String toString() {
-        return "ScoredNetwork[key=" + networkKey + ",score=" + rssiCurve
-            + ",meteredHint=" + meteredHint + "]";
+        return "ScoredNetwork{" +
+                "networkKey=" + networkKey +
+                ", rssiCurve=" + rssiCurve +
+                ", meteredHint=" + meteredHint +
+                ", attributes=" + attributes +
+                '}';
     }
 
     public static final Parcelable.Creator<ScoredNetwork> CREATOR =
