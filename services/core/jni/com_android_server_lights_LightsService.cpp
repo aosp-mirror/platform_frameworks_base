@@ -123,7 +123,7 @@ static void setLight_native(
             return;
         }
 
-        status = static_cast<Status>(ret); // hal status
+        status = ret.get(); // hal status
     }
 
     switch (status) {
