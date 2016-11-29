@@ -65,8 +65,9 @@ LOCAL_MODULE:= libandroidfw
 LOCAL_SRC_FILES:= $(deviceSources)
 LOCAL_C_INCLUDES := \
     system/core/include
-LOCAL_STATIC_LIBRARIES := libziparchive libbase
 LOCAL_SHARED_LIBRARIES := \
+    libziparchive \
+    libbase \
     libbinder \
     liblog \
     libcutils \
