@@ -2064,9 +2064,20 @@ class ContextImpl extends Context {
                 ? packageInfo.getCompatibilityInfo()
                 : CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
 
-        context.mResources = createResources(activityToken, packageInfo, displayId,
-                overrideConfiguration, compatInfo);
-        context.mDisplay = ResourcesManager.getInstance().getAdjustedDisplay(displayId,
+        final ResourcesManager resourcesManager = ResourcesManager.getInstance();
+
+        // Create the base resources for which all configuration contexts for this Activity
+        // will be rebased upon.
+        context.mResources = resourcesManager.createBaseActivityResources(activityToken,
+                packageInfo.getResDir(),
+                packageInfo.getSplitResDirs(),
+                packageInfo.getOverlayDirs(),
+                packageInfo.getApplicationInfo().sharedLibraryFiles,
+                displayId,
+                overrideConfiguration,
+                compatInfo,
+                packageInfo.getClassLoader());
+        context.mDisplay = resourcesManager.getAdjustedDisplay(displayId,
                 context.mResources.getDisplayAdjustments());
         return context;
     }
