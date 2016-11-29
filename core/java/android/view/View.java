@@ -2474,7 +2474,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                     1             PFLAG3_SCROLL_INDICATOR_START
      *                    1              PFLAG3_SCROLL_INDICATOR_END
      *                   1               PFLAG3_ASSIST_BLOCKED
-     *           xxxxxxxx                * NO LONGER NEEDED, SHOULD BE REUSED *
+     *                  1                PFLAG3_CLUSTER
+     *                 1                 PFLAG3_SECTION
+     *           xxxxxx                  * NO LONGER NEEDED, SHOULD BE REUSED *
      *          1                        PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
      *        1                          PFLAG3_TEMPORARY_DETACH
@@ -2671,6 +2673,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * into this view.<p>
      */
     static final int PFLAG3_ASSIST_BLOCKED = 0x4000;
+
+    /**
+     * Flag indicating that the view is a root of a keyboard navigation cluster.
+     *
+     * @see #isKeyboardNavigationCluster()
+     * @see #setKeyboardNavigationCluster(boolean)
+     */
+    private static final int PFLAG3_CLUSTER = 0x8000;
+
+    /**
+     * Flag indicating that the view is a root of a keyboard navigation section.
+     *
+     * @see #isKeyboardNavigationSection()
+     * @see #setKeyboardNavigationSection(boolean)
+     */
+    private static final int PFLAG3_SECTION = 0x10000;
 
     /**
      * Whether this view has rendered elements that overlap (see {@link
@@ -3740,6 +3758,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     int mNextFocusForwardId = View.NO_ID;
 
+    /**
+     * User-specified next keyboard navigation cluster.
+     */
+    int mNextClusterForwardId = View.NO_ID;
+
+    /**
+     * User-specified next keyboard navigation section.
+     */
+    int mNextSectionForwardId = View.NO_ID;
+
     private CheckForLongPress mPendingCheckForLongPress;
     private CheckForTap mPendingCheckForTap = null;
     private PerformClick mPerformClick;
@@ -4531,6 +4559,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_nextFocusForward:
                     mNextFocusForwardId = a.getResourceId(attr, View.NO_ID);
                     break;
+                case R.styleable.View_nextClusterForward:
+                    mNextClusterForwardId = a.getResourceId(attr, View.NO_ID);
+                    break;
+                case R.styleable.View_nextSectionForward:
+                    mNextSectionForwardId = a.getResourceId(attr, View.NO_ID);
+                    break;
                 case R.styleable.View_minWidth:
                     mMinWidth = a.getDimensionPixelSize(attr, 0);
                     break;
@@ -4667,9 +4701,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         forceHasOverlappingRendering(a.getBoolean(attr, true));
                     }
                     break;
-
                 case R.styleable.View_tooltip:
                     setTooltip(a.getText(attr));
+                    break;
+                case R.styleable.View_keyboardNavigationCluster:
+                    if (a.peekValue(attr) != null) {
+                        setKeyboardNavigationCluster(a.getBoolean(attr, true));
+                    }
+                    break;
+                case R.styleable.View_keyboardNavigationSection:
+                    if (a.peekValue(attr) != null) {
+                        setKeyboardNavigationSection(a.getBoolean(attr, true));
+                    }
                     break;
             }
         }
@@ -7852,6 +7895,50 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Gets the id of the root of the next keyboard navigation cluster.
+     * @return The next keyboard navigation cluster ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextClusterForward
+     */
+    public int getNextClusterForwardId() {
+        return mNextClusterForwardId;
+    }
+
+    /**
+     * Sets the id of the view to use as the root of the next keyboard navigation cluster.
+     * @param nextClusterForwardId The next cluster ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextClusterForward
+     */
+    public void setNextClusterForwardId(int nextClusterForwardId) {
+        mNextClusterForwardId = nextClusterForwardId;
+    }
+
+    /**
+     * Gets the id of the root of the next keyboard navigation section.
+     * @return The next keyboard navigation section ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextSectionForward
+     */
+    public int getNextSectionForwardId() {
+        return mNextSectionForwardId;
+    }
+
+    /**
+     * Sets the id of the view to use as the root of the next keyboard navigation section.
+     * @param nextSectionForwardId The next section ID, or {@link #NO_ID} if the framework should
+     * decide automatically.
+     *
+     * @attr ref android.R.styleable#View_nextSectionForward
+     */
+    public void setNextSectionForwardId(int nextSectionForwardId) {
+        mNextSectionForwardId = nextSectionForwardId;
+    }
+
+    /**
      * Returns the visibility of this view and all of its ancestors
      *
      * @return True if this view and all of its ancestors are {@link #VISIBLE}
@@ -8943,6 +9030,58 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return mParent.focusSearch(this, direction);
         } else {
             return null;
+        }
+    }
+
+    /**
+     * Returns whether this View is a root of a keyboard navigation cluster.
+     *
+     * @return True if this view is a root of a cluster, or false otherwise.
+     * @attr ref android.R.styleable#View_keyboardNavigationCluster
+     */
+    @ViewDebug.ExportedProperty(category = "keyboardNavigationCluster")
+    public final boolean isKeyboardNavigationCluster() {
+        return (mPrivateFlags3 & PFLAG3_CLUSTER) != 0;
+    }
+
+    /**
+     * Set whether this view is a root of a keyboard navigation cluster.
+     *
+     * @param isCluster If true, this view is a root of a cluster.
+     *
+     * @attr ref android.R.styleable#View_keyboardNavigationCluster
+     */
+    public void setKeyboardNavigationCluster(boolean isCluster) {
+        if (isCluster) {
+            mPrivateFlags3 |= PFLAG3_CLUSTER;
+        } else {
+            mPrivateFlags3 &= ~PFLAG3_CLUSTER;
+        }
+    }
+
+    /**
+     * Returns whether this View is a root of a keyboard navigation section.
+     *
+     * @return True if this view is a root of a section, or false otherwise.
+     * @attr ref android.R.styleable#View_keyboardNavigationSection
+     */
+    @ViewDebug.ExportedProperty(category = "keyboardNavigationSection")
+    public final boolean isKeyboardNavigationSection() {
+        return (mPrivateFlags3 & PFLAG3_SECTION) != 0;
+    }
+
+    /**
+     * Set whether this view is a root of a keyboard navigation section.
+     *
+     * @param isSection If true, this view is a root of a section.
+     *
+     * @attr ref android.R.styleable#View_keyboardNavigationSection
+     */
+    public void setKeyboardNavigationSection(boolean isSection) {
+        if (isSection) {
+            mPrivateFlags3 |= PFLAG3_SECTION;
+        } else {
+            mPrivateFlags3 &= ~PFLAG3_SECTION;
         }
     }
 

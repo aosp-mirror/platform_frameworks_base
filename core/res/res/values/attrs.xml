@@ -2887,6 +2887,28 @@
         <!-- Defines text displayed in a small popup window on hover or long press. -->
         <attr name="tooltip" format="string" localization="suggested" />
 
+        <!-- Whether this view is a root of a keyboard navigation cluster.
+             See {@link android.view.View#setKeyboardNavigationCluster(boolean)}. -->
+        <attr name="keyboardNavigationCluster" format="boolean" />
+
+        <!-- Whether this view is a root of a keyboard navigation section.
+             See {@link android.view.View#setKeyboardNavigationSection(boolean)}. -->
+        <attr name="keyboardNavigationSection" format="boolean" />
+
+        <!-- Defines the next keyboard navigation cluster.
+
+             If the reference refers to a view that does not exist or is part
+             of a hierarchy that is invisible, a {@link java.lang.RuntimeException}
+             will result when the reference is accessed.-->
+        <attr name="nextClusterForward" format="reference"/>
+
+        <!-- Defines the next keyboard navigation section.
+
+             If the reference refers to a view that does not exist or is part
+             of a hierarchy that is invisible, a {@link java.lang.RuntimeException}
+             will result when the reference is accessed.-->
+        <attr name="nextSectionForward" format="reference"/>
+
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->

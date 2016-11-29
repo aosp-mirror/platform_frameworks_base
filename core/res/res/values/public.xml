@@ -2776,6 +2776,10 @@
         <public name="paddingHorizontal" />
         <public name="paddingVertical" />
         <public name="visibleToEphemeral" />
+        <public name="keyboardNavigationCluster" />
+        <public name="keyboardNavigationSection" />
+        <public name="nextClusterForward" />
+        <public name="nextSectionForward" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
