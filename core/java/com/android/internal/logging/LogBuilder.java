@@ -1,6 +1,22 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.internal.logging;
 
 import android.util.EventLog;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 
@@ -14,16 +30,16 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
  */
 
 public class LogBuilder {
-
+    private static final String TAG = "LogBuilder";
     private SparseArray<Object> entries = new SparseArray();
 
     public LogBuilder(int mainCategory) {
         setCategory(mainCategory);
     }
 
-    public LogBuilder setView(View view) {
-        entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_VIEW, view.getId());
-        return this;
+    /* Deserialize from the eventlog */
+    public LogBuilder(Object[] items) {
+      deserialize(items);
     }
 
     public LogBuilder setCategory(int category) {
@@ -36,21 +52,141 @@ public class LogBuilder {
         return this;
     }
 
+    public LogBuilder setSubtype(int subtype) {
+        entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_SUBTYPE, subtype);
+        return this;
+    }
+
+    public LogBuilder setTimestamp(long timestamp) {
+        entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_TIMESTAMP, timestamp);
+        return this;
+    }
+
+    public LogBuilder setPackageName(String packageName) {
+        entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_PACKAGENAME, packageName);
+        return this;
+    }
+
+    public LogBuilder setCounterName(String name) {
+        entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_NAME, name);
+        return this;
+    }
+
+    public LogBuilder setCounterBucket(int bucket) {
+        entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_BUCKET, bucket);
+        return this;
+    }
+
+    public LogBuilder setCounterBucket(long bucket) {
+        entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_BUCKET, bucket);
+        return this;
+    }
+
+    public LogBuilder setCounterValue(int value) {
+        entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_VALUE, value);
+        return this;
+    }
+
     /**
      * @param tag From your MetricsEvent enum.
      * @param value One of Integer, Long, Float, String
      * @return
      */
     public LogBuilder addTaggedData(int tag, Object value) {
-        if (!(value instanceof Integer ||
-            value instanceof String ||
-            value instanceof Long ||
-            value instanceof Float)) {
+        if (isValidValue(value)) {
             throw new IllegalArgumentException(
                     "Value must be loggable type - int, long, float, String");
         }
         entries.put(tag, value);
         return this;
+    }
+
+    public boolean isValidValue(Object value) {
+        return !(value instanceof Integer ||
+            value instanceof String ||
+            value instanceof Long ||
+            value instanceof Float);
+    }
+
+    public Object getTaggedData(int tag) {
+        return entries.get(tag);
+    }
+
+    public int getCategory() {
+        Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_CATEGORY);
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        } else {
+            return MetricsEvent.VIEW_UNKNOWN;
+        }
+    }
+
+    public int getType() {
+        Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_TYPE);
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        } else {
+            return MetricsEvent.TYPE_UNKNOWN;
+        }
+    }
+
+    public int getSubtype() {
+        Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_SUBTYPE);
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        } else {
+            return 0;
+        }
+    }
+
+    public long getTimestamp() {
+        Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_TIMESTAMP);
+        if (obj instanceof Long) {
+            return (Long) obj;
+        } else {
+            return 0;
+        }
+    }
+
+    public String getPackageName() {
+        Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_PACKAGENAME);
+        if (obj instanceof String) {
+            return (String) obj;
+        } else {
+            return null;
+        }
+    }
+
+    public String getCounterName() {
+        Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_NAME);
+        if (obj instanceof String) {
+            return (String) obj;
+        } else {
+            return null;
+        }
+    }
+
+    public long getCounterBucket() {
+        Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_BUCKET);
+        if (obj instanceof Number) {
+            return ((Number) obj).longValue();
+        } else {
+            return 0L;
+        }
+    }
+
+    public boolean isLongCounterBucket() {
+        Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_BUCKET);
+        return obj instanceof Long;
+    }
+
+    public int getCounterValue() {
+        Object obj = entries.get(MetricsEvent.RESERVED_FOR_LOGBUILDER_VALUE);
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -64,5 +200,17 @@ public class LogBuilder {
         }
         return out;
     }
-}
 
+    public void deserialize(Object[] items) {
+        int i = 0;
+        while(i < items.length) {
+            Object key = items[i++];
+            Object value = i < items.length ? items[i++] : null;
+            if (key instanceof Integer) {
+                entries.put((Integer) key, value);
+            } else {
+              Log.i(TAG, "Invalid key " + key.toString());
+            }
+        }
+    }
+}

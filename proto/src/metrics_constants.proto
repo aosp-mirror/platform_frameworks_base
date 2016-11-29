@@ -3173,9 +3173,9 @@ message MetricsEvent {
 
     // These values should never appear in log outputs - they are reserved for
     // internal Tron use.
-    RESERVED_FOR_LOGBUILDER_VIEW = 757;
-    RESERVED_FOR_LOGBUILDER_CATEGORY = 758;
-    RESERVED_FOR_LOGBUILDER_TYPE = 759;
+    RESERVED_FOR_LOGBUILDER_CATEGORY = 757;
+    RESERVED_FOR_LOGBUILDER_TYPE = 758;
+    RESERVED_FOR_LOGBUILDER_SUBTYPE = 759;
 
     // ACTION: "Do not show again" was enabled in the support disclaimer and the
     // user accepted
@@ -3275,15 +3275,35 @@ message MetricsEvent {
     // OPEN: Settings > Apps > Default Apps > Warning dialog to confirm selection
     DEFAULT_APP_PICKER_CONFIRMATION_DIALOG = 791;
 
+
     // OPEN: Settings > Apps > Default Apps > Default auto-fill app
     DEFAULT_AUTO_FILL_PICKER = 792;
 
-    // ---- End O Constants, all O constants go above this line ----
+    // These values should never appear in log outputs - they are reserved for
+    // internal Tron use.
+    NOTIFICATION_SINCE_CREATE_MILLIS = 793;
+    NOTIFICATION_SINCE_VISIBLE_MILLIS = 794;
+    NOTIFICATION_SINCE_UPDATE_MILLIS = 795;
+    NOTIFICATION_ID = 796;
+    NOTIFICATION_TAG = 797;
+    NOTIFICATION_SHADE_INDEX = 798;
+    RESERVED_FOR_LOGBUILDER_NAME = 799;
 
     // OPEN: QS NFC tile shown
     // ACTION: QS NFC tile tapped
     // CATEGORY: QUICK_SETTINGS
     QS_NFC = 800;
+
+    // These values should never appear in log outputs - they are reserved for
+    // internal Tron use.
+    RESERVED_FOR_LOGBUILDER_BUCKET = 801;
+    RESERVED_FOR_LOGBUILDER_VALUE = 802;
+    RESERVED_FOR_LOGBUILDER_COUNTER = 803;
+    RESERVED_FOR_LOGBUILDER_HISTOGRAM = 804;
+    RESERVED_FOR_LOGBUILDER_TIMESTAMP = 805;
+    RESERVED_FOR_LOGBUILDER_PACKAGENAME = 806;
+
+    // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
