@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -264,6 +265,16 @@ public class GraphicBuffer implements Parcelable {
         nWriteGraphicBufferToParcel(mNativeObject, dest);
     }
 
+    /**
+     * Create hardware bitmap backed by this GraphicBuffer.
+     *
+     * @return Bitmap or null if this GraphicBuffer has unsupported PixelFormat.
+     *         currently PIXEL_FORMAT_RGBA_8888 is the only supported format
+     */
+    public Bitmap createHardwareBitmap() {
+        return nCreateHardwareBitmap(mNativeObject);
+    }
+
     public static final Parcelable.Creator<GraphicBuffer> CREATOR =
             new Parcelable.Creator<GraphicBuffer>() {
         public GraphicBuffer createFromParcel(Parcel in) {
@@ -289,4 +300,5 @@ public class GraphicBuffer implements Parcelable {
     private static native long nReadGraphicBufferFromParcel(Parcel in);
     private static native boolean nLockCanvas(long nativeObject, Canvas canvas, Rect dirty);
     private static native boolean nUnlockCanvasAndPost(long nativeObject, Canvas canvas);
+    private static native Bitmap nCreateHardwareBitmap(long nativeObject);
 }

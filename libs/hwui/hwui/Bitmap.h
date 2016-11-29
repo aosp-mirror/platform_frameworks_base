@@ -52,6 +52,8 @@ public:
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t allocSize, const SkImageInfo& info,
         size_t rowBytes, SkColorTable* ctable);
 
+    static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer);
+
     static sk_sp<Bitmap> createFrom(const SkImageInfo&, SkPixelRef&);
 
     static sk_sp<Bitmap> allocateHardwareBitmap(uirenderer::renderthread::RenderThread&,
@@ -63,7 +65,6 @@ public:
             const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
             size_t rowBytes, SkColorTable* ctable);
-    Bitmap(sp<GraphicBuffer>&& buffer, const SkImageInfo& info);
 
     int width() const { return info().width(); }
     int height() const { return info().height(); }
@@ -113,6 +114,7 @@ protected:
     virtual void onUnlockPixels() override { };
     virtual size_t getAllocatedSizeInBytes() const override;
 private:
+    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
     virtual ~Bitmap();
     void* getStorage() const;
 
