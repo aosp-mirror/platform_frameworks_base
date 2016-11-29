@@ -79,7 +79,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Public interface for managing policies enforced on a device. Most clients of this class must be
@@ -6491,27 +6490,32 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
-     * Indicates the entity that controls the device or profile owner. A user/profile is considered
-     * affiliated if it is managed by the same entity as the device.
-     *
-     * <p> By definition, the user that the device owner runs on is always affiliated. Any other
-     * user/profile is considered affiliated if the following conditions are both met:
-     * <ul>
-     * <li>The device owner and the user's/profile's profile owner have called this method,
-     *   specifying a set of opaque affiliation ids each. If the sets specified by the device owner
-     *   and a profile owner intersect, they must have come from the same source, which means that
-     *   the device owner and profile owner are controlled by the same entity.</li>
-     * <li>The device owner's and profile owner's package names are the same.</li>
-     * </ul>
+     * Indicates the entity that controls the device or profile owner. Two users/profiles are
+     * affiliated if the set of ids set by their device or profile owners intersect.
      *
      * @param admin Which profile or device owner this request is associated with.
-     * @param ids A set of opaque affiliation ids.
+     * @param ids A list of opaque non-empty affiliation ids. Duplicate elements will be ignored.
+     *
+     * @throws NullPointerException if {@code ids} is null or contains null elements.
+     * @throws IllegalArgumentException if {@code ids} contains an empty string.
      */
-    public void setAffiliationIds(@NonNull ComponentName admin, Set<String> ids) {
+    public void setAffiliationIds(@NonNull ComponentName admin, @NonNull List<String> ids) {
         throwIfParentInstance("setAffiliationIds");
         try {
-            mService.setAffiliationIds(admin, new ArrayList<String>(ids));
+            mService.setAffiliationIds(admin, ids);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of affiliation ids previously set via {@link #setAffiliationIds}, or an
+     * empty list if none have been set.
+     */
+    public @NonNull List<String> getAffiliationIds(@NonNull ComponentName admin) {
+        throwIfParentInstance("getAffiliationIds");
+        try {
+            return mService.getAffiliationIds(admin);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -6519,15 +6523,17 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * Returns whether this user/profile is affiliated with the device. See
-     * {@link #setAffiliationIds} for the definition of affiliation.
+     * Returns whether this user/profile is affiliated with the device.
+     * <p>
+     * By definition, the user that the device owner runs on is always affiliated with the device.
+     * Any other user/profile is considered affiliated with the device if the set specified by its
+     * profile owner via {@link #setAffiliationIds} intersects with the device owner's.
      *
-     * @return whether this user/profile is affiliated with the device.
      */
     public boolean isAffiliatedUser() {
         throwIfParentInstance("isAffiliatedUser");
         try {
-            return mService != null && mService.isAffiliatedUser();
+            return mService.isAffiliatedUser();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
