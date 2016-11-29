@@ -26,6 +26,7 @@ import android.os.CancellationSignal;
 import android.os.CancellationSignal.OnCancelListener;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -757,20 +758,22 @@ public class FingerprintManager {
                         new IFingerprintServiceLockoutResetCallback.Stub() {
 
                     @Override
-                    public void onLockoutReset(long deviceId) throws RemoteException {
-                        final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
-                                PowerManager.PARTIAL_WAKE_LOCK, "lockoutResetCallback");
-                        wakeLock.acquire();
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
+                    public void onLockoutReset(long deviceId, IRemoteCallback serverCallback)
+                            throws RemoteException {
+                        try {
+                            final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
+                                    PowerManager.PARTIAL_WAKE_LOCK, "lockoutResetCallback");
+                            wakeLock.acquire();
+                            mHandler.post(() -> {
                                 try {
                                     callback.onLockoutReset();
                                 } finally {
                                     wakeLock.release();
                                 }
-                            }
-                        });
+                            });
+                        } finally {
+                            serverCallback.sendResult(null /* data */);
+                        }
                     }
                 });
             } catch (RemoteException e) {

@@ -32,11 +32,14 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.hardware.fingerprint.IFingerprintServiceLockoutResetCallback;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
@@ -625,17 +628,28 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
     private class FingerprintServiceLockoutResetMonitor {
 
+        private static final long WAKELOCK_TIMEOUT_MS = 2000;
         private final IFingerprintServiceLockoutResetCallback mCallback;
+        private final WakeLock mWakeLock;
 
         public FingerprintServiceLockoutResetMonitor(
                 IFingerprintServiceLockoutResetCallback callback) {
             mCallback = callback;
+            mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    "lockout reset callback");
         }
 
         public void sendLockoutReset() {
             if (mCallback != null) {
                 try {
-                    mCallback.onLockoutReset(mHalDeviceId);
+                    mWakeLock.acquire(WAKELOCK_TIMEOUT_MS);
+                    mCallback.onLockoutReset(mHalDeviceId, new IRemoteCallback.Stub() {
+
+                        @Override
+                        public void sendResult(Bundle data) throws RemoteException {
+                            mWakeLock.release();
+                        }
+                    });
                 } catch (DeadObjectException e) {
                     Slog.w(TAG, "Death object while invoking onLockoutReset: ", e);
                     mHandler.post(mRemoveCallbackRunnable);
@@ -648,6 +662,9 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         private final Runnable mRemoveCallbackRunnable = new Runnable() {
             @Override
             public void run() {
+                if (mWakeLock.isHeld()) {
+                    mWakeLock.release();
+                }
                 removeLockoutResetCallback(FingerprintServiceLockoutResetMonitor.this);
             }
         };
