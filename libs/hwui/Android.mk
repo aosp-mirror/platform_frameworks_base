@@ -294,6 +294,7 @@ LOCAL_SRC_FILES += \
     tests/unit/MeshStateTests.cpp \
     tests/unit/OffscreenBufferPoolTests.cpp \
     tests/unit/OpDumperTests.cpp \
+    tests/unit/PathInterpolatorTests.cpp \
     tests/unit/RenderNodeDrawableTests.cpp \
     tests/unit/RecordingCanvasTests.cpp \
     tests/unit/RenderNodeTests.cpp \
