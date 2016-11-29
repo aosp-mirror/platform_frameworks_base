@@ -52,16 +52,20 @@ Canvas* Canvas::create_canvas(SkCanvas* skiaCanvas) {
 SkiaCanvas::SkiaCanvas() {}
 
 SkiaCanvas::SkiaCanvas(SkCanvas* canvas)
-    : mCanvas(SkRef(canvas)) {}
+    : mCanvas(canvas) {}
 
 SkiaCanvas::SkiaCanvas(const SkBitmap& bitmap) {
-    mCanvas.reset(new SkCanvas(bitmap));
+    mCanvasOwned = std::unique_ptr<SkCanvas>(new SkCanvas(bitmap));
+    mCanvas = mCanvasOwned.get();
 }
 
 SkiaCanvas::~SkiaCanvas() {}
 
 void SkiaCanvas::reset(SkCanvas* skiaCanvas) {
-    mCanvas.reset(SkRef(skiaCanvas));
+    if (mCanvas != skiaCanvas) {
+        mCanvas = skiaCanvas;
+        mCanvasOwned.reset();
+    }
     mSaveStack.reset(nullptr);
     mHighContrastText = false;
 }
@@ -99,8 +103,9 @@ void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
         mCanvas->replayClips(&copier);
     }
 
-    // unrefs the existing canvas
-    mCanvas.reset(newCanvas);
+    // deletes the previously owned canvas (if any)
+    mCanvasOwned = std::unique_ptr<SkCanvas>(newCanvas);
+    mCanvas = newCanvas;
 
     // clean up the old save stack
     mSaveStack.reset(nullptr);
@@ -307,7 +312,7 @@ void SkiaCanvas::applyPersistentClips(size_t clipStartIndex) {
     const SkMatrix saveMatrix = mCanvas->getTotalMatrix();
 
     for (auto clip = begin; clip != end; ++clip) {
-        clip->apply(mCanvas.get());
+        clip->apply(mCanvas);
     }
 
     mCanvas->setMatrix(saveMatrix);
@@ -562,7 +567,7 @@ void SkiaCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint
 void SkiaCanvas::drawBitmap(Bitmap& hwuiBitmap, const SkMatrix& matrix, const SkPaint* paint) {
     SkBitmap bitmap;
     hwuiBitmap.getSkBitmap(&bitmap);
-    SkAutoCanvasRestore acr(mCanvas.get(), true);
+    SkAutoCanvasRestore acr(mCanvas, true);
     mCanvas->concat(matrix);
     mCanvas->drawBitmap(bitmap, 0, 0, paint);
 }

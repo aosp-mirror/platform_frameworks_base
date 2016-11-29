@@ -311,40 +311,42 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
     static const int LAYER_HEIGHT = 200;
     class ProjectionTestCanvas : public SkCanvas {
     public:
-        ProjectionTestCanvas() : SkCanvas(CANVAS_WIDTH, CANVAS_HEIGHT) {}
+        ProjectionTestCanvas(int* drawCounter)
+            : SkCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
+            , mDrawCounter(drawCounter) 
+        {}
         void onDrawArc(const SkRect&, SkScalar startAngle, SkScalar sweepAngle, bool useCenter,
                 const SkPaint&) override {
-            EXPECT_EQ(0, mIndex++); //part of painting the layer
+            EXPECT_EQ(0, (*mDrawCounter)++); //part of painting the layer
             EXPECT_EQ(SkRect::MakeLTRB(0, 0, LAYER_WIDTH, LAYER_HEIGHT), getBounds(this));
         }
         void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
-            EXPECT_EQ(1, mIndex++);
+            EXPECT_EQ(1, (*mDrawCounter)++);
             EXPECT_EQ(SkRect::MakeLTRB(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT), getBounds(this));
         }
         void onDrawOval(const SkRect&, const SkPaint&) override {
-            EXPECT_EQ(2, mIndex++);
+            EXPECT_EQ(2, (*mDrawCounter)++);
             SkMatrix expectedMatrix;
             expectedMatrix.setTranslate(100 - SCROLL_X, 100 - SCROLL_Y);
             EXPECT_EQ(expectedMatrix, getTotalMatrix());
             EXPECT_EQ(SkRect::MakeLTRB(-85, -80, 295, 300), getLocalBounds(this));
         }
-        int mIndex = 0;
+        int* mDrawCounter;
     };
 
     class ProjectionLayer : public SkSurface_Base {
     public:
-        ProjectionLayer(ProjectionTestCanvas *canvas)
+        ProjectionLayer(int* drawCounter)
             : SkSurface_Base(SkImageInfo::MakeN32Premul(LAYER_WIDTH, LAYER_HEIGHT), nullptr)
-            , mCanvas(canvas) {
+            , mDrawCounter(drawCounter) {
         }
         void onDraw(SkCanvas*, SkScalar x, SkScalar y, const SkPaint*) override {
-            EXPECT_EQ(3, mCanvas->mIndex++);
+            EXPECT_EQ(3, (*mDrawCounter)++);
             EXPECT_EQ(SkRect::MakeLTRB(100 - SCROLL_X, 100 - SCROLL_Y, 300 - SCROLL_X,
-                   300 - SCROLL_Y), getBounds(mCanvas));
+                   300 - SCROLL_Y), getBounds(this->getCanvas()));
         }
         SkCanvas* onNewCanvas() override {
-            mCanvas->ref();
-            return mCanvas;
+            return new ProjectionTestCanvas(mDrawCounter);
         }
         sk_sp<SkSurface> onNewSurface(const SkImageInfo&) override {
             return sk_sp<SkSurface>();
@@ -353,7 +355,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
             return sk_sp<SkImage>();
         }
         void onCopyOnWrite(ContentChangeMode) override {}
-        ProjectionTestCanvas* mCanvas;
+        int* mDrawCounter;
     };
 
     auto receiverBackground = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
@@ -397,10 +399,10 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
     info.observer = nullptr;
     parent->prepareTree(info);
 
-    sk_sp<ProjectionTestCanvas> canvas(new ProjectionTestCanvas());
+    int drawCounter = 0;
     //set a layer after prepareTree to avoid layer logic there
     child->animatorProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
-    sk_sp<SkSurface> surfaceLayer1(new ProjectionLayer(canvas.get()));
+    sk_sp<SkSurface> surfaceLayer1(new ProjectionLayer(&drawCounter));
     child->setLayerSurface(surfaceLayer1);
     Matrix4 windowTransform;
     windowTransform.loadTranslate(100, 100, 0);
@@ -410,11 +412,11 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
     layerUpdateQueue.enqueueLayerWithDamage(child.get(),
             android::uirenderer::Rect(LAYER_WIDTH, LAYER_HEIGHT));
     SkiaPipeline::renderLayersImpl(layerUpdateQueue, true);
-    EXPECT_EQ(1, canvas->mIndex);  //assert index 0 is drawn on the layer
+    EXPECT_EQ(1, drawCounter);  //assert index 0 is drawn on the layer
 
-    RenderNodeDrawable drawable(parent.get(), canvas.get(), true);
-    canvas->drawDrawable(&drawable);
-    EXPECT_EQ(4, canvas->mIndex);
+    RenderNodeDrawable drawable(parent.get(), surfaceLayer1->getCanvas(), true);
+    surfaceLayer1->getCanvas()->drawDrawable(&drawable);
+    EXPECT_EQ(4, drawCounter);
 
     // clean up layer pointer, so we can safely destruct RenderNode
     child->setLayerSurface(nullptr);
@@ -487,7 +489,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionChildScroll) {
     info.observer = nullptr;
     parent->prepareTree(info);
 
-    sk_sp<ProjectionChildScrollTestCanvas> canvas(new ProjectionChildScrollTestCanvas());
+    std::unique_ptr<ProjectionChildScrollTestCanvas> canvas(new ProjectionChildScrollTestCanvas());
     RenderNodeDrawable drawable(parent.get(), canvas.get(), true);
     canvas->drawDrawable(&drawable);
     EXPECT_EQ(2, canvas->mIndex);
