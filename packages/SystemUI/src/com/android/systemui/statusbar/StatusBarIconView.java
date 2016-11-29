@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -30,20 +33,55 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.FloatProperty;
 import android.util.Log;
+import android.util.Property;
 import android.util.TypedValue;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.animation.Interpolator;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 
 import java.text.NumberFormat;
 
 public class StatusBarIconView extends AnimatedImageView {
-    private static final String TAG = "StatusBarIconView";
-    private boolean mAlwaysScaleIcon;
+    public static final int STATE_ICON = 0;
+    public static final int STATE_DOT = 1;
+    public static final int STATE_HIDDEN = 2;
 
+    private static final String TAG = "StatusBarIconView";
+    private static final Property<StatusBarIconView, Float> ICON_APPEAR_AMOUNT
+            = new FloatProperty<StatusBarIconView>("iconAppearAmount") {
+
+        @Override
+        public void setValue(StatusBarIconView object, float value) {
+            object.setIconAppearAmount(value);
+        }
+
+        @Override
+        public Float get(StatusBarIconView object) {
+            return object.getIconAppearAmount();
+        }
+    };
+    private static final Property<StatusBarIconView, Float> DOT_APPEAR_AMOUNT
+            = new FloatProperty<StatusBarIconView>("dot_appear_amount") {
+
+        @Override
+        public void setValue(StatusBarIconView object, float value) {
+            object.setDotAppearAmount(value);
+        }
+
+        @Override
+        public Float get(StatusBarIconView object) {
+            return object.getDotAppearAmount();
+        }
+    };
+
+    private boolean mAlwaysScaleIcon;
     private StatusBarIcon mIcon;
     @ViewDebug.ExportedProperty private String mSlot;
     private Drawable mNumberBackground;
@@ -54,6 +92,16 @@ public class StatusBarIconView extends AnimatedImageView {
     private Notification mNotification;
     private final boolean mBlocked;
     private int mDensity;
+    private float mIconScale = 1.0f;
+    private final Paint mDotPaint = new Paint();
+    private boolean mDotVisible;
+    private float mDotRadius;
+    private int mStaticDotRadius;
+    private int mVisibleState = STATE_ICON;
+    private float mIconAppearAmount = 1.0f;
+    private ObjectAnimator mIconAppearAnimator;
+    private ObjectAnimator mDotAnimator;
+    private float mDotAppearAmount;
 
     public StatusBarIconView(Context context, String slot, Notification notification) {
         this(context, slot, notification, false);
@@ -72,6 +120,11 @@ public class StatusBarIconView extends AnimatedImageView {
         maybeUpdateIconScale();
         setScaleType(ScaleType.CENTER);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
+        if (mNotification != null) {
+            setIconTint(getContext().getColor(
+                    com.android.internal.R.color.notification_icon_default_color));
+        }
+        reloadDimens();
     }
 
     private void maybeUpdateIconScale() {
@@ -86,9 +139,11 @@ public class StatusBarIconView extends AnimatedImageView {
         Resources res = mContext.getResources();
         final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
         final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
-        final float scale = (float)imageBounds / (float)outerBounds;
-        setScaleX(scale);
-        setScaleY(scale);
+        mIconScale = (float)imageBounds / (float)outerBounds;
+    }
+
+    public float getIconScale() {
+        return mIconScale;
     }
 
     @Override
@@ -99,6 +154,15 @@ public class StatusBarIconView extends AnimatedImageView {
             mDensity = density;
             maybeUpdateIconScale();
             updateDrawable();
+            reloadDimens();
+        }
+    }
+
+    private void reloadDimens() {
+        boolean applyRadius = mDotRadius == mStaticDotRadius;
+        mStaticDotRadius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
+        if (applyRadius) {
+            mDotRadius = mStaticDotRadius;
         }
     }
 
@@ -259,11 +323,31 @@ public class StatusBarIconView extends AnimatedImageView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+        if (mIconAppearAmount > 0.0f) {
+            canvas.save();
+            canvas.scale(mIconScale * mIconAppearAmount, mIconScale * mIconAppearAmount,
+                    getWidth() / 2, getHeight() / 2);
+            super.onDraw(canvas);
+            canvas.restore();
+        }
 
         if (mNumberBackground != null) {
             mNumberBackground.draw(canvas);
             canvas.drawText(mNumberText, mNumberX, mNumberY, mNumberPain);
+        }
+        if (mDotAppearAmount != 0.0f) {
+            float radius;
+            float alpha;
+            if (mDotAppearAmount <= 1.0f) {
+                radius = mDotRadius * mDotAppearAmount;
+                alpha = 1.0f;
+            } else {
+                float fadeOutAmount = mDotAppearAmount - 1.0f;
+                alpha = 1.0f - fadeOutAmount;
+                radius = NotificationUtils.interpolate(mDotRadius, getWidth() / 4, fadeOutAmount);
+            }
+            mDotPaint.setAlpha((int) (alpha * 255));
+            canvas.drawCircle(getWidth() / 2, getHeight() / 2, radius, mDotPaint);
         }
     }
 
@@ -351,4 +435,97 @@ public class StatusBarIconView extends AnimatedImageView {
         return c.getString(R.string.accessibility_desc_notification_icon, appName, desc);
     }
 
+    public void setIconTint(int iconTint) {
+        mDotPaint.setColor(iconTint);
+    }
+
+    public void setVisibleState(int state) {
+        setVisibleState(state, true /* animate */, null /* endRunnable */);
+    }
+
+    public void setVisibleState(int state, boolean animate) {
+        setVisibleState(state, animate, null);
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
+    public void setVisibleState(int visibleState, boolean animate, Runnable endRunnable) {
+        if (visibleState != mVisibleState) {
+            mVisibleState = visibleState;
+            if (animate) {
+                if (mIconAppearAnimator != null) {
+                    mIconAppearAnimator.cancel();
+                }
+                float targetAmount = 0.0f;
+                Interpolator interpolator = Interpolators.FAST_OUT_LINEAR_IN;
+                if (visibleState == STATE_ICON) {
+                    targetAmount = 1.0f;
+                    interpolator = Interpolators.LINEAR_OUT_SLOW_IN;
+                }
+                mIconAppearAnimator = ObjectAnimator.ofFloat(this, ICON_APPEAR_AMOUNT,
+                        targetAmount);
+                mIconAppearAnimator.setInterpolator(interpolator);
+                mIconAppearAnimator.setDuration(100);
+                mIconAppearAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mIconAppearAnimator = null;
+                        if (endRunnable != null) {
+                            endRunnable.run();
+                        }
+                    }
+                });
+                mIconAppearAnimator.start();
+
+                if (mDotAnimator != null) {
+                    mDotAnimator.cancel();
+                }
+                targetAmount = visibleState == STATE_ICON ? 2.0f : 0.0f;
+                interpolator = Interpolators.FAST_OUT_LINEAR_IN;
+                if (visibleState == STATE_DOT) {
+                    targetAmount = 1.0f;
+                    interpolator = Interpolators.LINEAR_OUT_SLOW_IN;
+                }
+                mDotAnimator = ObjectAnimator.ofFloat(this, DOT_APPEAR_AMOUNT,
+                        targetAmount);
+                mDotAnimator.setInterpolator(interpolator);
+                mDotAnimator.setDuration(100);
+                mDotAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mDotAnimator = null;
+                    }
+                });
+                mDotAnimator.start();
+            } else {
+                setIconAppearAmount(visibleState == STATE_ICON ? 1.0f : 0.0f);
+                setDotAppearAmount(visibleState == STATE_DOT ? 1.0f : 0.0f);
+            }
+        }
+    }
+
+    public void setIconAppearAmount(float iconAppearAmount) {
+        mIconAppearAmount = iconAppearAmount;
+        invalidate();
+    }
+
+    public float getIconAppearAmount() {
+        return mIconAppearAmount;
+    }
+
+    public int getVisibleState() {
+        return mVisibleState;
+    }
+
+    public void setDotAppearAmount(float dotAppearAmount) {
+        mDotAppearAmount = dotAppearAmount;
+        invalidate();
+    }
+
+    public float getDotAppearAmount() {
+        return mDotAppearAmount;
+    }
 }

@@ -42,7 +42,6 @@ import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -258,7 +257,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected boolean mShowLockscreenNotifications;
     protected boolean mAllowLockscreenRemoteInput;
 
-    protected NotificationOverflowContainer mKeyguardIconOverflowContainer;
+    protected NotificationShelf mNotificationShelf;
     protected DismissView mDismissView;
     protected EmptyShadeView mEmptyShadeView;
 
@@ -1025,9 +1024,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
 
-        if (entry.icon != null) {
-            entry.icon.setTag(R.id.icon_is_pre_L, entry.targetSdk < Build.VERSION_CODES.LOLLIPOP);
-        }
+        entry.setIconTag(R.id.icon_is_pre_L, entry.targetSdk < Build.VERSION_CODES.LOLLIPOP);
     }
 
     public boolean isMediaNotification(NotificationData.Entry entry) {
@@ -2160,45 +2157,19 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (DEBUG) {
             Log.d(TAG, "createNotificationViews(notification=" + sbn);
         }
-        final StatusBarIconView iconView = createIcon(sbn);
-        if (iconView == null) {
-            return null;
+        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        try {
+            entry.createIcons(mContext, sbn);
+        } catch (NotificationData.IconException exception) {
+            handleNotificationError(sbn, exception.getMessage());
         }
 
         // Construct the expanded view.
-        NotificationData.Entry entry = new NotificationData.Entry(sbn, iconView);
         if (!inflateViews(entry, mStackScroller)) {
             handleNotificationError(sbn, "Couldn't expand RemoteViews for: " + sbn);
             return null;
         }
         return entry;
-    }
-
-    public StatusBarIconView createIcon(StatusBarNotification sbn) {
-        // Construct the icon.
-        Notification n = sbn.getNotification();
-        final StatusBarIconView iconView = new StatusBarIconView(mContext,
-                sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), n);
-        iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-
-        final Icon smallIcon = n.getSmallIcon();
-        if (smallIcon == null) {
-            handleNotificationError(sbn,
-                    "No small icon in notification from " + sbn.getPackageName());
-            return null;
-        }
-        final StatusBarIcon ic = new StatusBarIcon(
-                sbn.getUser(),
-                sbn.getPackageName(),
-                smallIcon,
-                n.iconLevel,
-                n.number,
-                StatusBarIconView.contentDescForNotification(mContext, n));
-        if (!iconView.set(ic)) {
-            handleNotificationError(sbn, "Couldn't create icon: " + ic);
-            return null;
-        }
-        return iconView;
     }
 
     protected void addNotificationViews(Entry entry, RankingMap ranking) {
@@ -2220,17 +2191,16 @@ public abstract class BaseStatusBar extends SystemUI implements
      * Updates expanded, dimmed and locked states of notification rows.
      */
     protected void updateRowStates() {
-        mKeyguardIconOverflowContainer.getIconsView().removeAllViews();
-
         ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
         final int N = activeNotifications.size();
 
         int visibleNotifications = 0;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
-        int maxNotifications = 0;
+        int maxNotifications = -1;
         if (onKeyguard) {
             maxNotifications = getMaxKeyguardNotifications(true /* recompute */);
         }
+        mStackScroller.setMaxDisplayedNotifications(maxNotifications);
         for (int i = 0; i < N; i++) {
             NotificationData.Entry entry = activeNotifications.get(i);
             boolean childNotification = mGroupManager.isChildInGroupWithSummary(entry.notification);
@@ -2249,12 +2219,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
             if (suppressedSummary
                     || (isLockscreenPublicMode(userId) && !mShowLockscreenNotifications)
-                    || (onKeyguard && !childWithVisibleSummary
-                            && (visibleNotifications >= maxNotifications || !showOnKeyguard))) {
+                    || (onKeyguard && !showOnKeyguard)) {
                 entry.row.setVisibility(View.GONE);
-                if (onKeyguard && showOnKeyguard && !childNotification && !suppressedSummary) {
-                    mKeyguardIconOverflowContainer.getIconsView().addNotification(entry);
-                }
             } else {
                 boolean wasGone = entry.row.getVisibility() == View.GONE;
                 entry.row.setVisibility(View.VISIBLE);
@@ -2269,13 +2235,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
 
-        mStackScroller.updateOverflowContainerVisibility(onKeyguard
-                && mKeyguardIconOverflowContainer.getIconsView().getChildCount() > 0);
-
         mStackScroller.changeViewPosition(mDismissView, mStackScroller.getChildCount() - 1);
         mStackScroller.changeViewPosition(mEmptyShadeView, mStackScroller.getChildCount() - 2);
-        mStackScroller.changeViewPosition(mKeyguardIconOverflowContainer,
-                mStackScroller.getChildCount() - 3);
+        mStackScroller.changeViewPosition(mNotificationShelf, mStackScroller.getChildCount() - 3);
     }
 
     public boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
@@ -2367,48 +2329,28 @@ public abstract class BaseStatusBar extends SystemUI implements
         mGroupManager.onEntryUpdated(entry, oldNotification);
 
         boolean updateSuccessful = false;
-        if (applyInPlace) {
-            if (DEBUG) Log.d(TAG, "reusing notification for key: " + key);
-            try {
-                if (entry.icon != null) {
-                    // Update the icon
-                    final StatusBarIcon ic = new StatusBarIcon(
-                            notification.getUser(),
-                            notification.getPackageName(),
-                            n.getSmallIcon(),
-                            n.iconLevel,
-                            n.number,
-                            StatusBarIconView.contentDescForNotification(mContext, n));
-                    entry.icon.setNotification(n);
-                    if (!entry.icon.set(ic)) {
-                        handleNotificationError(notification, "Couldn't update icon: " + ic);
-                        return;
-                    }
+        try {
+            if (applyInPlace) {
+                if (DEBUG) Log.d(TAG, "reusing notification for key: " + key);
+                try {
+                    entry.updateIcons(mContext, n);
+                    updateNotificationViews(entry, notification);
+                    updateSuccessful = true;
+                } catch (RuntimeException e) {
+                    // It failed to apply cleanly.
+                    Log.w(TAG, "Couldn't reapply views for package " +
+                            notification.getPackageName(), e);
                 }
-                updateNotificationViews(entry, notification);
-                updateSuccessful = true;
             }
-            catch (RuntimeException e) {
-                // It failed to apply cleanly.
-                Log.w(TAG, "Couldn't reapply views for package " +
-                        notification.getPackageName(), e);
+            if (!updateSuccessful) {
+                entry.updateIcons(mContext, n);
+                if (!inflateViews(entry, mStackScroller)) {
+                    handleNotificationError(notification, "Couldn't update remote views for: "
+                            + notification);
+                }
             }
-        }
-        if (!updateSuccessful) {
-            if (DEBUG) Log.d(TAG, "not reusing notification for key: " + key);
-            final StatusBarIcon ic = new StatusBarIcon(
-                    notification.getUser(),
-                    notification.getPackageName(),
-                    n.getSmallIcon(),
-                    n.iconLevel,
-                    n.number,
-                    StatusBarIconView.contentDescForNotification(mContext, n));
-            entry.icon.setNotification(n);
-            entry.icon.set(ic);
-            if (!inflateViews(entry, mStackScroller)) {
-                handleNotificationError(notification, "Couldn't update remote views for: "
-                        + notification);
-            }
+        } catch (NotificationData.IconException e) {
+            handleNotificationError(notification, e.getMessage());
         }
         updateHeadsUp(key, entry, shouldPeek, alertAgain);
         updateNotifications();

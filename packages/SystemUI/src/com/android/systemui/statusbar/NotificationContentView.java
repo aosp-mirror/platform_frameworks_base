@@ -121,7 +121,9 @@ public class NotificationContentView extends FrameLayout {
 
     private int mContentHeightAtAnimationStart = UNDEFINED;
     private boolean mFocusOnVisibilityChange;
-    private boolean mHeadsupDisappearRunning;
+    private boolean mHeadsUpAnimatingAway;
+    private boolean mIconsVisible;
+    private int mClipBottomAmount;
 
 
     public NotificationContentView(Context context, AttributeSet attrs) {
@@ -456,7 +458,7 @@ public class NotificationContentView extends FrameLayout {
                     isTransitioningFromTo(VISIBLE_TYPE_HEADSUP, VISIBLE_TYPE_EXPANDED) ||
                     isTransitioningFromTo(VISIBLE_TYPE_EXPANDED, VISIBLE_TYPE_HEADSUP);
             boolean pinned = !isVisibleOrTransitioning(VISIBLE_TYPE_CONTRACTED)
-                    && (mIsHeadsUp || mHeadsupDisappearRunning);
+                    && (mIsHeadsUp || mHeadsUpAnimatingAway);
             if (transitioningBetweenHunAndExpanded || pinned) {
                 return Math.min(mHeadsUpChild.getHeight(), mExpandedChild.getHeight());
             }
@@ -587,9 +589,24 @@ public class NotificationContentView extends FrameLayout {
         updateClipping();
     }
 
+
+    public void setClipBottomAmount(int clipBottomAmount) {
+        mClipBottomAmount = clipBottomAmount;
+        updateClipping();
+    }
+
+    @Override
+    public void setTranslationY(float translationY) {
+        super.setTranslationY(translationY);
+        updateClipping();
+    }
+
     private void updateClipping() {
         if (mClipToActualHeight) {
-            mClipBounds.set(0, mClipTopAmount, getWidth(), mContentHeight);
+            int top = (int) (mClipTopAmount - getTranslationY());
+            int bottom = (int) (mContentHeight - mClipBottomAmount - getTranslationY());
+            bottom = Math.max(top, bottom);
+            mClipBounds.set(0, top, getWidth(), bottom);
             setClipBounds(mClipBounds);
         } else {
             setClipBounds(null);
@@ -840,7 +857,7 @@ public class NotificationContentView extends FrameLayout {
             return VISIBLE_TYPE_SINGLELINE;
         }
 
-        if ((mIsHeadsUp || mHeadsupDisappearRunning) && mHeadsUpChild != null) {
+        if ((mIsHeadsUp || mHeadsUpAnimatingAway) && mHeadsUpChild != null) {
             if (viewHeight <= mHeadsUpChild.getHeight() || noExpandedChild) {
                 return VISIBLE_TYPE_HEADSUP;
             } else {
@@ -1183,12 +1200,38 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
-    public void setHeadsupDisappearRunning(boolean headsupDisappearRunning) {
-        mHeadsupDisappearRunning = headsupDisappearRunning;
+    public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
+        mHeadsUpAnimatingAway = headsUpAnimatingAway;
         selectLayout(false /* animate */, true /* force */);
     }
 
     public void setFocusOnVisibilityChange() {
         mFocusOnVisibilityChange = true;
+    }
+
+    public void setIconsVisible(boolean iconsVisible) {
+        mIconsVisible = iconsVisible;
+        updateIconVisibilities();
+    }
+
+    private void updateIconVisibilities() {
+        if (mContractedWrapper != null) {
+            NotificationHeaderView header = mContractedWrapper.getNotificationHeader();
+            if (header != null) {
+                header.getIcon().setForceHidden(!mIconsVisible);
+            }
+        }
+        if (mHeadsUpWrapper != null) {
+            NotificationHeaderView header = mHeadsUpWrapper.getNotificationHeader();
+            if (header != null) {
+                header.getIcon().setForceHidden(!mIconsVisible);
+            }
+        }
+        if (mExpandedWrapper != null) {
+            NotificationHeaderView header = mExpandedWrapper.getNotificationHeader();
+            if (header != null) {
+                header.getIcon().setForceHidden(!mIconsVisible);
+            }
+        }
     }
 }

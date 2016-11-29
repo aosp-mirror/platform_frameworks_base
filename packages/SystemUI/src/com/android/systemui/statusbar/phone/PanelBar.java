@@ -118,7 +118,7 @@ public abstract class PanelBar extends FrameLayout {
         boolean fullyOpened = false;
         if (SPEW) LOG("panelExpansionChanged: start state=%d", mState);
         PanelView pv = mPanel;
-        pv.setVisibility(expanded ? View.VISIBLE : View.INVISIBLE);
+        pv.setVisibility(expanded ? VISIBLE : INVISIBLE);
         // adjust any other panels that may be partially visible
         if (expanded) {
             if (mState == STATE_CLOSED) {

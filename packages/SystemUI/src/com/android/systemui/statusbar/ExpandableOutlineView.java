@@ -97,13 +97,21 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         if (mCustomOutline) {
             return;
         }
-        boolean hasOutline = true;
-        if (isChildInGroup()) {
-            hasOutline = isGroupExpanded() && !isGroupExpansionChanging();
-        } else if (isSummaryWithChildren()) {
-            hasOutline = !isGroupExpanded() || isGroupExpansionChanging();
-        }
+        boolean hasOutline = needsOutline();
         setOutlineProvider(hasOutline ? mProvider : null);
+    }
+
+    /**
+     * @return whether the view currently needs an outline. This is usually false in case it doesn't
+     * have a background.
+     */
+    protected boolean needsOutline() {
+        if (isChildInGroup()) {
+            return isGroupExpanded() && !isGroupExpansionChanging();
+        } else if (isSummaryWithChildren()) {
+            return !isGroupExpanded() || isGroupExpansionChanging();
+        }
+        return true;
     }
 
     public boolean isOutlineShowing() {

@@ -23,6 +23,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.stack.ExpandableViewState;
+import com.android.systemui.statusbar.stack.StackScrollState;
 
 public class EmptyShadeView extends StackScrollerDecorView {
 
@@ -39,5 +41,23 @@ public class EmptyShadeView extends StackScrollerDecorView {
     @Override
     protected View findContentView() {
         return findViewById(R.id.no_notifications);
+    }
+
+    @Override
+    public ExpandableViewState createNewViewState(StackScrollState stackScrollState) {
+        return new EmptyShadeViewState();
+    }
+
+    public static class EmptyShadeViewState extends ExpandableViewState {
+        @Override
+        public void applyToView(View view) {
+            super.applyToView(view);
+            if (view instanceof EmptyShadeView) {
+                EmptyShadeView emptyShadeView = (EmptyShadeView) view;
+                boolean visible = this.clipTopAmount <= 0;
+                emptyShadeView.performVisibilityAnimation(
+                        visible && !emptyShadeView.willBeGone());
+            }
+        }
     }
 }

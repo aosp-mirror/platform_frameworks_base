@@ -103,6 +103,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private boolean mWaitingOnCollapseWhenGoingAway;
     private boolean mIsObserving;
     private boolean mRemoteInputActive;
+    private float mExpandedHeight;
 
     public HeadsUpManager(final Context context, View statusBarWindowView,
                           NotificationGroupManager groupManager) {
@@ -513,7 +514,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
                 row = groupSummary;
             }
         }
-        return row.getPinnedHeadsUpHeight(true /* atLeastMinHeight */);
+        return row.getPinnedHeadsUpHeight();
     }
 
     /**

@@ -33,6 +33,7 @@ public class NotificationBackgroundView extends View {
     private Drawable mBackground;
     private int mClipTopAmount;
     private int mActualHeight;
+    private int mClipBottomAmount;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -44,8 +45,9 @@ public class NotificationBackgroundView extends View {
     }
 
     private void draw(Canvas canvas, Drawable drawable) {
-        if (drawable != null && mActualHeight > mClipTopAmount) {
-            drawable.setBounds(0, mClipTopAmount, getWidth(), mActualHeight);
+        int bottom = mActualHeight - mClipBottomAmount;
+        if (drawable != null && bottom > mClipTopAmount) {
+            drawable.setBounds(0, mClipTopAmount, getWidth(), bottom);
             drawable.draw(canvas);
         }
     }
@@ -117,6 +119,11 @@ public class NotificationBackgroundView extends View {
 
     public void setClipTopAmount(int clipTopAmount) {
         mClipTopAmount = clipTopAmount;
+        invalidate();
+    }
+
+    public void setClipBottomAmount(int clipBottomAmount) {
+        mClipBottomAmount = clipBottomAmount;
         invalidate();
     }
 

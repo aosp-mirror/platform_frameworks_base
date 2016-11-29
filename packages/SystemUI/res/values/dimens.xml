@@ -81,8 +81,15 @@
     <!-- Height of a heads up notification in the status bar -->
     <dimen name="notification_max_heads_up_height">148dp</dimen>
 
-    <!-- Height of a the summary ("more card") notification on keyguard. -->
-    <dimen name="notification_summary_height">44dp</dimen>
+    <!-- Height of a the shelf with the notification icons -->
+    <dimen name="notification_shelf_height">32dp</dimen>
+
+    <!-- The padding of a notification icon on top to the start of the notification. Used for custom
+         views where the distance can't be measured -->
+    <dimen name="notification_icon_appear_padding">15dp</dimen>
+
+    <!-- The amount the content shifts upwards when transforming into the icon -->
+    <dimen name="notification_icon_transform_content_shift">32dp</dimen>
 
     <!-- Minimum layouted height of a notification in the statusbar-->
     <dimen name="min_notification_layout_height">48dp</dimen>
@@ -94,13 +101,22 @@
     <dimen name="notification_gear_padding">20dp</dimen>
 
     <!-- size at which Notification icons will be drawn in the status bar -->
-    <dimen name="status_bar_icon_drawing_size">17dip</dimen>
+    <dimen name="status_bar_icon_drawing_size">17dp</dimen>
 
     <!-- opacity at which Notification icons will be drawn in the status bar -->
     <item type="dimen" name="status_bar_icon_drawing_alpha">90%</item>
 
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">0dp</dimen>
+
+    <!-- the padding on the start of the statusbar -->
+    <dimen name="status_bar_padding_start">6dp</dimen>
+
+    <!-- the radius of the overflow dot in the status bar -->
+    <dimen name="overflow_dot_radius">1dp</dimen>
+
+    <!-- the padding between dots in the icon overflow -->
+    <dimen name="overflow_icon_dot_padding">3dp</dimen>
 
     <!-- The padding on the global screenshot background image -->
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
@@ -257,15 +273,9 @@
     <!-- Default distance from each snap target that GlowPadView considers a "hit" -->
     <dimen name="glowpadview_inner_radius">15dip</dimen>
 
-    <!-- Space reserved for the cards behind the top card in the bottom stack -->
-    <dimen name="bottom_stack_peek_amount">12dp</dimen>
-
     <!-- bottom_stack_peek_amount + notification_min_height
          + notification_collapse_second_card_padding -->
     <dimen name="min_stack_height">104dp</dimen>
-
-    <!-- The height of the area before the bottom stack in which the notifications slow down -->
-    <dimen name="bottom_stack_slow_down_length">12dp</dimen>
 
     <!-- Z distance between notifications if they are in the stack -->
     <dimen name="z_distance_between_notifications">0.5dp</dimen>

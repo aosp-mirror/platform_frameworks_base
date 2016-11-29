@@ -235,7 +235,7 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getActionMasked() == MotionEvent.ACTION_DOWN
-                && mNotificationPanel.getExpandedHeight() == 0f) {
+                && mNotificationPanel.isFullyCollapsed()) {
             mNotificationPanel.startExpandLatencyTracking();
         }
         mFalsingManager.onTouchEvent(ev, getWidth(), getHeight());

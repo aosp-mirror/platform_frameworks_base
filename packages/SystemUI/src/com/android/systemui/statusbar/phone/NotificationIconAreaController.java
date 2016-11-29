@@ -8,16 +8,19 @@ import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
+import java.util.function.Function;
 
 /**
  * A controller for the space in the status bar to the left of the system icons. This area is
@@ -32,13 +35,16 @@ public class NotificationIconAreaController {
 
     private PhoneStatusBar mPhoneStatusBar;
     protected View mNotificationIconArea;
-    private IconMerger mNotificationIcons;
-    private ImageView mMoreIcon;
+    private NotificationIconContainer mNotificationIcons;
+    private NotificationIconContainer mShelfIcons;
     private final Rect mTintArea = new Rect();
+    private NotificationStackScrollLayout mNotificationScrollLayout;
+    private Context mContext;
 
     public NotificationIconAreaController(Context context, PhoneStatusBar phoneStatusBar) {
         mPhoneStatusBar = phoneStatusBar;
         mNotificationColorUtil = NotificationColorUtil.getInstance(context);
+        mContext = context;
 
         initializeNotificationAreaViews(context);
     }
@@ -55,15 +61,14 @@ public class NotificationIconAreaController {
 
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         mNotificationIconArea = inflateIconArea(layoutInflater);
+        mNotificationIcons = (NotificationIconContainer) mNotificationIconArea.findViewById(
+                R.id.notificationIcons);
 
-        mNotificationIcons =
-                (IconMerger) mNotificationIconArea.findViewById(R.id.notificationIcons);
+        NotificationShelf shelf = mPhoneStatusBar.getNotificationShelf();
+        mShelfIcons = shelf.getShelfIcons();
+        shelf.setCollapsedIcons(mNotificationIcons);
 
-        mMoreIcon = (ImageView) mNotificationIconArea.findViewById(R.id.moreIcon);
-        if (mMoreIcon != null) {
-            mMoreIcon.setImageTintList(ColorStateList.valueOf(mIconTint));
-            mNotificationIcons.setOverflowIndicator(mMoreIcon);
-        }
+        mNotificationScrollLayout = mPhoneStatusBar.getNotificationScrollLayout();
     }
 
     public void onDensityOrFontScaleChanged(Context context) {
@@ -109,14 +114,10 @@ public class NotificationIconAreaController {
     }
 
     /**
-     * Sets the color that should be used to tint any icons in the notification area. If this
-     * method is not called, the default tint is {@link Color#WHITE}.
+     * Sets the color that should be used to tint any icons in the notification area.
      */
     public void setIconTint(int iconTint) {
         mIconTint = iconTint;
-        if (mMoreIcon != null) {
-            mMoreIcon.setImageTintList(ColorStateList.valueOf(mIconTint));
-        }
         applyNotificationIconsTint();
     }
 
@@ -144,24 +145,54 @@ public class NotificationIconAreaController {
      * Updates the notifications with the given list of notifications to display.
      */
     public void updateNotificationIcons(NotificationData notificationData) {
-        final LinearLayout.LayoutParams params = generateIconLayoutParams();
 
-        ArrayList<NotificationData.Entry> activeNotifications =
-                notificationData.getActiveNotifications();
-        final int size = activeNotifications.size();
-        ArrayList<StatusBarIconView> toShow = new ArrayList<>(size);
+        updateIconsForLayout(notificationData, entry -> entry.icon, mNotificationIcons);
+        updateIconsForLayout(notificationData, entry -> entry.expandedIcon, mShelfIcons);
+
+        applyNotificationIconsTint();
+        ArrayList<NotificationData.Entry> activeNotifications
+                = notificationData.getActiveNotifications();
+        for (int i = 0; i < activeNotifications.size(); i++) {
+            NotificationData.Entry entry = activeNotifications.get(i);
+            boolean isPreL = Boolean.TRUE.equals(entry.expandedIcon.getTag(R.id.icon_is_pre_L));
+            boolean colorize = !isPreL
+                    || NotificationUtils.isGrayscale(entry.expandedIcon, mNotificationColorUtil);
+            if (colorize) {
+                int color = entry.getContrastedColor(mContext);
+                entry.expandedIcon.setImageTintList(ColorStateList.valueOf(color));
+            }
+        }
+    }
+
+    /**
+     * Updates the notification icons for a host layout. This will ensure that the notification
+     * host layout will have the same icons like the ones in here.
+     *
+     * @param notificationData the notification data to look up which notifications are relevant
+     * @param function A function to look up an icon view based on an entry
+     * @param hostLayout which layout should be updated
+     */
+    private void updateIconsForLayout(NotificationData notificationData,
+            Function<NotificationData.Entry, StatusBarIconView> function,
+            NotificationIconContainer hostLayout) {
+        ArrayList<StatusBarIconView> toShow = new ArrayList<>(
+                mNotificationScrollLayout.getChildCount());
 
         // Filter out ambient notifications and notification children.
-        for (int i = 0; i < size; i++) {
-            NotificationData.Entry ent = activeNotifications.get(i);
-            if (shouldShowNotification(ent, notificationData)) {
-                toShow.add(ent.icon);
+        for (int i = 0; i < mNotificationScrollLayout.getChildCount(); i++) {
+            View view = mNotificationScrollLayout.getChildAt(i);
+            if (view instanceof ExpandableNotificationRow) {
+                NotificationData.Entry ent = ((ExpandableNotificationRow) view).getEntry();
+                if (shouldShowNotification(ent, notificationData)) {
+                    toShow.add(function.apply(ent));
+                }
             }
         }
 
+
         ArrayList<View> toRemove = new ArrayList<>();
-        for (int i = 0; i < mNotificationIcons.getChildCount(); i++) {
-            View child = mNotificationIcons.getChildAt(i);
+        for (int i = 0; i < hostLayout.getChildCount(); i++) {
+            View child = hostLayout.getChildAt(i);
             if (!toShow.contains(child)) {
                 toRemove.add(child);
             }
@@ -169,29 +200,32 @@ public class NotificationIconAreaController {
 
         final int toRemoveCount = toRemove.size();
         for (int i = 0; i < toRemoveCount; i++) {
-            mNotificationIcons.removeView(toRemove.get(i));
+            hostLayout.removeView(toRemove.get(i));
         }
 
+        final LinearLayout.LayoutParams params = generateIconLayoutParams();
         for (int i = 0; i < toShow.size(); i++) {
             View v = toShow.get(i);
+            // The view might still be transiently added if it was just removed and added again
+            hostLayout.removeTransientView(v);
             if (v.getParent() == null) {
-                mNotificationIcons.addView(v, i, params);
+                hostLayout.addView(v, i, params);
             }
         }
 
+        hostLayout.setChangingViewPositions(true);
         // Re-sort notification icons
-        final int childCount = mNotificationIcons.getChildCount();
+        final int childCount = hostLayout.getChildCount();
         for (int i = 0; i < childCount; i++) {
-            View actual = mNotificationIcons.getChildAt(i);
+            View actual = hostLayout.getChildAt(i);
             StatusBarIconView expected = toShow.get(i);
             if (actual == expected) {
                 continue;
             }
-            mNotificationIcons.removeView(expected);
-            mNotificationIcons.addView(expected, i);
+            hostLayout.removeView(expected);
+            hostLayout.addView(expected, i);
         }
-
-        applyNotificationIconsTint();
+        hostLayout.setChangingViewPositions(false);
     }
 
     /**
@@ -206,6 +240,7 @@ public class NotificationIconAreaController {
                 v.setImageTintList(ColorStateList.valueOf(
                         StatusBarIconController.getTint(mTintArea, v, mIconTint)));
             }
+            v.setIconTint(mIconTint);
         }
     }
 }

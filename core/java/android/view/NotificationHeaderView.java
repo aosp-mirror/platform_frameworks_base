@@ -28,6 +28,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 
+import com.android.internal.widget.CachingIconView;
+
 import java.util.ArrayList;
 
 /**
@@ -45,7 +47,7 @@ public class NotificationHeaderView extends ViewGroup {
     private OnClickListener mExpandClickListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
     private ImageView mExpandButton;
-    private View mIcon;
+    private CachingIconView mIcon;
     private View mProfileBadge;
     private View mInfo;
     private int mIconColor;
@@ -123,7 +125,7 @@ public class NotificationHeaderView extends ViewGroup {
         if (mExpandButton != null) {
             mExpandButton.setAccessibilityDelegate(mExpandDelegate);
         }
-        mIcon = findViewById(com.android.internal.R.id.icon);
+        mIcon = (CachingIconView) findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
     }
 
@@ -309,6 +311,10 @@ public class NotificationHeaderView extends ViewGroup {
 
     public View getWorkProfileIcon() {
         return mProfileBadge;
+    }
+
+    public CachingIconView getIcon() {
+        return mIcon;
     }
 
     public class HeaderTouchListener implements View.OnTouchListener {

@@ -23,6 +23,7 @@ import java.util.ArrayList;
  */
 public class AnimationFilter {
     boolean animateAlpha;
+    boolean animateX;
     boolean animateY;
     boolean animateZ;
     boolean animateHeight;
@@ -39,6 +40,11 @@ public class AnimationFilter {
 
     public AnimationFilter animateAlpha() {
         animateAlpha = true;
+        return this;
+    }
+
+    public AnimationFilter animateX() {
+        animateX = true;
         return this;
     }
 
@@ -116,6 +122,7 @@ public class AnimationFilter {
 
     private void combineFilter(AnimationFilter filter) {
         animateAlpha |= filter.animateAlpha;
+        animateX |= filter.animateX;
         animateY |= filter.animateY;
         animateZ |= filter.animateZ;
         animateHeight |= filter.animateHeight;
@@ -129,6 +136,7 @@ public class AnimationFilter {
 
     private void reset() {
         animateAlpha = false;
+        animateX = false;
         animateY = false;
         animateZ = false;
         animateHeight = false;

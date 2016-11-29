@@ -80,7 +80,7 @@ public class KeyguardClockPositionAlgorithm {
         mClockYFractionMin = res.getFraction(R.fraction.keyguard_clock_y_fraction_min, 1, 1);
         mClockYFractionMax = res.getFraction(R.fraction.keyguard_clock_y_fraction_max, 1, 1);
         mMoreCardNotificationAmount =
-                (float) res.getDimensionPixelSize(R.dimen.notification_summary_height) /
+                (float) res.getDimensionPixelSize(R.dimen.notification_shelf_height) /
                         res.getDimensionPixelSize(R.dimen.notification_min_height);
         mDensity = res.getDisplayMetrics().density;
     }

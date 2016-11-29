@@ -62,6 +62,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
 
     private Drawable mBackground;
     private int mClipTopAmount;
+    private int mClipBottomAmount;
     private int mActualHeight;
     private boolean mExposed;
     private INotificationManager mINotificationManager;
@@ -136,8 +137,10 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
     }
 
     private void draw(Canvas canvas, Drawable drawable) {
-        if (drawable != null) {
-            drawable.setBounds(0, mClipTopAmount, getWidth(), mActualHeight);
+        int top = mClipTopAmount;
+        int bottom = mActualHeight - mClipBottomAmount;
+        if (drawable != null && top < bottom) {
+            drawable.setBounds(0, top, getWidth(), bottom);
             drawable.draw(canvas);
         }
     }
@@ -420,6 +423,11 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
 
     public void setClipTopAmount(int clipTopAmount) {
         mClipTopAmount = clipTopAmount;
+        invalidate();
+    }
+
+    public void setClipBottomAmount(int clipBottomAmount) {
+        mClipBottomAmount = clipBottomAmount;
         invalidate();
     }
 
