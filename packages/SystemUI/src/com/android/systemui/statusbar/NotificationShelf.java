@@ -417,6 +417,9 @@ public class NotificationShelf extends ActivatableNotificationView {
                 iconState.scaleY = 1.0f;
                 iconState.hidden = false;
             }
+            if (row.isAboveShelf()) {
+                iconState.hidden = true;
+            }
         }
     }
 
