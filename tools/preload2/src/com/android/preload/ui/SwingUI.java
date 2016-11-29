@@ -41,7 +41,7 @@ import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
-public class UI extends JFrame {
+public class SwingUI extends JFrame implements IUI {
 
     private JList<Client> clientList;
     private JTable dataTable;
@@ -49,11 +49,13 @@ public class UI extends JFrame {
     // Shared file chooser, means the directory is retained.
     private JFileChooser jfc;
 
-    public UI(ListModel<Client> clientListModel,
-              TableModel dataTableModel,
-              List<Action> actions) {
+    public SwingUI() {
         super("Preloaded-classes computation");
+    }
 
+    @Override
+    public void prepare(ListModel<Client> clientListModel, TableModel dataTableModel,
+            List<Action> actions) {
         getContentPane().add(new JScrollPane(clientList = new JList<Client>(clientListModel)),
                 BorderLayout.WEST);
         clientList.setCellRenderer(new ClientListCellRenderer());
@@ -74,18 +76,27 @@ public class UI extends JFrame {
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 800, 600);
+
+        setVisible(true);
     }
 
+    @Override
+    public void ready() {
+    }
+
+    @Override
     public Client getSelectedClient() {
         return clientList.getSelectedValue();
     }
 
+    @Override
     public int getSelectedDataTableRow() {
         return dataTable.getSelectedRow();
     }
 
     private JDialog currentWaitDialog = null;
 
+    @Override
     public void showWaitDialog() {
         if (currentWaitDialog == null) {
             currentWaitDialog = new JDialog(this, "Please wait...", true);
@@ -111,6 +122,7 @@ public class UI extends JFrame {
         });
     }
 
+    @Override
     public void updateWaitDialog(String s) {
         if (currentWaitDialog != null) {
             ((JLabel) currentWaitDialog.getContentPane().getComponent(0)).setText(s);
@@ -124,6 +136,7 @@ public class UI extends JFrame {
         }
     }
 
+    @Override
     public void hideWaitDialog() {
         if (currentWaitDialog != null) {
             currentWaitDialog.setVisible(false);
@@ -131,6 +144,7 @@ public class UI extends JFrame {
         }
     }
 
+    @Override
     public void showMessageDialog(String s) {
         // Hide the wait dialog...
         if (currentWaitDialog != null) {
@@ -147,6 +161,7 @@ public class UI extends JFrame {
         }
     }
 
+    @Override
     public boolean showConfirmDialog(String title, String message) {
         // Hide the wait dialog...
         if (currentWaitDialog != null) {
@@ -164,6 +179,7 @@ public class UI extends JFrame {
         }
     }
 
+    @Override
     public String showInputDialog(String message) {
         // Hide the wait dialog...
         if (currentWaitDialog != null) {
@@ -180,6 +196,7 @@ public class UI extends JFrame {
         }
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public <T> T showChoiceDialog(String title, String message, T[] choices) {
         // Hide the wait dialog...
@@ -203,6 +220,7 @@ public class UI extends JFrame {
         }
     }
 
+    @Override
     public File showSaveDialog() {
         // Hide the wait dialog...
         if (currentWaitDialog != null) {
@@ -228,6 +246,7 @@ public class UI extends JFrame {
         }
     }
 
+    @Override
     public File[] showOpenDialog(boolean multi) {
         // Hide the wait dialog...
         if (currentWaitDialog != null) {
