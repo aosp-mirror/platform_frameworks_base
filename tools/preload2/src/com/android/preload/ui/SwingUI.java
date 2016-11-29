@@ -54,6 +54,11 @@ public class SwingUI extends JFrame implements IUI {
     }
 
     @Override
+    public boolean isSingleThreaded() {
+        return false;
+    }
+
+    @Override
     public void prepare(ListModel<Client> clientListModel, TableModel dataTableModel,
             List<Action> actions) {
         getContentPane().add(new JScrollPane(clientList = new JList<Client>(clientListModel)),
