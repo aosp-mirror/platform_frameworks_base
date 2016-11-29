@@ -28,7 +28,7 @@ LOCAL_JAVA_LIBRARIES := layoutlib \
 			layoutlib_api-prebuilt \
 			tools-common-prebuilt \
 			sdk-common \
-			junit
+			junit-host
 
 include $(BUILD_HOST_JAVA_LIBRARY)
 
