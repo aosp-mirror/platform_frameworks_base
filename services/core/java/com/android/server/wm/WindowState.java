@@ -3190,7 +3190,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean isDockedResizing() {
-        return mDragResizing && getResizeMode() == DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+        return (mDragResizing && getResizeMode() == DRAG_RESIZE_MODE_DOCKED_DIVIDER)
+                || (isChildWindow() && getParentWindow().isDockedResizing());
     }
 
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
@@ -4142,6 +4143,105 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else if (mWinAnimator.isAnimationSet()) {
             results.nowGone = false;
         }
+    }
+
+    /**
+     * Calculate the window crop according to system decor policy. In general this is
+     * the system decor rect (see #calculateSystemDecorRect), but we also have some
+     * special cases. This rectangle is in screen space.
+     */
+    void calculatePolicyCrop(Rect policyCrop) {
+        final DisplayContent displayContent = getDisplayContent();
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+
+        if (!isDefaultDisplay()) {
+            // On a different display there is no system decor. Crop the window
+            // by the screen boundaries.
+            // TODO(multi-display)
+            policyCrop.set(0, 0, mCompatFrame.width(), mCompatFrame.height());
+            policyCrop.intersect(-mCompatFrame.left, -mCompatFrame.top,
+                    displayInfo.logicalWidth - mCompatFrame.left,
+                    displayInfo.logicalHeight - mCompatFrame.top);
+        } else if (mLayer >= mService.mSystemDecorLayer) {
+            // Above the decor layer is easy, just use the entire window
+            policyCrop.set(0, 0, mCompatFrame.width(), mCompatFrame.height());
+        } else if (mDecorFrame.isEmpty()) {
+            // Windows without policy decor aren't cropped.
+            policyCrop.set(0, 0, mCompatFrame.width(), mCompatFrame.height());
+        } else {
+            // Crop to the system decor specified by policy.
+            calculateSystemDecorRect(policyCrop);
+        }
+    }
+
+    /**
+     * The system decor rect is the region of the window which is not covered
+     * by system decorations.
+     */
+    private void calculateSystemDecorRect(Rect systemDecorRect) {
+        final Rect decorRect = mDecorFrame;
+        final int width = mFrame.width();
+        final int height = mFrame.height();
+
+        // Compute the offset of the window in relation to the decor rect.
+        final int left = mXOffset + mFrame.left;
+        final int top = mYOffset + mFrame.top;
+
+        // Initialize the decor rect to the entire frame.
+        if (isDockedResizing()) {
+            // If we are resizing with the divider, the task bounds might be smaller than the
+            // stack bounds. The system decor is used to clip to the task bounds, which we don't
+            // want in this case in order to avoid holes.
+            //
+            // We take care to not shrink the width, for surfaces which are larger than
+            // the display region. Of course this area will not eventually be visible
+            // but if we truncate the width now, we will calculate incorrectly
+            // when adjusting to the stack bounds.
+            final DisplayInfo displayInfo = getDisplayContent().getDisplayInfo();
+            systemDecorRect.set(0, 0,
+                    Math.max(width, displayInfo.logicalWidth),
+                    Math.max(height, displayInfo.logicalHeight));
+        } else {
+            systemDecorRect.set(0, 0, width, height);
+        }
+
+        // If a freeform window is animating from a position where it would be cutoff, it would be
+        // cutoff during the animation. We don't want that, so for the duration of the animation
+        // we ignore the decor cropping and depend on layering to position windows correctly.
+        final boolean cropToDecor = !(inFreeformWorkspace() && isAnimatingLw());
+        if (cropToDecor) {
+            // Intersect with the decor rect, offsetted by window position.
+            systemDecorRect.intersect(decorRect.left - left, decorRect.top - top,
+                    decorRect.right - left, decorRect.bottom - top);
+        }
+
+        // If size compatibility is being applied to the window, the
+        // surface is scaled relative to the screen.  Also apply this
+        // scaling to the crop rect.  We aren't using the standard rect
+        // scale function because we want to round things to make the crop
+        // always round to a larger rect to ensure we don't crop too
+        // much and hide part of the window that should be seen.
+        if (mEnforceSizeCompat && mInvGlobalScale != 1.0f) {
+            final float scale = mInvGlobalScale;
+            systemDecorRect.left = (int) (systemDecorRect.left * scale - 0.5f);
+            systemDecorRect.top = (int) (systemDecorRect.top * scale - 0.5f);
+            systemDecorRect.right = (int) ((systemDecorRect.right + 1) * scale - 0.5f);
+            systemDecorRect.bottom = (int) ((systemDecorRect.bottom + 1) * scale - 0.5f);
+        }
+
+    }
+
+    /**
+     * Expand the given rectangle by this windows surface insets. This
+     * takes you from the 'window size' to the 'surface size'.
+     * The surface insets are positive in each direction, so we inset by
+     * the inverse.
+     */
+    void expandForSurfaceInsets(Rect r) {
+        r.inset(-mAttrs.surfaceInsets.left,
+                -mAttrs.surfaceInsets.top,
+                -mAttrs.surfaceInsets.right,
+                -mAttrs.surfaceInsets.bottom);
     }
 
     // TODO: Hack to work around the number of states AppWindowToken needs to access without having

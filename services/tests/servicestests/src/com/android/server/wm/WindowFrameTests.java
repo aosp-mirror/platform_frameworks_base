@@ -27,6 +27,7 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IWindow;
 import android.view.WindowManager;
@@ -53,6 +54,7 @@ public class WindowFrameTests {
 
     class WindowStateWithTask extends WindowState {
         final Task mTask;
+        boolean mDockedResizingForTest = false;
         WindowStateWithTask(WindowManager.LayoutParams attrs, Task t) {
             super(sWm, null, mIWindow, mWindowToken, null, 0, 0, attrs, 0, 0);
             mTask = t;
@@ -61,6 +63,11 @@ public class WindowFrameTests {
         @Override
         Task getTask() {
             return mTask;
+        }
+
+        @Override
+        boolean isDockedResizing() {
+            return mDockedResizingForTest;
         }
     };
 
@@ -92,6 +99,10 @@ public class WindowFrameTests {
     public void setUp() throws Exception {
         final Context context = InstrumentationRegistry.getTargetContext();
         sWm = TestWindowManagerPolicy.getWindowManagerService(context);
+
+        // Just any non zero value.
+        sWm.mSystemDecorLayer = 10000;
+
         mWindowToken = new WindowToken(sWm, new Binder(), 0, false,
                 sWm.getDefaultDisplayContentLocked());
         mStubStack = new TaskStack(sWm, 0);
@@ -274,7 +285,63 @@ public class WindowFrameTests {
         assertRect(w.mContentInsets, 0, 0, 100, 100);
     }
 
-    private WindowState createWindow(Task task, int width, int height) {
+    @Test
+    public void testCalculatePolicyCrop() {
+        final WindowStateWithTask w = createWindow(
+                new TaskWithBounds(null), FILL_PARENT, FILL_PARENT);
+        w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
+
+        final Rect pf = new Rect(0, 0, 1000, 1000);
+        final Rect df = pf;
+        final Rect of = df;
+        final Rect cf = new Rect(pf);
+        // Produce some insets
+        cf.top += 50;
+        cf.bottom -= 100;
+        final Rect vf = cf;
+        final Rect sf = vf;
+        // We use a decor content frame with insets to produce cropping.
+        Rect dcf = cf;
+
+        final Rect policyCrop = new Rect();
+
+        w.computeFrameLw(pf, df, of, cf, vf, dcf, sf, null);
+        w.calculatePolicyCrop(policyCrop);
+        // If we were above system decor we wouldnt' get any cropping though
+        w.mLayer = sWm.mSystemDecorLayer + 1;
+        w.calculatePolicyCrop(policyCrop);
+        assertRect(policyCrop, 0, 0, 1000, 1000);
+        w.mLayer = 1;
+        dcf.setEmpty();
+        // Likewise with no decor frame we would get no crop
+        w.computeFrameLw(pf, df, of, cf, vf, dcf, sf, null);
+        w.calculatePolicyCrop(policyCrop);
+        assertRect(policyCrop, 0, 0, 1000, 1000);
+
+        // Now we set up a window which doesn't fill the entire decor frame.
+        // Normally it would be cropped to it's frame but in the case of docked resizing
+        // we need to account for the fact the windows surface will be made
+        // fullscreen and thus also make the crop fullscreen.
+        w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
+        w.mAttrs.width = 500;
+        w.mAttrs.height = 500;
+        w.mRequestedWidth = 500;
+        w.mRequestedHeight = 500;
+        w.computeFrameLw(pf, pf, pf, pf, pf, pf, pf, pf);
+
+        w.calculatePolicyCrop(policyCrop);
+        // Normally the crop is shrunk from the decor frame
+        // to the computed window frame.
+        assertRect(policyCrop, 0, 0, 500, 500);
+
+        w.mDockedResizingForTest = true;
+        w.calculatePolicyCrop(policyCrop);
+        // But if we are docked resizing it won't be.
+        final DisplayInfo displayInfo = w.getDisplayContent().getDisplayInfo();
+        assertRect(policyCrop, 0, 0, 1000, 1000);
+    }
+
+    private WindowStateWithTask createWindow(Task task, int width, int height) {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
         attrs.width = width;
         attrs.height = height;
