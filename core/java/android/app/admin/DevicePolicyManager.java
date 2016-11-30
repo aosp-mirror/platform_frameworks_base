@@ -3844,14 +3844,22 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @return true if the device is managed by any device owner.
+     * Called by the system to find out whether the device is managed by a Device Owner.
      *
-     * <p>Requires the MANAGE_USERS permission.
+     * @return whether the device is managed by a Device Owner.
+     * @throws SecurityException if the caller is not the device owner, does not hold the
+     *         MANAGE_USERS permission and is not the system.
      *
      * @hide
      */
+    @SystemApi
+    @TestApi
     public boolean isDeviceManaged() {
-        return getDeviceOwnerComponentOnAnyUser() != null;
+        try {
+            return mService.hasDeviceOwner();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
