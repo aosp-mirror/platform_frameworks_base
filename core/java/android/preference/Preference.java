@@ -21,6 +21,7 @@ import com.android.internal.util.CharSequences;
 
 import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
+import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.content.Context;
 import android.content.Intent;
@@ -88,7 +89,17 @@ public class Preference implements Comparable<Preference> {
     public static final int DEFAULT_ORDER = Integer.MAX_VALUE;
 
     private Context mContext;
+
+    @Nullable
     private PreferenceManager mPreferenceManager;
+
+    /**
+     * The data store that should be used by this Preference to store / retrieve data. If null then
+     * {@link PreferenceManager#getPreferenceDataStore()} needs to be checked. If that one is null
+     * too it means that we are using {@link android.content.SharedPreferences} to store the data.
+     */
+    @Nullable
+    private PreferenceDataStore mPreferenceDataStore;
 
     /**
      * Set when added to hierarchy since we need a unique ID within that
@@ -392,6 +403,36 @@ public class Preference implements Comparable<Preference> {
      */
     public String getFragment() {
         return mFragment;
+    }
+
+    /**
+     * Sets a {@link PreferenceDataStore} to be used by this Preference instead of using
+     * {@link android.content.SharedPreferences}.
+     * <p>
+     * The data store will remain assigned even if the Preference is moved between multiple
+     * instances of {@link PreferenceFragment}.
+     *
+     * @param dataStore The {@link PreferenceDataStore} to be used by this Preference.
+     */
+    public void setPreferenceDataStore(PreferenceDataStore dataStore) {
+        mPreferenceDataStore = dataStore;
+    }
+
+    /**
+     * Returns {@link PreferenceDataStore} used by this Preference. Returns {@code null} if
+     * {@link android.content.SharedPreferences} is used instead.
+     *
+     * @return The {@link PreferenceDataStore} used by this Preference or {@code null} if none.
+     */
+    @Nullable
+    public PreferenceDataStore getPreferenceDataStore() {
+        if (mPreferenceDataStore != null) {
+            return mPreferenceDataStore;
+        } else if (mPreferenceManager != null) {
+            return mPreferenceManager.getPreferenceDataStore();
+        }
+
+        return null;
     }
 
     /**
@@ -1426,44 +1467,42 @@ public class Preference implements Comparable<Preference> {
     }
 
     /**
-     * Attempts to persist a String to the {@link android.content.SharedPreferences}.
-     * <p>
-     * This will check if this Preference is persistent, get an editor from
-     * the {@link PreferenceManager}, put in the string, and check if we should commit (and
-     * commit if so).
+     * Attempts to persist a String if this Preference is persistent.
      *
      * @param value The value to persist.
-     * @return True if the Preference is persistent. (This is not whether the
+     * @return True if this Preference is persistent. (This is not whether the
      *         value was persisted, since we may not necessarily commit if there
      *         will be a batch commit later.)
      * @see #getPersistedString(String)
      */
     protected boolean persistString(String value) {
-        if (shouldPersist()) {
-            // Shouldn't store null
-            if (TextUtils.equals(value, getPersistedString(null))) {
-                // It's already there, so the same as persisting
-                return true;
-            }
+        if (!shouldPersist()) {
+            return false;
+        }
 
+        // Shouldn't store null
+        if (TextUtils.equals(value, getPersistedString(null))) {
+            // It's already there, so the same as persisting
+            return true;
+        }
+
+        PreferenceDataStore dataStore = getPreferenceDataStore();
+        if (dataStore != null) {
+            dataStore.putString(mKey, value);
+        } else {
             SharedPreferences.Editor editor = mPreferenceManager.getEditor();
             editor.putString(mKey, value);
             tryCommit(editor);
-            return true;
         }
-        return false;
+        return true;
     }
 
     /**
-     * Attempts to get a persisted String from the {@link android.content.SharedPreferences}.
-     * <p>
-     * This will check if this Preference is persistent, get the SharedPreferences
-     * from the {@link PreferenceManager}, and get the value.
+     * Attempts to get a persisted String if this Preference is persistent.
      *
-     * @param defaultReturnValue The default value to return if either the
-     *            Preference is not persistent or the Preference is not in the
-     *            shared preferences.
-     * @return The value from the SharedPreferences or the default return
+     * @param defaultReturnValue The default value to return if either this
+     *            Preference is not persistent or this Preference is not present.
+     * @return The value from the data store or the default return
      *         value.
      * @see #persistString(String)
      */
@@ -1472,49 +1511,51 @@ public class Preference implements Comparable<Preference> {
             return defaultReturnValue;
         }
 
+        PreferenceDataStore dataStore = getPreferenceDataStore();
+        if (dataStore != null) {
+            return dataStore.getString(mKey, defaultReturnValue);
+        }
+
         return mPreferenceManager.getSharedPreferences().getString(mKey, defaultReturnValue);
     }
 
     /**
-     * Attempts to persist a set of Strings to the {@link android.content.SharedPreferences}.
-     * <p>
-     * This will check if this Preference is persistent, get an editor from
-     * the {@link PreferenceManager}, put in the strings, and check if we should commit (and
-     * commit if so).
+     * Attempts to persist a set of Strings if this Preference is persistent.
      *
      * @param values The values to persist.
-     * @return True if the Preference is persistent. (This is not whether the
+     * @return True if this Preference is persistent. (This is not whether the
      *         value was persisted, since we may not necessarily commit if there
      *         will be a batch commit later.)
      * @see #getPersistedStringSet(Set)
      */
-    public boolean persistStringSet(Set<String> values) {
-        if (shouldPersist()) {
-            // Shouldn't store null
-            if (values.equals(getPersistedStringSet(null))) {
-                // It's already there, so the same as persisting
-                return true;
-            }
+    public boolean persistStringSet(Set<String>  values) {
+        if (!shouldPersist()) {
+            return false;
+        }
 
+        // Shouldn't store null
+        if (values.equals(getPersistedStringSet(null))) {
+            // It's already there, so the same as persisting
+            return true;
+        }
+
+        PreferenceDataStore dataStore = getPreferenceDataStore();
+        if (dataStore != null) {
+            dataStore.putStringSet(mKey, values);
+        } else {
             SharedPreferences.Editor editor = mPreferenceManager.getEditor();
             editor.putStringSet(mKey, values);
             tryCommit(editor);
-            return true;
         }
-        return false;
+        return true;
     }
 
     /**
-     * Attempts to get a persisted set of Strings from the
-     * {@link android.content.SharedPreferences}.
-     * <p>
-     * This will check if this Preference is persistent, get the SharedPreferences
-     * from the {@link PreferenceManager}, and get the value.
+     * Attempts to get a persisted set of Strings if this Preference is persistent.
      *
-     * @param defaultReturnValue The default value to return if either the
-     *            Preference is not persistent or the Preference is not in the
-     *            shared preferences.
-     * @return The value from the SharedPreferences or the default return
+     * @param defaultReturnValue The default value to return if either this
+     *            Preference is not persistent or this Preference is not present.
+     * @return The value from the data store or the default return
      *         value.
      * @see #persistStringSet(Set)
      */
@@ -1523,41 +1564,51 @@ public class Preference implements Comparable<Preference> {
             return defaultReturnValue;
         }
 
+        PreferenceDataStore dataStore = getPreferenceDataStore();
+        if (dataStore != null) {
+            return dataStore.getStringSet(mKey, defaultReturnValue);
+        }
+
         return mPreferenceManager.getSharedPreferences().getStringSet(mKey, defaultReturnValue);
     }
 
     /**
-     * Attempts to persist an int to the {@link android.content.SharedPreferences}.
+     * Attempts to persist an int if this Preference is persistent.
      *
      * @param value The value to persist.
-     * @return True if the Preference is persistent. (This is not whether the
+     * @return True if this Preference is persistent. (This is not whether the
      *         value was persisted, since we may not necessarily commit if there
      *         will be a batch commit later.)
      * @see #persistString(String)
      * @see #getPersistedInt(int)
      */
     protected boolean persistInt(int value) {
-        if (shouldPersist()) {
-            if (value == getPersistedInt(~value)) {
-                // It's already there, so the same as persisting
-                return true;
-            }
+        if (!shouldPersist()) {
+            return false;
+        }
 
+        if (value == getPersistedInt(~value)) {
+            // It's already there, so the same as persisting
+            return true;
+        }
+
+        PreferenceDataStore dataStore = getPreferenceDataStore();
+        if (dataStore != null) {
+            dataStore.putInt(mKey, value);
+        } else {
             SharedPreferences.Editor editor = mPreferenceManager.getEditor();
             editor.putInt(mKey, value);
             tryCommit(editor);
-            return true;
         }
-        return false;
+        return true;
     }
 
     /**
-     * Attempts to get a persisted int from the {@link android.content.SharedPreferences}.
+     * Attempts to get a persisted int if this Preference is persistent.
      *
      * @param defaultReturnValue The default value to return if either this
-     *            Preference is not persistent or this Preference is not in the
-     *            SharedPreferences.
-     * @return The value from the SharedPreferences or the default return
+     *            Preference is not persistent or this Preference is not present.
+     * @return The value from the data store or the default return
      *         value.
      * @see #getPersistedString(String)
      * @see #persistInt(int)
@@ -1567,11 +1618,16 @@ public class Preference implements Comparable<Preference> {
             return defaultReturnValue;
         }
 
+        PreferenceDataStore dataStore = getPreferenceDataStore();
+        if (dataStore != null) {
+            return dataStore.getInt(mKey, defaultReturnValue);
+        }
+
         return mPreferenceManager.getSharedPreferences().getInt(mKey, defaultReturnValue);
     }
 
     /**
-     * Attempts to persist a float to the {@link android.content.SharedPreferences}.
+     * Attempts to persist a long if this Preference is persistent.
      *
      * @param value The value to persist.
      * @return True if this Preference is persistent. (This is not whether the
@@ -1581,27 +1637,32 @@ public class Preference implements Comparable<Preference> {
      * @see #getPersistedFloat(float)
      */
     protected boolean persistFloat(float value) {
-        if (shouldPersist()) {
-            if (value == getPersistedFloat(Float.NaN)) {
-                // It's already there, so the same as persisting
-                return true;
-            }
+        if (!shouldPersist()) {
+            return false;
+        }
 
+        if (value == getPersistedFloat(Float.NaN)) {
+            // It's already there, so the same as persisting
+            return true;
+        }
+
+        PreferenceDataStore dataStore = getPreferenceDataStore();
+        if (dataStore != null) {
+            dataStore.putFloat(mKey, value);
+        } else {
             SharedPreferences.Editor editor = mPreferenceManager.getEditor();
             editor.putFloat(mKey, value);
             tryCommit(editor);
-            return true;
         }
-        return false;
+        return true;
     }
 
     /**
-     * Attempts to get a persisted float from the {@link android.content.SharedPreferences}.
+     * Attempts to get a persisted float if this Preference is persistent.
      *
      * @param defaultReturnValue The default value to return if either this
-     *            Preference is not persistent or this Preference is not in the
-     *            SharedPreferences.
-     * @return The value from the SharedPreferences or the default return
+     *            Preference is not persistent or this Preference is not present.
+     * @return The value from the data store or the default return
      *         value.
      * @see #getPersistedString(String)
      * @see #persistFloat(float)
@@ -1611,11 +1672,16 @@ public class Preference implements Comparable<Preference> {
             return defaultReturnValue;
         }
 
+        PreferenceDataStore dataStore = getPreferenceDataStore();
+        if (dataStore != null) {
+            return dataStore.getFloat(mKey, defaultReturnValue);
+        }
+
         return mPreferenceManager.getSharedPreferences().getFloat(mKey, defaultReturnValue);
     }
 
     /**
-     * Attempts to persist a long to the {@link android.content.SharedPreferences}.
+     * Attempts to persist a long if this Preference is persistent.
      *
      * @param value The value to persist.
      * @return True if this Preference is persistent. (This is not whether the
@@ -1625,27 +1691,32 @@ public class Preference implements Comparable<Preference> {
      * @see #getPersistedLong(long)
      */
     protected boolean persistLong(long value) {
-        if (shouldPersist()) {
-            if (value == getPersistedLong(~value)) {
-                // It's already there, so the same as persisting
-                return true;
-            }
+        if (!shouldPersist()) {
+            return false;
+        }
 
+        if (value == getPersistedLong(~value)) {
+            // It's already there, so the same as persisting
+            return true;
+        }
+
+        PreferenceDataStore dataStore = getPreferenceDataStore();
+        if (dataStore != null) {
+            dataStore.putLong(mKey, value);
+        } else {
             SharedPreferences.Editor editor = mPreferenceManager.getEditor();
             editor.putLong(mKey, value);
             tryCommit(editor);
-            return true;
         }
-        return false;
+        return true;
     }
 
     /**
-     * Attempts to get a persisted long from the {@link android.content.SharedPreferences}.
+     * Attempts to get a persisted long if this Preference is persistent.
      *
      * @param defaultReturnValue The default value to return if either this
-     *            Preference is not persistent or this Preference is not in the
-     *            SharedPreferences.
-     * @return The value from the SharedPreferences or the default return
+     *            Preference is not persistent or this Preference is not present.
+     * @return The value from the data store or the default return
      *         value.
      * @see #getPersistedString(String)
      * @see #persistLong(long)
@@ -1655,11 +1726,16 @@ public class Preference implements Comparable<Preference> {
             return defaultReturnValue;
         }
 
+        PreferenceDataStore dataStore = getPreferenceDataStore();
+        if (dataStore != null) {
+            return dataStore.getLong(mKey, defaultReturnValue);
+        }
+
         return mPreferenceManager.getSharedPreferences().getLong(mKey, defaultReturnValue);
     }
 
     /**
-     * Attempts to persist a boolean to the {@link android.content.SharedPreferences}.
+     * Attempts to persist a boolean if this Preference is persistent.
      *
      * @param value The value to persist.
      * @return True if this Preference is persistent. (This is not whether the
@@ -1669,27 +1745,32 @@ public class Preference implements Comparable<Preference> {
      * @see #getPersistedBoolean(boolean)
      */
     protected boolean persistBoolean(boolean value) {
-        if (shouldPersist()) {
-            if (value == getPersistedBoolean(!value)) {
-                // It's already there, so the same as persisting
-                return true;
-            }
+        if (!shouldPersist()) {
+            return false;
+        }
 
+        if (value == getPersistedBoolean(!value)) {
+            // It's already there, so the same as persisting
+            return true;
+        }
+
+        PreferenceDataStore dataStore = getPreferenceDataStore();
+        if (dataStore != null) {
+            dataStore.putBoolean(mKey, value);
+        } else {
             SharedPreferences.Editor editor = mPreferenceManager.getEditor();
             editor.putBoolean(mKey, value);
             tryCommit(editor);
-            return true;
         }
-        return false;
+        return true;
     }
 
     /**
-     * Attempts to get a persisted boolean from the {@link android.content.SharedPreferences}.
+     * Attempts to get a persisted boolean if this Preference is persistent.
      *
      * @param defaultReturnValue The default value to return if either this
-     *            Preference is not persistent or this Preference is not in the
-     *            SharedPreferences.
-     * @return The value from the SharedPreferences or the default return
+     *            Preference is not persistent or this Preference is not present.
+     * @return The value from the data store or the default return
      *         value.
      * @see #getPersistedString(String)
      * @see #persistBoolean(boolean)
@@ -1697,6 +1778,11 @@ public class Preference implements Comparable<Preference> {
     protected boolean getPersistedBoolean(boolean defaultReturnValue) {
         if (!shouldPersist()) {
             return defaultReturnValue;
+        }
+
+        PreferenceDataStore dataStore = getPreferenceDataStore();
+        if (dataStore != null) {
+            return dataStore.getBoolean(mKey, defaultReturnValue);
         }
 
         return mPreferenceManager.getSharedPreferences().getBoolean(mKey, defaultReturnValue);
