@@ -78,9 +78,7 @@ import java.util.List;
  */
 public abstract class NotificationListenerService extends Service {
 
-    // TAG = "NotificationListenerService[MySubclass]"
-    private final String TAG = NotificationListenerService.class.getSimpleName()
-            + "[" + getClass().getSimpleName() + "]";
+    private final String TAG = getClass().getSimpleName();
 
     /**
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
