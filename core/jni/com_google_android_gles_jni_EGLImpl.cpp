@@ -254,59 +254,11 @@ static jlong jni_eglCreatePbufferSurface(JNIEnv *_env, jobject _this, jobject di
     return reinterpret_cast<jlong>(sur);
 }
 
-static PixelFormat convertPixelFormat(SkColorType format)
-{
-    switch (format) {
-    case kN32_SkColorType:         return PIXEL_FORMAT_RGBA_8888;
-    case kARGB_4444_SkColorType:   return PIXEL_FORMAT_RGBA_4444;
-    case kRGB_565_SkColorType:     return PIXEL_FORMAT_RGB_565;
-    default:                       return PIXEL_FORMAT_NONE;
-    }
-}
-
 static void jni_eglCreatePixmapSurface(JNIEnv *_env, jobject _this, jobject out_sur,
         jobject display, jobject config, jobject native_pixmap,
         jintArray attrib_list)
 {
-    if (display == NULL || config == NULL || native_pixmap == NULL
-        || !validAttribList(_env, attrib_list)) {
-        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
-        return;
-    }
-    EGLDisplay dpy = getDisplay(_env, display);
-    EGLConfig  cnf = getConfig(_env, config);
-    jint* base = 0;
-
-    SkBitmap nativeBitmap;
-    GraphicsJNI::getSkBitmap(_env, native_pixmap, &nativeBitmap);
-    SkPixelRef* ref = nativeBitmap.pixelRef();
-    if (ref == NULL) {
-        jniThrowException(_env, "java/lang/IllegalArgumentException", "Bitmap has no PixelRef");
-        return;
-    }
-
-    SkSafeRef(ref);
-    ref->lockPixels();
-
-    egl_native_pixmap_t pixmap;
-    pixmap.version = sizeof(pixmap);
-    pixmap.width  = nativeBitmap.width();
-    pixmap.height = nativeBitmap.height();
-    pixmap.stride = nativeBitmap.rowBytes() / nativeBitmap.bytesPerPixel();
-    pixmap.format = convertPixelFormat(nativeBitmap.colorType());
-    pixmap.data   = (uint8_t*)ref->pixels();
-
-    base = beginNativeAttribList(_env, attrib_list);
-    EGLSurface sur = eglCreatePixmapSurface(dpy, cnf, &pixmap, base);
-    endNativeAttributeList(_env, attrib_list, base);
-
-    if (sur != EGL_NO_SURFACE) {
-        _env->SetLongField(out_sur, gSurface_EGLSurfaceFieldID, reinterpret_cast<jlong>(sur));
-        _env->SetLongField(out_sur, gSurface_NativePixelRefFieldID, reinterpret_cast<jlong>(ref));
-    } else {
-        ref->unlockPixels();
-        SkSafeUnref(ref);
-    }
+    jniThrowException(_env, "java/lang/UnsupportedOperationException", "eglCreatePixmapSurface");
 }
 
 static jlong jni_eglCreateWindowSurface(JNIEnv *_env, jobject _this, jobject display,
