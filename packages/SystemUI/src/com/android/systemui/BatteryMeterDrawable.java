@@ -577,19 +577,21 @@ public class BatteryMeterDrawable extends Drawable implements
         // Not much we can do with zero width or height, we'll get another pass later
         if (mWidth <= 0 || mHeight <= 0) return;
 
-        final float widthDiv2 = mWidth / 2f;
         // text size is width / 2 - 2dp for wiggle room
+        final float widthDiv2 = mWidth / 2f;
+        // text size is adjusted for just the circle battery
+        final float widthDivCircle = mWidth / 3f;
 
         final float textSize;
         switch(mStyle) {
             case 2:
-                textSize = widthDiv2 - mContext.getResources().getDisplayMetrics().density / 1.3f;
+                textSize = widthDivCircle* 1.2f;
                 break;
             case 5:
-                textSize = widthDiv2 * 1.3f;
+                textSize = widthDiv2 * 1.0f;
                 break;
             default:
-                textSize = widthDiv2;
+                textSize = widthDiv2 * 0.9f;
                 break;
         }
 
