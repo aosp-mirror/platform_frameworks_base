@@ -10522,18 +10522,21 @@ public class PackageManagerService extends IPackageManager.Stub {
             BasePermission bp, PermissionsState origPermissions) {
         boolean privilegedPermission = (bp.protectionLevel
                 & PermissionInfo.PROTECTION_FLAG_PRIVILEGED) != 0;
-        boolean controlPrivappPermissions = RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS;
+        boolean privappPermissionsDisable =
+                RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_DISABLE;
         boolean platformPermission = PLATFORM_PACKAGE_NAME.equals(bp.sourcePackage);
         boolean platformPackage = PLATFORM_PACKAGE_NAME.equals(pkg.packageName);
-        if (controlPrivappPermissions && privilegedPermission && pkg.isPrivilegedApp()
+        if (!privappPermissionsDisable && privilegedPermission && pkg.isPrivilegedApp()
                 && !platformPackage && platformPermission) {
             ArraySet<String> wlPermissions = SystemConfig.getInstance()
                     .getPrivAppPermissions(pkg.packageName);
             boolean whitelisted = wlPermissions != null && wlPermissions.contains(perm);
             if (!whitelisted) {
-                // Log for now. TODO Enforce permissions
                 Slog.w(TAG, "Privileged permission " + perm + " for package "
                         + pkg.packageName + " - not in privapp-permissions whitelist");
+                if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
+                    return false;
+                }
             }
         }
         boolean allowed = (compareSignatures(
