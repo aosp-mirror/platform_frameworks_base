@@ -79,6 +79,7 @@ struct Options {
     string tabPattern;
 
     // For build/install/test
+    bool noRestart;
     bool reboot;
     vector<Target*> targets;
 
@@ -89,6 +90,7 @@ struct Options {
 Options::Options()
     :runHelp(false),
      runTab(false),
+     noRestart(false),
      reboot(false),
      targets()
 {
@@ -285,6 +287,7 @@ print_usage(FILE* out) {
     fprintf(out, "  -i     Install the targets\n");
     fprintf(out, "  -t     Run the tests\n");
     fprintf(out, "\n");
+    fprintf(out, "  -n     Don't reboot or restart\n");
     fprintf(out, "  -r     If the runtime needs to be restarted, do a full reboot\n");
     fprintf(out, "         instead\n");
     fprintf(out, "\n");
@@ -431,6 +434,9 @@ parse_args(Options* options, int argc, const char** argv)
                         flagTest = true;
                         anyPhases = true;
                         break;
+                    case 'n':
+                        options->noRestart = true;
+                        break;
                     case 'r':
                         options->reboot = true;
                         break;
@@ -558,7 +564,7 @@ check_device_property(const string& property, const string& expected)
  * Run the build, install, and test actions.
  */
 void
-run_phases(vector<Target*> targets, bool reboot)
+run_phases(vector<Target*> targets, const Options& options)
 {
     int err = 0;
 
@@ -676,40 +682,44 @@ run_phases(vector<Target*> targets, bool reboot)
             check_device_property("ro.build.id", buildId);
 
             // Stop & Sync
-            err = run_adb("shell", "stop", NULL);
-            check_error(err);
+            if (!options.noRestart) {
+                err = run_adb("shell", "stop", NULL);
+                check_error(err);
+            }
             err = run_adb("remount", NULL);
             check_error(err);
             err = run_adb("sync", "system", NULL);
             check_error(err);
 
-            if (reboot) {
-                print_status("Rebooting");
+            if (!options.noRestart) {
+                if (options.reboot) {
+                    print_status("Rebooting");
 
-                err = run_adb("reboot", NULL);
-                check_error(err);
-                err = run_adb("wait-for-device", NULL);
-                check_error(err);
-            } else {
-                print_status("Restarting the runtime");
+                    err = run_adb("reboot", NULL);
+                    check_error(err);
+                    err = run_adb("wait-for-device", NULL);
+                    check_error(err);
+                } else {
+                    print_status("Restarting the runtime");
 
-                err = run_adb("shell", "setprop", "sys.boot_completed", "0", NULL);
-                check_error(err);
-                err = run_adb("shell", "start", NULL);
-                check_error(err);
-            }
-
-            while (true) {
-                string completed = get_system_property("sys.boot_completed", &err);
-                check_error(err);
-                if (completed == "1") {
-                    break;
+                    err = run_adb("shell", "setprop", "sys.boot_completed", "0", NULL);
+                    check_error(err);
+                    err = run_adb("shell", "start", NULL);
+                    check_error(err);
                 }
-                sleep(2);
+
+                while (true) {
+                    string completed = get_system_property("sys.boot_completed", &err);
+                    check_error(err);
+                    if (completed == "1") {
+                        break;
+                    }
+                    sleep(2);
+                }
+                sleep(1);
+                err = run_adb("shell", "wm", "dismiss-keyguard", NULL);
+                check_error(err);
             }
-            sleep(1);
-            err = run_adb("shell", "wm", "dismiss-keyguard", NULL);
-            check_error(err);
         }
     }
 
@@ -976,7 +986,7 @@ main(int argc, const char** argv)
         exit(0);
     } else {
         // Normal run
-        run_phases(options.targets, options.reboot);
+        run_phases(options.targets, options);
     }
 
     return 0;
