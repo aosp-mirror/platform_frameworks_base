@@ -22,15 +22,20 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.IIpConnectivityMetrics;
+import android.content.pm.UserInfo;
 import android.net.wifi.WifiInfo;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -2447,6 +2452,60 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(-1, dpm.getLastNetworkLogRetrievalTime());
     }
 
+    public void testGetBindDeviceAdminTargetUsers() throws Exception {
+        // Setup device owner.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+
+        // Only device owner is setup, the result list should be empty.
+        List<UserHandle> targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
+        MoreAsserts.assertEmpty(targetUsers);
+
+        // Setup a managed profile managed by the same admin.
+        final int MANAGED_PROFILE_USER_ID = 15;
+        final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 20456);
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+
+        // Add a secondary user, it should never talk with.
+        final int ANOTHER_USER_ID = 36;
+        mContext.addUser(ANOTHER_USER_ID, 0);
+
+        // Calling from device owner admin, the result list should just contain the managed
+        // profile user id.
+        targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
+        MoreAsserts.assertContentsInAnyOrder(targetUsers, UserHandle.of(MANAGED_PROFILE_USER_ID));
+
+        // Calling from managed profile admin, the result list should just contain the system
+        // user id.
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
+        MoreAsserts.assertContentsInAnyOrder(targetUsers, UserHandle.SYSTEM);
+    }
+
+    public void testGetBindDeviceAdminTargetUsers_differentPackage() throws Exception {
+        // Setup a device owner.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+
+        // Set up a managed profile managed by different package.
+        final int MANAGED_PROFILE_USER_ID = 15;
+        final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 20456);
+        final ComponentName adminDifferentPackage =
+                new ComponentName("another.package", "whatever.class");
+        addManagedProfile(adminDifferentPackage, MANAGED_PROFILE_ADMIN_UID, admin2);
+
+        // Calling from device owner admin, we should get zero bind device admin target users as
+        // their packages are different.
+        List<UserHandle> targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
+        MoreAsserts.assertEmpty(targetUsers);
+
+        // Calling from managed profile admin, we should still get zero target users for the same
+        // reason.
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        targetUsers = dpm.getBindDeviceAdminTargetUsers(adminDifferentPackage);
+        MoreAsserts.assertEmpty(targetUsers);
+    }
+
     private void setUserSetupCompleteForUser(boolean isUserSetupComplete, int userhandle) {
         when(mContext.settings.settingsSecureGetIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0,
                 userhandle)).thenReturn(isUserSetupComplete ? 1 : 0);
@@ -2457,5 +2516,23 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private void assertProvisioningAllowed(String action, boolean expected) {
         assertEquals("isProvisioningAllowed(" + action + ") returning unexpected result", expected,
                 dpm.isProvisioningAllowed(action));
+    }
+
+    /**
+     * Setup a managed profile with the specified admin and its uid.
+     * @param admin ComponentName that's visible to the test code, which doesn't have to exist.
+     * @param adminUid uid of the admin package.
+     * @param copyFromAdmin package information for {@code admin} will be built based on this
+     *     component's information.
+     */
+    private void addManagedProfile(
+            ComponentName admin, int adminUid, ComponentName copyFromAdmin) throws Exception {
+        final int userId = UserHandle.getUserId(adminUid);
+        mContext.addUser(userId, UserInfo.FLAG_MANAGED_PROFILE, UserHandle.USER_SYSTEM);
+        mContext.callerPermissions.addAll(OWNER_SETUP_PERMISSIONS);
+        setUpPackageManagerForFakeAdmin(admin, adminUid, copyFromAdmin);
+        dpm.setActiveAdmin(admin, false, userId);
+        assertTrue(dpm.setProfileOwner(admin, null, userId));
+        mContext.callerPermissions.removeAll(OWNER_SETUP_PERMISSIONS);
     }
 }

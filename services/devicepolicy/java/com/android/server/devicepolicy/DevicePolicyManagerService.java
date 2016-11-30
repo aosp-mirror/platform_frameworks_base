@@ -9654,8 +9654,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final long callingIdentity = mInjector.binderClearCallingIdentity();
             try {
                 String callingOwnerPackage = callingOwner.info.getComponent().getPackageName();
-                for (int userId : mUserManager.getProfileIds(
-                        callingUserId, /* enabledOnly= */ false)) {
+                for (int userId : mUserManager.getProfileIdsWithDisabled(callingUserId)) {
                     if (userId == callingUserId) {
                         continue;
                     }
