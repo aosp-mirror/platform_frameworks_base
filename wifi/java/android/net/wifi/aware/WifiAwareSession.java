@@ -193,8 +193,8 @@ public class WifiAwareSession {
      *     This API is targeted for applications which can obtain the peer MAC address using OOB
      *     (out-of-band) discovery. Aware discovery does not provide the MAC address of the peer -
      *     when using Aware discovery use the alternative network specifier method -
-     *     {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int,
-     *     WifiAwareManager.PeerHandle, byte[])}.
+     *     {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(WifiAwareManager.PeerHandle,
+     *     byte[])}.
      *
      * @param role  The role of this device:
      *              {@link WifiAwareManager#WIFI_AWARE_DATA_PATH_ROLE_INITIATOR} or
@@ -211,7 +211,7 @@ public class WifiAwareSession {
      *
      * @return A string to be used to construct
      * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to
-     * {@link android.net.ConnectivityManager#requestNetwork(NetworkRequest,
+     * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
      * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
      */
