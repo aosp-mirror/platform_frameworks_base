@@ -90,9 +90,9 @@ public class PackageManagerPresubmitTest {
                 boolean granted = (packageInfo.requestedPermissionsFlags[i]
                         & PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0;
                 assertTrue("Permission " + pName + " should be granted to " + testPackage, granted);
-                // if CONTROL_PRIVAPP_PERMISSIONS enabled, platform permissions must be whitelisted
+                // if privapp permissions are enforced, platform permissions must be whitelisted
                 // in SystemConfig
-                if (platformPermission && RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS) {
+                if (platformPermission && RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
                     assertTrue("Permission " + pName
                                     + " should be declared in the xml file for package "
                                     + testPackage,
