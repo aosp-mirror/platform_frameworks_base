@@ -141,6 +141,16 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     }
 
     /**
+     * Get the GSM timing advance between 0..219 symbols (normally 0..63).
+     * Integer.MAX_VALUE is reported when there is no RR connection.
+     * Refer to 3GPP 45.010 Sec 5.8
+     * @return the current GSM timing advance, if available.
+     */
+    public int getTimingAdvance() {
+        return mTimingAdvance;
+    }
+
+    /**
      * Get the signal strength as dBm
      */
     @Override
