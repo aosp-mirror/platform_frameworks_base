@@ -1175,15 +1175,17 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                                 f.mView.setSaveFromParentEnabled(false);
                                 if (container != null) {
                                     container.addView(f.mView);
-                                    f.mIsNewlyAdded = true;
                                 }
                                 if (f.mHidden) {
                                     f.mView.setVisibility(View.GONE);
-                                    f.mIsNewlyAdded = false; // No animation required
                                 }
                                 f.onViewCreated(f.mView, f.mSavedFragmentState);
                                 dispatchOnFragmentViewCreated(f, f.mView, f.mSavedFragmentState,
                                         false);
+                                // Only animate the view if it is visible. This is done after
+                                // dispatchOnFragmentViewCreated in case visibility is changed
+                                f.mIsNewlyAdded = (f.mView.getVisibility() == View.VISIBLE)
+                                        && f.mContainer != null;
                             }
                         }
 
