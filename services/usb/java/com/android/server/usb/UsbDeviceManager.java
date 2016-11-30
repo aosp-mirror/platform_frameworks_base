@@ -119,6 +119,7 @@ public class UsbDeviceManager {
     private static final int MSG_USER_SWITCHED = 5;
     private static final int MSG_UPDATE_USER_RESTRICTIONS = 6;
     private static final int MSG_UPDATE_HOST_STATE = 7;
+    private static final int MSG_ACCESSORY_MODE_ENTER_TIMEOUT = 8;
 
     private static final int AUDIO_MODE_SOURCE = 1;
 
@@ -126,9 +127,6 @@ public class UsbDeviceManager {
     // We often get rapid connect/disconnect events when enabling USB functions,
     // which need debouncing.
     private static final int UPDATE_DELAY = 1000;
-
-    // Time we received a request to enter USB accessory mode
-    private long mAccessoryModeRequestTime = 0;
 
     // Timeout for entering USB request mode.
     // Request is cancelled if host does not configure device within 10 seconds.
@@ -297,7 +295,8 @@ public class UsbDeviceManager {
         }
 
         if (functions != null) {
-            mAccessoryModeRequestTime = SystemClock.elapsedRealtime();
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_ACCESSORY_MODE_ENTER_TIMEOUT),
+                    ACCESSORY_REQUEST_TIMEOUT);
             setCurrentFunctions(functions, false);
         }
     }
@@ -586,14 +585,10 @@ public class UsbDeviceManager {
         private void updateCurrentAccessory() {
             // We are entering accessory mode if we have received a request from the host
             // and the request has not timed out yet.
-            boolean enteringAccessoryMode =
-                    mAccessoryModeRequestTime > 0 &&
-                        SystemClock.elapsedRealtime() <
-                            mAccessoryModeRequestTime + ACCESSORY_REQUEST_TIMEOUT;
+            boolean enteringAccessoryMode = hasMessages(MSG_ACCESSORY_MODE_ENTER_TIMEOUT);
 
             if (mConfigured && enteringAccessoryMode) {
                 // successfully entered accessory mode
-
                 if (mAccessoryStrings != null) {
                     mCurrentAccessory = new UsbAccessory(mAccessoryStrings);
                     Slog.d(TAG, "entering USB accessory mode: " + mCurrentAccessory);
@@ -604,19 +599,23 @@ public class UsbDeviceManager {
                 } else {
                     Slog.e(TAG, "nativeGetAccessoryStrings failed");
                 }
-            } else if (!enteringAccessoryMode) {
-                // make sure accessory mode is off
-                // and restore default functions
-                Slog.d(TAG, "exited USB accessory mode");
-                setEnabledFunctions(null, false, false);
+            } else if (!mConnected && !enteringAccessoryMode) {
+                notifyAccessoryModeExit();
+            }
+        }
 
-                if (mCurrentAccessory != null) {
-                    if (mBootCompleted) {
-                        mSettingsManager.usbAccessoryRemoved(mCurrentAccessory);
-                    }
-                    mCurrentAccessory = null;
-                    mAccessoryStrings = null;
+        private void notifyAccessoryModeExit() {
+            // make sure accessory mode is off
+            // and restore default functions
+            Slog.d(TAG, "exited USB accessory mode");
+            setEnabledFunctions(null, false, false);
+
+            if (mCurrentAccessory != null) {
+                if (mBootCompleted) {
+                    mSettingsManager.usbAccessoryRemoved(mCurrentAccessory);
                 }
+                mCurrentAccessory = null;
+                mAccessoryStrings = null;
             }
         }
 
@@ -802,6 +801,12 @@ public class UsbDeviceManager {
                             setEnabledFunctions(mCurrentFunctions, true, false);
                         }
                         mCurrentUser = msg.arg1;
+                    }
+                    break;
+                }
+                case MSG_ACCESSORY_MODE_ENTER_TIMEOUT: {
+                    if (!mConnected) {
+                        notifyAccessoryModeExit();
                     }
                     break;
                 }
