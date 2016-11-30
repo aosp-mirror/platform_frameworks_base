@@ -22,6 +22,7 @@
 #include "android_os_Parcel.h"
 #include "android_view_GraphicBuffer.h"
 #include "android/graphics/GraphicsJNI.h"
+#include "Bitmap.h"
 
 #include <android_runtime/AndroidRuntime.h>
 
@@ -32,6 +33,7 @@
 
 #include <gui/IGraphicBufferAlloc.h>
 #include <gui/ISurfaceComposer.h>
+#include <hwui/Bitmap.h>
 
 #include <SkCanvas.h>
 #include <SkBitmap.h>
@@ -247,6 +249,17 @@ static jlong android_view_GraphiceBuffer_read(JNIEnv* env, jobject clazz,
     return NULL;
 }
 
+static jobject android_view_GraphicBuffer_createHardwareBitmap(JNIEnv* env, jobject,
+        jlong wrapperHandle) {
+    GraphicBufferWrapper* wrapper = reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
+    sk_sp<Bitmap> bitmap = Bitmap::createFrom(wrapper->buffer);
+    if (!bitmap.get()) {
+        ALOGW("failed to create hardware bitmap from graphic buffer");
+        return NULL;
+    }
+    return bitmap::createBitmap(env, bitmap.release(), android::bitmap::kBitmapCreateFlag_None);
+}
+
 // ----------------------------------------------------------------------------
 // External helpers
 // ----------------------------------------------------------------------------
@@ -282,6 +295,9 @@ static const JNINativeMethod gMethods[] = {
             (void*) android_view_GraphicBuffer_lockCanvas },
     { "nUnlockCanvasAndPost", "(JLandroid/graphics/Canvas;)Z",
             (void*) android_view_GraphicBuffer_unlockCanvasAndPost },
+    { "nCreateHardwareBitmap", "(J)Landroid/graphics/Bitmap;",
+        (void*) android_view_GraphicBuffer_createHardwareBitmap
+    }
 };
 
 int register_android_view_GraphicBuffer(JNIEnv* env) {

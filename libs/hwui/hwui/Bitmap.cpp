@@ -246,7 +246,7 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThr
     if (!uploadBitmapToGraphicBuffer(caches, bitmap, *buffer, format, type)) {
         return nullptr;
     }
-    return sk_sp<Bitmap>(new Bitmap(std::move(buffer), info));
+    return sk_sp<Bitmap>(new Bitmap(buffer.get(), info));
 }
 
 sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(SkBitmap& bitmap) {
@@ -299,6 +299,16 @@ sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, SkPixelRef& pixelRef) 
     pixelRef.lockPixels();
     return sk_sp<Bitmap>(new Bitmap((void*) pixelRef.pixels(), (void*) &pixelRef, FreePixelRef,
             info, pixelRef.rowBytes(), pixelRef.colorTable()));
+}
+
+sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer) {
+    PixelFormat format = graphicBuffer->getPixelFormat();
+    if (!graphicBuffer.get() || format != PIXEL_FORMAT_RGBA_8888) {
+        return nullptr;
+    }
+    SkImageInfo info = SkImageInfo::Make(graphicBuffer->getWidth(), graphicBuffer->getHeight(),
+            kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+    return sk_sp<Bitmap>(new Bitmap(graphicBuffer.get(), info));
 }
 
 void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes, SkColorTable* ctable) {
@@ -360,16 +370,14 @@ Bitmap::Bitmap(void* address, int fd, size_t mappedSize,
     reconfigure(info, rowBytes, ctable);
 }
 
-Bitmap::Bitmap(sp<GraphicBuffer>&& buffer, const SkImageInfo& info)
+Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info)
         : SkPixelRef(info)
         , mPixelStorageType(PixelStorageType::Hardware) {
-    auto rawBuffer = buffer.get();
-    mPixelStorage.hardware.buffer = rawBuffer;
-    if (rawBuffer) {
-        rawBuffer->incStrong(rawBuffer);
-    }
+    mPixelStorage.hardware.buffer = buffer;
+    buffer->incStrong(buffer);
     mRowBytes = bytesPerPixel(buffer->getPixelFormat()) * buffer->getStride();
 }
+
 Bitmap::~Bitmap() {
     switch (mPixelStorageType) {
     case PixelStorageType::External:
