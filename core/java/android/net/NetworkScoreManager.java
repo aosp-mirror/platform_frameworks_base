@@ -17,6 +17,7 @@
 package android.net;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -27,6 +28,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.UserHandle;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Class that manages communication between network subsystems and a network scorer.
@@ -130,6 +134,29 @@ public class NetworkScoreManager {
      * {@link android.content.Intent#getStringExtra(String)}.
      */
     public static final String EXTRA_NEW_SCORER = "newScorer";
+
+    /** @hide */
+    @IntDef({CACHE_FILTER_NONE, CACHE_FILTER_CURRENT_NETWORK, CACHE_FILTER_SCAN_RESULTS})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CacheUpdateFilter {}
+
+    /**
+     * Do not filter updates sent to the cache.
+     * @hide
+     */
+    public static final int CACHE_FILTER_NONE = 0;
+
+    /**
+     * Only send cache updates when the network matches the connected network.
+     * @hide
+     */
+    public static final int CACHE_FILTER_CURRENT_NETWORK = 1;
+
+    /**
+     * Only send cache updates when the network is part of the current scan result set.
+     * @hide
+     */
+    public static final int CACHE_FILTER_SCAN_RESULTS = 2;
 
     private final Context mContext;
     private final INetworkScoreService mService;
@@ -268,11 +295,29 @@ public class NetworkScoreManager {
      * @throws SecurityException if the caller does not hold the
      *         {@link android.Manifest.permission#BROADCAST_NETWORK_PRIVILEGED} permission.
      * @throws IllegalArgumentException if a score cache is already registered for this type.
+     * @deprecated equivalent to registering for cache updates with CACHE_FILTER_NONE.
      * @hide
      */
+    @Deprecated // migrate to registerNetworkScoreCache(int, INetworkScoreCache, int)
     public void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache) {
+        registerNetworkScoreCache(networkType, scoreCache, CACHE_FILTER_NONE);
+    }
+
+    /**
+     * Register a network score cache.
+     *
+     * @param networkType the type of network this cache can handle. See {@link NetworkKey#type}
+     * @param scoreCache implementation of {@link INetworkScoreCache} to store the scores
+     * @param filterType the {@link CacheUpdateFilter} to apply
+     * @throws SecurityException if the caller does not hold the
+     *         {@link android.Manifest.permission#BROADCAST_NETWORK_PRIVILEGED} permission.
+     * @throws IllegalArgumentException if a score cache is already registered for this type.
+     * @hide
+     */
+    public void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache,
+            @CacheUpdateFilter int filterType) {
         try {
-            mService.registerNetworkScoreCache(networkType, scoreCache);
+            mService.registerNetworkScoreCache(networkType, scoreCache, filterType);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
