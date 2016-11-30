@@ -63,7 +63,7 @@ import java.util.Arrays;
  * <li>Create a Aware network specifier to be used with
  * {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
  * to set-up a Aware connection with a peer. Refer to
- * {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, PeerHandle, byte[])} and
+ * {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(PeerHandle, byte[])} and
  * {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])}.
  * </ul>
  * <p>
@@ -114,7 +114,7 @@ import java.util.Arrays;
  *        {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
  *        <li>{@link NetworkRequest.Builder#setNetworkSpecifier(String)} using
  *        {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])} or
- *        {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, PeerHandle, byte[])}.
+ *        {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(PeerHandle, byte[])}.
  *    </ul>
  *
  * @hide PROPOSED_AWARE_API
@@ -224,7 +224,7 @@ public class WifiAwareManager {
      * Connection creation role is that of INITIATOR. Used to create a network specifier string
      * when requesting a Aware network.
      *
-     * @see WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, PeerHandle, byte[])
+     * @see WifiAwareDiscoveryBaseSession#createNetworkSpecifier(PeerHandle, byte[])
      * @see WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])
      */
     public static final int WIFI_AWARE_DATA_PATH_ROLE_INITIATOR = 0;
@@ -233,7 +233,7 @@ public class WifiAwareManager {
      * Connection creation role is that of RESPONDER. Used to create a network specifier string
      * when requesting a Aware network.
      *
-     * @see WifiAwareDiscoveryBaseSession#createNetworkSpecifier(int, PeerHandle, byte[])
+     * @see WifiAwareDiscoveryBaseSession#createNetworkSpecifier(PeerHandle, byte[])
      * @see WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])
      */
     public static final int WIFI_AWARE_DATA_PATH_ROLE_RESPONDER = 1;
