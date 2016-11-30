@@ -21,6 +21,8 @@ import android.util.Xml;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -97,6 +99,67 @@ public class FontListParser {
         } finally {
             in.close();
         }
+    }
+
+    // Note that a well-formed variation contains a four-character tag and a float as styleValue,
+    // with spacers in between. The tag is enclosd either by double quotes or single quotes.
+    @VisibleForTesting
+    public static Axis[] parseFontVariationSettings(String settings) {
+        String[] settingList = settings.split(",");
+        ArrayList<Axis> axisList = new ArrayList<>();
+        settingLoop:
+        for (String setting : settingList) {
+            int pos = 0;
+            while (pos < setting.length()) {
+                char c = setting.charAt(pos);
+                if (c == '\'' || c == '"') {
+                    break;
+                } else if (!isSpacer(c)) {
+                    continue settingLoop;  // Only spacers are allowed before tag appeared.
+                }
+                pos++;
+            }
+            if (pos + 7 > setting.length()) {
+                continue;  // 7 is the minimum length of tag-style value pair text.
+            }
+            if (setting.charAt(pos) != setting.charAt(pos + 5)) {
+                continue;  // Tag should be wrapped with double or single quote.
+            }
+            String tagString = setting.substring(pos + 1, pos + 5);
+            if (!TAG_PATTERN.matcher(tagString).matches()) {
+                continue;  // Skip incorrect format tag.
+            }
+            pos += 6;
+            while (pos < setting.length()) {
+                if (!isSpacer(setting.charAt(pos++))) {
+                    break;  // Skip spacers between the tag and the styleValue.
+                }
+            }
+            // Skip invalid styleValue
+            float styleValue;
+            String valueString = setting.substring(pos - 1);
+            if (!STYLE_VALUE_PATTERN.matcher(valueString).matches()) {
+                continue;  // Skip incorrect format styleValue.
+            }
+            try {
+                styleValue = Float.parseFloat(valueString);
+            } catch (NumberFormatException e) {
+                continue;  // ignoreing invalid number format
+            }
+            int tag = makeTag(tagString.charAt(0), tagString.charAt(1), tagString.charAt(2),
+                    tagString.charAt(3));
+            axisList.add(new Axis(tag, styleValue));
+        }
+        return axisList.toArray(new Axis[axisList.size()]);
+    }
+
+    @VisibleForTesting
+    public static int makeTag(char c1, char c2, char c3, char c4) {
+        return (c1 << 24) + (c2 << 16) + (c3 << 8) + c4;
+    }
+
+    private static boolean isSpacer(char c) {
+        return c == ' ' || c == '\r' || c == '\t' || c == '\n';
     }
 
     private static Config readFamilies(XmlPullParser parser)
@@ -179,10 +242,7 @@ public class FontListParser {
         int tag = 0;
         String tagStr = parser.getAttributeValue(null, "tag");
         if (tagStr != null && TAG_PATTERN.matcher(tagStr).matches()) {
-            tag = (tagStr.charAt(0) << 24) +
-                  (tagStr.charAt(1) << 16) +
-                  (tagStr.charAt(2) <<  8) +
-                  (tagStr.charAt(3)      );
+            tag = makeTag(tagStr.charAt(0), tagStr.charAt(1), tagStr.charAt(2), tagStr.charAt(3));
         } else {
             throw new XmlPullParserException("Invalid tag attribute value.", parser, null);
         }
