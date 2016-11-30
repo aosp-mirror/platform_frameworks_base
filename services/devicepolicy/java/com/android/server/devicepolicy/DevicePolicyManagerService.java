@@ -9126,7 +9126,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = mInjector.userHandleGetCallingUserId();
-        enforceManagedProfile(userHandle, "set organization name");
+
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
@@ -9149,6 +9149,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             return admin.organizationName;
+        }
+    }
+
+    @Override
+    public CharSequence getDeviceOwnerOrganizationName() {
+        if (!mHasFeature) {
+            return null;
+        }
+        enforceDeviceOwnerOrManageUsers();
+        synchronized(this) {
+            final ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdminLocked();
+            return deviceOwnerAdmin == null ? null : deviceOwnerAdmin.organizationName;
         }
     }
 

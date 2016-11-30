@@ -294,6 +294,7 @@ interface IDevicePolicyManager {
 
     void setOrganizationName(in ComponentName admin, in CharSequence title);
     CharSequence getOrganizationName(in ComponentName admin);
+    CharSequence getDeviceOwnerOrganizationName();
     CharSequence getOrganizationNameForUser(int userHandle);
 
     int getUserProvisioningState();
