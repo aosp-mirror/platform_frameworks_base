@@ -2880,9 +2880,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void batterySendBroadcast(Intent intent) {
-        broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                AppOpsManager.OP_NONE, null, false, false,
-                -1, Process.SYSTEM_UID, UserHandle.USER_ALL);
+        synchronized (this) {
+            broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
+                    AppOpsManager.OP_NONE, null, false, false,
+                    -1, Process.SYSTEM_UID, UserHandle.USER_ALL);
+        }
     }
 
     /**
