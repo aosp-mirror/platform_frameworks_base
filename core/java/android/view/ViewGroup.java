@@ -7357,34 +7357,48 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 rightMargin= margin;
                 bottomMargin = margin;
             } else {
-                leftMargin = a.getDimensionPixelSize(
-                        R.styleable.ViewGroup_MarginLayout_layout_marginLeft,
-                        UNDEFINED_MARGIN);
-                if (leftMargin == UNDEFINED_MARGIN) {
-                    mMarginFlags |= LEFT_MARGIN_UNDEFINED_MASK;
-                    leftMargin = DEFAULT_MARGIN_RESOLVED;
-                }
-                rightMargin = a.getDimensionPixelSize(
-                        R.styleable.ViewGroup_MarginLayout_layout_marginRight,
-                        UNDEFINED_MARGIN);
-                if (rightMargin == UNDEFINED_MARGIN) {
-                    mMarginFlags |= RIGHT_MARGIN_UNDEFINED_MASK;
-                    rightMargin = DEFAULT_MARGIN_RESOLVED;
+                int horizontalMargin = a.getDimensionPixelSize(
+                        R.styleable.ViewGroup_MarginLayout_layout_marginHorizontal, -1);
+                int verticalMargin = a.getDimensionPixelSize(
+                        R.styleable.ViewGroup_MarginLayout_layout_marginVertical, -1);
+
+                if (horizontalMargin >= 0) {
+                    leftMargin = horizontalMargin;
+                    rightMargin = horizontalMargin;
+                } else {
+                    leftMargin = a.getDimensionPixelSize(
+                            R.styleable.ViewGroup_MarginLayout_layout_marginLeft,
+                            UNDEFINED_MARGIN);
+                    if (leftMargin == UNDEFINED_MARGIN) {
+                        mMarginFlags |= LEFT_MARGIN_UNDEFINED_MASK;
+                        leftMargin = DEFAULT_MARGIN_RESOLVED;
+                    }
+                    rightMargin = a.getDimensionPixelSize(
+                            R.styleable.ViewGroup_MarginLayout_layout_marginRight,
+                            UNDEFINED_MARGIN);
+                    if (rightMargin == UNDEFINED_MARGIN) {
+                        mMarginFlags |= RIGHT_MARGIN_UNDEFINED_MASK;
+                        rightMargin = DEFAULT_MARGIN_RESOLVED;
+                    }
+                    startMargin = a.getDimensionPixelSize(
+                            R.styleable.ViewGroup_MarginLayout_layout_marginStart,
+                            DEFAULT_MARGIN_RELATIVE);
+                    endMargin = a.getDimensionPixelSize(
+                            R.styleable.ViewGroup_MarginLayout_layout_marginEnd,
+                            DEFAULT_MARGIN_RELATIVE);
                 }
 
-                topMargin = a.getDimensionPixelSize(
-                        R.styleable.ViewGroup_MarginLayout_layout_marginTop,
-                        DEFAULT_MARGIN_RESOLVED);
-                bottomMargin = a.getDimensionPixelSize(
-                        R.styleable.ViewGroup_MarginLayout_layout_marginBottom,
-                        DEFAULT_MARGIN_RESOLVED);
-
-                startMargin = a.getDimensionPixelSize(
-                        R.styleable.ViewGroup_MarginLayout_layout_marginStart,
-                        DEFAULT_MARGIN_RELATIVE);
-                endMargin = a.getDimensionPixelSize(
-                        R.styleable.ViewGroup_MarginLayout_layout_marginEnd,
-                        DEFAULT_MARGIN_RELATIVE);
+                if (verticalMargin >= 0) {
+                    topMargin = verticalMargin;
+                    bottomMargin = verticalMargin;
+                } else {
+                    topMargin = a.getDimensionPixelSize(
+                            R.styleable.ViewGroup_MarginLayout_layout_marginTop,
+                            DEFAULT_MARGIN_RESOLVED);
+                    bottomMargin = a.getDimensionPixelSize(
+                            R.styleable.ViewGroup_MarginLayout_layout_marginBottom,
+                            DEFAULT_MARGIN_RESOLVED);
+                }
 
                 if (isMarginRelative()) {
                    mMarginFlags |= NEED_RESOLUTION_MASK;
