@@ -425,7 +425,9 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     }
 
     @Override
-    public void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache) {
+    public void registerNetworkScoreCache(int networkType,
+                                          INetworkScoreCache scoreCache,
+                                          int filterType) {
         mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
         synchronized (mScoreCaches) {
             RemoteCallbackList<INetworkScoreCache> callbackList = mScoreCaches.get(networkType);
@@ -433,7 +435,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 callbackList = new RemoteCallbackList<>();
                 mScoreCaches.put(networkType, callbackList);
             }
-            if (!callbackList.register(scoreCache)) {
+            if (!callbackList.register(scoreCache, filterType)) {
                 if (callbackList.getRegisteredCallbackCount() == 0) {
                     mScoreCaches.remove(networkType);
                 }
