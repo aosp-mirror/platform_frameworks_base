@@ -945,7 +945,7 @@ public class WifiAwareManagerTest {
         final int clientId = 4565;
         final int sessionId = 123;
         final WifiAwareManager.PeerHandle peerHandle = new WifiAwareManager.PeerHandle(123412);
-        final int role = WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR;
+        final int role = WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
         final String token = "Some arbitrary token string - can really be anything";
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
         final PublishConfig publishConfig = new PublishConfig.Builder().build();
@@ -982,7 +982,7 @@ public class WifiAwareManagerTest {
         inOrder.verify(mockSessionCallback).onPublishStarted(publishSession.capture());
 
         // (3) request a network specifier from the session
-        String networkSpecifier = publishSession.getValue().createNetworkSpecifier(role, peerHandle,
+        String networkSpecifier = publishSession.getValue().createNetworkSpecifier(peerHandle,
                 token.getBytes());
 
         // validate format
