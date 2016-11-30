@@ -87,6 +87,12 @@ public final class MediaSession {
     public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 1 << 1;
 
     /**
+     * Set this flag on the session to indicate that it handles queue
+     * management commands through its {@link Callback}.
+     */
+    public static final int FLAG_HANDLES_QUEUE_COMMANDS = 1 << 2;
+
+    /**
      * System only flag for a session that needs to have priority over all other
      * sessions. This flag ensures this session will receive media button events
      * regardless of the current ordering in the system.
@@ -100,6 +106,7 @@ public final class MediaSession {
     @IntDef(flag = true, value = {
             FLAG_HANDLES_MEDIA_BUTTONS,
             FLAG_HANDLES_TRANSPORT_CONTROLS,
+            FLAG_HANDLES_QUEUE_COMMANDS,
             FLAG_EXCLUSIVE_GLOBAL_PRIORITY })
     public @interface SessionFlags { }
 
@@ -645,6 +652,22 @@ public final class MediaSession {
         postToCallback(CallbackMessageHandler.MSG_CUSTOM_ACTION, action, args);
     }
 
+    private void dispatchAddQueueItem(MediaDescription description) {
+        postToCallback(CallbackMessageHandler.MSG_ADD_QUEUE_ITEM, description);
+    }
+
+    private void dispatchAddQueueItem(MediaDescription description, int index) {
+        postToCallback(CallbackMessageHandler.MSG_ADD_QUEUE_ITEM_AT, description, index);
+    }
+
+    private void dispatchRemoveQueueItem(MediaDescription description) {
+        postToCallback(CallbackMessageHandler.MSG_REMOVE_QUEUE_ITEM, description);
+    }
+
+    private void dispatchRemoveQueueItemAt(int index) {
+        postToCallback(CallbackMessageHandler.MSG_REMOVE_QUEUE_ITEM_AT, index);
+    }
+
     private void dispatchMediaButton(Intent mediaButtonIntent) {
         postToCallback(CallbackMessageHandler.MSG_MEDIA_BUTTON, mediaButtonIntent);
     }
@@ -666,8 +689,20 @@ public final class MediaSession {
         postToCallback(CallbackMessageHandler.MSG_COMMAND, cmd);
     }
 
+    private void postToCallback(int what, int arg1) {
+        postToCallback(what, null, arg1);
+    }
+
     private void postToCallback(int what, Object obj) {
         postToCallback(what, obj, null);
+    }
+
+    private void postToCallback(int what, Object obj, int arg1) {
+        synchronized (mLock) {
+            if (mCallback != null) {
+                mCallback.post(what, obj, arg1);
+            }
+        }
     }
 
     private void postToCallback(int what, Object obj, Bundle extras) {
@@ -1043,6 +1078,47 @@ public final class MediaSession {
          */
         public void onCustomAction(@NonNull String action, @Nullable Bundle extras) {
         }
+
+        /**
+         * Called when a {@link MediaController} wants to add a {@link QueueItem} with the given
+         * {@link MediaDescription description} at the end of the play queue.
+         *
+         * @param description The {@link MediaDescription} for creating the {@link QueueItem} to be
+         *                    inserted.
+         */
+        public void onAddQueueItem(MediaDescription description) {
+        }
+
+        /**
+         * Called when a {@link MediaController} wants to add a {@link QueueItem} with the given
+         * {@link MediaDescription description} at the specified position in the play queue.
+         *
+         * @param description The {@link MediaDescription} for creating the {@link QueueItem} to be
+         *                    inserted.
+         * @param index The index at which the created {@link QueueItem} is to be inserted.
+         */
+        public void onAddQueueItem(MediaDescription description, int index) {
+        }
+
+        /**
+         * Called when a {@link MediaController} wants to remove the first occurrence of the
+         * specified {@link QueueItem} with the given {@link MediaDescription description}
+         * in the play queue.
+         *
+         * @param description The {@link MediaDescription} for denoting the {@link QueueItem} to be
+         *                    removed.
+         */
+        public void onRemoveQueueItem(MediaDescription description) {
+        }
+
+        /**
+         * Called when a {@link MediaController} wants to remove a {@link QueueItem} at the
+         * specified position in the play queue.
+         *
+         * @param index The index of the element to be removed.
+         */
+        public void onRemoveQueueItemAt(int index) {
+        }
     }
 
     /**
@@ -1239,6 +1315,38 @@ public final class MediaSession {
         }
 
         @Override
+        public void onAddQueueItem(MediaDescription description) {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                session.dispatchAddQueueItem(description);
+            }
+        }
+
+        @Override
+        public void onAddQueueItemAt(MediaDescription description, int index) {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                session.dispatchAddQueueItem(description, index);
+            }
+        }
+
+        @Override
+        public void onRemoveQueueItem(MediaDescription description) {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                session.dispatchRemoveQueueItem(description);
+            }
+        }
+
+        @Override
+        public void onRemoveQueueItemAt(int index) {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                session.dispatchRemoveQueueItemAt(index);
+            }
+        }
+
+        @Override
         public void onAdjustVolume(int direction) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
@@ -1376,6 +1484,10 @@ public final class MediaSession {
         private static final int MSG_CUSTOM_ACTION = 22;
         private static final int MSG_ADJUST_VOLUME = 23;
         private static final int MSG_SET_VOLUME = 24;
+        private static final int MSG_ADD_QUEUE_ITEM = 25;
+        private static final int MSG_ADD_QUEUE_ITEM_AT = 26;
+        private static final int MSG_REMOVE_QUEUE_ITEM = 27;
+        private static final int MSG_REMOVE_QUEUE_ITEM_AT = 28;
 
         private MediaSession.Callback mCallback;
 
@@ -1465,7 +1577,7 @@ public final class MediaSession {
                     mCallback.onSetRating((Rating) msg.obj);
                     break;
                 case MSG_REPEAT_MODE:
-                    mCallback.onSetRepeatMode((int) msg.obj);
+                    mCallback.onSetRepeatMode(msg.arg1);
                     break;
                 case MSG_SHUFFLE_MODE:
                     mCallback.onSetShuffleModeEnabled((boolean) msg.obj);
@@ -1473,12 +1585,24 @@ public final class MediaSession {
                 case MSG_CUSTOM_ACTION:
                     mCallback.onCustomAction((String) msg.obj, msg.getData());
                     break;
+                case MSG_ADD_QUEUE_ITEM:
+                    mCallback.onAddQueueItem((MediaDescription) msg.obj);
+                    break;
+                case MSG_ADD_QUEUE_ITEM_AT:
+                    mCallback.onAddQueueItem((MediaDescription) msg.obj, msg.arg1);
+                    break;
+                case MSG_REMOVE_QUEUE_ITEM:
+                    mCallback.onRemoveQueueItem((MediaDescription) msg.obj);
+                    break;
+                case MSG_REMOVE_QUEUE_ITEM_AT:
+                    mCallback.onRemoveQueueItemAt(msg.arg1);
+                    break;
                 case MSG_ADJUST_VOLUME:
                     synchronized (mLock) {
                         vp = mVolumeProvider;
                     }
                     if (vp != null) {
-                        vp.onAdjustVolume((int) msg.obj);
+                        vp.onAdjustVolume(msg.arg1);
                     }
                     break;
                 case MSG_SET_VOLUME:
@@ -1486,7 +1610,7 @@ public final class MediaSession {
                         vp = mVolumeProvider;
                     }
                     if (vp != null) {
-                        vp.onSetVolumeTo((int) msg.obj);
+                        vp.onSetVolumeTo(msg.arg1);
                     }
                     break;
             }

@@ -16,6 +16,7 @@
 package android.media.session;
 
 import android.content.Intent;
+import android.media.MediaDescription;
 import android.media.Rating;
 import android.net.Uri;
 import android.os.Bundle;
@@ -49,6 +50,10 @@ oneway interface ISessionCallback {
     void onRepeatMode(int repeatMode);
     void onShuffleMode(boolean enabled);
     void onCustomAction(String action, in Bundle args);
+    void onAddQueueItem(in MediaDescription description);
+    void onAddQueueItemAt(in MediaDescription description, int index);
+    void onRemoveQueueItem(in MediaDescription description);
+    void onRemoveQueueItemAt(int index);
 
     // These callbacks are for volume handling
     void onAdjustVolume(int direction);

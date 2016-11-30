@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
@@ -38,6 +39,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 import java.lang.ref.WeakReference;
+import java.lang.UnsupportedOperationException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,8 +113,7 @@ public final class MediaController {
     }
 
     /**
-     * Get a {@link TransportControls} instance to send transport actions to
-     * the associated session.
+     * Get a {@link TransportControls} instance to send transport actions to this session.
      *
      * @return A transport controls instance.
      */
@@ -151,7 +152,7 @@ public final class MediaController {
         try {
             return mSessionBinder.getPlaybackState();
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling getPlaybackState.", e);
+            Log.wtf(TAG, "Error calling getPlaybackState", e);
             return null;
         }
     }
@@ -165,7 +166,7 @@ public final class MediaController {
         try {
             return mSessionBinder.getMetadata();
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling getMetadata.", e);
+            Log.wtf(TAG, "Error calling getMetadata", e);
             return null;
         }
     }
@@ -183,9 +184,100 @@ public final class MediaController {
                 return queue.getList();
             }
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling getQueue.", e);
+            Log.wtf(TAG, "Error calling getQueue", e);
         }
         return null;
+    }
+
+    /**
+     * Add a queue item from the given {@code description} at the end of the play queue
+     * of this session. Not all sessions may support this.
+     *
+     * @param description The {@link MediaDescription} for creating the
+     *                    {@link MediaSession.QueueItem} to be inserted.
+     * @throws UnsupportedOperationException If this session doesn't support this.
+     * @see MediaSession#FLAG_HANDLES_QUEUE_COMMANDS
+     */
+    public void addQueueItem(MediaDescription description) {
+        try {
+            long flags = mSessionBinder.getFlags();
+            if ((flags & MediaSession.FLAG_HANDLES_QUEUE_COMMANDS) == 0) {
+                throw new UnsupportedOperationException(
+                        "This session doesn't support queue management operations");
+            }
+            mSessionBinder.addQueueItem(description);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling addQueueItem", e);
+        }
+    }
+
+    /**
+     * Add a queue item from the given {@code description} at the specified position
+     * in the play queue of this session. Shifts the queue item currently at that position
+     * (if any) and any subsequent queue items to the right (adds one to their indices).
+     * Not all sessions may support this.
+     *
+     * @param description The {@link MediaDescription} for creating the
+     *                    {@link MediaSession.QueueItem} to be inserted.
+     * @param index The index at which the created {@link MediaSession.QueueItem} is to be inserted.
+     * @throws UnsupportedOperationException If this session doesn't support this.
+     * @see MediaSession#FLAG_HANDLES_QUEUE_COMMANDS
+     */
+    public void addQueueItem(MediaDescription description, int index) {
+        try {
+            long flags = mSessionBinder.getFlags();
+            if ((flags & MediaSession.FLAG_HANDLES_QUEUE_COMMANDS) == 0) {
+                throw new UnsupportedOperationException(
+                        "This session doesn't support queue management operations");
+            }
+            mSessionBinder.addQueueItemAt(description, index);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling addQueueItemAt", e);
+        }
+    }
+
+    /**
+     * Remove the first occurrence of the specified {@link MediaSession.QueueItem}
+     * with the given {@link MediaDescription description} in the play queue of the associated
+     * session. Not all sessions may support this.
+     *
+     * @param description The {@link MediaDescription} for denoting the
+     *                    {@link MediaSession.QueueItem} to be removed.
+     * @throws UnsupportedOperationException If this session doesn't support this.
+     * @see MediaSession#FLAG_HANDLES_QUEUE_COMMANDS
+     */
+    public void removeQueueItem(MediaDescription description) {
+        try {
+            long flags = mSessionBinder.getFlags();
+            if ((flags & MediaSession.FLAG_HANDLES_QUEUE_COMMANDS) == 0) {
+                throw new UnsupportedOperationException(
+                        "This session doesn't support queue management operations");
+            }
+            mSessionBinder.removeQueueItem(description);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling removeQueueItem", e);
+        }
+    }
+
+    /**
+     * Remove an queue item at the specified position in the play queue
+     * of this session. Not all sessions may support this.
+     *
+     * @param index The index of the element to be removed.
+     * @throws UnsupportedOperationException If this session doesn't support this.
+     * @see MediaSession#FLAG_HANDLES_QUEUE_COMMANDS
+     */
+    public void removeQueueItemAt(int index) {
+        try {
+            long flags = mSessionBinder.getFlags();
+            if ((flags & MediaSession.FLAG_HANDLES_QUEUE_COMMANDS) == 0) {
+                throw new UnsupportedOperationException(
+                        "This session doesn't support queue management operations");
+            }
+            mSessionBinder.removeQueueItemAt(index);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling removeQueueItemAt", e);
+        }
     }
 
     /**
@@ -230,7 +322,7 @@ public final class MediaController {
         try {
             return mSessionBinder.getRatingType();
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling getRatingType.", e);
+            Log.wtf(TAG, "Error calling getRatingType", e);
             return Rating.RATING_NONE;
         }
     }
@@ -245,7 +337,7 @@ public final class MediaController {
         try {
             return mSessionBinder.getRepeatMode();
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling getRepeatMode.", e);
+            Log.wtf(TAG, "Error calling getRepeatMode", e);
             return PlaybackState.REPEAT_MODE_NONE;
         }
     }
@@ -259,7 +351,7 @@ public final class MediaController {
         try {
             return mSessionBinder.isShuffleModeEnabled();
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling isShuffleModeEnabled.", e);
+            Log.wtf(TAG, "Error calling isShuffleModeEnabled", e);
             return false;
         }
     }
@@ -273,7 +365,7 @@ public final class MediaController {
         try {
             return mSessionBinder.getFlags();
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling getFlags.", e);
+            Log.wtf(TAG, "Error calling getFlags", e);
         }
         return 0;
     }
@@ -290,7 +382,7 @@ public final class MediaController {
                     result.maxVolume, result.currentVolume);
 
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling getAudioInfo.", e);
+            Log.wtf(TAG, "Error calling getAudioInfo", e);
         }
         return null;
     }
@@ -305,7 +397,7 @@ public final class MediaController {
         try {
             return mSessionBinder.getLaunchPendingIntent();
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling getPendingIntent.", e);
+            Log.wtf(TAG, "Error calling getPendingIntent", e);
         }
         return null;
     }
@@ -334,7 +426,7 @@ public final class MediaController {
         try {
             mSessionBinder.setVolumeTo(value, flags, mContext.getPackageName());
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling setVolumeTo.", e);
+            Log.wtf(TAG, "Error calling setVolumeTo", e);
         }
     }
 
@@ -355,7 +447,7 @@ public final class MediaController {
         try {
             mSessionBinder.adjustVolume(direction, flags, mContext.getPackageName());
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling adjustVolumeBy.", e);
+            Log.wtf(TAG, "Error calling adjustVolumeBy", e);
         }
     }
 
@@ -421,7 +513,7 @@ public final class MediaController {
         try {
             mSessionBinder.sendCommand(command, args, cb);
         } catch (RemoteException e) {
-            Log.d(TAG, "Dead object in sendCommand.", e);
+            Log.d(TAG, "Dead object in sendCommand", e);
         }
     }
 
@@ -435,7 +527,7 @@ public final class MediaController {
             try {
                 mPackageName = mSessionBinder.getPackageName();
             } catch (RemoteException e) {
-                Log.d(TAG, "Dead object in getPackageName.", e);
+                Log.d(TAG, "Dead object in getPackageName", e);
             }
         }
         return mPackageName;
@@ -452,7 +544,7 @@ public final class MediaController {
             try {
                 mTag = mSessionBinder.getTag();
             } catch (RemoteException e) {
-                Log.d(TAG, "Dead object in getTag.", e);
+                Log.d(TAG, "Dead object in getTag", e);
             }
         }
         return mTag;
@@ -652,7 +744,7 @@ public final class MediaController {
             try {
                 mSessionBinder.prepare();
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling prepare.", e);
+                Log.wtf(TAG, "Error calling prepare", e);
             }
         }
 
@@ -671,12 +763,12 @@ public final class MediaController {
         public void prepareFromMediaId(String mediaId, Bundle extras) {
             if (TextUtils.isEmpty(mediaId)) {
                 throw new IllegalArgumentException(
-                        "You must specify a non-empty String for prepareFromMediaId.");
+                        "You must specify a non-empty String for prepareFromMediaId");
             }
             try {
                 mSessionBinder.prepareFromMediaId(mediaId, extras);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling prepare(" + mediaId + ").", e);
+                Log.wtf(TAG, "Error calling prepare(" + mediaId + ")", e);
             }
         }
 
@@ -702,7 +794,7 @@ public final class MediaController {
             try {
                 mSessionBinder.prepareFromSearch(query, extras);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling prepare(" + query + ").", e);
+                Log.wtf(TAG, "Error calling prepare(" + query + ")", e);
             }
         }
 
@@ -721,12 +813,12 @@ public final class MediaController {
         public void prepareFromUri(Uri uri, Bundle extras) {
             if (uri == null || Uri.EMPTY.equals(uri)) {
                 throw new IllegalArgumentException(
-                        "You must specify a non-empty Uri for prepareFromUri.");
+                        "You must specify a non-empty Uri for prepareFromUri");
             }
             try {
                 mSessionBinder.prepareFromUri(uri, extras);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling prepare(" + uri + ").", e);
+                Log.wtf(TAG, "Error calling prepare(" + uri + ")", e);
             }
         }
 
@@ -737,7 +829,7 @@ public final class MediaController {
             try {
                 mSessionBinder.play();
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling play.", e);
+                Log.wtf(TAG, "Error calling play", e);
             }
         }
 
@@ -751,12 +843,12 @@ public final class MediaController {
         public void playFromMediaId(String mediaId, Bundle extras) {
             if (TextUtils.isEmpty(mediaId)) {
                 throw new IllegalArgumentException(
-                        "You must specify a non-empty String for playFromMediaId.");
+                        "You must specify a non-empty String for playFromMediaId");
             }
             try {
                 mSessionBinder.playFromMediaId(mediaId, extras);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling play(" + mediaId + ").", e);
+                Log.wtf(TAG, "Error calling play(" + mediaId + ")", e);
             }
         }
 
@@ -778,7 +870,7 @@ public final class MediaController {
             try {
                 mSessionBinder.playFromSearch(query, extras);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling play(" + query + ").", e);
+                Log.wtf(TAG, "Error calling play(" + query + ")", e);
             }
         }
 
@@ -792,12 +884,12 @@ public final class MediaController {
         public void playFromUri(Uri uri, Bundle extras) {
             if (uri == null || Uri.EMPTY.equals(uri)) {
                 throw new IllegalArgumentException(
-                        "You must specify a non-empty Uri for playFromUri.");
+                        "You must specify a non-empty Uri for playFromUri");
             }
             try {
                 mSessionBinder.playFromUri(uri, extras);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling play(" + uri + ").", e);
+                Log.wtf(TAG, "Error calling play(" + uri + ")", e);
             }
         }
 
@@ -809,7 +901,7 @@ public final class MediaController {
             try {
                 mSessionBinder.skipToQueueItem(id);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling skipToItem(" + id + ").", e);
+                Log.wtf(TAG, "Error calling skipToItem(" + id + ")", e);
             }
         }
 
@@ -821,7 +913,7 @@ public final class MediaController {
             try {
                 mSessionBinder.pause();
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling pause.", e);
+                Log.wtf(TAG, "Error calling pause", e);
             }
         }
 
@@ -833,7 +925,7 @@ public final class MediaController {
             try {
                 mSessionBinder.stop();
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling stop.", e);
+                Log.wtf(TAG, "Error calling stop", e);
             }
         }
 
@@ -846,7 +938,7 @@ public final class MediaController {
             try {
                 mSessionBinder.seekTo(pos);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling seekTo.", e);
+                Log.wtf(TAG, "Error calling seekTo", e);
             }
         }
 
@@ -858,7 +950,7 @@ public final class MediaController {
             try {
                 mSessionBinder.fastForward();
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling fastForward.", e);
+                Log.wtf(TAG, "Error calling fastForward", e);
             }
         }
 
@@ -869,7 +961,7 @@ public final class MediaController {
             try {
                 mSessionBinder.next();
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling next.", e);
+                Log.wtf(TAG, "Error calling next", e);
             }
         }
 
@@ -881,7 +973,7 @@ public final class MediaController {
             try {
                 mSessionBinder.rewind();
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling rewind.", e);
+                Log.wtf(TAG, "Error calling rewind", e);
             }
         }
 
@@ -892,7 +984,7 @@ public final class MediaController {
             try {
                 mSessionBinder.previous();
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling previous.", e);
+                Log.wtf(TAG, "Error calling previous", e);
             }
         }
 
@@ -907,7 +999,7 @@ public final class MediaController {
             try {
                 mSessionBinder.rate(rating);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling rate.", e);
+                Log.wtf(TAG, "Error calling rate", e);
             }
         }
 
@@ -923,7 +1015,7 @@ public final class MediaController {
             try {
                 mSessionBinder.repeatMode(repeatMode);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling setRepeatMode.", e);
+                Log.wtf(TAG, "Error calling setRepeatMode", e);
             }
         }
 
@@ -936,7 +1028,7 @@ public final class MediaController {
             try {
                 mSessionBinder.shuffleMode(enabled);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling shuffleMode.", e);
+                Log.wtf(TAG, "Error calling shuffleMode", e);
             }
         }
 
@@ -950,7 +1042,7 @@ public final class MediaController {
         public void sendCustomAction(@NonNull PlaybackState.CustomAction customAction,
                     @Nullable Bundle args) {
             if (customAction == null) {
-                throw new IllegalArgumentException("CustomAction cannot be null.");
+                throw new IllegalArgumentException("CustomAction cannot be null");
             }
             sendCustomAction(customAction.getAction(), args);
         }
@@ -966,12 +1058,12 @@ public final class MediaController {
          */
         public void sendCustomAction(@NonNull String action, @Nullable Bundle args) {
             if (TextUtils.isEmpty(action)) {
-                throw new IllegalArgumentException("CustomAction cannot be null.");
+                throw new IllegalArgumentException("CustomAction cannot be null");
             }
             try {
                 mSessionBinder.sendCustomAction(action, args);
             } catch (RemoteException e) {
-                Log.d(TAG, "Dead object in sendCustomAction.", e);
+                Log.d(TAG, "Dead object in sendCustomAction", e);
             }
         }
     }
