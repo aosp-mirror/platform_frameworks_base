@@ -739,8 +739,13 @@ public class DevicePolicyManager {
      * <p>The broadcast is limited to the primary profile, to the app specified in the provisioning
      * intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE}.
      *
-     * <p>This intent will contain the extra {@link #EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE} which
-     * corresponds to the account requested to be migrated at provisioning time, if any.
+     * <p>This intent will contain the following extras
+     * <ul>
+     * <li>{@link Intent#EXTRA_USER}, corresponds to the {@link UserHandle} of the managed
+     * profile.</li>
+     * <li>{@link #EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE}, corresponds to the account requested to
+     * be migrated at provisioning time, if any.</li>
+     * </ul>
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGED_PROFILE_PROVISIONED
