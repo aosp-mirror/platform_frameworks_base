@@ -15,6 +15,8 @@
  */
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_NONE;
+
 import com.android.internal.R;
 
 import android.app.Notification;
@@ -450,6 +452,9 @@ public class RankingHelper implements RankingConfig {
     @Override
     public void createNotificationChannel(String pkg, int uid, NotificationChannel channel) {
         Record r = getOrCreateRecord(pkg, uid);
+        if (IMPORTANCE_NONE == r.importance) {
+            throw new IllegalArgumentException("Package blocked");
+        }
         if (r.channels.containsKey(channel.getId()) || channel.getName().equals(
                 mContext.getString(R.string.default_notification_channel_label))) {
             throw new IllegalArgumentException("Channel already exists");
