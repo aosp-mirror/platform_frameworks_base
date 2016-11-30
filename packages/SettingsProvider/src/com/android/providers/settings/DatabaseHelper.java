@@ -2484,9 +2484,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
             loadStringSetting(stmt, Settings.Secure.ACCESSIBILITY_SCREEN_READER_URL,
                     R.string.def_accessibility_screen_reader_url);
 
-            loadBooleanSetting(stmt, Settings.Secure.ACCESSIBILITY_DISABLE_ANIMATIONS,
-                    R.bool.def_accessibility_disable_animations);
-
             if (SystemProperties.getBoolean("ro.lockscreen.disable.default", false) == true) {
                 loadSetting(stmt, Settings.System.LOCKSCREEN_DISABLED, "1");
             } else {
