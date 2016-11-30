@@ -5979,6 +5979,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
+    public boolean hasDeviceOwner() {
+        enforceDeviceOwnerOrManageUsers();
+        return mOwners.hasDeviceOwner();
+    }
+
     boolean isDeviceOwner(ActiveAdmin admin) {
         return isDeviceOwner(admin.info.getComponent(), admin.getUserHandle().getIdentifier());
     }
