@@ -34,4 +34,4 @@ PROG_NAME="$(follow_links)"
 PROG_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 ANDROID_ROOT=$PROG_DIR/..
 
-java -cp $ANDROID_ROOT/framework/preload2.jar com.android.preload.Main
+java -cp $ANDROID_ROOT/framework/preload2.jar com.android.preload.Main $@
