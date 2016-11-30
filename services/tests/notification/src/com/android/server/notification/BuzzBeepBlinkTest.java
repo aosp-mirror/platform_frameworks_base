@@ -211,8 +211,9 @@ public class BuzzBeepBlinkTest {
                 defaults |= Notification.DEFAULT_VIBRATE;
             } else {
                 builder.setVibrate(CUSTOM_VIBRATION);
+                channel.setVibrationPattern(CUSTOM_VIBRATION);
             }
-            channel.setVibration(true);
+            channel.enableVibration(true);
         }
         if (lights) {
             if (defaultLights) {

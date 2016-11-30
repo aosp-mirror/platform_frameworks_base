@@ -46,6 +46,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -168,6 +169,18 @@ public class RankingHelperTest {
         return baos;
     }
 
+    private void compareChannels(NotificationChannel expected, NotificationChannel actual) {
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getName(), actual.getName());
+        assertEquals(expected.shouldVibrate(), actual.shouldVibrate());
+        assertEquals(expected.shouldShowLights(), actual.shouldShowLights());
+        assertEquals(expected.getImportance(), actual.getImportance());
+        assertEquals(expected.getLockscreenVisibility(), actual.getLockscreenVisibility());
+        assertEquals(expected.getSound(), actual.getSound());
+        assertEquals(expected.canBypassDnd(), actual.canBypassDnd());
+        assertTrue(Arrays.equals(expected.getVibrationPattern(), actual.getVibrationPattern()));
+    }
+
     @Test
     public void testFindAfterRankingWithASplitGroup() throws Exception {
         ArrayList<NotificationRecord> notificationList = new ArrayList<NotificationRecord>(3);
@@ -228,6 +241,8 @@ public class RankingHelperTest {
         channel2.setLights(true);
         channel2.setBypassDnd(true);
         channel2.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+        channel2.enableVibration(true);
+        channel2.setVibrationPattern(new long[] {100, 67, 145, 156});
 
         mHelper.createNotificationChannel(pkg, uid, channel1);
         mHelper.createNotificationChannel(pkg, uid, channel2);
@@ -246,7 +261,7 @@ public class RankingHelperTest {
         mHelper.readXml(parser, false);
 
         assertEquals(channel1, mHelper.getNotificationChannel(pkg, uid, channel1.getId()));
-        assertEquals(channel2, mHelper.getNotificationChannel(pkg, uid, channel2.getId()));
+        compareChannels(channel2, mHelper.getNotificationChannel(pkg, uid, channel2.getId()));
         assertNotNull(
                 mHelper.getNotificationChannel(pkg, uid, NotificationChannel.DEFAULT_CHANNEL_ID));
     }
@@ -385,7 +400,8 @@ public class RankingHelperTest {
         // same id, try to update
         final NotificationChannel channel2 =
             new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
-        channel2.setVibration(true);
+        channel2.enableVibration(true);
+        channel2.setVibrationPattern(new long[] {100});
 
         mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
 
