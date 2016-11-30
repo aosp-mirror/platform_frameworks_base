@@ -1004,6 +1004,12 @@ public class CarrierConfigManager {
     public static final String KEY_EDITABLE_WFC_ROAMING_MODE_BOOL =
             "editable_wfc_roaming_mode_bool";
 
+    /**
+     * Carrier specified WiFi networks.
+     * @hide
+     */
+    public static final String KEY_CARRIER_WIFI_STRING_ARRAY = "carrier_wifi_string_array";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1181,6 +1187,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(FILTERED_CNAP_NAMES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
+        sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
     }
 
     /**
