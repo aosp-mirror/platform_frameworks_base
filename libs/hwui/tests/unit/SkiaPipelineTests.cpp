@@ -179,3 +179,53 @@ RENDERTHREAD_TEST(SkiaPipeline, renderLayer) {
     redNode->setLayerSurface(sk_sp<SkSurface>());
     blueNode->setLayerSurface(sk_sp<SkSurface>());
 }
+
+RENDERTHREAD_TEST(SkiaPipeline, renderOverdraw) {
+    ScopedProperty<bool> prop(Properties::debugOverdraw, true);
+
+    auto whiteNode = TestUtils::createSkiaNode(0, 0, 1, 1,
+        [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+            canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
+        });
+    LayerUpdateQueue layerUpdateQueue;
+    SkRect dirty = SkRect::MakeXYWH(0, 0, 1, 1);
+    std::vector<sp<RenderNode>> renderNodes;
+    renderNodes.push_back(whiteNode);
+    bool opaque = true;
+    android::uirenderer::Rect contentDrawBounds(0, 0, 1, 1);
+    auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
+    auto surface = SkSurface::MakeRasterN32Premul(1, 1);
+
+    // Initialize the canvas to blue.
+    surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
+    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
+
+    // Single draw, should be white.
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
+    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
+
+    // 1 Overdraw, should be blue blended onto white.
+    renderNodes.push_back(whiteNode);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
+    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned) 0xffd0d0ff);
+
+    // 2 Overdraw, should be green blended onto white
+    renderNodes.push_back(whiteNode);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
+    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned) 0xffd0ffd0);
+
+    // 3 Overdraw, should be pink blended onto white.
+    renderNodes.push_back(whiteNode);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
+    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned) 0xffffc0c0);
+
+    // 4 Overdraw, should be red blended onto white.
+    renderNodes.push_back(whiteNode);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
+    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned) 0xffff8080);
+
+    // 5 Overdraw, should be red blended onto white.
+    renderNodes.push_back(whiteNode);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
+    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned) 0xffff8080);
+}

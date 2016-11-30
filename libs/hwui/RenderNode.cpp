@@ -188,8 +188,9 @@ void RenderNode::prepareTree(TreeInfo& info) {
     ATRACE_CALL();
     LOG_ALWAYS_FATAL_IF(!info.damageAccumulator, "DamageAccumulator missing");
 
-    // Functors don't correctly handle stencil usage of overdraw debugging - shove 'em in a layer.
-    bool functorsNeedLayer = Properties::debugOverdraw;
+    // The OpenGL renderer reserves the stencil buffer for overdraw debugging.  Functors
+    // will need to be drawn in a layer.
+    bool functorsNeedLayer = Properties::debugOverdraw && !Properties::isSkiaEnabled();
 
     prepareTreeImpl(info, functorsNeedLayer);
 }
