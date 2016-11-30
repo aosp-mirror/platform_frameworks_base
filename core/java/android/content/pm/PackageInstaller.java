@@ -1067,6 +1067,16 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
+        @SystemApi
+        public void setInstallAsInstantApp(boolean isInstantApp) {
+            if (isInstantApp) {
+                installFlags |= PackageManager.INSTALL_EPHEMERAL;
+            } else {
+                installFlags &= ~PackageManager.INSTALL_EPHEMERAL;
+            }
+        }
+
+        /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
             pw.printHexPair("installFlags", installFlags);

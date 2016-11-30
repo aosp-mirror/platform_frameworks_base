@@ -1109,7 +1109,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.abiOverride = checkAbiArgument(getNextArg());
                     break;
                 case "--ephemeral":
-                    sessionParams.installFlags |= PackageManager.INSTALL_EPHEMERAL;
+                    sessionParams.setInstallAsInstantApp(true /*isInstantApp*/);
                     break;
                 case "--user":
                     params.userId = UserHandle.parseUserArg(getNextArgRequired());
