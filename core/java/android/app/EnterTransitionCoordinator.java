@@ -90,7 +90,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                                     decorView.getViewTreeObserver().removeOnPreDrawListener(this);
                                 }
                             }
-                            return mIsReadyForTransition;
+                            return false;
                         }
                     });
         }
