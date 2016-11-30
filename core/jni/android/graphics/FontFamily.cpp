@@ -30,6 +30,7 @@
 #include <android_runtime/android_util_AssetManager.h>
 #include <androidfw/AssetManager.h>
 #include "Utils.h"
+#include "FontUtils.h"
 
 #include <hwui/MinikinSkia.h>
 #include <hwui/Typeface.h>
@@ -149,16 +150,6 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong builderPtr,
     return true;
 }
 
-static struct {
-    jmethodID mGet;
-    jmethodID mSize;
-} gListClassInfo;
-
-static struct {
-    jfieldID mTag;
-    jfieldID mStyleValue;
-} gAxisClassInfo;
-
 static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong builderPtr,
         jobject font, jint ttcIndex, jobject listOfAxis, jint weight, jboolean isItalic) {
     NPE_CHECK_RETURN_ZERO(env, font);
@@ -167,20 +158,22 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
     std::unique_ptr<SkFontMgr::FontParameters::Axis[]> skiaAxes;
     int skiaAxesLength = 0;
     if (listOfAxis) {
-        jint listSize = env->CallIntMethod(listOfAxis, gListClassInfo.mSize);
+        ListHelper list(env, listOfAxis);
+        jint listSize = list.size();
 
         skiaAxes.reset(new SkFontMgr::FontParameters::Axis[listSize]);
         skiaAxesLength = listSize;
         for (jint i = 0; i < listSize; ++i) {
-            jobject axisObject = env->CallObjectMethod(listOfAxis, gListClassInfo.mGet, i);
+            jobject axisObject = list.get(i);
             if (!axisObject) {
                 skiaAxes[i].fTag = 0;
                 skiaAxes[i].fStyleValue = 0;
                 continue;
             }
+            AxisHelper axis(env, axisObject);
 
-            jint tag = env->GetIntField(axisObject, gAxisClassInfo.mTag);
-            jfloat stylevalue = env->GetFloatField(axisObject, gAxisClassInfo.mStyleValue);
+            jint tag = axis.getTag();
+            jfloat stylevalue = axis.getStyleValue();
             skiaAxes[i].fTag = tag;
             skiaAxes[i].fStyleValue = SkFloatToScalar(stylevalue);
         }
@@ -291,14 +284,7 @@ int register_android_graphics_FontFamily(JNIEnv* env)
     int err = RegisterMethodsOrDie(env, "android/graphics/FontFamily", gFontFamilyMethods,
             NELEM(gFontFamilyMethods));
 
-    jclass listClass = FindClassOrDie(env, "java/util/List");
-    gListClassInfo.mGet = GetMethodIDOrDie(env, listClass, "get", "(I)Ljava/lang/Object;");
-    gListClassInfo.mSize = GetMethodIDOrDie(env, listClass, "size", "()I");
-
-    jclass axisClass = FindClassOrDie(env, "android/text/FontConfig$Axis");
-    gAxisClassInfo.mTag = GetFieldIDOrDie(env, axisClass, "mTag", "I");
-    gAxisClassInfo.mStyleValue = GetFieldIDOrDie(env, axisClass, "mStyleValue", "F");
-
+    init_FontUtils(env);
     return err;
 }
 

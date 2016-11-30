@@ -118,6 +118,7 @@ LOCAL_SRC_FILES:= \
     android/graphics/ColorFilter.cpp \
     android/graphics/DrawFilter.cpp \
     android/graphics/FontFamily.cpp \
+    android/graphics/FontUtils.cpp \
     android/graphics/CreateJavaOutputStreamAdaptor.cpp \
     android/graphics/GIFMovie.cpp \
     android/graphics/GraphicBuffer.cpp \

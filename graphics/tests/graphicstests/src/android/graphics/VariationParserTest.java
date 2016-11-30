@@ -18,9 +18,8 @@ package android.graphics;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.FontConfig;
-import junit.framework.TestCase;
-
 import java.util.List;
+import junit.framework.TestCase;
 
 
 public class VariationParserTest extends TestCase {
@@ -28,92 +27,92 @@ public class VariationParserTest extends TestCase {
     @SmallTest
     public void testParseFontVariationSetting() {
         int tag = FontListParser.makeTag('w', 'd', 't', 'h');
-        FontConfig.Axis[] axis = FontListParser.parseFontVariationSettings("'wdth' 1");
-        assertEquals(tag, axis[0].getTag());
-        assertEquals(1.0f, axis[0].getStyleValue());
+        List<FontConfig.Axis> axes = FontListParser.parseFontVariationSettings("'wdth' 1");
+        assertEquals(tag, axes.get(0).getTag());
+        assertEquals(1.0f, axes.get(0).getStyleValue());
 
-        axis = FontListParser.parseFontVariationSettings("\"wdth\" 100");
-        assertEquals(tag, axis[0].getTag());
-        assertEquals(100.0f, axis[0].getStyleValue());
+        axes = FontListParser.parseFontVariationSettings("\"wdth\" 100");
+        assertEquals(tag, axes.get(0).getTag());
+        assertEquals(100.0f, axes.get(0).getStyleValue());
 
-        axis = FontListParser.parseFontVariationSettings("   'wdth' 100");
-        assertEquals(tag, axis[0].getTag());
-        assertEquals(100.0f, axis[0].getStyleValue());
+        axes = FontListParser.parseFontVariationSettings("   'wdth' 100");
+        assertEquals(tag, axes.get(0).getTag());
+        assertEquals(100.0f, axes.get(0).getStyleValue());
 
-        axis = FontListParser.parseFontVariationSettings("\t'wdth' 0.5");
-        assertEquals(tag, axis[0].getTag());
-        assertEquals(0.5f, axis[0].getStyleValue());
+        axes = FontListParser.parseFontVariationSettings("\t'wdth' 0.5");
+        assertEquals(tag, axes.get(0).getTag());
+        assertEquals(0.5f, axes.get(0).getStyleValue());
 
         tag = FontListParser.makeTag('A', 'X', ' ', ' ');
-        axis = FontListParser.parseFontVariationSettings("'AX  ' 1");
-        assertEquals(tag, axis[0].getTag());
-        assertEquals(1.0f, axis[0].getStyleValue());
+        axes = FontListParser.parseFontVariationSettings("'AX  ' 1");
+        assertEquals(tag, axes.get(0).getTag());
+        assertEquals(1.0f, axes.get(0).getStyleValue());
 
-        axis = FontListParser.parseFontVariationSettings("'AX  '\t1");
-        assertEquals(tag, axis[0].getTag());
-        assertEquals(1.0f, axis[0].getStyleValue());
+        axes = FontListParser.parseFontVariationSettings("'AX  '\t1");
+        assertEquals(tag, axes.get(0).getTag());
+        assertEquals(1.0f, axes.get(0).getStyleValue());
 
-        axis = FontListParser.parseFontVariationSettings("'AX  '\n1");
-        assertEquals(tag, axis[0].getTag());
-        assertEquals(1.0f, axis[0].getStyleValue());
+        axes = FontListParser.parseFontVariationSettings("'AX  '\n1");
+        assertEquals(tag, axes.get(0).getTag());
+        assertEquals(1.0f, axes.get(0).getStyleValue());
 
-        axis = FontListParser.parseFontVariationSettings("'AX  '\r1");
-        assertEquals(tag, axis[0].getTag());
-        assertEquals(1.0f, axis[0].getStyleValue());
+        axes = FontListParser.parseFontVariationSettings("'AX  '\r1");
+        assertEquals(tag, axes.get(0).getTag());
+        assertEquals(1.0f, axes.get(0).getStyleValue());
 
-        axis = FontListParser.parseFontVariationSettings("'AX  '\r\t\n 1");
-        assertEquals(tag, axis[0].getTag());
-        assertEquals(1.0f, axis[0].getStyleValue());
+        axes = FontListParser.parseFontVariationSettings("'AX  '\r\t\n 1");
+        assertEquals(tag, axes.get(0).getTag());
+        assertEquals(1.0f, axes.get(0).getStyleValue());
 
         // Test for invalid input
-        axis = FontListParser.parseFontVariationSettings("");
-        assertEquals(0, axis.length);
-        axis = FontListParser.parseFontVariationSettings("invalid_form");
-        assertEquals(0, axis.length);
+        axes = FontListParser.parseFontVariationSettings("");
+        assertEquals(0, axes.size());
+        axes = FontListParser.parseFontVariationSettings("invalid_form");
+        assertEquals(0, axes.size());
 
         // Test with invalid tag
-        axis = FontListParser.parseFontVariationSettings("'' 1");
-        assertEquals(0, axis.length);
-        axis = FontListParser.parseFontVariationSettings("'invalid' 1");
-        assertEquals(0, axis.length);
+        axes = FontListParser.parseFontVariationSettings("'' 1");
+        assertEquals(0, axes.size());
+        axes = FontListParser.parseFontVariationSettings("'invalid' 1");
+        assertEquals(0, axes.size());
 
         // Test with invalid styleValue
-        axis = FontListParser.parseFontVariationSettings("'wdth' ");
-        assertEquals(0, axis.length);
-        axis = FontListParser.parseFontVariationSettings("'wdth' x");
-        assertEquals(0, axis.length);
-        axis = FontListParser.parseFontVariationSettings("'wdth' \t");
-        assertEquals(0, axis.length);
-        axis = FontListParser.parseFontVariationSettings("'wdth' \n\r");
-        assertEquals(0, axis.length);
+        axes = FontListParser.parseFontVariationSettings("'wdth' ");
+        assertEquals(0, axes.size());
+        axes = FontListParser.parseFontVariationSettings("'wdth' x");
+        assertEquals(0, axes.size());
+        axes = FontListParser.parseFontVariationSettings("'wdth' \t");
+        assertEquals(0, axes.size());
+        axes = FontListParser.parseFontVariationSettings("'wdth' \n\r");
+        assertEquals(0, axes.size());
     }
 
     @SmallTest
     public void testParseFontVariationStyleSettings() {
-        FontConfig.Axis[] axis =
+        List<FontConfig.Axis> axes =
                 FontListParser.parseFontVariationSettings("'wdth' 10,'AX  '\r1");
         int tag1 = FontListParser.makeTag('w', 'd', 't', 'h');
         int tag2 = FontListParser.makeTag('A', 'X', ' ', ' ');
-        assertEquals(tag1, axis[0].getTag());
-        assertEquals(10.0f, axis[0].getStyleValue());
-        assertEquals(tag2, axis[1].getTag());
-        assertEquals(1.0f, axis[1].getStyleValue());
+        assertEquals(tag1, axes.get(0).getTag());
+        assertEquals(10.0f, axes.get(0).getStyleValue());
+        assertEquals(tag2, axes.get(1).getTag());
+        assertEquals(1.0f, axes.get(1).getStyleValue());
 
         // Test only spacers are allowed before tag
-        axis = FontListParser.parseFontVariationSettings("     'wdth' 10,ab'wdth' 1");
+        axes = FontListParser.parseFontVariationSettings("     'wdth' 10,ab'wdth' 1");
         tag1 = FontListParser.makeTag('w', 'd', 't', 'h');
-        assertEquals(tag1, axis[0].getTag());
-        assertEquals(10.0f, axis[0].getStyleValue());
-        assertEquals(1, axis.length);
+        assertEquals(tag1, axes.get(0).getTag());
+        assertEquals(10.0f, axes.get(0).getStyleValue());
+        assertEquals(1, axes.size());
     }
 
     @SmallTest
     public void testInvalidTagCharacters() {
-        FontConfig.Axis[] axis =
+        List<FontConfig.Axis> axes =
                 FontListParser.parseFontVariationSettings("'\u0000\u0000\u0000\u0000' 10");
-        assertEquals(0, axis.length);
-        axis = FontListParser.parseFontVariationSettings("'\u3042\u3044\u3046\u3048' 10");
-        assertEquals(0, axis.length);
+        assertEquals(0, axes.size());
+        axes = FontListParser.parseFontVariationSettings("'\u3042\u3044\u3046\u3048' 10");
+        assertEquals(0, axes.size());
     }
 
     @SmallTest

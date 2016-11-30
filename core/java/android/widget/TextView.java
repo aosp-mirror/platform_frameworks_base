@@ -3433,6 +3433,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Returns the font variation settings.
+     *
+     * @return the currently set font variation settings.  Returns null if no variation is
+     * specified.
+     *
+     * @see #setFontVariationSettings(String)
+     * @see Paint#setFontVariationSettings(String) Paint.setFontVariationSettings(String)
+     */
+    @Nullable
+    public String getFontVariationSettings() {
+        return mTextPaint.getFontVariationSettings();
+    }
+
+    /**
      * Sets the break strategy for breaking paragraphs into lines. The default value for
      * TextView is {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}, and the default value for
      * EditText is {@link Layout#BREAK_STRATEGY_SIMPLE}, the latter to avoid the
@@ -3537,6 +3551,41 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+
+    /**
+     * Sets TrueType or OpenType font variation settings. The settings string is constructed from
+     * multiple pairs of axis tag and style values. The axis tag must contain four ASCII characters
+     * and must be wrapped with single quotes (U+0027) or double quotes (U+0022). Axis strings that
+     * are longer or shorter than four characters, or contain characters outside of U+0020..U+007E
+     * are invalid. If a specified axis name is not defined in the font, the settings will be
+     * ignored.
+     *
+     * <pre>
+     *   textView.setFontVariationSettings("'wdth' 1.0");
+     *   textView.setFontVariationSettings("'AX  ' 1.8, 'FB  ' 2.0");
+     * </pre>
+     *
+     * @param fontVariationSettings font variation settings. You can pass null or empty string as
+     *                              no variation settings.
+     *
+     * @see #getFontVariationSettings()
+     * @see Paint#getFontVariationSettings() Paint.getFontVariationSettings()
+     */
+    public void setFontVariationSettings(@Nullable String fontVariationSettings) {
+        final String existingSettings = mTextPaint.getFontVariationSettings();
+        if (fontVariationSettings == existingSettings
+                || (fontVariationSettings != null
+                        && fontVariationSettings.equals(existingSettings))) {
+            return;
+        }
+        mTextPaint.setFontVariationSettings(fontVariationSettings);
+
+        if (mLayout != null) {
+            nullLayouts();
+            requestLayout();
+            invalidate();
+        }
+    }
 
     /**
      * Sets the text color for all the states (normal, selected,
