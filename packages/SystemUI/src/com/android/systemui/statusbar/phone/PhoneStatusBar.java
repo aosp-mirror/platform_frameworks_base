@@ -1873,6 +1873,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         updateQsExpansionEnabled();
         mShadeUpdates.check();
+
+        // Let's also update the icons
+        mIconController.updateNotificationIcons(mNotificationData);
     }
 
     /**
@@ -2021,7 +2024,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNotificationData.filterAndSort();
 
         updateNotificationShade();
-        mIconController.updateNotificationIcons(mNotificationData);
     }
 
     public void requestNotificationUpdate() {
