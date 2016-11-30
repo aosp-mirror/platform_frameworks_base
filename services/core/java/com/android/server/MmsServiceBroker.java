@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.Manifest;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -499,13 +500,21 @@ public class MmsServiceBroker extends SystemService {
          */
         private Uri adjustUriForUserAndGrantPermission(Uri contentUri, String action,
                 int permission) {
+            final Intent grantIntent = new Intent();
+            grantIntent.setData(contentUri);
+            grantIntent.setFlags(permission);
+
+            final int callingUid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getCallingUserId();
             if (callingUserId != UserHandle.USER_SYSTEM) {
                 contentUri = ContentProvider.maybeAddUserId(contentUri, callingUserId);
             }
+
             long token = Binder.clearCallingIdentity();
             try {
-                mContext.grantUriPermission(PHONE_PACKAGE_NAME, contentUri, permission);
+                LocalServices.getService(ActivityManagerInternal.class)
+                        .grantUriPermissionFromIntent(callingUid, PHONE_PACKAGE_NAME,
+                                grantIntent, UserHandle.USER_SYSTEM);
 
                 // Grant permission for the carrier app.
                 Intent intent = new Intent(action);
@@ -514,7 +523,9 @@ public class MmsServiceBroker extends SystemService {
                 List<String> carrierPackages = telephonyManager.getCarrierPackageNamesForIntent(
                         intent);
                 if (carrierPackages != null && carrierPackages.size() == 1) {
-                    mContext.grantUriPermission(carrierPackages.get(0), contentUri, permission);
+                    LocalServices.getService(ActivityManagerInternal.class)
+                            .grantUriPermissionFromIntent(callingUid, carrierPackages.get(0),
+                                    grantIntent, UserHandle.USER_SYSTEM);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
