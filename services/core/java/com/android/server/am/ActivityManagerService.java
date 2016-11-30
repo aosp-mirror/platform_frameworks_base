@@ -21,7 +21,6 @@ import android.app.ApplicationThreadConstants;
 import android.app.ContentProviderHolder;
 import android.app.IActivityManager;
 import android.app.WaitResult;
-import android.graphics.PointF;
 import android.os.IDeviceIdentifiersPolicyService;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -19114,6 +19113,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallingPermission(CHANGE_CONFIGURATION, "updateDisplayOverrideConfiguration()");
 
         synchronized (this) {
+            // Check if display is initialized in AM.
+            if (!mStackSupervisor.isDisplayAdded(displayId)) {
+                // Call might come when display is not yet added or has already been removed.
+                if (DEBUG_CONFIGURATION) {
+                    Slog.w(TAG, "Trying to update display configuration for non-existing displayId="
+                            + displayId);
+                }
+                return false;
+            }
+
             if (values == null && mWindowManager != null) {
                 // sentinel: fetch the current configuration from the window manager
                 values = mWindowManager.computeNewConfiguration(displayId);
