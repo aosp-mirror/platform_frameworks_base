@@ -774,13 +774,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private int mIntentFilterVerificationToken = 0;
 
-    /** Component that knows whether or not an ephemeral application exists */
-    final ComponentName mEphemeralResolverComponent;
     /** The service connection to the ephemeral resolver */
     final EphemeralResolverConnection mEphemeralResolverConnection;
 
     /** Component used to install ephemeral applications */
-    final ComponentName mEphemeralInstallerComponent;
+    ComponentName mEphemeralInstallerComponent;
     final ActivityInfo mEphemeralInstallerActivity = new ActivityInfo();
     final ResolveInfo mEphemeralInstallerInfo = new ResolveInfo();
 
@@ -2740,31 +2738,21 @@ public class PackageManagerService extends IPackageManager.Stub {
             mInstallerService = new PackageInstallerService(context, this);
 
             final ComponentName ephemeralResolverComponent = getEphemeralResolverLPr();
-            final ComponentName ephemeralInstallerComponent = getEphemeralInstallerLPr();
-            // both the installer and resolver must be present to enable ephemeral
-            if (ephemeralInstallerComponent != null && ephemeralResolverComponent != null) {
+            if (ephemeralResolverComponent != null) {
                 if (DEBUG_EPHEMERAL) {
-                    Slog.i(TAG, "Ephemeral activated; resolver: " + ephemeralResolverComponent
-                            + " installer:" + ephemeralInstallerComponent);
+                    Slog.i(TAG, "Ephemeral resolver: " + ephemeralResolverComponent);
                 }
-                mEphemeralResolverComponent = ephemeralResolverComponent;
-                mEphemeralInstallerComponent = ephemeralInstallerComponent;
-                setUpEphemeralInstallerActivityLP(mEphemeralInstallerComponent);
                 mEphemeralResolverConnection =
-                        new EphemeralResolverConnection(mContext, mEphemeralResolverComponent);
+                        new EphemeralResolverConnection(mContext, ephemeralResolverComponent);
             } else {
-                if (DEBUG_EPHEMERAL) {
-                    final String missingComponent =
-                            (ephemeralResolverComponent == null)
-                            ? (ephemeralInstallerComponent == null)
-                                    ? "resolver and installer"
-                                    : "resolver"
-                            : "installer";
-                    Slog.i(TAG, "Ephemeral deactivated; missing " + missingComponent);
-                }
-                mEphemeralResolverComponent = null;
-                mEphemeralInstallerComponent = null;
                 mEphemeralResolverConnection = null;
+            }
+            mEphemeralInstallerComponent = getEphemeralInstallerLPr();
+            if (mEphemeralInstallerComponent != null) {
+                if (DEBUG_EPHEMERAL) {
+                    Slog.i(TAG, "Ephemeral installer: " + mEphemeralInstallerComponent);
+                }
+                setUpEphemeralInstallerActivityLP(mEphemeralInstallerComponent);
             }
 
             mEphemeralApplicationRegistry = new EphemeralApplicationRegistry(this);
@@ -5029,6 +5017,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         if (mEphemeralResolverConnection == null) {
+            return false;
+        }
+        if (mEphemeralInstallerComponent == null) {
             return false;
         }
         if (intent.getComponent() != null) {
@@ -9600,11 +9591,21 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void setUpEphemeralInstallerActivityLP(ComponentName installerComponent) {
-        final PackageParser.Package pkg = mPackages.get(installerComponent.getPackageName());
+        if (installerComponent == null) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "Clear ephemeral installer activity");
+            }
+            mEphemeralInstallerActivity.applicationInfo = null;
+            return;
+        }
 
+        if (DEBUG_EPHEMERAL) {
+            Slog.d(TAG, "Set ephemeral installer activity: " + installerComponent);
+        }
+        final PackageParser.Package pkg = mPackages.get(installerComponent.getPackageName());
         // Set up information for ephemeral installer activity
         mEphemeralInstallerActivity.applicationInfo = pkg.applicationInfo;
-        mEphemeralInstallerActivity.name = mEphemeralInstallerComponent.getClassName();
+        mEphemeralInstallerActivity.name = installerComponent.getClassName();
         mEphemeralInstallerActivity.packageName = pkg.applicationInfo.packageName;
         mEphemeralInstallerActivity.processName = pkg.applicationInfo.packageName;
         mEphemeralInstallerActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
@@ -9619,10 +9620,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         mEphemeralInstallerInfo.isDefault = true;
         mEphemeralInstallerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
                 | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
-
-        if (DEBUG_EPHEMERAL) {
-            Slog.d(TAG, "Set ephemeral installer activity: " + mEphemeralInstallerComponent);
-        }
     }
 
     private static String calculateBundledApkRoot(final String codePathString) {
