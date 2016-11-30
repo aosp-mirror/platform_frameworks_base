@@ -6424,7 +6424,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner of a managed profile to set the name of the organization under
+     * Called by the device owner or profile owner to set the name of the organization under
      * management.
      * <p>
      * If the organization name needs to be localized, it is the responsibility of the
@@ -6433,7 +6433,7 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param title The organization name or {@code null} to clear a previously set name.
-     * @throws SecurityException if {@code admin} is not a profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setOrganizationName(@NonNull ComponentName admin, @Nullable CharSequence title) {
         throwIfParentInstance("setOrganizationName");
@@ -6456,6 +6456,25 @@ public class DevicePolicyManager {
         throwIfParentInstance("getOrganizationName");
         try {
             return mService.getOrganizationName(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by the system to retrieve the name of the organization managing the device.
+     *
+     * @return The organization name or {@code null} if none is set.
+     * @throws SecurityException if the caller is not the device owner, does not hold the
+     *         MANAGE_USERS permission and is not the system.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public @Nullable CharSequence getDeviceOwnerOrganizationName() {
+        try {
+            return mService.getDeviceOwnerOrganizationName();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

@@ -2532,6 +2532,30 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertFalse(dpm.isDeviceManaged());
     }
 
+    public void testDeviceOwnerOrganizationName() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+
+        dpm.setOrganizationName(admin1, "organization");
+
+        // Device owner can retrieve organization managing the device.
+        assertEquals("organization", dpm.getDeviceOwnerOrganizationName());
+
+        // Any uid holding MANAGE_USERS permission can retrieve organization managing the device.
+        mContext.binder.callingUid = 1234567;
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
+        assertEquals("organization", dpm.getDeviceOwnerOrganizationName());
+        mContext.callerPermissions.remove(permission.MANAGE_USERS);
+
+        // System can retrieve organization managing the device.
+        mContext.binder.clearCallingIdentity();
+        assertEquals("organization", dpm.getDeviceOwnerOrganizationName());
+
+        // Removing the device owner clears the organization managing the device.
+        clearDeviceOwner();
+        assertNull(dpm.getDeviceOwnerOrganizationName());
+    }
+
     private void setUserSetupCompleteForUser(boolean isUserSetupComplete, int userhandle) {
         when(mContext.settings.settingsSecureGetIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0,
                 userhandle)).thenReturn(isUserSetupComplete ? 1 : 0);
