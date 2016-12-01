@@ -1052,7 +1052,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         assertEquals(CALLING_PACKAGE_1, si.getPackage());
         assertEquals("id", si.getId());
-        assertEquals(ShortcutActivity2.class.getName(), si.getActivity().getClassName());
+        assertNull(si.getActivity()); // It's now floating, so no target activity.
         assertEquals(null, si.getIcon());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
@@ -1116,7 +1116,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         assertEquals(CALLING_PACKAGE_1, si.getPackage());
         assertEquals("id", si.getId());
-        assertEquals(ShortcutActivity2.class.getName(), si.getActivity().getClassName());
+        assertNull(si.getActivity()); // It's now floating, so no target activity.
         assertEquals(null, si.getIcon());
         assertEquals(10, si.getTitleResId());
         assertEquals("r10", si.getTitleResName());

@@ -314,9 +314,11 @@ public final class ShortcutInfo implements Parcelable {
      *
      * @hide
      */
-    public void enforceMandatoryFields() {
+    public void enforceMandatoryFields(boolean forPinned) {
         Preconditions.checkStringNotEmpty(mId, "Shortcut ID must be provided");
-        Preconditions.checkNotNull(mActivity, "Activity must be provided");
+        if (!forPinned) {
+            Preconditions.checkNotNull(mActivity, "Activity must be provided");
+        }
         if (mTitle == null && mTitleResId == 0) {
             throw new IllegalArgumentException("Short label must be provided");
         }
@@ -1055,6 +1057,11 @@ public final class ShortcutInfo implements Parcelable {
      * Launcher apps should show the launcher icon for the returned activity alongside
      * this shortcut.
      *
+     * <p>When a shortcut is dynamic or manifest
+     * (i.e. either {@link #isDynamic()} or {@link #isDeclaredInManifest()} returns {@code TRUE}),
+     * then it should always have a non-null target activity.
+     * Otherwise it will return null.
+     *
      * @see Builder#setActivity
      */
     @Nullable
@@ -1361,7 +1368,7 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * @return true if pinned but neither static nor dynamic.
+     * Return {@code TRUE} if a shortcut is pinned but neither manifest nor dynamic.
      * @hide
      */
     public boolean isFloating() {
