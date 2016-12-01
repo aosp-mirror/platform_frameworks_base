@@ -1105,16 +1105,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Głośność multimediów"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Głośność powiadomień"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Dzwonek domyślny"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Domyślny (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Brak"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Dzwonki"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Dźwięki alarmu"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Dźwięki powiadomień"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"Nieznany"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="few">Dostępne są sieci Wi-Fi</item>
       <item quantity="many">Dostępne są sieci Wi-Fi</item>
@@ -1618,6 +1614,10 @@
     <string name="select_year" msgid="7952052866994196170">"Wybierz rok"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> usunięte"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (praca)"</string>
+    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
+    <skip />
+    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
+    <skip />
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Aby odpiąć ten ekran, naciśnij i przytrzymaj Wstecz."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikacja jest przypięta. Nie możesz jej odpiąć na tym urządzeniu."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran przypięty"</string>
@@ -1755,6 +1755,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Resetuj teraz"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Wyłączono: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Połączenie konferencyjne"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="8101791425834697618">"Wyskakujące okno z etykietką"</string>
 </resources>
