@@ -2716,7 +2716,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return SCREEN_ORIENTATION_UNSPECIFIED;
             }
 
-            return wtoken.getOrientation();
+            return wtoken.getOrientationIgnoreVisibility();
         }
     }
 

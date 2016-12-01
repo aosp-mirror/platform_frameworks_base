@@ -1103,6 +1103,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return mOrientation;
     }
 
+    /** Returns the app's preferred orientation regardless of its currently visibility state. */
+    int getOrientationIgnoreVisibility() {
+        return mOrientation;
+    }
+
     @Override
     void checkAppWindowsReadyToShow() {
         if (allDrawn == mAppAnimator.allDrawn) {
