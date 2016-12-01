@@ -183,6 +183,7 @@ LOCAL_SRC_FILES:= \
     android_content_res_Configuration.cpp \
     android_animation_PropertyValuesHolder.cpp \
     com_android_internal_net_NetworkStatsFactory.cpp \
+    com_android_internal_os_FuseAppLoop.cpp \
     com_android_internal_os_PathClassLoaderFactory.cpp \
     com_android_internal_os_Zygote.cpp \
     com_android_internal_util_VirtualRefBasePtr.cpp \
@@ -201,6 +202,7 @@ LOCAL_C_INCLUDES += \
     $(TOP)/frameworks/base/media/jni \
     $(TOP)/system/core/base/include \
     $(TOP)/system/core/include \
+    $(TOP)/system/core/libappfuse/include \
     $(TOP)/system/media/camera/include \
     $(TOP)/system/netd/include \
     external/giflib \
@@ -230,6 +232,7 @@ LOCAL_STATIC_LIBRARIES := \
 LOCAL_SHARED_LIBRARIES := \
     libmemtrack \
     libandroidfw \
+    libappfuse \
     libbase \
     libexpat \
     libnativehelper \
