@@ -440,7 +440,7 @@ public abstract class CameraDevice implements AutoCloseable {
      */
     public abstract void createCaptureSessionByOutputConfigurations(
             List<OutputConfiguration> outputConfigurations,
-            CameraCaptureSession.StateCallback callback, Handler handler)
+            CameraCaptureSession.StateCallback callback, @Nullable Handler handler)
             throws CameraAccessException;
     /**
      * Create a new reprocessable camera capture session by providing the desired reprocessing
