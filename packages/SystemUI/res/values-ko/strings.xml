@@ -442,18 +442,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>은(는) 볼륨 대화입니다."</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"원본을 복원하려면 탭하세요."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"직장 프로필을 사용하고 있습니다."</string>
-  <string-array name="volume_stream_titles">
-    <item msgid="5841843895402729630">"통화"</item>
-    <item msgid="5997713001067658559">"시스템"</item>
-    <item msgid="7858983209929864160">"벨 울리기"</item>
-    <item msgid="1850038478268896762">"미디어"</item>
-    <item msgid="8265110906352372092">"알람"</item>
-    <item msgid="5339394737636839168"></item>
-    <item msgid="2951313578278086204">"블루투스"</item>
-    <item msgid="2919807739709798970"></item>
-    <item msgid="150349973435223405"></item>
-    <item msgid="6761963760295549099"></item>
-  </string-array>
+    <!-- no translation found for volume_stream_titles:10 (8119402510273906841) -->
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. 탭하여 음소거를 해제하세요."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. 탭하여 진동으로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. 탭하여 음소거로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>

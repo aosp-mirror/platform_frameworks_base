@@ -440,18 +440,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> والیوم ڈائلاگ ہے"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"اصل بحال کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"آپ اپنا دفتری پروفائل استعمال کر رہے ہیں۔"</string>
-  <string-array name="volume_stream_titles">
-    <item msgid="5841843895402729630">"کال"</item>
-    <item msgid="5997713001067658559">"سسٹم"</item>
-    <item msgid="7858983209929864160">"رِنگ"</item>
-    <item msgid="1850038478268896762">"میڈیا"</item>
-    <item msgid="8265110906352372092">"الارم"</item>
-    <item msgid="5339394737636839168"></item>
-    <item msgid="2951313578278086204">"بلوٹوتھ"</item>
-    <item msgid="2919807739709798970"></item>
-    <item msgid="150349973435223405"></item>
-    <item msgid="6761963760295549099"></item>
-  </string-array>
+    <!-- no translation found for volume_stream_titles:10 (8119402510273906841) -->
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏‎%1$s۔ آواز چالو کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏‎%1$s۔ ارتعاش پر سیٹ کرنے کیلئے تھپتھپائیں۔ Accessibility سروسز شاید خاموش ہوں۔"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏‎%1$s۔ خاموش کرنے کیلئے تھپتھپائیں۔ Accessibility سروسز شاید خاموش ہوں۔"</string>
