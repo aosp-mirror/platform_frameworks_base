@@ -31,6 +31,7 @@ import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 
 import libcore.io.IoUtils;
 
@@ -82,6 +83,8 @@ public class PersistentDataBlockService extends SystemService {
 
     private int mAllowedUid = -1;
     private long mBlockDeviceSize;
+
+    @GuardedBy("mLock")
     private boolean mIsWritable = true;
 
     public PersistentDataBlockService(Context context) {
