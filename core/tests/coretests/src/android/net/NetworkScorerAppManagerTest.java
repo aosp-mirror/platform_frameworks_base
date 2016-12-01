@@ -42,6 +42,8 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
     @Mock private Context mMockContext;
     @Mock private PackageManager mMockPm;
 
+    private NetworkScorerAppManager mNetworkScorerAppManager;
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -54,6 +56,7 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
 
         MockitoAnnotations.initMocks(this);
         Mockito.when(mMockContext.getPackageManager()).thenReturn(mMockPm);
+        mNetworkScorerAppManager = new NetworkScorerAppManager(mMockContext);
     }
 
     public void testGetAllValidScorers() throws Exception {
@@ -81,7 +84,7 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         setScorers(scorers);
 
         Iterator<NetworkScorerAppData> result =
-                NetworkScorerAppManager.getAllValidScorers(mMockContext).iterator();
+                mNetworkScorerAppManager.getAllValidScorers().iterator();
 
         assertTrue(result.hasNext());
         NetworkScorerAppData next = result.next();
