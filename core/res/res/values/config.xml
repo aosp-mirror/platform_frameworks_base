@@ -1257,6 +1257,19 @@
          config_enableFusedLocationOverlay is false. -->
     <string name="config_fusedLocationProviderPackageName" translatable="false">com.android.location.fused</string>
 
+    <!-- A list of potential packages, in priority order, that may contain a
+         network recommendation provider. A network recommendation provider must:
+             * Be granted the SCORE_NETWORKS permission.
+             * Include a Receiver for the android.net.scoring.SCORE_NETWORKS action guarded by the
+               BROADCAST_NETWORK_PRIVILEGED permission.
+             * Include a Service for the android.net.scoring.RECOMMEND_NETWORKS action.
+
+         This may be empty if network scoring and recommending isn't supported.
+         -->
+    <string-array name="config_networkRecommendationPackageNames" translatable="false">
+        <!-- Add packages here -->
+    </string-array>
+
     <!-- Whether to enable Hardware FLP overlay which allows Hardware FLP to be
          replaced by an app at run-time. When disabled, only the
          config_hardwareFlpPackageName package will be searched for Hardware Flp,
