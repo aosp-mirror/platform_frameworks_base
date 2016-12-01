@@ -241,8 +241,10 @@ public class AppOpsManager {
     public static final int OP_RUN_IN_BACKGROUND = 63;
     /** @hide */
     public static final int OP_AUDIO_ACCESSIBILITY_VOLUME = 64;
+    /** @hide Read the phone number. */
+    public static final int OP_READ_PHONE_NUMBER = 65;
     /** @hide */
-    public static final int _NUM_OP = 65;
+    public static final int _NUM_OP = 66;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -343,6 +345,8 @@ public class AppOpsManager {
     /** @hide Get device accounts. */
     public static final String OPSTR_GET_ACCOUNTS
             = "android:get_accounts";
+    public static final String OPSTR_READ_PHONE_NUMBER
+            = "android:read_phone_number";
 
     private static final int[] RUNTIME_PERMISSIONS_OPS = {
             // Contacts
@@ -367,6 +371,7 @@ public class AppOpsManager {
             OP_FINE_LOCATION,
             // Phone
             OP_READ_PHONE_STATE,
+            OP_READ_PHONE_NUMBER,
             OP_CALL_PHONE,
             OP_READ_CALL_LOG,
             OP_WRITE_CALL_LOG,
@@ -455,6 +460,7 @@ public class AppOpsManager {
             OP_GET_ACCOUNTS,
             OP_RUN_IN_BACKGROUND,
             OP_AUDIO_ACCESSIBILITY_VOLUME,
+            OP_READ_PHONE_NUMBER,
     };
 
     /**
@@ -527,6 +533,7 @@ public class AppOpsManager {
             OPSTR_GET_ACCOUNTS,
             null,
             null, // OP_AUDIO_ACCESSIBILITY_VOLUME
+            OPSTR_READ_PHONE_NUMBER,
     };
 
     /**
@@ -599,6 +606,7 @@ public class AppOpsManager {
             "GET_ACCOUNTS",
             "RUN_IN_BACKGROUND",
             "AUDIO_ACCESSIBILITY_VOLUME",
+            "READ_PHONE_NUMBER",
     };
 
     /**
@@ -671,6 +679,7 @@ public class AppOpsManager {
             Manifest.permission.GET_ACCOUNTS,
             null, // no permission for running in background
             null, // no permission for changing accessibility volume
+            Manifest.permission.READ_PHONE_NUMBER,
     };
 
     /**
@@ -744,6 +753,7 @@ public class AppOpsManager {
             null, // GET_ACCOUNTS
             null, // RUN_IN_BACKGROUND
             UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_ACCESSIBILITY_VOLUME
+            null, // READ_PHONE_NUMBER
     };
 
     /**
@@ -816,6 +826,7 @@ public class AppOpsManager {
             false, // GET_ACCOUNTS
             false, // RUN_IN_BACKGROUND
             false, // AUDIO_ACCESSIBILITY_VOLUME
+            false, // READ_PHONE_NUMBER
     };
 
     /**
@@ -887,6 +898,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,  // OP_RUN_IN_BACKGROUND
             AppOpsManager.MODE_ALLOWED,  // OP_AUDIO_ACCESSIBILITY_VOLUME
+            AppOpsManager.MODE_ALLOWED,
     };
 
     /**
@@ -962,6 +974,7 @@ public class AppOpsManager {
             false,
             false,
             false, // OP_AUDIO_ACCESSIBILITY_VOLUME
+            false,
     };
 
     /**
