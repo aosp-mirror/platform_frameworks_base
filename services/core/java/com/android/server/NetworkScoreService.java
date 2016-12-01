@@ -41,6 +41,7 @@ import android.util.Log;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 
 import java.io.FileDescriptor;
@@ -61,6 +62,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     private static final boolean DBG = false;
 
     private final Context mContext;
+    private final NetworkScorerAppManager mNetworkScorerAppManager;
     private final Map<Integer, INetworkScoreCache> mScoreCaches;
     /** Lock used to update mPackageMonitor when scorer package changes occur. */
     private final Object mPackageMonitorLock = new Object[0];
@@ -131,7 +133,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                             + ", forceUnbind=" + forceUnbind);
                 }
                 final NetworkScorerAppData activeScorer =
-                        NetworkScorerAppManager.getActiveScorer(mContext);
+                        mNetworkScorerAppManager.getActiveScorer();
                 if (activeScorer == null) {
                     // Package change has invalidated a scorer, this will also unbind any service
                     // connection.
@@ -152,7 +154,13 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     }
 
     public NetworkScoreService(Context context) {
+      this(context, new NetworkScorerAppManager(context));
+    }
+
+    @VisibleForTesting
+    NetworkScoreService(Context context, NetworkScorerAppManager networkScoreAppManager) {
         mContext = context;
+        mNetworkScorerAppManager = networkScoreAppManager;
         mScoreCaches = new HashMap<>();
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
         // TODO: Need to update when we support per-user scorers. http://b/23422763
@@ -171,7 +179,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             String defaultPackage = mContext.getResources().getString(
                     R.string.config_defaultNetworkScorerPackageName);
             if (!TextUtils.isEmpty(defaultPackage)) {
-                NetworkScorerAppManager.setActiveScorer(mContext, defaultPackage);
+                mNetworkScorerAppManager.setActiveScorer(defaultPackage);
             }
             Settings.Global.putInt(cr, Settings.Global.NETWORK_SCORING_PROVISIONED, 1);
         }
@@ -192,7 +200,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     private void registerPackageMonitorIfNeeded() {
         if (DBG) Log.d(TAG, "registerPackageMonitorIfNeeded");
-        NetworkScorerAppData scorer = NetworkScorerAppManager.getActiveScorer(mContext);
+        NetworkScorerAppData scorer = mNetworkScorerAppManager.getActiveScorer();
         synchronized (mPackageMonitorLock) {
             // Unregister the current monitor if needed.
             if (mPackageMonitor != null) {
@@ -220,7 +228,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     private void bindToScoringServiceIfNeeded() {
         if (DBG) Log.d(TAG, "bindToScoringServiceIfNeeded");
-        NetworkScorerAppData scorerData = NetworkScorerAppManager.getActiveScorer(mContext);
+        NetworkScorerAppData scorerData = mNetworkScorerAppManager.getActiveScorer();
         bindToScoringServiceIfNeeded(scorerData);
     }
 
@@ -257,7 +265,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     @Override
     public boolean updateScores(ScoredNetwork[] networks) {
-        if (!NetworkScorerAppManager.isCallerActiveScorer(mContext, getCallingUid())) {
+        if (!mNetworkScorerAppManager.isCallerActiveScorer(getCallingUid())) {
             throw new SecurityException("Caller with UID " + getCallingUid() +
                     " is not the active scorer.");
         }
@@ -296,7 +304,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     public boolean clearScores() {
         // Only the active scorer or the system (who can broadcast BROADCAST_NETWORK_PRIVILEGED)
         // should be allowed to flush all scores.
-        if (NetworkScorerAppManager.isCallerActiveScorer(mContext, getCallingUid()) ||
+        if (mNetworkScorerAppManager.isCallerActiveScorer(getCallingUid()) ||
                 mContext.checkCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED) ==
                         PackageManager.PERMISSION_GRANTED) {
             clearInternal();
@@ -326,7 +334,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     public void disableScoring() {
         // Only the active scorer or the system (who can broadcast BROADCAST_NETWORK_PRIVILEGED)
         // should be allowed to disable scoring.
-        if (NetworkScorerAppManager.isCallerActiveScorer(mContext, getCallingUid()) ||
+        if (mNetworkScorerAppManager.isCallerActiveScorer(getCallingUid()) ||
                 mContext.checkCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED) ==
                         PackageManager.PERMISSION_GRANTED) {
             // The return value is discarded here because at this point, the call should always
@@ -350,8 +358,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             // only be allowing valid apps to be set as scorers, so failure here should be rare.
             clearInternal();
             // Get the scorer that is about to be replaced, if any, so we can notify it directly.
-            NetworkScorerAppData prevScorer = NetworkScorerAppManager.getActiveScorer(mContext);
-            boolean result = NetworkScorerAppManager.setActiveScorer(mContext, packageName);
+            NetworkScorerAppData prevScorer = mNetworkScorerAppManager.getActiveScorer();
+            boolean result = mNetworkScorerAppManager.setActiveScorer(packageName);
             // Unconditionally attempt to bind to the current scorer. If setActiveScorer() failed
             // then we'll attempt to restore the previous binding (if any), otherwise an attempt
             // will be made to bind to the new scorer.
@@ -409,7 +417,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         mContext.enforceCallingOrSelfPermission(permission.DUMP, TAG);
-        NetworkScorerAppData currentScorer = NetworkScorerAppManager.getActiveScorer(mContext);
+        NetworkScorerAppData currentScorer = mNetworkScorerAppManager.getActiveScorer();
         if (currentScorer == null) {
             writer.println("Scoring is disabled.");
             return;
