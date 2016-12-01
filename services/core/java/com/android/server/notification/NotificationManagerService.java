@@ -53,16 +53,17 @@ import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
+import android.app.backup.BackupManager;
 import android.app.IActivityManager;
+import android.app.IOnNotificationChannelCreatedListener;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.app.Notification;
 import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
-import android.app.backup.BackupManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
@@ -224,6 +225,7 @@ public class NotificationManagerService extends SystemService {
     private static final long MIN_PACKAGE_OVERRATE_LOG_INTERVAL = 5000; // milliseconds
 
     private IActivityManager mAm;
+    private IPackageManager mPackageManager;
     AudioManager mAudioManager;
     AudioManagerInternal mAudioManagerInternal;
     @Nullable StatusBarManagerInternal mStatusBar;
@@ -718,10 +720,10 @@ public class NotificationManagerService extends SystemService {
                     if (packageChanged) {
                         // We cancel notifications for packages which have just been disabled
                         try {
-                            final IPackageManager pm = AppGlobals.getPackageManager();
-                            final int enabled = pm.getApplicationEnabledSetting(pkgName,
+                            final int enabled = mPackageManager.getApplicationEnabledSetting(
+                                    pkgName,
                                     changeUserId != UserHandle.USER_ALL ? changeUserId :
-                                    UserHandle.USER_SYSTEM);
+                                            UserHandle.USER_SYSTEM);
                             if (enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                                     || enabled == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
                                 cancelNotifications = false;
@@ -884,6 +886,7 @@ public class NotificationManagerService extends SystemService {
         super(context);
     }
 
+    // TODO - replace these methods with a single VisibleForTesting constructor
     @VisibleForTesting
     void setAudioManager(AudioManager audioMananger) {
         mAudioManager = audioMananger;
@@ -931,6 +934,17 @@ public class NotificationManagerService extends SystemService {
         mFallbackVibrationPattern = vibrationPattern;
     }
 
+    @VisibleForTesting
+    void setPackageManager(IPackageManager packageManager) {
+        mPackageManager = packageManager;
+    }
+
+    // TODO: This probably should not be mocked, it's an implementation detail.
+    @VisibleForTesting
+    void setRankingHelper(RankingHelper rankingHelper) {
+        mRankingHelper = rankingHelper;
+    }
+
     @Override
     public void onStart() {
         Resources resources = getContext().getResources();
@@ -940,6 +954,7 @@ public class NotificationManagerService extends SystemService {
                 DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE);
 
         mAm = ActivityManager.getService();
+        mPackageManager = AppGlobals.getPackageManager();
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
         mAppUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
@@ -1312,6 +1327,11 @@ public class NotificationManagerService extends SystemService {
         scheduleInterruptionFilterChanged(interruptionFilter);
     }
 
+    @VisibleForTesting
+    INotificationManager getBinderService() {
+        return INotificationManager.Stub.asInterface(mService);
+    }
+
     private final IBinder mService = new INotificationManager.Stub() {
         // Toasts
         // ============================================================================
@@ -1529,13 +1549,15 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void createNotificationChannel(String pkg, NotificationChannel channel) {
+        public void createNotificationChannel(String pkg, NotificationChannel channel,
+                IOnNotificationChannelCreatedListener listener) throws RemoteException {
             Preconditions.checkNotNull(channel);
             Preconditions.checkNotNull(channel.getId());
             Preconditions.checkNotNull(channel.getName());
             checkCallerIsSystemOrSameApp(pkg);
             mRankingHelper.createNotificationChannel(pkg, Binder.getCallingUid(), channel);
             savePolicyFile();
+            listener.onNotificationChannelCreated(channel);
         }
 
         @Override
@@ -3906,23 +3928,23 @@ public class NotificationManagerService extends SystemService {
         throw new SecurityException("Disallowed call for uid " + Binder.getCallingUid());
     }
 
-    private static void checkCallerIsSystemOrSameApp(String pkg) {
+    private void checkCallerIsSystemOrSameApp(String pkg) {
         if (isCallerSystem()) {
             return;
         }
         checkCallerIsSameApp(pkg);
     }
 
-    private static void checkCallerIsSameApp(String pkg) {
+    private void checkCallerIsSameApp(String pkg) {
         final int uid = Binder.getCallingUid();
         try {
-            ApplicationInfo ai = AppGlobals.getPackageManager().getApplicationInfo(
+            ApplicationInfo ai = mPackageManager.getApplicationInfo(
                     pkg, 0, UserHandle.getCallingUserId());
             if (ai == null) {
                 throw new SecurityException("Unknown package " + pkg);
             }
             if (!UserHandle.isSameApp(ai.uid, uid)) {
-                throw new SecurityException("Calling uid " + uid + " gave package"
+                throw new SecurityException("Calling uid " + uid + " gave package "
                         + pkg + " which is owned by uid " + ai.uid);
             }
         } catch (RemoteException re) {
@@ -4009,7 +4031,7 @@ public class NotificationManagerService extends SystemService {
     private boolean isPackageSuspendedForUser(String pkg, int uid) {
         int userId = UserHandle.getUserId(uid);
         try {
-            return AppGlobals.getPackageManager().isPackageSuspendedForUser(pkg, userId);
+            return mPackageManager.isPackageSuspendedForUser(pkg, userId);
         } catch (RemoteException re) {
             throw new SecurityException("Could not talk to package manager service");
         } catch (IllegalArgumentException ex) {
@@ -4510,7 +4532,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         public String[] getRequestingPackages() throws RemoteException {
-            final ParceledListSlice list = AppGlobals.getPackageManager()
+            final ParceledListSlice list = mPackageManager
                     .getPackagesHoldingPermissions(PERM, 0 /*flags*/,
                             ActivityManager.getCurrentUser());
             final List<PackageInfo> pkgs = list.getList();

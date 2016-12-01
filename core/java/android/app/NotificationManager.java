@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.TestApi;
 import android.app.Notification.Builder;
@@ -30,6 +31,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -379,12 +381,42 @@ public class NotificationManager
     }
 
     /**
-     * Creates a notification channel that notifications can be posted to.
+     * Listener passed to {@link NotificationManager#createNotificationChannel} to notify
+     * caller of result.
      */
-    public void createNotificationChannel(NotificationChannel channel) {
+    public interface OnNotificationChannelCreatedListener {
+        /**
+         * @param createdChannel NotificationChannel created by the system.  Value is null iff an
+         *   exception was thrown during channel creation.
+         */
+        public void onNotificationChannelCreated(NotificationChannel createdChannel);
+    }
+
+    /**
+     * Creates a notification channel that notifications can be posted to.
+     *
+     * @param channel  the channel to attempt to create.  Note that the created channel may differ
+     *                 from this value.
+     * @param listener Called when operation is finished.
+     * @param handler  The handler to invoke the listener on, or {@code null} to use the main
+     *                 handler.
+     */
+    public void createNotificationChannel(
+            @NonNull NotificationChannel channel,
+            @NonNull OnNotificationChannelCreatedListener listener,
+            @Nullable Handler handler) {
         INotificationManager service = getService();
         try {
-            service.createNotificationChannel(mContext.getPackageName(), channel);
+            final Handler actualHandler =
+                    handler != null ? handler : new Handler(Looper.getMainLooper());
+            service.createNotificationChannel(mContext.getPackageName(), channel,
+                    new IOnNotificationChannelCreatedListener.Stub() {
+                        @Override public void onNotificationChannelCreated(
+                                NotificationChannel channel) {
+                            actualHandler.post(
+                                    () -> { listener.onNotificationChannelCreated(channel); });
+                        }
+                    });
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -583,7 +615,7 @@ public class NotificationManager
      * <p>
      * Callers can only update rules that they own. See {@link AutomaticZenRule#getOwner}.
      * @param id The id of the rule to update
-     * @param automaticZenRule the rule to update. 
+     * @param automaticZenRule the rule to update.
      * @return Whether the rule was successfully updated.
      */
     public boolean updateAutomaticZenRule(String id, AutomaticZenRule automaticZenRule) {
