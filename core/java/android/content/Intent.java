@@ -9009,7 +9009,7 @@ public class Intent implements Parcelable, Cloneable {
             mSelector.prepareToLeaveProcess(leavingPackage);
         }
         if (mClipData != null) {
-            mClipData.prepareToLeaveProcess(leavingPackage);
+            mClipData.prepareToLeaveProcess(leavingPackage, getFlags());
         }
 
         if (mAction != null && mData != null && StrictMode.vmFileUriExposureEnabled()
@@ -9034,6 +9034,17 @@ public class Intent implements Parcelable, Cloneable {
                     break;
                 default:
                     mData.checkFileUriExposed("Intent.getData()");
+            }
+        }
+
+        if (mAction != null && mData != null && StrictMode.vmContentUriWithoutPermissionEnabled()
+                && leavingPackage) {
+            switch (mAction) {
+                case ACTION_PROVIDER_CHANGED:
+                    // Ignore actions that don't need to grant
+                    break;
+                default:
+                    mData.checkContentUriWithoutPermission("Intent.getData()", getFlags());
             }
         }
     }

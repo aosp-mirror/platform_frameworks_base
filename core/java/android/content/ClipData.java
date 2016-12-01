@@ -853,14 +853,29 @@ public class ClipData implements Parcelable {
      * @hide
      */
     public void prepareToLeaveProcess(boolean leavingPackage) {
+        prepareToLeaveProcess(leavingPackage, 0);
+    }
+
+    /**
+     * Prepare this {@link ClipData} to leave an app process.
+     *
+     * @hide
+     */
+    public void prepareToLeaveProcess(boolean leavingPackage, int intentFlags) {
         final int size = mItems.size();
         for (int i = 0; i < size; i++) {
             final Item item = mItems.get(i);
             if (item.mIntent != null) {
                 item.mIntent.prepareToLeaveProcess(leavingPackage);
             }
-            if (item.mUri != null && StrictMode.vmFileUriExposureEnabled() && leavingPackage) {
-                item.mUri.checkFileUriExposed("ClipData.Item.getUri()");
+            if (item.mUri != null && leavingPackage) {
+                if (StrictMode.vmFileUriExposureEnabled()) {
+                    item.mUri.checkFileUriExposed("ClipData.Item.getUri()");
+                }
+                if (StrictMode.vmContentUriWithoutPermissionEnabled()) {
+                    item.mUri.checkContentUriWithoutPermission("ClipData.Item.getUri()",
+                            intentFlags);
+                }
             }
         }
     }
