@@ -577,15 +577,15 @@ android_media_MediaPlayer_getSyncParams(JNIEnv *env, jobject thiz)
 }
 
 static void
-android_media_MediaPlayer_seekTo(JNIEnv *env, jobject thiz, jint msec)
+android_media_MediaPlayer_seekTo(JNIEnv *env, jobject thiz, jint msec, jint mode)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
-    ALOGV("seekTo: %d(msec)", msec);
-    process_media_player_call( env, thiz, mp->seekTo(msec), NULL, NULL );
+    ALOGV("seekTo: %d(msec), mode=%d", msec, mode);
+    process_media_player_call( env, thiz, mp->seekTo(msec, (MediaPlayerSeekMode)mode), NULL, NULL );
 }
 
 static jint
@@ -1056,7 +1056,7 @@ static const JNINativeMethod gMethods[] = {
     {"getPlaybackParams", "()Landroid/media/PlaybackParams;", (void *)android_media_MediaPlayer_getPlaybackParams},
     {"setSyncParams",     "(Landroid/media/SyncParams;)V",  (void *)android_media_MediaPlayer_setSyncParams},
     {"getSyncParams",     "()Landroid/media/SyncParams;",   (void *)android_media_MediaPlayer_getSyncParams},
-    {"seekTo",              "(I)V",                             (void *)android_media_MediaPlayer_seekTo},
+    {"_seekTo",             "(II)V",                            (void *)android_media_MediaPlayer_seekTo},
     {"_pause",              "()V",                              (void *)android_media_MediaPlayer_pause},
     {"isPlaying",           "()Z",                              (void *)android_media_MediaPlayer_isPlaying},
     {"getCurrentPosition",  "()I",                              (void *)android_media_MediaPlayer_getCurrentPosition},

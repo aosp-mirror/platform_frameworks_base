@@ -127,7 +127,7 @@ import java.lang.ref.WeakReference;
  *         {@link #getVideoWidth()}, {@link #setAudioStreamType(int)},
  *         {@link #setLooping(boolean)},
  *         {@link #setVolume(float, float)}, {@link #pause()}, {@link #start()},
- *         {@link #stop()}, {@link #seekTo(int)}, {@link #prepare()} or
+ *         {@link #stop()}, {@link #seekTo(int, int)}, {@link #prepare()} or
  *         {@link #prepareAsync()} in the <em>Idle</em> state for both cases. If any of these
  *         methods is called right after a MediaPlayer object is constructed,
  *         the user supplied callback method OnErrorListener.onError() won't be
@@ -273,19 +273,22 @@ import java.lang.ref.WeakReference;
  *         </ul>
  *         </li>
  *     <li>The playback position can be adjusted with a call to
- *         {@link #seekTo(int)}.
+ *         {@link #seekTo(int, int)}.
  *         <ul>
- *         <li>Although the asynchronuous {@link #seekTo(int)}
- *         call returns right way, the actual seek operation may take a while to
+ *         <li>Although the asynchronuous {@link #seekTo(int, int)}
+ *         call returns right away, the actual seek operation may take a while to
  *         finish, especially for audio/video being streamed. When the actual
  *         seek operation completes, the internal player engine calls a user
  *         supplied OnSeekComplete.onSeekComplete() if an OnSeekCompleteListener
  *         has been registered beforehand via
  *         {@link #setOnSeekCompleteListener(OnSeekCompleteListener)}.</li>
  *         <li>Please
- *         note that {@link #seekTo(int)} can also be called in the other states,
+ *         note that {@link #seekTo(int, int)} can also be called in the other states,
  *         such as <em>Prepared</em>, <em>Paused</em> and <em>PlaybackCompleted
- *         </em> state.</li>
+ *         </em> state. When {@link #seekTo(int, int)} is called in those states,
+ *         one video frame will be displayed if the stream has video and the requested
+ *         position is valid.
+ *         </li>
  *         <li>Furthermore, the actual current playback position
  *         can be retrieved with a call to {@link #getCurrentPosition()}, which
  *         is helpful for applications such as a Music player that need to keep
@@ -1502,13 +1505,107 @@ public class MediaPlayer extends PlayerBase
     public native SyncParams getSyncParams();
 
     /**
+     * Seek modes used in method seekTo(int, int) to move media position
+     * to a specified location.
+     *
+     * Do not change these mode values without updating their counterparts
+     * in include/media/IMediaSource.h!
+     */
+    /**
+     * This mode is used with {@link #seekTo(int, int)} to move media position to
+     * a sync (or key) frame associated with a data source that is located
+     * right before or at the given time.
+     *
+     * @see #seekTo(int, int)
+     */
+    public static final int SEEK_PREVIOUS_SYNC    = 0x00;
+    /**
+     * This mode is used with {@link #seekTo(int, int)} to move media position to
+     * a sync (or key) frame associated with a data source that is located
+     * right after or at the given time.
+     *
+     * @see #seekTo(int, int)
+     */
+    public static final int SEEK_NEXT_SYNC        = 0x01;
+    /**
+     * This mode is used with {@link #seekTo(int, int)} to move media position to
+     * a sync (or key) frame associated with a data source that is located
+     * closest to (in time) or at the given time.
+     *
+     * @see #seekTo(int, int)
+     */
+    public static final int SEEK_CLOSEST_SYNC     = 0x02;
+    /**
+     * This mode is used with {@link #seekTo(int, int)} to move media position to
+     * a frame (not necessarily a key frame) associated with a data source that
+     * is located closest to or at the given time.
+     *
+     * @see #seekTo(int, int)
+     */
+    public static final int SEEK_CLOSEST          = 0x03;
+
+    /** @hide */
+    @IntDef(
+        value = {
+            SEEK_PREVIOUS_SYNC,
+            SEEK_NEXT_SYNC,
+            SEEK_CLOSEST_SYNC,
+            SEEK_CLOSEST,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SeekMode {}
+
+    private native final void _seekTo(int msec, int mode);
+
+    /**
+     * Moves the media to specified time position by considering the given mode.
+     * <p>
+     * When seekTo is finished, the user will be notified via OnSeekComplete supplied by the user.
+     * There is at most one active seekTo processed at any time. If there is a to-be-completed
+     * seekTo, new seekTo requests will be queued in such a way that only the last request
+     * is kept. When current seekTo is completed, the queued request will be processed if
+     * that request is different from just-finished seekTo operation, i.e., the requested
+     * position or mode is different.
+     *
+     * @param msec the offset in milliseconds from the start to seek to.
+     * When seeking to the given time position, there is no guarantee that the data source
+     * has a frame located at the position. When this happens, a frame nearby will be rendered.
+     * If msec is negative, time position zero will be used.
+     * If msec is larger than duration, duration will be used.
+     * @param mode the mode indicating where exactly to seek to.
+     * Use {@link #SEEK_PREVIOUS_SYNC} if one wants to seek to a sync frame
+     * that has a timestamp earlier than or the same as msec. Use
+     * {@link #SEEK_NEXT_SYNC} if one wants to seek to a sync frame
+     * that has a timestamp later than or the same as msec. Use
+     * {@link #SEEK_CLOSEST_SYNC} if one wants to seek to a sync frame
+     * that has a timestamp closest to or the same as msec. Use
+     * {@link #SEEK_CLOSEST} if one wants to seek to a frame that may
+     * or may not be a sync frame but is closest to or the same as msec.
+     * {@link #SEEK_CLOSEST} often has larger performance overhead compared
+     * to the other options if there is no sync frame located at msec.
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized
+     * @throws IllegalArgumentException if the mode is invalid.
+     */
+    public void seekTo(int msec, @SeekMode int mode) throws IllegalStateException {
+        if (mode < SEEK_PREVIOUS_SYNC || mode > SEEK_CLOSEST) {
+            final String msg = "Illegal seek mode: " + mode;
+            throw new IllegalArgumentException(msg);
+        }
+        _seekTo(msec, mode);
+    }
+
+    /**
      * Seeks to specified time position.
+     * Same as {@link #seekTo(int, int)} with {@code mode = SEEK_PREVIOUS_SYNC}.
      *
      * @param msec the offset in milliseconds from the start to seek to
      * @throws IllegalStateException if the internal player engine has not been
      * initialized
      */
-    public native void seekTo(int msec) throws IllegalStateException;
+    public void seekTo(int msec) throws IllegalStateException {
+        seekTo(msec, SEEK_PREVIOUS_SYNC /* mode */);
+    }
 
     /**
      * Get current playback position as a {@link MediaTimestamp}.
