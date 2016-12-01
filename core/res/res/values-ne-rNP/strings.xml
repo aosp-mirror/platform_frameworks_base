@@ -1065,16 +1065,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"मिडियाको मात्रा"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"सूचना भोल्युम"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"पूर्वनिर्धारित रिङटोन"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"पूर्वनिर्धारित (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"कुनै पनि होइन"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"रिङटोनहरू"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"अलार्मका आवाजहरू"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"सूचना सम्बन्धी आवाजहरू"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"अज्ञात"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">Wi-Fi सञ्जालहरू उपलब्ध छन्</item>
       <item quantity="one">Wi-Fi सञ्जाल उपलब्ध छ</item>
@@ -1570,6 +1566,10 @@
     <string name="select_year" msgid="7952052866994196170">"वर्ष चयन गर्नुहोस्"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटाइयो"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
+    <skip />
+    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
+    <skip />
     <string name="lock_to_app_toast" msgid="1420543809500606964">"यस स्क्रिनलाई अनपिन गर्न पछाडि बटनलाई छोइराख्नुहोस्।"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"अनुप्रयोग पिन गरियो: यस यन्त्रमा अनपिन गर्ने अनुमति छैन।"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रिन पिन गरियो"</string>
@@ -1689,6 +1689,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"अहिले रिसेट गर्नुहोस्"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> लाई असक्षम गरियो"</string>
     <string name="conference_call" msgid="3751093130790472426">"सम्मेलन कल"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="8101791425834697618">"उपकरणको वर्णन गर्ने पपअप"</string>
 </resources>

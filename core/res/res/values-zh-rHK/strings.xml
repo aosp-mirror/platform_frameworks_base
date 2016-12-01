@@ -1240,7 +1240,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"桌布"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"變更桌布"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知接聽器"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"虛擬現實接聽器"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR 接聽器"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"條件供應商"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"通知排序服務"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN 已啟用。"</string>
@@ -1564,6 +1564,10 @@
     <string name="select_year" msgid="7952052866994196170">"選取年份"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 已刪除"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
+    <skip />
+    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
+    <skip />
     <string name="lock_to_app_toast" msgid="1420543809500606964">"如要取消固定這個畫面，請按住 [返回]。"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"應用程式已固定：不允許在此裝置上取消固定。"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"螢幕已固定"</string>

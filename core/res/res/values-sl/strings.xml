@@ -656,7 +656,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Mati"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Starši"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Predlagatelj:"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Predlagatelj"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Sorodnik"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Sestra"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Zakonski partner"</string>
@@ -1618,6 +1618,10 @@
     <string name="select_year" msgid="7952052866994196170">"Izberite leto"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Številka <xliff:g id="KEY">%1$s</xliff:g> je izbrisana"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> za delo"</string>
+    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
+    <skip />
+    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
+    <skip />
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Če želite odpeti ta zaslon, se dotaknite tipke za nazaj in jo pridržite."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikacija je pripeta: v tej napravi odpenjanje ni dovoljeno."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Zaslon je pripet"</string>

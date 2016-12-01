@@ -1059,16 +1059,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Média hangereje"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Értesítés hangereje"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Alapértelmezett csengőhang"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Alapértelmezett (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Egyik sem"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Csengőhangok"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Ébresztőhangok"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Értesítőhangok"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"Ismeretlen"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">Wi-Fi hálózatok érhetők el</item>
       <item quantity="one">Van elérhető Wi-Fi hálózat</item>
@@ -1564,6 +1560,10 @@
     <string name="select_year" msgid="7952052866994196170">"Válassza ki az évet"</string>
     <string name="deleted_key" msgid="7659477886625566590">"A(z) <xliff:g id="KEY">%1$s</xliff:g> érték törölve"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
+    <skip />
+    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
+    <skip />
     <string name="lock_to_app_toast" msgid="1420543809500606964">"A képernyő rögzítésének feloldásához tartsa lenyomva a Vissza lehetőséget."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Az alkalmazás rögzítve van: a rögzítés feloldása nem engedélyezett ezen az eszközön."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Képernyő rögzítve"</string>
@@ -1683,6 +1683,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Visszaállítás most"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"A(z) <xliff:g id="LABEL">%1$s</xliff:g> letiltva"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferenciahívás"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="8101791425834697618">"Elemleíró előugró ablak"</string>
 </resources>

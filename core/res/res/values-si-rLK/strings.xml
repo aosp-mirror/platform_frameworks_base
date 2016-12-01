@@ -108,7 +108,7 @@
     <string name="serviceClassDataSync" msgid="7530000519646054776">"සමමුහුර්ත කිරීම"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"පැකැට්ටුව"</string>
     <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
-    <string name="roamingText0" msgid="7170335472198694945">"රෝමිං දර්ශකය සක්‍රියයි"</string>
+    <string name="roamingText0" msgid="7170335472198694945">"රෝමිං දර්ශකය ක්‍රියාත්මකයි"</string>
     <string name="roamingText1" msgid="5314861519752538922">"රෝමිං දර්ශකය අක්‍රියයි"</string>
     <string name="roamingText2" msgid="8969929049081268115">"රෝමිං දර්ශකය සැණෙලි වෙයි"</string>
     <string name="roamingText3" msgid="5148255027043943317">"වටපිටාවෙන් ඉවත්ව"</string>
@@ -189,7 +189,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"නොරැහන් සක්‍රිය කරන්න"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"නොරැහැන් අක්‍රිය කරන්න"</string>
     <string name="screen_lock" msgid="799094655496098153">"තිර අගුල"</string>
-    <string name="power_off" msgid="4266614107412865048">"බලය අක්‍රිය කරන්න"</string>
+    <string name="power_off" msgid="4266614107412865048">"බල රහිත කරන්න"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"හඬ නඟනය අක්‍රියයි"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"හඬ නඟනය කම්පනය"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"හඬ නඟනය සක්‍රීයයි"</string>
@@ -213,7 +213,7 @@
     <string name="global_actions" product="tv" msgid="7240386462508182976">"රූපවාහිනී විකල්ප"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"දුරකථන විකල්ප"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"තිර අගුල"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"බලය අක්‍රිය කරන්න"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"බල රහිත කරන්න"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"හදිසි"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"දෝෂ වර්තාව"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"දෝෂ වාර්තාවක් ගන්න"</string>
@@ -228,7 +228,7 @@
     </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"නිහඬ ආකාරය"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ශබ්දය අක්‍රියයි"</string>
-    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"හඬ සක්‍රියයි"</string>
+    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"හඬ ක්‍රියාත්මකයි"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"අහස්යානා ආකාරය"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"අහස්යානා ආකාරය සක්‍රීයයි."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"අහස්යානා අකාරය අක්‍රියයි"</string>
@@ -975,7 +975,7 @@
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"විවෘත කරන්න"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"සමඟ සංස්කරණය කරන්න"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s සමඟ සංස්කරණය කරන්න"</string>
-    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"සංස්කරණය කරන්න"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"සංස්කරණය"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"සමඟ බෙදාගන්න"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%s සමඟ බෙදාගන්න"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"බෙදා ගන්න"</string>
@@ -1104,7 +1104,7 @@
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"ඍජු Wi-Fi"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"ඍජු Wi-Fi ආරම්භ කරන්න. මෙය Wi-Fi සේවාදායක/හොට්ස්පොට් එක අක්‍රිය කරනු ඇත."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"ඍජු Wi-Fi ආරම්භ කළ නොහැක."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi ඍජු සම්බන්ධතාව සක්‍රියයි"</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct ක්‍රියාත්මකයි"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"සැකසීම් සඳහා තට්ටු කරන්න"</string>
     <string name="accept" msgid="1645267259272829559">"පිළිගන්න"</string>
     <string name="decline" msgid="2112225451706137894">"ප්‍රතික්ෂේප කරන්න"</string>
@@ -1336,7 +1336,7 @@
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB ධාවකය"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ධාවකය"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB ආචයනය"</string>
-    <string name="extract_edit_menu_button" msgid="8940478730496610137">"සංස්කරණය කරන්න"</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"සංස්කරණය"</string>
     <string name="data_usage_warning_title" msgid="3620440638180218181">"දත්ත භාවිතය ගැන ඇඟවීම"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"භාවිතය සහ සැකසීම් බැලීමට තට්ටු කරන්න."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G දත්ත සීමාවට ළඟාවී ඇත"</string>
@@ -1382,7 +1382,7 @@
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"පද්ධතිය"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"බ්ලූටූත් ශ්‍රව්‍ය"</string>
-    <string name="wireless_display_route_description" msgid="9070346425023979651">"රැහැන් රහිත දර්ශනය"</string>
+    <string name="wireless_display_route_description" msgid="9070346425023979651">"නොරැහැන් සංදර්ශකය"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Cast"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"උපාංගයට සම්බන්ධ වන්න"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"තිරය උපාංගයට යොමු කරන්න"</string>
@@ -1566,6 +1566,10 @@
     <string name="select_year" msgid="7952052866994196170">"වසර තෝරන්න"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> මකා දමන ලදි"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
+    <skip />
+    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
+    <skip />
     <string name="lock_to_app_toast" msgid="1420543809500606964">"මෙම තිරය ඇමුණුම් ඉවත් කිරීමට, ස්පර්ශ කර අල්ලා ගෙන සිටින්න."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"යෙදුම අමුණා ඇත: ගැලවීමට මෙම උපාංගය මත ඉඩ දිය නොහැකිය.‍"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"තිරය අගුළු දමා ඇත"</string>
@@ -1614,7 +1618,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක්"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක් (ඊළඟ එලාමය)"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"ඔබ මෙය අක්‍රිය කරන තුරු"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"ඔබ මෙය ක්‍රියාවිරහිත කරන තුරු"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"බාධා නොකරන්න ඔබ අක්‍රිය කරන තුරු"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"හකුළන්න"</string>

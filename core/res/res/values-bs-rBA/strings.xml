@@ -551,35 +551,35 @@
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Kuća"</item>
     <item msgid="869923650527136615">"Mobilni"</item>
-    <item msgid="7897544654242874543">"Poslovni"</item>
+    <item msgid="7897544654242874543">"Posao"</item>
     <item msgid="1103601433382158155">"Poslovni faks"</item>
     <item msgid="1735177144948329370">"Kućni faks"</item>
     <item msgid="603878674477207394">"Pejdžer"</item>
     <item msgid="1650824275177931637">"Ostalo"</item>
-    <item msgid="9192514806975898961">"Dodatno"</item>
+    <item msgid="9192514806975898961">"Prilagođeno"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Kućni"</item>
-    <item msgid="7084237356602625604">"Poslovni"</item>
-    <item msgid="1112044410659011023">"Ostali"</item>
-    <item msgid="2374913952870110618">"Dodatni"</item>
+    <item msgid="7084237356602625604">"Posao"</item>
+    <item msgid="1112044410659011023">"Ostalo"</item>
+    <item msgid="2374913952870110618">"Prilagođeno"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Kuća"</item>
     <item msgid="5629153956045109251">"Posao"</item>
     <item msgid="4966604264500343469">"Ostalo"</item>
-    <item msgid="4932682847595299369">"Dodatno"</item>
+    <item msgid="4932682847595299369">"Prilagođeno"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Kućni"</item>
-    <item msgid="1359644565647383708">"Poslovni"</item>
-    <item msgid="7868549401053615677">"Ostali"</item>
-    <item msgid="3145118944639869809">"Dodatni"</item>
+    <item msgid="1359644565647383708">"Posao"</item>
+    <item msgid="7868549401053615677">"Ostalo"</item>
+    <item msgid="3145118944639869809">"Prilagođeno"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"Posao"</item>
     <item msgid="4378074129049520373">"Ostalo"</item>
-    <item msgid="3455047468583965104">"Dodatno"</item>
+    <item msgid="3455047468583965104">"Prilagođeno"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -600,15 +600,15 @@
     <string name="phoneTypePager" msgid="7582359955394921732">"Pejdžer"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Ostalo"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Povratni poziv"</string>
-    <string name="phoneTypeCar" msgid="8738360689616716982">"Auto"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Glavni broj kompanije"</string>
+    <string name="phoneTypeCar" msgid="8738360689616716982">"Automobil"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Poslovni glavni"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Glavni"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Drugi faks"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleks"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Posao mobilni"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Poslovni mobilni"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Poslovni pejdžer"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Pomoćnik"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
@@ -616,10 +616,10 @@
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Rođendan"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Godišnjica"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Ostalo"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"Prilagođeni"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Prilagođeno"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Kućni"</string>
-    <string name="emailTypeWork" msgid="3548058059601149973">"Poslovni"</string>
-    <string name="emailTypeOther" msgid="2923008695272639549">"Ostali"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Posao"</string>
+    <string name="emailTypeOther" msgid="2923008695272639549">"Ostalo"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobilni"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Prilagođeno"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Kućna adresa"</string>
@@ -1084,16 +1084,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Jačina zvuka za medijske sadržaje"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Jačina zvuka za obavještenja"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Zadana melodija zvona"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Zadano (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Bez zvuka"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Melodije zvona"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Zvuci alarma"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Zvuci obavještenja"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"Nepoznato"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="one">Wi-Fi mreže su dostupne</item>
       <item quantity="few">Wi-Fi mreže su dostupne</item>
@@ -1593,6 +1589,10 @@
     <string name="select_year" msgid="7952052866994196170">"Odaberite godinu"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Broj <xliff:g id="KEY">%1$s</xliff:g> je izbrisan"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Poslovni <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
+    <skip />
+    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
+    <skip />
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Da biste otkačili ovaj ekran, dodirnite i držite dugme Nazad."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikacija je prikačena. Na ovom uređaju nije dozvoljeno otkačivanje."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran je zakačen"</string>
@@ -1721,6 +1721,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Vrati sada na početne postavke"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Onemogućen <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferencijski poziv"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="8101791425834697618">"Iskočni prozor sa savjetom u vezi alata"</string>
 </resources>
