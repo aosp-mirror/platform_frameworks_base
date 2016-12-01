@@ -16,12 +16,16 @@
 
 package android.graphics;
 
+import android.annotation.ColorInt;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Size;
 import android.annotation.Nullable;
+import android.util.Pair;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.DoubleUnaryOperator;
 
 /**
@@ -118,11 +122,38 @@ import java.util.function.DoubleUnaryOperator;
  * and {@link #connect(ColorSpace, ColorSpace)}, are also guaranteed to be
  * thread-safe.</p>
  *
+ * <h3>Visualization and debugging</h3>
+ *
+ * <p>To visualize and debug color spaces, you can call {@link #createRenderer()}.
+ * The {@link Renderer} created by calling this method can be used to compare
+ * color spaces and locate specific colors on a CIE 1931 chromaticity diagram.</p>
+ *
+ * <p>The following code snippet shows how to render a bitmap that compares
+ * the color gamuts and white points of {@link Named#DCI_P3} and
+ * {@link Named#PRO_PHOTO_RGB}:</p>
+ *
+ * <pre class="prettyprint">
+ * Bitmap bitmap = ColorSpace.createRenderer()
+ *     .size(768)
+ *     .clip(true)
+ *     .add(ColorSpace.get(ColorSpace.Named.DCI_P3), 0xffffc845)
+ *     .add(ColorSpace.get(ColorSpace.Named.PRO_PHOTO_RGB), 0xff097ae9)
+ *     .render();
+ * </pre>
+ * <p>
+ *     <img src="{@docRoot}reference/android/images/graphics/colorspace_renderer.png" />
+ *     <figcaption style="text-align: center;">DCI-P3 vs ProPhoto RGB</figcaption>
+ * </p>
+ *
+ * <p>Please refer to the documentation of the {@link Renderer} class for more
+ * information about its options and capabilities.</p>
+ *
  * @see #get(Named)
  * @see Named
  * @see Model
  * @see Connector
  * @see Adaptation
+ * @see Renderer
  */
 @SuppressWarnings("StaticInitializerReferencesSubClass")
 public abstract class ColorSpace {
@@ -1331,6 +1362,20 @@ public abstract class ColorSpace {
     @NonNull
     public static ColorSpace get(@NonNull Named name) {
         return sNamedColorSpaces[name.ordinal()];
+    }
+
+    /**
+     * <p>Creates a new {@link Renderer} that can be used to visualize and
+     * debug color spaces. See the documentation of {@link Renderer} for
+     * more information.</p>
+     *
+     * @return A new non-null {@link Renderer} instance
+     *
+     * @see Renderer
+     */
+    @NonNull
+    public static Renderer createRenderer() {
+        return new Renderer();
     }
 
     static {
@@ -3111,6 +3156,690 @@ public abstract class ColorSpace {
                     return v;
                 }
             };
+        }
+    }
+
+    /**
+     * <p>A color space renderer can be used to visualize and compare the gamut and
+     * white point of one or more color spaces. The output is an sRGB {@link Bitmap}
+     * showing a CIE 1931 xyY chromaticity diagram.</p>
+     *
+     * <p>The following code snippet shows how to compare the {@link Named#SRGB}
+     * and {@link Named#DCI_P3} color spaces:</p>
+     *
+     * <pre class="prettyprint">
+     * Bitmap bitmap = ColorSpace.createRenderer()
+     *     .size(768)
+     *     .clip(true)
+     *     .add(ColorSpace.get(ColorSpace.Named.SRGB), 0xffffffff)
+     *     .add(ColorSpace.get(ColorSpace.Named.DCI_P3), 0xffffc845)
+     *     .render();
+     * </pre>
+     * <p>
+     *     <img src="{@docRoot}reference/android/images/graphics/colorspace_clipped.png" />
+     *     <figcaption style="text-align: center;">sRGB vs DCI-P3</figcaption>
+     * </p>
+     *
+     * <p>A renderer can also be used to show the location of specific colors,
+     * associated with a color space, in the CIE 1931 xyY chromaticity diagram.
+     * See {@link #add(ColorSpace, float, float, float, int)} for more information.</p>
+     *
+     * @see ColorSpace#createRenderer()
+     */
+    public static class Renderer {
+        private static final int NATIVE_SIZE = 1440;
+
+        @IntRange(from = 128, to = Integer.MAX_VALUE)
+        private int mSize = 1024;
+
+        private boolean mShowWhitePoint = true;
+        private boolean mClip = false;
+
+        private final List<Pair<ColorSpace, Integer>> mColorSpaces = new ArrayList<>(2);
+        private final List<Point> mPoints = new ArrayList<>(0);
+
+        private Renderer() {
+        }
+
+        /**
+         * <p>Defines whether the chromaticity diagram should be clipped by the first
+         * registered color space. The default value is false.</p>
+         *
+         * <p>The following code snippet and image show the default behavior:</p>
+         * <pre class="prettyprint">
+         * Bitmap bitmap = ColorSpace.createRenderer()
+         *     .add(ColorSpace.get(ColorSpace.Named.SRGB), 0xffffffff)
+         *     .add(ColorSpace.get(ColorSpace.Named.DCI_P3), 0xffffc845)
+         *     .render();
+         * </pre>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_comparison.png" />
+         *     <figcaption style="text-align: center;">Clipping disabled</figcaption>
+         * </p>
+         *
+         * <p>Here is the same example with clipping enabled:</p>
+         * <pre class="prettyprint">
+         * Bitmap bitmap = ColorSpace.createRenderer()
+         *     .clip(true)
+         *     .add(ColorSpace.get(ColorSpace.Named.SRGB), 0xffffffff)
+         *     .add(ColorSpace.get(ColorSpace.Named.DCI_P3), 0xffffc845)
+         *     .render();
+         * </pre>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_clipped.png" />
+         *     <figcaption style="text-align: center;">Clipping enabled</figcaption>
+         * </p>
+         *
+         * @param clip True to clip the chromaticity diagram to the first registered color space,
+         *             false otherwise
+         * @return This instance of {@link Renderer}
+         */
+        @NonNull
+        public Renderer clip(boolean clip) {
+            mClip = clip;
+            return this;
+        }
+
+        /**
+         * Sets the dimensions (width and height) in pixels of the output bitmap.
+         * The size must be at least 128px and defaults to 1024px.
+         *
+         * @param size The size in pixels of the output bitmap
+         * @return This instance of {@link Renderer}
+         */
+        @NonNull
+        public Renderer size(@IntRange(from = 128, to = Integer.MAX_VALUE) int size) {
+            mSize = Math.max(128, size);
+            return this;
+        }
+
+        /**
+         * Shows or hides the white point of each color space in the output bitmap.
+         * The default is true.
+         *
+         * @param show True to show the white point of each color space, false
+         *             otherwise
+         * @return This instance of {@link Renderer}
+         */
+        @NonNull
+        public Renderer showWhitePoint(boolean show) {
+            mShowWhitePoint = show;
+            return this;
+        }
+
+        /**
+         * <p>Adds a color space to represent on the output CIE 1931 chromaticity
+         * diagram. The color space is represented as a triangle showing the
+         * footprint of its color gamut and, optionally, the location of its
+         * white point.</p>
+         *
+         * <p class="note">Color spaces with a color model that is not RGB are
+         * accepted but ignored.</p>
+         *
+         * <p>The following code snippet and image show an example of calling this
+         * method to compare {@link Named#SRGB sRGB} and {@link Named#DCI_P3 DCI-P3}:</p>
+         * <pre class="prettyprint">
+         * Bitmap bitmap = ColorSpace.createRenderer()
+         *     .add(ColorSpace.get(ColorSpace.Named.SRGB), 0xffffffff)
+         *     .add(ColorSpace.get(ColorSpace.Named.DCI_P3), 0xffffc845)
+         *     .render();
+         * </pre>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_comparison.png" />
+         *     <figcaption style="text-align: center;">sRGB vs DCI-P3</figcaption>
+         * </p>
+         *
+         * <p>Adding a color space extending beyond the boundaries of the
+         * spectral locus will alter the size of the diagram within the output
+         * bitmap as shown in this example:</p>
+         * <pre class="prettyprint">
+         * Bitmap bitmap = ColorSpace.createRenderer()
+         *     .add(ColorSpace.get(ColorSpace.Named.SRGB), 0xffffffff)
+         *     .add(ColorSpace.get(ColorSpace.Named.DCI_P3), 0xffffc845)
+         *     .add(ColorSpace.get(ColorSpace.Named.ACES), 0xff097ae9)
+         *     .add(ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB), 0xff000000)
+         *     .render();
+         * </pre>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_comparison2.png" />
+         *     <figcaption style="text-align: center;">sRGB vs DCI-P3</figcaption>
+         * </p>
+         *
+         * @param colorSpace The color space whose gamut to render on the diagram
+         * @param color The sRGB color to use to render the color space's gamut and white point
+         * @return This instance of {@link Renderer}
+         *
+         * @see #clip(boolean)
+         * @see #showWhitePoint(boolean)
+         */
+        @NonNull
+        public Renderer add(@NonNull ColorSpace colorSpace, @ColorInt int color) {
+            mColorSpaces.add(new Pair<>(colorSpace, color));
+            return this;
+        }
+
+        /**
+         * <p>Adds a color to represent as a point on the chromaticity diagram.
+         * The color is associated with a color space which will be used to
+         * perform the conversion to CIE XYZ and compute the location of the point
+         * on the diagram. The point is rendered as a colored circle.</p>
+         *
+         * <p>The following code snippet and image show an example of calling this
+         * method to render the location of several sRGB colors as white circles:</p>
+         * <pre class="prettyprint">
+         * Bitmap bitmap = ColorSpace.createRenderer()
+         *     .clip(true)
+         *     .add(ColorSpace.get(ColorSpace.Named.SRGB), 0xffffffff)
+         *     .add(ColorSpace.get(ColorSpace.Named.SRGB), 0.1f, 0.0f, 0.1f, 0xffffffff)
+         *     .add(ColorSpace.get(ColorSpace.Named.SRGB), 0.1f, 0.1f, 0.1f, 0xffffffff)
+         *     .add(ColorSpace.get(ColorSpace.Named.SRGB), 0.1f, 0.2f, 0.1f, 0xffffffff)
+         *     .add(ColorSpace.get(ColorSpace.Named.SRGB), 0.1f, 0.3f, 0.1f, 0xffffffff)
+         *     .add(ColorSpace.get(ColorSpace.Named.SRGB), 0.1f, 0.4f, 0.1f, 0xffffffff)
+         *     .add(ColorSpace.get(ColorSpace.Named.SRGB), 0.1f, 0.5f, 0.1f, 0xffffffff)
+         *     .render();
+         * </pre>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_points.png" />
+         *     <figcaption style="text-align: center;">
+         *         Locating colors on the chromaticity diagram
+         *     </figcaption>
+         * </p>
+         *
+         * @param colorSpace The color space of the color to locate on the diagram
+         * @param r The first component of the color to locate on the diagram
+         * @param g The second component of the color to locate on the diagram
+         * @param b The third component of the color to locate on the diagram
+         * @param pointColor The sRGB color to use to render the point on the diagram
+         * @return This instance of {@link Renderer}
+         */
+        @NonNull
+        public Renderer add(@NonNull ColorSpace colorSpace, float r, float g, float b,
+                @ColorInt int pointColor) {
+            mPoints.add(new Point(colorSpace, new float[] { r, g, b }, pointColor));
+            return this;
+        }
+
+        /**
+         * <p>Renders the {@link #add(ColorSpace, int) color spaces} and
+         * {@link #add(ColorSpace, float, float, float, int) points} registered
+         * with this renderer. The output bitmap is an sRGB image with the
+         * dimensions specified by calling {@link #size(int)} (1204x1024px by
+         * default).</p>
+         *
+         * @return A new non-null {@link Bitmap} with the dimensions specified
+         *        by {@link #size(int)} (1024x1024 by default)
+         */
+        @NonNull
+        public Bitmap render() {
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            Bitmap bitmap = Bitmap.createBitmap(mSize, mSize, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+
+            float[] primaries = new float[6];
+            float[] whitePoint = new float[2];
+
+            int width = NATIVE_SIZE;
+            int height = NATIVE_SIZE;
+
+            Path path = new Path();
+
+            setTransform(canvas, width, height, primaries);
+            drawBox(canvas, width, height, paint, path);
+            drawLocus(canvas, width, height, paint, path, primaries);
+            drawGamuts(canvas, width, height, paint, path, primaries, whitePoint);
+            drawPoints(canvas, width, height, paint);
+
+            return bitmap;
+        }
+
+        /**
+         * Draws registered points at their correct position in the xyY coordinates.
+         * Each point is positioned according to its associated color space.
+         *
+         * @param canvas The canvas to transform
+         * @param width Width in pixel of the final image
+         * @param height Height in pixel of the final image
+         * @param paint A pre-allocated paint used to avoid temporary allocations
+         */
+        private void drawPoints(@NonNull Canvas canvas, int width, int height,
+                @NonNull Paint paint) {
+
+            paint.setStyle(Paint.Style.FILL);
+
+            float[] v = new float[3];
+            for (final Point point : mPoints) {
+                v[0] = point.mRgb[0];
+                v[1] = point.mRgb[1];
+                v[2] = point.mRgb[2];
+                point.mColorSpace.toXyz(v);
+
+                paint.setColor(point.mColor);
+
+                // XYZ to xyY, assuming Y=1.0
+                float sum = v[0] + v[1] + v[2];
+                canvas.drawCircle(width * v[0] / sum, height - height * v[1] / sum,
+                        4.0f, paint);
+            }
+        }
+
+        /**
+         * Draws the color gamuts and white points of all the registered color
+         * spaces. Only color spaces with an RGB color model are rendered, the
+         * others are ignored.
+         *
+         * @param canvas The canvas to transform
+         * @param width Width in pixel of the final image
+         * @param height Height in pixel of the final image
+         * @param paint A pre-allocated paint used to avoid temporary allocations
+         * @param path A pre-allocated path used to avoid temporary allocations
+         * @param primaries A pre-allocated array of 6 floats to avoid temporary allocations
+         * @param whitePoint A pre-allocated array of 2 floats to avoid temporary allocations
+         */
+        private void drawGamuts(
+                @NonNull Canvas canvas, int width, int height,
+                @NonNull Paint paint, @NonNull Path path,
+                @NonNull @Size(6) float[] primaries, @NonNull @Size(2) float[] whitePoint) {
+
+            for (final Pair<ColorSpace, Integer> item : mColorSpaces) {
+                ColorSpace colorSpace = item.first;
+                int color = item.second;
+
+                if (colorSpace.getModel() != Model.RGB) continue;
+
+                Rgb rgb = (Rgb) colorSpace;
+                getPrimaries(rgb, primaries);
+
+                path.rewind();
+                path.moveTo(width * primaries[0], height - height * primaries[1]);
+                path.lineTo(width * primaries[2], height - height * primaries[3]);
+                path.lineTo(width * primaries[4], height - height * primaries[5]);
+                path.close();
+
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setColor(color);
+                canvas.drawPath(path, paint);
+
+                // Draw the white point
+                if (mShowWhitePoint) {
+                    rgb.getWhitePoint(whitePoint);
+
+                    paint.setStyle(Paint.Style.FILL);
+                    paint.setColor(color);
+                    canvas.drawCircle(width * whitePoint[0], height - height * whitePoint[1],
+                            4.0f, paint);
+                }
+            }
+        }
+
+        /**
+         * Returns the primaries of the specified RGB color space. This method handles
+         * the special case of the {@link Named#EXTENDED_SRGB} family of color spaces.
+         *
+         * @param rgb The color space whose primaries to extract
+         * @param primaries A pre-allocated array of 6 floats that will hold the result
+         */
+        @NonNull
+        @Size(6)
+        private static float[] getPrimaries(@NonNull Rgb rgb, @NonNull @Size(6) float[] primaries) {
+            // TODO: We should find a better way to handle these cases
+            if (rgb.equals(ColorSpace.get(Named.EXTENDED_SRGB)) ||
+                    rgb.equals(ColorSpace.get(Named.LINEAR_EXTENDED_SRGB))) {
+                primaries[0] = 1.41f;
+                primaries[1] = 0.33f;
+                primaries[2] = 0.27f;
+                primaries[3] = 1.24f;
+                primaries[4] = -0.23f;
+                primaries[5] = -0.57f;
+                return primaries;
+            }
+            return rgb.getPrimaries(primaries);
+        }
+
+        /**
+         * Draws the CIE 1931 chromaticity diagram: the spectral locus and its inside.
+         * This method respect the clip parameter.
+         *
+         * @param canvas The canvas to transform
+         * @param width Width in pixel of the final image
+         * @param height Height in pixel of the final image
+         * @param paint A pre-allocated paint used to avoid temporary allocations
+         * @param path A pre-allocated path used to avoid temporary allocations
+         * @param primaries A pre-allocated array of 6 floats to avoid temporary allocations
+         */
+        private void drawLocus(
+                @NonNull Canvas canvas, int width, int height, @NonNull Paint paint,
+                @NonNull Path path, @NonNull @Size(6) float[] primaries) {
+
+            int vertexCount = SPECTRUM_LOCUS_X.length * CHROMATICITY_RESOLUTION * 6;
+            float[] vertices = new float[vertexCount * 2];
+            int[] colors = new int[vertices.length];
+            computeChromaticityMesh(NATIVE_SIZE, NATIVE_SIZE, vertices, colors);
+
+            // Draw the spectral locus
+            if (mClip && mColorSpaces.size() > 0) {
+                for (final Pair<ColorSpace, Integer> item : mColorSpaces) {
+                    ColorSpace colorSpace = item.first;
+                    if (colorSpace.getModel() != Model.RGB) continue;
+
+                    Rgb rgb = (Rgb) colorSpace;
+                    getPrimaries(rgb, primaries);
+                    break;
+                }
+
+                path.rewind();
+                path.moveTo(width * primaries[0], height - height * primaries[1]);
+                path.lineTo(width * primaries[2], height - height * primaries[3]);
+                path.lineTo(width * primaries[4], height - height * primaries[5]);
+                path.close();
+
+                int[] solid = new int[colors.length];
+                Arrays.fill(solid, 0xff6c6c6c);
+                canvas.drawVertices(Canvas.VertexMode.TRIANGLES, vertices.length, vertices, 0,
+                        null, 0, solid, 0, null, 0, 0, paint);
+
+                canvas.save();
+                canvas.clipPath(path);
+
+                canvas.drawVertices(Canvas.VertexMode.TRIANGLES, vertices.length, vertices, 0,
+                        null, 0, colors, 0, null, 0, 0, paint);
+
+                canvas.restore();
+            } else {
+                canvas.drawVertices(Canvas.VertexMode.TRIANGLES, vertices.length, vertices, 0,
+                        null, 0, colors, 0, null, 0, 0, paint);
+            }
+
+            // Draw the non-spectral locus
+            int index = (CHROMATICITY_RESOLUTION - 1) * 12;
+            path.reset();
+            path.moveTo(vertices[index], vertices[index + 1]);
+            for (int x = 2; x < SPECTRUM_LOCUS_X.length; x++) {
+                index += CHROMATICITY_RESOLUTION * 12;
+                path.lineTo(vertices[index], vertices[index + 1]);
+            }
+            path.close();
+
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(0xff000000);
+            canvas.drawPath(path, paint);
+        }
+
+        /**
+         * Draws the diagram box, including borders, tick marks, grid lines
+         * and axis labels.
+         *
+         * @param canvas The canvas to transform
+         * @param width Width in pixel of the final image
+         * @param height Height in pixel of the final image
+         * @param paint A pre-allocated paint used to avoid temporary allocations
+         * @param path A pre-allocated path used to avoid temporary allocations
+         */
+        private void drawBox(@NonNull Canvas canvas, int width, int height, @NonNull Paint paint,
+                @NonNull Path path) {
+            // Draw the unit grid
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(2.0f);
+            paint.setColor(0xffc0c0c0);
+            for (int i = 1; i <= 9; i++) {
+                canvas.drawLine(0.0f, height - (height * i / 10.0f),
+                        0.9f * width, height - (height * i / 10.0f), paint);
+                canvas.drawLine(width * i / 10.0f, height,
+                        width * i / 10.0f, 0.1f * height, paint);
+            }
+
+            // Draw tick marks
+            paint.setStrokeWidth(4.0f);
+            paint.setColor(0xff000000);
+            for (int i = 1; i <= 9; i++) {
+                canvas.drawLine(0.0f, height - (height * i / 10.0f),
+                        width / 100.0f, height - (height * i / 10.0f), paint);
+                canvas.drawLine(width * i / 10.0f, height,
+                        width * i / 10.0f, height - (height / 100.0f), paint);
+            }
+
+            // Draw the axis labels
+            paint.setStyle(Paint.Style.FILL);
+            paint.setTextSize(36.0f);
+            paint.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
+
+            Rect bounds = new Rect();
+            for (int i = 1; i < 9; i++) {
+                String text = "0." + i;
+                paint.getTextBounds(text, 0, text.length(), bounds);
+
+                float y = height - (height * i / 10.0f);
+                canvas.drawText(text, -0.05f * width + 10, y + bounds.height() / 2.0f, paint);
+
+                float x = width * i / 10.0f;
+                canvas.drawText(text, x - bounds.width() / 2.0f,
+                        height + bounds.height() + 16, paint);
+            }
+            paint.setStyle(Paint.Style.STROKE);
+
+            // Draw the diagram box
+            path.moveTo(0.0f, height);
+            path.lineTo(0.9f * width, height);
+            path.lineTo(0.9f * width, 0.1f * height);
+            path.lineTo(0.0f, 0.1f * height);
+            path.close();
+            canvas.drawPath(path, paint);
+        }
+
+        /**
+         * Computes and applies the Canvas transforms required to make the color
+         * gamut of each color space visible in the final image.
+         *
+         * @param canvas The canvas to transform
+         * @param width Width in pixel of the final image
+         * @param height Height in pixel of the final image
+         * @param primaries Array of 6 floats used to avoid temporary allocations
+         */
+        private void setTransform(@NonNull Canvas canvas, int width, int height,
+                @NonNull @Size(6) float[] primaries) {
+
+            RectF primariesBounds = new RectF();
+            for (final Pair<ColorSpace, Integer> item : mColorSpaces) {
+                ColorSpace colorSpace = item.first;
+                if (colorSpace.getModel() != Model.RGB) continue;
+
+                Rgb rgb = (Rgb) colorSpace;
+                getPrimaries(rgb, primaries);
+
+                primariesBounds.left = Math.min(primariesBounds.left, primaries[4]);
+                primariesBounds.top = Math.min(primariesBounds.top, primaries[5]);
+                primariesBounds.right = Math.max(primariesBounds.right, primaries[0]);
+                primariesBounds.bottom = Math.max(primariesBounds.bottom, primaries[3]);
+            }
+
+            primariesBounds.left = Math.min(0.0f, primariesBounds.left);
+            primariesBounds.top = Math.min(0.0f, primariesBounds.top);
+            primariesBounds.right = Math.max(0.9f, primariesBounds.right);
+            primariesBounds.bottom = Math.max(0.9f, primariesBounds.bottom);
+
+            float scaleX = 0.9f / primariesBounds.width();
+            float scaleY = 0.9f / primariesBounds.height();
+            float scale = Math.min(scaleX, scaleY);
+
+            canvas.scale(mSize / (float) NATIVE_SIZE, mSize / (float) NATIVE_SIZE);
+            canvas.scale(scale, scale);
+            canvas.translate(
+                    (primariesBounds.width() - 0.9f) * width / 2.0f,
+                    (primariesBounds.height() - 0.9f) * height / 2.0f);
+
+            // The spectrum extends ~0.85 vertically and ~0.65 horizontally
+            // We shift the canvas a little bit to get nicer margins
+            canvas.translate(0.05f * width, -0.05f * height);
+        }
+
+        // X coordinates of the spectral locus in CIE 1931
+        private static final float[] SPECTRUM_LOCUS_X = {
+                0.175596f, 0.172787f, 0.170806f, 0.170085f, 0.160343f,
+                0.146958f, 0.139149f, 0.133536f, 0.126688f, 0.115830f,
+                0.109616f, 0.099146f, 0.091310f, 0.078130f, 0.068717f,
+                0.054675f, 0.040763f, 0.027497f, 0.016270f, 0.008169f,
+                0.004876f, 0.003983f, 0.003859f, 0.004646f, 0.007988f,
+                0.013870f, 0.022244f, 0.027273f, 0.032820f, 0.038851f,
+                0.045327f, 0.052175f, 0.059323f, 0.066713f, 0.074299f,
+                0.089937f, 0.114155f, 0.138695f, 0.154714f, 0.192865f,
+                0.229607f, 0.265760f, 0.301588f, 0.337346f, 0.373083f,
+                0.408717f, 0.444043f, 0.478755f, 0.512467f, 0.544767f,
+                0.575132f, 0.602914f, 0.627018f, 0.648215f, 0.665746f,
+                0.680061f, 0.691487f, 0.700589f, 0.707901f, 0.714015f,
+                0.719017f, 0.723016f, 0.734674f, 0.717203f, 0.699732f,
+                0.682260f, 0.664789f, 0.647318f, 0.629847f, 0.612376f,
+                0.594905f, 0.577433f, 0.559962f, 0.542491f, 0.525020f,
+                0.507549f, 0.490077f, 0.472606f, 0.455135f, 0.437664f,
+                0.420193f, 0.402721f, 0.385250f, 0.367779f, 0.350308f,
+                0.332837f, 0.315366f, 0.297894f, 0.280423f, 0.262952f,
+                0.245481f, 0.228010f, 0.210538f, 0.193067f, 0.175596f
+        };
+        // Y coordinates of the spectral locus in CIE 1931
+        private static final float[] SPECTRUM_LOCUS_Y = {
+                0.005295f, 0.004800f, 0.005472f, 0.005976f, 0.014496f,
+                0.026643f, 0.035211f, 0.042704f, 0.053441f, 0.073601f,
+                0.086866f, 0.112037f, 0.132737f, 0.170464f, 0.200773f,
+                0.254155f, 0.317049f, 0.387997f, 0.463035f, 0.538504f,
+                0.587196f, 0.610526f, 0.654897f, 0.675970f, 0.715407f,
+                0.750246f, 0.779682f, 0.792153f, 0.802971f, 0.812059f,
+                0.819430f, 0.825200f, 0.829460f, 0.832306f, 0.833833f,
+                0.833316f, 0.826231f, 0.814796f, 0.805884f, 0.781648f,
+                0.754347f, 0.724342f, 0.692326f, 0.658867f, 0.624470f,
+                0.589626f, 0.554734f, 0.520222f, 0.486611f, 0.454454f,
+                0.424252f, 0.396516f, 0.372510f, 0.351413f, 0.334028f,
+                0.319765f, 0.308359f, 0.299317f, 0.292044f, 0.285945f,
+                0.280951f, 0.276964f, 0.265326f, 0.257200f, 0.249074f,
+                0.240948f, 0.232822f, 0.224696f, 0.216570f, 0.208444f,
+                0.200318f, 0.192192f, 0.184066f, 0.175940f, 0.167814f,
+                0.159688f, 0.151562f, 0.143436f, 0.135311f, 0.127185f,
+                0.119059f, 0.110933f, 0.102807f, 0.094681f, 0.086555f,
+                0.078429f, 0.070303f, 0.062177f, 0.054051f, 0.045925f,
+                0.037799f, 0.029673f, 0.021547f, 0.013421f, 0.005295f
+        };
+
+        // Number of subdivision of the inside of the spectral locus
+        private static final int CHROMATICITY_RESOLUTION = 32;
+        private static final double ONE_THIRD = 1.0 / 3.0;
+
+        /**
+         * Computes a 2D mesh representation of the CIE 1931 chromaticity
+         * diagram.
+         *
+         * @param width Width in pixels of the mesh
+         * @param height Height in pixels of the mesh
+         * @param vertices Array of floats that will hold the mesh vertices
+         * @param colors Array of floats that will hold the mesh colors
+         */
+        private static void computeChromaticityMesh(int width, int height,
+                @NonNull float[] vertices, @NonNull int[] colors) {
+
+            ColorSpace colorSpace = get(Named.SRGB);
+
+            float[] color = new float[3];
+
+            int vertexIndex = 0;
+            int colorIndex = 0;
+
+            for (int x = 0; x < SPECTRUM_LOCUS_X.length; x++) {
+                int nextX = (x % (SPECTRUM_LOCUS_X.length - 1)) + 1;
+
+                float a1 = (float) Math.atan2(
+                        SPECTRUM_LOCUS_Y[x] - ONE_THIRD,
+                        SPECTRUM_LOCUS_X[x] - ONE_THIRD);
+                float a2 = (float) Math.atan2(
+                        SPECTRUM_LOCUS_Y[nextX] - ONE_THIRD,
+                        SPECTRUM_LOCUS_X[nextX] - ONE_THIRD);
+
+                float radius1 = (float) Math.pow(
+                        sqr(SPECTRUM_LOCUS_X[x] - ONE_THIRD) +
+                                sqr(SPECTRUM_LOCUS_Y[x] - ONE_THIRD),
+                        0.5);
+                float radius2 = (float) Math.pow(
+                        sqr(SPECTRUM_LOCUS_X[nextX] - ONE_THIRD) +
+                                sqr(SPECTRUM_LOCUS_Y[nextX] - ONE_THIRD),
+                        0.5);
+
+                // Compute patches; each patch is a quad with a different
+                // color associated with each vertex
+                for (int c = 1; c <= CHROMATICITY_RESOLUTION; c++) {
+                    float f1 = c / (float) CHROMATICITY_RESOLUTION;
+                    float f2 = (c - 1) / (float) CHROMATICITY_RESOLUTION;
+
+                    double cr1 = radius1 * Math.cos(a1);
+                    double sr1 = radius1 * Math.sin(a1);
+                    double cr2 = radius2 * Math.cos(a2);
+                    double sr2 = radius2 * Math.sin(a2);
+
+                    // Compute the XYZ coordinates of the 4 vertices of the patch
+                    float v1x = (float) (ONE_THIRD + cr1 * f1);
+                    float v1y = (float) (ONE_THIRD + sr1 * f1);
+                    float v1z = 1 - v1x - v1y;
+
+                    float v2x = (float) (ONE_THIRD + cr1 * f2);
+                    float v2y = (float) (ONE_THIRD + sr1 * f2);
+                    float v2z = 1 - v2x - v2y;
+
+                    float v3x = (float) (ONE_THIRD + cr2 * f2);
+                    float v3y = (float) (ONE_THIRD + sr2 * f2);
+                    float v3z = 1 - v3x - v3y;
+
+                    float v4x = (float) (ONE_THIRD + cr2 * f1);
+                    float v4y = (float) (ONE_THIRD + sr2 * f1);
+                    float v4z = 1 - v4x - v4y;
+
+                    // Compute the sRGB representation of each XYZ coordinate of the patch
+                    colors[colorIndex    ] = computeColor(color, v1x, v1y, v1z, colorSpace);
+                    colors[colorIndex + 1] = computeColor(color, v2x, v2y, v2z, colorSpace);
+                    colors[colorIndex + 2] = computeColor(color, v3x, v3y, v3z, colorSpace);
+                    colors[colorIndex + 3] = colors[colorIndex];
+                    colors[colorIndex + 4] = colors[colorIndex + 2];
+                    colors[colorIndex + 5] = computeColor(color, v4x, v4y, v4z, colorSpace);
+                    colorIndex += 6;
+
+                    // Flip the mesh upside down to match Canvas' coordinates system
+                    vertices[vertexIndex++] = v1x * width;
+                    vertices[vertexIndex++] = height - v1y * height;
+                    vertices[vertexIndex++] = v2x * width;
+                    vertices[vertexIndex++] = height - v2y * height;
+                    vertices[vertexIndex++] = v3x * width;
+                    vertices[vertexIndex++] = height - v3y * height;
+                    vertices[vertexIndex++] = v1x * width;
+                    vertices[vertexIndex++] = height - v1y * height;
+                    vertices[vertexIndex++] = v3x * width;
+                    vertices[vertexIndex++] = height - v3y * height;
+                    vertices[vertexIndex++] = v4x * width;
+                    vertices[vertexIndex++] = height - v4y * height;
+                }
+            }
+        }
+
+        @ColorInt
+        private static int computeColor(@NonNull @Size(3) float[] color,
+                float x, float y, float z, @NonNull ColorSpace cs) {
+            color[0] = x;
+            color[1] = y;
+            color[2] = z;
+            cs.fromXyz(color);
+            return 0xff000000 |
+                    (((int) (color[0] * 255.0f) & 0xff) << 16) |
+                    (((int) (color[1] * 255.0f) & 0xff) <<  8) |
+                    (((int) (color[2] * 255.0f) & 0xff)      );
+        }
+
+        private static double sqr(double v) {
+            return v * v;
+        }
+
+        private static class Point {
+            @NonNull final ColorSpace mColorSpace;
+            @NonNull final float[] mRgb;
+            final int mColor;
+
+            Point(@NonNull ColorSpace colorSpace,
+                    @NonNull @Size(3) float[] rgb, @ColorInt int color) {
+                mColorSpace = colorSpace;
+                mRgb = rgb;
+                mColor = color;
+            }
         }
     }
 }
