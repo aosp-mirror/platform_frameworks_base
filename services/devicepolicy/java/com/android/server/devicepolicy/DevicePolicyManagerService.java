@@ -9608,6 +9608,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(admin);
         Preconditions.checkNotNull(caller);
         Preconditions.checkNotNull(serviceIntent);
+        Preconditions.checkArgument(
+                serviceIntent.getComponent() != null || serviceIntent.getPackage() != null,
+                "Service intent must be explicit (with a package name or component): "
+                        + serviceIntent);
         Preconditions.checkNotNull(connection);
         Preconditions.checkArgument(mInjector.userHandleGetCallingUserId() != targetUserId,
                 "target user id must be different from the calling user id");
@@ -9628,9 +9632,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     createCrossUserServiceIntent(serviceIntent, targetPackage, targetUserId);
             if (sanitizedIntent == null) {
                 // Fail, cannot lookup the target service.
-                throw new SecurityException("Invalid intent or failed to look up the service");
+                return false;
             }
-
             // Ask ActivityManager to bind it. Notice that we are binding the service with the
             // caller app instead of DevicePolicyManagerService.
             return mInjector.getIActivityManager().bindService(
@@ -9885,35 +9888,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
-     * @param rawIntent Original service intent specified by caller.
-     * @param expectedPackageName The expected package name in the incoming intent.
-     * @return Intent that have component explicitly set. {@code null} if the incoming intent
-     *         or target service is invalid.
+     * @param rawIntent Original service intent specified by caller. It must be explicit.
+     * @param expectedPackageName The expected package name of the resolved service.
+     * @return Intent that have component explicitly set. {@code null} if no service is resolved
+     *     with the given intent.
+     * @throws SecurityException if the intent is resolved to an invalid service.
      */
     private Intent createCrossUserServiceIntent(
             @NonNull Intent rawIntent, @NonNull String expectedPackageName,
-            @UserIdInt int targetUserId) throws RemoteException {
-        if (rawIntent.getComponent() == null && rawIntent.getPackage() == null) {
-            Log.e(LOG_TAG, "Service intent must be explicit (with a package name or component): "
-                    + rawIntent);
-            return null;
-        }
+            @UserIdInt int targetUserId) throws RemoteException, SecurityException {
         ResolveInfo info = mIPackageManager.resolveService(
                 rawIntent,
                 rawIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
                 0,  // flags
                 targetUserId);
         if (info == null || info.serviceInfo == null) {
-            Log.e(LOG_TAG, "Fail to look up the service: " + rawIntent);
+            Log.e(LOG_TAG, "Fail to look up the service: " + rawIntent
+                    + " or user " + targetUserId + " is not running");
             return null;
         }
         if (!expectedPackageName.equals(info.serviceInfo.packageName)) {
-            Log.e(LOG_TAG, "Only allow to bind service in " + expectedPackageName);
-            return null;
+            throw new SecurityException("Only allow to bind service in " + expectedPackageName);
         }
         if (info.serviceInfo.exported) {
-            Log.e(LOG_TAG, "The service must be unexported.");
-            return null;
+            throw new SecurityException("The service must be unexported");
         }
         // It is the system server to bind the service, it would be extremely dangerous if it
         // can be exploited to bind any service. Set the component explicitly to make sure we
