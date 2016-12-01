@@ -1685,6 +1685,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (mGuts != null) {
             mGuts.setClipBottomAmount(clipBottomAmount);
         }
+        if (mChildrenContainer != null) {
+            mChildrenContainer.setClipBottomAmount(clipBottomAmount);
+        }
     }
 
     public boolean isMaxExpandHeightInitialized() {
@@ -1863,9 +1866,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             super.applyToView(view);
             if (view instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-                if (this.isBottomClipped) {
-                    row.setClipToActualHeight(true);
-                }
                 row.applyChildrenState(mOverallState);
             }
         }

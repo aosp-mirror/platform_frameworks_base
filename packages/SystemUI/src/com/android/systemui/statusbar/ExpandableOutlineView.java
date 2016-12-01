@@ -41,7 +41,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
                 outline.setRect(translation,
                         mClipTopAmount,
                         getWidth() + translation,
-                        Math.max(getActualHeight(), mClipTopAmount));
+                        Math.max(getActualHeight() - mClipBottomAmount, mClipTopAmount));
             } else {
                 outline.setRect(mOutlineRect);
             }
@@ -63,6 +63,12 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     @Override
     public void setClipTopAmount(int clipTopAmount) {
         super.setClipTopAmount(clipTopAmount);
+        invalidateOutline();
+    }
+
+    @Override
+    public void setClipBottomAmount(int clipBottomAmount) {
+        super.setClipBottomAmount(clipBottomAmount);
         invalidateOutline();
     }
 

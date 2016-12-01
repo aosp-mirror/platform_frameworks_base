@@ -156,7 +156,6 @@ public class NotificationShelf extends ActivatableNotificationView {
             mShelfState.alpha = 1.0f;
             mShelfState.belowSpeedBump = mAmbientState.getSpeedBumpIndex() == 0;
             mShelfState.shadowAlpha = 1.0f;
-            mShelfState.isBottomClipped = false;
             mShelfState.hideSensitive = false;
             mShelfState.xTranslation = getTranslationX();
             if (mNotGoneIndex != -1) {

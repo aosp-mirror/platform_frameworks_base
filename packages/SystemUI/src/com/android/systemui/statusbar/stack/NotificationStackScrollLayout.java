@@ -766,12 +766,14 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private float getAppearEndPosition() {
         int appearPosition;
+        int minNotificationsForShelf = 1;
         if (mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()) {
             appearPosition = mHeadsUpManager.getTopHeadsUpPinnedHeight();
+            minNotificationsForShelf = 2;
         } else {
-            appearPosition = getFirstItemMinHeight();
+            appearPosition = 0;
         }
-        if (getNotGoneChildCount() > 1) {
+        if (getNotGoneChildCount() >= minNotificationsForShelf) {
             appearPosition += mShelf.getIntrinsicHeight();
         }
         return appearPosition + (onKeyguard() ? mTopPadding : mIntrinsicPadding);
@@ -1092,29 +1094,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public int getMaxExpandHeight(ExpandableView view) {
-        int maxContentHeight = view.getMaxContentHeight();
-        if (view.isSummaryWithChildren() && view.getParent() == this) {
-            // Faking a measure with the group expanded to simulate how the group would look if
-            // it was. Doing a calculation here would be highly non-trivial because of the
-            // algorithm
-            mGroupExpandedForMeasure = true;
-            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-            mGroupManager.toggleGroupExpansion(row.getStatusBarNotification());
-            row.setForceUnlocked(true);
-            mAmbientState.setLayoutHeight(mMaxLayoutHeight);
-            mStackScrollAlgorithm.getStackScrollState(mAmbientState, mCurrentStackScrollState);
-            mAmbientState.setLayoutHeight(getLayoutHeight());
-            mGroupManager.toggleGroupExpansion(
-                    row.getStatusBarNotification());
-            mGroupExpandedForMeasure = false;
-            row.setForceUnlocked(false);
-            ExpandableViewState viewState = mCurrentStackScrollState.getViewStateForView(view);
-            if (viewState != null) {
-                // The view could have been removed
-                return Math.min(viewState.height, maxContentHeight);
-            }
-        }
-        return maxContentHeight;
+        return view.getMaxContentHeight();
     }
 
     public void setScrollingEnabled(boolean enable) {
@@ -2126,7 +2106,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 finalTranslationY = (int) ViewState.getFinalTranslationY(lastView);
             }
             int finalHeight = ExpandableViewState.getFinalActualHeight(lastView);
-            int finalBottom = finalTranslationY + finalHeight;
+            int finalBottom = finalTranslationY + finalHeight - lastView.getClipBottomAmount();
             finalBottom = Math.min(finalBottom, getHeight());
             if (mAnimateNextBackgroundBottom
                     || mBottomAnimator == null && mCurrentBounds.bottom == finalBottom
@@ -2134,10 +2114,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // we're ending up at the same location as we are now, lets just skip the animation
                 bottom = finalBottom;
             } else {
-                bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight());
+                bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight()
+                        - lastView.getClipBottomAmount());
                 bottom = Math.min(bottom, getHeight());
             }
-            bottom -= lastView.getClipBottomAmount();
         } else {
             top = mTopPadding;
             bottom = top;

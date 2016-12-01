@@ -48,7 +48,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             return mAnimationFilter;
         }
     }.setDuration(200);
-    
+
     private static final AnimationProperties ADD_ICON_PROPERTIES = new AnimationProperties() {
         private AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();
 

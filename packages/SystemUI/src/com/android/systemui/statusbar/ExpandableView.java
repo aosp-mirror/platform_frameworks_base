@@ -38,7 +38,7 @@ public abstract class ExpandableView extends FrameLayout {
     protected OnHeightChangedListener mOnHeightChangedListener;
     private int mActualHeight;
     protected int mClipTopAmount;
-    private float mClipBottomAmount;
+    protected int mClipBottomAmount;
     private boolean mDark;
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
     private static Rect mClipRect = new Rect();
@@ -241,7 +241,7 @@ public abstract class ExpandableView extends FrameLayout {
         return mClipTopAmount;
     }
 
-    public float getClipBottomAmount() {
+    public int getClipBottomAmount() {
         return mClipBottomAmount;
     }
 
@@ -354,11 +354,8 @@ public abstract class ExpandableView extends FrameLayout {
     private void updateClipping() {
         if (mClipToActualHeight) {
             int top = getClipTopAmount();
-            if (top >= getActualHeight()) {
-                top = getActualHeight() - 1;
-            }
-            mClipRect.set(0, top, getWidth(), (int) (getActualHeight() + getExtraBottomPadding()
-                                - mClipBottomAmount));
+            mClipRect.set(0, top, getWidth(), Math.max(getActualHeight() + getExtraBottomPadding()
+                                - mClipBottomAmount, top));
             setClipBounds(mClipRect);
         } else {
             setClipBounds(null);

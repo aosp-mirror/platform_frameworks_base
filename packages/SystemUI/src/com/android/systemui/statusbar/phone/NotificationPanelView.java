@@ -404,12 +404,9 @@ public class NotificationPanelView extends PanelView implements
                 mKeyguardStatusView.getHeight());
         int notificationPadding = Math.max(1, getResources().getDimensionPixelSize(
                 R.dimen.notification_divider_height));
-        final int overflowheight = getResources().getDimensionPixelSize(
-                R.dimen.notification_shelf_height);
         float shelfSize = mNotificationStackScroller.getNotificationShelf().getIntrinsicHeight()
                 + notificationPadding;
-        float availableSpace = mNotificationStackScroller.getHeight() - minPadding - overflowheight
-                - shelfSize;
+        float availableSpace = mNotificationStackScroller.getHeight() - minPadding - shelfSize;
         int count = 0;
         for (int i = 0; i < mNotificationStackScroller.getChildCount(); i++) {
             ExpandableView child = (ExpandableView) mNotificationStackScroller.getChildAt(i);
