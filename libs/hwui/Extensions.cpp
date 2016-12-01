@@ -37,6 +37,26 @@ namespace uirenderer {
 
 
 Extensions::Extensions() {
+    const char* version = (const char*) glGetString(GL_VERSION);
+
+    // Section 6.1.5 of the OpenGL ES specification indicates the GL version
+    // string strictly follows this format:
+    //
+    // OpenGL<space>ES<space><version number><space><vendor-specific information>
+    //
+    // In addition section 6.1.5 describes the version number thusly:
+    //
+    // "The version number is either of the form major number.minor number or
+    // major number.minor number.release number, where the numbers all have one
+    // or more digits. The release number and vendor specific information are
+    // optional."
+
+    if (sscanf(version, "OpenGL ES %d.%d", &mVersionMajor, &mVersionMinor) != 2) {
+        // If we cannot parse the version number, assume OpenGL ES 2.0
+        mVersionMajor = 2;
+        mVersionMinor = 0;
+    }
+
     auto extensions = StringUtils::split((const char*) glGetString(GL_EXTENSIONS));
     mHasNPot = extensions.has("GL_OES_texture_npot");
     mHasFramebufferFetch = extensions.has("GL_NV_shader_framebuffer_fetch");
@@ -58,26 +78,6 @@ Extensions::Extensions() {
     mHasSRGB = false;
     mHasSRGBWriteControl = false;
 #endif
-
-    const char* version = (const char*) glGetString(GL_VERSION);
-
-    // Section 6.1.5 of the OpenGL ES specification indicates the GL version
-    // string strictly follows this format:
-    //
-    // OpenGL<space>ES<space><version number><space><vendor-specific information>
-    //
-    // In addition section 6.1.5 describes the version number thusly:
-    //
-    // "The version number is either of the form major number.minor number or
-    // major number.minor number.release number, where the numbers all have one
-    // or more digits. The release number and vendor specific information are
-    // optional."
-
-    if (sscanf(version, "OpenGL ES %d.%d", &mVersionMajor, &mVersionMinor) != 2) {
-        // If we cannot parse the version number, assume OpenGL ES 2.0
-        mVersionMajor = 2;
-        mVersionMinor = 0;
-    }
 }
 
 }; // namespace uirenderer
