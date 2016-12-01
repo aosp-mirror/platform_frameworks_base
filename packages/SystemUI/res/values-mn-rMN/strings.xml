@@ -410,12 +410,12 @@
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Таны төхөөрөмжийн удирдагч <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nТаны админ таны төхөөрөмжтэй холбоотой тохиргоо, байгууллагын хандалт, мэдээлэл болон байршлын мэдээллийг удирдан, хяналт тавих боломжтой.\n\nТа таны имэйл, апп, вэб сайтын үйл ажиллагааг хянах VPN-д холбогдсон байна.\n\nДэлгэрэнгүй мэдээлэл авахыг хүсвэл админтайгаа холбогдоно уу."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг.\n\nАдмин нь таны имэйл,апп болон вэбсайт зэрэг сүлжээний үйл ажиллагааг хянадаг. \n\n Дэлгэрэнгүй мэдээлэл авахыг хүсвэл админтайгаа холбогдоно уу. \n\nМөн та VPN-д холбогдсон бөгөөд ингэснээр өөрийн сүлжээний үйл ажиллагааг хянах боломжтой байна."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6259179342284742878">"Та <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны имэйл, апп, вебсайт зэрэг сүлжээний үйл ажиллагааг хянах боломжтой."</string>
-    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Та <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны имэйл, апп, вебсайт зэрэг сүлжээний хувийн үйл ажиллагааг хянах боломжтой."</string>
+    <string name="monitoring_description_app" msgid="6259179342284742878">"Та <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны имэйл, апп, вэбсайт зэрэг сүлжээний үйл ажиллагааг хянах боломжтой."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Та <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны имэйл, апп, вэбсайт зэрэг сүлжээний хувийн үйл ажиллагааг хянах боломжтой."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Та имэйл, апп, вэб хуудас зэрэг хувийн сүлжээнийхээ үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон байна."</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь <xliff:g id="APPLICATION">%2$s</xliff:g>-тэй холбогдсон бөгөөд таны  имэйл, апп, вебсайт зэрэг сүлжээний үйл ажиллагааг хянах боломжтой.\n\nДэлгэрэнгүй мэдээлэл авахыг хүсвэл админтайгаа холбогдоно уу."</string>
-    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>-тай холбогдсон бөгөөд таны имэйл, апп, вебсайт зэрэг ажлын сүлжээний үйл ажиллагааг хянах боломжтой.\n\nМөн та <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны сүлжээний хувийн үйл ажиллагааг хянаж чадна."</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Таны төхөөрөмжийг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг.\n\n Танай админ төхөөрөмж, төхөөрөмжийн байршилтай холбоотой өгөгдлийг холбох, тохиргоог өөрчлөх болон хяналт тавих боломжтой.\n\nТа <xliff:g id="APPLICATION">%2$s</xliff:g>-тай холбогдсон бөгөөд ингэснээр таны имэйл,апп, аюулгүй вебсайт зэрэг сүлжээний үйл ажиллагаагаа хянах боломжтой.\n\n Дэлгэрэнгүй мэдээлэл авахыг хүсвэл админтайгаа холбогдоно уу."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь <xliff:g id="APPLICATION">%2$s</xliff:g>-тэй холбогдсон бөгөөд таны  имэйл, апп, вэбсайт зэрэг сүлжээний үйл ажиллагааг хянах боломжтой.\n\nДэлгэрэнгүй мэдээлэл авахыг хүсвэл админтайгаа холбогдоно уу."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>-тай холбогдсон бөгөөд таны имэйл, апп, вэбсайт зэрэг ажлын сүлжээний үйл ажиллагааг хянах боломжтой.\n\nМөн та <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны сүлжээний хувийн үйл ажиллагааг хянаж чадна."</string>
+    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Таны төхөөрөмжийг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг.\n\n Танай админ төхөөрөмж, төхөөрөмжийн байршилтай холбоотой өгөгдлийг холбох, тохиргоог өөрчлөх болон хяналт тавих боломжтой.\n\nТа <xliff:g id="APPLICATION">%2$s</xliff:g>-тай холбогдсон бөгөөд ингэснээр таны имэйл,апп, аюулгүй вэбсайт зэрэг сүлжээний үйл ажиллагаагаа хянах боломжтой.\n\n Дэлгэрэнгүй мэдээлэл авахыг хүсвэл админтайгаа холбогдоно уу."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Таныг гараар онгойлгох хүртэл төхөөрөмж түгжээтэй байх болно"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Мэдэгдлийг хурдан авах"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Түгжээг тайлахын өмнө үзнэ үү"</string>
@@ -438,18 +438,7 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> нь дууны диалог юм."</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Эх хувилбарыг сэргээхийн тулд дарна уу."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Та өөрийн ажлын профайлыг ашиглаж байна"</string>
-  <string-array name="volume_stream_titles">
-    <item msgid="5841843895402729630">"Дуудлага"</item>
-    <item msgid="5997713001067658559">"Систем"</item>
-    <item msgid="7858983209929864160">"Хонх дуугаргах"</item>
-    <item msgid="1850038478268896762">"Медиа"</item>
-    <item msgid="8265110906352372092">"Сэрүүлэг"</item>
-    <item msgid="5339394737636839168"></item>
-    <item msgid="2951313578278086204">"Bluetooth"</item>
-    <item msgid="2919807739709798970"></item>
-    <item msgid="150349973435223405"></item>
-    <item msgid="6761963760295549099"></item>
-  </string-array>
+    <!-- no translation found for volume_stream_titles:10 (8119402510273906841) -->
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Дууг нь нээхийн тулд товшино уу."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Чичиргээнд тохируулахын тулд товшино уу. Хүртээмжийн үйлчилгээний дууг хаасан."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Дууг нь хаахын тулд товшино уу. Хүртээмжийн үйлчилгээний дууг хаасан."</string>

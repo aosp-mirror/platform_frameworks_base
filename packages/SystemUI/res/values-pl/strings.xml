@@ -399,7 +399,7 @@
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Wyłącz oszczędzanie baterii"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> będzie zapisywać wszystko, co wyświetli się na ekranie."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nie pokazuj ponownie"</string>
-    <string name="clear_all_notifications_text" msgid="814192889771462828">"Usuń wszystkie"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"Ukryj wszystkie"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Rozpocznij teraz"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Brak powiadomień"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"Urządzenie może być monitorowane"</string>
@@ -455,6 +455,7 @@
     <item msgid="2919807739709798970"></item>
     <item msgid="150349973435223405"></item>
     <item msgid="6761963760295549099"></item>
+    <item msgid="8119402510273906841">"Ułatwienia dostępu"</item>
   </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Kliknij, by wyłączyć wyciszenie."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Kliknij, by włączyć wibracje. Ułatwienia dostępu mogą być wyciszone."</string>
