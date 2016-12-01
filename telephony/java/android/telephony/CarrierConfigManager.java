@@ -209,6 +209,14 @@ public class CarrierConfigManager {
             KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL = "disable_cdma_activation_code_bool";
 
     /**
+     * List of RIL radio technologies (See {@link ServiceState} {@code RIL_RADIO_TECHNOLOGY_*}
+     * constants) which support only a single data connection at a time. Some carriers do not
+     * support multiple pdp on UMTS.
+     */
+    public static final String
+            KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY = "only_single_dc_allowed_int_array";
+
+    /**
      * Override the platform's notion of a network operator being considered roaming.
      * Value is string array of MCCMNCs to be considered roaming for 3GPP RATs.
      */
@@ -1127,6 +1135,15 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS,
                 new String[]{"default", "mms", "dun", "supl"});
 
+        sDefaults.putIntArray(KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY,
+                new int[]{
+                    4, /* IS95A */
+                    5, /* IS95B */
+                    6, /* 1xRTT */
+                    7, /* EVDO_0 */
+                    8, /* EVDO_A */
+                    12 /* EVDO_B */
+                });
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
