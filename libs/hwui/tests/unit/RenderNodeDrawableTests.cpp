@@ -102,6 +102,8 @@ TEST(RenderNodeDrawable, zReorder) {
 
     auto parent = TestUtils::createSkiaNode(0, 0, 100, 100,
             [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+        canvas.insertReorderBarrier(true);
+        canvas.insertReorderBarrier(false);
         drawOrderedNode(&canvas, 0, 10.0f); // in reorder=false at this point, so played inorder
         drawOrderedRect(&canvas, 1);
         canvas.insertReorderBarrier(true);
