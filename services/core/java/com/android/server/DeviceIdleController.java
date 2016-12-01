@@ -1430,7 +1430,7 @@ public class DeviceIdleController extends SystemService
         synchronized (this) {
             try {
                 ApplicationInfo ai = getContext().getPackageManager().getApplicationInfo(name,
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                        PackageManager.MATCH_ANY_USER);
                 if (mPowerSaveWhitelistUserApps.put(name, UserHandle.getAppId(ai.uid)) == null) {
                     reportPowerSaveWhitelistChangedLocked();
                     updateWhitelistAppIdsLocked();
@@ -2396,7 +2396,7 @@ public class DeviceIdleController extends SystemService
                     if (name != null) {
                         try {
                             ApplicationInfo ai = pm.getApplicationInfo(name,
-                                    PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                                    PackageManager.MATCH_ANY_USER);
                             mPowerSaveWhitelistUserApps.put(ai.packageName,
                                     UserHandle.getAppId(ai.uid));
                         } catch (PackageManager.NameNotFoundException e) {

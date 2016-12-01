@@ -112,7 +112,7 @@ public class AppRestrictionsHelper {
             // Enable selected apps
             try {
                 ApplicationInfo info = mIPm.getApplicationInfo(packageName,
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+                        PackageManager.MATCH_ANY_USER, userId);
                 if (info == null || !info.enabled
                         || (info.flags&ApplicationInfo.FLAG_INSTALLED) == 0) {
                     mIPm.installExistingPackageAsUser(packageName, mUser.getIdentifier());
@@ -178,7 +178,7 @@ public class AppRestrictionsHelper {
         addSystemApps(mVisibleApps, widgetIntent, excludePackages);
 
         List<ApplicationInfo> installedApps = pm.getInstalledApplications(
-                PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                PackageManager.MATCH_ANY_USER);
         for (ApplicationInfo app : installedApps) {
             // If it's not installed, skip
             if ((app.flags & ApplicationInfo.FLAG_INSTALLED) == 0) continue;

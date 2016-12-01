@@ -610,7 +610,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         showUid = true;
                         break;
                     case "-u":
-                        getFlags |= PackageManager.GET_UNINSTALLED_PACKAGES;
+                        getFlags |= PackageManager.MATCH_UNINSTALLED_PACKAGES;
                         break;
                     case "-3":
                         listThirdParty = true;

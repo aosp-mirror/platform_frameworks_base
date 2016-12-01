@@ -2720,7 +2720,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // update rules for all installed applications
             final List<UserInfo> users = mUserManager.getUsers();
             final List<ApplicationInfo> apps = pm.getInstalledApplications(
-                    PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.MATCH_DISABLED_COMPONENTS
+                    PackageManager.MATCH_ANY_USER | PackageManager.MATCH_DISABLED_COMPONENTS
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
 

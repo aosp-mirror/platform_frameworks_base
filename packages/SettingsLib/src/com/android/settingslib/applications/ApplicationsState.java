@@ -135,11 +135,11 @@ public class ApplicationsState {
         mBackgroundHandler = new BackgroundHandler(mThread.getLooper());
 
         // Only the owner can see all apps.
-        mAdminRetrieveFlags = PackageManager.GET_UNINSTALLED_PACKAGES |
-                PackageManager.GET_DISABLED_COMPONENTS |
-                PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS;
-        mRetrieveFlags = PackageManager.GET_DISABLED_COMPONENTS |
-                PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS;
+        mAdminRetrieveFlags = PackageManager.MATCH_ANY_USER |
+                PackageManager.MATCH_DISABLED_COMPONENTS |
+                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+        mRetrieveFlags = PackageManager.MATCH_DISABLED_COMPONENTS |
+                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
 
         /**
          * This is a trick to prevent the foreground thread from being delayed.
@@ -855,7 +855,7 @@ public class ApplicationsState {
                         // explicitly include both direct boot aware and unaware components here.
                         List<ResolveInfo> intents = mPm.queryIntentActivitiesAsUser(
                                 launchIntent,
-                                PackageManager.GET_DISABLED_COMPONENTS
+                                PackageManager.MATCH_DISABLED_COMPONENTS
                                         | PackageManager.MATCH_DIRECT_BOOT_AWARE
                                         | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                                 userId

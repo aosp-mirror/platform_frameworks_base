@@ -791,7 +791,7 @@ public class UsageStatsService extends SystemService implements
     int getAppId(String packageName) {
         try {
             ApplicationInfo ai = mPackageManager.getApplicationInfo(packageName,
-                    PackageManager.MATCH_UNINSTALLED_PACKAGES
+                    PackageManager.MATCH_ANY_USER
                             | PackageManager.MATCH_DISABLED_COMPONENTS);
             return ai.uid;
         } catch (NameNotFoundException re) {

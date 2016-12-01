@@ -409,8 +409,8 @@ public class StorageMeasurement {
         // Measure all apps hosted on this volume for all users
         if (mVolume.getType() == VolumeInfo.TYPE_PRIVATE) {
             final List<ApplicationInfo> apps = packageManager.getInstalledApplications(
-                    PackageManager.GET_UNINSTALLED_PACKAGES
-                    | PackageManager.GET_DISABLED_COMPONENTS);
+                    PackageManager.MATCH_ANY_USER
+                    | PackageManager.MATCH_DISABLED_COMPONENTS);
 
             final List<ApplicationInfo> volumeApps = new ArrayList<>();
             for (ApplicationInfo app : apps) {

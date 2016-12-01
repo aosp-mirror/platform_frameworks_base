@@ -355,7 +355,7 @@ public class PackageHelper {
         ApplicationInfo existingInfo = null;
         try {
             existingInfo = context.getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.GET_UNINSTALLED_PACKAGES);
+                    PackageManager.MATCH_ANY_USER);
         } catch (NameNotFoundException ignored) {
         }
 
@@ -445,7 +445,7 @@ public class PackageHelper {
         ApplicationInfo existingInfo = null;
         try {
             existingInfo = context.getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.GET_UNINSTALLED_PACKAGES);
+                    PackageManager.MATCH_ANY_USER);
         } catch (NameNotFoundException ignored) {
         }
 

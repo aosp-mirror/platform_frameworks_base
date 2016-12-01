@@ -2716,7 +2716,7 @@ public class UserManagerService extends IUserManager.Stub {
     public Bundle getApplicationRestrictionsForUser(String packageName, int userId) {
         if (UserHandle.getCallingUserId() != userId
                 || !UserHandle.isSameApp(Binder.getCallingUid(), getUidForPackage(packageName))) {
-            checkSystemOrRoot("get application restrictions for other users/apps");
+            checkSystemOrRoot("get application restrictions for other user/app " + packageName);
         }
         synchronized (mPackagesLock) {
             // Read the restrictions from XML
@@ -2751,7 +2751,7 @@ public class UserManagerService extends IUserManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             return mContext.getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.MATCH_UNINSTALLED_PACKAGES).uid;
+                    PackageManager.MATCH_ANY_USER).uid;
         } catch (NameNotFoundException nnfe) {
             return -1;
         } finally {
@@ -3716,5 +3716,24 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         return 0;
+    }
+
+    /**
+     * Checks if the given user has a managed profile associated with it.
+     * @param userId The parent user
+     * @return
+     */
+    boolean hasManagedProfile(int userId) {
+        synchronized (mUsersLock) {
+            UserInfo userInfo = getUserInfoLU(userId);
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
+                UserInfo profile = mUsers.valueAt(i).info;
+                if (userId != profile.id && isProfileOf(userInfo, profile)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

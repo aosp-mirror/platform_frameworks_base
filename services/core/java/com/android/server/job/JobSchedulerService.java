@@ -1820,7 +1820,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 String pkg = args[opti];
                 try {
                     filterUid = getContext().getPackageManager().getPackageUid(pkg,
-                            PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                            PackageManager.MATCH_ANY_USER);
                 } catch (NameNotFoundException ignored) {
                     pw.println("Invalid package: " + pkg);
                     return;

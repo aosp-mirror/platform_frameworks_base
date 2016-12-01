@@ -59,11 +59,13 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_ALL;
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_FACTORY_ONLY;
+import static android.content.pm.PackageManager.MATCH_KNOWN_PACKAGES;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.MOVE_FAILED_DEVICE_ADMIN;
@@ -100,6 +102,7 @@ import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCES
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -3140,6 +3143,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ? Collections.<String>emptySet() : permissionsState.getPermissions(userId);
         final PackageUserState state = ps.readUserState(userId);
 
+        if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0
+                && ps.isSystem()) {
+            flags |= MATCH_ANY_USER;
+        }
+
         return PackageParser.generatePackageInfo(p, gids, flags,
                 ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId);
     }
@@ -3221,7 +3229,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (p != null) {
                 return generatePackageInfo((PackageSetting)p.mExtras, flags, userId);
             }
-            if (!matchFactoryOnly && (flags & MATCH_UNINSTALLED_PACKAGES) != 0) {
+            if (!matchFactoryOnly && (flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
                 return generatePackageInfo(ps, flags, userId);
             }
@@ -3268,7 +3276,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (p != null && p.isMatch(flags)) {
                 return UserHandle.getUid(userId, p.applicationInfo.uid);
             }
-            if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0) {
+            if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null && ps.isMatch(flags)) {
                     return UserHandle.getUid(userId, ps.appId);
@@ -3292,9 +3300,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             final PackageParser.Package p = mPackages.get(packageName);
             if (p != null && p.isMatch(flags)) {
                 PackageSetting ps = (PackageSetting) p.mExtras;
+                // TODO: Shouldn't this be checking for package installed state for userId and
+                // return null?
                 return ps.getPermissionsState().computeGids(userId);
             }
-            if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0) {
+            if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null && ps.isMatch(flags)) {
                     return ps.getPermissionsState().computeGids(userId);
@@ -3418,7 +3428,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if ("android".equals(packageName)||"system".equals(packageName)) {
                 return mAndroidApplication;
             }
-            if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0) {
+            if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 return generateApplicationInfoFromSettingsLPw(packageName, flags, userId);
             }
         }
@@ -3527,6 +3537,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      * Update given flags when being used to request {@link PackageInfo}.
      */
     private int updateFlagsForPackage(int flags, int userId, Object cookie) {
+        final boolean isCallerSystemUser = UserHandle.getCallingUserId() == UserHandle.USER_SYSTEM;
         boolean triaged = true;
         if ((flags & (PackageManager.GET_ACTIVITIES | PackageManager.GET_RECEIVERS
                 | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS)) != 0) {
@@ -3542,6 +3553,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                 | PackageManager.MATCH_SYSTEM_ONLY
                 | PackageManager.MATCH_DEBUG_TRIAGED_MISSING)) == 0) {
             triaged = false;
+        }
+        if ((flags & PackageManager.MATCH_ANY_USER) != 0) {
+            enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false,
+                    "MATCH_ANY_USER flag requires INTERACT_ACROSS_USERS permission at "
+                    + Debug.getCallers(5));
+        } else if ((flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0 && isCallerSystemUser
+                && sUserManager.hasManagedProfile(UserHandle.USER_SYSTEM)) {
+            // If the caller wants all packages and has a restricted profile associated with it,
+            // then match all users. This is to make sure that launchers that need to access work
+            // profile apps don't start breaking. TODO: Remove this hack when launchers stop using
+            // MATCH_UNINSTALLED_PACKAGES to query apps in other profiles. b/31000380
+            flags |= PackageManager.MATCH_ANY_USER;
         }
         if (DEBUG_TRIAGED_MISSING && (Binder.getCallingUid() == Process.SYSTEM_UID) && !triaged) {
             Log.w(TAG, "Caller hasn't been triaged for missing apps; they asked about " + cookie
@@ -6299,7 +6322,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ParceledListSlice<PackageInfo> getInstalledPackages(int flags, int userId) {
         if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
         flags = updateFlagsForPackage(flags, userId, null);
-        final boolean listUninstalled = (flags & MATCH_UNINSTALLED_PACKAGES) != 0;
+        final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "get installed packages");
@@ -6383,7 +6406,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             String[] permissions, int flags, int userId) {
         if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
         flags = updateFlagsForPackage(flags, userId, permissions);
-        final boolean listUninstalled = (flags & MATCH_UNINSTALLED_PACKAGES) != 0;
+        enforceCrossUserPermission(Binder.getCallingUid(), userId,
+                true /* requireFullPermission */, false /* checkShell */,
+                "get packages holding permissions");
+        final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
 
         // writer
         synchronized (mPackages) {
@@ -6391,7 +6417,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             boolean[] tmpBools = new boolean[permissions.length];
             if (listUninstalled) {
                 for (PackageSetting ps : mSettings.mPackages.values()) {
-                    addPackageHoldingPermissions(list, ps, permissions, tmpBools, flags, userId);
+                    addPackageHoldingPermissions(list, ps, permissions, tmpBools, flags,
+                            userId);
                 }
             } else {
                 for (PackageParser.Package pkg : mPackages.values()) {
@@ -6411,7 +6438,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ParceledListSlice<ApplicationInfo> getInstalledApplications(int flags, int userId) {
         if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
         flags = updateFlagsForApplication(flags, userId, null);
-        final boolean listUninstalled = (flags & MATCH_UNINSTALLED_PACKAGES) != 0;
+        final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
 
         // writer
         synchronized (mPackages) {
@@ -6420,11 +6447,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 list = new ArrayList<ApplicationInfo>(mSettings.mPackages.size());
                 for (PackageSetting ps : mSettings.mPackages.values()) {
                     ApplicationInfo ai;
+                    int effectiveFlags = flags;
+                    if (ps.isSystem()) {
+                        effectiveFlags |= PackageManager.MATCH_ANY_USER;
+                    }
                     if (ps.pkg != null) {
-                        ai = PackageParser.generateApplicationInfo(ps.pkg, flags,
+                        ai = PackageParser.generateApplicationInfo(ps.pkg, effectiveFlags,
                                 ps.readUserState(userId), userId);
                     } else {
-                        ai = generateApplicationInfoFromSettingsLPw(ps.name, flags, userId);
+                        ai = generateApplicationInfoFromSettingsLPw(ps.name, effectiveFlags,
+                                userId);
                     }
                     if (ai != null) {
                         list.add(ai);
