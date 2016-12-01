@@ -69,8 +69,9 @@ public class WifiAwareCharacteristics implements Parcelable {
 
     /**
      * Returns the maximum length of byte array that can be used to specify a Aware match filter.
-     * Restricts the parameters of the {@link PublishConfig.Builder#setMatchFilter(byte[])} and
-     * {@link SubscribeConfig.Builder#setMatchFilter(byte[])}.
+     * Restricts the parameters of the
+     * {@link PublishConfig.Builder#setMatchFilter(java.util.List<byte[]>)} and
+     * {@link SubscribeConfig.Builder#setMatchFilter(java.util.List<byte[]>)}.
      *
      * @return A positive integer, maximum legngth of byte array for Aware discovery match filter.
      */

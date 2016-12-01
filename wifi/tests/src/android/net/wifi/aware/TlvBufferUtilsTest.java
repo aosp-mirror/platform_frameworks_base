@@ -24,6 +24,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 
+import java.nio.BufferOverflowException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Unit test harness for TlvBufferUtils class.
  */
@@ -47,9 +51,9 @@ public class TlvBufferUtilsTest {
         collector.checkThat("tlv11-correct-construction",
                 tlv11.getArray(), equalTo(new byte[]{0, 1, 2, 2, 3, 0, 1, 2}));
 
-        LvBufferUtils.LvConstructor tlv01 = new LvBufferUtils.LvConstructor(1);
+        TlvBufferUtils.TlvConstructor tlv01 = new TlvBufferUtils.TlvConstructor(0, 1);
         tlv01.allocate(15);
-        tlv01.putByte((byte) 2);
+        tlv01.putByte(0, (byte) 2);
         tlv01.putByteArray(2, new byte[] {
                 0, 1, 2 });
 
@@ -60,8 +64,61 @@ public class TlvBufferUtilsTest {
                 TlvBufferUtils.isValid(tlv11.getArray(), 1, 1),
                 equalTo(true));
         collector.checkThat("tlv01-valid",
-                LvBufferUtils.isValid(tlv01.getArray(), 1),
+                TlvBufferUtils.isValid(tlv01.getArray(), 0, 1),
                 equalTo(true));
+    }
+
+    /**
+     * Verify that can build a valid TLV from a List of byte[].
+     */
+    @Test
+    public void testTlvListOperations() {
+        byte[] entry1 = { 1, 2, 3 };
+        byte[] entry2 = { 4, 5 };
+        byte[] entry3 = new byte[0];
+        List<byte[]> data = new ArrayList<>();
+        data.add(entry1);
+        data.add(entry2);
+        data.add(entry3);
+        data.add(null); // zero-length should work
+
+        TlvBufferUtils.TlvConstructor tlv01 = new TlvBufferUtils.TlvConstructor(0, 1);
+        tlv01.allocateAndPut(data);
+        byte[] tlvData = tlv01.getArray();
+        List<byte[]> parsedList = new TlvBufferUtils.TlvIterable(0, 1, tlvData).toList();
+
+        collector.checkThat("tlvData-correct-length", tlvData.length,
+                equalTo(entry1.length + 1 + entry2.length + 1 + entry3.length + 1 + 1));
+        collector.checkThat("parsedList-correct-length", parsedList.size(), equalTo(4));
+        collector.checkThat("parsedList-entry1", parsedList.get(0), equalTo(entry1));
+        collector.checkThat("parsedList-entry2", parsedList.get(1), equalTo(entry2));
+        collector.checkThat("parsedList-entry3", parsedList.get(2), equalTo(entry3));
+        collector.checkThat("parsedList-entry4", parsedList.get(3), equalTo(new byte[0]));
+    }
+
+    /**
+     * Verify that can parse a (correctly formatted) byte array to a list.
+     */
+    @Test
+    public void testTlvParseToList() {
+        byte[] validTlv01 = { 0, 1, 55, 2, 33, 66, 0 };
+
+        List<byte[]> parsedList = new TlvBufferUtils.TlvIterable(0, 1, validTlv01).toList();
+
+        collector.checkThat("parsedList-entry1", parsedList.get(0), equalTo(new byte[0]));
+        collector.checkThat("parsedList-entry2", parsedList.get(1), equalTo(new byte[] { 55 }));
+        collector.checkThat("parsedList-entry3", parsedList.get(2), equalTo(new byte[] { 33, 66 }));
+        collector.checkThat("parsedList-entry4", parsedList.get(3), equalTo(new byte[0]));
+    }
+
+    /**
+     * Verify that an exception is thrown when trying to parse an invalid array.
+     */
+    @Test(expected = BufferOverflowException.class)
+    public void testTlvParseToListError() {
+        byte[] invalidTlv01 = { 0, 1, 55, 2, 55, 66, 3 }; // bad data
+
+        List<byte[]> data = new TlvBufferUtils.TlvIterable(0, 1, invalidTlv01).toList();
     }
 
     @Test
@@ -137,7 +194,7 @@ public class TlvBufferUtilsTest {
                 TlvBufferUtils.isValid(tlv22.getArray(), 2, 2),
                 equalTo(true));
         collector.checkThat("tlv02-valid",
-                LvBufferUtils.isValid(tlv02.getArray(), 2),
+                TlvBufferUtils.isValid(tlv02.getArray(), 0, 2),
                 equalTo(true));
     }
 
@@ -211,15 +268,15 @@ public class TlvBufferUtilsTest {
      */
     @Test
     public void testTlvInvalidByteArray() {
-        LvBufferUtils.LvConstructor tlv01 = new LvBufferUtils.LvConstructor(1);
+        TlvBufferUtils.TlvConstructor tlv01 = new TlvBufferUtils.TlvConstructor(0, 1);
         tlv01.allocate(15);
-        tlv01.putByte((byte) 2);
+        tlv01.putByte(0, (byte) 2);
         tlv01.putByteArray(2, new byte[]{0, 1, 2});
 
         byte[] array = tlv01.getArray();
         array[0] = 10;
 
         collector.checkThat("tlv01-invalid",
-                LvBufferUtils.isValid(array, 1), equalTo(false));
+                TlvBufferUtils.isValid(array, 0, 1), equalTo(false));
     }
 }
