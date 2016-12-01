@@ -347,6 +347,8 @@
     <dimen name="keyguard_clock_notifications_margin_max">42dp</dimen>
     <dimen name="heads_up_scrim_height">250dp</dimen>
 
+    <item name="scrim_behind_alpha" format="float" type="dimen">0.62</item>
+
     <!-- The minimum amount the user needs to swipe to go to the camera / phone. -->
     <dimen name="keyguard_min_swipe_amount">110dp</dimen>
 

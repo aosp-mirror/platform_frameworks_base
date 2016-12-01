@@ -110,6 +110,11 @@ public abstract class PanelView extends FrameLayout {
     private float mInitialTouchX;
     private boolean mTouchDisabled;
 
+    /**
+     * Whether or not the PanelView can be expanded or collapsed with a drag.
+     */
+    private boolean mNotificationsDragEnabled;
+
     private Interpolator mBounceInterpolator;
     protected KeyguardBottomAreaView mKeyguardBottomArea;
 
@@ -190,6 +195,8 @@ public abstract class PanelView extends FrameLayout {
                 0.84f /* y2 */);
         mBounceInterpolator = new BounceInterpolator();
         mFalsingManager = FalsingManager.getInstance(context);
+        mNotificationsDragEnabled =
+                getResources().getBoolean(R.bool.config_enableNotificationShadeDrag);
     }
 
     protected void loadDimens() {
@@ -229,6 +236,15 @@ public abstract class PanelView extends FrameLayout {
     public boolean onTouchEvent(MotionEvent event) {
         if (mInstantExpanding || mTouchDisabled
                 || (mMotionAborted && event.getActionMasked() != MotionEvent.ACTION_DOWN)) {
+            return false;
+        }
+
+        // If dragging should not expand the notifications shade, then return false.
+        if (!mNotificationsDragEnabled) {
+            if (mTracking) {
+                // Turn off tracking if it's on or the shade can get stuck in the down position.
+                onTrackingStopped(true /* expand */);
+            }
             return false;
         }
 
@@ -487,7 +503,7 @@ public abstract class PanelView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (mInstantExpanding
+        if (mInstantExpanding || !mNotificationsDragEnabled
                 || (mMotionAborted && event.getActionMasked() != MotionEvent.ACTION_DOWN)) {
             return false;
         }

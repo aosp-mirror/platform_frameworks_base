@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -29,6 +30,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Interpolator;
+import com.android.systemui.R;
 
 /**
  * A view which can draw a scrim
@@ -73,6 +75,14 @@ public class ScrimView extends View
 
     public ScrimView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
+        TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ScrimView);
+
+        try {
+            mScrimColor = ta.getColor(R.styleable.ScrimView_scrimColor, Color.BLACK);
+        } finally {
+            ta.recycle();
+        }
     }
 
     @Override

@@ -74,8 +74,14 @@ public class QSFragment extends Fragment implements QS {
         mContainer = (QSContainerImpl) view;
 
         mQSDetail.setQsPanel(mQSPanel, mHeader);
-        mQSAnimator = new QSAnimator(this, (QuickQSPanel) mHeader.findViewById(R.id.quick_qs_panel),
-                mQSPanel);
+
+        // If the quick settings row is not shown, then there is no need for the animation from
+        // the row to the full QS panel.
+        if (getResources().getBoolean(R.bool.config_showQuickSettingsRow)) {
+            mQSAnimator = new QSAnimator(this,
+                    (QuickQSPanel) mHeader.findViewById(R.id.quick_qs_panel), mQSPanel);
+        }
+
         mQSCustomizer = (QSCustomizer) view.findViewById(R.id.qs_customize);
         mQSCustomizer.setQs(this);
     }
@@ -89,7 +95,10 @@ public class QSFragment extends Fragment implements QS {
         super.onConfigurationChanged(newConfig);
         if (newConfig.getLayoutDirection() != mLayoutDirection) {
             mLayoutDirection = newConfig.getLayoutDirection();
-            mQSAnimator.onRtlChanged();
+
+            if (mQSAnimator != null) {
+                mQSAnimator.onRtlChanged();
+            }
         }
     }
 
@@ -108,7 +117,10 @@ public class QSFragment extends Fragment implements QS {
         mQSPanel.setHost(qsh, mQSCustomizer);
         mHeader.setQSPanel(mQSPanel);
         mQSDetail.setHost(qsh);
-        mQSAnimator.setHost(qsh);
+
+        if (mQSAnimator != null) {
+            mQSAnimator.setHost(qsh);
+        }
     }
 
     private void updateQsState() {
@@ -155,7 +167,11 @@ public class QSFragment extends Fragment implements QS {
     public void setKeyguardShowing(boolean keyguardShowing) {
         if (DEBUG) Log.d(TAG, "setKeyguardShowing " + keyguardShowing);
         mKeyguardShowing = keyguardShowing;
-        mQSAnimator.setOnKeyguard(keyguardShowing);
+
+        if (mQSAnimator != null) {
+            mQSAnimator.setOnKeyguard(keyguardShowing);
+        }
+
         updateQsState();
     }
 
@@ -187,7 +203,10 @@ public class QSFragment extends Fragment implements QS {
         mHeader.setExpansion(mKeyguardShowing ? 1 : expansion);
         mQSPanel.setTranslationY(translationScaleY * mQSPanel.getHeight());
         mQSDetail.setFullyExpanded(expansion == 1);
-        mQSAnimator.setPosition(expansion);
+
+        if (mQSAnimator != null) {
+            mQSAnimator.setPosition(expansion);
+        }
 
         // Set bounds on the QS panel so it doesn't run over the header.
         mQsBounds.top = (int) (mQSPanel.getHeight() * (1 - expansion));

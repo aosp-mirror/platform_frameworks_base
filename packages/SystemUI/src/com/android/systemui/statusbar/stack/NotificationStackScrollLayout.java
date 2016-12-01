@@ -27,6 +27,7 @@ import android.annotation.FloatRange;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -55,7 +56,6 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.OverScroller;
 import android.widget.ScrollView;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.ExpandHelper;
@@ -114,6 +114,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mSwipingInProgress;
     private int mCurrentStackHeight = Integer.MAX_VALUE;
     private final Paint mBackgroundPaint = new Paint();
+    private boolean mShouldDrawNotificationBackground;
 
     private float mExpandedHeight;
     private int mOwnScrollY;
@@ -229,6 +230,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private NotificationMenuRow mCurrIconRow;
     private View mTranslatingParentView;
     private View mGearExposedView;
+    private boolean mShouldShowGear;
 
     /**
      * Should in this touch motion only be scrolling allowed? It's true when the scroller was
@@ -378,10 +380,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     public NotificationStackScrollLayout(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        Resources res = getResources();
+
         mAmbientState = new AmbientState(context);
         mBgColor = context.getColor(R.color.notification_shade_background_color);
-        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
-        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_max_height);
+        int minHeight = res.getDimensionPixelSize(R.dimen.notification_min_height);
+        int maxHeight = res.getDimensionPixelSize(R.dimen.notification_max_height);
         mExpandHelper = new ExpandHelper(getContext(), this,
                 minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
@@ -390,14 +394,18 @@ public class NotificationStackScrollLayout extends ViewGroup
         mSwipeHelper.setLongPressListener(mLongPressListener);
         mStackScrollAlgorithm = createStackScrollAlgorithm(context);
         initView(context);
-        setWillNotDraw(false);
+        mFalsingManager = FalsingManager.getInstance(context);
+        mShouldShowGear = res.getBoolean(R.bool.config_showNotificationGear);
+        mShouldDrawNotificationBackground =
+                res.getBoolean(R.bool.config_drawNotificationBackground);
+
+        updateWillNotDraw();
         if (DEBUG) {
             mDebugPaint = new Paint();
             mDebugPaint.setColor(0xffff0000);
             mDebugPaint.setStrokeWidth(2);
             mDebugPaint.setStyle(Paint.Style.STROKE);
         }
-        mFalsingManager = FalsingManager.getInstance(context);
     }
 
     @Override
@@ -424,10 +432,11 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mCurrentBounds.top < mCurrentBounds.bottom) {
+        if (mShouldDrawNotificationBackground && mCurrentBounds.top < mCurrentBounds.bottom) {
             canvas.drawRect(0, mCurrentBounds.top, getWidth(), mCurrentBounds.bottom,
                     mBackgroundPaint);
         }
+
         if (DEBUG) {
             int y = mTopPadding;
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
@@ -439,6 +448,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateBackgroundDimming() {
+        // No need to update the background color if it's not being drawn.
+        if (!mShouldDrawNotificationBackground) {
+            return;
+        }
+
         float alpha = BACKGROUND_ALPHA_DIMMED + (1 - BACKGROUND_ALPHA_DIMMED) * (1.0f - mDimAmount);
         alpha *= mBackgroundFadeAmount;
         // We need to manually blend in the background color
@@ -487,6 +501,10 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateSrcDrawing() {
+        if (!mShouldDrawNotificationBackground) {
+            return;
+        }
+
         mBackgroundPaint.setXfermode(mDrawBackgroundAsSrc && !mFadingOut && !mParentNotFullyVisible
                 ? mSrcMode : null);
         invalidate();
@@ -1967,9 +1985,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateBackground() {
-        if (mAmbientState.isDark()) {
+        // No need to update the background color if it's not being drawn.
+        if (!mShouldDrawNotificationBackground || mAmbientState.isDark()) {
             return;
         }
+
         updateBackgroundBounds();
         if (!mCurrentBounds.equals(mBackgroundBounds)) {
             boolean animate = mAnimateNextBackgroundTop || mAnimateNextBackgroundBottom
@@ -2119,6 +2139,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void applyCurrentBackgroundBounds() {
+        // If the background of the notification is not being drawn, then there is no need to
+        // exclude an area in the scrim. Rather, the scrim's color should serve as the background.
+        if (!mShouldDrawNotificationBackground) {
+            return;
+        }
+
         mScrimController.setExcludedBackgroundArea(
                 mFadingOut || mParentNotFullyVisible || mAmbientState.isDark() || mIsClipped ? null
                         : mCurrentBounds);
@@ -3545,14 +3571,27 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         requestChildrenUpdate();
         if (dark) {
-            setWillNotDraw(!DEBUG);
             mScrimController.setExcludedBackgroundArea(null);
         } else {
             updateBackground();
-            setWillNotDraw(false);
         }
+
+        updateWillNotDraw();
         updateContentHeight();
         notifyHeightChangeListener(mShelf);
+    }
+
+    /**
+     * Updates whether or not this Layout will perform its own custom drawing (i.e. whether or
+     * not {@link #onDraw(Canvas)} is called). This method should be called whenever the
+     * {@link #mAmbientState}'s dark mode is toggled.
+     */
+    private void updateWillNotDraw() {
+       if (mAmbientState.isDark()) {
+           setWillNotDraw(!DEBUG);
+       } else {
+           setWillNotDraw(!mShouldDrawNotificationBackground && !DEBUG);
+       }
     }
 
     private void setBackgroundFadeAmount(float fadeAmount) {
@@ -4106,14 +4145,14 @@ public class NotificationStackScrollLayout extends ViewGroup
      * A listener that is notified when some child locations might have changed.
      */
     public interface OnChildLocationsChangedListener {
-        public void onChildLocationsChanged(NotificationStackScrollLayout stackScrollLayout);
+        void onChildLocationsChanged(NotificationStackScrollLayout stackScrollLayout);
     }
 
     /**
      * A listener that is notified when the empty space below the notifications is clicked on
      */
     public interface OnEmptySpaceClickListener {
-        public void onEmptySpaceClicked(float x, float y);
+        void onEmptySpaceClicked(float x, float y);
     }
 
     /**
@@ -4129,7 +4168,7 @@ public class NotificationStackScrollLayout extends ViewGroup
          *                     unrubberbanded motion to directly expand overscroll view (e.g expand
          *                     QS)
          */
-        public void onOverscrollTopChanged(float amount, boolean isRubberbanded);
+        void onOverscrollTopChanged(float amount, boolean isRubberbanded);
 
         /**
          * Notify a listener that the scroller wants to escape from the scrolling motion and
@@ -4138,7 +4177,7 @@ public class NotificationStackScrollLayout extends ViewGroup
          * @param velocity The velocity that the Scroller had when over flinging
          * @param open Should the fling open or close the overscroll view.
          */
-        public void flingTopOverscroll(float velocity, boolean open);
+        void flingTopOverscroll(float velocity, boolean open);
     }
 
     private class NotificationSwipeHelper extends SwipeHelper {
@@ -4216,7 +4255,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             final boolean gutsExposed = (view instanceof ExpandableNotificationRow)
                     && ((ExpandableNotificationRow) view).areGutsExposed();
 
-            if (!isPinnedHeadsUp(view) && !gutsExposed) {
+            if (mShouldShowGear && !isPinnedHeadsUp(view) && !gutsExposed) {
                 // Only show the gear if we're not a heads up view and guts aren't exposed.
                 checkForDrag();
             }
@@ -4259,11 +4298,19 @@ public class NotificationStackScrollLayout extends ViewGroup
                 return false; // Let SwipeHelper handle it.
             }
 
+            // If the gear icon should not be shown, then there is no need to check if the a swipe
+            // should result in a snapping to the gear icon. As a result, just check if the swipe
+            // was enough to dismiss the notification.
+            if (!mShouldShowGear) {
+                dismissOrSnapBack(animView, velocity, ev);
+                return true;
+            }
+
             boolean gestureTowardsGear = isTowardsGear(velocity, mCurrIconRow.isMenuOnLeft());
             boolean gestureFastEnough = Math.abs(velocity) > getEscapeVelocity();
             final double timeForGesture = ev.getEventTime() - ev.getDownTime();
             final boolean showGearForSlowOnGoing = !canChildBeDismissed(animView)
-                && timeForGesture >= SWIPE_GEAR_TIMING;
+                    && timeForGesture >= SWIPE_GEAR_TIMING;
 
             if (mGearSnappedTo && mCurrIconRow.isVisible()) {
                 if (mGearSnappedOnLeft == mCurrIconRow.isMenuOnLeft()) {

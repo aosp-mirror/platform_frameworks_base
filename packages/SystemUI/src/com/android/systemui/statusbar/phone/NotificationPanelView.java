@@ -26,6 +26,7 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -137,6 +138,7 @@ public class NotificationPanelView extends PanelView implements
     protected int mQsMinExpansionHeight;
     protected int mQsMaxExpansionHeight;
     private int mQsPeekHeight;
+    private boolean mQsOverscrollExpansionEnabled;
     private boolean mStackScrollerOverscrolling;
     private boolean mQsExpansionFromOverscroll;
     private float mLastOverscroll;
@@ -217,6 +219,8 @@ public class NotificationPanelView extends PanelView implements
         super(context, attrs);
         setWillNotDraw(!DEBUG);
         mFalsingManager = FalsingManager.getInstance(context);
+        mQsOverscrollExpansionEnabled =
+                getResources().getBoolean(R.bool.config_enableQuickSettingsOverscrollExpansion);
     }
 
     public void setStatusBar(StatusBar bar) {
@@ -596,7 +600,8 @@ public class NotificationPanelView extends PanelView implements
             MetricsLogger.count(mContext, COUNTER_PANEL_OPEN_PEEK, 1);
             return true;
         }
-        if (!isFullyCollapsed() && onQsIntercept(event)) {
+
+        if (mQsOverscrollExpansionEnabled && !isFullyCollapsed() && onQsIntercept(event)) {
             return true;
         }
         return super.onInterceptTouchEvent(event);
@@ -770,7 +775,9 @@ public class NotificationPanelView extends PanelView implements
             return true;
         }
         mHeadsUpTouchHelper.onTouchEvent(event);
-        if (!mHeadsUpTouchHelper.isTrackingHeadsUp() && handleQsTouch(event)) {
+
+        if (mQsOverscrollExpansionEnabled && !mHeadsUpTouchHelper.isTrackingHeadsUp()
+                && handleQsTouch(event)) {
             return true;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyCollapsed()) {
@@ -953,6 +960,10 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onOverscrollTopChanged(float amount, boolean isRubberbanded) {
+        if (!mQsOverscrollExpansionEnabled) {
+            return;
+        }
+
         cancelQsAnimation();
         if (!mQsExpansionEnabled) {
             amount = 0f;
@@ -967,6 +978,10 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void flingTopOverscroll(float velocity, boolean open) {
+        if (!mQsOverscrollExpansionEnabled) {
+            return;
+        }
+
         mLastOverscroll = 0f;
         mQsExpansionFromOverscroll = false;
         setQsExpansion(mQsExpansionHeight);

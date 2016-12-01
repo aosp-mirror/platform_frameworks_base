@@ -48,6 +48,7 @@
         android:layout_height="match_parent"
         android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
+        sysui:scrimColor="@color/scrim_behind_color"
         />
 
     <com.android.systemui.statusbar.AlphaOptimizedView

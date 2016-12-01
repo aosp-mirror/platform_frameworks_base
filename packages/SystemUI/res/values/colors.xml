@@ -36,6 +36,7 @@
     <color name="qs_detail_button">@*android:color/quaternary_device_default_settings</color>
     <color name="qs_detail_button_white">#B3FFFFFF</color><!-- 70% white -->
     <color name="qs_detail_transition">#66FFFFFF</color>
+    <color name="scrim_behind_color">@android:color/black</color>
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <color name="qs_user_detail_icon_muted">#FFFFFFFF</color> <!-- not so muted after all -->
     <color name="qs_tile_disabled_color">#9E9E9E</color> <!-- 38% black -->

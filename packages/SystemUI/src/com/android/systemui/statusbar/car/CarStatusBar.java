@@ -35,10 +35,12 @@ import android.widget.LinearLayout;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.SwipeHelper;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -51,10 +53,8 @@ public class CarStatusBar extends StatusBar implements
         CarBatteryController.BatteryViewHandler {
     private static final String TAG = "CarStatusBar";
 
-    private SystemServicesProxy mSystemServicesProxy;
     private TaskStackListenerImpl mTaskStackListener;
 
-    private CarNavigationBarView mCarNavigationBar;
     private CarNavigationBarController mController;
     private FullscreenUserSwitcher mFullscreenUserSwitcher;
 
@@ -62,7 +62,6 @@ public class CarStatusBar extends StatusBar implements
     private BatteryMeterView mBatteryMeterView;
 
     private ConnectedDeviceSignalController mConnectedDeviceSignalController;
-    private View mSignalsView;
     private CarNavigationBarView mNavigationBarView;
 
     @Override
@@ -71,6 +70,8 @@ public class CarStatusBar extends StatusBar implements
         mTaskStackListener = new TaskStackListenerImpl();
         SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskStackListener);
         registerPackageChangeReceivers();
+
+        mStackScroller.setScrollingEnabled(true);
 
         createBatteryController();
         mCarBatteryController.startListening();
@@ -96,16 +97,16 @@ public class CarStatusBar extends StatusBar implements
         mBatteryMeterView.setVisibility(View.GONE);
 
         ViewStub stub = (ViewStub) statusBarView.findViewById(R.id.connected_device_signals_stub);
-        mSignalsView = stub.inflate();
+        View signalsView = stub.inflate();
 
         // When a ViewStub if inflated, it does not respect the margins on the inflated view.
         // As a result, manually add the ending margin.
-        ((LinearLayout.LayoutParams) mSignalsView.getLayoutParams()).setMarginEnd(
+        ((LinearLayout.LayoutParams) signalsView.getLayoutParams()).setMarginEnd(
                 mContext.getResources().getDimensionPixelOffset(
                         R.dimen.status_bar_connected_device_signal_margin_end));
 
         mConnectedDeviceSignalController = new ConnectedDeviceSignalController(mContext,
-                mSignalsView);
+                signalsView);
 
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "makeStatusBarView(). mBatteryMeterView: " + mBatteryMeterView);
@@ -126,12 +127,11 @@ public class CarStatusBar extends StatusBar implements
             return;
         }
 
-        mCarNavigationBar =
-                (CarNavigationBarView) View.inflate(mContext, R.layout.car_navigation_bar, null);
-        mController = new CarNavigationBarController(mContext, mCarNavigationBar,
+        mNavigationBarView = (CarNavigationBarView) View.inflate(mContext,
+                R.layout.car_navigation_bar, null);
+        mController = new CarNavigationBarController(mContext, mNavigationBarView,
                 this /* ActivityStarter*/);
-        mNavigationBarView = mCarNavigationBar;
-        mCarNavigationBar.getBarTransitions().setAlwaysOpaque(true);
+        mNavigationBarView.getBarTransitions().setAlwaysOpaque(true);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
@@ -145,6 +145,31 @@ public class CarStatusBar extends StatusBar implements
         lp.setTitle("CarNavigationBar");
         lp.windowAnimations = 0;
         mWindowManager.addView(mNavigationBarView, lp);
+    }
+
+    @Override
+    public NavigationBarView getNavigationBarView() {
+        return mNavigationBarView;
+    }
+
+    @Override
+    protected View.OnTouchListener getStatusBarWindowTouchListener() {
+        // Usually, a touch on the background window will dismiss the notification shade. However,
+        // for the car use-case, the shade should remain unless the user switches to a different
+        // facet (e.g. phone).
+        return null;
+    }
+
+    /**
+     * Returns the {@link com.android.systemui.SwipeHelper.LongPressListener} that will be
+     * triggered when a notification card is long-pressed.
+     */
+    @Override
+    protected SwipeHelper.LongPressListener getNotificationLongClicker() {
+        // For the automative use case, we do not want to the user to be able to interact with
+        // a notification other than a regular click. As a result, just return null for the
+        // long click listener.
+        return null;
     }
 
     @Override
@@ -271,5 +296,15 @@ public class CarStatusBar extends StatusBar implements
         ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchStackId(stackId);
         return startActivityWithOptions(intent, options.toBundle());
+    }
+
+    /**
+     * Ensures that relevant child views are appropriately recreated when the device's density
+     * changes.
+     */
+    @Override
+    protected void onDensityOrFontScaleChanged() {
+        super.onDensityOrFontScaleChanged();
+        mController.onDensityOrFontScaleChanged();
     }
 }
