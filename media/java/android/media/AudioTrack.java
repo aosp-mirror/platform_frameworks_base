@@ -471,7 +471,7 @@ public class AudioTrack extends PlayerBase
     public AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
             int mode, int sessionId)
                     throws IllegalArgumentException {
-        super(attributes);
+        super(attributes, AudioPlaybackConfiguration.PLAYER_TYPE_JAM_AUDIOTRACK);
         // mState already == STATE_UNINITIALIZED
 
         if (format == null) {
@@ -551,7 +551,8 @@ public class AudioTrack extends PlayerBase
      * OpenSLES interface is realized.
      */
     /*package*/ AudioTrack(long nativeTrackInJavaObj) {
-        super(new AudioAttributes.Builder().build());
+        super(new AudioAttributes.Builder().build(),
+                AudioPlaybackConfiguration.PLAYER_TYPE_JAM_AUDIOTRACK);
         // "final"s
         mNativeTrackInJavaObj = 0;
         mJniData = 0;
@@ -1749,8 +1750,8 @@ public class AudioTrack extends PlayerBase
         if (mState != STATE_INITIALIZED) {
             throw new IllegalStateException("play() called on uninitialized AudioTrack.");
         }
-        baseStart();
         synchronized(mPlayStateLock) {
+            baseStart();
             native_start();
             mPlayState = PLAYSTATE_PLAYING;
         }
@@ -1773,6 +1774,7 @@ public class AudioTrack extends PlayerBase
         // stop playing
         synchronized(mPlayStateLock) {
             native_stop();
+            baseStop();
             mPlayState = PLAYSTATE_STOPPED;
             mAvSyncHeader = null;
             mAvSyncBytesRemaining = 0;
@@ -1791,11 +1793,11 @@ public class AudioTrack extends PlayerBase
         if (mState != STATE_INITIALIZED) {
             throw new IllegalStateException("pause() called on uninitialized AudioTrack.");
         }
-        //logd("pause()");
 
         // pause playback
         synchronized(mPlayStateLock) {
             native_pause();
+            basePause();
             mPlayState = PLAYSTATE_PAUSED;
         }
     }

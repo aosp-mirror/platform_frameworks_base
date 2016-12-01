@@ -20,13 +20,16 @@ import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.media.AudioAttributes;
+import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
+import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
+import android.media.PlayerBase;
 import android.media.Rating;
 import android.media.VolumePolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
@@ -165,4 +168,18 @@ interface IAudioService {
     oneway void unregisterRecordingCallback(in IRecordingConfigDispatcher rcdb);
 
     List<AudioRecordingConfiguration> getActiveRecordingConfigurations();
+
+    void registerPlaybackCallback(in IPlaybackConfigDispatcher pcdb);
+
+    oneway void unregisterPlaybackCallback(in IPlaybackConfigDispatcher pcdb);
+
+    List<AudioPlaybackConfiguration> getActivePlaybackConfigurations();
+
+    oneway void trackPlayer(in PlayerBase.PlayerIdCard pic);
+
+    oneway void playerAttributes(in int piid, in AudioAttributes attr);
+
+    oneway void playerEvent(in int piid, in int event);
+
+    oneway void releasePlayer(in int piid);
 }

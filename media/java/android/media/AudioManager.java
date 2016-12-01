@@ -67,7 +67,8 @@ public class AudioManager {
     private long mVolumeKeyUpTime;
     private final boolean mUseVolumeKeySounds;
     private final boolean mUseFixedVolume;
-    private static String TAG = "AudioManager";
+    private static final String TAG = "AudioManager";
+    private static final boolean DEBUG = false;
     private static final AudioPortEventHandler sAudioPortEventHandler = new AudioPortEventHandler();
 
     /**
@@ -2130,6 +2131,7 @@ public class AudioManager {
      */
     private final static int MSSG_FOCUS_CHANGE = 0;
     private final static int MSSG_RECORDING_CONFIG_CHANGE = 1;
+    private final static int MSSG_PLAYBACK_CONFIG_CHANGE = 2;
 
     /**
      * Helper class to handle the forwarding of audio service events to the appropriate listener
@@ -2153,7 +2155,7 @@ public class AudioManager {
                     @Override
                     public void handleMessage(Message msg) {
                         switch (msg.what) {
-                            case MSSG_FOCUS_CHANGE:
+                            case MSSG_FOCUS_CHANGE: {
                                 OnAudioFocusChangeListener listener = null;
                                 synchronized(mFocusListenerLock) {
                                     listener = findFocusListener((String)msg.obj);
@@ -2163,14 +2165,24 @@ public class AudioManager {
                                             + msg.arg1 + ") for " + msg.obj);
                                     listener.onAudioFocusChange(msg.arg1);
                                 }
-                                break;
-                            case MSSG_RECORDING_CONFIG_CHANGE:
+                            } break;
+                            case MSSG_RECORDING_CONFIG_CHANGE: {
                                 final RecordConfigChangeCallbackData cbData =
                                         (RecordConfigChangeCallbackData) msg.obj;
                                 if (cbData.mCb != null) {
                                     cbData.mCb.onRecordingConfigChanged(cbData.mConfigs);
                                 }
-                                break;
+                            } break;
+                            case MSSG_PLAYBACK_CONFIG_CHANGE: {
+                                final PlaybackConfigChangeCallbackData cbData =
+                                        (PlaybackConfigChangeCallbackData) msg.obj;
+                                if (cbData.mCb != null) {
+                                    if (DEBUG) {
+                                        Log.d(TAG, "dispatching onPlaybackConfigChanged()");
+                                    }
+                                    cbData.mCb.onPlaybackConfigChanged(cbData.mConfigs);
+                                }
+                            } break;
                             default:
                                 Log.e(TAG, "Unknown event " + msg.what);
                         }
@@ -2740,9 +2752,193 @@ public class AudioManager {
         }
     }
 
+    //====================================================================
+    // Notification of playback activity & playback configuration
+    /**
+     * Interface for receiving update notifications about the playback activity on the system.
+     * Extend this abstract class and register it with
+     * {@link AudioManager#registerAudioPlaybackCallback(AudioPlaybackCallback, Handler)}
+     * to be notified.
+     * Use {@link AudioManager#getActivePlaybackConfigurations()} to query the current
+     * configuration.
+     * @see AudioPlaybackConfiguration
+     */
+    public static abstract class AudioPlaybackCallback {
+        /**
+         * Called whenever the playback activity and configuration has changed.
+         * @param configs list containing the results of
+         *      {@link AudioManager#getActivePlaybackConfigurations()}.
+         */
+        public void onPlaybackConfigChanged(List<AudioPlaybackConfiguration> configs) {}
+    }
+
+    private static class AudioPlaybackCallbackInfo {
+        final AudioPlaybackCallback mCb;
+        final Handler mHandler;
+        AudioPlaybackCallbackInfo(AudioPlaybackCallback cb, Handler handler) {
+            mCb = cb;
+            mHandler = handler;
+        }
+    }
+
+    private final static class PlaybackConfigChangeCallbackData {
+        final AudioPlaybackCallback mCb;
+        final List<AudioPlaybackConfiguration> mConfigs;
+
+        PlaybackConfigChangeCallbackData(AudioPlaybackCallback cb,
+                List<AudioPlaybackConfiguration> configs) {
+            mCb = cb;
+            mConfigs = configs;
+        }
+    }
+
+    /**
+     * Register a callback to be notified of audio playback changes through
+     * {@link AudioPlaybackCallback}
+     * @param cb non-null callback to register
+     * @param handler the {@link Handler} object for the thread on which to execute
+     * the callback. If <code>null</code>, the {@link Handler} associated with the main
+     * {@link Looper} will be used.
+     */
+    public void registerAudioPlaybackCallback(@NonNull AudioPlaybackCallback cb, Handler handler)
+    {
+        if (cb == null) {
+            throw new IllegalArgumentException("Illegal null AudioPlaybackCallback argument");
+        }
+
+        synchronized(mPlaybackCallbackLock) {
+            // lazy initialization of the list of playback callbacks
+            if (mPlaybackCallbackList == null) {
+                mPlaybackCallbackList = new ArrayList<AudioPlaybackCallbackInfo>();
+            }
+            final int oldCbCount = mPlaybackCallbackList.size();
+            if (!hasPlaybackCallback_sync(cb)) {
+                mPlaybackCallbackList.add(new AudioPlaybackCallbackInfo(cb,
+                        new ServiceEventHandlerDelegate(handler).getHandler()));
+                final int newCbCount = mPlaybackCallbackList.size();
+                if ((oldCbCount == 0) && (newCbCount > 0)) {
+                    // register binder for callbacks
+                    try {
+                        getService().registerPlaybackCallback(mPlayCb);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                }
+            } else {
+                Log.w(TAG, "attempt to call registerAudioPlaybackCallback() on a previously"
+                        + "registered callback");
+            }
+        }
+    }
+
+    /**
+     * Unregister an audio playback callback previously registered with
+     * {@link #registerAudioPlaybackCallback(AudioPlaybackCallback, Handler)}.
+     * @param cb non-null callback to unregister
+     */
+    public void unregisterAudioPlaybackCallback(@NonNull AudioPlaybackCallback cb) {
+        if (cb == null) {
+            throw new IllegalArgumentException("Illegal null AudioPlaybackCallback argument");
+        }
+        synchronized(mPlaybackCallbackLock) {
+            if (mPlaybackCallbackList == null) {
+                Log.w(TAG, "attempt to call unregisterAudioPlaybackCallback() on a callback"
+                        + " that was never registered");
+                return;
+            }
+            final int oldCbCount = mPlaybackCallbackList.size();
+            if (removePlaybackCallback_sync(cb)) {
+                final int newCbCount = mPlaybackCallbackList.size();
+                if ((oldCbCount > 0) && (newCbCount == 0)) {
+                    // unregister binder for callbacks
+                    try {
+                        getService().unregisterPlaybackCallback(mPlayCb);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                }
+            } else {
+                Log.w(TAG, "attempt to call unregisterAudioPlaybackCallback() on a callback"
+                        + " already unregistered or never registered");
+            }
+        }
+    }
+
+    /**
+     * Returns the current active audio playback configurations of the device
+     * @return a non-null list of playback configurations. An empty list indicates there is no
+     *     playback active when queried.
+     * @see AudioPlaybackConfiguration
+     */
+    public @NonNull List<AudioPlaybackConfiguration> getActivePlaybackConfigurations() {
+        final IAudioService service = getService();
+        try {
+            return service.getActivePlaybackConfigurations();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * All operations on this list are sync'd on mPlaybackCallbackLock.
+     * List is lazy-initialized in
+     * {@link #registerAudioPlaybackCallback(AudioPlaybackCallback, Handler)}.
+     * List can be null.
+     */
+    private List<AudioPlaybackCallbackInfo> mPlaybackCallbackList;
+    private final Object mPlaybackCallbackLock = new Object();
+
+    /**
+     * Must be called synchronized on mPlaybackCallbackLock
+     */
+    private boolean hasPlaybackCallback_sync(@NonNull AudioPlaybackCallback cb) {
+        if (mPlaybackCallbackList != null) {
+            for (int i=0 ; i < mPlaybackCallbackList.size() ; i++) {
+                if (cb.equals(mPlaybackCallbackList.get(i).mCb)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Must be called synchronized on mPlaybackCallbackLock
+     */
+    private boolean removePlaybackCallback_sync(@NonNull AudioPlaybackCallback cb) {
+        if (mPlaybackCallbackList != null) {
+            for (int i=0 ; i < mPlaybackCallbackList.size() ; i++) {
+                if (cb.equals(mPlaybackCallbackList.get(i).mCb)) {
+                    mPlaybackCallbackList.remove(i);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private final IPlaybackConfigDispatcher mPlayCb = new IPlaybackConfigDispatcher.Stub() {
+
+        public void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs) {
+            synchronized(mPlaybackCallbackLock) {
+                if (mPlaybackCallbackList != null) {
+                    for (int i=0 ; i < mPlaybackCallbackList.size() ; i++) {
+                        final AudioPlaybackCallbackInfo arci = mPlaybackCallbackList.get(i);
+                        if (arci.mHandler != null) {
+                            final Message m = arci.mHandler.obtainMessage(
+                                    MSSG_PLAYBACK_CONFIG_CHANGE/*what*/,
+                                    new PlaybackConfigChangeCallbackData(arci.mCb, configs)/*obj*/);
+                            arci.mHandler.sendMessage(m);
+                        }
+                    }
+                }
+            }
+        }
+
+    };
 
     //====================================================================
-    // Recording configuration
+    // Notification of recording activity & recording configuration
     /**
      * Interface for receiving update notifications about the recording configuration. Extend
      * this abstract class and register it with

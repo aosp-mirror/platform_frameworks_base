@@ -161,6 +161,12 @@ public class AudioSystem
     public static native int newAudioSessionId();
 
     /*
+     * Returns a new unused audio player ID
+     */
+    public static native int newAudioPlayerId();
+
+
+    /*
      * Sets a group generic audio configuration parameters. The use of these parameters
      * are platform dependent, see libaudio
      *

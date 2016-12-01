@@ -59,11 +59,13 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.AudioPort;
+import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
+import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
@@ -72,6 +74,7 @@ import android.media.SoundPool;
 import android.media.VolumePolicy;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
+import android.media.PlayerBase;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
@@ -6023,6 +6026,8 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mVolumePolicy="); pw.println(mVolumePolicy);
 
         dumpAudioPolicies(pw);
+
+        mPlaybackMonitor.dump(pw);
     }
 
     private static String safeMediaVolumeStateToString(Integer state) {
@@ -6440,6 +6445,42 @@ public class AudioService extends IAudioService.Stub
 
     public List<AudioRecordingConfiguration> getActiveRecordingConfigurations() {
         return mRecordMonitor.getActiveRecordingConfigurations();
+    }
+
+    //======================
+    // Audio policy callbacks from players for playback configuration updates
+    //======================
+    private final PlaybackActivityMonitor mPlaybackMonitor = new PlaybackActivityMonitor();
+
+    public void registerPlaybackCallback(IPlaybackConfigDispatcher pcdb) {
+        final boolean isPrivileged = 
+                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
+                        android.Manifest.permission.MODIFY_AUDIO_ROUTING));
+        mPlaybackMonitor.registerPlaybackCallback(pcdb, isPrivileged);
+    }
+
+    public void unregisterPlaybackCallback(IPlaybackConfigDispatcher pcdb) {
+        mPlaybackMonitor.unregisterPlaybackCallback(pcdb);
+    }
+
+    public List<AudioPlaybackConfiguration> getActivePlaybackConfigurations() {
+        return mPlaybackMonitor.getActivePlaybackConfigurations();
+    }
+
+    public void trackPlayer(PlayerBase.PlayerIdCard pic) {
+        mPlaybackMonitor.trackPlayer(pic);
+    }
+
+    public void playerAttributes(int piid, AudioAttributes attr) {
+        mPlaybackMonitor.playerAttributes(piid, attr);
+    }
+
+    public void playerEvent(int piid, int event) {
+        mPlaybackMonitor.playerEvent(piid, event);
+    }
+
+    public void releasePlayer(int piid) {
+        mPlaybackMonitor.releasePlayer(piid);
     }
 
     //======================
