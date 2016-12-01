@@ -32,5 +32,6 @@ public final class NativeInterpolatorFactoryHelper {
     public static native long createDecelerateInterpolator(float factor);
     public static native long createLinearInterpolator();
     public static native long createOvershootInterpolator(float tension);
+    public static native long createPathInterpolator(float[] x, float[] y);
     public static native long createLutInterpolator(float[] values);
 }
