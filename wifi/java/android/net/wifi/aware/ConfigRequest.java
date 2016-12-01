@@ -22,7 +22,7 @@ import android.os.Parcelable;
 /**
  * Defines a request object to configure a Wi-Fi Aware network. Built using
  * {@link ConfigRequest.Builder}. Configuration is requested using
- * {@link WifiAwareManager#attach(android.os.Handler, WifiAwareAttachCallback)}.
+ * {@link WifiAwareManager#attach(WifiAwareAttachCallback, android.os.Handler)}.
  * Note that the actual achieved configuration may be different from the
  * requested configuration - since different applications may request different
  * configurations.
