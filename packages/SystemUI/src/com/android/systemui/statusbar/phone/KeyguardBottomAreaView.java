@@ -107,6 +107,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private KeyguardAffordanceView mRightAffordanceView;
     private KeyguardAffordanceView mLeftAffordanceView;
     private LockIcon mLockIcon;
+    private ViewGroup mIndicationArea;
+    private TextView mEnterpriseDisclosure;
     private TextView mIndicationText;
     private ViewGroup mPreviewContainer;
 
@@ -208,6 +210,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightAffordanceView = (KeyguardAffordanceView) findViewById(R.id.camera_button);
         mLeftAffordanceView = (KeyguardAffordanceView) findViewById(R.id.left_button);
         mLockIcon = (LockIcon) findViewById(R.id.lock_icon);
+        mIndicationArea = (ViewGroup) findViewById(R.id.keyguard_indication_area);
+        mEnterpriseDisclosure = (TextView) findViewById(
+                R.id.keyguard_indication_enterprise_disclosure);
         mIndicationText = (TextView) findViewById(R.id.keyguard_indication_text);
         watchForCameraPolicyChanges();
         updateCameraVisibility();
@@ -252,13 +257,16 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         super.onConfigurationChanged(newConfig);
         int indicationBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_margin_bottom);
-        MarginLayoutParams mlp = (MarginLayoutParams) mIndicationText.getLayoutParams();
+        MarginLayoutParams mlp = (MarginLayoutParams) mIndicationArea.getLayoutParams();
         if (mlp.bottomMargin != indicationBottomMargin) {
             mlp.bottomMargin = indicationBottomMargin;
-            mIndicationText.setLayoutParams(mlp);
+            mIndicationArea.setLayoutParams(mlp);
         }
 
         // Respect font size setting.
+        mEnterpriseDisclosure.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.text_size_small_material));
         mIndicationText.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.text_size_small_material));
@@ -595,8 +603,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         return mLockIcon;
     }
 
-    public View getIndicationView() {
-        return mIndicationText;
+    public View getIndicationArea() {
+        return mIndicationArea;
     }
 
     @Override
@@ -658,8 +666,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         if (mRightAffordanceView.getVisibility() == View.VISIBLE) {
             startFinishDozeAnimationElement(mRightAffordanceView, delay);
         }
-        mIndicationText.setAlpha(0f);
-        mIndicationText.animate()
+        mIndicationArea.setAlpha(0f);
+        mIndicationArea.animate()
                 .alpha(1f)
                 .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
                 .setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
