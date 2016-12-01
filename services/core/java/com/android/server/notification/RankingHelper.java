@@ -328,7 +328,7 @@ public class RankingHelper implements RankingConfig {
         for (int i = 0; i < N; i++) {
             mSignalExtractors[i].setConfig(this);
         }
-        mRankingHandler.requestSort();
+        mRankingHandler.requestSort(false);
     }
 
     public void sort(ArrayList<NotificationRecord> notificationList) {

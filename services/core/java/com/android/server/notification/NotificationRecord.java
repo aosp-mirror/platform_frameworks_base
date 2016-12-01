@@ -36,6 +36,7 @@ import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.util.Slog;
@@ -45,6 +46,7 @@ import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -110,6 +112,9 @@ public final class NotificationRecord {
     private Uri mSound;
     private long[] mVibration;
     private AudioAttributes mAttributes;
+    private NotificationChannel mOverrideChannel;
+    private ArrayList<String> mPeopleOverride;
+    private ArrayList<SnoozeCriterion> mSnoozeCriteria;
 
     @VisibleForTesting
     public NotificationRecord(Context context, StatusBarNotification sbn)
@@ -626,7 +631,14 @@ public final class NotificationRecord {
     }
 
     public NotificationChannel getChannel() {
-        return sbn.getNotificationChannel();
+        return mOverrideChannel == null ? sbn.getNotificationChannel() : mOverrideChannel;
+    }
+
+    protected void setNotificationChannelOverride(NotificationChannel channel) {
+        mOverrideChannel = channel;
+        if (mOverrideChannel != null) {
+            calculateImportance();
+        }
     }
 
     public Uri getSound() {
@@ -639,5 +651,21 @@ public final class NotificationRecord {
 
     public AudioAttributes getAudioAttributes() {
         return mAttributes;
+    }
+
+    public ArrayList<String> getPeopleOverride() {
+        return mPeopleOverride;
+    }
+
+    protected void setPeopleOverride(ArrayList<String> people) {
+        mPeopleOverride = people;
+    }
+
+    public ArrayList<SnoozeCriterion> getSnoozeCriteria() {
+        return mSnoozeCriteria;
+    }
+
+    protected void setSnoozeCriteria(ArrayList<SnoozeCriterion> snoozeCriteria) {
+        mSnoozeCriteria = snoozeCriteria;
     }
 }

@@ -16,11 +16,11 @@
 
 package android.service.notification;
 
+import android.app.NotificationChannel;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.app.INotificationManager;
@@ -49,8 +49,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SomeArgs;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -1112,7 +1111,10 @@ public abstract class NotificationListenerService extends Service {
         }
     }
 
-    private void applyUpdateLocked(NotificationRankingUpdate update) {
+    /**
+     * @hide
+     */
+    public final void applyUpdateLocked(NotificationRankingUpdate update) {
         mRankingMap = new RankingMap(update);
     }
 
@@ -1148,6 +1150,12 @@ public abstract class NotificationListenerService extends Service {
         private CharSequence mImportanceExplanation;
         // System specified group key.
         private String mOverrideGroupKey;
+        // Notification assistant channel override.
+        private NotificationChannel mOverrideChannel;
+        // Notification assistant people override.
+        private ArrayList<String> mOverridePeople;
+        // Notification assistant snooze criteria.
+        private ArrayList<SnoozeCriterion> mSnoozeCriteria;
 
         public Ranking() {}
 
@@ -1217,7 +1225,7 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * If the importance has been overriden by user preference, then this will be non-null,
+         * If the importance has been overridden by user preference, then this will be non-null,
          * and should be displayed to the user.
          *
          * @return the explanation for the importance, or null if it is the natural importance
@@ -1227,16 +1235,44 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * If the system has overriden the group key, then this will be non-null, and this
+         * If the system has overridden the group key, then this will be non-null, and this
          * key should be used to bundle notifications.
          */
         public String getOverrideGroupKey() {
             return mOverrideGroupKey;
         }
 
+        /**
+         * If the {@link NotificationAssistantService} has overridden the channel this notification
+         * was posted to, then this will not match the channel provided by the posting application
+         * and this should be used to determine the interruptiveness of the notification instead.
+         */
+        public NotificationChannel getChannel() {
+            return mOverrideChannel;
+        }
+
+        /**
+         * If the {@link NotificationAssistantService} has added people to this notification, then
+         * this will be non-null.
+         */
+        public List<String> getAdditionalPeople() {
+            return mOverridePeople;
+        }
+
+        /**
+         * Returns snooze criteria provided by the {@link NotificationAssistantService}. If your
+         * user interface displays options for snoozing notifications these criteria should be
+         * displayed as well.
+         */
+        public List<SnoozeCriterion> getSnoozeCriteria() {
+            return mSnoozeCriteria;
+        }
+
         private void populate(String key, int rank, boolean matchesInterruptionFilter,
                 int visibilityOverride, int suppressedVisualEffects, int importance,
-                CharSequence explanation, String overrideGroupKey) {
+                CharSequence explanation, String overrideGroupKey,
+                NotificationChannel overrideChannel, ArrayList<String> overridePeople,
+                ArrayList<SnoozeCriterion> snoozeCriteria) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1246,6 +1282,9 @@ public abstract class NotificationListenerService extends Service {
             mImportance = importance;
             mImportanceExplanation = explanation;
             mOverrideGroupKey = overrideGroupKey;
+            mOverrideChannel = overrideChannel;
+            mOverridePeople = overridePeople;
+            mSnoozeCriteria = snoozeCriteria;
         }
 
         /**
@@ -1289,6 +1328,9 @@ public abstract class NotificationListenerService extends Service {
         private ArrayMap<String, Integer> mImportance;
         private ArrayMap<String, String> mImportanceExplanation;
         private ArrayMap<String, String> mOverrideGroupKeys;
+        private ArrayMap<String, NotificationChannel> mOverrideChannels;
+        private ArrayMap<String, ArrayList<String>> mOverridePeople;
+        private ArrayMap<String, ArrayList<SnoozeCriterion>> mSnoozeCriteria;
 
         private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
@@ -1315,7 +1357,8 @@ public abstract class NotificationListenerService extends Service {
             int rank = getRank(key);
             outRanking.populate(key, rank, !isIntercepted(key),
                     getVisibilityOverride(key), getSuppressedVisualEffects(key),
-                    getImportance(key), getImportanceExplanation(key), getOverrideGroupKey(key));
+                    getImportance(key), getImportanceExplanation(key), getOverrideGroupKey(key),
+                    getOverrideChannel(key), getOverridePeople(key), getSnoozeCriteria(key));
             return rank >= 0;
         }
 
@@ -1395,6 +1438,33 @@ public abstract class NotificationListenerService extends Service {
             return mOverrideGroupKeys.get(key);
         }
 
+        private NotificationChannel getOverrideChannel(String key) {
+            synchronized (this) {
+                if (mOverrideChannels == null) {
+                    buildOverrideChannelsLocked();
+                }
+            }
+            return mOverrideChannels.get(key);
+        }
+
+        private ArrayList<String> getOverridePeople(String key) {
+            synchronized (this) {
+                if (mOverridePeople == null) {
+                    buildOverridePeopleLocked();
+                }
+            }
+            return mOverridePeople.get(key);
+        }
+
+        private ArrayList<SnoozeCriterion> getSnoozeCriteria(String key) {
+            synchronized (this) {
+                if (mSnoozeCriteria == null) {
+                    buildSnoozeCriteriaLocked();
+                }
+            }
+            return mSnoozeCriteria.get(key);
+        }
+
         // Locked by 'this'
         private void buildRanksLocked() {
             String[] orderedKeys = mRankingUpdate.getOrderedKeys();
@@ -1455,6 +1525,33 @@ public abstract class NotificationListenerService extends Service {
             mOverrideGroupKeys = new ArrayMap<>(overrideGroupKeys.size());
             for (String key: overrideGroupKeys.keySet()) {
                 mOverrideGroupKeys.put(key, overrideGroupKeys.getString(key));
+            }
+        }
+
+        // Locked by 'this'
+        private void buildOverrideChannelsLocked() {
+            Bundle overrideChannels = mRankingUpdate.getOverrideChannels();
+            mOverrideChannels = new ArrayMap<>(overrideChannels.size());
+            for (String key : overrideChannels.keySet()) {
+                mOverrideChannels.put(key, overrideChannels.getParcelable(key));
+            }
+        }
+
+        // Locked by 'this'
+        private void buildOverridePeopleLocked() {
+            Bundle overridePeople = mRankingUpdate.getOverridePeople();
+            mOverridePeople = new ArrayMap<>(overridePeople.size());
+            for (String key : overridePeople.keySet()) {
+                mOverridePeople.put(key, overridePeople.getStringArrayList(key));
+            }
+        }
+
+        // Locked by 'this'
+        private void buildSnoozeCriteriaLocked() {
+            Bundle snoozeCriteria = mRankingUpdate.getSnoozeCriteria();
+            mSnoozeCriteria = new ArrayMap<>(snoozeCriteria.size());
+            for (String key : snoozeCriteria.keySet()) {
+                mSnoozeCriteria.put(key, snoozeCriteria.getParcelableArrayList(key));
             }
         }
 

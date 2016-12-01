@@ -15,8 +15,7 @@
  */
 package android.service.notification;
 
-import android.annotation.SystemApi;
-import android.net.Uri;
+import android.app.NotificationChannel;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,33 +26,39 @@ import android.os.Parcelable;
 public final class Adjustment implements Parcelable {
     private final String mPackage;
     private final String mKey;
-    private final int mImportance;
     private final CharSequence mExplanation;
-    private final Uri mReference;
     private final Bundle mSignals;
     private final int mUser;
+
+    /**
+     * Data type: {@code String}. See {@link NotificationChannel#getId()}.
+     */
+    public static final String KEY_CHANNEL_ID = "key_channel_id";
+    /**
+     * Data type: ArrayList of {@code String}, where each is a representation of a
+     * {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}.
+     * See {@link android.app.Notification.Builder#addPerson(String)}.
+     */
+    public static final String KEY_PEOPLE = "key_people";
+    /**
+     * Parcelable {@code ArrayList} of {@link SnoozeCriterion}.
+     */
+    public static final String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";
 
     /**
      * Create a notification adjustment.
      *
      * @param pkg The package of the notification.
      * @param key The notification key.
-     * @param importance The recommended importance of the notification.
-     * @param signals A bundle of signals that should inform notification grouping and ordering.
+     * @param signals A bundle of signals that should inform notification display, ordering, and
+     *                interruptiveness.
      * @param explanation A human-readable justification for the adjustment.
-     * @param reference A reference to an external object that augments the
-     *                  explanation, such as a
-     *                  {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI},
-     *                  or null.
      */
-    public Adjustment(String pkg, String key, int importance, Bundle signals,
-            CharSequence explanation, Uri reference, int user) {
+    public Adjustment(String pkg, String key, Bundle signals, CharSequence explanation, int user) {
         mPackage = pkg;
         mKey = key;
-        mImportance = importance;
         mSignals = signals;
         mExplanation = explanation;
-        mReference = reference;
         mUser = user;
     }
 
@@ -68,13 +73,11 @@ public final class Adjustment implements Parcelable {
         } else {
             mKey = null;
         }
-        mImportance = in.readInt();
         if (in.readInt() == 1) {
             mExplanation = in.readCharSequence();
         } else {
             mExplanation = null;
         }
-        mReference = in.readParcelable(Uri.class.getClassLoader());
         mSignals = in.readBundle();
         mUser = in.readInt();
     }
@@ -99,16 +102,8 @@ public final class Adjustment implements Parcelable {
         return mKey;
     }
 
-    public int getImportance() {
-        return mImportance;
-    }
-
     public CharSequence getExplanation() {
         return mExplanation;
-    }
-
-    public Uri getReference() {
-        return mReference;
     }
 
     public Bundle getSignals() {
@@ -138,14 +133,12 @@ public final class Adjustment implements Parcelable {
         } else {
             dest.writeInt(0);
         }
-        dest.writeInt(mImportance);
         if (mExplanation != null) {
             dest.writeInt(1);
             dest.writeCharSequence(mExplanation);
         } else {
             dest.writeInt(0);
         }
-        dest.writeParcelable(mReference, flags);
         dest.writeBundle(mSignals);
         dest.writeInt(mUser);
     }
