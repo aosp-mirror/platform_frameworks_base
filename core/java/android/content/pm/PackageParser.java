@@ -1696,6 +1696,11 @@ public class PackageParser {
         String str = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifest_sharedUserId, 0);
         if (str != null && str.length() > 0) {
+            if ((flags & PARSE_IS_EPHEMERAL) != 0) {
+                outError[0] = "sharedUserId not allowed in ephemeral application";
+                mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID;
+                return null;
+            }
             String nameError = validateName(str, true, false);
             if (nameError != null && !"android".equals(pkg.packageName)) {
                 outError[0] = "<manifest> specifies bad sharedUserId name \""
