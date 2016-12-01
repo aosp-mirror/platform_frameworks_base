@@ -41,6 +41,7 @@ import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -51,6 +52,8 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
+import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
@@ -173,6 +176,24 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         public void onBluetoothStateChange(int prevState, int newState) throws RemoteException  {
             Message msg = mHandler.obtainMessage(MESSAGE_BLUETOOTH_STATE_CHANGE,prevState,newState);
             mHandler.sendMessage(msg);
+        }
+    };
+
+    private final UserRestrictionsListener mUserRestrictionsListener =
+            new UserRestrictionsListener() {
+        @Override
+        public void onUserRestrictionsChanged(int userId, Bundle newRestrictions,
+                Bundle prevRestrictions) {
+            final boolean bluetoothDisallowed =
+                    newRestrictions.getBoolean(UserManager.DISALLOW_BLUETOOTH);
+            if ((mEnable || mEnableExternal) && bluetoothDisallowed) {
+                try {
+                    disable(null, true);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Exception when disabling Bluetooth from UserRestrictionsListener",
+                            e);
+                }
+            }
         }
     };
 
@@ -612,6 +633,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     public boolean enableNoAutoConnect()
     {
+        if (isBluetoothDisallowed()) {
+            if (DBG) {
+                Slog.d(TAG, "enableNoAutoConnect(): not enabling - bluetooth disallowed");
+            }
+            return false;
+        }
+
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH ADMIN permission");
 
@@ -636,6 +664,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     public boolean enable(String packageName) throws RemoteException {
         final int callingUid = Binder.getCallingUid();
         final boolean callerSystem = UserHandle.getAppId(callingUid) == Process.SYSTEM_UID;
+
+        if (isBluetoothDisallowed()) {
+            if (DBG) {
+                Slog.d(TAG,"enable(): not enabling - bluetooth disallowed");
+            }
+            return false;
+        }
 
         if (!callerSystem) {
             if (!checkIfCallerIsForegroundUser()) {
@@ -841,6 +876,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      */
     public void handleOnBootPhase() {
         if (DBG) Slog.d(TAG, "Bluetooth boot completed");
+        UserManagerInternal userManagerInternal =
+                LocalServices.getService(UserManagerInternal.class);
+        userManagerInternal.addUserRestrictionsListener(mUserRestrictionsListener);
+        if (isBluetoothDisallowed()) {
+            return;
+        }
         if (mEnableExternal && isBluetoothPersistedStateOnBluetooth()) {
             if (DBG) Slog.d(TAG, "Auto-enabling Bluetooth.");
             sendEnableMsg(mQuietEnableExternal);
@@ -1880,6 +1921,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             mHandler.sendMessageDelayed(restartMsg, ERROR_RESTART_TIME_MS);
         } else {
             // todo: notify user to power down and power up phone to make bluetooth work.
+        }
+    }
+
+    private boolean isBluetoothDisallowed() {
+        long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            return mContext.getSystemService(UserManager.class)
+                    .hasUserRestriction(UserManager.DISALLOW_BLUETOOTH, UserHandle.SYSTEM);
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
         }
     }
 
