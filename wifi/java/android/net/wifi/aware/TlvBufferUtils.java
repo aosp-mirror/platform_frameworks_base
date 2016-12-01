@@ -22,8 +22,10 @@ import libcore.io.Memory;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -32,7 +34,7 @@ import java.util.NoSuchElementException;
  * the Type field and the Length field. A Type field size of 0 is allowed -
  * allowing usage for LV (no T) array formats.
  *
- * @hide PROPOSED_AWARE_API
+ * @hide
  */
 public class TlvBufferUtils {
     private TlvBufferUtils() {
@@ -107,6 +109,31 @@ public class TlvBufferUtils {
         public TlvConstructor allocate(int capacity) {
             mArray = new byte[capacity];
             mArrayLength = capacity;
+            return this;
+        }
+
+        /**
+         * Creates a TLV array (of the previously specified Type and Length sizes) from the input
+         * list. Allocates an array matching the contents (and required Type and Length
+         * fields), copies the contents, and set the Length fields. The Type field is set to 0.
+         *
+         * @param list A list of fields to be added to the TLV buffer.
+         * @return The constructor of the TLV.
+         */
+        public TlvConstructor allocateAndPut(@Nullable List<byte[]> list) {
+            if (list != null) {
+                int size = 0;
+                for (byte[] field : list) {
+                    size += mTypeSize + mLengthSize;
+                    if (field != null) {
+                        size += field.length;
+                    }
+                }
+                allocate(size);
+                for (byte[] field : list) {
+                    putByteArray(0, field);
+                }
+            }
             return this;
         }
 
@@ -319,6 +346,10 @@ public class TlvBufferUtils {
             this.length = length;
             this.refArray = refArray;
             this.offset = offset;
+
+            if (offset + length > refArray.length) {
+                throw new BufferOverflowException();
+            }
         }
 
         /**
@@ -393,7 +424,7 @@ public class TlvBufferUtils {
          * @param typeSize Number of bytes used for the Type (T) field. Valid
          *            values are 0 (i.e. indicating the format is LV rather than
          *            TLV), 1, and 2 bytes.
-         * @param lengthSize Number of bytes sued for the Length (L) field.
+         * @param lengthSize Number of bytes used for the Length (L) field.
          *            Values values are 1 or 2 bytes.
          * @param array The TLV formatted byte-array to parse.
          */
@@ -447,6 +478,18 @@ public class TlvBufferUtils {
             builder.append("]");
 
             return builder.toString();
+        }
+
+        /**
+         * Returns a List with the raw contents (no types) of the iterator.
+         */
+        public List<byte[]> toList() {
+            List<byte[]> list = new ArrayList<>();
+            for (TlvElement tlv : this) {
+                list.add(Arrays.copyOfRange(tlv.refArray, tlv.offset, tlv.offset + tlv.length));
+            }
+
+            return list;
         }
 
         /**
