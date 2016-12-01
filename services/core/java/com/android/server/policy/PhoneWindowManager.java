@@ -265,6 +265,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP = 2;
     static final int SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME = 3;
     static final int SHORT_PRESS_POWER_GO_HOME = 4;
+    static final int SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME = 5;
 
     static final int LONG_PRESS_POWER_NOTHING = 0;
     static final int LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
@@ -1344,6 +1345,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case SHORT_PRESS_POWER_GO_HOME:
                     launchHomeFromHotKey(true /* awakenFromDreams */, false /*respectKeyguard*/);
+                    break;
+                case SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME:
+                    if (mWindowManagerFuncs.isInputMethodWindowVisible()) {
+                        mWindowManagerFuncs.hideCurrentInputMethod();
+                    } else {
+                        launchHomeFromHotKey(true /* awakenFromDreams */,
+                            false /*respectKeyguard*/);
+                    }
                     break;
             }
         }
