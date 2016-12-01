@@ -840,6 +840,12 @@
     <!-- Shows when people have pressed the unlock icon to explain how to unlock. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to unlock</string>
 
+    <!-- Text on keyguard screen indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=60] -->
+    <string name="do_disclosure_generic">This device is managed</string>
+
+    <!-- Text on keyguard screen indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=40] -->
+    <string name="do_disclosure_with_name">This device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%s</xliff:g></string>
+
     <!-- Shows when people have clicked on the phone icon [CHAR LIMIT=60] -->
     <string name="phone_hint">Swipe from icon for phone</string>
 

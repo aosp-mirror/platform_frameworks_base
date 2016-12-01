@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.app.ActivityManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +37,7 @@ import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -58,7 +60,9 @@ public class KeyguardIndicationController {
     private static final long TRANSIENT_FP_ERROR_TIMEOUT = 1300;
 
     private final Context mContext;
+    private final ViewGroup mIndicationArea;
     private final KeyguardIndicationTextView mTextView;
+    private final KeyguardIndicationTextView mDisclosure;
     private final UserManager mUserManager;
     private final IBatteryStats mBatteryInfo;
 
@@ -78,10 +82,16 @@ public class KeyguardIndicationController {
     private int mChargingWattage;
     private String mMessageToShowOnScreenOn;
 
-    public KeyguardIndicationController(Context context, KeyguardIndicationTextView textView,
-                                        LockIcon lockIcon) {
+    private final DevicePolicyManager mDevicePolicyManager;
+
+    public KeyguardIndicationController(Context context, ViewGroup indicationArea,
+            LockIcon lockIcon) {
         mContext = context;
-        mTextView = textView;
+        mIndicationArea = indicationArea;
+        mTextView = (KeyguardIndicationTextView) indicationArea.findViewById(
+                R.id.keyguard_indication_text);
+        mDisclosure = (KeyguardIndicationTextView) indicationArea.findViewById(
+                R.id.keyguard_indication_enterprise_disclosure);
         mLockIcon = lockIcon;
 
         Resources res = context.getResources();
@@ -92,14 +102,39 @@ public class KeyguardIndicationController {
         mBatteryInfo = IBatteryStats.Stub.asInterface(
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
 
+        mDevicePolicyManager = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitor);
         context.registerReceiverAsUser(mTickReceiver, UserHandle.SYSTEM,
                 new IntentFilter(Intent.ACTION_TIME_TICK), null, null);
+
+        updateDisclosure();
+    }
+
+    private void updateDisclosure() {
+        if (mDevicePolicyManager == null) {
+            return;
+        }
+
+        if (mDevicePolicyManager.isDeviceManaged()) {
+            final CharSequence organizationName =
+                    mDevicePolicyManager.getDeviceOwnerOrganizationName();
+            if (organizationName != null) {
+                mDisclosure.switchIndication(mContext.getResources().getString(
+                        R.string.do_disclosure_with_name, organizationName));
+            } else {
+                mDisclosure.switchIndication(R.string.do_disclosure_generic);
+            }
+            mDisclosure.setVisibility(View.VISIBLE);
+        } else {
+            mDisclosure.setVisibility(View.GONE);
+        }
     }
 
     public void setVisible(boolean visible) {
         mVisible = visible;
-        mTextView.setVisibility(visible ? View.VISIBLE : View.GONE);
+        mIndicationArea.setVisibility(visible ? View.VISIBLE : View.GONE);
         if (visible) {
             hideTransientIndication();
             updateIndication();
@@ -239,6 +274,13 @@ public class KeyguardIndicationController {
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
             updateIndication();
+        }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
+            if (showing) {
+                updateDisclosure();
+            }
         }
 
         @Override
