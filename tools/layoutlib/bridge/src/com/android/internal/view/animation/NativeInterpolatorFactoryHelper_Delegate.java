@@ -104,7 +104,7 @@ public class NativeInterpolatorFactoryHelper_Delegate {
 
         @Override
         public float getInterpolation(float input) {
-            float lutpos = input * mSize;
+            float lutpos = input * (mSize - 1);
             if (lutpos >= (mSize - 1)) {
                 return mValues[mSize - 1];
             }

@@ -97,7 +97,8 @@ LUTInterpolator::~LUTInterpolator() {
 }
 
 float LUTInterpolator::interpolate(float input) {
-    float lutpos = input * mSize;
+    // lut position should only be at the end of the table when input is 1f.
+    float lutpos = input * (mSize - 1);
     if (lutpos >= (mSize - 1)) {
         return mValues[mSize - 1];
     }
