@@ -1325,6 +1325,17 @@ public class ApplicationsState {
         }
     };
 
+    public static final AppFilter FILTER_SUBSTRATUM_ICONS = new AppFilter() {
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            return !((entry.info.metaData != null) &&
+                    (entry.info.metaData.getString("Substratum_IconPack") != null));
+        }
+    };
+
     public static final AppFilter FILTER_WORK = new AppFilter() {
         private int mCurrentUser;
 
