@@ -565,6 +565,7 @@ public class NavigationBarView extends LinearLayout {
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
         mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
+        mDeadZone.setDisplayRotation(mCurrentRotation);
 
         // force the low profile & disabled states into compliance
         mBarTransitions.init();
