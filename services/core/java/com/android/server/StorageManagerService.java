@@ -644,14 +644,8 @@ class StorageManagerService extends IStorageManager.Stub
                         Slog.e(TAG, "Unable to record last fstrim!");
                     }
 
-                    final boolean shouldBenchmark = shouldBenchmark();
-                    try {
-                        // This method must be run on the main (handler) thread,
-                        // so it is safe to directly call into vold.
-                        mConnector.execute("fstrim", shouldBenchmark ? "dotrimbench" : "dotrim");
-                    } catch (NativeDaemonConnectorException ndce) {
-                        Slog.e(TAG, "Failed to run fstrim!");
-                    }
+                    final int flags = shouldBenchmark() ? StorageManager.FSTRIM_FLAG_BENCHMARK : 0;
+                    fstrim(flags);
 
                     // invoke the completion callback, if any
                     // TODO: fstrim is non-blocking, so remove this useless callback
@@ -1953,6 +1947,28 @@ class StorageManagerService extends IStorageManager.Stub
             mConnector.execute("volume", "forget_partition", partGuid);
         } catch (NativeDaemonConnectorException e) {
             Slog.w(TAG, "Failed to forget key for " + partGuid + ": " + e);
+        }
+    }
+
+    @Override
+    public void fstrim(int flags) {
+        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+        waitForReady();
+
+        String cmd;
+        if ((flags & StorageManager.FSTRIM_FLAG_DEEP) != 0) {
+            cmd = "dodtrim";
+        } else {
+            cmd = "dotrim";
+        }
+        if ((flags & StorageManager.FSTRIM_FLAG_BENCHMARK) != 0) {
+            cmd += "bench";
+        }
+
+        try {
+            mConnector.execute("fstrim", cmd);
+        } catch (NativeDaemonConnectorException e) {
+            Slog.e(TAG, "Failed to run fstrim: " + e);
         }
     }
 
