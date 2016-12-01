@@ -40,7 +40,7 @@ void StartReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
         //mChildren is allocated and initialized only the first time onDraw is called and cached for
         //subsequent calls
         mChildren.reserve(mEndChildIndex - mBeginChildIndex + 1);
-        for (unsigned int i = mBeginChildIndex; i <= mEndChildIndex; i++) {
+        for (int i = mBeginChildIndex; i <= mEndChildIndex; i++) {
             mChildren.push_back(const_cast<RenderNodeDrawable*>(&mDisplayList->mChildNodes[i]));
         }
     }

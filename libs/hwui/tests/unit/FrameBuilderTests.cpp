@@ -1530,6 +1530,8 @@ public:
 RENDERTHREAD_TEST(FrameBuilder, zReorder) {
     auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [](RenderProperties& props, RecordingCanvas& canvas) {
+        canvas.insertReorderBarrier(true);
+        canvas.insertReorderBarrier(false);
         drawOrderedNode(&canvas, 0, 10.0f); // in reorder=false at this point, so played inorder
         drawOrderedRect(&canvas, 1);
         canvas.insertReorderBarrier(true);

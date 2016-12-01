@@ -47,8 +47,8 @@ protected:
     virtual void onDraw(SkCanvas* canvas) override;
 
 private:
-    size_t mEndChildIndex;
-    size_t mBeginChildIndex;
+    int mEndChildIndex;
+    int mBeginChildIndex;
     FatVector<RenderNodeDrawable*, 16> mChildren;
     SkiaDisplayList* mDisplayList;
 
