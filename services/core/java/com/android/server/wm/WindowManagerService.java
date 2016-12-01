@@ -5786,6 +5786,24 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    // Called by window manager policy.  Not exposed externally.
+    @Override
+    public boolean isInputMethodWindowVisible() {
+        synchronized (mWindowMap) {
+            return mInputMethodWindow != null && mInputMethodWindow.isVisibleLw();
+        }
+    }
+
+    // Called by window manager policy.  Not exposed externally.
+    @Override
+    public void hideCurrentInputMethod() {
+        final InputMethodManagerInternal inputMethodManagerInternal =
+            LocalServices.getService(InputMethodManagerInternal.class);
+        if (inputMethodManagerInternal != null) {
+            inputMethodManagerInternal.hideCurrentInputMethod();
+        }
+    }
+
     // Called by window manager policy. Not exposed externally.
     @Override
     public void lockDeviceNow() {
