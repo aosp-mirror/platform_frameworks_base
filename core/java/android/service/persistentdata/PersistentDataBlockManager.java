@@ -68,6 +68,7 @@ public class PersistentDataBlockManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface FlashLockState {}
 
+    /** @hide */
     public PersistentDataBlockManager(IPersistentDataBlockService service) {
         sService = service;
     }
