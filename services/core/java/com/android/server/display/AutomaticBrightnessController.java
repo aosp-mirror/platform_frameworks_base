@@ -208,7 +208,7 @@ class AutomaticBrightnessController {
         mDozeScaleFactor = dozeScaleFactor;
         mNormalLightSensorRate = lightSensorRate;
         mInitialLightSensorRate = initialLightSensorRate;
-        mCurrentLightSensorRate = mNormalLightSensorRate;
+        mCurrentLightSensorRate = -1;
         mBrighteningLightDebounceConfig = brighteningLightDebounceConfig;
         mDarkeningLightDebounceConfig = darkeningLightDebounceConfig;
         mResetAmbientLuxAfterWarmUpConfig = resetAmbientLuxAfterWarmUpConfig;
@@ -320,6 +320,7 @@ class AutomaticBrightnessController {
                 mInitialHorizonAmbientLightRingBuffer.clear();
                 mAmbientLuxValid = !mResetAmbientLuxAfterWarmUpConfig;
                 mLightSensorEnableTime = SystemClock.uptimeMillis();
+                mCurrentLightSensorRate = mInitialLightSensorRate;
                 mSensorManager.registerListener(mLightSensorListener, mLightSensor,
                         mCurrentLightSensorRate * 1000, mHandler);
                 return true;
@@ -328,9 +329,7 @@ class AutomaticBrightnessController {
             if (mLightSensorEnabled) {
                 mLightSensorEnabled = false;
                 mRecentLightSamples = 0;
-                if (mInitialLightSensorRate > 0) {
-                    mCurrentLightSensorRate = mInitialLightSensorRate;
-                }
+                mCurrentLightSensorRate = -1;
                 mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
                 mSensorManager.unregisterListener(mLightSensorListener);
             }
