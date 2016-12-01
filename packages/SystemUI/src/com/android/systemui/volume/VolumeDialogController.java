@@ -78,7 +78,6 @@ public class VolumeDialogController {
         AudioSystem.STREAM_SYSTEM_ENFORCED,
         AudioSystem.STREAM_TTS,
         AudioSystem.STREAM_VOICE_CALL,
-        AudioSystem.STREAM_ACCESSIBILITY,
     };
 
     private final HandlerThread mWorkerThread;
