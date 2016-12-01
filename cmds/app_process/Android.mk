@@ -48,41 +48,20 @@ LOCAL_MODULE_STEM_64 := app_process64
 
 LOCAL_CFLAGS += $(app_process_cflags)
 
-# In SANITIZE_LITE mode, the main app_process is not sanitized - special
-# binaries below do that.
+# In SANITIZE_LITE mode, we create the sanitized binary in a separate location (but reuse
+# the same module). Using the same module also works around an issue with make: binaries
+# that depend on sanitized libraries will be relinked, even if they set LOCAL_SANITIZE := never.
+#
+# Also pull in the asanwrapper helper.
 ifeq ($(SANITIZE_LITE),true)
-LOCAL_SANITIZE := never
+LOCAL_MODULE_PATH := $(TARGET_OUT_EXECUTABLES)/asan
+LOCAL_REQUIRED_MODULES := asanwrapper
 endif
 
 include $(BUILD_EXECUTABLE)
 
 # Create a symlink from app_process to app_process32 or 64
 # depending on the target configuration.
+ifneq ($(SANITIZE_LITE),true)
 include  $(BUILD_SYSTEM)/executable_prefer_symlink.mk
-
-# Build a variant of app_process binary linked with ASan runtime.
-# Built when SANITIZE_LITE is enabled.
-ifeq ($(SANITIZE_LITE),true)
-
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES:= $(app_process_src_files)
-
-LOCAL_LDFLAGS_32 := $(app_process_ldflags_32)
-LOCAL_LDFLAGS_64 := $(app_process_ldflags_64)
-
-LOCAL_SHARED_LIBRARIES := $(app_process_common_shared_libs)
-
-LOCAL_WHOLE_STATIC_LIBRARIES := $(app_process_common_static_libs)
-
-LOCAL_MODULE := app_process__asan
-LOCAL_MULTILIB := both
-LOCAL_MODULE_STEM_32 := app_process32
-LOCAL_MODULE_STEM_64 := app_process64
-LOCAL_MODULE_PATH := $(TARGET_OUT_EXECUTABLES)/asan
-
-LOCAL_CFLAGS += $(app_process_cflags)
-
-include $(BUILD_EXECUTABLE)
-
-endif # SANITIZE_LITE
+endif
