@@ -91,7 +91,7 @@ class Method():
             while r in raw: raw.remove(r)
         self.split = list(raw)
 
-        for r in ["method", "public", "protected", "static", "final", "deprecated", "abstract"]:
+        for r in ["method", "public", "protected", "static", "final", "deprecated", "abstract", "default"]:
             while r in raw: raw.remove(r)
 
         self.typ = raw[0]
