@@ -28,6 +28,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Defines the configuration of a Aware publish session. Built using
@@ -84,7 +85,8 @@ public final class PublishConfig implements Parcelable {
     /** @hide */
     public final boolean mEnableTerminateNotification;
 
-    private PublishConfig(byte[] serviceName, byte[] serviceSpecificInfo, byte[] matchFilter,
+    /** @hide */
+    public PublishConfig(byte[] serviceName, byte[] serviceSpecificInfo, byte[] matchFilter,
             int publishType, int publichCount, int ttlSec, boolean enableTerminateNotification) {
         mServiceName = serviceName;
         mServiceSpecificInfo = serviceSpecificInfo;
@@ -99,9 +101,9 @@ public final class PublishConfig implements Parcelable {
     public String toString() {
         return "PublishConfig [mServiceName='" + mServiceName + ", mServiceSpecificInfo='" + (
                 (mServiceSpecificInfo == null) ? "null" : HexEncoding.encode(mServiceSpecificInfo))
-                + ", mTxFilter=" + (new LvBufferUtils.LvIterable(1, mMatchFilter)).toString()
-                + ", mPublishType=" + mPublishType + ", mPublishCount=" + mPublishCount
-                + ", mTtlSec=" + mTtlSec + ", mEnableTerminateNotification="
+                + ", mMatchFilter=" + (new TlvBufferUtils.TlvIterable(0, 1,
+                mMatchFilter)).toString() + ", mPublishType=" + mPublishType + ", mPublishCount="
+                + mPublishCount + ", mTtlSec=" + mTtlSec + ", mEnableTerminateNotification="
                 + mEnableTerminateNotification + "]";
     }
 
@@ -186,7 +188,7 @@ public final class PublishConfig implements Parcelable {
             throws IllegalArgumentException {
         WifiAwareUtils.validateServiceName(mServiceName);
 
-        if (!LvBufferUtils.isValid(mMatchFilter, 1)) {
+        if (!TlvBufferUtils.isValid(mMatchFilter, 0, 1)) {
             throw new IllegalArgumentException(
                     "Invalid txFilter configuration - LV fields do not match up to length");
         }
@@ -281,18 +283,17 @@ public final class PublishConfig implements Parcelable {
          * The match filter for a publish session. Used to determine whether a service
          * discovery occurred - in addition to relying on the service name.
          * <p>
-         * Format is an LV byte array: a single byte Length field followed by L bytes (the value of
-         * the Length field) of a value blob.
-         * <p>
          *     Optional. Empty by default.
          *
-         * @param matchFilter The byte-array containing the LV formatted match filter.
+         * @param matchFilter A list of match filter entries (each of which is an arbitrary byte
+         *                    array).
          *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setMatchFilter(@Nullable byte[] matchFilter) {
-            mMatchFilter = matchFilter;
+        public Builder setMatchFilter(@Nullable List<byte[]> matchFilter) {
+            mMatchFilter = new TlvBufferUtils.TlvConstructor(0, 1).allocateAndPut(
+                    matchFilter).getArray();
             return this;
         }
 
