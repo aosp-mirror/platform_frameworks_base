@@ -313,7 +313,11 @@ public class FalsingManager implements SensorEventListener {
         mDataCollector.onNotificationActive();
     }
 
-    public void onNotificationDoubleTap() {
+    public void onNotificationDoubleTap(boolean accepted, float dx, float dy) {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onNotificationDoubleTap", "accepted=" + accepted
+                    + " dx=" + dx + " dy=" + dy + " (px)");
+        }
         mDataCollector.onNotificationDoubleTap();
     }
 
