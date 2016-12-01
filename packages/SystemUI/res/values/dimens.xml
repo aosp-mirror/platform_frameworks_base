@@ -405,7 +405,7 @@
     <dimen name="header_battery_margin_expanded">6dp</dimen>
 
     <!-- Margin on the left side of the battery % when on Keyguard. -->
-    <dimen name="header_battery_margin_keyguard">6dp</dimen>
+    <dimen name="header_battery_margin_keyguard">2dp</dimen>
 
     <!-- Margin on the right side of the system icon group on Keyguard. -->
     <dimen name="system_icons_keyguard_padding_end">4dp</dimen>
