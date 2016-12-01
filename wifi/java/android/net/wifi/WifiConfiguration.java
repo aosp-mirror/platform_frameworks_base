@@ -685,9 +685,19 @@ public class WifiConfiguration implements Parcelable {
     /**
      * @hide
      * A hint about whether or not the network represented by this WifiConfiguration
-     * is metered.
+     * is metered. This is hinted at via the meteredHint bit on DHCP results set in
+     * {@link com.android.server.wifi.WifiStateMachine}, or via a network score in
+     * {@link com.android.server.wifi.ExternalScoreEvaluator}.
      */
     public boolean meteredHint;
+
+    /**
+     * @hide
+     * Indicates if a user has specified the WifiConfiguration to be metered. Users
+     * can toggle if a network is metered within Settings -> Data Usage -> Network
+     * Restrictions.
+     */
+    public boolean meteredOverride;
 
     /**
      * @hide
@@ -1367,6 +1377,7 @@ public class WifiConfiguration implements Parcelable {
         didSelfAdd = false;
         ephemeral = false;
         meteredHint = false;
+        meteredOverride = false;
         useExternalScores = false;
         validatedInternetAccess = false;
         mIpConfiguration = new IpConfiguration();
@@ -1470,9 +1481,11 @@ public class WifiConfiguration implements Parcelable {
         if (this.validatedInternetAccess) sbuf.append(" validatedInternetAccess");
         if (this.ephemeral) sbuf.append(" ephemeral");
         if (this.meteredHint) sbuf.append(" meteredHint");
+        if (this.meteredOverride) sbuf.append(" meteredOverride");
         if (this.useExternalScores) sbuf.append(" useExternalScores");
         if (this.didSelfAdd || this.selfAdded || this.validatedInternetAccess
-            || this.ephemeral || this.meteredHint || this.useExternalScores) {
+            || this.ephemeral || this.meteredHint || this.meteredOverride
+            || this.useExternalScores) {
             sbuf.append("\n");
         }
         sbuf.append(" KeyMgmt:");
@@ -1897,6 +1910,7 @@ public class WifiConfiguration implements Parcelable {
             validatedInternetAccess = source.validatedInternetAccess;
             ephemeral = source.ephemeral;
             meteredHint = source.meteredHint;
+            meteredOverride = source.meteredOverride;
             useExternalScores = source.useExternalScores;
             if (source.visibility != null) {
                 visibility = new Visibility(source.visibility);
@@ -1978,6 +1992,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(validatedInternetAccess ? 1 : 0);
         dest.writeInt(ephemeral ? 1 : 0);
         dest.writeInt(meteredHint ? 1 : 0);
+        dest.writeInt(meteredOverride ? 1 : 0);
         dest.writeInt(useExternalScores ? 1 : 0);
         dest.writeInt(creatorUid);
         dest.writeInt(lastConnectUid);
@@ -2049,6 +2064,7 @@ public class WifiConfiguration implements Parcelable {
                 config.validatedInternetAccess = in.readInt() != 0;
                 config.ephemeral = in.readInt() != 0;
                 config.meteredHint = in.readInt() != 0;
+                config.meteredOverride = in.readInt() != 0;
                 config.useExternalScores = in.readInt() != 0;
                 config.creatorUid = in.readInt();
                 config.lastConnectUid = in.readInt();
