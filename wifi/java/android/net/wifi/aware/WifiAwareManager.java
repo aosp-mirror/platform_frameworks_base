@@ -45,7 +45,9 @@ import org.json.JSONObject;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.nio.BufferOverflowException;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class provides the primary API for managing Wi-Fi Aware operations:
@@ -874,12 +876,22 @@ public class WifiAwareManager {
                         case CALLBACK_SESSION_TERMINATED:
                             onProxySessionTerminated(msg.arg1);
                             break;
-                        case CALLBACK_MATCH:
-                            mOriginalCallback.onServiceDiscovered(
-                                    new PeerHandle(msg.arg1),
+                        case CALLBACK_MATCH: {
+                            List<byte[]> matchFilter = null;
+                            byte[] arg = msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2);
+                            try {
+                                matchFilter = new TlvBufferUtils.TlvIterable(0, 1, arg).toList();
+                            } catch (BufferOverflowException e) {
+                                matchFilter = null;
+                                Log.e(TAG, "onServiceDiscovered: invalid match filter byte array '"
+                                        + new String(HexEncoding.encode(arg))
+                                        + "' - cannot be parsed: e=" + e);
+                            }
+                            mOriginalCallback.onServiceDiscovered(new PeerHandle(msg.arg1),
                                     msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
-                                    msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2));
+                                    matchFilter);
                             break;
+                        }
                         case CALLBACK_MESSAGE_SEND_SUCCESS:
                             mOriginalCallback.onMessageSendSucceeded(msg.arg1);
                             break;
@@ -966,7 +978,7 @@ public class WifiAwareManager {
         @Override
         public void onMessageReceived(int peerId, byte[] message) {
             if (VDBG) {
-                Log.v(TAG, "onMessageReceived: peerId='" + peerId);
+                Log.v(TAG, "onMessageReceived: peerId=" + peerId);
             }
 
             Message msg = mHandler.obtainMessage(CALLBACK_MESSAGE_RECEIVED);
