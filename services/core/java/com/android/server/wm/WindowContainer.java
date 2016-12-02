@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
-import android.view.animation.Animation;
 import com.android.internal.util.ToBooleanFunction;
 
 import java.util.Comparator;
@@ -483,19 +482,11 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         return false;
     }
 
-    /**
-     * Rebuilds the WindowList for the input display content.
-     * @param addIndex The index in the window list to add the next entry to.
-     * @return The next index in the window list to.
-     */
-    // TODO: Hoping we can get rid of WindowList so this method wouldn't be needed.
-    int rebuildWindowList(int addIndex) {
-        final int count = mChildren.size();
-        for (int i = 0; i < count; i++) {
-            final WindowContainer wc = mChildren.get(i);
-            addIndex = wc.rebuildWindowList(addIndex);
+    // TODO: Users would have their own window containers under the display container?
+    void switchUser() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            mChildren.get(i).switchUser();
         }
-        return addIndex;
     }
 
     /**

@@ -604,17 +604,6 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mInputMethodTargetWaitingAnim;
 
     WindowState mInputMethodWindow = null;
-    // TODO: Remove with extreme prejudice! This list is maintained so that we can keep track of
-    // dialogs that should go on top of the IME so they can be re-arranged in the window list any
-    // time the IME changes position in the window list. Normally you would have a dialog be a child
-    // window of the IME, but they don't share the same token since they are added by different
-    // clients. This doesn't really affect what the user sees on screen since this dialogs have an
-    // higher base layer than the IME window, but it will affect users of the window list that
-    // expect the list to represent the order of things on-screen (e.g input service). This makes
-    // the code for managing the window list hard to follow (see all the places it is used).
-    // We can remove the use of this field when we automatically assign layers and z-order the
-    // window list before it is used whenever window container order changes.
-    final ArrayList<WindowState> mInputMethodDialogs = new ArrayList<>();
 
     boolean mHardKeyboardAvailable;
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
@@ -1375,19 +1364,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean imMayMove = true;
 
+            win.mToken.addWindow(win);
             if (type == TYPE_INPUT_METHOD) {
                 win.mGivenInsetsPending = true;
-                mInputMethodWindow = win;
-                win.mToken.addImeWindow(win);
+                setInputMethodWindowLocked(win);
                 imMayMove = false;
             } else if (type == TYPE_INPUT_METHOD_DIALOG) {
-                mInputMethodDialogs.add(win);
-                win.mToken.addWindow(win);
-                displayContent.moveInputMethodDialogs(
-                        displayContent.findDesiredInputMethodWindowIndex(true));
+                displayContent.computeImeTarget(true /* updateImeTarget */);
                 imMayMove = false;
             } else {
-                win.mToken.addWindow(win);
                 if (type == TYPE_WALLPAPER) {
                     displayContent.mWallpaperController.clearLastWallpaperTimeoutTime();
                     displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
@@ -1461,7 +1446,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (imMayMove) {
-                displayContent.moveInputMethodWindowsIfNeeded(false);
+                displayContent.computeImeTarget(true /* updateImeTarget */);
             }
 
             // Don't do layout here, the window must call
@@ -1644,9 +1629,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Final remove of window: " + win);
 
         if (mInputMethodWindow == win) {
-            mInputMethodWindow = null;
-        } else if (win.mAttrs.type == TYPE_INPUT_METHOD_DIALOG) {
-            mInputMethodDialogs.remove(win);
+            setInputMethodWindowLocked(null);
         }
 
         final WindowToken token = win.mToken;
@@ -1676,17 +1659,22 @@ public class WindowManagerService extends IWindowManager.Stub
             dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
         }
 
-        if (dc != null && dc.removeFromWindowList(win)) {
-            if (!mWindowPlacerLocked.isInLayout()) {
-                dc.assignWindowLayers(true /* setLayoutNeeded */);
-                mWindowPlacerLocked.performSurfacePlacement();
-                if (win.mAppToken != null) {
-                    win.mAppToken.updateReportedVisibilityLocked();
-                }
+        if (dc != null && !mWindowPlacerLocked.isInLayout()) {
+            dc.assignWindowLayers(true /* setLayoutNeeded */);
+            mWindowPlacerLocked.performSurfacePlacement();
+            if (win.mAppToken != null) {
+                win.mAppToken.updateReportedVisibilityLocked();
             }
         }
 
         mInputMonitor.updateInputWindowsLw(true /*force*/);
+    }
+
+    void setInputMethodWindowLocked(WindowState win) {
+        mInputMethodWindow = win;
+        final DisplayContent dc = win != null
+                ? win.getDisplayContent() : getDefaultDisplayContentLocked();
+        dc.computeImeTarget(true /* updateImeTarget */);
     }
 
     private void updateAppOpsState() {
@@ -1997,7 +1985,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     focusMayChange = isDefaultDisplay;
                 }
                 if (win.mAttrs.type == TYPE_INPUT_METHOD && mInputMethodWindow == null) {
-                    mInputMethodWindow = win;
+                    setInputMethodWindowLocked(win);
                     imMayMove = true;
                 }
                 win.adjustStartingWindowFlags();
@@ -2063,14 +2051,15 @@ public class WindowManagerService extends IWindowManager.Stub
             // reassign them at this point if the IM window state gets shuffled
             boolean toBeDisplayed = (result & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0;
             final DisplayContent dc = win.getDisplayContent();
-            if (imMayMove && (dc.moveInputMethodWindowsIfNeeded(false) || toBeDisplayed)) {
-                // Little hack here -- we -should- be able to rely on the function to return true if
-                // the IME has moved and needs its layer recomputed.  However, if the IME was hidden
-                // and isn't actually moved in the list, its layer may be out of data so we make
-                // sure to recompute it.
-                // TODO: Probably not needed once the window list always has the right z-ordering
-                // when the window hierarchy is updated.
-                dc.assignWindowLayers(false /* setLayoutNeeded */);
+            if (imMayMove) {
+                dc.computeImeTarget(true /* updateImeTarget */);
+                if (toBeDisplayed) {
+                    // Little hack here -- we -should- be able to rely on the function to return
+                    // true if the IME has moved and needs its layer recomputed. However, if the IME
+                    // was hidden and isn't actually moved in the list, its layer may be out of data
+                    // so we make sure to recompute it.
+                    dc.assignWindowLayers(false /* setLayoutNeeded */);
+                }
             }
 
             if (wallpaperMayMove) {
@@ -2164,7 +2153,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.mWinAnimator.mAnimating = true;
         } else {
             if (mInputMethodWindow == win) {
-                mInputMethodWindow = null;
+                setInputMethodWindowLocked(null);
             }
             win.destroyOrSaveSurface();
         }
@@ -3348,7 +3337,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mAppTransition.isTransitionSet()) {
                     task.setSendingToBottom(false);
                 }
-                displayContent.rebuildAppWindowsAndLayoutIfNeeded();
+                displayContent.layoutAndAssignWindowLayersIfNeeded();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -3370,7 +3359,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mAppTransition.isTransitionSet()) {
                     task.setSendingToBottom(true);
                 }
-                stack.getDisplayContent().rebuildAppWindowsAndLayoutIfNeeded();
+                stack.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4627,7 +4616,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return null;
             }
         }
-        return displayContent.screenshotApplications(appToken, displayId, width, height,
+        return displayContent.screenshotApplications(appToken, width, height,
                 includeFullDisplay, frameScale, config, wallpaperOnly);
     }
 
@@ -5189,7 +5178,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean result = true;
 
-        final WindowList windows = new WindowList();
+        final ArrayList<WindowState> windows = new ArrayList();
         synchronized (mWindowMap) {
             mRoot.forAllWindows(w -> {
                 windows.add(w);
@@ -7284,7 +7273,7 @@ public class WindowManagerService extends IWindowManager.Stub
         changes |= FINISH_LAYOUT_REDO_LAYOUT;
         if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG_WM,
                 "Wallpaper layer changed: assigning layers + relayout");
-        dc.moveInputMethodWindowsIfNeeded(true);
+        dc.computeImeTarget(true /* updateImeTarget */);
         mRoot.mWallpaperMayChange = true;
         // Since the window list has been rebuilt, focus might have to be recomputed since the
         // actual order of windows might have changed again.
@@ -7377,10 +7366,25 @@ public class WindowManagerService extends IWindowManager.Stub
             mH.sendEmptyMessage(H.REPORT_FOCUS_CHANGE);
             // TODO(multidisplay): Focused windows on default display only.
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
-            final boolean imWindowChanged = displayContent.moveInputMethodWindowsIfNeeded(
-                    mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS
-                            && mode != UPDATE_FOCUS_WILL_PLACE_SURFACES);
+            boolean imWindowChanged = false;
+            if (mInputMethodWindow != null) {
+                final WindowState prevTarget = mInputMethodTarget;
+                final WindowState newTarget =
+                        displayContent.computeImeTarget(true /* updateImeTarget*/);
+
+                imWindowChanged = prevTarget != newTarget;
+
+                if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS
+                        && mode != UPDATE_FOCUS_WILL_PLACE_SURFACES) {
+                    final int prevImeAnimLayer = mInputMethodWindow.mWinAnimator.mAnimLayer;
+                    displayContent.assignWindowLayers(false /* setLayoutNeeded */);
+                    imWindowChanged |=
+                            prevImeAnimLayer != mInputMethodWindow.mWinAnimator.mAnimLayer;
+                }
+            }
+
             if (imWindowChanged) {
+                mWindowsChanged = true;
                 displayContent.setLayoutNeeded();
                 newFocus = mRoot.computeFocusedWindow();
             }
@@ -7855,7 +7859,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private void dumpTokensLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER TOKENS (dumpsys window tokens)");
         mRoot.dumpTokens(pw, dumpAll);
-        mRoot.mWallpaperController.dumpTokens(pw, "  ", dumpAll);
         if (!mFinishedStarting.isEmpty()) {
             pw.println();
             pw.println("  Finishing start of application tokens:");
@@ -7901,16 +7904,6 @@ public class WindowManagerService extends IWindowManager.Stub
             ArrayList<WindowState> windows) {
         mRoot.dumpWindowsNoHeader(pw, dumpAll, windows);
 
-        if (mInputMethodDialogs.size() > 0) {
-            pw.println();
-            pw.println("  Input method dialogs:");
-            for (int i=mInputMethodDialogs.size()-1; i>=0; i--) {
-                WindowState w = mInputMethodDialogs.get(i);
-                if (windows == null || windows.contains(w)) {
-                    pw.print("  IM Dialog #"); pw.print(i); pw.print(": "); pw.println(w);
-                }
-            }
-        }
         if (mPendingRemove.size() > 0) {
             pw.println();
             pw.println("  Remove pending for:");
@@ -8069,7 +8062,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private boolean dumpWindows(PrintWriter pw, String name, String[] args, int opti,
             boolean dumpAll) {
-        final WindowList windows = new WindowList();
+        final ArrayList<WindowState> windows = new ArrayList();
         if ("apps".equals(name) || "visible".equals(name) || "visible-apps".equals(name)) {
             final boolean appsOnly = name.contains("apps");
             final boolean visibleOnly = name.contains("visible");

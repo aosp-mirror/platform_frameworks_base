@@ -16,10 +16,15 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
@@ -70,6 +75,10 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     // Array of window handles to provide to the input dispatcher.
     private InputWindowHandle[] mInputWindowHandles;
     private int mInputWindowHandleCount;
+    private boolean mAddInputConsumerHandle;
+    private boolean mAddPipInputConsumerHandle;
+    private boolean mAddWallpaperInputConsumerHandle;
+    private boolean mDisableWallpaperTouchEvents;
 
     // Set to true when the first input device configuration change notification
     // is received to indicate that the input devices are ready.
@@ -323,12 +332,12 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         }
     }
 
-    public void setUpdateInputWindowsNeededLw() {
+    void setUpdateInputWindowsNeededLw() {
         mUpdateInputWindowsNeeded = true;
     }
 
     /* Updates the cached window information provided to the input dispatcher. */
-    public void updateInputWindowsLw(boolean force) {
+    void updateInputWindowsLw(boolean force) {
         if (!force && !mUpdateInputWindowsNeeded) {
             return;
         }
@@ -372,15 +381,92 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         }
 
         // Add all windows on the default display.
-        mService.mRoot.updateInputWindows(this, mInputFocus, inDrag);
+        updateInputWindows(inDrag);
+
+        if (false) Slog.d(TAG_WM, "<<<<<<< EXITED updateInputWindowsLw");
+    }
+
+    private void updateInputWindows(boolean inDrag) {
+
+        clearInputWindowHandlesLw();
+
+        // TODO: multi-display
+        final InputConsumerImpl navInputConsumer =
+                getInputConsumer(INPUT_CONSUMER_NAVIGATION, DEFAULT_DISPLAY);
+        final InputConsumerImpl pipInputConsumer =
+                getInputConsumer(INPUT_CONSUMER_PIP, DEFAULT_DISPLAY);
+        final InputConsumerImpl wallpaperInputConsumer =
+                getInputConsumer(INPUT_CONSUMER_WALLPAPER, DEFAULT_DISPLAY);
+        mAddInputConsumerHandle = navInputConsumer != null;
+        mAddPipInputConsumerHandle = pipInputConsumer != null;
+        mAddWallpaperInputConsumerHandle = wallpaperInputConsumer != null;
+        final Rect pipTouchableBounds = mAddPipInputConsumerHandle ? new Rect() : null;
+        mDisableWallpaperTouchEvents = false;
+
+        final WallpaperController wallpaperController = mService.mRoot.mWallpaperController;
+        mService.mRoot.forAllWindows(w -> {
+            final InputChannel inputChannel = w.mInputChannel;
+            final InputWindowHandle inputWindowHandle = w.mInputWindowHandle;
+            if (inputChannel == null || inputWindowHandle == null || w.mRemoved
+                    || w.isAdjustedForMinimizedDock()) {
+                // Skip this window because it cannot possibly receive input.
+                return;
+            }
+
+            if (mAddPipInputConsumerHandle
+                    && w.getStackId() == PINNED_STACK_ID
+                    && inputWindowHandle.layer <= pipInputConsumer.mWindowHandle.layer) {
+                // Update the bounds of the Pip input consumer to match the Pinned stack
+                w.getStack().getBounds(pipTouchableBounds);
+                pipInputConsumer.mWindowHandle.touchableRegion.set(pipTouchableBounds);
+                addInputWindowHandle(pipInputConsumer.mWindowHandle);
+                mAddPipInputConsumerHandle = false;
+            }
+
+            if (mAddInputConsumerHandle
+                    && inputWindowHandle.layer <= navInputConsumer.mWindowHandle.layer) {
+                addInputWindowHandle(navInputConsumer.mWindowHandle);
+                mAddInputConsumerHandle = false;
+            }
+
+            if (mAddWallpaperInputConsumerHandle) {
+                if (w.mAttrs.type == TYPE_WALLPAPER && w.isVisibleLw()) {
+                    // Add the wallpaper input consumer above the first visible wallpaper.
+                    addInputWindowHandle(wallpaperInputConsumer.mWindowHandle);
+                    mAddWallpaperInputConsumerHandle = false;
+                }
+            }
+
+            final int flags = w.mAttrs.flags;
+            final int privateFlags = w.mAttrs.privateFlags;
+            final int type = w.mAttrs.type;
+
+            final boolean hasFocus = w == mInputFocus;
+            final boolean isVisible = w.isVisibleLw();
+            if ((privateFlags & PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS) != 0) {
+                mDisableWallpaperTouchEvents = true;
+            }
+            final boolean hasWallpaper = wallpaperController.isWallpaperTarget(w)
+                    && (privateFlags & PRIVATE_FLAG_KEYGUARD) == 0
+                    && !mDisableWallpaperTouchEvents;
+
+            // If there's a drag in progress and 'child' is a potential drop target,
+            // make sure it's been told about the drag
+            if (inDrag && isVisible && w.getDisplayContent().isDefaultDisplay) {
+                mService.mDragState.sendDragStartedIfNeededLw(w);
+            }
+
+            addInputWindowHandle(
+                    inputWindowHandle, w, flags, type, isVisible, hasFocus, hasWallpaper);
+        }, true /* traverseTopToBottom */);
+
+        if (mAddWallpaperInputConsumerHandle) {
+            // No visible wallpaper found, add the wallpaper input consumer at the end.
+            addInputWindowHandle(wallpaperInputConsumer.mWindowHandle);
+        }
 
         // Send windows to native code.
         mService.mInputManager.setInputWindows(mInputWindowHandles);
-
-        // Clear the list in preparation for the next round.
-        clearInputWindowHandlesLw();
-
-        if (false) Slog.d(TAG_WM, "<<<<<<< EXITED updateInputWindowsLw");
     }
 
     /* Notifies that the input device configuration has changed. */
