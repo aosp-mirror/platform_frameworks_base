@@ -996,10 +996,9 @@ public class UserManager {
     }
 
     /** {@hide} */
-    public boolean isUserRunning(int userId) {
-        // TODO Switch to using UMS internal isUserRunning
+    public boolean isUserRunning(@UserIdInt int userId) {
         try {
-            return ActivityManager.getService().isUserRunning(userId, 0);
+            return mService.isUserRunning(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1096,8 +1095,7 @@ public class UserManager {
     /** {@hide} */
     public boolean isUserUnlocked(@UserIdInt int userId) {
         try {
-            return ActivityManager.getService().isUserRunning(userId,
-                    ActivityManager.FLAG_AND_UNLOCKED);
+            return mService.isUserUnlocked(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

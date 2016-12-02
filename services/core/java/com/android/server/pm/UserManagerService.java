@@ -913,14 +913,33 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean isUserUnlockingOrUnlocked(int userId) {
-        int callingUserId = UserHandle.getCallingUserId();
-        if (callingUserId != userId && !hasManageUsersPermission()) {
-            if (!isSameProfileGroupNoChecks(callingUserId, userId)) {
-                throw new SecurityException(
-                        "You need MANAGE_USERS permission to: check isUserUnlockingOrUnlocked");
-            }
-        }
+        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "isUserUnlockingOrUnlocked");
         return mLocalService.isUserUnlockingOrUnlocked(userId);
+    }
+
+    @Override
+    public boolean isUserUnlocked(int userId) {
+        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "isUserUnlocked");
+        return mLocalService.isUserUnlockingOrUnlocked(userId);
+    }
+
+    @Override
+    public boolean isUserRunning(int userId) {
+        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "isUserRunning");
+        return mLocalService.isUserRunning(userId);
+    }
+
+    private void checkManageOrInteractPermIfCallerInOtherProfileGroup(int userId, String name) {
+        int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId == userId || isSameProfileGroupNoChecks(callingUserId, userId) ||
+                hasManageUsersPermission()) {
+            return;
+        }
+        if (ActivityManager.checkComponentPermission(Manifest.permission.INTERACT_ACROSS_USERS,
+                Binder.getCallingUid(), -1, true) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need INTERACT_ACROSS_USERS or MANAGE_USERS permission "
+                    + "to: check " + name);
+        }
     }
 
     @Override
@@ -3639,6 +3658,14 @@ public class UserManagerService extends IUserManager.Stub {
                 int state = mUserStates.get(userId, -1);
                 return (state == UserState.STATE_RUNNING_UNLOCKING)
                         || (state == UserState.STATE_RUNNING_UNLOCKED);
+            }
+        }
+
+        @Override
+        public boolean isUserUnlocked(int userId) {
+            synchronized (mUserStates) {
+                int state = mUserStates.get(userId, -1);
+                return state == UserState.STATE_RUNNING_UNLOCKED;
             }
         }
     }

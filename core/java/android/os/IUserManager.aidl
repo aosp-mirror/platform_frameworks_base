@@ -87,4 +87,6 @@ interface IUserManager {
             in String[] disallowedPackages);
     boolean isUserUnlockingOrUnlocked(int userId);
     int getManagedProfileBadge(int userId);
+    boolean isUserUnlocked(int userId);
+    boolean isUserRunning(int userId);
 }
