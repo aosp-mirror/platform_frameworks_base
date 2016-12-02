@@ -1126,6 +1126,7 @@
         <item></item> <!-- STREAM_SYSTEM_ENFORCED -->
         <item></item> <!-- STREAM_DTMF -->
         <item></item> <!-- STREAM_TTS -->
+        <item>Accessibility</item> <!-- STREAM_ACCESSIBILITY -->
     </string-array>
 
     <string name="volume_stream_muted" translatable="false">%s silent</string>

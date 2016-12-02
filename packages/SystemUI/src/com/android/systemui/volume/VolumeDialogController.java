@@ -78,6 +78,7 @@ public class VolumeDialogController {
         AudioSystem.STREAM_SYSTEM_ENFORCED,
         AudioSystem.STREAM_TTS,
         AudioSystem.STREAM_VOICE_CALL,
+        AudioSystem.STREAM_ACCESSIBILITY,
     };
 
     private final HandlerThread mWorkerThread;
@@ -119,7 +120,26 @@ public class VolumeDialogController {
         mObserver = new SettingObserver(mWorker);
         mObserver.init();
         mReceiver.init();
-        mStreamTitles = mContext.getResources().getStringArray(R.array.volume_stream_titles);
+        final String[] titles =
+                mContext.getResources().getStringArray(R.array.volume_stream_titles);
+        if (STREAMS.length == titles.length) {
+            mStreamTitles = titles;
+        } else if (STREAMS.length > titles.length) {
+            Log.e(TAG, String.format("Missing stream titles (found %d, expected %d): "
+                    + " invalid resources for volume_stream_titles",
+                    titles.length, STREAMS.length));
+            mStreamTitles = new String[STREAMS.length];
+            System.arraycopy(titles, 0, mStreamTitles, 0, titles.length);
+            for (int i = titles.length ; i < STREAMS.length ; i++) {
+                mStreamTitles[i] = "";
+            }
+        } else { // STREAMS.length < titles.length
+            Log.e(TAG, String.format("Too many stream titles (found %d, expected %d): "
+                    + " invalid resources for volume_stream_titles",
+                    titles.length, STREAMS.length));
+            mStreamTitles = new String[STREAMS.length];
+            System.arraycopy(titles, 0, mStreamTitles, 0, STREAMS.length);
+        }
         mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator != null && mVibrator.hasVibrator();
     }
