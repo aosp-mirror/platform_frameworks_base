@@ -19,11 +19,14 @@ package com.android.server.content;
 import android.Manifest;
 import android.accounts.Account;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerNative;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentService;
 import android.content.ISyncStatusObserver;
+import android.content.Intent;
 import android.content.PeriodicSync;
 import android.content.pm.PackageManager;
 import android.content.SyncAdapterType;
@@ -45,6 +48,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
+
+import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -172,16 +177,17 @@ public final class ContentService extends IContentService.Stub {
             throw new IllegalArgumentException("You must pass a valid uri and observer");
         }
 
-        enforceCrossUserPermission(userHandle,
-                "no permission to observe other users' provider view");
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
 
-        if (userHandle < 0) {
-            if (userHandle == UserHandle.USER_CURRENT) {
-                userHandle = ActivityManager.getCurrentUser();
-            } else if (userHandle != UserHandle.USER_ALL) {
-                throw new InvalidParameterException("Bad user handle for registerContentObserver: "
-                        + userHandle);
-            }
+        userHandle = handleIncomingUser(uri, pid, uid,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION, userHandle);
+
+        final String msg = LocalServices.getService(ActivityManagerInternal.class)
+                .checkContentProviderAccess(uri.getAuthority(), userHandle);
+        if (msg != null) {
+            Log.w(TAG, "Ignoring content changes for " + uri + " from " + uid + ": " + msg);
+            return;
         }
 
         synchronized (mRootNode) {
@@ -224,24 +230,20 @@ public final class ContentService extends IContentService.Stub {
                     + " from observer " + observer + ", syncToNetwork " + syncToNetwork);
         }
 
-        // Notify for any user other than the caller's own requires permission.
-        final int callingUserHandle = UserHandle.getCallingUserId();
-        if (userHandle != callingUserHandle) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS,
-                    "no permission to notify other users");
-        }
-
-        // We passed the permission check; resolve pseudouser targets as appropriate
-        if (userHandle < 0) {
-            if (userHandle == UserHandle.USER_CURRENT) {
-                userHandle = ActivityManager.getCurrentUser();
-            } else if (userHandle != UserHandle.USER_ALL) {
-                throw new InvalidParameterException("Bad user handle for notifyChange: "
-                        + userHandle);
-            }
-        }
-
         final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
+        final int callingUserHandle = UserHandle.getCallingUserId();
+
+        userHandle = handleIncomingUser(uri, pid, uid,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION, userHandle);
+
+        final String msg = LocalServices.getService(ActivityManagerInternal.class)
+                .checkContentProviderAccess(uri.getAuthority(), userHandle);
+        if (msg != null) {
+            Log.w(TAG, "Ignoring notify for " + uri + " from " + uid + ": " + msg);
+            return;
+        }
+
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
         long identityToken = clearCallingIdentity();
@@ -879,6 +881,24 @@ public final class ContentService extends IContentService.Stub {
         ContentService service = new ContentService(context, factoryTest);
         ServiceManager.addService(ContentResolver.CONTENT_SERVICE_NAME, service);
         return service;
+    }
+
+    private int handleIncomingUser(Uri uri, int pid, int uid, int modeFlags, int userId) {
+        if (userId == UserHandle.USER_CURRENT) {
+            userId = ActivityManager.getCurrentUser();
+        }
+
+        if (userId == UserHandle.USER_ALL) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, TAG);
+        } else if (userId < 0) {
+            throw new IllegalArgumentException("Invalid user: " + userId);
+        } else if (userId != UserHandle.getCallingUserId()) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, TAG);
+        }
+
+        return userId;
     }
 
     /**
