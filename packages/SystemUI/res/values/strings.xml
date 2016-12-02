@@ -1010,6 +1010,13 @@
     <!-- Monitoring dialog title for normal devices  [CHAR LIMIT=35]-->
     <string name="monitoring_title">Network monitoring</string>
 
+    <!-- STOPSHIP Monitoring strings still need to be finalized and approved -->
+    <!-- Monitoring dialog subtitle for the section describing VPN [CHAR LIMIT=TODO]-->
+    <string name="monitoring_subtitle_vpn">VPN</string>
+
+    <!-- Monitoring dialog subtitle for the section describing network logging [CHAR LIMIT=TODO]-->
+    <string name="monitoring_subtitle_network_logging">Network Logging</string>
+
     <!-- Monitoring dialog disable vpn button [CHAR LIMIT=30] -->
     <string name="disable_vpn">Disable VPN</string>
 
@@ -1025,14 +1032,24 @@
     <!-- Monitoring dialog: Part of text body explaining what a Device Owner app can do [CHAR LIMIT=130] -->
     <string name="monitoring_description_do_body">Your administrator can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.</string>
 
-    <!-- Monitoring dialog: Part of text body explaining that a VPN is connected and what it can do, for devices managed by a Device Owner app [CHAR LIMIT=130] -->
-    <string name="monitoring_description_do_body_vpn">You\'re connected to <xliff:g id="vpn_app">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
-
     <!-- Monitoring dialog: Space that separates the body text and the "learn more" link that follows it. [CHAR LIMIT=5] -->
     <string name="monitoring_description_do_learn_more_separator">" "</string>
 
     <!-- Monitoring dialog: Link to learn more about what a Device Owner app can do [CHAR LIMIT=55] -->
     <string name="monitoring_description_do_learn_more">Learn more</string>
+
+    <!-- Monitoring dialog: Part of text body explaining that a VPN is connected and what it can do, for devices managed by a Device Owner app [CHAR LIMIT=130] -->
+    <string name="monitoring_description_do_body_vpn">You\'re connected to <xliff:g id="vpn_app">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
+
+    <!-- Monitoring dialog: Space that separates the VPN body text and the "Open VPN Settings" link that follows it. [CHAR LIMIT=5] -->
+    <string name="monitoring_description_vpn_settings_separator">" "</string>
+
+    <!-- Monitoring dialog: Link to open the VPN settings page [CHAR LIMIT=TODO] -->
+    <string name="monitoring_description_vpn_settings">Open VPN Settings</string>
+
+    <!-- Monitoring dialog: Network logging text [CHAR LIMIT=TODO] -->
+    <string name="monitoring_description_network_logging">Your admin has turned on network logging, which monitors traffic on your device.\n\nFor more information contact your admin.</string>
+
 
     <!-- Monitoring dialog VPN text [CHAR LIMIT=400] -->
     <string name="monitoring_description_vpn">You gave an app permission to set up a VPN connection.\n\nThis app can monitor your device and network activity, including emails, apps, and websites.</string>

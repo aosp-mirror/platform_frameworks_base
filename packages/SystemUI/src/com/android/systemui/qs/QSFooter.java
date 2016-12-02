@@ -31,6 +31,7 @@ import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.ImageView;
@@ -175,6 +176,7 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     private void createDialog() {
         final String deviceOwnerPackage = mSecurityController.getDeviceOwnerName();
         final String profileOwnerPackage = mSecurityController.getProfileOwnerName();
+        final boolean isNetworkLoggingEnabled = mSecurityController.isNetworkLoggingEnabled();
         final String primaryVpn = mSecurityController.getPrimaryVpnName();
         final String profileVpn = mSecurityController.getProfileVpnName();
         final CharSequence deviceOwnerOrganization =
@@ -186,24 +188,47 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         if (!isBranded) {
             mDialog.setTitle(getTitle(deviceOwnerPackage));
         }
-        mDialog.setMessage(getMessage(deviceOwnerPackage, profileOwnerPackage, primaryVpn,
-                profileVpn, deviceOwnerOrganization, hasProfileOwner, isBranded));
+        CharSequence msg = getMessage(deviceOwnerPackage, profileOwnerPackage, primaryVpn,
+                profileVpn, deviceOwnerOrganization, hasProfileOwner, isBranded);
+        if (deviceOwnerPackage == null) {
+            mDialog.setMessage(msg);
+        } else {
+            View dialogView = LayoutInflater.from(mContext)
+                   .inflate(R.layout.quick_settings_footer_dialog, null, false);
+            mDialog.setView(dialogView);
+            TextView deviceOwnerWarning =
+                    (TextView) dialogView.findViewById(R.id.device_owner_warning);
+            deviceOwnerWarning.setText(msg);
+            // Make the link "learn more" clickable.
+            deviceOwnerWarning.setMovementMethod(new LinkMovementMethod());
+            if (primaryVpn == null) {
+                dialogView.findViewById(R.id.vpn_icon).setVisibility(View.GONE);
+                dialogView.findViewById(R.id.vpn_subtitle).setVisibility(View.GONE);
+                dialogView.findViewById(R.id.vpn_warning).setVisibility(View.GONE);
+            } else {
+                final SpannableStringBuilder message = new SpannableStringBuilder();
+                message.append(mContext.getString(R.string.monitoring_description_do_body_vpn,
+                        primaryVpn));
+                message.append(mContext.getString(
+                        R.string.monitoring_description_vpn_settings_separator));
+                message.append(mContext.getString(R.string.monitoring_description_vpn_settings),
+                        new VpnSpan(), 0);
 
-        mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(isBranded), this);
-        if (mSecurityController.isVpnEnabled() && !mSecurityController.isVpnRestricted()) {
-            mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getSettingsButton(), this);
+                TextView vpnWarning = (TextView) dialogView.findViewById(R.id.vpn_warning);
+                vpnWarning.setText(message);
+                // Make the link "Open VPN Settings" clickable.
+                vpnWarning.setMovementMethod(new LinkMovementMethod());
+            }
+            if (!isNetworkLoggingEnabled) {
+                dialogView.findViewById(R.id.network_logging_icon).setVisibility(View.GONE);
+                dialogView.findViewById(R.id.network_logging_subtitle).setVisibility(View.GONE);
+                dialogView.findViewById(R.id.network_logging_warning).setVisibility(View.GONE);
+            }
         }
 
-        // Make the link "learn more" clickable.
-        // TODO: Reaching into SystemUIDialog's internal View hierarchy is ugly and error-prone.
-        // This is a temporary solution. b/33126622 will introduce a custom View hierarchy for this
-        // dialog, allowing us to set the movement method on the appropriate View without any
-        // knowledge of SystemUIDialog's internals.
-        mDialog.create();
-        ((TextView) mDialog.getWindow().findViewById(com.android.internal.R.id.message))
-                .setMovementMethod(new LinkMovementMethod());
-
+        mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(isBranded), this);
         mDialog.show();
+        mDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
     private String getSettingsButton() {
@@ -229,11 +254,6 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
             }
             message.append("\n\n");
             message.append(mContext.getString(R.string.monitoring_description_do_body));
-            if (primaryVpn != null) {
-                message.append("\n\n");
-                message.append(mContext.getString(R.string.monitoring_description_do_body_vpn,
-                        primaryVpn));
-            }
             message.append(mContext.getString(
                     R.string.monitoring_description_do_learn_more_separator));
             message.append(mContext.getString(R.string.monitoring_description_do_learn_more),
@@ -338,6 +358,16 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         @Override
         public boolean equals(Object object) {
             return object instanceof EnterprisePrivacySpan;
+        }
+    }
+
+    protected class VpnSpan extends ClickableSpan {
+        @Override
+        public void onClick(View widget) {
+            final Intent intent = new Intent(Settings.ACTION_VPN_SETTINGS);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            mDialog.dismiss();
+            mContext.startActivity(intent);
         }
     }
 }

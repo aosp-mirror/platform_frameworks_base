@@ -217,11 +217,6 @@ public class QSFooterTest extends SysuiTestCase {
                         DEVICE_OWNER_PACKAGE));
         message.append("\n\n");
         message.append(mResources.getString(R.string.monitoring_description_do_body));
-        if (hasVPN) {
-            message.append("\n\n");
-            message.append(mResources.getString(R.string.monitoring_description_do_body_vpn,
-                    VPN_PACKAGE));
-        }
         message.append(mResources.getString(
                 R.string.monitoring_description_do_learn_more_separator));
         message.append(mResources.getString(R.string.monitoring_description_do_learn_more),
