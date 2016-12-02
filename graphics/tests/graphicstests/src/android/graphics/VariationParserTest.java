@@ -105,6 +105,15 @@ public class VariationParserTest extends TestCase {
     }
 
     @SmallTest
+    public void testInvalidTagCharacters() {
+        FontListParser.Axis[] axis =
+                FontListParser.parseFontVariationSettings("'\u0000\u0000\u0000\u0000' 10");
+        assertEquals(0, axis.length);
+        axis = FontListParser.parseFontVariationSettings("'\u3042\u3044\u3046\u3048' 10");
+        assertEquals(0, axis.length);
+    }
+
+    @SmallTest
     public void testMakeTag() {
       assertEquals(0x77647468, FontListParser.makeTag('w', 'd', 't', 'h'));
       assertEquals(0x41582020, FontListParser.makeTag('A', 'X', ' ', ' '));
