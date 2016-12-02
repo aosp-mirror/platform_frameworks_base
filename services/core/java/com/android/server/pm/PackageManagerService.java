@@ -8916,6 +8916,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 PackageParser.PermissionGroup pg = pkg.permissionGroups.get(i);
                 PackageParser.PermissionGroup cur = mPermissionGroups.get(pg.info.name);
                 final String curPackageName = cur == null ? null : cur.info.packageName;
+                // Dont allow ephemeral apps to define new permission groups.
+                if (pkg.applicationInfo.isEphemeralApp()) {
+                    Slog.w(TAG, "Permission group " + pg.info.name + " from package "
+                            + pg.info.packageName
+                            + " ignored: ephemeral apps cannot define new permission groups.");
+                    continue;
+                }
                 final boolean isPackageUpdate = pg.info.packageName.equals(curPackageName);
                 if (cur == null || isPackageUpdate) {
                     mPermissionGroups.put(pg.info.name, pg);
@@ -8953,6 +8960,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             r = null;
             for (i=0; i<N; i++) {
                 PackageParser.Permission p = pkg.permissions.get(i);
+
+                // Dont allow ephemeral apps to define new permissions.
+                if (pkg.applicationInfo.isEphemeralApp()) {
+                    Slog.w(TAG, "Permission " + p.info.name + " from package "
+                            + p.info.packageName
+                            + " ignored: ephemeral apps cannot define new permissions.");
+                    continue;
+                }
 
                 // Assume by default that we did not install this permission into the system.
                 p.info.flags &= ~PermissionInfo.FLAG_INSTALLED;
