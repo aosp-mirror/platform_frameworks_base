@@ -179,7 +179,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
     }
 
-    private void ensureNotImmutable(@NonNull String id) {
+    public void ensureNotImmutable(@NonNull String id) {
         ensureNotImmutable(mShortcuts.get(id));
     }
 
@@ -706,6 +706,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             for (int i = mShortcuts.size() - 1; i >= 0; i--) {
                 final ShortcutInfo si = mShortcuts.valueAt(i);
 
+                // Disable dynamic shortcuts whose target activity is gone.
                 if (si.isDynamic()) {
                     if (!s.injectIsMainActivity(si.getActivity(), getPackageUserId())) {
                         Slog.w(TAG, String.format(

@@ -729,6 +729,10 @@ public class ShortcutManagerTestUtils {
         return new ShortcutListAsserter(list);
     }
 
+    public static ShortcutListAsserter assertWith(ShortcutInfo... list) {
+        return assertWith(list(list));
+    }
+
     /**
      * New style assertion that allows chained calls.
      */
@@ -883,6 +887,30 @@ public class ShortcutManagerTestUtils {
 
         public ShortcutListAsserter areAllDisabled() {
             forAllShortcuts(s -> assertFalse("id=" + s.getId(), s.isEnabled()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllFloating() {
+            forAllShortcuts(s -> assertTrue("id=" + s.getId(),
+                    s.isPinned() && !s.isDeclaredInManifest() && !s.isDynamic()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllNotFloating() {
+            forAllShortcuts(s -> assertTrue("id=" + s.getId(),
+                    !(s.isPinned() && !s.isDeclaredInManifest() && !s.isDynamic())));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllOrphan() {
+            forAllShortcuts(s -> assertTrue("id=" + s.getId(),
+                    !s.isPinned() && !s.isDeclaredInManifest() && !s.isDynamic()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllNotOrphan() {
+            forAllShortcuts(s -> assertTrue("id=" + s.getId(),
+                    s.isPinned() || s.isDeclaredInManifest() || s.isDynamic()));
             return this;
         }
 

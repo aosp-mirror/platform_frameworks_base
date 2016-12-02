@@ -16,21 +16,31 @@
 package android.content.pm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.os.Binder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import java.util.List;
 
 /**
+ * <p><strong>TODO Update the overview to how to use the O new features.</strong></p>
+ *
  * The ShortcutManager manages an app's <em>shortcuts</em>. Shortcuts provide users
  * with quick access to activities other than an app's main activity in the currently-active
  * launcher.  For example,
@@ -618,7 +628,7 @@ public class ShortcutManager {
      *
      * @throws IllegalStateException when the user is locked.
      */
-    public boolean updateShortcuts(List<ShortcutInfo> shortcutInfoList) {
+    public boolean updateShortcuts(@NonNull List<ShortcutInfo> shortcutInfoList) {
         try {
             return mService.updateShortcuts(mContext.getPackageName(),
                     new ParceledListSlice(shortcutInfoList), injectMyUserId());
@@ -809,6 +819,61 @@ public class ShortcutManager {
         try {
             mService.reportShortcutUsed(mContext.getPackageName(), shortcutId,
                     injectMyUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return {@code TRUE} if the default launcher supports
+     * {@link #requestPinShortcut(ShortcutInfo, IntentSender)}.
+     */
+    public boolean isRequestPinShortcutSupported() {
+        try {
+            return mService.isRequestPinShortcutSupported(injectMyUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request to create a pinned shortcut.  The default launcher will receive this request and
+     * ask the user for approval.  If the user approves it, the shortcut will be created and
+     * {@code resultIntent} will be sent.  Otherwise, no responses will be sent to the caller.
+     *
+     * <p>When a request is denied by the user, the caller app will not get any response.
+     *
+     * <p>Only apps with a foreground activity or a foreground service can call it.  Otherwise
+     * it'll throw {@link IllegalStateException}.
+     *
+     * <p>When an app calls this API when a previous request is still waiting for a response,
+     * the previous request will be canceled.
+     *
+     * @param shortcut New shortcut to pin.  If an app wants to pin an existing (either dynamic
+     *     or manifest) shortcut, then it only needs to have an ID, and other fields don't have to
+     *     be set, in which case, the target shortcut must be enabled.
+     *     If it's a new shortcut, all the mandatory fields, such as a short label, must be
+     *     set.
+     * @param resultIntent If not null, this intent will be sent when the shortcut is pinned.
+     *    Use {@link android.app.PendingIntent#getIntentSender()} to create a {@link IntentSender}.
+     *
+     * @return {@code TRUE} if the launcher supports this feature.  Note the API will return without
+     *    waiting for the user to respond, so getting {@code TRUE} from this API does *not* mean
+     *    the shortcut is pinned.  {@code FALSE} if the launcher doesn't support this feature.
+     *
+     * @see #isRequestPinShortcutSupported()
+     * @see IntentSender
+     * @see android.app.PendingIntent#getIntentSender()
+     *
+     * @throws IllegalArgumentException if a shortcut with the same ID exists and is disabled.
+     * @throws IllegalStateException The caller doesn't have a foreground activity or a foreground
+     * service.
+     */
+    public boolean requestPinShortcut(@NonNull ShortcutInfo shortcut,
+            @Nullable IntentSender resultIntent) {
+        try {
+            return mService.requestPinShortcut(mContext.getPackageName(), shortcut,
+                    resultIntent, injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
