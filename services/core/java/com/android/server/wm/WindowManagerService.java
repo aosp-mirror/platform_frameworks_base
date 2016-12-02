@@ -1415,7 +1415,8 @@ public class WindowManagerService extends IWindowManager.Stub
             winAnimator.mEnterAnimationPending = true;
             winAnimator.mEnteringAnimation = true;
             // Check if we need to prepare a transition for replacing window first.
-            if (atoken != null && !prepareWindowReplacementTransition(atoken)) {
+            if (atoken != null && atoken.isVisible()
+                    && !prepareWindowReplacementTransition(atoken)) {
                 // If not, check if need to set up a dummy transition during display freeze
                 // so that the unfreeze wait for the apps to draw. This might be needed if
                 // the app is relaunching.
