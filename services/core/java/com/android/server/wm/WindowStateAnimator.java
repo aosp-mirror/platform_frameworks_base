@@ -57,7 +57,6 @@ import android.os.Trace;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
-import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -1108,10 +1107,9 @@ class WindowStateAnimator {
 
     /**
      * Calculate the window-space crop rect and fill clipRect.
-     * @return true if clipRect has been filled otherwise, no window space
-     * crop should be applied.
+     * @return true if clipRect has been filled otherwise, no window space crop should be applied.
      */
-    boolean calculateCrop(Rect clipRect) {
+    private boolean calculateCrop(Rect clipRect) {
         final WindowState w = mWin;
         final DisplayContent displayContent = w.getDisplayContent();
         clipRect.setEmpty();
@@ -1130,7 +1128,6 @@ class WindowStateAnimator {
             return false;
         }
 
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         if (DEBUG_WINDOW_CROP) Slog.d(TAG,
                 "Updating crop win=" + w + " mLastCrop=" + mLastClipRect);
 
@@ -1139,7 +1136,7 @@ class WindowStateAnimator {
         if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Applying decor to crop win=" + w + " mDecorFrame="
                 + w.mDecorFrame + " mSystemDecorRect=" + mSystemDecorRect);
 
-        final boolean fullscreen = w.isFrameFullscreen(displayInfo);
+        final boolean fullscreen = w.fillsDisplay();
         final boolean isFreeformResizing =
                 w.isDragResizing() && w.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;
 

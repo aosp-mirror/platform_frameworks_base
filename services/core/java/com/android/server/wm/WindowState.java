@@ -60,8 +60,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static android.app.ActivityManager.StackId;
@@ -91,7 +89,6 @@ import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
@@ -1654,18 +1651,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && (!mIsChildWindow || !getParentWindow().hasMoved());
     }
 
-    boolean isObscuringFullscreen(final DisplayInfo displayInfo) {
+    boolean isObscuringDisplay() {
         Task task = getTask();
         if (task != null && task.mStack != null && !task.mStack.fillsParent()) {
             return false;
         }
-        if (!isOpaqueDrawn() || !isFrameFullscreen(displayInfo)) {
-            return false;
-        }
-        return true;
+        return isOpaqueDrawn() && fillsDisplay();
     }
 
-    boolean isFrameFullscreen(final DisplayInfo displayInfo) {
+    boolean fillsDisplay() {
+        final DisplayInfo displayInfo = getDisplayInfo();
         return mFrame.left <= 0 && mFrame.top <= 0
                 && mFrame.right >= displayInfo.appWidth && mFrame.bottom >= displayInfo.appHeight;
     }

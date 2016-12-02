@@ -66,6 +66,8 @@ class WindowLayersController {
     private boolean mAnyLayerChanged;
     private int mHighestLayerInImeTargetBaseLayer;
     private WindowState mImeTarget;
+    private boolean mAboveImeTarget;
+    private ArrayDeque<WindowState> mAboveImeTargetAppWindows = new ArrayDeque();
 
     final void assignWindowLayers(DisplayContent dc) {
         if (DEBUG_LAYERS) Slog.v(TAG_WM, "Assigning layers based",
@@ -143,6 +145,8 @@ class WindowLayersController {
 
         mImeTarget = mService.mInputMethodTarget;
         mHighestLayerInImeTargetBaseLayer = (mImeTarget != null) ? mImeTarget.mBaseLayer : 0;
+        mAboveImeTarget = false;
+        mAboveImeTargetAppWindows.clear();
     }
 
     private void collectSpecialWindows(WindowState w) {
@@ -157,6 +161,20 @@ class WindowLayersController {
             mInputMethodWindows.add(w);
             return;
         }
+        if (mImeTarget != null) {
+            if (w.getParentWindow() == mImeTarget && w.mSubLayer > 0) {
+                // Child windows of the ime target with a positive sub-layer should be placed above
+                // the IME.
+                mAboveImeTargetAppWindows.add(w);
+            } else if (mAboveImeTarget && w.mAppToken != null) {
+                // windows of apps above the IME target should be placed above the IME.
+                mAboveImeTargetAppWindows.add(w);
+            }
+            if (w == mImeTarget) {
+                mAboveImeTarget = true;
+            }
+        }
+
         final Task task = w.getTask();
         if (task == null) {
             return;
@@ -210,6 +228,12 @@ class WindowLayersController {
 
             while (!mInputMethodWindows.isEmpty()) {
                 layer = assignAndIncreaseLayerIfNeeded(mInputMethodWindows.remove(), layer);
+            }
+
+            // Adjust app windows the should be displayed above the IME since they are above the IME
+            // target.
+            while (!mAboveImeTargetAppWindows.isEmpty()) {
+                layer = assignAndIncreaseLayerIfNeeded(mAboveImeTargetAppWindows.remove(), layer);
             }
         }
 
