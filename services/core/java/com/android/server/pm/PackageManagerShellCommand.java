@@ -51,9 +51,11 @@ import android.os.ShellCommand;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.SizedInputStream;
+import com.android.server.SystemConfig;
 
 import dalvik.system.DexFile;
 
@@ -135,6 +137,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSuspend(false);
                 case "set-home-activity":
                     return runSetHomeActivity();
+                case "get-privapp-permissions":
+                    return runGetPrivappPermissions();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -1162,6 +1166,18 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println(e.toString());
             return 1;
         }
+    }
+
+    private int runGetPrivappPermissions() {
+        final String pkg = getNextArg();
+        if (pkg == null) {
+            System.err.println("Error: no package specified.");
+            return 1;
+        }
+        ArraySet<String> privAppPermissions = SystemConfig.getInstance().getPrivAppPermissions(pkg);
+        getOutPrintWriter().println(privAppPermissions == null
+                ? "{}" : privAppPermissions.toString());
+        return 0;
     }
 
     private static String checkAbiArgument(String abi) {
