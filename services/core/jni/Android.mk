@@ -52,6 +52,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_SHARED_LIBRARIES += \
     libandroid_runtime \
     libandroidfw \
+    libbase \
     libbinder \
     libcutils \
     liblog \
