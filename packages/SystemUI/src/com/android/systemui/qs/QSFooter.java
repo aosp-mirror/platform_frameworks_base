@@ -24,9 +24,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.UserHandle;
+import android.provider.Settings;
+import android.text.SpannableStringBuilder;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -159,24 +164,60 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     }
 
     private void createDialog() {
-        String deviceOwner = mSecurityController.getDeviceOwnerName();
-        String profileOwner = mSecurityController.getProfileOwnerName();
-        String primaryVpn = mSecurityController.getPrimaryVpnName();
-        String profileVpn = mSecurityController.getProfileVpnName();
-        boolean managed = mSecurityController.hasProfileOwner();
-        boolean isBranded = deviceOwner == null && mSecurityController.isVpnBranded();
+        final String deviceOwnerPackage = mSecurityController.getDeviceOwnerName();
+        final String profileOwnerPackage = mSecurityController.getProfileOwnerName();
+        final boolean isNetworkLoggingEnabled = mSecurityController.isNetworkLoggingEnabled();
+        final String primaryVpn = mSecurityController.getPrimaryVpnName();
+        final String profileVpn = mSecurityController.getProfileVpnName();
+        boolean hasProfileOwner = mSecurityController.hasProfileOwner();
+        boolean isBranded = deviceOwnerPackage == null && mSecurityController.isVpnBranded();
 
         mDialog = new SystemUIDialog(mContext);
         if (!isBranded) {
-            mDialog.setTitle(getTitle(deviceOwner));
+            mDialog.setTitle(getTitle(deviceOwnerPackage));
         }
-        mDialog.setMessage(getMessage(deviceOwner, profileOwner, primaryVpn, profileVpn, managed,
-                isBranded));
+        CharSequence msg = getMessage(deviceOwnerPackage, profileOwnerPackage, primaryVpn,
+                profileVpn, hasProfileOwner, isBranded);
+        if (deviceOwnerPackage == null) {
+            mDialog.setMessage(msg);
+        } else {
+            View dialogView = LayoutInflater.from(mContext)
+                   .inflate(R.layout.quick_settings_footer_dialog, null, false);
+            mDialog.setView(dialogView);
+            TextView deviceOwnerWarning =
+                    (TextView) dialogView.findViewById(R.id.device_owner_warning);
+            deviceOwnerWarning.setText(msg);
+            // Make the link "learn more" clickable.
+            deviceOwnerWarning.setMovementMethod(new LinkMovementMethod());
+            if (primaryVpn == null) {
+                dialogView.findViewById(R.id.vpn_icon).setVisibility(View.GONE);
+                dialogView.findViewById(R.id.vpn_subtitle).setVisibility(View.GONE);
+                dialogView.findViewById(R.id.vpn_warning).setVisibility(View.GONE);
+            } else {
+                final SpannableStringBuilder message = new SpannableStringBuilder();
+                message.append(mContext.getString(R.string.monitoring_description_do_body_vpn,
+                        primaryVpn));
+                message.append(mContext.getString(
+                        R.string.monitoring_description_vpn_settings_separator));
+                message.append(mContext.getString(R.string.monitoring_description_vpn_settings),
+                        new VpnSpan(), 0);
+
+                TextView vpnWarning = (TextView) dialogView.findViewById(R.id.vpn_warning);
+                vpnWarning.setText(message);
+                // Make the link "Open VPN Settings" clickable.
+                vpnWarning.setMovementMethod(new LinkMovementMethod());
+            }
+            if (!isNetworkLoggingEnabled) {
+                dialogView.findViewById(R.id.network_logging_icon).setVisibility(View.GONE);
+                dialogView.findViewById(R.id.network_logging_subtitle).setVisibility(View.GONE);
+                dialogView.findViewById(R.id.network_logging_warning).setVisibility(View.GONE);
+            }
+        }
+
         mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(isBranded), this);
-        if (mSecurityController.isVpnEnabled() && !mSecurityController.isVpnRestricted()) {
-            mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getSettingsButton(), this);
-        }
         mDialog.show();
+        mDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+                                      ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
     private String getSettingsButton() {
@@ -187,22 +228,15 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         return mContext.getString(isBranded ? android.R.string.ok : R.string.quick_settings_done);
     }
 
-    private String getMessage(String deviceOwner, String profileOwner, String primaryVpn,
-            String profileVpn, boolean primaryUserIsManaged, boolean isBranded) {
-        // Show a special warning when the device has device owner, but --
-        // TODO See b/25779452 -- device owner doesn't actually have monitoring power.
-        if (deviceOwner != null) {
-            if (primaryVpn != null) {
-                return mContext.getString(R.string.monitoring_description_vpn_app_device_owned,
-                        deviceOwner, primaryVpn);
-            } else {
-                return mContext.getString(R.string.monitoring_description_device_owned,
-                        deviceOwner);
-            }
+    protected CharSequence getMessage(String deviceOwnerPackage, String profileOwnerPackage,
+            String primaryVpn, String profileVpn, boolean hasProfileOwner, boolean isBranded) {
+        if (deviceOwnerPackage != null) {
+            return mContext.getString(R.string.monitoring_description_device_owned,
+                    deviceOwnerPackage);
         } else if (primaryVpn != null) {
             if (profileVpn != null) {
                 return mContext.getString(R.string.monitoring_description_app_personal_work,
-                        profileOwner, profileVpn, primaryVpn);
+                        profileOwnerPackage, profileVpn, primaryVpn);
             } else {
                 if (isBranded) {
                     return mContext.getString(R.string.branded_monitoring_description_app_personal,
@@ -214,10 +248,10 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
             }
         } else if (profileVpn != null) {
             return mContext.getString(R.string.monitoring_description_app_work,
-                    profileOwner, profileVpn);
-        } else if (profileOwner != null && primaryUserIsManaged) {
+                    profileOwnerPackage, profileVpn);
+        } else if (profileOwnerPackage != null && hasProfileOwner) {
             return mContext.getString(R.string.monitoring_description_device_owned,
-                    profileOwner);
+                    profileOwnerPackage);
         } else {
             // No device owner, no personal VPN, no work VPN, no user owner. Why are we here?
             return null;
@@ -286,4 +320,13 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         }
     }
 
+    protected class VpnSpan extends ClickableSpan {
+        @Override
+        public void onClick(View widget) {
+            final Intent intent = new Intent(Settings.ACTION_VPN_SETTINGS);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            mDialog.dismiss();
+            mContext.startActivity(intent);
+        }
+    }
 }
