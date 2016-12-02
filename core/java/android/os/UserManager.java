@@ -186,6 +186,8 @@ public class UserManager {
      * Specifies if a user is disallowed from configuring bluetooth.
      * This does <em>not</em> restrict the user from turning bluetooth on or off.
      * The default value is <code>false</code>.
+     * <p>This restriction doesn't prevent the user from using bluetooth. For disallowing usage of
+     * bluetooth completely on the device, use {@link #DISALLOW_BLUETOOTH}.
      * <p>This restriction has no effect in a managed profile.
      *
      * <p>Key for user restrictions.
@@ -195,6 +197,20 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
+
+    /**
+     * Specifies if bluetooth is disallowed on the device.
+     *
+     * <p> This restriction can only be set by the device owner and the profile owner on the
+     * primary user and it applies globally - i.e. it disables bluetooth on the entire device.
+     * <p>The default value is <code>false</code>.
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_BLUETOOTH = "no_bluetooth";
 
     /**
      * Specifies if a user is disallowed from transferring files over
