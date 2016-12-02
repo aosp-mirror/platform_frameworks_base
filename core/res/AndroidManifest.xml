@@ -182,6 +182,10 @@
         android:name="android.bluetooth.input.profile.action.VIRTUAL_UNPLUG_STATUS" />
     <protected-broadcast
         android:name="android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.mapmce.profile.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.mapmce.profile.action.MESSAGE_RECEIVED" />
+    <protected-broadcast android:name="android.bluetooth.mapmce.profile.action.MESSAGE_SENT_SUCCESSFULLY" />
+    <protected-broadcast android:name="android.bluetooth.mapmce.profile.action.MESSAGE_DELIVERED_SUCCESSFULLY" />
     <protected-broadcast
         android:name="com.android.bluetooth.BluetoothMapContentObserver.action.MESSAGE_SENT" />
     <protected-broadcast
@@ -189,6 +193,7 @@
     <protected-broadcast
         android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.pbap.intent.action.PBAP_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.sap.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.btopp.intent.action.INCOMING_FILE_NOTIFICATION" />
     <protected-broadcast android:name="android.btopp.intent.action.USER_CONFIRMATION_TIMEOUT" />
