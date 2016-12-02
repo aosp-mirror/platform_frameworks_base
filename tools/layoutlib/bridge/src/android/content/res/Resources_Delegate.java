@@ -405,9 +405,6 @@ public class Resources_Delegate {
             rv = resources.mContext.getRenderResources().resolveResValue(rv);
             if (rv != null) {
                 return rv.getValue();
-            } else {
-                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE,
-                        "Unable to resolve resource " + ref, null);
             }
         }
         // Not a reference.

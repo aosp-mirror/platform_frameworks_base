@@ -69,6 +69,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.android.collect.Lists;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -313,6 +314,12 @@ public class Main {
         sBridge = new Bridge();
         sBridge.init(ConfigGenerator.loadProperties(buildProp), fontLocation,
                 ConfigGenerator.getEnumMap(attrs), getLayoutLog());
+        Bridge.getLock().lock();
+        try {
+            Bridge.setLog(getLayoutLog());
+        } finally {
+            Bridge.getLock().unlock();
+        }
     }
 
     @Before
@@ -622,6 +629,36 @@ public class Main {
                 resources.getResourcePackageName(id));
         assertEquals("string", resources.getResourceTypeName(id));
         assertEquals("app_name", resources.getResourceEntryName(id));
+    }
+
+    @Test
+    public void testStringEscaping() throws Exception {
+        // Setup
+        // Create the layout pull parser for our resources (empty.xml can not be part of the test
+        // app as it won't compile).
+        LayoutPullParser parser = new LayoutPullParser("/empty.xml");
+        // Create LayoutLibCallback.
+        LayoutLibTestCallback layoutLibCallback =
+                new LayoutLibTestCallback(getLogger(), mDefaultClassLoader);
+        layoutLibCallback.initResources();
+        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_4,
+                layoutLibCallback, "AppTheme", true, RenderingMode.NORMAL, 22);
+        AssetManager assetManager = AssetManager.getSystem();
+        DisplayMetrics metrics = new DisplayMetrics();
+        Configuration configuration = RenderAction.getConfiguration(params);
+        Resources resources = new Resources(assetManager, metrics, configuration);
+        resources.mLayoutlibCallback = params.getLayoutlibCallback();
+        resources.mContext =
+                new BridgeContext(params.getProjectKey(), metrics, params.getResources(),
+                        params.getAssets(), params.getLayoutlibCallback(), configuration,
+                        params.getTargetSdkVersion(), params.isRtlSupported());
+
+        int id = resources.mLayoutlibCallback.getResourceId(ResourceType.ARRAY, "string_array");
+        String[] strings = resources.getStringArray(id);
+        assertArrayEquals(
+                new String[]{"mystring", "Hello world!", "candidates", "Unknown", "?EC"},
+                strings);
+        assertTrue(sRenderMessages.isEmpty());
     }
 
     @NonNull
