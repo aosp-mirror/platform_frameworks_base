@@ -95,7 +95,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Properties;
-
+import java.util.Map;
+import java.util.HashMap;
 import libcore.io.IoUtils;
 
 /**
@@ -211,23 +212,17 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static final int AGPS_RIL_REQUEST_SETID_IMSI = 1;
     private static final int AGPS_RIL_REQUEST_SETID_MSISDN = 2;
 
-    // Request ref location
-    private static final int AGPS_RIL_REQUEST_REFLOC_CELLID = 1;
-    private static final int AGPS_RIL_REQUEST_REFLOC_MAC = 2;
+    //TODO(b/33112647): Create gps_debug.conf with commented career parameters.
+    private static final String DEBUG_PROPERTIES_FILE = "/etc/gps_debug.conf";
 
     // ref. location info
     private static final int AGPS_REF_LOCATION_TYPE_GSM_CELLID = 1;
     private static final int AGPS_REF_LOCATION_TYPE_UMTS_CELLID = 2;
-    private static final int AGPS_REG_LOCATION_TYPE_MAC        = 3;
 
     // set id info
     private static final int AGPS_SETID_TYPE_NONE = 0;
     private static final int AGPS_SETID_TYPE_IMSI = 1;
     private static final int AGPS_SETID_TYPE_MSISDN = 2;
-
-    private static final String PROPERTIES_FILE_PREFIX = "/etc/gps";
-    private static final String PROPERTIES_FILE_SUFFIX = ".conf";
-    private static final String DEFAULT_PROPERTIES_FILE = PROPERTIES_FILE_PREFIX + PROPERTIES_FILE_SUFFIX;
 
     private static final int GPS_GEOFENCE_UNAVAILABLE = 1<<0L;
     private static final int GPS_GEOFENCE_AVAILABLE = 1<<1L;
@@ -501,10 +496,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 startNavigating(false);
             } else if (action.equals(ALARM_TIMEOUT)) {
                 hibernate();
-            } else if (action.equals(Intents.DATA_SMS_RECEIVED_ACTION)) {
-                checkSmsSuplInit(intent);
-            } else if (action.equals(Intents.WAP_PUSH_RECEIVED_ACTION)) {
-                checkWapSuplInit(intent);
             } else if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(action)
                     || PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)
@@ -557,31 +548,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
     }
 
-    private void checkSmsSuplInit(Intent intent) {
-        SmsMessage[] messages = Intents.getMessagesFromIntent(intent);
-        if (messages == null) {
-            Log.e(TAG, "Message does not exist in the intent.");
-            return;
-        }
-
-        for (SmsMessage message : messages) {
-            if (message != null && message.mWrappedSmsMessage != null) {
-                byte[] suplInit = message.getUserData();
-                if (suplInit != null) {
-                    native_agps_ni_message(suplInit, suplInit.length);
-                }
-            }
-        }
-    }
-
-    private void checkWapSuplInit(Intent intent) {
-        byte[] suplInit = intent.getByteArrayExtra("data");
-        if (suplInit == null) {
-            return;
-        }
-        native_agps_ni_message(suplInit,suplInit.length);
-    }
-
     private void updateLowPowerMode() {
         // Disable GPS if we are in device idle mode.
         boolean disableGps = mPowerManager.isDeviceIdleMode();
@@ -602,23 +568,14 @@ public class GnssLocationProvider implements LocationProviderInterface {
         return native_is_supported();
     }
 
+    interface SetCarrierProperty {
+        public boolean set(int value);
+    }
+
     private void reloadGpsProperties(Context context, Properties properties) {
         if (DEBUG) Log.d(TAG, "Reset GPS properties, previous size = " + properties.size());
         loadPropertiesFromResource(context, properties);
 
-        boolean isPropertiesLoadedFromFile = false;
-        final String gpsHardware = SystemProperties.get("ro.hardware.gps");
-
-        if (!TextUtils.isEmpty(gpsHardware)) {
-            final String propFilename =
-                    PROPERTIES_FILE_PREFIX + "." + gpsHardware + PROPERTIES_FILE_SUFFIX;
-            isPropertiesLoadedFromFile =
-                    loadPropertiesFromFile(propFilename, properties);
-        }
-        if (!isPropertiesLoadedFromFile) {
-            loadPropertiesFromFile(DEFAULT_PROPERTIES_FILE, properties);
-        }
-        if (DEBUG) Log.d(TAG, "GPS properties reloaded, size = " + properties.size());
         String lpp_prof = SystemProperties.get(LPP_PROFILE);
         if (!TextUtils.isEmpty(lpp_prof)) {
                 // override default value of this if lpp_prof is not empty
@@ -636,16 +593,37 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 Log.e(TAG, "unable to parse C2K_PORT: " + portString);
             }
         }
-
+        /*
+         * Allow carrier properties to be loaded from a  debug configuration file.
+         */
+        loadPropertiesFromFile(DEBUG_PROPERTIES_FILE, properties);
         if (native_is_gnss_configuration_supported()) {
-            try {
-                // Convert properties to string contents and send it to HAL.
-                ByteArrayOutputStream baos = new ByteArrayOutputStream(4096);
-                properties.store(baos, null);
-                native_configuration_update(baos.toString());
-                if (DEBUG) Log.d(TAG, "final config = " + baos.toString());
-            } catch (IOException ex) {
-                Log.e(TAG, "failed to dump properties contents");
+            Map<String, SetCarrierProperty> map = new HashMap<String, SetCarrierProperty>() {
+                {
+                    put("SUPL_VER", (val) -> native_set_supl_version(val));
+                    put("SUPL_MODE", (val) -> native_set_supl_mode(val));
+                    put("SUPL_ES", (val) -> native_set_supl_es(val));
+                    put("LPP_PROFILE", (val) -> native_set_lpp_profile(val));
+                    put("A_GLONASS_POS_PROTOCOL_SELECT", (val) -> native_set_gnss_pos_protocol_select(val));
+                    put("USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL", (val) -> native_set_emergency_supl_pdn(val));
+                    put("GPS_LOCK", (val) -> native_set_gps_lock(val));
+                }
+            };
+
+            for(Entry<String, SetCarrierProperty> entry : map.entrySet()) {
+                String propertyName = entry.getKey();
+                String propertyValueString = properties.getProperty(propertyName);
+                if (propertyValueString != null) {
+                    try {
+                          int propertyValueInt = Integer.decode(propertyValueString);
+                          boolean result = entry.getValue().set(propertyValueInt);
+                          if (result == false) {
+                              Log.e(TAG, "Unable to set " + propertyName);
+                          }
+                    } catch (NumberFormatException e) {
+                          Log.e(TAG, "unable to parse propertyName: " + propertyValueString);
+                    }
+                }
             }
         } else if (DEBUG) {
             Log.d(TAG, "Skipped configuration update because GNSS configuration in GPS HAL is not"
@@ -692,7 +670,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
 
         } catch (IOException e) {
-            Log.w(TAG, "Could not open GPS configuration file " + filename);
+            Log.v(TAG, "Could not open GPS configuration file " + filename);
             return false;
         }
         return true;
@@ -1973,8 +1951,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             String requestorId,
             String text,
             int requestorIdEncoding,
-            int textEncoding,
-            String extras  // Encoded extra data
+            int textEncoding
         )
     {
         Log.i(TAG, "reportNiNotification: entered");
@@ -2002,28 +1979,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
         notification.text = text;
         notification.requestorIdEncoding = requestorIdEncoding;
         notification.textEncoding = textEncoding;
-
-        // Process extras, assuming the format is
-        // one of more lines of "key = value"
-        Bundle bundle = new Bundle();
-
-        if (extras == null) extras = "";
-        Properties extraProp = new Properties();
-
-        try {
-            extraProp.load(new StringReader(extras));
-        }
-        catch (IOException e)
-        {
-            Log.e(TAG, "reportNiNotification cannot parse extras data: " + extras);
-        }
-
-        for (Entry<Object, Object> ent : extraProp.entrySet())
-        {
-            bundle.putString((String) ent.getKey(), (String) ent.getValue());
-        }
-
-        notification.extras = bundle;
 
         mNIHandler.handleNiNotification(notification);
     }
@@ -2075,7 +2030,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
      * Called from native code to request reference location info
      */
 
-    private void requestRefLocation(int flags) {
+    private void requestRefLocation() {
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
         final int phoneType = phone.getPhoneType();
@@ -2547,5 +2502,12 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private native boolean native_stop_navigation_message_collection();
 
     // GNSS Configuration
-    private static native void native_configuration_update(String configData);
+    private static native boolean native_set_supl_version(int version);
+    private static native boolean native_set_supl_mode(int mode);
+    private static native boolean native_set_supl_es(int es);
+    private static native boolean native_set_lpp_profile(int lppProfile);
+    private static native boolean native_set_gnss_pos_protocol_select(int gnssPosProtocolSelect);
+    private static native boolean native_set_gps_lock(int gpsLock);
+    private static native boolean native_set_emergency_supl_pdn(int emergencySuplPdn);
+
 }

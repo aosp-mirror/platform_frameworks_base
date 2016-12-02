@@ -131,14 +131,11 @@ public class GpsNetInitiatedHandler {
         public String text;
         public int requestorIdEncoding;
         public int textEncoding;
-        public Bundle extras;
     };
 
     public static class GpsNiResponse {
         /* User response, one of the values in GpsUserResponseType */
         int userResponse;
-        /* Optional extra data to pass with the user response */
-        Bundle extras;
     };
 
     private final BroadcastReceiver mBroadcastReciever = new BroadcastReceiver() {
