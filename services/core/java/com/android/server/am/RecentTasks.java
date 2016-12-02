@@ -130,8 +130,8 @@ class RecentTasks extends ArrayList<TaskRecord> {
 
     void notifyTaskPersisterLocked(TaskRecord task, boolean flush) {
         final ActivityStack stack = task != null ? task.getStack() : null;
-        if (stack != null && stack.isHomeStack()) {
-            // Never persist the home stack.
+        if (stack != null && stack.isHomeOrRecentsStack()) {
+            // Never persist the home or recents stack.
             return;
         }
         syncPersistentTaskIdsLocked();
@@ -150,7 +150,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
         for (int i = size() - 1; i >= 0; i--) {
             final TaskRecord task = get(i);
             final ActivityStack stack = task.getStack();
-            if (task.isPersistable && (stack == null || !stack.isHomeStack())) {
+            if (task.isPersistable && (stack == null || !stack.isHomeOrRecentsStack())) {
                 // Set of persisted taskIds for task.userId should not be null here
                 // TODO Investigate why it can happen. For now initialize with an empty set
                 if (mPersistedTaskIds.get(task.userId) == null) {

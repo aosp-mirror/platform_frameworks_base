@@ -32,6 +32,7 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.isStaticStack;
+import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -589,7 +590,7 @@ class ActivityStarter {
     }
 
     void startHomeActivityLocked(Intent intent, ActivityInfo aInfo, String reason) {
-        mSupervisor.moveHomeStackTaskToTop(HOME_ACTIVITY_TYPE, reason);
+        mSupervisor.moveHomeStackTaskToTop(reason);
         startActivityLocked(null /*caller*/, intent, null /*ephemeralIntent*/,
                 null /*resolvedType*/, aInfo, null /*rInfo*/, null /*voiceSession*/,
                 null /*voiceInteractor*/, null /*resultTo*/, null /*resultWho*/,
@@ -1524,8 +1525,8 @@ class ActivityStarter {
 
     private void updateTaskReturnToType(
             TaskRecord task, int launchFlags, ActivityStack focusedStack) {
-        if (focusedStack != null && focusedStack.isHomeStack() && focusedStack.topTask() != null
-                && focusedStack.topTask().isOnTopLauncher()) {
+        if (focusedStack != null && focusedStack.isHomeOrRecentsStack()
+                && focusedStack.topTask() != null && focusedStack.topTask().isOnTopLauncher()) {
             // Since an on-top launcher will is moved to back when tasks are launched from it,
             // those tasks should first try to return to a non-home activity.
             // This also makes sure that non-home activities are visible under a transparent
@@ -1869,7 +1870,10 @@ class ActivityStarter {
     private ActivityStack computeStackFocus(ActivityRecord r, boolean newTask, Rect bounds,
             int launchFlags, ActivityOptions aOptions) {
         final TaskRecord task = r.task;
-        if (!(r.isApplicationActivity() || (task != null && task.isApplicationTask()))) {
+        if (r.isRecentsActivity()) {
+            return mSupervisor.getStack(RECENTS_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
+        }
+        if (r.isHomeActivity()) {
             return mSupervisor.mHomeStack;
         }
 

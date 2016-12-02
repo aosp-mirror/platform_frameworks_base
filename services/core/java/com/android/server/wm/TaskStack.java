@@ -1183,7 +1183,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     @Override
     public boolean dimFullscreen() {
-        return mStackId == HOME_STACK_ID || fillsParent();
+        return StackId.isHomeOrRecentsStack(mStackId) || fillsParent();
     }
 
     @Override
