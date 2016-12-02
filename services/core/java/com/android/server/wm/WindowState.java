@@ -3251,7 +3251,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     pw.print(mPolicyVisibilityAfterAnim);
                     pw.print(" mAppOpVisibility=");
                     pw.print(mAppOpVisibility);
-                    pw.print(" parentHidden="); pw.println(isParentWindowHidden());
+                    pw.print(" parentHidden="); pw.print(isParentWindowHidden());
                     pw.print(" mPermanentlyHidden="); pw.println(mPermanentlyHidden);
         }
         if (!mRelayoutCalled || mLayoutNeeded) {
@@ -3837,7 +3837,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean forAllWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
         if (mChildren.isEmpty()) {
             // The window has no children so we just return it.
-            return callback.apply(this);
+            return applyInOrderWithImeWindows(callback, traverseTopToBottom);
         }
 
         if (traverseTopToBottom) {
@@ -3866,7 +3866,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             child = mChildren.get(i);
         }
 
-        if (callback.apply(this)) {
+        if (applyInOrderWithImeWindows(callback, false /* traverseTopToBottom */)) {
             return true;
         }
 
@@ -3902,7 +3902,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             child = mChildren.get(i);
         }
 
-        if (callback.apply(this)) {
+        if (applyInOrderWithImeWindows(callback, true /* traverseTopToBottom */)) {
             return true;
         }
 
@@ -3915,6 +3915,35 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 break;
             }
             child = mChildren.get(i);
+        }
+
+        return false;
+    }
+
+    private boolean applyInOrderWithImeWindows(ToBooleanFunction<WindowState> callback,
+            boolean traverseTopToBottom) {
+        if (traverseTopToBottom) {
+            if (mService.mInputMethodTarget == this) {
+                // This window is the current IME target, so we need to process the IME windows
+                // directly above it.
+                if (getDisplayContent().forAllImeWindows(callback, traverseTopToBottom)) {
+                    return true;
+                }
+            }
+            if (callback.apply(this)) {
+                return true;
+            }
+        } else {
+            if (callback.apply(this)) {
+                return true;
+            }
+            if (mService.mInputMethodTarget == this) {
+                // This window is the current IME target, so we need to process the IME windows
+                // directly above it.
+                if (getDisplayContent().forAllImeWindows(callback, traverseTopToBottom)) {
+                    return true;
+                }
+            }
         }
 
         return false;

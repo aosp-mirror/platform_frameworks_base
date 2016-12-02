@@ -22,7 +22,6 @@ import org.junit.Before;
 import android.content.Context;
 import android.os.IBinder;
 import android.support.test.InstrumentationRegistry;
-import android.view.Display;
 import android.view.IWindow;
 import android.view.WindowManager;
 
@@ -31,6 +30,15 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.content.res.Configuration.EMPTY;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -40,15 +48,49 @@ public class WindowTestsBase {
     static WindowManagerService sWm = null;
     private final IWindow mIWindow = new TestIWindow();
     private final Session mMockSession = mock(Session.class);
-    Display mDisplay;
     private static int sNextStackId = FIRST_DYNAMIC_STACK_ID;
     private static int sNextTaskId = 0;
 
+    private static boolean sOneTimeSetupDone = false;
+    protected static DisplayContent sDisplayContent;
+    protected static WindowLayersController sLayersController;
+    protected static WindowState sWallpaperWindow;
+    protected static WindowState sImeWindow;
+    protected static WindowState sImeDialogWindow;
+    protected static WindowState sStatusBarWindow;
+    protected static WindowState sDockedDividerWindow;
+    protected static WindowState sNavBarWindow;
+    protected static WindowState sAppWindow;
+    protected static WindowState sChildAppWindowAbove;
+    protected static WindowState sChildAppWindowBelow;
+
     @Before
     public void setUp() throws Exception {
+        if (sOneTimeSetupDone) {
+            return;
+        }
+        sOneTimeSetupDone = true;
         final Context context = InstrumentationRegistry.getTargetContext();
         sWm = TestWindowManagerPolicy.getWindowManagerService(context);
-        mDisplay = context.getDisplay();
+        sLayersController = new WindowLayersController(sWm);
+        sDisplayContent = new DisplayContent(context.getDisplay(), sWm, sLayersController,
+                new WallpaperController(sWm));
+
+        // Set-up some common windows.
+        sWallpaperWindow = createWindow(null, TYPE_WALLPAPER, sDisplayContent, "wallpaperWindow");
+        sImeWindow = createWindow(null, TYPE_INPUT_METHOD, sDisplayContent, "sImeWindow");
+        sImeDialogWindow =
+                createWindow(null, TYPE_INPUT_METHOD_DIALOG, sDisplayContent, "sImeDialogWindow");
+        sStatusBarWindow = createWindow(null, TYPE_STATUS_BAR, sDisplayContent, "sStatusBarWindow");
+        sNavBarWindow =
+                createWindow(null, TYPE_NAVIGATION_BAR, sStatusBarWindow.mToken, "sNavBarWindow");
+        sDockedDividerWindow =
+                createWindow(null, TYPE_DOCK_DIVIDER, sDisplayContent, "sDockedDividerWindow");
+        sAppWindow = createWindow(null, TYPE_BASE_APPLICATION, sDisplayContent, "sAppWindow");
+        sChildAppWindowAbove = createWindow(sAppWindow,
+                TYPE_APPLICATION_ATTACHED_DIALOG, sAppWindow.mToken, "sChildAppWindowAbove");
+        sChildAppWindowBelow = createWindow(sAppWindow,
+                TYPE_APPLICATION_MEDIA_OVERLAY, sAppWindow.mToken, "sChildAppWindowBelow");
     }
 
     /** Asserts that the first entry is greater than the second entry. */
