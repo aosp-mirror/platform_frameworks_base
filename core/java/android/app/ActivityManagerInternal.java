@@ -25,6 +25,11 @@ import android.content.ComponentName;
  * @hide Only for use within the system server.
  */
 public abstract class ActivityManagerInternal {
+    /**
+     * Verify that calling app has access to the given provider.
+     */
+    public abstract String checkContentProviderAccess(String authority, int userId);
+
     // Called by the power manager.
     public abstract void onWakefulnessChanged(int wakefulness);
 
