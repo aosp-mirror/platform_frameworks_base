@@ -155,7 +155,7 @@ public class FontListParser {
 
     @VisibleForTesting
     public static int makeTag(char c1, char c2, char c3, char c4) {
-        return (c1 << 24) + (c2 << 16) + (c3 << 8) + c4;
+        return (c1 << 24) | (c2 << 16) | (c3 << 8) | c4;
     }
 
     private static boolean isSpacer(char c) {
@@ -228,8 +228,10 @@ public class FontListParser {
         return new Font(fullFilename, index, axes, weight, isItalic);
     }
 
-    /** The 'tag' attribute value is read as four character values between 0 and 255 inclusive. */
-    private static final Pattern TAG_PATTERN = Pattern.compile("[\\x00-\\xFF]{4}");
+    /** The 'tag' attribute value is read as four character values between U+0020 and U+007E
+     *  inclusive.
+     */
+    private static final Pattern TAG_PATTERN = Pattern.compile("[\\x20-\\x7E]{4}");
 
     /** The 'styleValue' attribute has an optional leading '-', followed by '<digits>',
      *  '<digits>.<digits>', or '.<digits>' where '<digits>' is one or more of [0-9].
