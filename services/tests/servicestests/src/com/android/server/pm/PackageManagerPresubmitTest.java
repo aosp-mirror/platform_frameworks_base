@@ -27,12 +27,16 @@ import android.support.test.runner.AndroidJUnit4;
 import android.util.ArraySet;
 
 import com.android.internal.os.RoSystemProperties;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
+
+import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static junit.framework.Assert.assertTrue;
 
 
@@ -53,27 +57,34 @@ public class PackageManagerPresubmitTest {
     }
 
     /**
-     * <p>This test ensures that all signature|privileged permissions are granted to core apps like
-     * systemui/settings. If CONTROL_PRIVAPP_PERMISSIONS is set, the test also verifies that
+     * <p>This test ensures that all signature|privileged permissions are granted to priv-apps.
+     * If CONTROL_PRIVAPP_PERMISSIONS_ENFORCE is set, the test also verifies that
      * granted permissions are whitelisted in {@link SystemConfig}
      */
     @Test
     @SmallTest
     @Presubmit
     public void testPrivAppPermissions() throws PackageManager.NameNotFoundException {
-        String[] testPackages = {"com.android.settings", "com.android.shell",
-                "com.android.systemui"};
-        for (String testPackage : testPackages) {
-            testPackagePrivAppPermission(testPackage);
+        List<PackageInfo> installedPackages = mPackageManager
+                .getInstalledPackages(PackageManager.MATCH_UNINSTALLED_PACKAGES | GET_PERMISSIONS);
+        for (PackageInfo packageInfo : installedPackages) {
+            if (!packageInfo.applicationInfo.isPrivilegedApp()
+                    || PackageManagerService.PLATFORM_PACKAGE_NAME.equals(packageInfo.packageName)) {
+                continue;
+            }
+            testPackagePrivAppPermission(packageInfo);
         }
+
     }
 
-    private void testPackagePrivAppPermission(String testPackage)
+    private void testPackagePrivAppPermission(PackageInfo packageInfo)
             throws PackageManager.NameNotFoundException {
-        PackageInfo packageInfo = mPackageManager.getPackageInfo(testPackage,
-                PackageManager.GET_PERMISSIONS);
+        String packageName = packageInfo.packageName;
         ArraySet<String> privAppPermissions = SystemConfig.getInstance()
-                .getPrivAppPermissions(testPackage);
+                .getPrivAppPermissions(packageName);
+        if (ArrayUtils.isEmpty(packageInfo.requestedPermissions)) {
+            return;
+        }
         for (int i = 0; i < packageInfo.requestedPermissions.length; i++) {
             String pName = packageInfo.requestedPermissions[i];
             int protectionLevel;
@@ -89,13 +100,14 @@ public class PackageManagerPresubmitTest {
             if ((protectionLevel & PermissionInfo.PROTECTION_FLAG_PRIVILEGED) != 0) {
                 boolean granted = (packageInfo.requestedPermissionsFlags[i]
                         & PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0;
-                assertTrue("Permission " + pName + " should be granted to " + testPackage, granted);
+                assertTrue("Permission " + pName + " should be granted to " + packageName, granted);
                 // if privapp permissions are enforced, platform permissions must be whitelisted
                 // in SystemConfig
                 if (platformPermission && RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
                     assertTrue("Permission " + pName
-                                    + " should be declared in the xml file for package "
-                                    + testPackage,
+                                    + " should be declared in privapp-permissions-platform.xml "
+                                    + "or privapp-permissions-<product>.xml file for package "
+                                    + packageName,
                             privAppPermissions.contains(pName));
                 }
             }
