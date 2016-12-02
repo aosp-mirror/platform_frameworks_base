@@ -124,7 +124,7 @@ import java.lang.ref.WeakReference;
  *         is called. It is a programming error to invoke methods such
  *         as {@link #getCurrentPosition()},
  *         {@link #getDuration()}, {@link #getVideoHeight()},
- *         {@link #getVideoWidth()}, {@link #setAudioStreamType(int)},
+ *         {@link #getVideoWidth()}, {@link #setAudioAttributes(AudioAttributes)},
  *         {@link #setLooping(boolean)},
  *         {@link #setVolume(float, float)}, {@link #pause()}, {@link #start()},
  *         {@link #stop()}, {@link #seekTo(int, int)}, {@link #prepare()} or
@@ -410,7 +410,7 @@ import java.lang.ref.WeakReference;
  *          Error} </p></td>
  *     <td>This method must be called in idle state as the audio session ID must be known before
  *         calling setDataSource. Calling it does not change the object state. </p></td></tr>
- * <tr><td>setAudioStreamType </p></td>
+ * <tr><td>setAudioStreamType (deprecated)</p></td>
  *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
  *          PlaybackCompleted}</p></td>
  *     <td>{Error}</p></td>
@@ -822,7 +822,7 @@ public class MediaPlayer extends PlayerBase
      * to free the resources. If not released, too many MediaPlayer instances will
      * result in an exception.</p>
      * <p>Note that since {@link #prepare()} is called automatically in this method,
-     * you cannot change the audio stream type (see {@link #setAudioStreamType(int)}), audio
+     * you cannot change the audio
      * session ID (see {@link #setAudioSessionId(int)}) or audio attributes
      * (see {@link #setAudioAttributes(AudioAttributes)} of the new MediaPlayer.</p>
      *
@@ -841,7 +841,7 @@ public class MediaPlayer extends PlayerBase
      * to free the resources. If not released, too many MediaPlayer instances will
      * result in an exception.</p>
      * <p>Note that since {@link #prepare()} is called automatically in this method,
-     * you cannot change the audio stream type (see {@link #setAudioStreamType(int)}), audio
+     * you cannot change the audio
      * session ID (see {@link #setAudioSessionId(int)}) or audio attributes
      * (see {@link #setAudioAttributes(AudioAttributes)} of the new MediaPlayer.</p>
      *
@@ -904,7 +904,7 @@ public class MediaPlayer extends PlayerBase
      * to free the resources. If not released, too many MediaPlayer instances will
      * result in an exception.</p>
      * <p>Note that since {@link #prepare()} is called automatically in this method,
-     * you cannot change the audio stream type (see {@link #setAudioStreamType(int)}), audio
+     * you cannot change the audio
      * session ID (see {@link #setAudioSessionId(int)}) or audio attributes
      * (see {@link #setAudioAttributes(AudioAttributes)} of the new MediaPlayer.</p>
      *
@@ -1843,9 +1843,11 @@ public class MediaPlayer extends PlayerBase
      * thereafter.
      *
      * @param streamtype the audio stream type
+     * @deprecated use {@link #setAudioAttributes(AudioAttributes)}
      * @see android.media.AudioManager
      */
     public void setAudioStreamType(int streamtype) {
+        deprecateStreamTypeForPlayback(streamtype, "MediaPlayer", "setAudioStreamType()");
         baseUpdateAudioAttributes(
                 new AudioAttributes.Builder().setInternalLegacyStreamType(streamtype).build());
         _setAudioStreamType(streamtype);

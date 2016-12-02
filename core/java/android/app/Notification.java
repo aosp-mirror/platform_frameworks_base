@@ -37,6 +37,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.PlayerBase;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.BadParcelableException;
@@ -2821,6 +2822,7 @@ public class Notification implements Parcelable
          */
         @Deprecated
         public Builder setSound(Uri sound, int streamType) {
+            PlayerBase.deprecateStreamTypeForPlayback(streamType, "Notification", "setSound()");
             mN.sound = sound;
             mN.audioStreamType = streamType;
             return this;
