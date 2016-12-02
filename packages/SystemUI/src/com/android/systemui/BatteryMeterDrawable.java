@@ -686,7 +686,8 @@ public class BatteryMeterDrawable extends Drawable implements
             // happened, we need to change the paint rather than the alpha in case the blendMode
             // has been set to clear.  Clear always clears regardless of alpha level ;)
             final BitmapDrawable bd = (BitmapDrawable) d;
-            bd.getPaint().set(mPluggedIn && mForceChargeBatteryText ? mTextAndBoltPaint : mClearPaint);
+            bd.getPaint().set(!mPluggedIn || (mPluggedIn && mShowPercent && !mForceChargeBatteryText) 
+                                      ? mClearPaint : mTextAndBoltPaint);
             if (mBoltOverlay) {
                 mBoltDrawable.setTint(getBoltColor());
             }
