@@ -203,6 +203,26 @@ public abstract class ContentResolver {
     public static final String EXTRA_REFRESH_SUPPORTED = "android.content.extra.REFRESH_SUPPORTED";
 
     /**
+     * Key for an SQL style selection string that may be present in the query Bundle argument
+     * passed to {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}
+     * when called by a legacy client.
+     */
+    public static final String QUERY_ARG_SELECTION = "android:query-selection";
+
+    /**
+     * Key for sql selection string arguments list.
+     * @see #QUERY_ARG_SELECTION
+     */
+    public static final String QUERY_ARG_SELECTION_ARGS = "android:query-selection-args";
+
+    /**
+     * Key for an SQL style sort string that may be present in the query Bundle argument
+     * passed to {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}
+     * when called by a legacy client.
+     */
+    public static final String QUERY_ARG_SORT_ORDER = "android:query-sort-order";
+
+    /**
      * This is the Android platform's base MIME type for a content: URI
      * containing a Cursor of a single item.  Applications should use this
      * as the base type along with their own sub-type of their content: URIs
@@ -517,9 +537,36 @@ public abstract class ContentResolver {
      * @return A Cursor object, which is positioned before the first entry, or null
      * @see Cursor
      */
-    public final @Nullable Cursor query(final @RequiresPermission.Read @NonNull Uri uri,
+    public final @Nullable Cursor query(@RequiresPermission.Read @NonNull Uri uri,
             @Nullable String[] projection, @Nullable String selection,
             @Nullable String[] selectionArgs, @Nullable String sortOrder,
+            @Nullable CancellationSignal cancellationSignal) {
+        Bundle queryArgs = createSqlQueryBundle(selection, selectionArgs, sortOrder);
+        return query(uri, projection, queryArgs, cancellationSignal);
+    }
+
+    /**
+     * Query the given URI, returning a {@link Cursor} over the result set
+     * with support for cancellation.
+     *
+     * <p>For best performance, the caller should follow these guidelines:
+     *
+     * <li>Provide an explicit projection, to prevent reading data from storage
+     * that aren't going to be used.
+     *
+     * @param uri The URI, using the content:// scheme, for the content to
+     *         retrieve.
+     * @param projection A list of which columns to return. Passing null will
+     *         return all columns, which is inefficient.
+     * @param queryArgs A Bundle containing any arguments to the query.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
+     * If the operation is canceled, then {@link OperationCanceledException} will be thrown
+     * when the query is executed.
+     * @return A Cursor object, which is positioned before the first entry, or null
+     * @see Cursor
+     */
+    public final @Nullable Cursor query(final @RequiresPermission.Read @NonNull Uri uri,
+            @Nullable String[] projection, @Nullable Bundle queryArgs,
             @Nullable CancellationSignal cancellationSignal) {
         Preconditions.checkNotNull(uri, "uri");
         IContentProvider unstableProvider = acquireUnstableProvider(uri);
@@ -539,7 +586,7 @@ public abstract class ContentResolver {
             }
             try {
                 qCursor = unstableProvider.query(mPackageName, uri, projection,
-                        selection, selectionArgs, sortOrder, remoteCancellationSignal);
+                        queryArgs, remoteCancellationSignal);
             } catch (DeadObjectException e) {
                 // The remote process has died...  but we only hold an unstable
                 // reference though, so we might recover!!!  Let's try!!!!
@@ -549,8 +596,8 @@ public abstract class ContentResolver {
                 if (stableProvider == null) {
                     return null;
                 }
-                qCursor = stableProvider.query(mPackageName, uri, projection,
-                        selection, selectionArgs, sortOrder, remoteCancellationSignal);
+                qCursor = stableProvider.query(
+                        mPackageName, uri, projection, queryArgs, remoteCancellationSignal);
             }
             if (qCursor == null) {
                 return null;
@@ -559,7 +606,7 @@ public abstract class ContentResolver {
             // Force query execution.  Might fail and throw a runtime exception here.
             qCursor.getCount();
             long durationMillis = SystemClock.uptimeMillis() - startTime;
-            maybeLogQueryToEventLog(durationMillis, uri, projection, selection, sortOrder);
+            maybeLogQueryToEventLog(durationMillis, uri, projection, queryArgs);
 
             // Wrap the cursor object into CursorWrapperInner object.
             final IContentProvider provider = (stableProvider != null) ? stableProvider
@@ -2541,6 +2588,7 @@ public abstract class ContentResolver {
         }
         try {
             ISyncStatusObserver.Stub observer = new ISyncStatusObserver.Stub() {
+                @Override
                 public void onStatusChanged(int which) throws RemoteException {
                     callback.onStatusChanged(which);
                 }
@@ -2602,9 +2650,8 @@ public abstract class ContentResolver {
         return (int) (100 * durationMillis / SLOW_THRESHOLD_MILLIS) + 1;
     }
 
-    private void maybeLogQueryToEventLog(long durationMillis,
-                                         Uri uri, String[] projection,
-                                         String selection, String sortOrder) {
+    private void maybeLogQueryToEventLog(
+            long durationMillis, Uri uri, String[] projection, @Nullable Bundle queryArgs) {
         if (!ENABLE_CONTENT_SAMPLE) return;
         int samplePercent = samplePercentForDuration(durationMillis);
         if (samplePercent < 100) {
@@ -2614,6 +2661,9 @@ public abstract class ContentResolver {
                 }
             }
         }
+
+        // Ensure a non-null bundle.
+        queryArgs = (queryArgs != null) ? queryArgs : Bundle.EMPTY;
 
         StringBuilder projectionBuffer = new StringBuilder(100);
         if (projection != null) {
@@ -2636,8 +2686,8 @@ public abstract class ContentResolver {
             EventLogTags.CONTENT_QUERY_SAMPLE,
             uri.toString(),
             projectionBuffer.toString(),
-            selection != null ? selection : "",
-            sortOrder != null ? sortOrder : "",
+            queryArgs.getString(QUERY_ARG_SELECTION, ""),
+            queryArgs.getString(QUERY_ARG_SORT_ORDER, ""),
             durationMillis,
             blockingPackage != null ? blockingPackage : "",
             samplePercent);
@@ -2750,5 +2800,30 @@ public abstract class ContentResolver {
     /** @hide */
     public Drawable getTypeDrawable(String mimeType) {
         return MimeIconUtils.loadMimeIcon(mContext, mimeType);
+    }
+
+    /**
+     * @hide
+     */
+    public static @Nullable Bundle createSqlQueryBundle(
+            @Nullable String selection,
+            @Nullable String[] selectionArgs,
+            @Nullable String sortOrder) {
+
+        if (selection == null && selectionArgs == null && sortOrder == null) {
+            return null;
+        }
+
+        Bundle queryArgs = new Bundle();
+        if (selection != null) {
+            queryArgs.putString(QUERY_ARG_SELECTION, selection);
+        }
+        if (selectionArgs != null) {
+            queryArgs.putStringArray(QUERY_ARG_SELECTION_ARGS, selectionArgs);
+        }
+        if (sortOrder != null) {
+            queryArgs.putString(QUERY_ARG_SORT_ORDER, sortOrder);
+        }
+        return queryArgs;
     }
 }

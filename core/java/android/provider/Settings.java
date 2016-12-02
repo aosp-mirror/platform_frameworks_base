@@ -44,6 +44,7 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.IBinder;
@@ -52,7 +53,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.os.Build.VERSION_CODES;
 import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 import android.util.AndroidException;
@@ -1580,12 +1580,13 @@ public final class Settings {
 
         private final Uri mUri;
 
-        private static final String[] SELECT_VALUE =
-            new String[] { Settings.NameValueTable.VALUE };
+        private static final String[] SELECT_VALUE_PROJECTION = new String[] {
+                Settings.NameValueTable.VALUE
+        };
         private static final String NAME_EQ_PLACEHOLDER = "name=?";
 
         // Must synchronize on 'this' to access mValues and mValuesVersion.
-        private final HashMap<String, String> mValues = new HashMap<String, String>();
+        private final HashMap<String, String> mValues = new HashMap<>();
 
         // Initially null; set lazily and held forever.  Synchronized on 'this'.
         private IContentProvider mContentProvider = null;
@@ -1738,8 +1739,9 @@ public final class Settings {
 
             Cursor c = null;
             try {
-                c = cp.query(cr.getPackageName(), mUri, SELECT_VALUE, NAME_EQ_PLACEHOLDER,
-                             new String[]{name}, null, null);
+                Bundle queryArgs = ContentResolver.createSqlQueryBundle(
+                        NAME_EQ_PLACEHOLDER, new String[]{name}, null);
+                c = cp.query(cr.getPackageName(), mUri, SELECT_VALUE_PROJECTION, queryArgs, null);
                 if (c == null) {
                     Log.w(TAG, "Can't get key " + name + " from " + mUri);
                     return null;
@@ -1807,7 +1809,7 @@ public final class Settings {
 
         private static final HashSet<String> MOVED_TO_SECURE;
         static {
-            MOVED_TO_SECURE = new HashSet<String>(30);
+            MOVED_TO_SECURE = new HashSet<>(30);
             MOVED_TO_SECURE.add(Secure.ANDROID_ID);
             MOVED_TO_SECURE.add(Secure.HTTP_PROXY);
             MOVED_TO_SECURE.add(Secure.LOCATION_PROVIDERS_ALLOWED);
@@ -1844,8 +1846,8 @@ public final class Settings {
         private static final HashSet<String> MOVED_TO_GLOBAL;
         private static final HashSet<String> MOVED_TO_SECURE_THEN_GLOBAL;
         static {
-            MOVED_TO_GLOBAL = new HashSet<String>();
-            MOVED_TO_SECURE_THEN_GLOBAL = new HashSet<String>();
+            MOVED_TO_GLOBAL = new HashSet<>();
+            MOVED_TO_SECURE_THEN_GLOBAL = new HashSet<>();
 
             // these were originally in system but migrated to secure in the past,
             // so are duplicated in the Secure.* namespace
@@ -4163,12 +4165,12 @@ public final class Settings {
         private static final HashSet<String> MOVED_TO_LOCK_SETTINGS;
         private static final HashSet<String> MOVED_TO_GLOBAL;
         static {
-            MOVED_TO_LOCK_SETTINGS = new HashSet<String>(3);
+            MOVED_TO_LOCK_SETTINGS = new HashSet<>(3);
             MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PATTERN_ENABLED);
             MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PATTERN_VISIBLE);
             MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
 
-            MOVED_TO_GLOBAL = new HashSet<String>();
+            MOVED_TO_GLOBAL = new HashSet<>();
             MOVED_TO_GLOBAL.add(Settings.Global.ADB_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.ASSISTED_GPS_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.BLUETOOTH_ON);
@@ -5203,6 +5205,7 @@ public final class Settings {
          * @hide
          * @deprecated
          */
+        @Deprecated
         public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE =
                 "accessibility_display_magnification_auto_update";
 
@@ -6457,7 +6460,7 @@ public final class Settings {
          * @hide
          */
         public static final String DOWNLOADS_BACKUP_ENABLED = "downloads_backup_enabled";
-        
+
         /**
          * Whether Downloads folder backup should only occur if the device is using a metered
          * network.
@@ -9139,7 +9142,7 @@ public final class Settings {
         // Certain settings have been moved from global to the per-user secure namespace
         private static final HashSet<String> MOVED_TO_SECURE;
         static {
-            MOVED_TO_SECURE = new HashSet<String>(1);
+            MOVED_TO_SECURE = new HashSet<>(1);
             MOVED_TO_SECURE.add(Settings.Global.INSTALL_NON_MARKET_APPS);
         }
 
