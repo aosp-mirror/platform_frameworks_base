@@ -405,7 +405,7 @@ public final class SubscribeConfig implements Parcelable {
          * single match session (corresponding to the same publish action on the
          * peer) reported to the host (using the
          * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
-         * byte[], byte[])}). The options are: only report the first match and ignore the rest
+         * byte[], List)}). The options are: only report the first match and ignore the rest
          * {@link SubscribeConfig#MATCH_STYLE_FIRST_ONLY} or report every single
          * match {@link SubscribeConfig#MATCH_STYLE_ALL} (the default).
          *
