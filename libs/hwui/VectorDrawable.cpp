@@ -308,7 +308,7 @@ void FullPath::FullPathProperties::setPropertyValue(int propertyId, float value)
 
 void ClipPath::drawPath(SkCanvas* outCanvas, SkPath& renderPath,
         float strokeScale, const SkMatrix& matrix, bool useStagingData){
-    outCanvas->clipPath(renderPath, SkRegion::kIntersect_Op);
+    outCanvas->clipPath(renderPath);
 }
 
 Group::Group(const Group& group) : Node(group) {

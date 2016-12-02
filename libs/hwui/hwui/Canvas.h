@@ -182,9 +182,9 @@ public:
     virtual bool quickRejectPath(const SkPath& path) const = 0;
 
     virtual bool clipRect(float left, float top, float right, float bottom,
-            SkRegion::Op op = SkRegion::kIntersect_Op) = 0;
-    virtual bool clipPath(const SkPath* path, SkRegion::Op op) = 0;
-    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) = 0;
+            SkClipOp op) = 0;
+    virtual bool clipPath(const SkPath* path, SkClipOp op) = 0;
+    virtual bool clipRegion(const SkRegion* region, SkClipOp op) = 0;
 
     // filters
     virtual SkDrawFilter* getDrawFilter() = 0;

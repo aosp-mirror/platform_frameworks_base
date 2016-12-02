@@ -72,19 +72,19 @@ Snapshot::Snapshot(Snapshot* s, int saveFlags)
 // Clipping
 ///////////////////////////////////////////////////////////////////////////////
 
-void Snapshot::clipRegionTransformed(const SkRegion& region, SkRegion::Op op) {
+void Snapshot::clipRegionTransformed(const SkRegion& region, SkClipOp op) {
     flags |= Snapshot::kFlagClipSet;
-    mClipArea->clipRegion(region, op);
+    mClipArea->clipRegion(region, static_cast<SkRegion::Op>(op));
 }
 
-void Snapshot::clip(const Rect& localClip, SkRegion::Op op) {
+void Snapshot::clip(const Rect& localClip, SkClipOp op) {
     flags |= Snapshot::kFlagClipSet;
-    mClipArea->clipRectWithTransform(localClip, transform, op);
+    mClipArea->clipRectWithTransform(localClip, transform, static_cast<SkRegion::Op>(op));
 }
 
-void Snapshot::clipPath(const SkPath& path, SkRegion::Op op) {
+void Snapshot::clipPath(const SkPath& path, SkClipOp op) {
     flags |= Snapshot::kFlagClipSet;
-    mClipArea->clipPathWithTransform(path, transform, op);
+    mClipArea->clipPathWithTransform(path, transform, static_cast<SkRegion::Op>(op));
 }
 
 void Snapshot::setClip(float left, float top, float right, float bottom) {

@@ -23,6 +23,7 @@
 #include <utils/RefBase.h>
 #include <ui/Region.h>
 
+#include <SkClipOp.h>
 #include <SkRegion.h>
 
 #include "ClipArea.h"
@@ -107,25 +108,25 @@ public:
      * the specified operation. The specified rectangle is transformed
      * by this snapshot's trasnformation.
      */
-    void clip(const Rect& localClip, SkRegion::Op op);
+    void clip(const Rect& localClip, SkClipOp op);
 
     /**
      * Modifies the current clip with the new clip rectangle and
      * the specified operation. The specified rectangle is considered
      * already transformed.
      */
-    void clipTransformed(const Rect& r, SkRegion::Op op = SkRegion::kIntersect_Op);
+    void clipTransformed(const Rect& r, SkClipOp op = kIntersect_SkClipOp);
 
     /**
      * Modifies the current clip with the specified region and operation.
      * The specified region is considered already transformed.
      */
-    void clipRegionTransformed(const SkRegion& region, SkRegion::Op op);
+    void clipRegionTransformed(const SkRegion& region, SkClipOp op);
 
     /**
      * Modifies the current clip with the specified path and operation.
      */
-    void clipPath(const SkPath& path, SkRegion::Op op);
+    void clipPath(const SkPath& path, SkClipOp op);
 
     /**
      * Sets the current clip.

@@ -98,7 +98,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
             int saveCount = layerCanvas->save();
             SkASSERT(saveCount == 1);
 
-            layerCanvas->clipRect(layerDamage.toSkRect(), SkRegion::kReplace_Op);
+            layerCanvas->clipRect(layerDamage.toSkRect(), kReplace_SkClipOp);
 
             auto savedLightCenter = mLightCenter;
             // map current light center into RenderNode's coordinate space
@@ -222,7 +222,7 @@ void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect&
         const std::vector<sp<RenderNode>>& nodes, bool opaque, const Rect &contentDrawBounds,
         SkCanvas* canvas) {
 
-    canvas->clipRect(clip, SkRegion::kReplace_Op);
+    canvas->clipRect(clip, kReplace_SkClipOp);
 
     if (!opaque) {
         canvas->clear(SK_ColorTRANSPARENT);
@@ -272,7 +272,7 @@ void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect&
             const float dy = backdropBounds.top - contentDrawBounds.top;
             canvas->translate(dx, dy);
             // It gets cropped against the bounds of the backdrop to stay inside.
-            canvas->clipRect(clip, SkRegion::kIntersect_Op);
+            canvas->clipRect(clip);
         }
 
         RenderNodeDrawable root(node.get(), canvas);

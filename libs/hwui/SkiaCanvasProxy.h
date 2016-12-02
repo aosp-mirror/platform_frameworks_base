@@ -90,10 +90,10 @@ protected:
                              const SkPoint texCoords[4], SkBlendMode,
                              const SkPaint& paint) override;
 
-    virtual void onClipRect(const SkRect&, SkRegion::Op, ClipEdgeStyle) override;
-    virtual void onClipRRect(const SkRRect&, SkRegion::Op, ClipEdgeStyle) override;
-    virtual void onClipPath(const SkPath&, SkRegion::Op, ClipEdgeStyle) override;
-    virtual void onClipRegion(const SkRegion&, SkRegion::Op) override;
+    virtual void onClipRect(const SkRect&, SkClipOp, ClipEdgeStyle) override;
+    virtual void onClipRRect(const SkRRect&, SkClipOp, ClipEdgeStyle) override;
+    virtual void onClipPath(const SkPath&, SkClipOp, ClipEdgeStyle) override;
+    virtual void onClipRegion(const SkRegion&, SkClipOp) override;
 
 private:
     Canvas* mCanvas;

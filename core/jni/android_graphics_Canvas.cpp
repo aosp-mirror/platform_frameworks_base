@@ -183,26 +183,46 @@ static jboolean quickRejectPath(JNIEnv* env, jobject, jlong canvasHandle, jlong 
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
+// SkRegion::Op and SkClipOp are numerically identical, so we can freely cast
+// from one to the other (though SkClipOp is destined to become a strict subset)
+static_assert(SkRegion::kDifference_Op == static_cast<SkRegion::Op>(kDifference_SkClipOp), "");
+static_assert(SkRegion::kIntersect_Op == static_cast<SkRegion::Op>(kIntersect_SkClipOp), "");
+static_assert(SkRegion::kUnion_Op == static_cast<SkRegion::Op>(kUnion_SkClipOp), "");
+static_assert(SkRegion::kXOR_Op == static_cast<SkRegion::Op>(kXOR_SkClipOp), "");
+static_assert(SkRegion::kReverseDifference_Op == static_cast<SkRegion::Op>(kReverseDifference_SkClipOp), "");
+static_assert(SkRegion::kReplace_Op == static_cast<SkRegion::Op>(kReplace_SkClipOp), "");
+
+static SkClipOp opHandleToClipOp(jint opHandle) {
+    // The opHandle is defined in Canvas.java to be Region::Op
+    SkRegion::Op rgnOp = static_cast<SkRegion::Op>(opHandle);
+
+    // In the future, when we no longer support the wide range of ops (e.g. Union, Xor)
+    // this function can perform a range check and throw an unsupported-exception.
+    // e.g. if (rgnOp != kIntersect && rgnOp != kDifference) throw...
+
+    // Skia now takes a different type, SkClipOp, as the parameter to clipping calls
+    // This type is binary compatible with SkRegion::Op, so a static_cast<> is safe.
+    return static_cast<SkClipOp>(rgnOp);
+}
+
 static jboolean clipRect(JNIEnv*, jobject, jlong canvasHandle, jfloat l, jfloat t,
                          jfloat r, jfloat b, jint opHandle) {
-    SkRegion::Op op = static_cast<SkRegion::Op>(opHandle);
-    bool nonEmptyClip = get_canvas(canvasHandle)->clipRect(l, t, r, b, op);
+    bool nonEmptyClip = get_canvas(canvasHandle)->clipRect(l, t, r, b,
+            opHandleToClipOp(opHandle));
     return nonEmptyClip ? JNI_TRUE : JNI_FALSE;
 }
 
 static jboolean clipPath(JNIEnv* env, jobject, jlong canvasHandle, jlong pathHandle,
                          jint opHandle) {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
-    SkRegion::Op op = static_cast<SkRegion::Op>(opHandle);
-    bool nonEmptyClip = get_canvas(canvasHandle)->clipPath(path, op);
+    bool nonEmptyClip = get_canvas(canvasHandle)->clipPath(path, opHandleToClipOp(opHandle));
     return nonEmptyClip ? JNI_TRUE : JNI_FALSE;
 }
 
 static jboolean clipRegion(JNIEnv* env, jobject, jlong canvasHandle, jlong deviceRgnHandle,
                            jint opHandle) {
     SkRegion* deviceRgn = reinterpret_cast<SkRegion*>(deviceRgnHandle);
-    SkRegion::Op op = static_cast<SkRegion::Op>(opHandle);
-    bool nonEmptyClip = get_canvas(canvasHandle)->clipRegion(deviceRgn, op);
+    bool nonEmptyClip = get_canvas(canvasHandle)->clipRegion(deviceRgn, opHandleToClipOp(opHandle));
     return nonEmptyClip ? JNI_TRUE : JNI_FALSE;
 }
 
