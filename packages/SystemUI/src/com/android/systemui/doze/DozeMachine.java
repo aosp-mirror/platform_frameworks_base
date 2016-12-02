@@ -56,7 +56,41 @@ public class DozeMachine {
         /** Pulse is done showing. Followed by transition to DOZE or DOZE_AOD. */
         DOZE_PULSE_DONE,
         /** Doze is done. DozeService is finished. */
-        FINISH,
+        FINISH;
+
+        boolean canPulse() {
+            switch (this) {
+                case DOZE:
+                case DOZE_AOD:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        boolean staysAwake() {
+            switch (this) {
+                case DOZE_REQUEST_PULSE:
+                case DOZE_PULSING:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        int screenState() {
+            switch (this) {
+                case UNINITIALIZED:
+                case INITIALIZED:
+                case DOZE:
+                    return Display.STATE_OFF;
+                case DOZE_PULSING:
+                case DOZE_AOD:
+                    return Display.STATE_DOZE; // TODO: use STATE_ON if appropriate.
+                default:
+                    return Display.STATE_UNKNOWN;
+            }
+        }
     }
 
     private final Service mDozeService;
@@ -165,52 +199,32 @@ public class DozeMachine {
     }
 
     private void validateTransition(State newState) {
-        switch (mState) {
-            case FINISH:
-                Preconditions.checkState(newState == State.FINISH);
-                break;
-            case UNINITIALIZED:
-                Preconditions.checkState(newState == State.INITIALIZED);
-                break;
-        }
-        switch (newState) {
-            case UNINITIALIZED:
-                throw new IllegalArgumentException("can't go to UNINITIALIZED");
-            case INITIALIZED:
-                Preconditions.checkState(mState == State.UNINITIALIZED);
-                break;
-            case DOZE_PULSING:
-                Preconditions.checkState(mState == State.DOZE_REQUEST_PULSE);
-                break;
-            case DOZE_PULSE_DONE:
-                Preconditions.checkState(mState == State.DOZE_PULSING);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private int screenPolicy(State newState) {
-        switch (newState) {
-            case UNINITIALIZED:
-            case INITIALIZED:
-            case DOZE:
-                return Display.STATE_OFF;
-            case DOZE_PULSING:
-            case DOZE_AOD:
-                return Display.STATE_DOZE; // TODO: use STATE_ON if appropriate.
-            default:
-                return Display.STATE_UNKNOWN;
-        }
-    }
-
-    private boolean wakeLockPolicy(State newState) {
-        switch (newState) {
-            case DOZE_REQUEST_PULSE:
-            case DOZE_PULSING:
-                return true;
-            default:
-                return false;
+        try {
+            switch (mState) {
+                case FINISH:
+                    Preconditions.checkState(newState == State.FINISH);
+                    break;
+                case UNINITIALIZED:
+                    Preconditions.checkState(newState == State.INITIALIZED);
+                    break;
+            }
+            switch (newState) {
+                case UNINITIALIZED:
+                    throw new IllegalArgumentException("can't transition to UNINITIALIZED");
+                case INITIALIZED:
+                    Preconditions.checkState(mState == State.UNINITIALIZED);
+                    break;
+                case DOZE_PULSING:
+                    Preconditions.checkState(mState == State.DOZE_REQUEST_PULSE);
+                    break;
+                case DOZE_PULSE_DONE:
+                    Preconditions.checkState(mState == State.DOZE_PULSING);
+                    break;
+                default:
+                    break;
+            }
+        } catch (RuntimeException e) {
+            throw new IllegalStateException("Illegal Transition: " + mState + " -> " + newState, e);
         }
     }
 
@@ -218,22 +232,26 @@ public class DozeMachine {
         if (mState == State.FINISH) {
             return State.FINISH;
         }
+        if (requestedState == State.DOZE_REQUEST_PULSE && !mState.canPulse()) {
+            Log.i(TAG, "Dropping pulse request because current state can't pulse: " + mState);
+            return mState;
+        }
         return requestedState;
     }
 
     private void updateWakeLockState(State newState) {
-        boolean newPolicy = wakeLockPolicy(newState);
-        if (mWakeLockHeldForCurrentState && !newPolicy) {
+        boolean staysAwake = newState.staysAwake();
+        if (mWakeLockHeldForCurrentState && !staysAwake) {
             mWakeLock.release();
             mWakeLockHeldForCurrentState = false;
-        } else if (!mWakeLockHeldForCurrentState && newPolicy) {
+        } else if (!mWakeLockHeldForCurrentState && staysAwake) {
             mWakeLock.acquire();
             mWakeLockHeldForCurrentState = true;
         }
     }
 
     private void updateScreenState(State newState) {
-        int state = screenPolicy(newState);
+        int state = newState.screenState();
         if (state != Display.STATE_UNKNOWN) {
             mDozeService.setDozeScreenState(state);
         }
