@@ -1800,6 +1800,13 @@ public final class StrictMode {
     /**
      * @hide
      */
+    public static boolean vmContentUriWithoutPermissionEnabled() {
+        return (sVmPolicyMask & DETECT_VM_FILE_URI_EXPOSURE) != 0;
+    }
+
+    /**
+     * @hide
+     */
     public static boolean vmCleartextNetworkEnabled() {
         return (sVmPolicyMask & DETECT_VM_CLEARTEXT_NETWORK) != 0;
     }
@@ -1842,6 +1849,16 @@ public final class StrictMode {
         } else {
             onVmPolicyViolation(null, new Throwable(message));
         }
+    }
+
+    /**
+     * @hide
+     */
+    public static void onContentUriWithoutPermission(Uri uri, String location) {
+        final String message = uri + " exposed beyond app through " + location
+                + " without permission grant flags; did you forget"
+                + " FLAG_GRANT_READ_URI_PERMISSION?";
+        onVmPolicyViolation(null, new Throwable(message));
     }
 
     /**

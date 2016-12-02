@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.content.Intent;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -2342,8 +2343,21 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * @hide
      */
     public void checkFileUriExposed(String location) {
-        if ("file".equals(getScheme()) && !getPath().startsWith("/system/")) {
+        if ("file".equals(getScheme())
+                && (getPath() != null) && !getPath().startsWith("/system/")) {
             StrictMode.onFileUriExposed(this, location);
+        }
+    }
+
+    /**
+     * If this is a {@code content://} Uri without access flags, it will be
+     * reported to {@link StrictMode}.
+     *
+     * @hide
+     */
+    public void checkContentUriWithoutPermission(String location, int flags) {
+        if ("content".equals(getScheme()) && !Intent.isAccessUriMode(flags)) {
+            StrictMode.onContentUriWithoutPermission(this, location);
         }
     }
 
