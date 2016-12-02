@@ -178,7 +178,7 @@ public class EventLogCollector {
         public void readEvents(int[] tags, Collection<Event> events) throws IOException {
             // Testing in Android: the Static Final Class Strikes Back!
             ArrayList<EventLog.Event> nativeEvents = new ArrayList<>();
-            EventLog.readEvents(tags, nativeEvents);
+            EventLog.readEventsOnWrapping(tags, 0L, nativeEvents);
             for (EventLog.Event nativeEvent : nativeEvents) {
                 Event event = new Event(nativeEvent);
                 events.add(event);

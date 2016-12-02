@@ -16,6 +16,8 @@
 
 package android.util;
 
+import android.annotation.SystemApi;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -250,6 +252,19 @@ public class EventLog {
      * @throws IOException if something goes wrong reading events
      */
     public static native void readEvents(int[] tags, Collection<Event> output)
+            throws IOException;
+
+    /**
+     * Read events from the log, filtered by type, blocking until logs are about to be overwritten.
+     * @param tags to search for
+     * @param timestamp timestamp allow logs before this time to be overwritten.
+     * @param output container to add events into
+     * @throws IOException if something goes wrong reading events
+     * @hide
+     */
+    @SystemApi
+    public static native void readEventsOnWrapping(int[] tags, long timestamp,
+            Collection<Event> output)
             throws IOException;
 
     /**
