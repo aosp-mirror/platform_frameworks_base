@@ -73,6 +73,9 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
@@ -1077,12 +1080,32 @@ final class TaskRecord extends ConfigurationContainer {
                 && !mTemporarilyUnresizable;
     }
 
+    /**
+     * Check that a given bounds matches the application requested orientation.
+     *
+     * @param bounds The bounds to be tested.
+     * @return True if the requested bounds are okay for a resizing request.
+     */
+    boolean canResizeToBounds(Rect bounds) {
+        if (bounds == null || getStackId() != FREEFORM_WORKSPACE_STACK_ID) {
+            // Note: If not on the freeform workspace, we ignore the bounds.
+            return true;
+        }
+        final boolean landscape = bounds.width() > bounds.height();
+        if (mResizeMode == RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION) {
+            return mBounds == null || landscape == (mBounds.width() > mBounds.height());
+        }
+        return (mResizeMode != RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY || !landscape)
+                && (mResizeMode != RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY || landscape);
+    }
+
     boolean isOnTopLauncher() {
         return isHomeTask() && mIsOnTopLauncher;
     }
 
     boolean canGoInDockedStack() {
-        return isResizeable();
+        return isResizeable() &&
+                !ActivityInfo.isPreserveOrientationMode(mResizeMode);
     }
 
     /**
