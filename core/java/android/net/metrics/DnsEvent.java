@@ -21,7 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * An event recorded by DnsEventListenerService.
+ * A DNS event recorded by NetdEventListenerService.
  * {@hide}
  */
 @SystemApi

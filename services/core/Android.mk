@@ -12,7 +12,7 @@ LOCAL_SRC_FILES += \
     java/com/android/server/EventLogTags.logtags \
     java/com/android/server/am/EventLogTags.logtags \
     ../../../../system/netd/server/binder/android/net/INetd.aidl \
-    ../../../../system/netd/server/binder/android/net/metrics/IDnsEventListener.aidl \
+    ../../../../system/netd/server/binder/android/net/metrics/INetdEventListener.aidl \
 
 LOCAL_AIDL_INCLUDES += \
     system/netd/server/binder
