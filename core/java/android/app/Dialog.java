@@ -744,7 +744,7 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     /** @hide */
     @Override
-    public void onWindowDismissed(boolean finishTask) {
+    public void onWindowDismissed(boolean finishTask, boolean suppressWindowTransition) {
         dismiss();
     }
 
