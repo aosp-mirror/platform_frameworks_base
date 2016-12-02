@@ -69,6 +69,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.NetworkEvent;
 import android.app.admin.PasswordMetrics;
+import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.app.admin.SystemUpdatePolicy;
@@ -4526,9 +4527,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
             }
         } else {
-            synchronized (this) {
-                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            }
+            enforceProfileOrDeviceOwner(who);
+        }
+    }
+
+    private void enforceProfileOrDeviceOwner(ComponentName who) {
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
         }
     }
 
@@ -4538,9 +4543,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new SecurityException("who == null, but caller is not cert installer");
             }
         } else {
-            synchronized (this) {
-                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            }
+            enforceProfileOrDeviceOwner(who);
         }
     }
 
@@ -4830,9 +4833,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean setAlwaysOnVpnPackage(ComponentName admin, String vpnPackage, boolean lockdown)
             throws SecurityException {
-        synchronized (this) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-        }
+        enforceProfileOrDeviceOwner(admin);
 
         final int userId = mInjector.userHandleGetCallingUserId();
         final long token = mInjector.binderClearCallingIdentity();
@@ -4854,9 +4855,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public String getAlwaysOnVpnPackage(ComponentName admin)
             throws SecurityException {
-        synchronized (this) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-        }
+        enforceProfileOrDeviceOwner(admin);
 
         final int userId = mInjector.userHandleGetCallingUserId();
         final long token = mInjector.binderClearCallingIdentity();
@@ -6999,9 +6998,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void enforceCanManageApplicationRestrictions(ComponentName who) {
         if (who != null) {
-            synchronized (this) {
-                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            }
+            enforceProfileOrDeviceOwner(who);
         } else if (!isCallerApplicationRestrictionsManagingPackage()) {
             throw new SecurityException(
                     "No admin component given, and caller cannot manage application restrictions "
@@ -8801,9 +8798,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     "can broadcast update information.");
             return;
         }
+
+        if (!mOwners.saveSystemUpdateInfo(updateReceivedTime)) {
+            // Received time hasn't changed, don't send duplicate notification.
+            return;
+        }
+
         final Intent intent = new Intent(DeviceAdminReceiver.ACTION_NOTIFY_PENDING_SYSTEM_UPDATE);
-        intent.putExtra(DeviceAdminReceiver.EXTRA_SYSTEM_UPDATE_RECEIVED_TIME,
-                updateReceivedTime);
+        intent.putExtra(DeviceAdminReceiver.EXTRA_SYSTEM_UPDATE_RECEIVED_TIME, updateReceivedTime);
 
         final long ident = mInjector.binderClearCallingIdentity();
         try {
@@ -8839,6 +8841,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
+    }
+
+    @Override
+    public SystemUpdateInfo getPendingSystemUpdate(ComponentName admin) {
+        Preconditions.checkNotNull(admin, "ComponentName is null");
+        enforceProfileOrDeviceOwner(admin);
+
+        return mOwners.getSystemUpdateInfo();
     }
 
     @Override
@@ -9168,9 +9178,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean isManagedProfile(ComponentName admin) {
-        synchronized (this) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-        }
+        enforceProfileOrDeviceOwner(admin);
         return isManagedProfile(mInjector.userHandleGetCallingUserId());
     }
 
