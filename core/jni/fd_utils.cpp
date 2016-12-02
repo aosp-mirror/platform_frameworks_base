@@ -29,17 +29,7 @@
 #include <android-base/strings.h>
 #include <cutils/log.h>
 
-// Whitelist of open paths that the zygote is allowed to keep open.
-//
-// In addition to the paths listed here, all files ending with
-// ".jar" under /system/framework" are whitelisted. See
-// FileDescriptorInfo::IsWhitelisted for the canonical definition.
-//
-// If the whitelisted path is associated with a regular file or a
-// character device, the file is reopened after a fork with the same
-// offset and mode. If the whilelisted  path is associated with a
-// AF_UNIX socket, the socket will refer to /dev/null after each
-// fork, and all operations on it will fail.
+// Static whitelist of open paths that the zygote is allowed to keep open.
 static const char* kPathWhitelist[] = {
   "/dev/null",
   "/dev/socket/zygote",
@@ -55,6 +45,93 @@ static const char* kPathWhitelist[] = {
 static const char kFdPath[] = "/proc/self/fd";
 
 // static
+FileDescriptorWhitelist* FileDescriptorWhitelist::Get() {
+  if (instance_ == nullptr) {
+    instance_ = new FileDescriptorWhitelist();
+  }
+  return instance_;
+}
+
+bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
+  // Check the static whitelist path.
+  for (const auto& whitelist_path : kPathWhitelist) {
+    if (path == whitelist_path)
+      return true;
+  }
+
+  // Check any paths added to the dynamic whitelist.
+  for (const auto& whitelist_path : whitelist_) {
+    if (path == whitelist_path)
+      return true;
+  }
+
+  static const std::string kFrameworksPrefix = "/system/framework/";
+  static const std::string kJarSuffix = ".jar";
+  if (StartsWith(path, kFrameworksPrefix) && EndsWith(path, kJarSuffix)) {
+    return true;
+  }
+
+  // Whitelist files needed for Runtime Resource Overlay, like these:
+  // /system/vendor/overlay/framework-res.apk
+  // /system/vendor/overlay-subdir/pg/framework-res.apk
+  // /vendor/overlay/framework-res.apk
+  // /vendor/overlay/PG/android-framework-runtime-resource-overlay.apk
+  // /data/resource-cache/system@vendor@overlay@framework-res.apk@idmap
+  // /data/resource-cache/system@vendor@overlay-subdir@pg@framework-res.apk@idmap
+  // See AssetManager.cpp for more details on overlay-subdir.
+  static const std::string kOverlayDir = "/system/vendor/overlay/";
+  static const std::string kVendorOverlayDir = "/vendor/overlay";
+  static const std::string kOverlaySubdir = "/system/vendor/overlay-subdir/";
+  static const std::string kApkSuffix = ".apk";
+
+  if ((StartsWith(path, kOverlayDir) || StartsWith(path, kOverlaySubdir)
+       || StartsWith(path, kVendorOverlayDir))
+      && EndsWith(path, kApkSuffix)
+      && path.find("/../") == std::string::npos) {
+    return true;
+  }
+
+  static const std::string kOverlayIdmapPrefix = "/data/resource-cache/";
+  static const std::string kOverlayIdmapSuffix = ".apk@idmap";
+  if (StartsWith(path, kOverlayIdmapPrefix) && EndsWith(path, kOverlayIdmapSuffix)
+      && path.find("/../") == std::string::npos) {
+    return true;
+  }
+
+  // All regular files that are placed under this path are whitelisted automatically.
+  static const std::string kZygoteWhitelistPath = "/vendor/zygote_whitelist/";
+  if (StartsWith(path, kZygoteWhitelistPath) && path.find("/../") == std::string::npos) {
+    return true;
+  }
+
+  return false;
+}
+
+FileDescriptorWhitelist::FileDescriptorWhitelist()
+    : whitelist_() {
+}
+
+// TODO: Call android::base::StartsWith instead of copying the code here.
+// static
+bool FileDescriptorWhitelist::StartsWith(const std::string& str,
+                                         const std::string& prefix) {
+  return str.compare(0, prefix.size(), prefix) == 0;
+}
+
+// TODO: Call android::base::EndsWith instead of copying the code here.
+// static
+bool FileDescriptorWhitelist::EndsWith(const std::string& str,
+                                       const std::string& suffix) {
+  if (suffix.size() > str.size()) {
+    return false;
+  }
+
+  return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+FileDescriptorWhitelist* FileDescriptorWhitelist::instance_ = nullptr;
+
+// static
 FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd) {
   struct stat f_stat;
   // This should never happen; the zygote should always have the right set
@@ -64,13 +141,15 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd) {
     return NULL;
   }
 
+  const FileDescriptorWhitelist* whitelist = FileDescriptorWhitelist::Get();
+
   if (S_ISSOCK(f_stat.st_mode)) {
     std::string socket_name;
     if (!GetSocketName(fd, &socket_name)) {
       return NULL;
     }
 
-    if (!IsWhitelisted(socket_name)) {
+    if (!whitelist->IsAllowed(socket_name)) {
       ALOGE("Socket name not whitelisted : %s (fd=%d)", socket_name.c_str(), fd);
       return NULL;
     }
@@ -98,7 +177,7 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd) {
     return NULL;
   }
 
-  if (!IsWhitelisted(file_path)) {
+  if (!whitelist->IsAllowed(file_path)) {
     ALOGE("Not whitelisted : %s", file_path.c_str());
     return NULL;
   }
@@ -216,72 +295,6 @@ FileDescriptorInfo::FileDescriptorInfo(struct stat stat, const std::string& file
   fs_flags(fs_flags),
   offset(offset),
   is_sock(false) {
-}
-
-// TODO: Call android::base::StartsWith instead of copying the code here.
-// static
-bool FileDescriptorInfo::StartsWith(const std::string& str, const std::string& prefix) {
-  return str.compare(0, prefix.size(), prefix) == 0;
-}
-
-// TODO: Call android::base::EndsWith instead of copying the code here.
-// static
-bool FileDescriptorInfo::EndsWith(const std::string& str, const std::string& suffix) {
-  if (suffix.size() > str.size()) {
-    return false;
-  }
-
-  return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
-
-// static
-bool FileDescriptorInfo::IsWhitelisted(const std::string& path) {
-  for (size_t i = 0; i < (sizeof(kPathWhitelist) / sizeof(kPathWhitelist[0])); ++i) {
-    if (kPathWhitelist[i] == path) {
-      return true;
-    }
-  }
-
-  static const std::string kFrameworksPrefix = "/system/framework/";
-  static const std::string kJarSuffix = ".jar";
-  if (StartsWith(path, kFrameworksPrefix) && EndsWith(path, kJarSuffix)) {
-    return true;
-  }
-
-  // Whitelist files needed for Runtime Resource Overlay, like these:
-  // /system/vendor/overlay/framework-res.apk
-  // /system/vendor/overlay-subdir/pg/framework-res.apk
-  // /vendor/overlay/framework-res.apk
-  // /vendor/overlay/PG/android-framework-runtime-resource-overlay.apk
-  // /data/resource-cache/system@vendor@overlay@framework-res.apk@idmap
-  // /data/resource-cache/system@vendor@overlay-subdir@pg@framework-res.apk@idmap
-  // See AssetManager.cpp for more details on overlay-subdir.
-  static const std::string kOverlayDir = "/system/vendor/overlay/";
-  static const std::string kVendorOverlayDir = "/vendor/overlay";
-  static const std::string kOverlaySubdir = "/system/vendor/overlay-subdir/";
-  static const std::string kApkSuffix = ".apk";
-
-  if ((StartsWith(path, kOverlayDir) || StartsWith(path, kOverlaySubdir)
-       || StartsWith(path, kVendorOverlayDir))
-      && EndsWith(path, kApkSuffix)
-      && path.find("/../") == std::string::npos) {
-    return true;
-  }
-
-  static const std::string kOverlayIdmapPrefix = "/data/resource-cache/";
-  static const std::string kOverlayIdmapSuffix = ".apk@idmap";
-  if (StartsWith(path, kOverlayIdmapPrefix) && EndsWith(path, kOverlayIdmapSuffix)
-      && path.find("/../") == std::string::npos) {
-    return true;
-  }
-
-  // All regular files that are placed under this path are whitelisted automatically.
-  static const std::string kZygoteWhitelistPath = "/vendor/zygote_whitelist/";
-  if (StartsWith(path, kZygoteWhitelistPath) && path.find("/../") == std::string::npos) {
-    return true;
-  }
-
-  return false;
 }
 
 // TODO: Call android::base::Readlink instead of copying the code here.
