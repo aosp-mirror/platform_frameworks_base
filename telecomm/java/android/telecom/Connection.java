@@ -722,6 +722,7 @@ public abstract class Connection extends Conferenceable {
         public void onDestroyed(Connection c) {}
         public void onConnectionCapabilitiesChanged(Connection c, int capabilities) {}
         public void onConnectionPropertiesChanged(Connection c, int properties) {}
+        public void onSupportedAudioRoutesChanged(Connection c, int supportedAudioRoutes) {}
         public void onVideoProviderChanged(
                 Connection c, VideoProvider videoProvider) {}
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
@@ -1428,6 +1429,7 @@ public abstract class Connection extends Conferenceable {
     private boolean mRingbackRequested = false;
     private int mConnectionCapabilities;
     private int mConnectionProperties;
+    private int mSupportedAudioRoutes = CallAudioState.ROUTE_ALL;
     private VideoProvider mVideoProvider;
     private boolean mAudioModeIsVoip;
     private long mConnectTimeMillis = Conference.CONNECT_TIME_NOT_SPECIFIED;
@@ -1708,6 +1710,15 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
+     * Returns the connection's supported audio routes.
+     *
+     * @hide
+     */
+    public final int getSupportedAudioRoutes() {
+        return mSupportedAudioRoutes;
+    }
+
+    /**
      * Sets the value of the {@link #getAddress()} property.
      *
      * @param address The new address.
@@ -1924,6 +1935,28 @@ public abstract class Connection extends Conferenceable {
             mConnectionProperties = connectionProperties;
             for (Listener l : mListeners) {
                 l.onConnectionPropertiesChanged(this, mConnectionProperties);
+            }
+        }
+    }
+
+    /**
+     * Sets the supported audio routes.
+     *
+     * @param supportedAudioRoutes the supported audio routes as a bitmask.
+     *                             See {@link CallAudioState}
+     * @hide
+     */
+    public final void setSupportedAudioRoutes(int supportedAudioRoutes) {
+        if ((supportedAudioRoutes
+                & (CallAudioState.ROUTE_EARPIECE | CallAudioState.ROUTE_SPEAKER)) == 0) {
+            throw new IllegalArgumentException(
+                    "supported audio routes must include either speaker or earpiece");
+        }
+
+        if (mSupportedAudioRoutes != supportedAudioRoutes) {
+            mSupportedAudioRoutes = supportedAudioRoutes;
+            for (Listener l : mListeners) {
+                l.onSupportedAudioRoutesChanged(this, mSupportedAudioRoutes);
             }
         }
     }
