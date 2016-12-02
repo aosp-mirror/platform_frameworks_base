@@ -15,14 +15,14 @@
 package android.graphics.drawable;
 
 import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
-import android.animation.Animator.AnimatorListener;
+import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
-import android.animation.ObjectAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
@@ -55,8 +55,8 @@ import android.view.RenderNodeAnimatorSetHelper;
 import android.view.View;
 
 import com.android.internal.R;
-
 import com.android.internal.util.VirtualRefBasePtr;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -88,9 +88,77 @@ import java.util.ArrayList;
  * <a name="VDExample"></a>
  * <li><h4>XML for the VectorDrawable containing properties to be animated</h4>
  * <p>
- * Animations can be performed on both group and path attributes, which requires groups and paths to
- * have unique names in the same VectorDrawable. Groups and paths without animations do not need to
- * be named.
+ * Animations can be performed on the animatable attributes in
+ * {@link android.graphics.drawable.VectorDrawable}. These attributes will be animated by
+ * {@link android.animation.ObjectAnimator}. The ObjectAnimator's target can be the root element,
+ * a group element or a path element. The targeted elements need to be named uniquely within
+ * the same VectorDrawable. Elements without animation do not need to be named.
+ * </p>
+ * <p>
+ * Here are all the animatable attributes in {@link android.graphics.drawable.VectorDrawable}:
+ * <table border="2" align="center" cellpadding="5">
+ *     <thead>
+ *         <tr>
+ *             <th>Element Name</th>
+ *             <th>Animatable attribute name</th>
+ *         </tr>
+ *     </thead>
+ *     <tr>
+ *         <td>&lt;vector&gt;</td>
+ *         <td>alpha</td>
+ *     </tr>
+ *     <tr>
+ *         <td rowspan="7">&lt;group&gt;</td>
+ *         <td>rotation</td>
+ *     </tr>
+ *     <tr>
+ *         <td>pivotX</td>
+ *     </tr>
+ *     <tr>
+ *         <td>pivotY</td>
+ *     </tr>
+ *     <tr>
+ *         <td>scaleX</td>
+ *     </tr>
+ *     <tr>
+ *         <td>scaleY</td>
+ *     </tr>
+ *     <tr>
+ *         <td>translateX</td>
+ *     </tr>
+ *     <tr>
+ *         <td>translateY</td>
+ *     </tr>
+ *     <tr>
+ *         <td rowspan="8">&lt;path&gt;</td>
+ *         <td>pathData</td>
+ *     </tr>
+ *     <tr>
+ *         <td>fillColor</td>
+ *     </tr>
+ *     <tr>
+ *         <td>strokeColor</td>
+ *     </tr>
+ *     <tr>
+ *         <td>strokeWidth</td>
+ *     </tr>
+ *     <tr>
+ *         <td>strokeAlpha</td>
+ *     </tr>
+ *     <tr>
+ *         <td>fillAlpha</td>
+ *     </tr>
+ *     <tr>
+ *         <td>trimPathStart</td>
+ *     </tr>
+ *     <tr>
+ *         <td>trimPathOffset</td>
+ *     </tr>
+ *     <tr>
+ *         <td>&lt;clip-path&gt;</td>
+ *         <td>pathData</td>
+ *     </tr>
+ * </table>
  * </p>
  * Below is an example of a VectorDrawable defined in vectordrawable.xml. This VectorDrawable is
  * referred to by its file name (not including file suffix) in the
@@ -118,9 +186,8 @@ import java.util.ArrayList;
  * <li><h4>XML for AnimatedVectorDrawable</h4>
  * <p>
  * An AnimatedVectorDrawable element has a VectorDrawable attribute, and one or more target
- * element(s). The target elements can be the path or group to be animated. Each target element
- * contains a name attribute that references a property (of a path or a group) to animate, and an
- * animation attribute that points to an ObjectAnimator or an AnimatorSet.
+ * element(s). The target element can specify its target by android:name attribute, and link the
+ * target with the proper ObjectAnimator or AnimatorSet by android:animation attribute.
  * </p>
  * The following code sample defines an AnimatedVectorDrawable. Note that the names refer to the
  * groups and paths in the <a href="#VDExample">VectorDrawable XML above</a>.
@@ -173,7 +240,8 @@ import java.util.ArrayList;
  * merge the XML files from the previous examples into one XML file:
  * </p>
  * <pre>
- * &lt;animated-vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; &gt;
+ * &lt;animated-vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+ *                  xmlns:aapt=&quothttp://schemas.android.com/aapt&quot; &gt;
  *     &lt;aapt:attr name="android:drawable"&gt;
  *         &lt;vector
  *             android:height=&quot;64dp&quot;
