@@ -28,6 +28,7 @@ testFiles := \
     Config_test.cpp \
     ConfigLocale_test.cpp \
     Idmap_test.cpp \
+    Main.cpp \
     ResTable_test.cpp \
     Split_test.cpp \
     TestHelpers.cpp \
@@ -59,7 +60,8 @@ LOCAL_STATIC_LIBRARIES := \
     libutils \
     libcutils \
     liblog \
-    libz \
+    libz
+LOCAL_PICKUP_FILES := $(LOCAL_PATH)/data
 
 include $(BUILD_HOST_NATIVE_TEST)
 
@@ -80,7 +82,8 @@ LOCAL_SHARED_LIBRARIES := \
     libbase \
     libcutils \
     libutils \
-    libui \
+    libui
+LOCAL_PICKUP_FILES := $(LOCAL_PATH)/data
 
 include $(BUILD_NATIVE_TEST)
 endif # Not SDK_ONLY

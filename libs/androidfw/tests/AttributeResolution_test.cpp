@@ -15,24 +15,27 @@
  */
 
 #include "androidfw/AttributeResolution.h"
+
+#include "android-base/file.h"
+#include "android-base/logging.h"
+#include "android-base/macros.h"
+
 #include "TestHelpers.h"
 #include "data/styles/R.h"
 
-#include <android-base/file.h>
-#include <android-base/macros.h>
-
-using namespace android;
-using android::base::ReadFileToString;
 using com::android::app::R;
+
+namespace android {
 
 class AttributeResolutionTest : public ::testing::Test {
  public:
   virtual void SetUp() override {
-    std::string test_source_dir = TestSourceDir();
+    std::string test_source_dir = GetTestDataPath();
     std::string contents;
-    LOG_ALWAYS_FATAL_IF(!ReadFileToString(test_source_dir + "/styles/resources.arsc", &contents));
-    LOG_ALWAYS_FATAL_IF(
-        table_.add(contents.data(), contents.size(), 1 /*cookie*/, true /*copyData*/) != NO_ERROR);
+    CHECK(base::ReadFileToString(test_source_dir + "/styles/resources.arsc",
+                                 &contents));
+    CHECK(table_.add(contents.data(), contents.size(), 1 /*cookie*/,
+                     true /*copyData*/) == NO_ERROR);
   }
 
  protected:
@@ -43,11 +46,12 @@ class AttributeResolutionXmlTest : public AttributeResolutionTest {
  public:
   virtual void SetUp() override {
     AttributeResolutionTest::SetUp();
-    std::string test_source_dir = TestSourceDir();
+    std::string test_source_dir = GetTestDataPath();
     std::string contents;
-    LOG_ALWAYS_FATAL_IF(!ReadFileToString(test_source_dir + "/styles/layout.xml", &contents));
-    LOG_ALWAYS_FATAL_IF(xml_parser_.setTo(contents.data(), contents.size(), true /*copyData*/) !=
-                        NO_ERROR);
+    CHECK(base::ReadFileToString(test_source_dir + "/styles/layout.xml",
+                                 &contents));
+    CHECK(xml_parser_.setTo(contents.data(), contents.size(),
+                            true /*copyData*/) == NO_ERROR);
 
     // Skip to the first tag.
     while (xml_parser_.next() != ResXMLParser::START_TAG) {
@@ -68,8 +72,9 @@ TEST_F(AttributeResolutionTest, Theme) {
   values.resize(arraysize(attrs) * 6);
 
   ASSERT_TRUE(ResolveAttrs(&theme, 0 /*def_style_attr*/, 0 /*def_style_res*/,
-                           nullptr /*src_values*/, 0 /*src_values_length*/, attrs, arraysize(attrs),
-                           values.data(), nullptr /*out_indices*/));
+                           nullptr /*src_values*/, 0 /*src_values_length*/,
+                           attrs, arraysize(attrs), values.data(),
+                           nullptr /*out_indices*/));
 
   const uint32_t public_flag = ResTable_typeSpec::SPEC_PUBLIC;
 
@@ -111,8 +116,8 @@ TEST_F(AttributeResolutionXmlTest, XmlParser) {
   std::vector<uint32_t> values;
   values.resize(arraysize(attrs) * 6);
 
-  ASSERT_TRUE(RetrieveAttributes(&table_, &xml_parser_, attrs, arraysize(attrs), values.data(),
-                                 nullptr /*out_indices*/));
+  ASSERT_TRUE(RetrieveAttributes(&table_, &xml_parser_, attrs, arraysize(attrs),
+                                 values.data(), nullptr /*out_indices*/));
 
   uint32_t* values_cursor = values.data();
   EXPECT_EQ(Res_value::TYPE_NULL, values_cursor[STYLE_TYPE]);
@@ -151,13 +156,14 @@ TEST_F(AttributeResolutionXmlTest, ThemeAndXmlParser) {
   ResTable::Theme theme(table_);
   ASSERT_EQ(NO_ERROR, theme.applyStyle(R::style::StyleTwo));
 
-  uint32_t attrs[] = {R::attr::attr_one, R::attr::attr_two, R::attr::attr_three, R::attr::attr_four,
-                      R::attr::attr_five};
+  uint32_t attrs[] = {R::attr::attr_one, R::attr::attr_two, R::attr::attr_three,
+                      R::attr::attr_four, R::attr::attr_five};
   std::vector<uint32_t> values;
   values.resize(arraysize(attrs) * 6);
 
-  ASSERT_TRUE(ApplyStyle(&theme, &xml_parser_, 0 /*def_style_attr*/, 0 /*def_style_res*/, attrs,
-                         arraysize(attrs), values.data(), nullptr /*out_indices*/));
+  ASSERT_TRUE(ApplyStyle(&theme, &xml_parser_, 0 /*def_style_attr*/,
+                         0 /*def_style_res*/, attrs, arraysize(attrs),
+                         values.data(), nullptr /*out_indices*/));
 
   const uint32_t public_flag = ResTable_typeSpec::SPEC_PUBLIC;
 
@@ -199,3 +205,5 @@ TEST_F(AttributeResolutionXmlTest, ThemeAndXmlParser) {
   EXPECT_EQ(0u, values_cursor[STYLE_DENSITY]);
   EXPECT_EQ(public_flag, values_cursor[STYLE_CHANGING_CONFIGURATIONS]);
 }
+
+}  // namespace android

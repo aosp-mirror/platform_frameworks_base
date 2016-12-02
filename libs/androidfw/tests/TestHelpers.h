@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-#ifndef __TEST_HELPERS_H
-#define __TEST_HELPERS_H
-
-#include <androidfw/ResourceTypes.h>
-#include <gtest/gtest.h>
-#include <utils/String16.h>
-#include <utils/String8.h>
+#ifndef TEST_HELPERS_H_
+#define TEST_HELPERS_H_
 
 #include <ostream>
 #include <string>
 
-std::string TestSourceDir();
+#include "androidfw/ResourceTypes.h"
+#include "gtest/gtest.h"
+#include "utils/String16.h"
+#include "utils/String8.h"
 
-static inline ::std::ostream& operator<<(::std::ostream& out, const android::String8& str) {
+static inline ::std::ostream& operator<<(::std::ostream& out,
+                                         const android::String8& str) {
   return out << str.string();
 }
 
-static inline ::std::ostream& operator<<(::std::ostream& out, const android::String16& str) {
+static inline ::std::ostream& operator<<(::std::ostream& out,
+                                         const android::String16& str) {
   return out << android::String8(str).string();
 }
 
@@ -39,18 +39,24 @@ namespace android {
 
 enum { MAY_NOT_BE_BAG = false };
 
-static inline bool operator==(const android::ResTable_config& a,
-                              const android::ResTable_config& b) {
+void SetTestDataPath(const std::string& path);
+
+const std::string& GetTestDataPath();
+
+static inline bool operator==(const ResTable_config& a,
+                              const ResTable_config& b) {
   return a.compare(b) == 0;
 }
 
-static inline ::std::ostream& operator<<(::std::ostream& out, const android::ResTable_config& c) {
+static inline ::std::ostream& operator<<(::std::ostream& out,
+                                         const ResTable_config& c) {
   return out << c.toString().string();
 }
 
-::testing::AssertionResult IsStringEqual(const ResTable& table, uint32_t resource_id,
+::testing::AssertionResult IsStringEqual(const ResTable& table,
+                                         uint32_t resource_id,
                                          const char* expected_str);
 
 }  // namespace android
 
-#endif  // __TEST_HELPERS_H
+#endif  // TEST_HELPERS_H_
