@@ -75,6 +75,7 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.webkit.WebViewZygote;
 
 public final class ActiveServices {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActiveServices" : TAG_AM;
@@ -1708,6 +1709,7 @@ public final class ActiveServices {
 
         final boolean isolated = (r.serviceInfo.flags&ServiceInfo.FLAG_ISOLATED_PROCESS) != 0;
         final String procName = r.processName;
+        String hostingType = "service";
         ProcessRecord app;
 
         if (!isolated) {
@@ -1736,13 +1738,17 @@ public final class ActiveServices {
             // in the service any current isolated process it is running in or
             // waiting to have come up.
             app = r.isolatedProc;
+            if (WebViewZygote.isMultiprocessEnabled()
+                    && r.serviceInfo.packageName.equals(WebViewZygote.getPackageName())) {
+                hostingType = "webview_service";
+            }
         }
 
         // Not running -- get it started, and enqueue this service record
         // to be executed when the app comes up.
         if (app == null && !permissionsReviewRequired) {
             if ((app=mAm.startProcessLocked(procName, r.appInfo, true, intentFlags,
-                    "service", r.name, false, isolated, false)) == null) {
+                    hostingType, r.name, false, isolated, false)) == null) {
                 String msg = "Unable to launch app "
                         + r.appInfo.packageName + "/"
                         + r.appInfo.uid + " for service "

@@ -53,6 +53,10 @@ public class WebViewZygote {
         return sPackage.packageName;
     }
 
+    public static boolean isMultiprocessEnabled() {
+        return sMultiprocessEnabled && sPackage != null;
+    }
+
     public static void setMultiprocessEnabled(boolean enabled) {
         sMultiprocessEnabled = enabled;
 
