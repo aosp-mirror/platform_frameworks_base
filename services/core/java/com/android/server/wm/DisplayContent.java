@@ -141,8 +141,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Utility class for keeping track of the WindowStates and other pertinent contents of a
@@ -2546,7 +2544,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (!obscured) {
                 final boolean isDisplayed = w.isDisplayedLw();
 
-                if (isDisplayed && w.isObscuringFullscreen(mDisplayInfo)) {
+                if (isDisplayed && w.isObscuringDisplay()) {
                     // This window completely covers everything behind it, so we want to leave all
                     // of them as undimmed (for performance reasons).
                     root.mObscuringWindow = w;
@@ -2945,7 +2943,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     screenshotReady = true;
                 }
 
-                if (ws.isObscuringFullscreen(mDisplayInfo)){
+                if (ws.isObscuringDisplay()){
                     break;
                 }
             }
