@@ -190,14 +190,14 @@ public class BatteryMeterDrawable extends Drawable implements
         final int resId = getBatteryDrawableStyleResourceForStyle(style);
         PorterDuff.Mode xferMode = PorterDuff.Mode.XOR;
         if (resId != 0) {
-            TypedArray a = mContext.obtainStyledAttributes(
-                    getBatteryDrawableStyleResourceForStyle(style), attrs);
+            TypedArray a = mContext.obtainStyledAttributes(resId, attrs);
             mTextGravity = a.getInt(0, Gravity.CENTER);
             if (mBoltOverlay) {
                 xferMode = PorterDuff.Mode.OVERLAY;
             } else {
                 xferMode = PorterDuff.intToMode(a.getInt(1, PorterDuff.modeToInt(PorterDuff.Mode.XOR)));
             }
+            a.recycle();
         } else {
             mTextGravity = Gravity.CENTER;
         }
@@ -319,8 +319,8 @@ public class BatteryMeterDrawable extends Drawable implements
         }
         final float[] ptsF = new float[pts.length];
         for (int i = 0; i < pts.length; i += 2) {
-            ptsF[i] = (float)pts[i] / maxX;
-            ptsF[i + 1] = (float)pts[i + 1] / maxY;
+            ptsF[i] = (float) pts[i] / maxX;
+            ptsF[i + 1] = (float) pts[i + 1] / maxY;
         }
         return ptsF;
     }
@@ -380,16 +380,17 @@ public class BatteryMeterDrawable extends Drawable implements
         } else {
             // If we are in power save mode, always use the normal color.
             if (mPowerSaveEnabled) {
-                return mColors[mColors.length-1];
+                return mColors[mColors.length - 1];
             }
-            int thresh, color = 0;
-            for (int i=0; i<mColors.length; i+=2) {
+            int thresh = 0;
+            int color = 0;
+            for (int i = 0; i < mColors.length; i += 2) {
                 thresh = mColors[i];
                 color = mColors[i+1];
                 if (percent <= thresh) {
 
                     // Respect tinting for "normal" level
-                    if (i == mColors.length-2) {
+                    if (i == mColors.length - 2) {
                         return mIconTint;
                     } else {
                         return color;

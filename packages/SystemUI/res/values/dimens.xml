@@ -402,7 +402,7 @@
     <dimen name="keyguard_carrier_text_margin">16dp</dimen>
 
     <!-- Margin on the left side of the battery % in the header. -->
-    <dimen name="header_battery_margin_expanded">6dp</dimen>
+    <dimen name="header_battery_margin_expanded">4dp</dimen>
 
     <!-- Margin on the left side of the battery % when on Keyguard. -->
     <dimen name="header_battery_margin_keyguard">2dp</dimen>

@@ -41,6 +41,7 @@ import com.android.settingslib.BatteryInfo;
 import com.android.settingslib.graph.UsageView;
 import com.android.systemui.BatteryMeterDrawable;
 import com.android.systemui.R;
+import com.android.systemui.qs.QSIconView;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.BatteryController;
 
@@ -72,6 +73,15 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
         if (mBatteryStyle == BATTERY_STYLE_HIDDEN || mBatteryStyle == BATTERY_STYLE_TEXT || mBatteryStyleTile == 0) {
             mBatteryStyle = 0;
         }
+    }
+
+    @Override
+    public QSIconView createTileView(Context context) {
+        QSIconView view = new QSIconView(context);
+        // The BatteryMeterDrawable wants to use the clear xfermode,
+        // put it on its own layer to not make it clear the background with it.
+        view.getIconView().setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        return view;
     }
 
     @Override
