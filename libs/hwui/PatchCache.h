@@ -69,10 +69,6 @@ public:
         return mMeshBuffer;
     }
 
-    uint32_t getGenerationId() const {
-        return mGenerationId;
-    }
-
     /**
      * Removes the entries associated with the specified 9-patch. This is meant
      * to be called from threads that are not the EGL context thread (GC thread
@@ -174,8 +170,6 @@ private:
     GLuint mMeshBuffer;
     // First available free block inside the mesh buffer
     BufferBlock* mFreeBlocks;
-
-    uint32_t mGenerationId;
 
     // Garbage tracking, required to handle GC events on the VM side
     Vector<Res_png_9patch*> mGarbage;

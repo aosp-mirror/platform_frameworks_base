@@ -36,8 +36,7 @@ PatchCache::PatchCache(RenderState& renderState)
         , mSize(0)
         , mCache(LruCache<PatchDescription, Patch*>::kUnlimitedCapacity)
         , mMeshBuffer(0)
-        , mFreeBlocks(nullptr)
-        , mGenerationId(0) {}
+        , mFreeBlocks(nullptr) {}
 
 PatchCache::~PatchCache() {
     clear();
@@ -158,7 +157,6 @@ void PatchCache::createVertexBuffer() {
         mMaxSize, nullptr, GL_DYNAMIC_DRAW);
     mSize = 0;
     mFreeBlocks = new BufferBlock(0, mMaxSize);
-    mGenerationId++;
 }
 
 /**
