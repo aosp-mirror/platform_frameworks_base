@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -349,9 +351,17 @@ final class BackStackRecord extends FragmentTransaction implements
 
     public BackStackRecord(FragmentManagerImpl manager) {
         mManager = manager;
-        int targetSdkVersion = manager.mHost.getContext().getApplicationInfo().targetSdkVersion;
-        // TODO: make the check N_MR1 or O
-        mAllowOptimization = targetSdkVersion > Build.VERSION_CODES.N;
+        FragmentHostCallback host = manager.mHost;
+        if (host != null) {
+            Context context = host.getContext();
+            if (context != null) {
+                ApplicationInfo info = context.getApplicationInfo();
+                if (info != null) {
+                    int targetSdkVersion = info.targetSdkVersion;
+                    mAllowOptimization = targetSdkVersion > Build.VERSION_CODES.N_MR1;
+                }
+            }
+        }
     }
 
     public int getId() {
