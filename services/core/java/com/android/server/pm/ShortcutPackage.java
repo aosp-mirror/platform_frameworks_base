@@ -259,6 +259,11 @@ class ShortcutPackage extends ShortcutPackageItem {
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
 
+            if (si.isFloating()) {
+                si.setRank(0);
+                si.setActivity(null);
+            }
+
             if (si.isAlive()) continue;
 
             if (removeList == null) {
@@ -288,6 +293,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 si.setTimestamp(now);
                 si.clearFlags(ShortcutInfo.FLAG_DYNAMIC);
                 si.setRank(0); // It may still be pinned, so clear the rank.
+                si.setActivity(null);
             }
         }
         if (changed) {
@@ -355,6 +361,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (oldShortcut.isPinned()) {
 
             oldShortcut.setRank(0);
+            oldShortcut.setActivity(null);
             oldShortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_MANIFEST);
             if (disable) {
                 oldShortcut.addFlags(ShortcutInfo.FLAG_DISABLED);
@@ -595,6 +602,10 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
+
+            if (si.isFloating()) {
+                continue; // Ignore floating shortcuts, which are not tied to any activities.
+            }
             final ComponentName activity = si.getActivity();
 
             if (checked.contains(activity)) {
@@ -1356,6 +1367,10 @@ class ShortcutPackage extends ShortcutPackageItem {
                     case TAG_SHORTCUT:
                         final ShortcutInfo si = parseShortcut(parser, packageName,
                                 shortcutUser.getUserId());
+                        // Floating shortcut used to have target activities, but not anymore.
+                        if (si.isFloating()) { // Not really needed by just in case.
+                            si.setActivity(null);
+                        }
 
                         // Don't use addShortcut(), we don't need to save the icon.
                         ret.mShortcuts.put(si.getId(), si);
@@ -1462,7 +1477,6 @@ class ShortcutPackage extends ShortcutPackageItem {
             intents.clear();
             intents.add(intentLegacy);
         }
-
         return new ShortcutInfo(
                 userId, id, packageName, activityComponent, /* icon =*/ null,
                 title, titleResId, titleResName, text, textResId, textResName,
@@ -1553,12 +1567,17 @@ class ShortcutPackage extends ShortcutPackageItem {
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " is both dynamic and manifest at the same time.");
             }
-            if (si.getActivity() == null) {
+            if (!si.isFloating() && si.getActivity() == null) {
                 failed = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
-                        + " has null activity.");
+                        + " is not floating, but has null activity.");
             }
-            if ((si.isDynamic() || si.isManifestShortcut()) && !si.isEnabled()) {
+            if (si.isFloating() && si.getActivity() != null) {
+                failed = true;
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " is floating, but has non-null activity.");
+            }
+            if (!si.isFloating() && !si.isEnabled()) {
                 failed = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " is not floating, but is disabled.");
@@ -1581,7 +1600,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         if (failed) {
-            throw new IllegalStateException("See logcat for errors");
+            mShortcutUser.mService.verifyError();
         }
     }
 

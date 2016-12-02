@@ -124,6 +124,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -401,6 +402,9 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     ShortcutService(Context context, Looper looper, boolean onlyForPackageManagerApis) {
+        if (DEBUG) {
+            Binder.LOG_RUNTIME_EXCEPTION = true;
+        }
         mContext = Preconditions.checkNotNull(context);
         LocalServices.addService(ShortcutServiceInternal.class, new LocalService());
         mHandler = new Handler(looper);
@@ -1604,7 +1608,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         if (!forUpdate) {
-            shortcut.enforceMandatoryFields();
+            shortcut.enforceMandatoryFields(/* forPinned= */ false);
             Preconditions.checkArgument(
                     injectIsMainActivity(shortcut.getActivity(), shortcut.getUserId()),
                     "Cannot publish shortcut: " + shortcut.getActivity() + " is not main activity");
@@ -1752,6 +1756,9 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 // Note copyNonNullFieldsFrom() does the "updatable with?" check too.
                 target.copyNonNullFieldsFrom(source);
+                if (target.isFloating()) {
+                    target.setActivity(null);
+                }
                 target.setTimestamp(injectCurrentTimeMillis());
 
                 if (replacingIcon) {
@@ -2320,8 +2327,7 @@ public class ShortcutService extends IShortcutService.Stub {
                             return false;
                         }
                         if (componentName != null) {
-                            if (si.getActivity() != null
-                                    && !si.getActivity().equals(componentName)) {
+                            if (!Objects.equals(componentName, si.getActivity())) {
                                 return false;
                             }
                         }
@@ -3770,5 +3776,9 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             forEachLoadedUserLocked(u -> u.forAllPackageItems(ShortcutPackageItem::verifyStates));
         }
+    }
+
+    void verifyError() {
+        Slog.e(TAG, "See logcat for errors");
     }
 }

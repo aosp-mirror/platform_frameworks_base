@@ -764,6 +764,12 @@ public class ShortcutManagerTestUtils {
                     filter(mList, ShortcutInfo::isPinned));
         }
 
+        public ShortcutListAsserter selectFloating() {
+            return new ShortcutListAsserter(this,
+                    filter(mList, (si -> si.isPinned()
+                            && !(si.isDynamic() || si.isDeclaredInManifest()))));
+        }
+
         public ShortcutListAsserter selectByActivity(ComponentName activity) {
             return new ShortcutListAsserter(this,
                     ShortcutManagerTestUtils.filterByActivity(mList, activity));
@@ -892,6 +898,11 @@ public class ShortcutManagerTestUtils {
 
         public ShortcutListAsserter areAllWithActivity(ComponentName activity) {
             forAllShortcuts(s -> assertTrue("id=" + s.getId(), s.getActivity().equals(activity)));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllWithNoActivity() {
+            forAllShortcuts(s -> assertNull("id=" + s.getId(), s.getActivity()));
             return this;
         }
 
