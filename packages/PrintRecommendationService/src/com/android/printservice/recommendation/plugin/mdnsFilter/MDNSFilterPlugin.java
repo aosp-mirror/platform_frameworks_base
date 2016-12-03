@@ -16,30 +16,52 @@
 
 package com.android.printservice.recommendation.plugin.mdnsFilter;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.StringRes;
 import android.content.Context;
-import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-import android.util.Log;
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
+import android.annotation.NonNull;
+import android.annotation.StringRes;
+
 import com.android.printservice.recommendation.PrintServicePlugin;
-import com.android.printservice.recommendation.util.DiscoveryListenerMultiplexer;
-import com.android.printservice.recommendation.util.NsdResolveQueue;
+import com.android.printservice.recommendation.util.MDNSFilteredDiscovery;
+import com.android.printservice.recommendation.util.MDNSUtils;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A plugin listening for mDNS results and only adding the ones that {@link
  * MDNSUtils#isVendorPrinter match} configured list
  */
-public class MDNSFilterPlugin implements PrintServicePlugin, NsdManager.DiscoveryListener {
-    private static final String LOG_TAG = "MDNSFilterPlugin";
+public class MDNSFilterPlugin implements PrintServicePlugin {
 
-    private static final String PRINTER_SERVICE_TYPE = "_ipp._tcp";
+    /** The mDNS service types supported */
+    private static final Set<String> PRINTER_SERVICE_TYPES = new HashSet<String>() {{
+        add("_ipp._tcp");
+    }};
+
+    /**
+     * The printer filter for {@link MDNSFilteredDiscovery} passing only mDNS results
+     * that {@link MDNSUtils#isVendorPrinter match} configured list
+     */
+    private static class VendorNameFilter implements MDNSFilteredDiscovery.PrinterFilter {
+        /** mDNS names handled by the print service this plugin is for */
+        private final @NonNull Set<String> mMDNSNames;
+
+        /**
+         * Filter constructor
+         *
+         * @param vendorNames The vendor names to pass
+         */
+        VendorNameFilter(@NonNull Set<String> vendorNames) {
+            mMDNSNames = new HashSet<>(vendorNames);
+        }
+
+        @Override
+        public boolean matchesCriteria(NsdServiceInfo nsdServiceInfo) {
+            return MDNSUtils.isVendorPrinter(nsdServiceInfo, mMDNSNames);
+        }
+    }
 
     /** Name of the print service this plugin is for */
     private final @StringRes int mName;
@@ -47,26 +69,8 @@ public class MDNSFilterPlugin implements PrintServicePlugin, NsdManager.Discover
     /** Package name of the print service this plugin is for */
     private final @NonNull CharSequence mPackageName;
 
-    /** mDNS names handled by the print service this plugin is for */
-    private final @NonNull HashSet<String> mMDNSNames;
-
-    /** Printer identifiers of the mPrinters found. */
-    @GuardedBy("mLock")
-    private final @NonNull HashSet<String> mPrinters;
-
-    /** Context of the user of this plugin */
-    private final @NonNull Context mContext;
-
-    /**
-     * Call back to report the number of mPrinters found.
-     *
-     * We assume that {@link #start} and {@link #stop} are never called in parallel, hence it is
-     * safe to not synchronize access to this field.
-     */
-    private @Nullable PrinterDiscoveryCallback mCallback;
-
-    /** Queue used to resolve nsd infos */
-    private final @NonNull NsdResolveQueue mResolveQueue;
+    /** The mDNS filtered discovery */
+    private final MDNSFilteredDiscovery mMDNSFilteredDiscovery;
 
     /**
      * Create new stub that assumes that a print service can be used to print on all mPrinters
@@ -79,16 +83,11 @@ public class MDNSFilterPlugin implements PrintServicePlugin, NsdManager.Discover
      */
     public MDNSFilterPlugin(@NonNull Context context, @NonNull String name,
             @NonNull CharSequence packageName, @NonNull List<String> mDNSNames) {
-        mContext = Preconditions.checkNotNull(context, "context");
-        mName = mContext.getResources().getIdentifier(Preconditions.checkStringNotEmpty(name,
-                "name"), null, "com.android.printservice.recommendation");
-        mPackageName = Preconditions.checkStringNotEmpty(packageName);
-        mMDNSNames = new HashSet<>(Preconditions
-                .checkCollectionNotEmpty(Preconditions.checkCollectionElementsNotNull(mDNSNames,
-                        "mDNSNames"), "mDNSNames"));
-
-        mResolveQueue = NsdResolveQueue.getInstance();
-        mPrinters = new HashSet<>();
+        mName = context.getResources().getIdentifier(name, null,
+                "com.android.printservice.recommendation");
+        mPackageName = packageName;
+        mMDNSFilteredDiscovery = new MDNSFilteredDiscovery(context, PRINTER_SERVICE_TYPES,
+                new VendorNameFilter(new HashSet<>(mDNSNames)));
     }
 
     @Override
@@ -96,18 +95,9 @@ public class MDNSFilterPlugin implements PrintServicePlugin, NsdManager.Discover
         return mPackageName;
     }
 
-    /**
-     * @return The NDS manager
-     */
-    private NsdManager getNDSManager() {
-        return (NsdManager) mContext.getSystemService(Context.NSD_SERVICE);
-    }
-
     @Override
     public void start(@NonNull PrinterDiscoveryCallback callback) throws Exception {
-        mCallback = callback;
-
-        DiscoveryListenerMultiplexer.addListener(getNDSManager(), PRINTER_SERVICE_TYPE, this);
+        mMDNSFilteredDiscovery.start(callback);
     }
 
     @Override
@@ -117,82 +107,6 @@ public class MDNSFilterPlugin implements PrintServicePlugin, NsdManager.Discover
 
     @Override
     public void stop() throws Exception {
-        mCallback.onChanged(0);
-        mCallback = null;
-
-        DiscoveryListenerMultiplexer.removeListener(getNDSManager(), this);
-    }
-
-    @Override
-    public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-        Log.w(LOG_TAG, "Failed to start network discovery for type " + serviceType + ": "
-                + errorCode);
-    }
-
-    @Override
-    public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-        Log.w(LOG_TAG, "Failed to stop network discovery for type " + serviceType + ": "
-                + errorCode);
-    }
-
-    @Override
-    public void onDiscoveryStarted(String serviceType) {
-        // empty
-    }
-
-    @Override
-    public void onDiscoveryStopped(String serviceType) {
-        mPrinters.clear();
-    }
-
-    @Override
-    public void onServiceFound(NsdServiceInfo serviceInfo) {
-        mResolveQueue.resolve(getNDSManager(), serviceInfo,
-                new NsdManager.ResolveListener() {
-            @Override
-            public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                Log.w(LOG_TAG, "Service found: could not resolve " + serviceInfo + ": " +
-                        errorCode);
-            }
-
-            @Override
-            public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                if (MDNSUtils.isVendorPrinter(serviceInfo, mMDNSNames)) {
-                    if (mCallback != null) {
-                        boolean added = mPrinters.add(serviceInfo.getHost().getHostAddress());
-
-                        if (added) {
-                            mCallback.onChanged(mPrinters.size());
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onServiceLost(NsdServiceInfo serviceInfo) {
-        mResolveQueue.resolve(getNDSManager(), serviceInfo,
-                new NsdManager.ResolveListener() {
-            @Override
-            public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                Log.w(LOG_TAG, "Service lost: Could not resolve " + serviceInfo + ": "
-                        + errorCode);
-            }
-
-            @Override
-            public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                if (MDNSUtils.isVendorPrinter(serviceInfo, mMDNSNames)) {
-                    if (mCallback != null) {
-                        boolean removed = mPrinters
-                                .remove(serviceInfo.getHost().getHostAddress());
-
-                        if (removed) {
-                            mCallback.onChanged(mPrinters.size());
-                        }
-                    }
-                }
-            }
-        });
+        mMDNSFilteredDiscovery.stop();
     }
 }
