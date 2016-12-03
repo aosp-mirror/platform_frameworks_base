@@ -114,6 +114,7 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -1523,6 +1524,11 @@ public final class SystemServer {
                 } catch (Throwable e) {
                     reportWtf("making Network Managment Service ready", e);
                 }
+                CountDownLatch networkPolicyInitReadySignal = null;
+                if (networkPolicyF != null) {
+                    networkPolicyInitReadySignal = networkPolicyF
+                            .networkScoreAndNetworkManagementServiceReady();
+                }
                 traceEnd();
                 traceBeginAndSlog("MakeNetworkStatsServiceReady");
                 try {
@@ -1531,18 +1537,20 @@ public final class SystemServer {
                     reportWtf("making Network Stats Service ready", e);
                 }
                 traceEnd();
-                traceBeginAndSlog("MakeNetworkPolicyServiceReady");
-                try {
-                    if (networkPolicyF != null) networkPolicyF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Network Policy Service ready", e);
-                }
-                traceEnd();
                 traceBeginAndSlog("MakeConnectivityServiceReady");
                 try {
                     if (connectivityF != null) connectivityF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making Connectivity Service ready", e);
+                }
+                traceEnd();
+                traceBeginAndSlog("MakeNetworkPolicyServiceReady");
+                try {
+                    if (networkPolicyF != null) {
+                        networkPolicyF.systemReady(networkPolicyInitReadySignal);
+                    }
+                } catch (Throwable e) {
+                    reportWtf("making Network Policy Service ready", e);
                 }
                 traceEnd();
 
