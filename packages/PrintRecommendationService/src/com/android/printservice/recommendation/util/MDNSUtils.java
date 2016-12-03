@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.android.printservice.recommendation.plugin.mdnsFilter;
+package com.android.printservice.recommendation.util;
 
 import android.annotation.NonNull;
 import android.net.nsd.NsdServiceInfo;
@@ -27,11 +27,14 @@ import java.util.Set;
 /**
  * Utils for dealing with mDNS attributes
  */
-class MDNSUtils {
+public class MDNSUtils {
     public static final String ATTRIBUTE_TY = "ty";
     public static final String ATTRIBUTE_PRODUCT = "product";
     public static final String ATTRIBUTE_USB_MFG = "usb_mfg";
     public static final String ATTRIBUTE_MFG = "mfg";
+
+    private MDNSUtils() {
+    }
 
     /**
      * Check if the service has any of a set of vendor names.
@@ -94,5 +97,36 @@ class MDNSUtils {
      */
     private static boolean containsString(@NonNull String container, @NonNull String contained) {
         return container.equalsIgnoreCase(contained) || container.contains(contained + " ");
+    }
+
+    /**
+     * Return String from mDNS attribute byte array
+     *
+     * @param value the byte array with string data
+     *
+     * @return constructed string
+     */
+    public static String getString(byte[] value) {
+        if (value != null) return new String(value, StandardCharsets.UTF_8);
+        return null;
+    }
+
+    /**
+     * Check if service has a type of supported types set
+     *
+     * @param serviceInfo   The service
+     * @param serviceTypes  The supported service types set
+     *
+     * @return true if service has a type of supported types set
+     */
+    public static boolean isSupportedServiceType(@NonNull NsdServiceInfo serviceInfo,
+            @NonNull Set<String> serviceTypes) {
+        String curType = serviceInfo.getServiceType().toLowerCase();
+        for (String type : serviceTypes) {
+            if (curType.contains(type.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
