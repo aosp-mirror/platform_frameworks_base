@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.stack.StackScrollState;
  */
 public class NotificationShelf extends ActivatableNotificationView {
 
+    public static final boolean SHOW_AMBIENT_ICONS = true;
     private static final boolean USE_ANIMATIONS_WHEN_OPENING =
             SystemProperties.getBoolean("debug.icon_opening_animations", true);
     private ViewInvertHelper mViewInvertHelper;
@@ -248,6 +249,7 @@ public class NotificationShelf extends ActivatableNotificationView {
             notGoneIndex++;
             previousColor = ownColorUntinted;
         }
+        mShelfIcons.setSpeedBumpIndex(mAmbientState.getSpeedBumpIndex());
         mShelfIcons.calculateIconTranslations();
         mShelfIcons.applyIconStates();
         boolean hideBackground = numViewsInShelf < 1.0f;
@@ -476,6 +478,7 @@ public class NotificationShelf extends ActivatableNotificationView {
         float paddingStart = NotificationUtils.interpolate(start,
                 mShelfIcons.getPaddingStart(), openedAmount);
         mShelfIcons.setActualPaddingStart(paddingStart);
+        mShelfIcons.setOpenedAmount(openedAmount);
     }
 
     public void setMaxLayoutHeight(int maxLayoutHeight) {

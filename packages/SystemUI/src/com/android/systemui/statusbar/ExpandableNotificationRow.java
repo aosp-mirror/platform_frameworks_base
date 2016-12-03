@@ -891,7 +891,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     private void updateIconVisibilities() {
-        boolean visible = isChildInGroup() || isBelowSpeedBump() || mIconsVisible;
+        boolean visible = isChildInGroup()
+                || (isBelowSpeedBump() && !NotificationShelf.SHOW_AMBIENT_ICONS)
+                || mIconsVisible;
         mPublicLayout.setIconsVisible(visible);
         mPrivateLayout.setIconsVisible(visible);
         if (mChildrenContainer != null) {

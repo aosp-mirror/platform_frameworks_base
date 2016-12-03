@@ -89,6 +89,9 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private boolean mChangingViewPositions;
     private int mAddAnimationStartIndex = -1;
     private int mCannedAnimationStartIndex = -1;
+    private int mSpeedBumpIndex = -1;
+    private int mIconSize;
+    private float mOpenedAmount = 0.0f;
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -119,6 +122,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         float centerY = getHeight() / 2.0f;
         // we layout all our children on the left at the top
+        mIconSize = 0;
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             // We need to layout all children even the GONE ones, such that the heights are
@@ -127,6 +131,9 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             int height = child.getMeasuredHeight();
             int top = (int) (centerY - height / 2.0f);
             child.layout(0, top, width, top + height);
+            if (i == 0) {
+                mIconSize = child.getWidth();
+            }
         }
         if (mShowAllIcons) {
             resetViewStates();
@@ -216,42 +223,56 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
      */
     public void calculateIconTranslations() {
         float translationX = getActualPaddingStart();
-        int overflowingIconIndex = -1;
-        int lastTwoIconWidth = 0;
+        int firstOverflowIndex = -1;
         int childCount = getChildCount();
+        float layoutEnd = getLayoutEnd();
+        float overflowStart = layoutEnd - mIconSize * 2.2f;
+        boolean hasAmbient = mSpeedBumpIndex != -1 && mSpeedBumpIndex < getChildCount();
+        float visualOverflowStart = 0;
         for (int i = 0; i < childCount; i++) {
             View view = getChildAt(i);
             IconState iconState = mIconStates.get(view);
             iconState.xTranslation = translationX;
-            iconState.visibleState = StatusBarIconView.STATE_ICON;
-            translationX += iconState.iconAppearAmount * view.getWidth();
-            if (translationX > getLayoutEnd()) {
-                // we are overflowing it with this icon
-                overflowingIconIndex = i - 1;
-                lastTwoIconWidth = view.getWidth();
-                break;
+            boolean isAmbient = mSpeedBumpIndex != -1 && i >= mSpeedBumpIndex
+                    && iconState.iconAppearAmount > 0.0f;
+            boolean noOverflowAfter = i == childCount - 1;
+            if (mOpenedAmount != 0.0f) {
+                noOverflowAfter = noOverflowAfter && !hasAmbient;
             }
+            iconState.visibleState = StatusBarIconView.STATE_ICON;
+            if (firstOverflowIndex == -1 && (isAmbient
+                    || (translationX >= (noOverflowAfter ? layoutEnd - mIconSize : overflowStart)))) {
+                firstOverflowIndex = noOverflowAfter ? i - 1 : i;
+                int totalDotLength = mStaticDotRadius * 6 + 2 * mDotPadding;
+                visualOverflowStart = overflowStart + mIconSize * 1.2f - totalDotLength / 2
+                        - mIconSize * 0.5f + mStaticDotRadius;
+                if (isAmbient) {
+                    visualOverflowStart = Math.min(translationX, visualOverflowStart
+                            + mStaticDotRadius * 2 + mDotPadding);
+                } else {
+                    visualOverflowStart += (translationX - overflowStart) / mIconSize
+                            * (mStaticDotRadius * 2 + mDotPadding);
+                }
+            }
+            translationX += iconState.iconAppearAmount * view.getWidth();
         }
-        if (overflowingIconIndex != -1) {
+        if (firstOverflowIndex != -1) {
             int numDots = 1;
-            View overflowIcon = getChildAt(overflowingIconIndex);
-            IconState overflowState = mIconStates.get(overflowIcon);
-            lastTwoIconWidth += overflowIcon.getWidth();
-            int dotWidth = mStaticDotRadius * 2 + mDotPadding;
-            int totalDotLength = mStaticDotRadius * 6 + 2 * mDotPadding;
-            translationX = (getLayoutEnd() - lastTwoIconWidth / 2 - totalDotLength / 2)
-                    - overflowIcon.getWidth() * 0.3f + mStaticDotRadius;
-            float overflowStart = getLayoutEnd() - lastTwoIconWidth;
-            float overlapAmount = (overflowState.xTranslation - overflowStart)
-                    / overflowIcon.getWidth();
-            translationX += overlapAmount * dotWidth;
-            for (int i = overflowingIconIndex; i < childCount; i++) {
+            translationX = visualOverflowStart;
+            for (int i = firstOverflowIndex; i < childCount; i++) {
                 View view = getChildAt(i);
                 IconState iconState = mIconStates.get(view);
+                int dotWidth = mStaticDotRadius * 2 + mDotPadding;
                 iconState.xTranslation = translationX;
                 if (numDots <= 3) {
-                    iconState.visibleState = StatusBarIconView.STATE_DOT;
-                    translationX += numDots == 3 ? 3 * dotWidth : dotWidth;
+                    if (numDots == 1 && iconState.iconAppearAmount < 0.8f) {
+                        iconState.visibleState = StatusBarIconView.STATE_ICON;
+                        numDots--;
+                    } else {
+                        iconState.visibleState = StatusBarIconView.STATE_DOT;
+                    }
+                    translationX += (numDots == 3 ? 3 * dotWidth : dotWidth)
+                            * iconState.iconAppearAmount;
                 } else {
                     iconState.visibleState = StatusBarIconView.STATE_HIDDEN;
                 }
@@ -329,6 +350,14 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
 
     public IconState getIconState(StatusBarIconView icon) {
         return mIconStates.get(icon);
+    }
+
+    public void setSpeedBumpIndex(int speedBumpIndex) {
+        mSpeedBumpIndex = speedBumpIndex;
+    }
+
+    public void setOpenedAmount(float expandAmount) {
+        mOpenedAmount = expandAmount;
     }
 
     public class IconState extends ViewState {
