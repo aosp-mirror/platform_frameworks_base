@@ -25,14 +25,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
 
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -48,21 +41,8 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testForAllWindows() throws Exception {
-        final DisplayContent dc = new DisplayContent(mDisplay, sWm, null, null);
-        final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, dc, "wallpaper");
-        final WindowState imeWindow = createWindow(null, TYPE_INPUT_METHOD, dc, "ime");
-        final WindowState imeDialogWindow = createWindow(null, TYPE_INPUT_METHOD_DIALOG, dc,
-                "ime dialog");
-        final WindowState statusBarWindow = createWindow(null, TYPE_STATUS_BAR, dc, "status bar");
-        final WindowState navBarWindow = createWindow(null, TYPE_NAVIGATION_BAR,
-                statusBarWindow.mToken, "nav bar");
-        final WindowState appWindow = createWindow(null, TYPE_BASE_APPLICATION, dc, "app");
-        final WindowState negChildAppWindow = createWindow(appWindow, TYPE_APPLICATION_MEDIA,
-                appWindow.mToken, "negative app child");
-        final WindowState posChildAppWindow = createWindow(appWindow,
-                TYPE_APPLICATION_ATTACHED_DIALOG, appWindow.mToken, "positive app child");
-        final WindowState exitingAppWindow = createWindow(null, TYPE_BASE_APPLICATION, dc,
-                "exiting app");
+        final WindowState exitingAppWindow = createWindow(null, TYPE_BASE_APPLICATION,
+                sDisplayContent, "exiting app");
         final AppWindowToken exitingAppToken = exitingAppWindow.mAppToken;
         exitingAppToken.mIsExiting = true;
         exitingAppToken.mTask.mStack.mExitingAppTokens.add(exitingAppToken);
@@ -70,30 +50,75 @@ public class DisplayContentTests extends WindowTestsBase {
         final ArrayList<WindowState> windows = new ArrayList();
 
         // Test forward traversal.
-        dc.forAllWindows(w -> {windows.add(w);}, false /* traverseTopToBottom */);
+        sDisplayContent.forAllWindows(w -> {windows.add(w);}, false /* traverseTopToBottom */);
 
-        assertEquals(wallpaperWindow, windows.get(0));
+        assertEquals(sWallpaperWindow, windows.get(0));
         assertEquals(exitingAppWindow, windows.get(1));
-        assertEquals(negChildAppWindow, windows.get(2));
-        assertEquals(appWindow, windows.get(3));
-        assertEquals(posChildAppWindow, windows.get(4));
-        assertEquals(statusBarWindow, windows.get(5));
-        assertEquals(navBarWindow, windows.get(6));
-        assertEquals(imeWindow, windows.get(7));
-        assertEquals(imeDialogWindow, windows.get(8));
+        assertEquals(sChildAppWindowBelow, windows.get(2));
+        assertEquals(sAppWindow, windows.get(3));
+        assertEquals(sChildAppWindowAbove, windows.get(4));
+        assertEquals(sDockedDividerWindow, windows.get(5));
+        assertEquals(sStatusBarWindow, windows.get(6));
+        assertEquals(sNavBarWindow, windows.get(7));
+        assertEquals(sImeWindow, windows.get(8));
+        assertEquals(sImeDialogWindow, windows.get(9));
 
         // Test backward traversal.
         windows.clear();
-        dc.forAllWindows(w -> {windows.add(w);}, true /* traverseTopToBottom */);
+        sDisplayContent.forAllWindows(w -> {windows.add(w);}, true /* traverseTopToBottom */);
 
-        assertEquals(wallpaperWindow, windows.get(8));
-        assertEquals(exitingAppWindow, windows.get(7));
-        assertEquals(negChildAppWindow, windows.get(6));
-        assertEquals(appWindow, windows.get(5));
-        assertEquals(posChildAppWindow, windows.get(4));
-        assertEquals(statusBarWindow, windows.get(3));
-        assertEquals(navBarWindow, windows.get(2));
-        assertEquals(imeWindow, windows.get(1));
-        assertEquals(imeDialogWindow, windows.get(0));
+        assertEquals(sWallpaperWindow, windows.get(9));
+        assertEquals(exitingAppWindow, windows.get(8));
+        assertEquals(sChildAppWindowBelow, windows.get(7));
+        assertEquals(sAppWindow, windows.get(6));
+        assertEquals(sChildAppWindowAbove, windows.get(5));
+        assertEquals(sDockedDividerWindow, windows.get(4));
+        assertEquals(sStatusBarWindow, windows.get(3));
+        assertEquals(sNavBarWindow, windows.get(2));
+        assertEquals(sImeWindow, windows.get(1));
+        assertEquals(sImeDialogWindow, windows.get(0));
+    }
+
+    @Test
+    public void testForAllWindows_WithImeTarget() throws Exception {
+        final WindowState imeAppTarget =
+                createWindow(null, TYPE_BASE_APPLICATION, sDisplayContent, "imeAppTarget");
+
+        sWm.mInputMethodTarget = imeAppTarget;
+
+        final ArrayList<WindowState> windows = new ArrayList();
+
+        // Test forward traversal.
+        sDisplayContent.forAllWindows(w -> {windows.add(w);}, false /* traverseTopToBottom */);
+
+        assertEquals(sWallpaperWindow, windows.get(0));
+        assertEquals(sChildAppWindowBelow, windows.get(1));
+        assertEquals(sAppWindow, windows.get(2));
+        assertEquals(sChildAppWindowAbove, windows.get(3));
+        assertEquals(imeAppTarget, windows.get(4));
+        assertEquals(sImeWindow, windows.get(5));
+        assertEquals(sImeDialogWindow, windows.get(6));
+        assertEquals(sDockedDividerWindow, windows.get(7));
+        assertEquals(sStatusBarWindow, windows.get(8));
+        assertEquals(sNavBarWindow, windows.get(9));
+
+        // Test backward traversal.
+        windows.clear();
+        sDisplayContent.forAllWindows(w -> {windows.add(w);}, true /* traverseTopToBottom */);
+
+        assertEquals(sWallpaperWindow, windows.get(9));
+        assertEquals(sChildAppWindowBelow, windows.get(8));
+        assertEquals(sAppWindow, windows.get(7));
+        assertEquals(sChildAppWindowAbove, windows.get(6));
+        assertEquals(imeAppTarget, windows.get(5));
+        assertEquals(sImeWindow, windows.get(4));
+        assertEquals(sImeDialogWindow, windows.get(3));
+        assertEquals(sDockedDividerWindow, windows.get(2));
+        assertEquals(sStatusBarWindow, windows.get(1));
+        assertEquals(sNavBarWindow, windows.get(0));
+
+        // Clean-up
+        sWm.mInputMethodTarget = null;
+        imeAppTarget.removeImmediately();
     }
 }

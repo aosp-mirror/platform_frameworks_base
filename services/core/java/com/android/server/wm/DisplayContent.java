@@ -457,6 +457,43 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     @Override
+    boolean forAllWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
+        // Special handling so we can process IME windows with #forAllImeWindows above their IME
+        // target, or here in order if there isn't an IME target.
+        if (traverseTopToBottom) {
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                final DisplayChildWindowContainer child = mChildren.get(i);
+                if (child == mImeWindowsContainers && mService.mInputMethodTarget != null) {
+                    // In this case the Ime windows will be processed above their target so we skip
+                    // here.
+                    continue;
+                }
+                if (child.forAllWindows(callback, traverseTopToBottom)) {
+                    return true;
+                }
+            }
+        } else {
+            final int count = mChildren.size();
+            for (int i = 0; i < count; i++) {
+                final DisplayChildWindowContainer child = mChildren.get(i);
+                if (child == mImeWindowsContainers && mService.mInputMethodTarget != null) {
+                    // In this case the Ime windows will be processed above their target so we skip
+                    // here.
+                    continue;
+                }
+                if (child.forAllWindows(callback, traverseTopToBottom)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    boolean forAllImeWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
+        return mImeWindowsContainers.forAllWindows(callback, traverseTopToBottom);
+    }
+
+    @Override
     int getOrientation() {
         final WindowManagerPolicy policy = mService.mPolicy;
 
