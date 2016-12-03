@@ -1484,8 +1484,10 @@ public final class SystemServer {
             @Override
             public void run() {
                 Slog.i(TAG, "Making services ready");
+                traceBeginAndSlog("StartActivityManagerReadyPhase");
                 mSystemServiceManager.startBootPhase(
                         SystemService.PHASE_ACTIVITY_MANAGER_READY);
+                traceEnd();
                 traceBeginAndSlog("PhaseActivityManagerReady");
 
                 traceBeginAndSlog("StartObservingNativeCrashes");
