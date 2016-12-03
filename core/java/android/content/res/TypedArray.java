@@ -30,6 +30,8 @@ import android.util.TypedValue;
 
 import com.android.internal.util.XmlUtils;
 
+import dalvik.system.VMRuntime;
+
 import java.util.Arrays;
 
 /**
@@ -44,28 +46,17 @@ import java.util.Arrays;
 public class TypedArray {
 
     static TypedArray obtain(Resources res, int len) {
-        final TypedArray attrs = res.mTypedArrayPool.acquire();
-        if (attrs != null) {
-            attrs.mLength = len;
-            attrs.mRecycled = false;
-
-            // Reset the assets, which may have changed due to configuration changes
-            // or further resource loading.
-            attrs.mAssets = res.getAssets();
-
-            final int fullLen = len * AssetManager.STYLE_NUM_ENTRIES;
-            if (attrs.mData.length >= fullLen) {
-                return attrs;
-            }
-
-            attrs.mData = new int[fullLen];
-            attrs.mIndices = new int[1 + len];
-            return attrs;
+        TypedArray attrs = res.mTypedArrayPool.acquire();
+        if (attrs == null) {
+            attrs = new TypedArray(res);
         }
 
-        return new TypedArray(res,
-                new int[len*AssetManager.STYLE_NUM_ENTRIES],
-                new int[1+len], len);
+        attrs.mRecycled = false;
+        // Reset the assets, which may have changed due to configuration changes
+        // or further resource loading.
+        attrs.mAssets = res.getAssets();
+        attrs.resize(len);
+        return attrs;
     }
 
     private final Resources mResources;
@@ -77,9 +68,24 @@ public class TypedArray {
     /*package*/ XmlBlock.Parser mXml;
     /*package*/ Resources.Theme mTheme;
     /*package*/ int[] mData;
+    /*package*/ long mDataAddress;
     /*package*/ int[] mIndices;
+    /*package*/ long mIndicesAddress;
     /*package*/ int mLength;
     /*package*/ TypedValue mValue = new TypedValue();
+
+    private void resize(int len) {
+        mLength = len;
+        final int dataLen = len * AssetManager.STYLE_NUM_ENTRIES;
+        final int indicesLen = len + 1;
+        final VMRuntime runtime = VMRuntime.getRuntime();
+        if (mData == null || mData.length < dataLen) {
+            mData = (int[]) runtime.newNonMovableArray(int.class, dataLen);
+            mDataAddress = runtime.addressOf(mData);
+            mIndices = (int[]) runtime.newNonMovableArray(int.class, indicesLen);
+            mIndicesAddress = runtime.addressOf(mIndices);
+        }
+    }
 
     /**
      * Returns the number of values in this array.
@@ -1217,13 +1223,11 @@ public class TypedArray {
         return mAssets.getPooledStringForCookie(cookie, data[index+AssetManager.STYLE_DATA]);
     }
 
-    /*package*/ TypedArray(Resources resources, int[] data, int[] indices, int len) {
+    /** @hide */
+    protected TypedArray(Resources resources) {
         mResources = resources;
         mMetrics = mResources.getDisplayMetrics();
         mAssets = mResources.getAssets();
-        mData = data;
-        mIndices = indices;
-        mLength = len;
     }
 
     @Override

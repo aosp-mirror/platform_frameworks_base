@@ -1126,7 +1126,7 @@ public class ResourcesImpl {
                 final XmlBlock.Parser parser = (XmlBlock.Parser) set;
                 AssetManager.applyStyle(mTheme, defStyleAttr, defStyleRes,
                         parser != null ? parser.mParseState : 0,
-                        attrs, array.mData, array.mIndices);
+                        attrs, attrs.length, array.mDataAddress, array.mIndicesAddress);
                 array.mTheme = wrapper;
                 array.mXml = parser;
 
