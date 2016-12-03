@@ -32,13 +32,6 @@
         <item>Hewlett Packard</item>
     </string-array>
 
-    <!-- Samsung plugin -->
-    <string-array name="known_print_vendor_info_for_samsung" translatable="false">
-        <item>com.sec.app.samsungprintservice</item>
-        <item>Samsung Electronics</item>
-        <item>Samsung</item>
-    </string-array>
-
     <!-- Xerox plugin -->
     <string-array name="known_print_vendor_info_for_xerox" translatable="false">
         <item>com.xerox.printservice</item>
@@ -49,6 +42,8 @@
     <array name="known_print_plugin_vendors" translatable="false">
         <item>@array/known_print_vendor_info_for_mopria</item>
         <item>@array/known_print_vendor_info_for_hp</item>
-        <item>@array/known_print_vendor_info_for_samsung</item>
     </array>
+
+    <!-- Samsung plugin -->
+    <string name="plugin_package_samsung">com.sec.app.samsungprintservice</string>
 </resources>
