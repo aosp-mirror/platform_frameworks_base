@@ -7650,6 +7650,13 @@ public final class Settings {
        public static final String WIFI_SCAN_ALWAYS_AVAILABLE =
                 "wifi_scan_always_enabled";
 
+        /**
+         * Value to specify if Wi-Fi Wakeup feature is enabled.
+         * @hide
+         */
+        @SystemApi
+        public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
+
        /**
         * Settings to allow BLE scans to be enabled even when Bluetooth is turned off for
         * connectivity.
