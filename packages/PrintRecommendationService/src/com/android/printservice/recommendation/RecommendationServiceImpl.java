@@ -78,7 +78,7 @@ public class RecommendationServiceImpl extends RecommendationService
 
         try {
             mPlugins.add(new RemotePrintServicePlugin(new SamsungRecommendationPlugin(this), this,
-                    false));
+                    true));
         } catch (Exception e) {
             Log.e(LOG_TAG, "Could not initiate " + getString(R.string.plugin_vendor_samsung) +
                     " plugin", e);
