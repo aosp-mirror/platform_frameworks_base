@@ -57,6 +57,7 @@ class KeyguardController {
     private boolean mKeyguardShowing;
     private boolean mKeyguardGoingAway;
     private boolean mOccluded;
+    private boolean mDismissalRequested;
     private ActivityRecord mDismissingKeyguardActivity;
     private int mBeforeUnoccludeTransit;
     private int mVisibilityTransactionDepth;
@@ -95,9 +96,7 @@ class KeyguardController {
         mKeyguardShowing = showing;
         if (showing) {
             mKeyguardGoingAway = false;
-
-            // Allow an activity to redismiss Keyguard.
-            mDismissingKeyguardActivity = null;
+            mDismissalRequested = false;
         }
         mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         mService.updateSleepIfNeededLocked();
@@ -183,8 +182,20 @@ class KeyguardController {
      * @return True if we may show an activity while Keyguard is showing because we are in the
      *         process of dismissing it anyways, false otherwise.
      */
-    boolean canShowActivityWhileKeyguardShowing(boolean dismissKeyguard) {
-        return dismissKeyguard && canDismissKeyguard();
+    boolean canShowActivityWhileKeyguardShowing(ActivityRecord r, boolean dismissKeyguard) {
+
+        // Allow to show it when we are about to dismiss Keyguard. This isn't allowed if r is
+        // already the dismissing activity, in which case we don't allow it to repeatedly dismiss
+        // Keyguard.
+        return dismissKeyguard && canDismissKeyguard() &&
+                (mDismissalRequested || r != mDismissingKeyguardActivity);
+    }
+
+    /**
+     * @return True if we may show an activity while Keyguard is occluded, false otherwise.
+     */
+    boolean canShowWhileOccluded(boolean dismissKeyguard, boolean showWhenLocked) {
+        return showWhenLocked || dismissKeyguard && !mWindowManager.isKeyguardSecure();
     }
 
     private void visibilitiesUpdated() {
@@ -199,7 +210,14 @@ class KeyguardController {
 
             // Only the very top activity may control occluded state
             if (stackNdx == topStackNdx) {
-                mOccluded = stack.topActivityOccludesKeyguard();
+
+                // A dismissing activity occludes Keyguard in the insecure case for legacy reasons.
+                final ActivityRecord topDismissing = stack.getTopDismissingKeyguardActivity();
+                mOccluded = stack.topActivityOccludesKeyguard()
+                        || (topDismissing != null
+                                && stack.topRunningActivityLocked() == topDismissing
+                                && canShowWhileOccluded(true /* dismissKeyguard */,
+                                        false /* showWhenLocked */));
             }
             if (mDismissingKeyguardActivity == null
                     && stack.getTopDismissingKeyguardActivity() != null) {
@@ -239,8 +257,13 @@ class KeyguardController {
      * Called when somebody might want to dismiss the Keyguard.
      */
     private void handleDismissKeyguard() {
-        if (mDismissingKeyguardActivity != null) {
+        // We only allow dismissing Keyguard via the flag when Keyguard is secure for legacy
+        // reasons, because that's how apps used to dismiss Keyguard in the secure case. In the
+        // insecure case, we actually show it on top of the lockscreen. See #canShowWhileOccluded.
+        if (!mOccluded && mDismissingKeyguardActivity != null
+                && mWindowManager.isKeyguardSecure()) {
             mWindowManager.dismissKeyguard(null /* callback */);
+            mDismissalRequested = true;
 
             // If we are about to unocclude the Keyguard, but we can dismiss it without security,
             // we immediately dismiss the Keyguard so the activity gets shown without a flicker.
@@ -296,6 +319,7 @@ class KeyguardController {
         pw.println(prefix + "  mKeyguardGoingAway=" + mKeyguardGoingAway);
         pw.println(prefix + "  mOccluded=" + mOccluded);
         pw.println(prefix + "  mDismissingKeyguardActivity=" + mDismissingKeyguardActivity);
+        pw.println(prefix + "  mDismissalRequested=" + mDismissalRequested);
         pw.println(prefix + "  mVisibilityTransactionDepth=" + mVisibilityTransactionDepth);
     }
 }

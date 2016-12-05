@@ -922,8 +922,11 @@ public interface WindowManager extends ViewManager {
          * unlock credential) than the user will still need to confirm it before
          * seeing this window, unless {@link #FLAG_SHOW_WHEN_LOCKED} has
          * also been set.
-         * @see KeyguardManager#dismissKeyguard
+         * @deprecated Use {@link #FLAG_SHOW_WHEN_LOCKED} or {@link KeyguardManager#dismissKeyguard}
+         * instead. The Keyguard should never be dismissed automatically repeatedly as it also
+         * guards against unintentional touches.
          */
+        @Deprecated
         public static final int FLAG_DISMISS_KEYGUARD = 0x00400000;
 
         /** Window flag: when set the window will accept for touch events
