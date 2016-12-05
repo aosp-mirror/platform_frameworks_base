@@ -1297,6 +1297,29 @@ public final class Parcel {
     }
 
     /**
+     * Flatten a {@code List} containing arbitrary {@code Parcelable} objects into this parcel
+     * at the current position. They can later be retrieved using
+     * {@link #readParcelableList(List, ClassLoader)} if required.
+     *
+     * @see #readParcelableList(List, ClassLoader)
+     * @hide
+     */
+    public final <T extends Parcelable> void writeParcelableList(List<T> val, int flags) {
+        if (val == null) {
+            writeInt(-1);
+            return;
+        }
+
+        int N = val.size();
+        int i=0;
+        writeInt(N);
+        while (i < N) {
+            writeParcelable(val.get(i), flags);
+            i++;
+        }
+    }
+
+    /**
      * Flatten a heterogeneous array containing a particular object type into
      * the parcel, at
      * the current dataPosition() and growing dataCapacity() if needed.  The
@@ -2244,9 +2267,6 @@ public final class Parcel {
      * Read into the given List items IBinder objects that were written with
      * {@link #writeBinderList} at the current dataPosition().
      *
-     * @return A newly created ArrayList containing strings with the same data
-     *         as those that were previously written.
-     *
      * @see #writeBinderList
      */
     public final void readBinderList(List<IBinder> list) {
@@ -2258,6 +2278,34 @@ public final class Parcel {
         }
         for (; i<N; i++) {
             list.add(readStrongBinder());
+        }
+        for (; i<M; i++) {
+            list.remove(N);
+        }
+    }
+
+    /**
+     * Read the list of {@code Parcelable} objects at the current data position into the
+     * given {@code list}. The contents of the {@code list} are replaced. If the serialized
+     * list was {@code null}, {@code list} is cleared.
+     *
+     * @see #writeParcelableList(List, int)
+     * @hide
+     */
+    public final <T extends Parcelable> void readParcelableList(List<T> list, ClassLoader cl) {
+        final int N = readInt();
+        if (N == -1) {
+            list.clear();
+            return;
+        }
+
+        final int M = list.size();
+        int i = 0;
+        for (; i < M && i < N; i++) {
+            list.set(i, (T) readParcelable(cl));
+        }
+        for (; i<N; i++) {
+            list.add((T) readParcelable(cl));
         }
         for (; i<M; i++) {
             list.remove(N);
