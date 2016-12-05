@@ -540,11 +540,23 @@ android_glQueryMatrixxOES__Ljava_nio_IntBuffer_2Ljava_nio_IntBuffer_2
     jint _exponentRemaining;
     GLint *exponent = (GLint *) 0;
 
+    if (!mantissa_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "mantissa == null";
+        goto exit;
+    }
     mantissa = (GLfixed *)getPointer(_env, mantissa_buf, (jarray*)&_mantissaArray, &_mantissaRemaining, &_mantissaBufferOffset);
     if (_mantissaRemaining < 16) {
         _exception = 1;
         _exceptionType = "java/lang/IllegalArgumentException";
         _exceptionMessage = "remaining() < 16 < needed";
+        goto exit;
+    }
+    if (!exponent_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "exponent == null";
         goto exit;
     }
     exponent = (GLint *)getPointer(_env, exponent_buf, (jarray*)&_exponentArray, &_exponentRemaining, &_exponentBufferOffset);
