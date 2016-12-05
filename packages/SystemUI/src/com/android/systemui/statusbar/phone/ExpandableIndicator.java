@@ -57,11 +57,11 @@ public class ExpandableIndicator extends ImageView {
 
     private int getDrawableResourceId(boolean expanded) {
         if (mIsDefaultDirection) {
-            return expanded ? R.drawable.ic_volume_collapse_animation
-                    : R.drawable.ic_volume_expand_animation;
+            return expanded ? R.drawable.ic_qs_collapse_animation
+                    : R.drawable.ic_qs_expand_animation;
         } else {
-            return expanded ? R.drawable.ic_volume_expand_animation
-                    : R.drawable.ic_volume_collapse_animation;
+            return expanded ? R.drawable.ic_qs_expand_animation
+                    : R.drawable.ic_qs_collapse_animation;
         }
     }
 
