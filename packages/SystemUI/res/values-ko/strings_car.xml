@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2016, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"안전 운전"</string>
+    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"도로 상황에 주의를 기울이고 관련 법규를 항상 준수하세요. 경로가 정확하지 않거나 불완전하거나 위험하거나 적합하지 않을 수 있으며 금지된 지역이나 여러 행정 구역을 통과할 수 있습니다. 비즈니스 정보 또한 부정확하거나 불완전할 수 있습니다. 데이터는 실시간이 아니며 위치의 정확도를 보증할 수 없습니다. 운전 중에 휴대기기를 조작하거나 Android Auto가 지원되지 않는 앱을 사용해서는 안 됩니다."</string>
+</resources>

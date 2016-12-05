@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2016, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Jazdite bezpečne"</string>
+    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Zachovajte si úplný prehľad o jazdných podmienkach a vždy dodržiavajte príslušné zákony. Trasy môžu byť nepresné, neúplné, nebezpečné, nevhodné, zakázané alebo môžu zahŕňať cestu cez rôzne správne oblasti. Obchodné informácie môžu byť tiež nepresné alebo neúplné. Údaje nie sú aktualizované v reálnom čase a presnosť polohy nemôžeme zaručiť. Počas jazdy nemanipulujte s mobilným zariadením ani nepoužívajte aplikácie, ktoré nie sú určené pre funkciu Android Auto."</string>
+</resources>
