@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="prompt" msgid="3183836924226407828">"연결 요청"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g>에서 네트워크 트래픽을 모니터링하도록 허용하는 VPN 연결을 설정하려고 합니다. 출처를 신뢰할 수 있는 경우에만 수락하세요. VPN이 활성화되면 &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt;이 화면 위에 표시됩니다."</string>
+    <string name="legacy_title" msgid="192936250066580964">"VPN이 연결되었습니다."</string>
+    <string name="configure" msgid="4905518375574791375">"설정"</string>
+    <string name="disconnect" msgid="971412338304200056">"연결 끊기"</string>
+    <string name="session" msgid="6470628549473641030">"세션:"</string>
+    <string name="duration" msgid="3584782459928719435">"기간:"</string>
+    <string name="data_transmitted" msgid="7988167672982199061">"보냄:"</string>
+    <string name="data_received" msgid="4062776929376067820">"수신됨:"</string>
+    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g>바이트/<xliff:g id="NUMBER_1">%2$s</xliff:g>패킷"</string>
+</resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="prompt" msgid="3183836924226407828">"કનેક્શન વિનંતી"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> VPN કનેક્શન સેટ કરવા માગે છે જે તેને નેટવર્ક ટ્રાફિક મૉનિટર કરવાની મંજૂરી આપે છે. જો તમને સ્રોત પર વિશ્વાસ હોય તો જ સ્વીકારો. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; તમારી સ્ક્રીનની ટોચ પર ત્યારે દેખાય છે જ્યારે VPN સક્રિય હોય છે."</string>
+    <string name="legacy_title" msgid="192936250066580964">"VPN કનેક્ટ કરેલું છે"</string>
+    <string name="configure" msgid="4905518375574791375">"ગોઠવો"</string>
+    <string name="disconnect" msgid="971412338304200056">"ડિસ્કનેક્ટ કરો"</string>
+    <string name="session" msgid="6470628549473641030">"સત્ર:"</string>
+    <string name="duration" msgid="3584782459928719435">"અવધિ:"</string>
+    <string name="data_transmitted" msgid="7988167672982199061">"મોકલ્યું:"</string>
+    <string name="data_received" msgid="4062776929376067820">"પ્રાપ્ત કર્યુ:"</string>
+    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> બાઇટ્સ / <xliff:g id="NUMBER_1">%2$s</xliff:g> પેકેટ્સ"</string>
+</resources>
