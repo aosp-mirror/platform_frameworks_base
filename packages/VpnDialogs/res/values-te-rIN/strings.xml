@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="prompt" msgid="3183836924226407828">"కనెక్షన్ అభ్యర్థన"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> నెట్‌వర్క్ ట్రాఫిక్‌ని పర్యవేక్షించగలగడానికి VPN కనెక్షన్‌ను సెటప్ చేయాలనుకుంటోంది. మీరు మూలాన్ని విశ్వసిస్తే మాత్రమే ఆమోదించండి. VPN సక్రియంగా ఉన్నప్పుడు మీ స్క్రీన్ ఎగువన &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; కనిపిస్తుంది."</string>
+    <string name="legacy_title" msgid="192936250066580964">"VPN కనెక్ట్ చేయబడింది"</string>
+    <string name="configure" msgid="4905518375574791375">"కాన్ఫిగర్ చేయి"</string>
+    <string name="disconnect" msgid="971412338304200056">"డిస్‌కనెక్ట్ చేయి"</string>
+    <string name="session" msgid="6470628549473641030">"సెషన్:"</string>
+    <string name="duration" msgid="3584782459928719435">"వ్యవధి:"</string>
+    <string name="data_transmitted" msgid="7988167672982199061">"పంపినది:"</string>
+    <string name="data_received" msgid="4062776929376067820">"స్వీకరించినది:"</string>
+    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> బైట్లు / <xliff:g id="NUMBER_1">%2$s</xliff:g> ప్యాకెట్‌లు"</string>
+</resources>
