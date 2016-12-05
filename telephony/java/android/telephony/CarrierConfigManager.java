@@ -73,6 +73,15 @@ public class CarrierConfigManager {
             KEY_IGNORE_SIM_NETWORK_LOCKED_EVENTS_BOOL = "ignore_sim_network_locked_events_bool";
 
     /**
+     * When checking if a given number is the voicemail number, if this flag is true
+     * then in addition to comparing the given number to the voicemail number, we also compare it
+     * to the mdn. If this flag is false, the given number is only compared to the voicemail number.
+     * By default this value is false.
+     */
+    public static final String KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL =
+            "mdn_is_additional_voicemail_number_bool";
+
+    /**
      * Flag indicating whether the Phone app should provide a "Dismiss" button on the SIM network
      * unlock screen. The default value is true. If set to false, there will be *no way* to dismiss
      * the SIM network unlock screen if you don't enter the correct unlock code. (One important
@@ -1148,6 +1157,7 @@ public class CarrierConfigManager {
 
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONED_BOOL, false);
         sDefaults.putBoolean(KEY_IGNORE_SIM_NETWORK_LOCKED_EVENTS_BOOL, false);
+        sDefaults.putBoolean(KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
         sDefaults.putBoolean(KEY_PREFER_2G_BOOL, true);
         sDefaults.putBoolean(KEY_SHOW_APN_SETTING_CDMA_BOOL, false);
