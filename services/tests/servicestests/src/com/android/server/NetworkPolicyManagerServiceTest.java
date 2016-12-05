@@ -49,6 +49,7 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -141,6 +142,15 @@ import java.util.stream.Collectors;
 
 /**
  * Tests for {@link NetworkPolicyManagerService}.
+ *
+ * <p>Typical usage:
+ *
+ * <pre><code>
+    m -j32 FrameworksServicesTests && adb install -r -g \
+    ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk && \
+    adb shell am instrument -e class "com.android.server.NetworkPolicyManagerServiceTest" -w \
+    "com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner"
+ * </code></pre>
  */
 @RunWith(AndroidJUnit4.class)
 @MediumTest
@@ -247,7 +257,7 @@ public class NetworkPolicyManagerServiceTest {
                 return null;
             }
         }).when(mActivityManager).registerUidObserver(any(), anyInt(),
-                ActivityManager.PROCESS_STATE_UNKNOWN, null);
+                eq(ActivityManager.PROCESS_STATE_UNKNOWN), isNull(String.class));
 
         mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager, mStatsService,
                 mNetworkManager, mIpm, mTime, mPolicyDir, true);
