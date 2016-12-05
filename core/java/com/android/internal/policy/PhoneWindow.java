@@ -2495,6 +2495,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // System.out.println("Features: 0x" + Integer.toHexString(features));
         if ((features & (1 << FEATURE_SWIPE_TO_DISMISS)) != 0) {
             layoutResource = R.layout.screen_swipe_dismiss;
+            setCloseOnSwipeEnabled(true);
         } else if ((features & ((1 << FEATURE_LEFT_ICON) | (1 << FEATURE_RIGHT_ICON))) != 0) {
             if (mIsFloating) {
                 TypedValue res = new TypedValue();
@@ -2566,7 +2567,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         if ((features & (1 << FEATURE_SWIPE_TO_DISMISS)) != 0) {
-            registerSwipeCallbacks();
+            registerSwipeCallbacks(contentParent);
         }
 
         // Remaining setup -- of background and title -- that only applies
@@ -2980,9 +2981,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         return (mRightIconView = (ImageView)findViewById(R.id.right_icon));
     }
 
-    private void registerSwipeCallbacks() {
-        SwipeDismissLayout swipeDismiss =
-                (SwipeDismissLayout) findViewById(R.id.content);
+    private void registerSwipeCallbacks(ViewGroup contentParent) {
+        if (!(contentParent instanceof SwipeDismissLayout)) {
+            Log.w(TAG, "contentParent is not a SwipeDismissLayout: " + contentParent);
+            return;
+        }
+        SwipeDismissLayout swipeDismiss = (SwipeDismissLayout) contentParent;
         swipeDismiss.setOnDismissedListener(new SwipeDismissLayout.OnDismissedListener() {
             @Override
             public void onDismissed(SwipeDismissLayout layout) {
@@ -3019,6 +3023,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN | FLAG_LAYOUT_NO_LIMITS);
                     }
                 });
+    }
+
+    /** @hide */
+    @Override
+    public void setCloseOnSwipeEnabled(boolean closeOnSwipeEnabled) {
+        if (hasFeature(Window.FEATURE_SWIPE_TO_DISMISS) // swipe-to-dismiss feature is requested
+                && mContentParent instanceof SwipeDismissLayout) { // check casting mContentParent
+            ((SwipeDismissLayout) mContentParent).setDismissable(closeOnSwipeEnabled);
+        }
+        super.setCloseOnSwipeEnabled(closeOnSwipeEnabled);
     }
 
     /**
