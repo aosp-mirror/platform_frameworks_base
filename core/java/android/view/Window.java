@@ -301,6 +301,7 @@ public abstract class Window {
     private boolean mDestroyed;
 
     private boolean mOverlayWithDecorCaptionEnabled = false;
+    private boolean mCloseOnSwipeEnabled = false;
 
     // The current window attributes.
     private final WindowManager.LayoutParams mWindowAttributes =
@@ -2209,4 +2210,21 @@ public abstract class Window {
      * @hide
      */
     public abstract void reportActivityRelaunched();
+
+    /**
+     * Called to set flag to check if the close on swipe is enabled. This will only function if
+     * FEATURE_SWIPE_TO_DISMISS has been set.
+     * @hide
+     */
+    public void setCloseOnSwipeEnabled(boolean closeOnSwipeEnabled) {
+        mCloseOnSwipeEnabled = closeOnSwipeEnabled;
+    }
+
+    /**
+     * @return {@code true} if the close on swipe is enabled.
+     * @hide
+     */
+    public boolean isCloseOnSwipeEnabled() {
+        return mCloseOnSwipeEnabled;
+    }
 }

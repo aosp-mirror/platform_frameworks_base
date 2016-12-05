@@ -110,6 +110,8 @@ public class SwipeDismissLayout extends FrameLayout {
 
     private float mLastX;
 
+    private boolean mDismissable = true;
+
     public SwipeDismissLayout(Context context) {
         super(context);
         init(context);
@@ -166,6 +168,10 @@ public class SwipeDismissLayout extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (!mDismissable) {
+            return super.onInterceptTouchEvent(ev);
+        }
+
         // offset because the view is translated during swipe
         ev.offsetLocation(mTranslationX, 0);
 
@@ -225,7 +231,7 @@ public class SwipeDismissLayout extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (mVelocityTracker == null) {
+        if (mVelocityTracker == null || !mDismissable) {
             return super.onTouchEvent(ev);
         }
         // offset because the view is translated during swipe
@@ -362,5 +368,14 @@ public class SwipeDismissLayout extends FrameLayout {
         }
 
         return checkV && v.canScrollHorizontally((int) -dx);
+    }
+
+    public void setDismissable(boolean dismissable) {
+        if (!dismissable && mDismissable) {
+            cancel();
+            resetMembers();
+        }
+
+        mDismissable = dismissable;
     }
 }
