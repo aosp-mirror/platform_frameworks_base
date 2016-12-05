@@ -140,7 +140,7 @@ public class WifiAwareDiscoveryBaseSession {
      * Sends a message to the specified destination. Aware messages are transmitted in the context
      * of a discovery session - executed subsequent to a publish/subscribe
      * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
-     * byte[], java.util.List<byte[]>)} event.
+     * byte[], java.util.List)} event.
      * <p>
      *     Aware messages are not guaranteed delivery. Callbacks on
      *     {@link WifiAwareDiscoverySessionCallback} indicate message was transmitted successfully,
@@ -154,7 +154,7 @@ public class WifiAwareDiscoveryBaseSession {
      *
      * @param peerHandle The peer's handle for the message. Must be a result of an
      * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
-     * byte[], java.util.List<byte[]>)} or
+     * byte[], java.util.List)} or
      * {@link WifiAwareDiscoverySessionCallback#onMessageReceived(WifiAwareManager.PeerHandle,
      * byte[])} events.
      * @param messageId An arbitrary integer used by the caller to identify the message. The same
@@ -187,7 +187,7 @@ public class WifiAwareDiscoveryBaseSession {
      * Sends a message to the specified destination. Aware messages are transmitted in the context
      * of a discovery session - executed subsequent to a publish/subscribe
      * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
-     * byte[], java.util.List<byte[]>)} event.
+     * byte[], java.util.List)} event.
      * <p>
      *     Aware messages are not guaranteed delivery. Callbacks on
      *     {@link WifiAwareDiscoverySessionCallback} indicate message was transmitted successfully,
@@ -203,7 +203,7 @@ public class WifiAwareDiscoveryBaseSession {
      *
      * @param peerHandle The peer's handle for the message. Must be a result of an
      * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
-     * byte[], java.util.List<byte[]>)} or
+     * byte[], java.util.List)} or
      * {@link WifiAwareDiscoverySessionCallback#onMessageReceived(WifiAwareManager.PeerHandle,
      * byte[])} events.
      * @param messageId An arbitrary integer used by the caller to identify the message. The same
@@ -220,7 +220,7 @@ public class WifiAwareDiscoveryBaseSession {
     /**
      * Start a ranging operation with the specified peers. The peer IDs are obtained from an
      * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
-     * byte[], java.util.List<byte[]>)} or
+     * byte[], java.util.List)} or
      * {@link WifiAwareDiscoverySessionCallback#onMessageReceived(WifiAwareManager.PeerHandle,
      * byte[])} operation - can
      * only range devices which are part of an ongoing discovery session.
@@ -266,7 +266,7 @@ public class WifiAwareDiscoveryBaseSession {
      *
      * @param peerHandle The peer's handle obtained through
      * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
-     * byte[], java.util.List<byte[]>)} or
+     * byte[], java.util.List)} or
      * {@link WifiAwareDiscoverySessionCallback#onMessageReceived(WifiAwareManager.PeerHandle,
      * byte[])}. On a RESPONDER this value is used to gate the acceptance of a connection request
      *                   from only that peer. A RESPONDER may specified a null - indicating that
