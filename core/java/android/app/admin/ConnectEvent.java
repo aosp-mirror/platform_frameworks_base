@@ -31,6 +31,7 @@ public final class ConnectEvent extends NetworkEvent implements Parcelable {
     /** The destination port number. */
     private final int port;
 
+    /** @hide */
     public ConnectEvent(String ipAddress, int port, String packageName, long timestamp) {
         super(packageName, timestamp);
         this.ipAddress = ipAddress;
