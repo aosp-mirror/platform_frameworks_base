@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="8016145283189546017">"Beviteli eszközök"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android-billentyűzet"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"angol (Egyesült Királyság)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"angol (USA)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"angol (USA), nemzetközi stílus"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"angol (USA), Colemak-stílus"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"angol (USA), Dvorak-stílus"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"angol (USA), „Workman” stílus"</string>
+    <string name="keyboard_layout_german_label" msgid="8451565865467909999">"német"</string>
+    <string name="keyboard_layout_french_label" msgid="813450119589383723">"francia"</string>
+    <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"francia (Kanada)"</string>
+    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"orosz"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"orosz, Mac-stílus"</string>
+    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"spanyol"</string>
+    <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"svájci francia"</string>
+    <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"svájci német"</string>
+    <string name="keyboard_layout_belgian" msgid="2011984572838651558">"belga"</string>
+    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"bolgár"</string>
+    <string name="keyboard_layout_italian" msgid="6497079660449781213">"olasz"</string>
+    <string name="keyboard_layout_danish" msgid="8036432066627127851">"dán"</string>
+    <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"norvég"</string>
+    <string name="keyboard_layout_swedish" msgid="732959109088479351">"svéd"</string>
+    <string name="keyboard_layout_finnish" msgid="5585659438924315466">"finn"</string>
+    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"horvát"</string>
+    <string name="keyboard_layout_czech" msgid="1349256901452975343">"cseh"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"észt"</string>
+    <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"magyar"</string>
+    <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"izlandi"</string>
+    <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"brazil"</string>
+    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"portugál"</string>
+    <string name="keyboard_layout_slovak" msgid="2469379934672837296">"szlovák"</string>
+    <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"szlovén"</string>
+    <string name="keyboard_layout_turkish" msgid="7736163250907964898">"török"</string>
+    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"ukrán"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"arab"</string>
+    <string name="keyboard_layout_greek" msgid="7289253560162386040">"görög"</string>
+    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"héber"</string>
+    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"litván"</string>
+    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"spanyol (latin-amerikai)"</string>
+    <string name="keyboard_layout_latvian" msgid="4405417142306250595">"lett"</string>
+</resources>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="8016145283189546017">"உள்ளீட்டுச் சாதனங்கள்"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android விசைப்பலகை"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"ஆங்கிலம் (யூகே)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"ஆங்கிலம் (யூஎஸ்)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"ஆங்கிலம் (யூஎஸ்), சர்வதேச நடை"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"ஆங்கிலம் (யூஎஸ்), கோல்மாக் நடை"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"ஆங்கிலம் (யூஎஸ்), டிவாரக் நடை"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"ஆங்கிலம் (யூஎஸ்), வொர்க்மென் நடை"</string>
+    <string name="keyboard_layout_german_label" msgid="8451565865467909999">"ஜெர்மன்"</string>
+    <string name="keyboard_layout_french_label" msgid="813450119589383723">"ஃபிரெஞ்ச்"</string>
+    <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"ஃபிரெஞ்ச் (கனடா)"</string>
+    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"ரஷ்யன்"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"ரஷ்யன், மேக் நடை"</string>
+    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"ஸ்பானிஷ்"</string>
+    <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"ஸ்விஸ் ஃபிரெஞ்ச்"</string>
+    <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"ஸ்விஸ் ஜெர்மன்"</string>
+    <string name="keyboard_layout_belgian" msgid="2011984572838651558">"பெல்ஜியன்"</string>
+    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"பல்கேரியன்"</string>
+    <string name="keyboard_layout_italian" msgid="6497079660449781213">"இத்தாலியன்"</string>
+    <string name="keyboard_layout_danish" msgid="8036432066627127851">"டேனிஷ்"</string>
+    <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"நார்வேஜியன்"</string>
+    <string name="keyboard_layout_swedish" msgid="732959109088479351">"ஸ்வீடிஷ்"</string>
+    <string name="keyboard_layout_finnish" msgid="5585659438924315466">"ஃபின்னிஷ்"</string>
+    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"குரோஷியன்"</string>
+    <string name="keyboard_layout_czech" msgid="1349256901452975343">"செக்"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"எஸ்தோனியன்"</string>
+    <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"ஹங்கேரியன்"</string>
+    <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"ஐஸ்லாண்டிக்"</string>
+    <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"பிரேசிலியன்"</string>
+    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"போர்ச்சுகீஸ்"</string>
+    <string name="keyboard_layout_slovak" msgid="2469379934672837296">"ஸ்லோவாக்"</string>
+    <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"ஸ்லோவேனியன்"</string>
+    <string name="keyboard_layout_turkish" msgid="7736163250907964898">"டர்கிஷ்"</string>
+    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"உக்ரைனியன்"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"அரபிக்"</string>
+    <string name="keyboard_layout_greek" msgid="7289253560162386040">"கிரேக்கம்"</string>
+    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"ஹீப்ரு"</string>
+    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"லிதுவேனியன்"</string>
+    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"ஸ்பானிஷ் (லத்தீன்)"</string>
+    <string name="keyboard_layout_latvian" msgid="4405417142306250595">"லத்வியன்"</string>
+</resources>

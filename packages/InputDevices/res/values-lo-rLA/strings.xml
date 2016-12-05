@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="8016145283189546017">"ອຸປະກອນປ້ອນຂໍ້ມູນ"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"ແປ້ນພິມ Android"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"ອັງກິດ (ສະຫະລັດຊະອານາຈັກ)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"ອັງກິດ (ສະຫະລັດຯ)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"ອັງກິດ (ສະຫະລັດຯ), ແບບສາກົນ"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"ອັງກິດ (ສະຫະລັດຯ), ແບບ Colemak"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"ອັງກິດ (ສະຫະລັດຯ), ແບບ Dvorak"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"ອັງກິດ (ສະຫະລັດ), ແບບຄົນ​ເຮັດ​ວຽກ"</string>
+    <string name="keyboard_layout_german_label" msgid="8451565865467909999">"ເຢຍລະມັນ"</string>
+    <string name="keyboard_layout_french_label" msgid="813450119589383723">"ຝຣັ່ງ"</string>
+    <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"ຝຣັ່ງ (ຄານາດາ)"</string>
+    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"ຣັດເຊຍ"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"ຣັດຊຽຍ, ແບບ Mac"</string>
+    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"ສະແປນນິດ"</string>
+    <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"ສະວິສ ຝຣັ່ງ"</string>
+    <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"ສະວິສ ເຢຍລະມັນ"</string>
+    <string name="keyboard_layout_belgian" msgid="2011984572838651558">"ເບວຢ້ຽນ"</string>
+    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"ຮັງກາຣຽນ"</string>
+    <string name="keyboard_layout_italian" msgid="6497079660449781213">"ອິຕາລຽນ"</string>
+    <string name="keyboard_layout_danish" msgid="8036432066627127851">"ເດັນນິຊ"</string>
+    <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"ນໍເວກຽນ"</string>
+    <string name="keyboard_layout_swedish" msgid="732959109088479351">"ສະວີດິຊ"</string>
+    <string name="keyboard_layout_finnish" msgid="5585659438924315466">"ຟິນນິຊ"</string>
+    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"ໂຄຣເອທຽນ"</string>
+    <string name="keyboard_layout_czech" msgid="1349256901452975343">"ເຊກ"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"ເອສໂຕນຽນ"</string>
+    <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"ຮັງກາຣຽນ"</string>
+    <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"ໄອສແລນດິກ"</string>
+    <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"ບຣາຊິລຽນ"</string>
+    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"ປໍຕູກີສ"</string>
+    <string name="keyboard_layout_slovak" msgid="2469379934672837296">"ສະໂລແວັກ"</string>
+    <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"ສະໂລເວນຽນ"</string>
+    <string name="keyboard_layout_turkish" msgid="7736163250907964898">"ເຕີກິສ"</string>
+    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"ຢູເຄຣນຽນ"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"ອາຣັບ"</string>
+    <string name="keyboard_layout_greek" msgid="7289253560162386040">"ກ​ຣີກ"</string>
+    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"ຮີບຣິວ"</string>
+    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"​ລິ​ທົວ​ນຽນ"</string>
+    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"​ສະ​ແປນ​ນິດ (ລາ​ຕິນ)"</string>
+    <string name="keyboard_layout_latvian" msgid="4405417142306250595">"​ລັດ​ວຽນ"</string>
+</resources>
