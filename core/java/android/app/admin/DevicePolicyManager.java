@@ -514,14 +514,15 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_ACCOUNT_TO_MIGRATE";
 
     /**
-     * Boolean extra that is used in conjunction with
-     * {@link #EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE}. If it's set to {@code true}, the account will
-     * not be removed from the primary user after it is migrated to the newly created user or
-     * profile.
+     * Boolean extra to indicate that the migrated account should be kept. This is used in
+     * conjunction with {@link #EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE}. If it's set to {@code true},
+     * the account will not be removed from the primary user after it is migrated to the newly
+     * created user or profile.
      *
      * <p> Defaults to {@code false}
      *
-     * <p> Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}.
+     * <p> Use with {@link #ACTION_PROVISION_MANAGED_PROFILE} and
+     * {@link #EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE}
      */
     public static final String EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION
             = "android.app.extra.PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION";
