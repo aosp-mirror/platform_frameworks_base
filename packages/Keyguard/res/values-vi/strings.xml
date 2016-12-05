@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Khóa bàn phím"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Nhập mã PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Nhập mã PIN mới và mã PUK của SIM"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Mã PUK của SIM"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Mã PIN mới của SIM"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Chạm để nhập mật khẩu"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Nhập mật khẩu để mở khóa"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Nhập mã PIN để mở khóa"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Mã PIN không chính xác."</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Đã sạc đầy"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"Đang sạc"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"Đang sạc nhanh"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"Đang sạc chậm"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Kết nối bộ sạc của bạn."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Nhấn vào Menu để mở khóa."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Mạng đã bị khóa"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"Không có thẻ SIM nào"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Không có thẻ SIM nào trong máy tính bảng."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Không có thẻ SIM nào trong điện thoại."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Vui lòng lắp thẻ SIM."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"Thẻ SIM bị thiếu hoặc không thể đọc được. Vui lòng lắp thẻ SIM."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Thẻ SIM không sử dụng được."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Thẻ SIM của bạn đã bị vô hiệu hóa vĩnh viễn.\n Hãy liên hệ với nhà cung cấp dịch vụ không dây của bạn để lấy thẻ SIM khác."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"Thẻ SIM đã bị khóa."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Thẻ SIM đã bị khóa PUK."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Đang mở khóa thẻ SIM…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Khu vực mã PIN"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Khu vực mã PIN của SIM"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Khu vực PUK của SIM"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Báo thức tiếp theo được đặt cho <xliff:g id="ALARM">%1$s</xliff:g>"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Xóa"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Đã quên hình"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Hình sai"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Mật khẩu sai"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN sai"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Hãy thử lại sau <xliff:g id="NUMBER">%d</xliff:g> giây."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Vẽ hình của bạn"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Nhập PIN của SIM"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Nhập mã PIN của SIM dành cho \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Nhập PIN"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Nhập mật khẩu"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM hiện bị vô hiệu hóa. Nhập mã PUK để tiếp tục. Liên hệ với nhà cung cấp dịch vụ để biết chi tiết."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"Hiện tại, SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" đang tắt. Hãy nhập mã PUK để tiếp tục. Liên hệ với nhà cung cấp dịch vụ để biết chi tiết."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Nhập mã PIN mong muốn"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Xác nhận mã PIN mong muốn"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Đang mở khóa thẻ SIM…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Nhập mã PIN có từ 4 đến 8 số."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Mã PUK phải có từ 8 số trở lên."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Hãy nhập lại mã PUK chính xác. Nhiều lần lặp lại sẽ vô hiệu hóa vĩnh viễn thẻ SIM."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Mã PIN không khớp"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Quá nhiều lần nhập hình"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Bạn đã <xliff:g id="NUMBER_0">%1$d</xliff:g> lần nhập sai mã PIN. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%2$d</xliff:g> giây."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Bạn đã <xliff:g id="NUMBER_0">%1$d</xliff:g> lần nhập sai mật khẩu. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%2$d</xliff:g> giây."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Bạn đã <xliff:g id="NUMBER_0">%1$d</xliff:g> lần vẽ không chính xác hình mở khóa. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%2$d</xliff:g> giây."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Bạn đã mở khóa máy tính bảng sai <xliff:g id="NUMBER_0">%1$d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%2$d</xliff:g> lần mở khóa không thành công nữa, máy tính bảng này sẽ được đặt lại, tức là tất cả dữ liệu của máy tính bảng sẽ bị xóa."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Bạn đã mở khóa điện thoại sai <xliff:g id="NUMBER_0">%1$d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%2$d</xliff:g> lần mở khóa không thành công nữa, điện thoại này sẽ được đặt lại, tức là tất cả dữ liệu của điện thoại sẽ bị xóa."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"Bạn đã mở khóa máy tính bảng sai <xliff:g id="NUMBER">%d</xliff:g> lần. Máy tính bảng này sẽ được đặt lại, tức là tất cả dữ liệu của máy tính bảng sẽ bị xóa."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"Bạn đã mở khóa điện thoại sai <xliff:g id="NUMBER">%d</xliff:g> lần. Điện thoại này sẽ được đặt lại, tức là tất cả dữ liệu của điện thoại sẽ bị xóa."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"Bạn đã mở khóa máy tính bảng sai <xliff:g id="NUMBER_0">%1$d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%2$d</xliff:g> lần mở khóa không thành công nữa, người dùng này sẽ bị xóa, tức là tất cả dữ liệu người dùng sẽ bị xóa."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"Bạn đã mở khóa điện thoại sai <xliff:g id="NUMBER_0">%1$d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%2$d</xliff:g> lần mở khóa không thành công nữa, người dùng này sẽ bị xóa, tức là tất cả dữ liệu người dùng sẽ bị xóa."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"Bạn đã mở khóa máy tính bảng sai <xliff:g id="NUMBER">%d</xliff:g> lần. Người dùng này sẽ bị xóa, tức là tất cả dữ liệu người dùng sẽ bị xóa."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"Bạn đã mở khóa điện thoại sai <xliff:g id="NUMBER">%d</xliff:g> lần. Người dùng này sẽ bị xóa, tức là tất cả dữ liệu người dùng sẽ bị xóa."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"Bạn đã mở khóa máy tính bảng sai <xliff:g id="NUMBER_0">%1$d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%2$d</xliff:g> lần mở khóa không thành công nữa, hồ sơ công việc sẽ bị xóa, tức là tất cả dữ liệu hồ sơ sẽ bị xóa."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"Bạn đã mở khóa điện thoại sai <xliff:g id="NUMBER_0">%1$d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%2$d</xliff:g> lần mở khóa không thành công nữa, hồ sơ công việc sẽ bị xóa, tức là tất cả dữ liệu hồ sơ sẽ bị xóa."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"Bạn đã mở khóa máy tính bảng sai <xliff:g id="NUMBER">%d</xliff:g> lần. Hồ sơ công việc sẽ bị xóa, tức là tất cả dữ liệu hồ sơ sẽ bị xóa."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Bạn đã mở khóa điện thoại sai <xliff:g id="NUMBER">%d</xliff:g> lần. Hồ sơ công việc sẽ bị xóa, tức là tất cả dữ liệu hồ sơ sẽ bị xóa."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Bạn đã <xliff:g id="NUMBER_0">%1$d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%2$d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa máy tính bảng bằng tài khoản email.\n\n Vui lòng thử lại sau <xliff:g id="NUMBER_2">%3$d</xliff:g> giây."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Bạn đã <xliff:g id="NUMBER_0">%1$d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%2$d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa điện thoại bằng tài khoản email.\n\n Vui lòng thử lại sau <xliff:g id="NUMBER_2">%3$d</xliff:g> giây."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Mã PIN của SIM không chính xác, bây giờ bạn phải liên hệ với nhà cung cấp dịch vụ để mở khóa thiết bị của bạn."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">Mã PIN của SIM không chính xác, bạn còn  <xliff:g id="NUMBER_1">%d</xliff:g> lần thử.</item>
+      <item quantity="one">Mã PIN của SIM không chính xác, bạn còn  <xliff:g id="NUMBER_0">%d</xliff:g> lần thử trước khi bạn phải liên hệ với nhà cung cấp dịch vụ để mở khóa thiết bị của mình.</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM không thể sử dụng được. Liên hệ với nhà cung cấp dịch vụ của bạn."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">Mã PUK của SIM không chính xác, bạn còn  <xliff:g id="NUMBER_1">%d</xliff:g> lần thử trước khi SIM vĩnh viễn không sử dụng được.</item>
+      <item quantity="one">Mã PUK của SIM không chính xác, bạn còn  <xliff:g id="NUMBER_0">%d</xliff:g> lần thử trước khi SIM vĩnh viễn không thể sử dụng được.</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Thao tác mã PIN của SIM không thành công!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Thao tác mã PUK của SIM không thành công!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Mã được chấp nhận!"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Không có dịch vụ."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Chuyển phương thức nhập"</string>
+    <string name="airplane_mode" msgid="3122107900897202805">"Chế độ trên máy bay"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Yêu cầu hình mở khóa sau khi thiết bị khởi động lại"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Yêu cầu mã PIN sau khi thiết bị khởi động lại"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Yêu cầu mật khẩu sau khi thiết bị khởi động lại"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Cần có hình mở khóa để bảo mật thêm"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Cần có mã PIN để bảo mật thêm"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Cần có mật khẩu để bảo mật thêm"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Yêu cầu hình mở khóa khi bạn chuyển đổi hồ sơ"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Yêu cầu mã PIN khi bạn chuyển đổi hồ sơ"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Yêu cầu mật khẩu khi bạn chuyển đổi hồ sơ"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Quản trị viên thiết bị đã khóa thiết bị"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Thiết bị đã bị khóa theo cách thủ công"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_1">%d</xliff:g> giờ. Xác nhận hình.</item>
+      <item quantity="one">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_0">%d</xliff:g> giờ. Xác nhận hình.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_1">%d</xliff:g> giờ. Xác nhận mã PIN.</item>
+      <item quantity="one">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_0">%d</xliff:g> giờ. Xác nhận mã PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_1">%d</xliff:g> giờ. Xác nhận mật khẩu.</item>
+      <item quantity="one">Thiết bị đã không được mở khóa trong <xliff:g id="NUMBER_0">%d</xliff:g> giờ. Xác nhận mật khẩu.</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Không nhận dạng được"</string>
+</resources>

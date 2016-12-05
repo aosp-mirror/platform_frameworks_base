@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"キーガード"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PINコードを入力"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"PUKと新しいPINコードを入力"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM PUKコード"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"新しいSIM PINコード"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"タップしてパスワードを入力"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"ロックを解除するにはパスワードを入力"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"ロックを解除するにはPINを入力"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PINコードが正しくありません。"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"充電完了"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"充電中"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"急速充電中"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"低速充電中"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"充電してください。"</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"メニューからロックを解除できます。"</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"ネットワークがロックされました"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"SIMカードが挿入されていません"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"タブレット内にSIMカードがありません。"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"SIMカードが端末に挿入されていません。"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"SIMカードを挿入してください。"</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIMカードが見つからないか読み取れません。SIMカードを挿入してください。"</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"SIMカードは使用できません。"</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"お使いのSIMカードは永久に無効となっています。\nワイヤレスサービスプロバイダに問い合わせて新しいSIMカードを入手してください。"</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIMカードはロックされています。"</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIMカードはPUKでロックされています。"</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIMカードをロック解除しています…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PINエリア"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PINエリア"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUKエリア"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"次のアラームは<xliff:g id="ALARM">%1$s</xliff:g>に設定されました"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"削除"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"パターンを忘れた場合"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"パターンが正しくありません"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"パスワードが正しくありません"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"PINが正しくありません"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"パターンを入力"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PINを入力"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"「<xliff:g id="CARRIER">%1$s</xliff:g>」のSIM PINを入力します"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"PINを入力"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"パスワードを入力"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIMが無効になりました。続行するにはPUKコードを入力してください。詳しくは携帯通信会社にお問い合わせください。"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM「<xliff:g id="CARRIER">%1$s</xliff:g>」は現在無効になっています。処理を続行するにはPUKコードを入力します。詳しくは携帯通信会社にお問い合わせください。"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"希望のPINコードを入力してください"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"希望のPINコードを確認してください"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIMカードのロック解除中…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"PINは4～8桁の数字で入力してください。"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUKコードは8桁以上の番号です。"</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"正しいPUKコードを再入力してください。誤入力を繰り返すと、SIMが永久に無効になるおそれがあります。"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PINコードが一致しません"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"パターンの入力を所定の回数以上間違えました。"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PINの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"パスワードの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"タブレットのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、このタブレットはリセットされ、データがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"携帯電話のロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、この携帯電話はリセットされ、データがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"タブレットのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。このタブレットはリセットされ、データがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"携帯電話のロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。この携帯電話はリセットされ、データがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"タブレットのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、このユーザーは削除され、ユーザーのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"携帯電話のロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、このユーザーは削除され、ユーザーのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"タブレットのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。このユーザーは削除され、ユーザーのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"携帯電話のロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。このユーザーは削除され、ユーザーのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"タブレットのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、仕事用プロファイルが削除され、プロファイルのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"スマートフォンのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、仕事用プロファイルが削除され、プロファイルのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"タブレットのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。仕事用プロファイルが削除され、プロファイルのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"スマートフォンのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。仕事用プロファイルが削除され、プロファイルのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、タブレットのロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、モバイル端末のロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PINコードが無効です。お使いの端末をロック解除するには携帯通信会社にお問い合わせいただく必要があります。"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">SIM PINコードが無効です。入力できるのはあと<xliff:g id="NUMBER_1">%d</xliff:g>回です。</item>
+      <item quantity="one">SIM PINコードが無効です。入力できるのはあと<xliff:g id="NUMBER_0">%d</xliff:g>回です。この回数を超えた場合は、携帯通信会社にお問い合わせください。</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIMは使用できません。携帯通信会社にお問い合わせください。"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">SIM PUKコードが無効です。入力できるのはあと<xliff:g id="NUMBER_1">%d</xliff:g>回です。この回数を超えるとSIMは完全に使用できなくなります。</item>
+      <item quantity="one">SIM PUKコードが無効です。入力できるのはあと<xliff:g id="NUMBER_0">%d</xliff:g>回です。この回数を超えるとSIMは完全に使用できなくなります。</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN操作に失敗しました。"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK操作に失敗しました。"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"コードが承認されました。"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"通信サービスはありません。"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"入力方法の切り替え"</string>
+    <string name="airplane_mode" msgid="3122107900897202805">"機内モード"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"端末の再起動後はパターンの入力が必要となります"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"端末の再起動後は PIN の入力が必要となります"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"端末の再起動後はパスワードの入力が必要となります"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"セキュリティを強化するにはパターンが必要です"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"セキュリティを強化するには PIN が必要です"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"セキュリティを強化するにはパスワードが必要です"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"プロファイルを切り替えるにはパターンが必要です"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"プロファイルを切り替えるには PIN が必要です"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"プロファイルを切り替えるにはパスワードが必要です"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"端末管理アプリが端末をロックしました"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"端末は手動でロックされました"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">端末のロックが<xliff:g id="NUMBER_1">%d</xliff:g>時間、解除されていません。パターンを確認してください。</item>
+      <item quantity="one">端末のロックが<xliff:g id="NUMBER_0">%d</xliff:g>時間、解除されていません。パターンを確認してください。</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">端末のロックが<xliff:g id="NUMBER_1">%d</xliff:g>時間、解除されていません。PINを確認してください。</item>
+      <item quantity="one">端末のロックが<xliff:g id="NUMBER_0">%d</xliff:g>時間、解除されていません。PINを確認してください。</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">端末のロックが<xliff:g id="NUMBER_1">%d</xliff:g>時間、解除されていません。パスワードを確認してください。</item>
+      <item quantity="one">端末のロックが<xliff:g id="NUMBER_0">%d</xliff:g>時間、解除されていません。パスワードを確認してください。</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"認識されませんでした"</string>
+</resources>

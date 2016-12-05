@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Keyguard"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Ketik kode PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Ketik kode PIN baru dan PUK SIM"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Kode PUK SIM"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Kode PIN SIM baru"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Sentuh untuk mengetikkan sandi"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Ketik sandi untuk membuka kunci"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Ketik PIN untuk membuka kunci"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Kode PIN salah."</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Terisi"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"Mengisi daya"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"Mengisi daya dengan cepat"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"Mengisi daya dengan lambat"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Hubungkan pengisi daya."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Tekan Menu untuk membuka."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Jaringan terkunci"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"Tidak ada kartu SIM"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Tidak ada kartu SIM dalam tablet."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Tidak ada Kartu SIM di dalam ponsel."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Masukkan kartu SIM."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"Kartu SIM tidak ada atau tidak dapat dibaca. Masukkan kartu SIM."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Kartu SIM tidak dapat digunakan."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Kartu SIM Anda telah dinonaktifkan secara permanen.\n Hubungi penyedia layanan nirkabel Anda untuk kartu SIM lain."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"Kartu SIM terkunci."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Kartu SIM terkunci PUK."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Membuka kartu SIM…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Bidang PIN"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Bidang PIN SIM"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Bidang PUK SIM"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Alarm berikutnya disetel untuk <xliff:g id="ALARM">%1$s</xliff:g>"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Hapus"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Lupa Pola?"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Pola Salah"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Sandi Salah"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN Salah"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Coba lagi dalam <xliff:g id="NUMBER">%d</xliff:g> detik."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Gambar pola Anda"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Masukkan PIN SIM"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Masukkan PIN SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Masukkan PIN"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Masukkan Sandi"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM telah dinonaktifkan. Masukkan kode PUK untuk melanjutkan. Hubungi operator untuk keterangan selengkapnya."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" kini dinonaktifkan. Masukkan kode PUK untuk melanjutkan. Hubungi operator untuk mengetahui detailnya."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Masukkan kode PIN yang diinginkan"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Konfirmasi kode PIN yang diinginkan"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Membuka kunci kartu SIM…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Ketik PIN yang terdiri dari 4 sampai 8 angka."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Kode PUK harus terdiri dari 8 angka atau lebih."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Masukkan kembali kode PUK yang benar. Jika berulang kali gagal, SIM akan dinonaktifkan secara permanen."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Kode PIN tidak cocok"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Terlalu banyak upaya pola"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah mengetik PIN. \n\nCoba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> detik."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah mengetik sandi. \n\nCoba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> detik."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah menggambar pola pembuka kunci. \n\nCoba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> detik."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Sudah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali Anda berupaya membuka kunci tablet dengan tidak benar. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya yang tidak berhasil, tablet ini akan disetel ulang, sehingga semua datanya akan dihapus."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Sudah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali Anda berupaya membuka kunci ponsel dengan tidak benar. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya yang tidak berhasil, ponsel ini akan disetel ulang, sehingga semua datanya akan dihapus."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"Sudah <xliff:g id="NUMBER">%d</xliff:g> kali Anda berupaya membuka kunci tablet dengan tidak benar. Tablet ini akan disetel ulang, sehingga menghapus semua datanya."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"Sudah <xliff:g id="NUMBER">%d</xliff:g> kali Anda berupaya membuka kunci ponsel dengan tidak benar. Ponsel ini akan disetel ulang, sehingga menghapus semua datanya."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"Sudah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali Anda berupaya membuka kunci tablet dengan tidak benar. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya yang tidak berhasil, pengguna ini akan dihapus, sehingga semua data pengguna akan dihapus."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"Sudah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali Anda berupaya membuka kunci ponsel dengan tidak benar. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya yang tidak berhasil, pengguna ini akan dihapus, sehingga semua data pengguna akan dihapus."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"Sudah <xliff:g id="NUMBER">%d</xliff:g> kali Anda berupaya membuka kunci tablet dengan tidak benar. Pengguna ini akan dihapus, sehingga menghapus semua data pengguna."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"Sudah <xliff:g id="NUMBER">%d</xliff:g> kali Anda berupaya membuka kunci ponsel dengan tidak benar. Pengguna ini akan dihapus, sehingga menghapus semua data pengguna."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"Sudah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali Anda berupaya membuka kunci tablet dengan tidak benar. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya yang tidak berhasil, profil kerja akan dihapus, sehingga semua data profil akan dihapus."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"Sudah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali Anda berupaya membuka kunci ponsel dengan tidak benar. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya yang tidak berhasil, profil kerja akan dihapus, sehingga semua data profil akan dihapus."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"Sudah <xliff:g id="NUMBER">%d</xliff:g> kali Anda berupaya membuka kunci tablet dengan tidak benar. Profil kerja akan dihapus, sehingga menghapus semua data profil."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Sudah <xliff:g id="NUMBER">%d</xliff:g> kali Anda berupaya membuka kunci ponsel dengan tidak benar. Profil kerja akan dihapus, sehingga menghapus semua data profil."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci tablet menggunakan akun email.\n\nCoba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> detik."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci ponsel menggunakan akun email.\n\nCoba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> detik."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Kode PIN SIM salah. Hubungi operator untuk membuka kunci perangkat."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">Kode PIN SIM salah, sisa <xliff:g id="NUMBER_1">%d</xliff:g> percobaan.</item>
+      <item quantity="one">Kode PIN SIM salah, sisa <xliff:g id="NUMBER_0">%d</xliff:g> percobaan sebelum Anda harus menghubungi operator untuk membuka kunci perangkat.</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM tidak dapat digunakan. Hubungi operator Anda."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">Kode PUK SIM salah, sisa <xliff:g id="NUMBER_1">%d</xliff:g> percobaan sebelum SIM tidak dapat digunakan selamanya.</item>
+      <item quantity="one">Kode PUK SIM salah, sisa <xliff:g id="NUMBER_0">%d</xliff:g> percobaan sebelum SIM tidak dapat digunakan selamanya.</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Operasi PIN SIM gagal!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operasi PUK SIM gagal!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Kode Diterima!"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Tidak ada layanan."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Beralih metode masukan"</string>
+    <string name="airplane_mode" msgid="3122107900897202805">"Mode pesawat"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Pola diperlukan setelah perangkat dimulai ulang"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"PIN diperlukan setelah perangkat dimulai ulang"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Sandi diperlukan setelah perangkat dimulai ulang"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Pola diperlukan untuk keamanan tambahan"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"PIN diperlukan untuk keamanan tambahan"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Sandi diperlukan untuk keamanan tambahan"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Pola diperlukan jika Anda beralih profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"PIN diperlukan jika Anda beralih profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Sandi diperlukan jika Anda beralih profil"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Perangkat dikunci oleh administrator"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Perangkat dikunci secara manual"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Perangkat belum dibuka kuncinya selama <xliff:g id="NUMBER_1">%d</xliff:g> jam. Konfirmasi pola.</item>
+      <item quantity="one">Perangkat belum dibuka kuncinya selama <xliff:g id="NUMBER_0">%d</xliff:g> jam. Konfirmasi pola.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Perangkat belum dibuka kuncinya selama <xliff:g id="NUMBER_1">%d</xliff:g> jam. Konfirmasi PIN.</item>
+      <item quantity="one">Perangkat belum dibuka kuncinya selama <xliff:g id="NUMBER_0">%d</xliff:g> jam. Konfirmasi PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Perangkat belum dibuka kuncinya selama <xliff:g id="NUMBER_1">%d</xliff:g> jam. Konfirmasi sandi.</item>
+      <item quantity="one">Perangkat belum dibuka kuncinya selama <xliff:g id="NUMBER_0">%d</xliff:g> jam. Konfirmasi sandi.</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Tidak dikenali"</string>
+</resources>
