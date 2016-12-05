@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"ការពារ​គ្រាប់ចុច"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"បញ្ចូល​កូដ PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"បញ្ចូល​លេខ​កូដ PUK  និង​​ PIN ថ្មី​របស់​ស៊ីម"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"លេខ​កូដ PUK ស៊ីម"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"លេខ​កូដ PIN ស៊ីម​ថ្មី"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"ប៉ះ ដើម្បី​បញ្ចូល​ពាក្យ​សម្ងាត់"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"បញ្ចូល​ពាក្យ​សម្ងាត់​ ​ដើម្បី​ដោះ​សោ"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"បញ្ចូល​កូដ PIN ដើម្បី​ដោះ​សោ"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"កូដ PIN មិន​ត្រឹមត្រូវ។"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"បាន​បញ្ចូល​​ពេញ"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"កំពុង​បញ្ចូល​ថ្ម"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"សាកយ៉ាងឆាប់រហ័ស"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"សាកយឺត"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"ភ្ជាប់​ឧបករណ៍​បញ្ចូល​ថ្ម​។"</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"ចុច​ម៉ឺនុយ ដើម្បី​ដោះ​សោ។"</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"បណ្ដាញ​ជាប់​សោ"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"គ្មាន​ស៊ី​ម​កាត"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"គ្មាន​ស៊ី​ម​កាត​នៅ​ក្នុង​កុំព្យូទ័រ​បន្ទះ​។"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"គ្មាន​ស៊ីមកាត​ក្នុង​ទូរស័ព្ទ។"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"បញ្ចូល​​​ស៊ី​ម​កាត​។"</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"បាត់​ស៊ីមកាត ឬ​មិន​អាច​អាន។ បញ្ចូល​ស៊ីម​កាត។"</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"ស៊ីម​កាត​មិន​អាច​ប្រើ​បាន។"</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"បាន​បិទ​ស៊ីម​កាត​របស់​អ្នក​ជា​អចិន្ត្រៃយ៍។\n ទាក់ទង​​ក្រុមហ៊ុន​ផ្ដល់​សេវាកម្ម​ឥត​ខ្សែ​សម្រាប់​ស៊ីម​កាត​ផ្សេង។"</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"ស៊ីម​កាត​​ជាប់​សោ។"</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"ស៊ីម​កាត​ជាប់​កូដ​​ PUK ។"</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"កំពុង​ដោះ​សោ​ស៊ីម​កាត..."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"ប្រអប់លេខសម្ងាត់"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"ប្រអប់លេខសម្ងាត់ស៊ីម"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"ប្រអប់ PUK ស៊ីម"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"ការ​ជូន​ដំណឹង​បន្ទាប់​កំណត់​សម្រាប់ <xliff:g id="ALARM">%1$s</xliff:g>"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"លុប"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ភ្លេច​​លំនាំ"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"លំនាំ​មិន​ត្រឹមត្រូវ"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"កូដ PIN មិន​ត្រឹមត្រូវ"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER">%d</xliff:g> វិនាទី។"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"គូរ​លំនាំ​របស់​អ្នក"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"បញ្ចូល​កូដ PIN ស៊ីម​កាត"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"បញ្ចូលលេខកូដសម្ងាត់ស៊ីមសម្រាប់ \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"បញ្ចូល​​កូដ PIN"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"បញ្ចូល​ពាក្យ​សម្ងាត់"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"ឥឡូវ​ស៊ីមកាត​ត្រូវ​បាន​បិទ។ បញ្ចូល​កូដ PUK ដើម្បី​បន្ត។ ចំពោះ​ព័ត៌មាន​លម្អិត​ទាក់ទង​ក្រុមហ៊ុន​បញ្ជូន​របស់​អ្នក។"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"ស៊ីម \"<xliff:g id="CARRIER">%1$s</xliff:g>\" ត្រូវបានបិទដំណើរការឥឡូវនេះ។ បញ្ចូលលេខកូដ PUK ដើម្បីបន្តទំនាក់ទំនងអ្នកផ្តល់សេវាកម្មសម្រាប់ព័ត៌មានលំអិត។"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"បញ្ចូល​កូដ PIN ដែល​ចង់​បាន"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"បញ្ជាក់​កូដ PIN ដែល​ចង់​បាន"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"កំពុង​ដោះ​សោ​​ស៊ីម​កាត..."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"បញ្ចូល​កូដ PIN ដែល​មាន​ពី ៤ ដល់ ៨ លេខ។"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"កូដ PUK គួរ​តែ​មាន​​ ៨ លេខ ឬ​​ច្រើន​ជាង​នេះ។"</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"បញ្ចូល​កូដ PUK ម្ដង​ទៀត។ ការ​ព្យាយាម​ដដែល​ច្រើន​ដឹង​នឹង​បិទ​ស៊ីម​កាត​ជា​អចិន្ត្រៃយ៍។"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"កូដ PIN មិន​ដូច​គ្នា"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"ព្យាយាម​លំនាំ​ច្រើន​ពេក"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"អ្នក​បាន​បញ្ចូល​កូដ PIN របស់​អ្នក​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។\n\n ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_1">%2$d</xliff:g> វិនាទី។"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"អ្នក​បាន​បញ្ចូល​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។\n\nព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_1">%2$d</xliff:g> វិនាទី។"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"អ្នក​បាន​​គូរ​លំនាំ​ដោះ​សោ​របស់​អ្នក​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។\n\nព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_1">%2$d</xliff:g> វិនាទី។"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"អ្នកបានព្យាយាមដោះសោមិនត្រឹមត្រូវលើថេប្លេតរបស់អ្នក <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ បន្ទាប់ពីការព្យាយាម <xliff:g id="NUMBER_1">%2$d</xliff:g> ដងទៀត ថេប្លេតនេះនឹងត្រូវបានកំណត់ឡើងវិញ ដែលវានឹងលុបទិន្នន័យរបស់វាទាំងអស់។"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"អ្នកបានព្យាយាមដោះសោមិនត្រឹមត្រូវលើទូរស័ព្ទរបស់អ្នក <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ បន្ទាប់ពីការព្យាយាម <xliff:g id="NUMBER_1">%2$d</xliff:g> ដងទៀត ទូរស័ព្ទនេះនឹងត្រូវបានកំណត់ឡើងវិញ ដែលវានឹងលុបទិន្នន័យរបស់វាទាំងអស់។"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"អ្នកបានព្យាយាមដោះសមិនត្រឹមត្រូវលើថេប្លេតនេះ <xliff:g id="NUMBER">%d</xliff:g> ដង។ ថេប្លេតនេះនឹងត្រូវបានកំណត់ឡើងវិញ ដែលវានឹងលុបទិន្នន័យរបស់វាទាំងអស់។"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"អ្នកបានព្យាយាមដោះសោមិនត្រឹមត្រូវលើទូរស័ព្ទរបស់អ្នក <xliff:g id="NUMBER">%d</xliff:g> ដង។ ទូរស័ព្ទនេះនឹងត្រូវបានកំណត់ឡើងវិញ ដែលវានឹងលុបទិន្នន័យរបស់វាទាំងអស់។"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"អ្នកបានព្យាយាមដោះសោមិនត្រឹមត្រូវលើថេប្លេតរបស់អ្នក <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ បន្ទាប់ពីការព្យាយាម <xliff:g id="NUMBER_1">%2$d</xliff:g> ដងទៀត អ្នកប្រើនេះនឹងត្រូវបានដកចេញ ដែលវានឹងលុបទិន្នន័យអ្នកប្រើទាំងអស់។"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"អ្នកបានព្យាយាមដោះសោមិនត្រឹមត្រូវលើទូរស័ព្ទរបស់អ្នក <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ បន្ទាប់ពីការព្យាយាម <xliff:g id="NUMBER_1">%2$d</xliff:g> ដងទៀត អ្នកប្រើនេះនឹងត្រូវបានដកចេញ ដែលវានឹងលុបទិន្នន័យអ្នកប្រើទាំងអស់។"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"អ្នកបានព្យាយាមដោះសោមិនត្រឹមត្រូវលើថេប្លេតរបស់អ្នក <xliff:g id="NUMBER">%d</xliff:g> ដង។ អ្នកប្រើនេះនឹងត្រូវបានដកចេញ ដែលវានឹងលុបទិន្នន័យអ្នកប្រើទាំងអស់។"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"អ្នកបានព្យាយាមដោះសោមិនត្រឹមត្រូវលើទូរស័ព្ទរបស់អ្នក <xliff:g id="NUMBER">%d</xliff:g> ដង។ អ្នកប្រើនេះនឹងត្រូវបានដកចេញ ដែលវានឹងលុបទិន្នន័យអ្នកប្រើទាំងអស់។"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"អ្នកបានព្យាយាមដោះសោមិនត្រឹមត្រូវលើថេប្លេតរបស់អ្នក <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ បន្ទាប់ពីការព្យាយាម <xliff:g id="NUMBER_1">%2$d</xliff:g> ដងទៀត ប្រវត្តិរូបការងាររបស់អ្នកនឹងត្រូវបានដកចេញ ដែលវានឹងលុបទិន្នន័យប្រវត្តិរូបទាំងអស់។"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"អ្នកបានព្យាយាមដោះសោមិនត្រឹមត្រូវលើទូរស័ព្ទរបស់អ្នក <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ បន្ទាប់ពីការព្យាយាម <xliff:g id="NUMBER_1">%2$d</xliff:g> ដងទៀត ប្រវត្តិរូបការងាររបស់អ្នកនឹងត្រូវបានដកចេញ ដែលវានឹងលុបទិន្នន័យប្រវត្តិរូបទាំងអស់។"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"អ្នកបានព្យាយាមដោះសោមិនត្រឹមត្រូវលើថេប្លេតរបស់អ្នក <xliff:g id="NUMBER">%d</xliff:g> ដង។ ប្រវត្តិរូបការងាររបស់អ្នកនឹងត្រូវបានដកចេញ ដែលវានឹងលុបទិន្នន័យប្រវត្តិរូបទាំងអស់របស់អ្នក។"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"អ្នកបានព្យាយាមដោះសោមិនត្រឹមត្រូវលើទូរស័ព្ទរបស់អ្នក <xliff:g id="NUMBER">%d</xliff:g> ដង។ ប្រវត្តិរូបការងាររបស់អ្នកនឹងត្រូវបានដកចេញ ដែលវានឹងលុបទិន្នន័យប្រវត្តិរូបទាំងអស់របស់អ្នក។"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"អ្នក​បាន​គូរ​លំនាំ​ដោះ​សោ​មិន​ត្រឹមត្រូវ <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ បន្ទាប់​ពី​ការ​ព្យាយាម <xliff:g id="NUMBER_1">%2$d</xliff:g> ដង​មិន​ជោគជ័យ អ្នក​នឹង​ត្រូវ​បាន​ស្នើ​ឲ្យ​ដោះ​សោ​កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក ដោយ​ប្រើ​គណនី​អ៊ីមែល។\n\n ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_2">%3$d</xliff:g> វិនាទី។"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"អ្នក​បាន​គូរ​លំនាំ​ដោះ​​សោ​របស់​អ្នក​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ បន្ទាប់​ពី​ការ​ព្យាយាម​មិន​ជោគជ័យ​​ច្រើនជាង <xliff:g id="NUMBER_1">%2$d</xliff:g> ដង អ្នក​នឹង​ត្រូវ​បាន​​ស្នើ​ឲ្យ​ដោះ​សោ​ទូរស័ព្ទ​របស់​អ្នក​ដោយ​ប្រើ​គណនី​អ៊ីមែល។\n\n ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_2">%3$d</xliff:g> វិនាទី។"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"លេខ​កូដ PIN ស៊ីម​មិន​ត្រឹមត្រូវ អ្នក​ត្រូវ​ទាក់ទង​ក្រុមហ៊ុន​បញ្ជូន​របស់​អ្នក​ឥឡូវ​នេះ ដើម្បី​ដោះ​សោ​ឧបករណ៍​របស់​អ្នក។"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">លេខកូដសម្ងាត់ស៊ីមមិនត្រឹមត្រូវ អ្នកនៅសល់ការព្យាយាម <xliff:g id="NUMBER_1">%d</xliff:g> ដងទៀត</item>
+      <item quantity="one">លេខកូដសម្ងាត់ស៊ីមមិនត្រឹមត្រូវ អ្នកនៅសល់ការព្យាយាម <xliff:g id="NUMBER_0">%d</xliff:g> ដងទៀត មុនពេលពេលដែលអ្នកត្រូវទាក់ទងទៅអ្នកផ្តល់សេវាកម្មរបស់អ្នកដើម្បីដោះសោឧបករណ៍របស់អ្នក។</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"ស៊ីម​មិន​អាច​ប្រើ​បាន។ ទាក់ទង​ក្រុមហ៊ុន​បញ្ជូន​របស់​អ្នក។"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">លេខកូដ PUK ស៊ីមមិនត្រឹមត្រូវ អ្នកនៅសល់ការព្យាយាម <xliff:g id="NUMBER_1">%d</xliff:g> ដងទៀត មុនពេលស៊ីមរបស់អ្នកមិនអាចប្រើបានជាអចិន្ត្រៃយ៍។</item>
+      <item quantity="one">លេខកូដ PUK ស៊ីមមិនត្រឹមត្រូវ អ្នកនៅសល់ការព្យាយាម <xliff:g id="NUMBER_0">%d</xliff:g> ដងទៀត មុនពេលស៊ីមរបស់អ្នកមិនអាចប្រើបានជាអចិន្ត្រៃយ៍។</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"បាន​បរាជ័យ​ក្នុង​ការ​ប្រតិបត្តិ​លេខ​កូដ PIN ស៊ីម!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"បាន​បរាជ័យ​ក្នុង​ការ​ប្រតិបត្តិ​​លេខ​កូដ PUK ស៊ីម!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"បាន​ទទួល​យក​លេខ​កូដ​!"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"គ្មាន​សេវា​"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"ប្ដូរ​វិធីសាស្ត្រ​បញ្ចូល"</string>
+    <string name="airplane_mode" msgid="3122107900897202805">"របៀបក្នុងយន្តហោះ"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"តម្រូវឲ្យប្រើលំនាំបន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"តម្រូវឲ្យបញ្ចូលកូដ PIN បន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"តម្រូវឲ្យបញ្ចូលពាក្យសម្ងាត់បន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"តម្រូវឲ្យប្រើលំនាំដើម្បីទទួលបានសវុត្ថិភាពបន្ថែម"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"តម្រូវឲ្យបញ្ចូលកូដ PIN ដើម្បីទទួលបានសុវត្ថិភាពបន្ថែម"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"តម្រូវឲ្យបញ្ចូលពាក្យសម្ងាត់ដើម្បីទទួលបានសុវត្ថិភាពបន្ថែម"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"តម្រូវឲ្យប្រើលំនាំនៅពេលដែលអ្នកប្តូរប្រវត្តិរូប"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"តម្រូវឲ្យបញ្ចូលកូដ PIN នៅពេលដែលអ្នកប្តូរប្រវត្តិរូប"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"តម្រូវឲ្យបញ្ចូលពាក្យសម្ងាត់នៅពេលដែលអ្នកប្តូរប្រវត្តិរូប"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"អ្នកគ្រប់គ្រងឧបករណ៍បានចាក់សោឧបករណ៍"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"ឧបករណ៍ត្រូវបានចាក់សោដោយអ្នកប្រើផ្ទាល់"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">ឧបករណ៍មិនបានដោះសោអស់រយៈពេល <xliff:g id="NUMBER_1">%d</xliff:g> ម៉ោងហើយ។ បញ្ជាប់លំនាំ។</item>
+      <item quantity="one">ឧបករណ៍មិនបានដោះសោអស់រយៈពេល <xliff:g id="NUMBER_0">%d</xliff:g> ម៉ោងហើយ។ បញ្ជាក់លំនាំ។</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">ឧបករណ៍មិនបានដោះសោអស់រយៈពេល <xliff:g id="NUMBER_1">%d</xliff:g> ម៉ោងហើយ។ បញ្ជាក់កូដ PIN។</item>
+      <item quantity="one">ឧបករណ៍មិនបានដោះសោអស់រយៈពេល <xliff:g id="NUMBER_0">%d</xliff:g> ម៉ោងហើយ។ បញ្ជាក់កូដ PIN។</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">ឧបករណ៍មិនបានដោះសោអស់រយៈពេល <xliff:g id="NUMBER_1">%d</xliff:g> ម៉ោងហើយ។ បញ្ជាក់ពាក្យសម្ងាត់។</item>
+      <item quantity="one">ឧបករណ៍មិនបានដោះសោអស់រយៈពេល <xliff:g id="NUMBER_0">%d</xliff:g> ម៉ោងហើយ។ បញ្ជាក់ពាក្យសម្ងាត់។</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"មិនអាចសម្គាល់បានទេ"</string>
+</resources>

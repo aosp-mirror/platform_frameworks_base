@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Keyguard"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"输入PIN码"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"请输入SIM卡PUK码和新的PIN码"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM卡PUK码"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"新SIM卡PIN码"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"触摸可输入密码"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"输入密码以解锁"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"输入PIN码进行解锁"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PIN码有误。"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"已充满"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"正在充电"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"正在快速充电"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"正在慢速充电"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"请连接充电器。"</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"按“菜单”键解锁。"</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"网络已锁定"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"没有 SIM 卡"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"平板电脑中没有SIM卡。"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"手机中没有SIM卡。"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"请插入SIM卡。"</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM卡缺失或无法读取，请插入SIM卡。"</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"SIM卡无法使用。"</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"您的SIM卡已永久停用。\n请与您的无线服务提供商联系，以便重新获取一张SIM卡。"</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM卡已被锁定。"</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM卡已被PUK码锁定。"</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"正在解锁SIM卡..."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN 码区域"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM 卡 PIN 码区域"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM 卡 PUK 码区域"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"下次闹钟时间已设置为<xliff:g id="ALARM">%1$s</xliff:g>"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘记了图案"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"图案错误"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"密码错误"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN码有误"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"请在 <xliff:g id="NUMBER">%d</xliff:g> 秒后重试。"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"绘制您的图案"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"输入SIM卡PIN码"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"输入“<xliff:g id="CARRIER">%1$s</xliff:g>”的 SIM 卡 PIN 码"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"输入PIN码"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"输入密码"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM卡已被停用，需要输入PUK码才能继续使用。有关详情，请联系您的运营商。"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM 卡“<xliff:g id="CARRIER">%1$s</xliff:g>”现已停用，需要输入 PUK 码才能继续使用。要了解详情，请联系您的运营商。"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"请输入所需的PIN码"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"请确认所需的PIN码"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"正在解锁SIM卡..."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"请输入4至8位数的PIN码。"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK码应至少包含8位数字。"</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"请重新输入正确的PUK码。如果尝试错误次数过多，SIM卡将永久停用。"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN码不匹配"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"图案尝试次数过多"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您已经<xliff:g id="NUMBER_0">%1$d</xliff:g>次输错了PIN码。\n\n请在<xliff:g id="NUMBER_1">%2$d</xliff:g>秒后重试。"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次输错密码。\n\n请在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒后重试。"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。\n\n请在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒后重试。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次错误地尝试解锁平板电脑。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，平板电脑将会被重置，这会删除其中的所有数据。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次错误地尝试解锁手机。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，手机将会被重置，这会删除其中的所有数据。"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁平板电脑。平板电脑将会被重置，这会删除其中的所有数据。"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁手机。手机将会被重置，这会删除其中的所有数据。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次错误地尝试解锁平板电脑。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统将移除此用户，这会删除所有的用户数据。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次错误地尝试解锁手机。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统将移除此用户，这会删除所有的用户数据。"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁平板电脑。系统将移除此用户，这会删除所有的用户数据。"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁手机。系统将移除此用户，这会删除所有的用户数据。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次错误地尝试解锁平板电脑。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统将移除此工作资料，这会删除所有的工作资料数据。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次错误地尝试解锁手机。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统将移除此工作资料，这会删除所有的工作资料数据。"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁平板电脑。系统将移除此工作资料，这会删除所有的工作资料数据。"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁手机。系统将移除此工作资料，这会删除所有的工作资料数据。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁平板电脑。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM卡PIN码不正确，您现在必须联系运营商为您解锁设备。"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">SIM 卡 PIN 码不正确，您还可尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
+      <item quantity="one">SIM 卡 PIN 码不正确，您还可尝试 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍不正确，则需要联系运营商帮您解锁设备。</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM卡无法使用，请与您的运营商联系。"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">SIM 卡 PUK 码不正确，您还可尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次。如果仍不正确，SIM 卡将永远无法使用。</item>
+      <item quantity="one">SIM 卡 PUK 码不正确，您还可尝试 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍不正确，SIM 卡将永远无法使用。</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM卡PIN码操作失败！"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM卡PUK码操作失败！"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"代码正确！"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"无服务。"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"切换输入法"</string>
+    <string name="airplane_mode" msgid="3122107900897202805">"飞行模式"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"重启设备后需要绘制解锁图案"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"重启设备后需要输入 PIN 码"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"重启设备后需要输入密码"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"需要绘制解锁图案以进一步确保安全"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"需要输入 PIN 码以进一步确保安全"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"需要输入密码以进一步确保安全"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"切换资料后需要绘制解锁图案"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"切换资料后需要输入 PIN 码"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"切换资料后需要输入密码"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"设备管理员已锁定此设备"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"此设备已手动锁定"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">设备已保持锁定状态达 <xliff:g id="NUMBER_1">%d</xliff:g> 小时。请确认解锁图案。</item>
+      <item quantity="one">设备已保持锁定状态达 <xliff:g id="NUMBER_0">%d</xliff:g> 小时。请确认解锁图案。</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">设备已保持锁定状态达 <xliff:g id="NUMBER_1">%d</xliff:g> 小时。请确认 PIN 码。</item>
+      <item quantity="one">设备已保持锁定状态达 <xliff:g id="NUMBER_0">%d</xliff:g> 小时。请确认 PIN 码。</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">设备已保持锁定状态达 <xliff:g id="NUMBER_1">%d</xliff:g> 小时。请确认密码。</item>
+      <item quantity="one">设备已保持锁定状态达 <xliff:g id="NUMBER_0">%d</xliff:g> 小时。请确认密码。</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"无法识别"</string>
+</resources>

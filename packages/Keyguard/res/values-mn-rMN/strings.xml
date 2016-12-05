@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Keyguard"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN кодыг бичнэ үү"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"СИМ ПҮК-г бичээд шинэ ПИН код оруулна уу"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"СИМ ПҮК код"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Шинэ СИМ ПИН код"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Нууц үг бичих бол хүрнэ үү"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Тайлах нууц үгийг бичнэ үү"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Тайлах PIN-г оруулна уу"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Буруу PIN код."</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Цэнэглэгдэв"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"Цэнэглэж байна"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"Хурдан цэнэглэх"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"Удаан цэнэглэх"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Цэнэглэгчээ холбоно уу."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Тайлх бол цэсийг дарна уу."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Сүлжээ түгжигдсэн"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"SIM карт байхгүй"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Таблет SIM картгүй."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Утсанд SIM карт байхгүй."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"SIM картыг оруулна уу."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM карт байхгүй эсвэл унших боломжгүй. SIM карт оруулна уу."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Ашиглаж болохгүй SIM карт."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Таны SIM карт бүрмөсөн идэвхгүй болов.\n Өөр SIM карт авах бол өөрийн утасгүй үйлчилгээний нийлүүлэгчтэй холбогдоно уу."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM карт түгжигдсэн."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM картны PUK-түгжигдсэн."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM картны түгжээг гаргаж байна…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN талбар"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN талбар"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK талбар"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Дараагийн сэрүүлгийг <xliff:g id="ALARM">%1$s</xliff:g>-д тохируулсан"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Устгах"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Оруулах"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Хээг мартсан"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Буруу хээ"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Нууц үг буруу"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN буруу"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Хээг зурах"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PIN оруулна уу"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"SIM-н PIN кодыг \"<xliff:g id="CARRIER">%1$s</xliff:g>\"-д оруулна уу."</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN оруулна уу"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Нууц үгээ оруулна уу"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM идэвхгүй байна. Үргэлжлүүлэх бол PUK кодыг оруулна уу. Дэлгэрэнгүй мэдээллийг оператороос асууна ууу"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\"-ыг одоогоор идэвхгүй болгосон байна. Үргэлжлүүлэхийн тулд PUK кодоо оруулна уу. Дэлгэрэнгүй мэдээлэл авахын тулд оператортай холбоо барина уу."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Хүссэн PIN кодоо оруулна уу"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Хүссэн PIN кодоо дахин оруулна уу"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM картны түгжээг гаргаж байна…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4-8 тооноос бүтэх PIN-г бичнэ үү."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK код 8-с цөөнгүй тооноос бүтнэ."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Зөв PUK кодыг дахин оруулна уу. Давтан оролдвол SIM нь бүрмөсөн идэвхгүй болгоно."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN кодууд таарахгүй байна"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Хээ оруулах оролдлого хэт олон"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Та PIN кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Та PIN кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Та таблетын түгжээг тайлах оролдлогыг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оруулсан байна. <xliff:g id="NUMBER_1">%2$d</xliff:g>-с илүү удаа буруу хийвэл энэ таблетын тохиргоо дахин шинээр хийгдэх бөгөөд улмаар таблетын дээрх бүх мэдээлэл устах болно."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Та утасны түгжээг тайлах оролдлогыг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оруулсан байна. <xliff:g id="NUMBER_1">%2$d</xliff:g>-с илүү удаа буруу хийвэл энэ утасны тохиргоо дахин шинээр хийгдэх бөгөөд улмаар утсан дээрх бүх мэдээлэл устах болно."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"Та таблетын түгжээг тайлах оролдлогыг <xliff:g id="NUMBER">%d</xliff:g>  удаа буруу оруулсан байна. Энэ таблетын тохиргоо дахин шинээр хийгдэх бөгөөд улмаар таблетан дээрх бүх мэдээлэл устах болно."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"Та утасны түгжээг тайлах оролдлогыг <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оруулсан байна. Энэ утасны тохиргоо дахин шинээр хийгдэх бөгөөд улмаар утсан дээрх бүх мэдээлэл устах болно."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"Та таблетын түгжээг тайлах оролдлогыг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу хийсэн байна. <xliff:g id="NUMBER_1">%2$d</xliff:g>-с илүү удаа буруу хийвэл энэ хэрэглэгч устгагдах бөгөөд энэ нь улмаар хэрэглэгчийн бүх мэдээллийг устгах болно."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"Та утасны түгжээг тайлах оролдлогыг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу хийсэн байна. <xliff:g id="NUMBER_1">%2$d</xliff:g>-с илүү удаа буруу хийвэл энэ хэрэглэгч устгагдах бөгөөд энэ нь улмаар хэрэглэгчийн бүх мэдээллийг устгах болно."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"Та таблетын түгжээг тайлах оролдлогыг  <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оруулсан байна. Энэ хэрэглэгч устгагдаж, улмаар хэрэглэгчийн бүх мэдээлэл устах болно."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"Та утасны түгжээг тайлах оролдлогыг <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оруулсан байна. Энэ хэрэглэгч устгагдаж, улмаар хэрэглэгчийн бүх мэдээлэл устах болно."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"Та таблетын түгжээг тайлах оролдлогыг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу хийсэн байна. <xliff:g id="NUMBER_1">%2$d</xliff:g>-с илүү удаа буруу хийвэл ажлын профайл устгагдах бөгөөд энэ нь улмаар профайлын бүх мэдээллийг устгах болно."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"Та утасны түгжээг тайлах оролдлогыг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу хийсэн байна. <xliff:g id="NUMBER_1">%2$d</xliff:g>-с илүү удаа буруу хийвэл ажлын профайл устгагдах бөгөөд энэ нь улмаар профайлын бүх мэдээллийг устгах болно."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"Та таблетын түгжээг тайлах оролдлогыг <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оруулсан байна. Ажлын профайл устгагдаж, улмаар профайлын бүх мэдээлэл устах болно."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Та утасны түгжээг тайлах оролдлогыг <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оруулсан байна. Ажлын профайл устгагдаж, улмаар профайлын бүх мэдээлэл устах болно."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оруулбал, та таблетаа тайлахын тулд имэйл бүртгэл шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оруулбал, та утсаа тайлахын тулд имэйл бүртгэлээ ашиглах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"СИМ ПИН код буруу, та төхөөрөмжийн түгжээг тайлахын тулд оператор компанитай холбоо барих шаардлагатай."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">СИМ-ны ПИН код буруу байна. Та <xliff:g id="NUMBER_1">%d</xliff:g> удаа оролдлого хийх боломжтой байна.</item>
+      <item quantity="one">СИМ-ны ПИН код буруу байна. Танд мобайл оператортойгоо холбогдохгүйгээр төхөөрөмжийн түгжээг тайлахад <xliff:g id="NUMBER_0">%d</xliff:g> оролдлого хийх боломж үлдсэн байна.</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"СИМ ашиглах боломжгүй. Өөрийн оператор компанитай холбоо барина уу."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">]СИМ-ны PUK код буруу байна. Таны СИМ хаагдах хүртэл төхөөрөмжийн түгжээг тайлахад <xliff:g id="NUMBER_1">%d</xliff:g> .оролдлого хийх боломж үлдсэн байна.</item>
+      <item quantity="one">СИМ-ны PUK код буруу байна. Таны СИМ хаагдах хүртэл төхөөрөмжийн түгжээг тайлахад <xliff:g id="NUMBER_0">%d</xliff:g> оролдлого хийх боломж үлдсэн байна.</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"СИМ ПИН ажиллуулах амжилтгүй боллоо!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"СИМ ПҮК ажиллуулах амжилтгүй боллоо!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Код зөвшөөрөгдлөө!"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Үйлчилгээ байхгүй."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Оролтын аргыг солих"</string>
+    <string name="airplane_mode" msgid="3122107900897202805">"Нислэгийн горим"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Төхөөрөмжийг дахин эхлүүлсний дараа зурган түгжээ оруулах шаардлагатай"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Төхөөрөмжийг дахин эхлүүлсний дараа PIN оруулах шаардлагатай"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Төхөөрөмжийг дахин эхлүүлсний дараа нууц үгээ оруулах шаардлагатай"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Аюулгүй байдлын үүднээс зурган түгжээ оруулах шаардлагатай"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Аюулгүй байдлын үүднээс PIN оруулах шаардлагатай"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Аюулгүй байдлын үүднээс нууц үг оруулах шаардлагатай"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Профайлыг солиход зурган түгжээ оруулах шаардлагатай"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Профайлыг солиход PIN оруулах шаардлагатай"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Профайлыг солиход нууц үг оруулах шаардлагатай"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Төхөөрөмжийн админ төхөөрөмжийг түгжсэн"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Төхөөрөмжийг гараар түгжсэн"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">Төхөөрөмжийн түгжээг <xliff:g id="NUMBER_1">%d</xliff:g> цагийн турш тайлаагүй байна. Зурган хээг баталгаажуулна уу.</item>
+      <item quantity="one">Төхөөрөмжийн түгжээг <xliff:g id="NUMBER_0">%d</xliff:g> цагийн турш тайлаагүй байна. Зурган хээг баталгаажуулна уу.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">Төхөөрөмжийн түгжээг <xliff:g id="NUMBER_1">%d</xliff:g> цагийн турш тайлаагүй байна. PIN-ээ баталгаажуулна уу.</item>
+      <item quantity="one">Төхөөрөмжийн түгжээг <xliff:g id="NUMBER_0">%d</xliff:g> цагийн турш тайлаагүй байна. PIN-ээ баталгаажуулна уу.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">Төхөөрөмжийн түгжээг <xliff:g id="NUMBER_1">%d</xliff:g> цагийн турш тайлаагүй байна. Нууц үгээ баталгаажуулна уу.</item>
+      <item quantity="one">Төхөөрөмжийн түгжээг <xliff:g id="NUMBER_0">%d</xliff:g> цагийн турш тайлаагүй байна. Нууц үгээ баталгаажуулна уу.</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Танигдахгүй байна"</string>
+</resources>

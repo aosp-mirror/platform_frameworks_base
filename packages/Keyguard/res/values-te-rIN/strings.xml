@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"కీగార్డ్"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"పిన్‌ కోడ్‌ను టైప్ చేయండి"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"సిమ్ PUK మరియు కొత్త పిన్ కోడ్‌ను టైప్ చేయండి"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"సిమ్ PUK కోడ్"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"కొత్త సిమ్ పిన్ కోడ్"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"పాస్‌వర్డ్‌ను టైప్ చేయడానికి తాకండి"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"అన్‌లాక్ చేయడానికి పాస్‌వర్డ్‌ను టైప్ చేయండి"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"అన్‌లాక్ చేయడానికి పిన్‌ను టైప్ చేయండి"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"చెల్లని పిన్‌ కోడ్."</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"ఛార్జ్ అయింది"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"ఛార్జ్ అవుతోంది"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"వేగంగా ఛార్జ్ అవుతోంది"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"నెమ్మదిగా ఛార్జ్ అవుతోంది"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"మీ ఛార్జర్‌ను కనెక్ట్ చేయండి."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"అన్‌లాక్ చేయడానికి మెను నొక్కండి."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"నెట్‌వర్క్ లాక్ చేయబడింది"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"సిమ్ కార్డు లేదు"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"టాబ్లెట్‌లో సిమ్ కార్డు లేదు."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"ఫోన్‌లో సిమ్ కార్డు లేదు."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"సిమ్ కార్డును చొప్పించండి."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"సిమ్ కార్డు లేదు లేదా చదవగలిగేలా లేదు. సిమ్ కార్డును చొప్పించండి."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"నిరుపయోగ సిమ్ కార్డు."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"మీ సిమ్ కార్డు శాశ్వతంగా నిలిపివేయబడింది.\n మరో సిమ్ కార్డు కోసం మీ వైర్‌లెస్ సేవా ప్రదాతను సంప్రదించండి."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"సిమ్ కార్డు లాక్ చేయబడింది."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"సిమ్ కార్డు PUK లాక్ చేయబడింది."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"సిమ్ కార్డును అన్‌లాక్ చేస్తోంది…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN ప్రాంతం"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN ప్రాంతం"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK ప్రాంతం"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"తదుపరి అలారం <xliff:g id="ALARM">%1$s</xliff:g>కి సెట్ చేయబడింది"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"తొలగించు"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"నమూనాను మర్చిపోయాను"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"నమూనా తప్పు"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"పాస్‌వర్డ్ తప్పు"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"పిన్‌ తప్పు"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"మీ నమూనాను గీయండి"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"సిమ్ పిన్‌ను నమోదు చేయండి"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" కోసం SIM PIN నమోదు చేయండి"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"పిన్‌ను నమోదు చేయండి"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"పాస్‌వర్డ్‌ని నమోదు చేయండి"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"సిమ్ ఇప్పుడు నిలిపివేయబడింది. కొనసాగడానికి PUK కోడ్‌ను నమోదు చేయండి. వివరాల కోసం క్యారియర్‌ను సంప్రదించండి."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" ఇప్పుడు నిలిపివేయబడింది. కొనసాగించడానికి PUK కోడ్‌ను నమోదు చేయండి. వివరాల కోసం క్యారియర్‌ను సంప్రదించండి."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"కోరుకునే పిన్‌ కోడ్‌ను నమోదు చేయండి"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"కావల్సిన పిన్‌ కోడ్‌ను నిర్ధారించండి"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"సిమ్ కార్డు‌ను అన్‌లాక్ చేస్తోంది…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 నుండి 8 సంఖ్యలు ఉండే పిన్‌ను టైప్ చేయండి."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK కోడ్ 8 లేదా అంతకంటే ఎక్కువ సంఖ్యలు ఉండాలి."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"సరైన PUK కోడ్‌ను మళ్లీ నమోదు చేయండి. పునరావృత ప్రయత్నాల వలన సిమ్ శాశ్వతంగా నిలిపివేయబడుతుంది."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"పిన్‌ కోడ్‌లు సరిపోలలేదు"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"చాలా ఎక్కువ నమూనా ప్రయత్నాలు చేసారు"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> ప్రయత్నాలు విఫలమైతే, ఈ టాబ్లెట్ రీసెట్ చేయబడుతుంది, ఇందువల్ల ఇందులోని మొత్తం డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> ప్రయత్నాలు విఫలమైతే, ఈ ఫోన్ రీసెట్ చేయబడుతుంది, ఇందువల్ల ఇందులోని మొత్తం డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేశారు. ఈ టాబ్లెట్ రీసెట్ చేయబడుతుంది, ఇందువల్ల ఇందులోని మొత్తం డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేశారు. ఈ ఫోన్ రీసెట్ చేయబడుతుంది, ఇందువల్ల ఇందులోని మొత్తం డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> ప్రయత్నాలు విఫలమైతే, ఈ వినియోగదారు తీసివేయబడతారు, ఇందువల్ల మొత్తం వినియోగదారు డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> ప్రయత్నాలు విఫలమైతే, ఈ వినియోగదారు తీసివేయబడతారు, ఇందువల్ల మొత్తం వినియోగదారు డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేశారు. ఈ వినియోగదారు తీసివేయబడతారు, ఇందువల్ల మొత్తం వినియోగదారు డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేశారు. ఈ వినియోగదారు తీసివేయబడతారు, ఇందువల్ల మొత్తం వినియోగదారు డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> ప్రయత్నాలు విఫలమైతే, కార్యాలయ ప్రొఫైల్ తీసివేయబడుతుంది, ఇందువల్ల మొత్తం ప్రొఫైల్ డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> ప్రయత్నాలు విఫలమైతే, కార్యాలయ ప్రొఫైల్ తీసివేయబడుతుంది, ఇందువల్ల మొత్తం ప్రొఫైల్ డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేశారు. కార్యాలయ ప్రొఫైల్ తీసివేయబడుతుంది, ఇందువల్ల మొత్తం ప్రొఫైల్ డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేశారు. కార్యాలయ ప్రొఫైల్ తీసివేయబడుతుంది, ఇందువల్ల మొత్తం ప్రొఫైల్ డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"సిమ్ పిన్ కోడ్ చెల్లదు, మీరు ఇప్పుడు మీ పరికరాన్ని అన్‌లాక్ చేయడానికి తప్పనిసరిగా మీ క్యారియర్‌ను సంప్రదించండి."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">SIM PIN కోడ్ చెల్లదు, మీకు <xliff:g id="NUMBER_1">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి.</item>
+      <item quantity="one">SIM PIN కోడ్ చెల్లదు, మీరు మీ పరికరాన్ని అన్‌లాక్ చేయడానికి తప్పనిసరిగా మీ క్యారియర్‌ను సంప్రదించడానికి ముందు మీకు <xliff:g id="NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది.</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"సిమ్ నిరుపయోగమైనది. మీ క్యారియర్‌ను సంప్రదించండి."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">SIM PUK కోడ్ చెల్లదు, SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER_1">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి.</item>
+      <item quantity="one">SIM PUK కోడ్ చెల్లదు, SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది.</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"సిమ్ పిన్ చర్య విఫలమైంది!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"సిమ్ PUK చర్య విఫలమైంది!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"కోడ్ ఆమోదించబడింది!"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"సేవ లేదు."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"ఇన్‌పుట్ పద్ధతిని మారుస్తుంది"</string>
+    <string name="airplane_mode" msgid="3122107900897202805">"ఎయిర్‌ప్లైన్ మోడ్"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత నమూనా నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత PIN నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత పాస్‌వర్డ్ నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"అదనపు భద్రత కోసం నమూనా నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"అదనపు భద్రత కోసం PIN నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"అదనపు భద్రత కోసం పాస్‌వర్డ్ నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"మీరు ప్రొఫైల్‌లు మారినప్పుడు నమూనా నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"మీరు ప్రొఫైల్‌లు మారినప్పుడు PIN నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"మీరు ప్రొఫైల్‌లు మారినప్పుడు పాస్‌వర్డ్ నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"పరికర నిర్వాహకులు పరికరాన్ని లాక్ చేసారు"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"పరికరం మాన్యువల్‌గా లాక్ చేయబడింది"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="other">పరికరం <xliff:g id="NUMBER_1">%d</xliff:g> గంటల పాటు అన్‌లాక్ చేయబడలేదు. నమూనాను నిర్ధారించండి.</item>
+      <item quantity="one">పరికరం <xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు అన్‌లాక్ చేయబడలేదు. నమూనాను నిర్ధారించండి.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="other">పరికరం <xliff:g id="NUMBER_1">%d</xliff:g> గంటల పాటు అన్‌లాక్ చేయబడలేదు. PINను నిర్ధారించండి.</item>
+      <item quantity="one">పరికరం <xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు అన్‌లాక్ చేయబడలేదు. PINను నిర్ధారించండి.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="other">పరికరం <xliff:g id="NUMBER_1">%d</xliff:g> గంటల పాటు అన్‌లాక్ చేయబడలేదు. పాస్‌వర్డ్‌ని నిర్ధారించండి.</item>
+      <item quantity="one">పరికరం <xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు అన్‌లాక్ చేయబడలేదు. పాస్‌వర్డ్‌ని నిర్ధారించండి.</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"గుర్తించలేదు"</string>
+</resources>

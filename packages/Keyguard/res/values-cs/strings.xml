@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"Uzamčení kláves"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Zadejte kód PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Zadejte kód PUK SIM karty a nový kód PIN."</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"Kód PUK SIM karty"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Nový kód PIN SIM karty"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Dotykem zadáte heslo"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Zadejte heslo pro odemknutí"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Zadejte kód PIN pro odemknutí"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Nesprávný kód PIN."</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"Nabito"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"Nabíjení"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"Rychlé nabíjení"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"Pomalé nabíjení"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"Připojte dobíjecí zařízení."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Telefon odemknete stisknutím tlačítka Menu."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Síť je blokována"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"Není vložena SIM karta."</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"V tabletu není SIM karta."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"V telefonu není SIM karta."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Vložte SIM kartu."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM karta chybí nebo je nečitelná. Vložte SIM kartu."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Nepoužitelná SIM karta."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Vaše SIM karta byla natrvalo zablokována.\n Požádejte svého poskytovatele bezdrátových služeb o další SIM kartu."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM karta je zablokována."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM karta je zablokována pomocí kódu PUK."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Odblokování SIM karty…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Oblast kódu PIN"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Oblast kódu PIN SIM karty"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Oblast kódu PUK SIM karty"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Další budík je nastaven na <xliff:g id="ALARM">%1$s</xliff:g>"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Smazat"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Zapomenuté gesto"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Nesprávné gesto"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Nesprávné heslo"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"Nesprávný kód PIN"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Zkuste to znovu za <xliff:g id="NUMBER">%d</xliff:g> s."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Nakreslete gesto"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Zadejte kód PIN SIM karty"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Zadejte PIN SIM karty <xliff:g id="CARRIER">%1$s</xliff:g>."</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Zadejte kód PIN"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Zadejte heslo"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM karta byla deaktivována. Chcete-li pokračovat, je třeba zadat kód PUK. Podrobné informace získáte od operátora."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM karta <xliff:g id="CARRIER">%1$s</xliff:g> je nyní zakázána. Chcete-li pokračovat, zadejte kód PUK. Podrobnosti vám poskytne operátor."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Zadejte požadovaný kód PIN."</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Potvrďte požadovaný kód PIN."</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Odblokování SIM karty..."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Zadejte kód PIN o délce 4–8 číslic."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Minimální délka kódu PUK je 8 číslic."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Znovu zadejte správný kód PUK. Opakovanými pokusy SIM kartu trvale deaktivujete."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Kódy PIN se neshodují."</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Příliš mnoho pokusů o nakreslení gesta"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste zadali nesprávný kód PIN. \n\nZkuste to znovu za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně zadali heslo. \n\nZkuste to znovu za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste zadali nesprávné bezpečnostní gesto. \n\nZkuste to znovu za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Již jste se <xliff:g id="NUMBER_0">%1$d</xliff:g>krát pokusili odemknout tablet nesprávným způsobem. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech bude tablet resetován, čímž se z něj smažou všechna data."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Již jste se <xliff:g id="NUMBER_0">%1$d</xliff:g>krát pokusili odemknout telefon nesprávným způsobem. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech bude telefon resetován, čímž se z něj smažou všechna data."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout tablet nesprávným způsobem. Tablet bude resetován, čímž z něj budou smazána všechna data."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout telefon nesprávným způsobem. Telefon bude resetován, čímž z něj budou smazána všechna data."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"Již jste se <xliff:g id="NUMBER_0">%1$d</xliff:g>krát pokusili odemknout tablet nesprávným způsobem. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech bude tento uživatel odstraněn, čímž se smažou všechna jeho data."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"Již jste se <xliff:g id="NUMBER_0">%1$d</xliff:g>krát pokusili odemknout telefon nesprávným způsobem. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech bude tento uživatel odstraněn, čímž se smažou všechna jeho data."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout tablet nesprávným způsobem. Uživatel bude odstraněn, čímž budou smazána všechna jeho data."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout telefon nesprávným způsobem. Uživatel bude odstraněn, čímž budou smazána všechna jeho data."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"Již jste se <xliff:g id="NUMBER_0">%1$d</xliff:g>krát pokusili odemknout tablet nesprávným způsobem. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech bude pracovní profil odstraněn, čímž se smažou všechna jeho data."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"Již jste se <xliff:g id="NUMBER_0">%1$d</xliff:g>krát pokusili odemknout telefon nesprávným způsobem. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech bude pracovní profil odstraněn, čímž se smažou všechna jeho data."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout tablet nesprávným způsobem. Pracovní profil bude odstraněn, čímž budou smazána všechna jeho data."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout telefon nesprávným způsobem. Pracovní profil bude odstraněn, čímž budou smazána všechna jeho data."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně nakreslili své heslo odemknutí. Po <xliff:g id="NUMBER_1">%2$d</xliff:g>dalších neúspěšných pokusech budete požádáni o odemčení tabletu pomocí e-mailového účtu.\n\n Zkuste to znovu za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně nakreslili své heslo odemknutí. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech budete požádáni o odemčení telefonu pomocí e-mailového účtu.\n\n Zkuste to znovu za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Zadali jste nesprávný kód PIN SIM karty. Nyní musíte za účelem odemknutí zařízení kontaktovat svého operátora."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="few">Zadali jste nesprávný kód PIN SIM karty. Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusy.</item>
+      <item quantity="many">Zadali jste nesprávný kód PIN SIM karty. Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusu.</item>
+      <item quantity="other">Zadali jste nesprávný kód PIN SIM karty. Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusů.</item>
+      <item quantity="one">Zadali jste nesprávný PIN SIM karty. Zbývá <xliff:g id="NUMBER_0">%d</xliff:g> pokus, poté bude muset zařízení odemknout operátor.</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM kartu nelze použít. Kontaktujte operátora."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="few">Nesprávný kód PUK SIM karty. Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusy, poté bude SIM karta natrvalo zablokována.</item>
+      <item quantity="many">Nesprávný kód PUK SIM karty. Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusu, poté bude SIM karta natrvalo zablokována.</item>
+      <item quantity="other">Nesprávný kód PUK SIM karty. Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusů, poté bude SIM karta natrvalo zablokována.</item>
+      <item quantity="one">Nesprávný kód PUK SIM karty. Máte ještě <xliff:g id="NUMBER_0">%d</xliff:g> pokus, poté bude SIM karta natrvalo zablokována.</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"Operace pomocí kódu PIN SIM karty se nezdařila!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operace pomocí kódu PUK SIM karty se nezdařila!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"Kód byl přijat."</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"Žádný signál."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Přepnout metodu zadávání"</string>
+    <string name="airplane_mode" msgid="3122107900897202805">"Režim Letadlo"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Po restartování zařízení je vyžadováno gesto"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Po restartování zařízení je vyžadován kód PIN"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Po restartování zařízení je vyžadováno heslo"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Za účelem zvýšení zabezpečení je vyžadováno gesto"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Za účelem zvýšení zabezpečení je vyžadován kód PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Za účelem zvýšení zabezpečení je vyžadováno heslo"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Po přepnutí profilů je vyžadováno gesto"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Po přepnutí profilů je vyžadován kód PIN"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Po přepnutí profilů je vyžadováno heslo"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Správce zařízení toto zařízení uzamkl"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Zařízení bylo ručně uzamčeno"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="few">Zařízení již <xliff:g id="NUMBER_1">%d</xliff:g> hodiny nebylo odemknuto. Potvrďte gesto.</item>
+      <item quantity="many">Zařízení již <xliff:g id="NUMBER_1">%d</xliff:g> hodiny nebylo odemknuto. Potvrďte gesto.</item>
+      <item quantity="other">Zařízení již <xliff:g id="NUMBER_1">%d</xliff:g> hodin nebylo odemknuto. Potvrďte gesto.</item>
+      <item quantity="one">Zařízení již <xliff:g id="NUMBER_0">%d</xliff:g> hodinu nebylo odemknuto. Potvrďte gesto.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="few">Zařízení již <xliff:g id="NUMBER_1">%d</xliff:g> hodiny nebylo odemknuto. Potvrďte PIN.</item>
+      <item quantity="many">Zařízení již <xliff:g id="NUMBER_1">%d</xliff:g> hodiny nebylo odemknuto. Potvrďte PIN.</item>
+      <item quantity="other">Zařízení již <xliff:g id="NUMBER_1">%d</xliff:g> hodin nebylo odemknuto. Potvrďte PIN.</item>
+      <item quantity="one">Zařízení již <xliff:g id="NUMBER_0">%d</xliff:g> hodinu nebylo odemknuto. Potvrďte PIN.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="few">Zařízení již <xliff:g id="NUMBER_1">%d</xliff:g> hodiny nebylo odemknuto. Potvrďte heslo.</item>
+      <item quantity="many">Zařízení již <xliff:g id="NUMBER_1">%d</xliff:g> hodiny nebylo odemknuto. Potvrďte heslo.</item>
+      <item quantity="other">Zařízení již <xliff:g id="NUMBER_1">%d</xliff:g> hodin nebylo odemknuto. Potvrďte heslo.</item>
+      <item quantity="one">Zařízení již <xliff:g id="NUMBER_0">%d</xliff:g> hodinu nebylo odemknuto. Potvrďte heslo.</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nerozpoznáno"</string>
+</resources>

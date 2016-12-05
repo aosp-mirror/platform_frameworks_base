@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="719438068451601849">"कीगार्ड"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"पिन कोड लिखें"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"सिम PUK और नया PIN कोड लिखें"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"सिम PUK कोड"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"नया सिम PIN कोड"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"पासवर्ड लिखने के लिए स्पर्श करें"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"अनलॉक करने के लिए पासवर्ड लिखें"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"अनलॉक करने के लिए पिन लिखें"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"गलत पिन कोड."</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"चार्ज हो गई है"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"चार्ज हो रहा है"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"तेज़ी से चार्ज हो रही है"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"धीमे चार्ज हो रही है"</string>
+    <string name="keyguard_low_battery" msgid="8143808018719173859">"अपना चार्जर कनेक्‍ट करें."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"अनलॉक करने के लिए मेनू दबाएं."</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"नेटवर्क लॉक किया गया"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"कोई सिम कार्ड नहीं है"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"टेबलेट में कोई सिम कार्ड नहीं है."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"फ़ोन में कोई सिम कार्ड नहीं है."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"सिम कार्ड डालें."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"सिम कार्ड गुम है या पढ़ने योग्‍य नहीं है. सिम कार्ड डालें."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"अनुपयोगी सिम कार्ड."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"आपका सिम कार्ड स्‍थायी रूप से अक्षम कर दिया गया है.\n दूसरे सिम कार्ड के लिए अपने वायरलेस सेवा प्रदाता से संपर्क करें."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"सिम कार्ड लॉक है."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"सिम कार्ड PUK द्वारा लॉक किया हुआ है."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"सिम कार्ड अनलॉक हो रहा है…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"पिन क्षेत्र"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"सिम पिन क्षेत्र"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"सिम पिइउके क्षेत्र"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"अगला अलार्म <xliff:g id="ALARM">%1$s</xliff:g> के लिए सेट किया गया"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"हटाएं"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"आकार भूल गए"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"गलत आकार"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"गलत पासवर्ड"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"गलत PIN"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"अपना आकार आरेखित करें"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"सिम PIN डालें"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" के लिए सिम पिन डालें"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN डालें"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"पासवर्ड डालें"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"सिम अब अक्षम हो गई है. जारी रखने के लिए PUK कोड डालें. विवरण के लिए कैरियर से संपर्क करें."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"सिम \"<xliff:g id="CARRIER">%1$s</xliff:g>\" अब अक्षम हो गई है. जारी रखने के लिए PUK कोड डालें. विवरण के लिए कैरियर से संपर्क करें."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"इच्छित पिन कोड डालें"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"इच्छित पिन कोड की दुबारा पूछें"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"सिम कार्ड अनलॉक कर रहा है…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"ऐसा PIN लिखें, जो 4 से 8 अंकों का हो."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK कोड 8 या अधिक संख्या वाला होना चाहिए."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"सही PUK कोड पुन: डालें. बार-बार प्रयास करने से सिम स्थायी रूप से अक्षम हो जाएगी."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"पिन कोड का मिलान नहीं होता"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बहुत अधिक आकार प्रयास"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आप अपना PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आप अपना पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से आरेखित किया है. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से प्रयास किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, इस टैबलेट को रीसेट कर दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से प्रयास किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, इस फ़ोन को रीसेट कर दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास किया है. इस टैबलेट को रीसेट कर दिया जाएगा, जिससे उसका सभी डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास किया है. इस फ़ोन को रीसेट कर दिया जाएगा, जिससे उसका सभी डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से प्रयास किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से प्रयास किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास किया है. इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास किया है. इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से प्रयास किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"आपके डिवाइस ने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से प्रयास किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास किया है. कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास किया है. कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने टेबलेट को किसी ईमेल खाते के उपयोग से अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"गलत सिम PIN कोड अपने डिवाइस को अनलॉक करने के लिए अब आपको अपने वाहक से संपर्क करना होगा."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="one">गलत सिम PIN कोड, आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> प्रयास शेष हैं.</item>
+      <item quantity="other">गलत सिम PIN कोड, आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> प्रयास शेष हैं.</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"सिम अनुपयोगी है. अपने वाहक से संपर्क करें."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="one">गलत सिम PUK कोड, सिम के स्थायी रूप से अनुपयोगी हो जाने से पहले आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> प्रयास शेष हैं.</item>
+      <item quantity="other">गलत सिम PUK कोड, सिम के स्थायी रूप से अनुपयोगी हो जाने से पहले आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> प्रयास शेष हैं.</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"सिम PIN की कार्यवाही विफल रही!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"सिम PUK की कार्यवाही विफल रही!"</string>
+    <string name="kg_pin_accepted" msgid="1448241673570020097">"कोड स्वीकार किया गया!"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"कोई सेवा नहीं."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"इनपुट पद्धति‍ बदलें"</string>
+    <string name="airplane_mode" msgid="3122107900897202805">"हवाई जहाज़ मोड"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"डिवाइस के पुनः प्रारंभ होने पर पैटर्न की आवश्यकता होती है"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"डिवाइस के पुनः प्रारंभ होने पर पिन की आवश्यकता होती है"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"डिवाइस के पुनः प्रारंभ होने पर पासवर्ड की आवश्यकता होती है"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"अतिरिक्‍त सुरक्षा के लिए पैटर्न आवश्‍यक है"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"अतिरिक्‍त सुरक्षा के लिए पिन आवश्‍यक है"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"अतिरिक्‍त सुरक्षा के लिए पासवर्ड आवश्‍यक है"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"प्रोफ़ाइल में स्विच करते समय पैटर्न की आवश्यकता होती है"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"प्रोफ़ाइल में स्विच करते समय पिन की आवश्यकता होती है"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"प्रोफ़ाइल में स्विच करते समय पासवर्ड की आवश्यकता होती है"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"डिवाइस व्यवस्थापक ने डिवाइस को लॉक कर दिया है"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"डिवाइस को मैन्युअल रूप से लॉक किया गया था"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
+      <item quantity="one">डिवाइस <xliff:g id="NUMBER_1">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पैटर्न की पुष्टि करें.</item>
+      <item quantity="other">डिवाइस <xliff:g id="NUMBER_1">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पैटर्न की पुष्टि करें.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
+      <item quantity="one">डिवाइस <xliff:g id="NUMBER_1">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पिन की पुष्‍टि करें.</item>
+      <item quantity="other">डिवाइस <xliff:g id="NUMBER_1">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पिन की पुष्‍टि करें.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
+      <item quantity="one">डिवाइस <xliff:g id="NUMBER_1">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पासवर्ड की पुष्टि करें.</item>
+      <item quantity="other">डिवाइस <xliff:g id="NUMBER_1">%d</xliff:g> घंटे से अनलॉक नहीं किया गया है. पासवर्ड की पुष्टि करें.</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"पहचाना नहीं गया"</string>
+</resources>
