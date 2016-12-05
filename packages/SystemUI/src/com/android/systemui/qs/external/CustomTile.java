@@ -15,6 +15,9 @@
  */
 package com.android.systemui.qs.external;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
+
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,7 +27,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
@@ -37,18 +39,13 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.IWindowManager;
-import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import libcore.util.Objects;
-
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 
 public class CustomTile extends QSTile<QSTile.State> implements TileChangeListener {
     public static final String PREFIX = "custom(";
@@ -301,7 +298,7 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
             tileState = Tile.STATE_UNAVAILABLE;
             drawable = mDefaultIcon.loadDrawable(mAppContext);
         }
-        int color = mContext.getColor(getColor(tileState));
+        final int color = TileColorPicker.getInstance(mContext).getColor(tileState);
         drawable.setTint(color);
         state.icon = mHasRes ? new DrawableIconWithRes(drawable, icon.getResId())
                 : new DrawableIcon(drawable);
@@ -333,18 +330,6 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
                 }
             }
         });
-    }
-
-    private static int getColor(int state) {
-        switch (state) {
-            case Tile.STATE_UNAVAILABLE:
-                return R.color.qs_tile_tint_unavailable;
-            case Tile.STATE_INACTIVE:
-                return R.color.qs_tile_tint_inactive;
-            case Tile.STATE_ACTIVE:
-                return R.color.qs_tile_tint_active;
-        }
-        return 0;
     }
 
     public static String toSpec(ComponentName name) {
