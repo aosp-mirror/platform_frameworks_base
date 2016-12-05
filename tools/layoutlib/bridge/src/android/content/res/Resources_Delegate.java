@@ -21,6 +21,7 @@ import com.android.ide.common.rendering.api.ArrayResourceValue;
 import com.android.ide.common.rendering.api.DensityBasedResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.LayoutlibCallback;
+import com.android.ide.common.rendering.api.PluralsResourceValue;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
@@ -43,6 +44,7 @@ import android.annotation.Nullable;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.Resources.Theme;
 import android.graphics.drawable.Drawable;
+import android.icu.text.PluralRules;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.LruCache;
@@ -732,6 +734,48 @@ public class Resources_Delegate {
 
         // this is not used since the method above always throws
         return null;
+    }
+
+    @LayoutlibDelegate
+    static String getQuantityString(Resources resources, int id, int quantity) throws
+            NotFoundException {
+        Pair<String, ResourceValue> value = getResourceValue(resources, id, mPlatformResourceFlag);
+
+        if (value != null) {
+            if (value.getSecond() instanceof PluralsResourceValue) {
+                PluralsResourceValue pluralsResourceValue = (PluralsResourceValue) value.getSecond();
+                PluralRules pluralRules = PluralRules.forLocale(resources.getConfiguration().getLocales()
+                        .get(0));
+                String strValue = pluralsResourceValue.getValue(pluralRules.select(quantity));
+                if (strValue == null) {
+                    strValue = pluralsResourceValue.getValue(PluralRules.KEYWORD_OTHER);
+                }
+
+                return strValue;
+            }
+            else {
+                return value.getSecond().getValue();
+            }
+        }
+
+        // id was not found or not resolved. Throw a NotFoundException.
+        throwException(resources, id);
+
+        // this is not used since the method above always throws
+        return null;
+    }
+
+    @LayoutlibDelegate
+    static String getQuantityString(Resources resources, int id, int quantity, Object... formatArgs)
+            throws NotFoundException {
+        String raw = getQuantityString(resources, id, quantity);
+        return String.format(resources.getConfiguration().getLocales().get(0), raw, formatArgs);
+    }
+
+    @LayoutlibDelegate
+    static CharSequence getQuantityText(Resources resources, int id, int quantity) throws
+            NotFoundException {
+        return getQuantityString(resources, id, quantity);
     }
 
     @LayoutlibDelegate

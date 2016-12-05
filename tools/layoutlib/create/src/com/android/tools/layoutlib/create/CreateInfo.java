@@ -154,6 +154,8 @@ public final class CreateInfo implements ICreateInfo {
         "android.content.res.Resources#getIntArray",
         "android.content.res.Resources#getInteger",
         "android.content.res.Resources#getLayout",
+        "android.content.res.Resources#getQuantityString",
+        "android.content.res.Resources#getQuantityText",
         "android.content.res.Resources#getResourceEntryName",
         "android.content.res.Resources#getResourceName",
         "android.content.res.Resources#getResourcePackageName",
