@@ -20,6 +20,10 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageStats;
 import android.os.Build;
+import android.os.IInstalld;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.util.Slog;
 
 import com.android.internal.os.InstallerConnection;
@@ -32,6 +36,8 @@ import java.util.Arrays;
 
 public final class Installer extends SystemService {
     private static final String TAG = "Installer";
+
+    private static final boolean USE_BINDER = true;
 
     /* ***************************************************************************
      * IMPORTANT: These values are passed to native code. Keep them in sync with
@@ -55,10 +61,13 @@ public final class Installer extends SystemService {
     public static final int FLAG_CLEAR_CODE_CACHE_ONLY = 1 << 9;
 
     private final InstallerConnection mInstaller;
+    private final IInstalld mInstalld;
 
     public Installer(Context context) {
         super(context);
         mInstaller = new InstallerConnection();
+        // TODO: reconnect if installd restarts
+        mInstalld = IInstalld.Stub.asInterface(ServiceManager.getService("installd"));
     }
 
     // Package-private installer that accepts a custom InstallerConnection. Used for
@@ -66,6 +75,8 @@ public final class Installer extends SystemService {
     Installer(Context context, InstallerConnection connection) {
         super(context);
         mInstaller = connection;
+        // TODO: reconnect if installd restarts
+        mInstalld = IInstalld.Stub.asInterface(ServiceManager.getService("installd"));
     }
 
     /**
@@ -84,8 +95,17 @@ public final class Installer extends SystemService {
 
     public void createAppData(String uuid, String pkgname, int userid, int flags, int appid,
             String seinfo, int targetSdkVersion) throws InstallerException {
-        mInstaller.execute("create_app_data", uuid, pkgname, userid, flags, appid, seinfo,
-            targetSdkVersion);
+        if (USE_BINDER) {
+            try {
+                mInstalld.createAppData(uuid, pkgname, userid, flags, appid, seinfo,
+                        targetSdkVersion);
+            } catch (RemoteException | ServiceSpecificException e) {
+                throw new InstallerException(e.getMessage());
+            }
+        } else {
+            mInstaller.execute("create_app_data", uuid, pkgname, userid, flags, appid, seinfo,
+                    targetSdkVersion);
+        }
     }
 
     public void restoreconAppData(String uuid, String pkgname, int userid, int flags, int appid,
