@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import android.content.pm.PackageManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ParcelFormatException;
@@ -35,21 +36,29 @@ public abstract class NetworkEvent implements Parcelable {
     /** The timestamp of the event being reported in milliseconds. */
     long timestamp;
 
-    protected NetworkEvent() {
+    /** @hide */
+    NetworkEvent() {
         //empty constructor
     }
 
-    protected NetworkEvent(String packageName, long timestamp) {
+    /** @hide */
+    NetworkEvent(String packageName, long timestamp) {
         this.packageName = packageName;
         this.timestamp = timestamp;
     }
 
-    /** Returns the package name of the UID that performed the query. */
+    /**
+     * Returns the package name of the UID that performed the query, as returned by
+     * {@link PackageManager#getNameForUid}.
+     */
     public String getPackageName() {
         return packageName;
     }
 
-    /** Returns the timestamp of the event being reported in milliseconds. */
+    /**
+     * Returns the timestamp of the event being reported in milliseconds, the difference between
+     * the time the event was reported and midnight, January 1, 1970 UTC.
+     */
     public long getTimestamp() {
         return timestamp;
     }
