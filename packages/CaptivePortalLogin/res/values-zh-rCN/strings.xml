@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
+    <string name="action_use_network" msgid="6076184727448466030">"直接使用此网络"</string>
+    <string name="action_do_not_use_network" msgid="4577366536956516683">"不要使用此网络"</string>
+    <string name="action_bar_label" msgid="917235635415966620">"登录到网络"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"您尝试加入的网络存在安全问题。"</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"例如，登录页面可能并不属于页面上显示的单位。"</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"仍然通过浏览器继续操作"</string>
+</resources>

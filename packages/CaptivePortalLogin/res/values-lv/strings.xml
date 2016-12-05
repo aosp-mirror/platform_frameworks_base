@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
+    <string name="action_use_network" msgid="6076184727448466030">"Izmantot tīklu ar pašreizējiem iestatījumiem"</string>
+    <string name="action_do_not_use_network" msgid="4577366536956516683">"Neizmantot šo tīklu"</string>
+    <string name="action_bar_label" msgid="917235635415966620">"Pierakstīties tīklā"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Tīklam, kuram mēģināt pievienoties, ir drošības problēmas."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Piemēram, pieteikšanās lapa, iespējams, nepieder norādītajai organizācijai."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Tik un tā turpināt, izmantojot pārlūkprogrammu"</string>
+</resources>

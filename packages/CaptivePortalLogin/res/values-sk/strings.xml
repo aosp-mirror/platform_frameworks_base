@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
+    <string name="action_use_network" msgid="6076184727448466030">"Použiť túto sieť tak, ako je"</string>
+    <string name="action_do_not_use_network" msgid="4577366536956516683">"Túto sieť nepoužívať"</string>
+    <string name="action_bar_label" msgid="917235635415966620">"Prihlásiť sa do siete"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Sieť, ku ktorej sa pokúšate pripojiť, má problémy so zabezpečením"</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Napríklad prihlasovacia stránka nemusí patriť uvedenej organizácii."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Pokračovať pomocou prehliadača"</string>
+</resources>

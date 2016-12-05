@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
+    <string name="action_use_network" msgid="6076184727448466030">"Использовать эту сеть"</string>
+    <string name="action_do_not_use_network" msgid="4577366536956516683">"Не использовать эту сеть"</string>
+    <string name="action_bar_label" msgid="917235635415966620">"Регистрация в сети"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Сеть, к которой вы хотите подключиться, небезопасна."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Например, страница входа в аккаунт может быть фиктивной."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Игнорировать и открыть браузер"</string>
+</resources>

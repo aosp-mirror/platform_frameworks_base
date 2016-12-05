@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
+    <string name="action_use_network" msgid="6076184727448466030">"যেভাবে আছে সেভাবেই এই নেটওয়ার্ক ব্যবহার করুন"</string>
+    <string name="action_do_not_use_network" msgid="4577366536956516683">"এই নেটওয়ার্ক ব্যবহার করবেন না"</string>
+    <string name="action_bar_label" msgid="917235635415966620">"নেটওয়ার্কে প্রবেশ করুন"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"আপনি যে নেটওয়ার্কে যোগ দেওয়ার চেষ্টা করছেন তাতে নিরাপত্তার সমস্যা আছে।"</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"উদাহরণস্বরূপ, লগইন পৃষ্ঠাটি প্রদর্শিত প্রতিষ্ঠানের অন্তর্গত নাও হতে পারে৷"</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"যাই হোক না কেন ব্রাউজারের মাধ্যমে অবিরত রাখুন"</string>
+</resources>
