@@ -72,6 +72,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_SHARE_LOCATION,
             UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
             UserManager.DISALLOW_CONFIG_BLUETOOTH,
+            UserManager.DISALLOW_BLUETOOTH,
             UserManager.DISALLOW_USB_FILE_TRANSFER,
             UserManager.DISALLOW_CONFIG_CREDENTIALS,
             UserManager.DISALLOW_REMOVE_USER,
@@ -118,6 +119,7 @@ public class UserRestrictionsUtils {
      * User restrictions that can not be set by profile owners.
      */
     private static final Set<String> DEVICE_OWNER_ONLY_RESTRICTIONS = Sets.newArraySet(
+            UserManager.DISALLOW_BLUETOOTH,
             UserManager.DISALLOW_USB_FILE_TRANSFER,
             UserManager.DISALLOW_CONFIG_TETHERING,
             UserManager.DISALLOW_NETWORK_RESET,
