@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="8016145283189546017">"ઇનપુટ ઉપકરણો"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android કીબોર્ડ"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"અંગ્રેજી (યુકે)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"અંગ્રેજી (યુએસ)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"અંગ્રેજી (યુએસ), આંતરરાષ્ટ્રીય શૈલી"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"અંગ્રેજી (યુએસ), કોલેમેક શૈલી"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"અંગ્રેજી (યુએસ), ડ્વોરક શૈલી"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"અંગ્રેજી (યુએસ), વર્કમૅન શૈલી"</string>
+    <string name="keyboard_layout_german_label" msgid="8451565865467909999">"જર્મન"</string>
+    <string name="keyboard_layout_french_label" msgid="813450119589383723">"ફ્રેન્ચ"</string>
+    <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"ફ્રેન્ચ (કેનેડા)"</string>
+    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"રશિયન"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"રશિયન, Mac શૈલી"</string>
+    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"સ્પેનિશ"</string>
+    <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"સ્વિસ ફ્રેંચ"</string>
+    <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"સ્વિસ જર્મન"</string>
+    <string name="keyboard_layout_belgian" msgid="2011984572838651558">"બેલ્જિયન"</string>
+    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"બલ્ગેરિયન"</string>
+    <string name="keyboard_layout_italian" msgid="6497079660449781213">"ઇટાલિયન"</string>
+    <string name="keyboard_layout_danish" msgid="8036432066627127851">"ડેનિશ"</string>
+    <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"નોર્વેજીયન"</string>
+    <string name="keyboard_layout_swedish" msgid="732959109088479351">"સ્વીડિશ"</string>
+    <string name="keyboard_layout_finnish" msgid="5585659438924315466">"ફિનિશ"</string>
+    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"ક્રોએશિયન"</string>
+    <string name="keyboard_layout_czech" msgid="1349256901452975343">"ચેક"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"એસ્ટોનિયન"</string>
+    <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"હંગેરિયન"</string>
+    <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"આઇસલેન્ડિક"</string>
+    <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"બ્રાઝિલિયન"</string>
+    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"પોર્ટુગીઝ"</string>
+    <string name="keyboard_layout_slovak" msgid="2469379934672837296">"સ્લોવૅક"</string>
+    <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"સ્લોવેનિયન"</string>
+    <string name="keyboard_layout_turkish" msgid="7736163250907964898">"ટર્કીશ"</string>
+    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"યુક્રેનિયન"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"અરબી"</string>
+    <string name="keyboard_layout_greek" msgid="7289253560162386040">"ગ્રીક"</string>
+    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"હીબ્રુ"</string>
+    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"લિથુનિયન"</string>
+    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"સ્પેનિશ (લેટિન)"</string>
+    <string name="keyboard_layout_latvian" msgid="4405417142306250595">"લાતવિયન"</string>
+</resources>

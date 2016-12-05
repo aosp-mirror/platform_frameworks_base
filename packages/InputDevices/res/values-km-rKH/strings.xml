@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="8016145283189546017">"ឧបករណ៍​បញ្ចូល"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"ក្ដារចុច​ Android"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"អង់គ្លេស (​ចក្រភព​អង់គ្លេស)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"អង់គ្លេស (​សហរដ្ឋ​អាមេរិក)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"អង់គ្លេស (សហរដ្ឋ​អាមេរិក​)​, ​​រចនាប័ទ្ម​​អន្តរជាតិ"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"អង់គ្លេស (សហរដ្ឋ​អាមេរិក​)​, ​​រចនាប័ទ្ម Colemak"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"អង់គ្លេស (សហរដ្ឋ​អាមេរិក​)​, ​​រចនាប័ទ្ម Dvorak"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"អង់គ្លេស (អាមេរិក) រចនាបទ Workman"</string>
+    <string name="keyboard_layout_german_label" msgid="8451565865467909999">"អាល្លឺម៉ង់"</string>
+    <string name="keyboard_layout_french_label" msgid="813450119589383723">"បារាំង"</string>
+    <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"បារាំង (កាណាដា​)"</string>
+    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"រុស្សី"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"រុស្សី ​រចនាប័ទ្ម Mac"</string>
+    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"អេស្ប៉ាញ"</string>
+    <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"​​បារាំង​ ស្វីស"</string>
+    <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"អាល្លឺម៉ង់ ស្វីស"</string>
+    <string name="keyboard_layout_belgian" msgid="2011984572838651558">"បែលហ្ស៊ិក"</string>
+    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"ប៊ុលហ្ការី"</string>
+    <string name="keyboard_layout_italian" msgid="6497079660449781213">"អ៊ីតាលី"</string>
+    <string name="keyboard_layout_danish" msgid="8036432066627127851">"ដាណឺម៉ាក"</string>
+    <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"ន័រវែស"</string>
+    <string name="keyboard_layout_swedish" msgid="732959109088479351">"ស៊ុយអែដ"</string>
+    <string name="keyboard_layout_finnish" msgid="5585659438924315466">"ហ្វាំងឡង់"</string>
+    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"ក្រូអាត"</string>
+    <string name="keyboard_layout_czech" msgid="1349256901452975343">"ឆេក"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"អេស្តូនី"</string>
+    <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"ហុងគ្រី"</string>
+    <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"អ៊ីស្លង់"</string>
+    <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"ប្រេស៊ីល"</string>
+    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"ព័រទុយហ្គាល់"</string>
+    <string name="keyboard_layout_slovak" msgid="2469379934672837296">"ស្លូវ៉ាគី"</string>
+    <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"ស្លូវ៉ានី"</string>
+    <string name="keyboard_layout_turkish" msgid="7736163250907964898">"ទួរគី"</string>
+    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"អ៊ុយក្រែន"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"អារ៉ាប់"</string>
+    <string name="keyboard_layout_greek" msgid="7289253560162386040">"ក្រិក"</string>
+    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"អ៊ីស្រាអែល"</string>
+    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"លីទុយអានី"</string>
+    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"អេស្ប៉ាញ (ឡាតាំង​)"</string>
+    <string name="keyboard_layout_latvian" msgid="4405417142306250595">"ឡាតវីយ៉ា"</string>
+</resources>
