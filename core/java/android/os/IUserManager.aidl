@@ -82,4 +82,7 @@ interface IUserManager {
     boolean someUserHasSeedAccount(in String accountName, in String accountType);
     boolean isManagedProfile(int userId);
     boolean isDemoUser(int userId);
+    boolean isUserUnlocked(int userId);
+    boolean isUserUnlockingOrUnlocked(int userId);
+    boolean isUserRunning(int userId);
 }
