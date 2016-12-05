@@ -2843,15 +2843,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                     if (mMotionEventInjector != null) {
                         List<GestureDescription.GestureStep> steps = gestureSteps.getList();
-                        List<MotionEvent> events = GestureDescription.MotionEventGenerator
-                                .getMotionEventsFromGestureSteps(steps);
-                        // Confirm that the motion events end with an UP event.
-                        if (events.get(events.size() - 1).getAction() == MotionEvent.ACTION_UP) {
-                            mMotionEventInjector.injectEvents(events, mServiceInterface, sequence);
-                            return;
-                        } else {
-                            Slog.e(LOG_TAG, "Gesture is not well-formed");
-                        }
+                         mMotionEventInjector.injectEvents(steps, mServiceInterface, sequence);
+                         return;
                     } else {
                         Slog.e(LOG_TAG, "MotionEventInjector installation timed out");
                     }
