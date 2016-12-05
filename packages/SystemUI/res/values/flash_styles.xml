@@ -33,6 +33,7 @@
     <!-- Battery meter drawable styles -->
     <style name="BatteryMeterViewDrawable.Portrait"/>
     <style name="BatteryMeterViewDrawable.Landscape"/>
+    <style name="BatteryMeterViewDrawable.Solid"/>
     <style name="BatteryMeterViewDrawable.Circle">
         <item name="blendMode">overlay</item>
     </style>
