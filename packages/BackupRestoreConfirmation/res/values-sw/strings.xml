@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_title" msgid="827563724209303345">"Kuhifadhi kikamilifu"</string>
+    <string name="restore_confirm_title" msgid="5469365809567486602">"Kurejesha kila kitu"</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Ombi la kuhifadhi nakala rudufu kamili za data kwenye eneo kazi la kompyuta iliyounganishwa limewasilishwa. Ungependa shughuli hii ufanyike?\n\n Ikiwa sio wewe uliyewasilisha ombi hili, usikubali shughuli hii iendelee."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Hifadhi nakala ya data yangu"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"Usicheleze"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"Kurejesha kamili kwa data nzima kutoka kwa eneo kazi la kompyuta lililounganishwa limeombwa. Unataka kuruhusu hii kutendeka?\n\n Ikiwa hukuweza kurejesha upya mwenyewe, usiruhusu uendeshaji huu kuendelea. Hii itaweka upya data yoyote iliyo kwenye kifaa hiki sasa!"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"Rejesha upya data yangu"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"Usirejeshe upya"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Tafadhali weka nenosiri unalotumia kuhifadhi nakala hapo chini:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"Tafadhali weka nenosiri la kifaa chako la kusimba kwa njia fiche hapo chini."</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"Tafadhali weka nenosiri lako la kusimba kifaa kwa njia fiche hapo chini. Pia litatumika kusimba kumbukumbu za nakala kwa njia fiche."</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Tafadhali weka nenosiri la kutumia katika kusimba nakala kamili za data kwa njia fiche. Ikiwa sehemu hii itawachwa wazi, nenosiri lako la sasa litatumika:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ikiwa unataka kusimba nakala za data kwa njia fiche, weka nenosiri hapo chini:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Kwa kuwa kifaa chako kimesimbwa kwa njia fiche, unatakiwa usimbe hifadhi rudufu yako kwa njia fiche. Tafadhali weka nenosiri hapo chini:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"Ikiwa data imesimbwa kwa njia fiche, tafadhali weka nenosiri lake hapo chini:"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"Inaanza kuhifadhi..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"Imemaliza kuhifadhi"</string>
+    <string name="toast_restore_started" msgid="7881679218971277385">"Inaanza kurejesha..."</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"Kurejesha kumekamilika"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"Muda wa uendeshaji umeisha"</string>
+</resources>

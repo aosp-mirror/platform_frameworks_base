@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_title" msgid="827563724209303345">"پشتیبان‌گیری کامل"</string>
+    <string name="restore_confirm_title" msgid="5469365809567486602">"بازیابی کامل"</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"درخواست پشتیبان گیری کامل از تمام داده‌ها به یک رایانه دسک‌تاپ متصل داده شده است. آیا می‌خواهید این عمل انجام شود؟\n\nاگر شما درخواست تهیهٔ نسخهٔ پشتیبان را نداده‌اید، اجازه‌ ادامه عملیات را ندهید."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"پشتیبان‌گیری از داده‌های من"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"نسخهٔ پشتیبان تهیه نشود"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"بازیابی کامل تمام داده‌ها از یک رایانه دسک تاپ متصل درخواست شده است. آیا می‌خواهید این اجازه را بدهید؟\n\nاگر خود شما درخواست بازیابی نداده‌اید، اجازه ادامه این عملیات را ندهید. با این کار همه داده‌هایی که اکنون روی دستگاه است جایگزین می‌شود!"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"بازیابی داده‌های من"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"بازیابی نشود"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"لطفاً گذرواژه نسخهٔ پشتیبان فعلی خود را در زیر وارد کنید:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"لطفاً گذرواژه رمزگذاری دستگاه خود را در زیر وارد کنید."</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"لطفاً گذرواژه رمزگذاری دستگاه خود را در زیر وارد کنید. این برای رمزگذاری بایگانی پشتیبان نیز مورد استفاده قرار می‌گیرد."</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"لطفاً یک گذرواژه برای رمزگذاری داده‌های کامل نسخهٔ پشتیبانی وارد کنید. اگر این خالی بماند، گذرواژه فعلی نسخهٔ پشتیبان مورد استفاده قرار خواهد گرفت:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"اگر می‌خواهید تمام نسخه پشتیبانی داده را رمزدار کنید، یک گذرواژه در زیر وارد کنید:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"چون دستگاهتان رمز‌گذاری شده است، باید نسخه پشتیبان خودتان را رمزگذاری کنید. لطفاً گذرواژه‌ای را در زیر وارد کنید:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"اگر داده بازیابی شده رمزگذاری شده است، لطفاً گذرواژه را در زیر وارد کنید:"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"شروع پشتیبان‌گیری..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"پشتیبان‌گیری پایان یافت"</string>
+    <string name="toast_restore_started" msgid="7881679218971277385">"شروع بازیابی..."</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"بازیابی پایان یافت"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"مهلت عملیات تمام شد"</string>
+</resources>
