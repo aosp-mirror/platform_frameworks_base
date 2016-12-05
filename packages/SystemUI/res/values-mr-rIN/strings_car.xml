@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2016, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"सुरक्षितपणे वाहन चालवा"</string>
+    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"वाहन चालविण्‍याच्या शर्तींची पूर्णपणे माहिती असू द्या आणि नेहमी लागू असलेल्या कायद्यांचे पालन करा. दिशानिर्देश कदाचित चुकीचे, अपूर्ण, धोकादायक, अनुकूल नसलेले, प्रतिबंधित किंवा प्रशासकीय क्षेत्रांना ओलांडणारे असू शकतात. व्यवसाय माहिती देखील चुकीची किंवा अपूर्ण असू शकते. डेटा हा रिअल-टाइम नसतो आणि स्थान अचूकतेची हमी दिली जाऊ शकत नाही. वाहन चालविताना Android Auto च्या उद्देशासाठी नसलेले आपले मोबाईल डिव्हाइस हाताळू नका किंवा अॅप्स वापरू नका."</string>
+</resources>

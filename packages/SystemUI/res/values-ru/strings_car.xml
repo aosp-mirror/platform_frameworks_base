@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2016, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Безопасность движения"</string>
+    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Всегда учитывайте дорожную обстановку и соблюдайте правила. Маршруты могут быть неточными, неполными, проходить по опасным, неподходящим или запрещенным для движения участкам или пересекать границы. Сведения об организациях также могут быть неточными и неполными. Данные не обновляются в режиме реального времени, и точность определения местоположения не гарантируется. Не пользуйтесь мобильным устройством и не используйте приложения, не предназначенные для Android Auto, управляя автомобилем."</string>
+</resources>

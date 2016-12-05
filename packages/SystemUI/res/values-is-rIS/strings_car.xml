@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2016, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Aktu varlega"</string>
+    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Vertu vakandi fyrir akstursskilyrðum hverju sinni og farðu ævinlega eftir gildandi lögum. Leiðarlýsing kann að vera ónákvæm, ófullkomin, ekki við hæfi, bönnuð eða fela í sér ferðir um opinber svæði. Upplýsingar um fyrirtæki kunna einnig að vera ónákvæmar eða ófullkomnar. Gögn eru ekki í rauntíma og ekki er hægt að tryggja nákvæmni staðsetningarupplýsinga. Ekki handleika fartækið þitt meðan á akstri stendur eða nota forrit sem ekki eru hugsuð fyrir Android Auto."</string>
+</resources>
