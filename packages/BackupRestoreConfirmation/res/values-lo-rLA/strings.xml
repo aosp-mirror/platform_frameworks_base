@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_title" msgid="827563724209303345">"ສຳຮອງຂໍ້ມູນເຕັມຮູບແບບ"</string>
+    <string name="restore_confirm_title" msgid="5469365809567486602">"ກູ້ຂໍ້ມູນເຕັມຮູບແບບ"</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"ມີການຮ້ອງຂໍໃຫ້ສຳຮອງຂໍ້ມູນທັງໝົດ ໄປໃສ່ຄອມພິວເຕີຕັ້ງໂຕະທີ່ເຊື່ອມຕໍ່ຢູ່. ທ່ານຈະອະນຸມັດໃຫ້ດຳເນີນການຫຼືບໍ່?\n\nຫາກທ່ານບໍ່ໄດ້ຮ້ອງຂໍໃຫ້ສຳຮອງຂໍ້ມູນດ້ວຍຕົນເອງ, ກະລຸນາຢ່າອະນຸຍາດໃຫ້ດຳເນີນການຕໍ່ໄປ."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"ສຳຮອງຂໍ້ມູນຂອງຂ້ອຍ"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"ບໍ່ໃຫ້ສຳຮອງຂໍ້ມູນ"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"ການກູ້ຂໍ້ມູນທັງໝົດຈາກຄອມພິວເຕີທີ່ເຊື່ອມຕໍ່ຢູ່ນັ້ນຖືກຮ້ອງຂໍແລ້ວ. ທ່ານຕ້ອງການອະນຸຍາດໃຫ້ການກະທຳນີ້ເກີດຂຶ້ນບໍ່?\n\nຫາກທ່ານບໍ່ໄດ້ເຮັດການຮ້ອງຂໍ້ການກູ້ຂໍ້ມູນດ້ວຍໂຕທ່ານເອງ, ທ່ານບໍ່ຄວນອະນຸຍາດໃຫ້ມີການດຳເນີນການໃດໆ ເນື່ອງຈາກມັນຈະໄປຂຽນທັບຂໍ້ມູນທັງໝົດທີ່ຢູ່ໃນອຸປະກອນ!"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"ກູ້ຄືນຂໍ້ມູນຂອງຂ້ອຍ"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"ບໍ່ໃຫ້ກູ້ຄືນ"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"ກະລຸນາປ້ອນລະຫັດຜ່ານການສຳຮອງຂໍ້ມູນທີ່ທ່ານໃຊ້ຢູ່ໃສ່ດ້ານລຸ່ມ:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"ກະລຸນາປ້ອນລະຫັດຜ່ານການເຂົ້າລະຫັດອຸປະກອນຂອງທ່ານໃສ່ດ້ານລຸ່ມ."</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"ກະລຸນາປ້ອນລະຫັດຜ່ານການເຂົ້າລະຫັດອຸປະກອນຂອງທ່ານໃສ່ດ້ານລຸ່ມ. ລະຫັດນີ້ຍັງຈະໃຊ້ເພື່ອເຂົ້າລະຫັດຂໍ້ມູນທີ່ສຳຮອງໄວ້."</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"ກະລຸນາປ້ອນລະຫັດຜ່ານ ເພື່ອໃຊ້ໃນການເຂົ້າລະຫັດການສຳຮອງຂໍ້ມູນເຕັມຮູບແບບ. ຖ້າປ່ອຍໃຫ້ເປົ່າຫວ່າງໄວ້, ລະຫັດຜ່ານສຳຮອງຂໍ້ມູນທີ່ທ່ານໃຊ້ຢູ່ຈະຖືກນຳໃຊ້ແທນ:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"ຫາກທ່ານຕ້ອງການທີ່ຈະເຂົ້າລະຫັດໃຫ້ກັບການສຳຮອງຂໍ້ມູນທັງໝົດ, ກະລຸນາໃສ່ລະຫັດທາງລຸ່ມນີ້:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"ເນື່ອງ​ຈາກ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຖືກ​ເຂົ້າ​ລະ​ຫັດ​ໄວ້, ທ່ານ​ຈຶ່ງ​ຕ້ອງ​ເຂົ້າ​ລະ​ຫັດ​ການ​ສຳ​ຮອງ​ຂໍ້​ມູນ​ຂອງ​ທ່ານ. ກະ​ລຸ​ນາ​ລະ​ບຸ​ລະ​ຫັດ​ຜ່ານ​ດ້ານ​ລຸ່ມ:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"ຫາກຂໍ້ມູນສຳຮອງຖືກເຂົ້າລະຫັດໄວ້, ກະລຸນາໃສ່ລະຫັດຜ່ານທາງດ້ານລຸ່ມນີ້:"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"ກຳລັງເລີ່ມການສຳຮອງຂໍ້ມູນ..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"ສຳຮອງຂໍ້ມູນສຳເລັດແລ້ວ"</string>
+    <string name="toast_restore_started" msgid="7881679218971277385">"ການກູ້ຂໍ້ມູນກຳລັງຈະເລີ່ມ..."</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"ການກູ້ຂໍ້ມູນສິ້ນສຸດແລ້ວ"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"ໝົດເວລາປະຕິບັດການ"</string>
+</resources>

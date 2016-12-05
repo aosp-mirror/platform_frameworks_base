@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_title" msgid="827563724209303345">"Copiere de rezervă completă"</string>
+    <string name="restore_confirm_title" msgid="5469365809567486602">"Restabilire completă"</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"S-a solicitat crearea unei copii de rezervă complete a tuturor datelor pe un computer desktop conectat. Doriți să permiteți acest lucru?\n\nDacă nu ați solicitat dvs. copierea de rezervă, nu permiteți ca operațiunea să continue."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Faceți backup pentru date"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"Nu creați copii de rezervă"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"S-a solicitat o restabilire completă a tuturor datelor de pe un computer desktop conectat. Doriți să permiteți acest lucru?\n\nDacă nu dvs. ați solicitat această restabilire, nu permiteți continuarea operațiunii. Acest proces va înlocui toate datele existente în prezent pe dispozitiv!"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"Restabiliți datele dvs."</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"Nu restabiliți"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Introduceți mai jos parola actuală pentru copia de rezervă:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"Introduceți mai jos parola pentru criptarea dispozitivului."</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"Introduceți mai jos parola de criptare a dispozitivului. Aceasta va fi utilizată, de asemenea, pentru a cripta arhiva copiei de rezervă."</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Introduceți o parolă pentru a o utiliza la criptarea datelor copiei de rezervă complete. Dacă acest câmp rămâne necompletat, pentru copierea de rezervă se va utiliza parola dvs. actuală."</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Dacă doriți să criptați datele copiei de rezervă complete, introduceți o parolă mai jos:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Întrucât dispozitivul este criptat, trebuie să criptați backupurile. Introduceți o parolă mai jos:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"Dacă datele pentru restabilire sunt criptate, introduceți parola mai jos:"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"Se începe copierea de rezervă..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"Copierea de rezervă a fost finalizată"</string>
+    <string name="toast_restore_started" msgid="7881679218971277385">"Se pornește restabilirea..."</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"Restabilirea s-a încheiat"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"Operația a expirat"</string>
+</resources>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_title" msgid="827563724209303345">"Пълно резервно копие"</string>
+    <string name="restore_confirm_title" msgid="5469365809567486602">"Пълно възстановяване"</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Бе поискано пълно резервно копие на всичките данни до свързан настолен компютър. Искате ли да разрешите това?\n\nАко не сте заявили създаването на копие, не позволявайте операцията да продължи."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Резервно копие на данните ми"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"Без резервно копие"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"Бе поискано пълно възстановяване на всичките данни от свързан настолен компютър. Искате ли да разрешите това?\n\nАко не сте заявили възстановяването, не позволявайте операцията да продължи. Това ще замести данните, които понастоящем са в устройството!"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"Възстановяване на данните ми"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"Без възстановяване"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Моля, въведете текущата си парола за резервно копие по-долу:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"Моля, въведете паролата си за шифроване на устройството по-долу."</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"Моля, въведете паролата си за шифроване на устройството по-долу. Тя ще се използва и за шифроване на резервното копие на архива."</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Моля, въведете парола, която да използвате за шифроване на пълното резервно копие на данните. Ако не е попълнена, ще бъде използвана текущата ви парола за резервно копие:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ако искате да шифровате пълното резервно копие на данните, въведете парола по-долу:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Тъй като устройството ви е шифровано, трябва да направите това и за резервното си копие. Моля, по-долу въведете парола:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"Ако възстановените данни са шифровани, моля, въведете паролата по-долу:"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"Създаването на резервно копие се стартира..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"Създаването на резервно копие завърши"</string>
+    <string name="toast_restore_started" msgid="7881679218971277385">"Възстановяването се стартира..."</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"Възстановяването завърши"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"Времето за изчакване на операцията изтече"</string>
+</resources>
