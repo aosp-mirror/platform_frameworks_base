@@ -18,25 +18,18 @@ package com.android.server.wm;
 
 import java.util.Comparator;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
-import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Slog;
-import android.view.DisplayInfo;
-import android.view.animation.Animation;
 
 import java.io.PrintWriter;
 
@@ -58,8 +51,8 @@ class WindowToken extends WindowContainer<WindowState> {
     final int windowType;
 
     // Set if this token was explicitly added by a client, so should
-    // not be removed when all windows are removed.
-    final boolean explicit;
+    // persist (not be removed) when all windows are removed.
+    boolean mPersistOnEmpty;
 
     // For printing.
     String stringName;
@@ -104,27 +97,28 @@ class WindowToken extends WindowContainer<WindowState> {
         return isFirstChildWindowGreaterThanSecond(newWindow, existingWindow) ? 1 : -1;
     };
 
-    WindowToken(WindowManagerService service, IBinder _token, int type, boolean _explicit,
+    WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
             DisplayContent dc) {
         mService = service;
         token = _token;
         windowType = type;
-        explicit = _explicit;
+        mPersistOnEmpty = persistOnEmpty;
         onDisplayChanged(dc);
     }
 
-    void removeAllWindows() {
+    void removeAllWindowsIfPossible() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowState win = mChildren.get(i);
-            if (DEBUG_WINDOW_MOVEMENT) Slog.w(TAG_WM, "removeAllWindows: removing win=" + win);
+            if (DEBUG_WINDOW_MOVEMENT) Slog.w(TAG_WM,
+                    "removeAllWindowsIfPossible: removing win=" + win);
             win.removeIfPossible();
-            if (mChildren.contains(win)) {
-                removeChild(win);
-            }
         }
     }
 
     void setExiting() {
+        // This token is exiting, so allow it to be removed when it no longer contains any windows.
+        mPersistOnEmpty = false;
+
         if (hidden) {
             return;
         }
@@ -297,16 +291,8 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     void onDisplayChanged(DisplayContent dc) {
-        if (mDisplayContent == dc) {
-            return;
-        }
-
-        if (mDisplayContent != null) {
-            mDisplayContent.removeWindowToken(token);
-        }
+        dc.reParentWindowToken(this);
         mDisplayContent = dc;
-        mDisplayContent.setWindowToken(token, this);
-
         super.onDisplayChanged(dc);
     }
 

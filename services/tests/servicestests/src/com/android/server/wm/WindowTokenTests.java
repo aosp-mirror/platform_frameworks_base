@@ -16,24 +16,19 @@
 
 package com.android.server.wm;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import android.content.Context;
-import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.IWindow;
-import android.view.WindowManager;
 
-import static android.app.AppOpsManager.OP_NONE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -51,7 +46,7 @@ public class WindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testAddWindow() throws Exception {
-        final TestWindowToken token = new TestWindowToken();
+        final TestWindowToken token = new TestWindowToken(0, sDisplayContent);
 
         assertEquals(0, token.getWindowsCount());
 
@@ -80,15 +75,13 @@ public class WindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testChildRemoval() throws Exception {
-        final TestWindowToken token = new TestWindowToken();
-        final DisplayContent dc = sWm.getDefaultDisplayContentLocked();
+        final DisplayContent dc = sDisplayContent;
+        final TestWindowToken token = new TestWindowToken(0, dc);
 
         assertEquals(token, dc.getWindowToken(token.token));
 
         final WindowState window1 = createWindow(null, TYPE_APPLICATION, token, "window1");
         final WindowState window2 = createWindow(null, TYPE_APPLICATION, token, "window2");
-        token.addWindow(window1);
-        token.addWindow(window2);
 
         window2.removeImmediately();
         // The token should still be mapped in the display content since it still has a child.
@@ -102,16 +95,12 @@ public class WindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testAdjustAnimLayer() throws Exception {
-        final TestWindowToken token = new TestWindowToken();
+        final TestWindowToken token = new TestWindowToken(0, sDisplayContent);
         final WindowState window1 = createWindow(null, TYPE_APPLICATION, token, "window1");
         final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, token, "window11");
         final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, token, "window12");
         final WindowState window2 = createWindow(null, TYPE_APPLICATION, token, "window2");
         final WindowState window3 = createWindow(null, TYPE_APPLICATION, token, "window3");
-
-        token.addWindow(window1);
-        token.addWindow(window2);
-        token.addWindow(window3);
 
         final int adj = 50;
         final int window2StartLayer = window2.mLayer = 100;
@@ -126,19 +115,39 @@ public class WindowTokenTests extends WindowTestsBase {
         assertEquals(window3StartLayer + adj, highestLayer);
     }
 
-    /* Used so we can gain access to some protected members of the {@link WindowToken} class */
-    private class TestWindowToken extends WindowToken {
+    /**
+     * Test that a window token isn't orphaned by the system when it is requested to be removed.
+     * Tokens should only be removed from the system when all their windows are gone.
+     */
+    @Test
+    public void testTokenRemovalProcess() throws Exception {
+        final TestWindowToken token =
+                new TestWindowToken(TYPE_TOAST, sDisplayContent, true /* persistOnEmpty */);
 
-        TestWindowToken() {
-            super(sWm, mock(IBinder.class), 0, false, sWm.getDefaultDisplayContentLocked());
-        }
+        // Verify that the token is on the display
+        assertNotNull(sDisplayContent.getWindowToken(token.token));
 
-        int getWindowsCount() {
-            return mChildren.size();
-        }
+        final WindowState window1 = createWindow(null, TYPE_TOAST, token, "window1");
+        final WindowState window2 = createWindow(null, TYPE_TOAST, token, "window2");
 
-        boolean hasWindow(WindowState w) {
-            return mChildren.contains(w);
-        }
+        sDisplayContent.removeWindowToken(token.token);
+        // Verify that the token is no longer mapped on the display
+        assertNull(sDisplayContent.getWindowToken(token.token));
+        // Verify that the token is still attached to its parent
+        assertNotNull(token.getParent());
+        // Verify that the token windows are still around.
+        assertEquals(2, token.getWindowsCount());
+
+        window1.removeImmediately();
+        // Verify that the token is still attached to its parent
+        assertNotNull(token.getParent());
+        // Verify that the other token window is still around.
+        assertEquals(1, token.getWindowsCount());
+
+        window2.removeImmediately();
+        // Verify that the token is no-longer attached to its parent
+        assertNull(token.getParent());
+        // Verify that the token windows are no longer attached to it.
+        assertEquals(0, token.getWindowsCount());
     }
 }
