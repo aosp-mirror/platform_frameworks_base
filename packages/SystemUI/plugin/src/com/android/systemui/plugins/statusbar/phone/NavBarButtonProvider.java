@@ -44,7 +44,7 @@ public interface NavBarButtonProvider extends Plugin {
 
         void abortCurrentGesture();
 
-        void setLandscape(boolean landscape);
+        void setVertical(boolean vertical);
 
         void setCarMode(boolean carMode);
     }
