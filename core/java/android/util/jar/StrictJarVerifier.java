@@ -17,7 +17,7 @@
 
 package android.util.jar;
 
-import java.io.ByteArrayInputStream;
+import android.util.apk.ApkSignatureSchemeV2Verifier;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -33,13 +33,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
-import android.util.ArraySet;
-import android.util.apk.ApkSignatureSchemeV2Verifier;
-import libcore.io.Base64;
 import sun.security.jca.Providers;
 import sun.security.pkcs.PKCS7;
 import sun.security.pkcs.SignerInfo;
@@ -139,7 +135,7 @@ class StrictJarVerifier {
          */
         void verify() {
             byte[] d = digest.digest();
-            if (!MessageDigest.isEqual(d, Base64.decode(hash))) {
+            if (!verifyMessageDigest(d, hash)) {
                 throw invalidDigest(JarFile.MANIFEST_NAME, name, name);
             }
             verifiedEntries.put(name, certChains);
@@ -490,10 +486,20 @@ class StrictJarVerifier {
                 md.update(data, start, end - start);
             }
             byte[] b = md.digest();
-            byte[] hashBytes = hash.getBytes(StandardCharsets.ISO_8859_1);
-            return MessageDigest.isEqual(b, Base64.decode(hashBytes));
+            byte[] encodedHashBytes = hash.getBytes(StandardCharsets.ISO_8859_1);
+            return verifyMessageDigest(b, encodedHashBytes);
         }
         return ignorable;
+    }
+
+    private static boolean verifyMessageDigest(byte[] expected, byte[] encodedActual) {
+        byte[] actual;
+        try {
+            actual = java.util.Base64.getDecoder().decode(encodedActual);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return MessageDigest.isEqual(expected, actual);
     }
 
     /**
