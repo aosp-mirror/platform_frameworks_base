@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
+    <string name="action_use_network" msgid="6076184727448466030">"Hálózat használata jelen állapotában"</string>
+    <string name="action_do_not_use_network" msgid="4577366536956516683">"Ne használja ezt a hálózatot"</string>
+    <string name="action_bar_label" msgid="917235635415966620">"Bejelentkezés a hálózatba"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Biztonsági problémák vannak azzal a hálózattal, amelyhez csatlakozni szeretne."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Például lehet, hogy a bejelentkezési oldal nem a megjelenített szervezethez tartozik."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Folytatás ennek ellenére böngészőn keresztül"</string>
+</resources>
