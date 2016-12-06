@@ -31,6 +31,10 @@ public class StackViewState extends ViewState {
     public static final int LOCATION_BOTTOM_STACK_HIDDEN = 0x10;
     /** The view isn't layouted at all. */
     public static final int LOCATION_GONE = 0x40;
+    /**
+     * The visible locations of a view.
+     */
+    public static final int VISIBLE_LOCATIONS = LOCATION_FIRST_HUN | LOCATION_MAIN_AREA;
 
     public int height;
     public boolean dimmed;

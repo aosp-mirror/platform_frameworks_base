@@ -75,6 +75,7 @@ import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -92,7 +93,7 @@ import java.util.HashSet;
 public class NotificationStackScrollLayout extends ViewGroup
         implements SwipeHelper.Callback, ExpandHelper.Callback, ScrollAdapter,
         ExpandableView.OnHeightChangedListener, NotificationGroupManager.OnGroupChangeListener,
-        SettingsIconRowListener, ScrollContainer {
+        SettingsIconRowListener, ScrollContainer, VisibilityLocationProvider {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -536,21 +537,19 @@ public class NotificationStackScrollLayout extends ViewGroup
         mListener = listener;
     }
 
-    /**
-     * Returns the location the given child is currently rendered at.
-     *
-     * @param child the child to get the location for
-     * @return one of {@link StackViewState}'s <code>LOCATION_*</code> constants
-     */
-    public int getChildLocation(View child) {
-        StackViewState childViewState = mCurrentStackScrollState.getViewStateForView(child);
+    @Override
+    public boolean isInVisibleLocation(ExpandableNotificationRow row) {
+        StackViewState childViewState = mCurrentStackScrollState.getViewStateForView(row);
         if (childViewState == null) {
-            return StackViewState.LOCATION_UNKNOWN;
+            return false;
         }
-        if (childViewState.gone) {
-            return StackViewState.LOCATION_GONE;
+        if ((childViewState.location &= StackViewState.VISIBLE_LOCATIONS) == 0) {
+            return false;
         }
-        return childViewState.location;
+        if (row.getVisibility() != View.VISIBLE) {
+            return false;
+        }
+        return true;
     }
 
     private void setMaxLayoutHeight(int maxLayoutHeight) {
@@ -4581,5 +4580,4 @@ public class NotificationStackScrollLayout extends ViewGroup
             return length;
         }
     }
-
 }
