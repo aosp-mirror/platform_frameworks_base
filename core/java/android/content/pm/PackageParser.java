@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 
@@ -39,6 +40,9 @@ import android.os.FileUtils;
 import android.os.PatternMatcher;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.system.ErrnoException;
+import android.system.OsConstants;
+import android.system.StructStat;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -54,6 +58,8 @@ import android.util.jar.StrictJarFile;
 import android.view.Gravity;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -259,6 +265,7 @@ public class PackageParser {
     private String[] mSeparateProcesses;
     private boolean mOnlyCoreApps;
     private DisplayMetrics mMetrics;
+    private File mCacheDir;
 
     private static final int SDK_VERSION = Build.VERSION.SDK_INT;
     private static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
@@ -451,6 +458,13 @@ public class PackageParser {
 
     public void setDisplayMetrics(DisplayMetrics metrics) {
         mMetrics = metrics;
+    }
+
+    /**
+     * Sets the cache directory for this package parser.
+     */
+    public void setCacheDir(File cacheDir) {
+        mCacheDir = cacheDir;
     }
 
     public static final boolean isApkFile(File file) {
@@ -806,13 +820,154 @@ public class PackageParser {
      * Note that this <em>does not</em> perform signature verification; that
      * must be done separately in {@link #collectCertificates(Package, int)}.
      *
+     * If {@code useCaches} is true, the package parser might return a cached
+     * result from a previous parse of the same {@code packageFile} with the same
+     * {@code flags}. Note that this method does not check whether {@code packageFile}
+     * has changed since the last parse, it's up to callers to do so.
+     *
      * @see #parsePackageLite(File, int)
      */
-    public Package parsePackage(File packageFile, int flags) throws PackageParserException {
+    public Package parsePackage(File packageFile, int flags, boolean useCaches)
+            throws PackageParserException {
+        Package parsed = useCaches ? getCachedResult(packageFile, flags) : null;
+        if (parsed != null) {
+            return parsed;
+        }
+
         if (packageFile.isDirectory()) {
-            return parseClusterPackage(packageFile, flags);
+            parsed = parseClusterPackage(packageFile, flags);
         } else {
-            return parseMonolithicPackage(packageFile, flags);
+            parsed = parseMonolithicPackage(packageFile, flags);
+        }
+
+        cacheResult(packageFile, flags, parsed);
+
+        return parsed;
+    }
+
+    /**
+     * Equivalent to {@link #parsePackage(File, int, boolean)} with {@code useCaches == false}.
+     */
+    public Package parsePackage(File packageFile, int flags) throws PackageParserException {
+        return parsePackage(packageFile, flags, false /* useCaches */);
+    }
+
+    /**
+     * Returns the cache key for a specificied {@code packageFile} and {@code flags}.
+     */
+    private String getCacheKey(File packageFile, int flags) {
+        StringBuilder sb = new StringBuilder(packageFile.getName());
+        sb.append('-');
+        sb.append(flags);
+
+        return sb.toString();
+    }
+
+    @VisibleForTesting
+    protected Package fromCacheEntry(byte[] bytes) throws IOException {
+        return null;
+    }
+
+    @VisibleForTesting
+    protected byte[] toCacheEntry(Package pkg) throws IOException {
+        return null;
+    }
+
+    /**
+     * Given a {@code packageFile} and a {@code cacheFile} returns whether the
+     * cache file is up to date based on the mod-time of both files.
+     */
+    private static boolean isCacheUpToDate(File packageFile, File cacheFile) {
+        try {
+            // NOTE: We don't use the File.lastModified API because it has the very
+            // non-ideal failure mode of returning 0 with no excepions thrown.
+            // The nio2 Files API is a little better but is considerably more expensive.
+            final StructStat pkg = android.system.Os.stat(packageFile.getAbsolutePath());
+            final StructStat cache = android.system.Os.stat(cacheFile.getAbsolutePath());
+            return pkg.st_mtime < cache.st_mtime;
+        } catch (ErrnoException ee) {
+            // The most common reason why stat fails is that a given cache file doesn't
+            // exist. We ignore that here. It's easy to reason that it's safe to say the
+            // cache isn't up to date if we see any sort of exception here.
+            //
+            // (1) Exception while stating the package file : This should never happen,
+            // and if it does, we do a full package parse (which is likely to throw the
+            // same exception).
+            // (2) Exception while stating the cache file : If the file doesn't exist, the
+            // cache is obviously out of date. If the file *does* exist, we can't read it.
+            // We will attempt to delete and recreate it after parsing the package.
+            if (ee.errno != OsConstants.ENOENT) {
+                Slog.w("Error while stating package cache : ", ee);
+            }
+
+            return false;
+        }
+    }
+
+    /**
+     * Returns the cached parse result for {@code packageFile} for parse flags {@code flags},
+     * or {@code null} if no cached result exists.
+     */
+    private Package getCachedResult(File packageFile, int flags) {
+        if (mCacheDir == null) {
+            return null;
+        }
+
+        final String cacheKey = getCacheKey(packageFile, flags);
+        final File cacheFile = new File(mCacheDir, cacheKey);
+
+        // If the cache is not up to date, return null.
+        if (!isCacheUpToDate(packageFile, cacheFile)) {
+            return null;
+        }
+
+        try {
+            final byte[] bytes = IoUtils.readFileAsByteArray(cacheFile.getAbsolutePath());
+            return fromCacheEntry(bytes);
+        } catch (IOException ioe) {
+            Slog.w(TAG, "Error reading package cache: ", ioe);
+
+            // If something went wrong while reading the cache entry, delete the cache file
+            // so that we regenerate it the next time.
+            cacheFile.delete();
+            return null;
+        }
+    }
+
+    /**
+     * Caches the parse result for {@code packageFile} with flags {@code flags}.
+     */
+    private void cacheResult(File packageFile, int flags, Package parsed) {
+        if (mCacheDir == null) {
+            return;
+        }
+
+        final String cacheKey = getCacheKey(packageFile, flags);
+        final File cacheFile = new File(mCacheDir, cacheKey);
+
+        if (cacheFile.exists()) {
+            if (!cacheFile.delete()) {
+                Slog.e(TAG, "Unable to delete cache file: " + cacheFile);
+            }
+        }
+
+        final byte[] cacheEntry;
+        try {
+            cacheEntry = toCacheEntry(parsed);
+        } catch (IOException ioe) {
+            Slog.e(TAG, "Unable to serialize parsed package for: " + packageFile);
+            return;
+        }
+
+        if (cacheEntry == null) {
+            return;
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(cacheFile)) {
+            fos.write(cacheEntry);
+        } catch (IOException ioe) {
+            Slog.w(TAG, "Error writing cache entry.", ioe);
+            cacheFile.delete();
         }
     }
 
