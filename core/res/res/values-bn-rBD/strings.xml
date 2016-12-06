@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"আপনার হস্তক্ষেপ ছাড়াই কল করতে অ্যাপ্লিকেশানটিকে IMS পরিষেবা ব্যবহারের অনুমতি দিন৷"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ফোনের স্থিতি এবং পরিচয় পড়ুন"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"অ্যাপ্লিকেশানটিকে ডিভাইসের ফোন বৈশিষ্ট্যগুলিকে অ্যাক্সেস করার অনুমতি দেয়৷ এই অনুমতিটি অ্যাপ্লিকেশানটিকে একটি কল সক্রিয় থাকা অবস্থায় এবং দূরবর্তী নম্বর একটি কল দ্বারা সংযুক্ত থাকাকালীনও ফোন নম্বর এবং ডিভাইসের IDগুলি নির্ধারণ করার অনুমতি দেয়৷"</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"অ্যাপটিকে ফোন নম্বর পড়ার অনুমতি দিন"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"অ্যাপটিকে এই ডিভাইসের ফোন নম্বর অ্যাক্সেস করার মঞ্জুরি দেয়"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ঘুমানো থেকে ট্যাবলেটকে প্রতিরোধ করে"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"টিভিকে নিদ্রায় যাওয়া থেকে প্রতিরোধ করে"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ঘুমানো থেকে ফোনটিকে প্রতিরোধ করে"</string>
@@ -605,7 +607,7 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"রেডিও"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"টেলেক্স"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"কার্যক্ষেত্রের মোবাইল"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"অফিসের মোবাইল"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"কার্যক্ষেত্রের পেজার"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"সহায়ক"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
@@ -1059,16 +1061,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"মিডিয়ার ভলিউম"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"বিজ্ঞপ্তির ভলিউম"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"ডিফল্ট রিংটোন"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"ডিফল্ট (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"কোনো কিছুই নয়"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"রিংটোনগুলি"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"অ্যালার্মের শব্দ"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"বিজ্ঞপ্তির শব্দ"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"অজানা"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="one">ওয়াই-ফাই নেটওয়ার্কগুলি উপলব্ধ রয়েছে</item>
       <item quantity="other">ওয়াই-ফাই নেটওয়ার্কগুলি উপলব্ধ রয়েছে</item>
@@ -1564,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"বছর নির্বাচন করুন"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> মুছে ফেলা হয়েছে"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"কর্মক্ষেত্র <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"দ্বিতীয় কার্যক্ষেত্রের <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"তৃতীয় কার্যক্ষেত্রের <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"এই স্ক্রীনটিকে আনপিন করতে, \'ফিরুন\' স্পর্শ করুন এবং ধরে রাখুন৷"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"অ্যাপ্লিকেশান পিন করা আছে: এই ডিভাইস এটিকে পিনমুক্ত করা মঞ্জুরিপ্রাপ্ত নয়৷"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"স্ক্রীন পিন করা হয়েছে"</string>
@@ -1687,6 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"এখনই পুনরায় সেট করুন"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"অক্ষম করা <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"কনফারেন্স কল"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
     <skip />
 </resources>

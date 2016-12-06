@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"允許應用程式自行使用 IMS 服務撥打電話。"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"讀取手機狀態和識別碼"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"允許應用程式使用裝置的電話功能。這項權限允許應用程式確定手機號碼和裝置編號、是否正在通話中，以及所撥打的對方號碼。"</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"讀取電話號碼"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"允許應用程式存取裝置的電話號碼。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"防止平板電腦進入休眠狀態"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"阻止電視進入休眠狀態"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"防止手機進入休眠狀態"</string>
@@ -646,7 +648,7 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"同居伴侶"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"父親"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"朋友"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"管理員"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"主管"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"母親"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"父母"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"夥伴"</string>
@@ -1059,16 +1061,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"媒體音量"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"通知音量"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"預設鈴聲"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"預設 (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"無"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"鈴聲"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"鬧鐘音效"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"通知音效"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"不明"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">有可用的 Wi-Fi 網絡</item>
       <item quantity="one">有可用的 Wi-Fi 網絡</item>
@@ -1564,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"選取年份"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 已刪除"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"第二個工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"第三個工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"如要取消固定這個畫面，請按住 [返回]。"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"應用程式已固定：不允許在此裝置上取消固定。"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"螢幕已固定"</string>
@@ -1687,6 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"立即重設"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"「<xliff:g id="LABEL">%1$s</xliff:g>」已停用"</string>
     <string name="conference_call" msgid="3751093130790472426">"會議通話"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
     <skip />
 </resources>

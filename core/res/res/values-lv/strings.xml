@@ -380,6 +380,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Ļauj lietotnei izmantot tūlītējās ziņojumapmaiņas pakalpojumu, lai veiktu zvanus bez jūsu ziņas."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lasīt tālruņa statusu un identitāti"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ļauj lietotnei piekļūt ierīces tālruņa funkcijām. Ar šo atļauju lietotne var noteikt tālruņa numuru un ierīču ID, zvana statusu un attālo numuru, ar ko ir izveidots savienojums, veicot zvanu."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"lasīt tālruņa numuru"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Ļauj lietotnei piekļūt ierīces tālruņa numuram."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"novērst planšetdatora pāriešanu miega režīmā"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"novērst televizora pāreju miega režīmā"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"novērst tālruņa pāriešanu miega režīmā"</string>
@@ -1082,16 +1084,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Multivides skaļums"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Paziņojumu skaļums"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Noklusējuma zvana signāls"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Noklusējuma (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Nav"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Zvana signāli"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Modinātāja signāla skaņas"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Paziņojumu skaņas"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"Nezināms"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="zero">Pieejami Wi-Fi tīkli</item>
       <item quantity="one">Pieejami Wi-Fi tīkli</item>
@@ -1591,10 +1589,8 @@
     <string name="select_year" msgid="7952052866994196170">"Atlasiet gadu."</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> tika dzēsts."</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Darbā: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. darba profils: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. darba profils: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Lai atspraustu šo ekrānu, pieskarieties pogai “Atpakaļ” un turiet to."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Lietotne ir piesprausta. Atspraušana šajā ierīcē nav atļauta."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrāns ir piesprausts"</string>
@@ -1723,6 +1719,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Atiestatīt tūlīt"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> atspējots"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferences zvans"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
     <skip />
 </resources>

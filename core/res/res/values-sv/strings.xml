@@ -82,10 +82,10 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Avvisande av oönskade irriterande samtal"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Leverans av nummer för inkommande samtal"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Stör ej"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Nummerpresentatören är begränsad som standard. Nästa samtal: Begränsad"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Nummerpresentatörens standardinställning är begränsad. Nästa samtal: Inte begränsad"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Nummerpresentatörens standardinställning är inte begränsad. Nästa samtal: Begränsad"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Nummerpresentatörens standardinställning är inte begränsad. Nästa samtal: Inte begränsad"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Nummerpresentatören är blockerad som standard. Nästa samtal: Blockerad"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Nummerpresentatörens standardinställning är blockerad. Nästa samtal: Inte blockerad"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Nummerpresentatörens standardinställning är inte blockerad. Nästa samtal: Blockerad"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Nummerpresentatörens standardinställning är inte blockerad. Nästa samtal: Inte blockerad"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Tjänsten är inte etablerad."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Det går inte att ändra inställningen för nummerpresentatör."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Datatjänsten är blockerad."</string>
@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Tillåter att appen använder tjänsten för snabbmeddelanden för att ringa samtal utan åtgärd från dig."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"läsa telefonens status och identitet"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Tillåter att appen kommer åt enhetens telefonfunktioner. Med den här behörigheten tillåts appen att identifiera mobilens telefonnummer och enhets-ID, om ett samtal pågår och vilket nummer samtalet är kopplat till."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"läsa telefonnumret"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Ger appen åtkomst till mobilnumret på enheten."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"förhindra att surfplattan går in i viloläge"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"förhindra att TV:n försätts i viloläge"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"förhindra att telefonen sätts i viloläge"</string>
@@ -650,7 +652,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Mamma"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Förälder"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Genom"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Känner genom"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Släkting"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Syster"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Make/maka"</string>
@@ -1560,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"Välj år"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> har tagits bort"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> för arbetet"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Andra <xliff:g id="LABEL">%1$s</xliff:g> för jobbet"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Tredje <xliff:g id="LABEL">%1$s</xliff:g> för jobbet"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Om du vill lossa skärmen trycker du länge på Tillbaka."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Appen är fäst. Att lossa den är inte tillåtet på den här enheten."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skärmen är fäst"</string>
@@ -1683,5 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Återställ nu"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> har inaktiverats"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferenssamtal"</string>
-    <string name="tooltip_popup_title" msgid="8101791425834697618">"Popup-fönster med beskrivning"</string>
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
+    <skip />
 </resources>

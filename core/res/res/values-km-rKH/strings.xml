@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"អនុញ្ញាតឲ្យកម្មវិធីនេះប្រើសេវាកម្ម IMS ដើម្បីធ្វើការហៅដោយគ្មានការអន្តរាគមន៍ពីអ្នក។"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"អាន​ស្ថានភាព និង​អត្តសញ្ញាណ​ទូរស័ព្ទ"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​លក្ខណៈ​ទូរស័ព្ទ​នៃ​ឧបករណ៍។ សិទ្ធិ​នេះ​​ឲ្យ​កម្មវិធី​កំណត់​លេខ​ទូរស័ព្ទ និង​លេខ​សម្គាល់​ឧបករណ៍ ថា​តើ​ការ​ហៅ​សកម្ម និង​លេខ​ពី​ចម្ងាយ​បាន​ភ្ជាប់​ដោយ​ការ​ហៅ។"</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"អានលេខទូរសព្ទ"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"អនុញ្ញាតឲ្យកម្មវិធីនេះចូលប្រើលេខទូរសព្ទរបស់ឧបករណ៍នេះ។"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ការពារ​​កុំព្យូទ័រ​បន្ទះ​មិន​ឲ្យ​ដេក"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"បង្ការទូរទស្សន៍ពីការបិទពន្លឺ"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ការ​ពារ​ទូរស័ព្ទ​មិន​ឲ្យ​ដេក"</string>
@@ -605,9 +607,9 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"វិទ្យុ"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"ទូរសារ"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"ទូរស័ព្ទ​​កន្លែងធ្វើការ"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"ទូរសព្ទ​​កន្លែងធ្វើការ"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"ភេយ័រ​កន្លែង​ធ្វើ​ការ"</string>
-    <string name="phoneTypeAssistant" msgid="5596772636128562884">"អ្នក​ជំនួយ​ការ"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"ជំនួយ​ការ"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"សារ MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"តាម​តម្រូវ​ការ"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"ថ្ងៃ​ខួប​កំណើត"</string>
@@ -640,10 +642,10 @@
     <string name="orgTypeOther" msgid="3951781131570124082">"ផ្សេងៗ"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"តាម​តម្រូវការ"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"តាម​បំណង"</string>
-    <string name="relationTypeAssistant" msgid="6274334825195379076">"អ្នក​ជំនួយ​ការ"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"ជំនួយ​ការ"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"បងប្អូន​ប្រុស"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"កូន"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"ដៃគូ​ក្នុងស្រុក"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"ដៃគូ​រួមរស់ជាមួយគ្នា"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"ឪពុក"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"មិត្តភ័ក្ដិ"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"អ្នក​គ្រប់គ្រង"</string>
@@ -1061,16 +1063,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"កម្រិត​សំឡេង​មេឌៀ"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"កម្រិត​សំឡេង​ការ​ជូន​ដំណឹង"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"សំឡេង​រោទ៍​លំនាំដើម"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"(<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>) លំនាំដើម"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"គ្មាន"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"សំឡេង​រោទ៍"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"សំឡេងម៉ោងរោទិ៍"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"សំឡេងជូនដំណឹង"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"មិន​ស្គាល់"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">មានបណ្តាញ Wi-Fi</item>
       <item quantity="one">មានបណ្តាញ Wi-Fi</item>
@@ -1566,10 +1564,8 @@
     <string name="select_year" msgid="7952052866994196170">"ជ្រើស​ឆ្នាំ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"បាន​លុប <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"កន្លែង​ធ្វើការ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 2"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 3"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"ដើម្បីផ្តាច់អេក្រង់នេះ សូមប៉ះ និងសង្កត់ប៊ូតុងថយក្រោយឲ្យជាប់។"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"កម្មវិធីនេះត្រូវបានខ្ទាស់។ មិនអនុញ្ញាតឲ្យដោះការខ្ទាស់នៅលើឧបករណ៍នេះទេ។"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"បាន​ភ្ជាប់​អេក្រង់"</string>
@@ -1689,6 +1685,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"កំណត់ឡើងវិញឥឡូវនេះ"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> ដែលបានបិទដំណើរការ"</string>
     <string name="conference_call" msgid="3751093130790472426">"ការហៅជាក្រុម"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
     <skip />
 </resources>

@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Сіздің қатысуыңызсыз қоңыраулар соғу үшін қолданбаға IMS қызметін пайдалануға рұқсат етеді."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"телефон күйін оқу немесе анықтау"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Қолданбаға құрылғыдағы телефон функцияларына кіру мүмкіндігін береді. Бұл рұқсат қолданбаға телефон нөмірі, құрылғы жеке анықтағышы, қоңырау белсенділігі және сол қоңырауға байланысты қашықтағы нөмірді анықтау мүмкіндігін береді."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"телефон нөмірін оқу"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Қолданбаға құрылғының телефон нөмірін алуға рұқсат береді."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"планшетті ұйқыдан бөгеу"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"ТД ұйықтауын болдырмау"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"телефонды ұйқыдан бөгеу"</string>
@@ -1059,16 +1061,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Meдиа дыбысының қаттылығы"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Хабар дыбысының қаттылығы"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Әдепкі рингтон"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Әдепкі (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Ешқандай"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Қоңырау әуендері"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Дабыл сигналдары"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Хабарландыру сигналдары"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"Белгісіз"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">Wi-Fi желілері қол жетімді</item>
       <item quantity="one">Wi-Fi желісі қол жетімді</item>
@@ -1564,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"Жыл таңдау"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> жойылды"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Жұмыс <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2-ші жұмыс профилі (<xliff:g id="LABEL">%1$s</xliff:g>)"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3-ші жұмыс профилі (<xliff:g id="LABEL">%1$s</xliff:g>)"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Осы экранды босату үшін \"Артқа\" түймесін басып тұрыңыз."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Бағдарлама белгіленді: Бұл құрылғыда белгіні алуға рұқсат берілмейді."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Экран түйрелді"</string>
@@ -1687,6 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Қазір бастапқы күйге қайтару"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> өшірулі"</string>
     <string name="conference_call" msgid="3751093130790472426">"Конференциялық қоңырау"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
     <skip />
 </resources>

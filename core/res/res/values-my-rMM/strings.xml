@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"သင့်ရဲ့ဝင်ရောက်စွက်ဖက်မှုမပါဘဲ IMS ဝန်ဆောင်မှုကိုအသုံးပြုပြီး ဖုန်းခေါ်ဆိုနိုင်ရန် အပ်ဖ်ကို ခွင့်ပြုထားပါ။"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ဖုန်းရဲ့ အခြေအနေ နှင့် အမှတ်သညာအား ဖတ်ခြင်း"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"အပလီကေးရှင်းအား ဖုန်းရဲ့ စွမ်းဆောင်ချက်များအား သုံးခွင့်ပြုပါ။ အပလီကေးရှင်းအနေဖြင့် ဖုန်းနံပါတ်၊ စက်နံပါတ်၊ ဖုန်းခေါ်နေမှု ရှိမရှိနှင့် တဖက်မှ ဖုန်းနံပါတ် များအား သိရှိနိုင်ပါသည်"</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"ဖုန်းနံပါတ်ကို ဖတ်ရန်"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"စက်ပစ္စည်း၏ ဖုန်းနံပါတ်အား အက်ပ်ကို အသုံးပြုခွင့်ပေးပါ။"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"တက်ပလက်အား ပိတ်ခြင်းမှ ကာကွယ်ခြင်း"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"တီဗွီအား နားနေခြင်းမှ ကာကွယ်ရန်"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ဖုန်းအနားယူခြင်းမပြုလုပ်စေရန်"</string>
@@ -643,7 +645,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"အထောက်အကူ"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"ညီအကို"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"သားသမီး"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"အတူနေအပေါင်းအဖော်"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"အတူနေအဖော်"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"ဖခင်"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"သူငယ်ချင်း"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"မန်နေဂျာ"</string>
@@ -651,7 +653,7 @@
     <string name="relationTypeParent" msgid="4755635567562925226">"မိဘ"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"လုပ်ဖော်ကိုင်ဖက်"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"မှရည်ညွှန်းပေးသည်"</string>
-    <string name="relationTypeRelative" msgid="1799819930085610271">"ဆွေးမျိုး"</string>
+    <string name="relationTypeRelative" msgid="1799819930085610271">"ဆွေမျိုး"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"ညီအမ"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"အိမ်ထောင်ဖက်"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"မိမိစိတ်ကြိုက်"</string>
@@ -1560,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"ခုနှစ်ကို ရွေးပါ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ကို ဖျက်ပြီးပါပြီ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"အလုပ် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"ဒုတိယအလုပ် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"တတိယအလုပ် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"ဤမျက်နှာပြင်ကို ပင်ဖြုတ်ရန် \"နောက်သို့\" ကိုထိပြီးဖိထားပါ။"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"အက်ပ်ကို ပင်ထိုးထားသည်။ ပင်ဖျက်ခြင်းကို ဒီစက်မှာ မရနိုင်ပါ။"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"မျက်နှာပြင်ကို ပင်ထိုးထား"</string>
@@ -1683,5 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"ယခုပြန်လည်သတ်မှတ်ပါ"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"ပိတ်ထားသည့် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"လူအမြောက်အမြားတပြိုင်နက် ခေါ်ဆိုမှု"</string>
-    <string name="tooltip_popup_title" msgid="8101791425834697618">"အကြံပြုချက်ပြ ပေါ့အပ်ဝင်းဒိုး"</string>
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
+    <skip />
 </resources>
