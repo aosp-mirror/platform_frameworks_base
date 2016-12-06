@@ -350,6 +350,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"不太紧急的通知会显示在下方"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"再次点按即可打开"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"向上滑动即可解锁"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"此设备已受到托管"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"此设备是由<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>托管"</string>
     <string name="phone_hint" msgid="4872890986869209950">"滑动图标即可拨打电话"</string>
     <string name="voice_hint" msgid="8939888732119726665">"滑动图标即可打开语音助理"</string>
     <string name="camera_hint" msgid="7939688436797157483">"滑动图标即可打开相机"</string>
@@ -440,7 +442,19 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”已用作音量控制对话框"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"点按即可恢复原始设置。"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"您当前正在使用工作资料"</string>
-    <!-- no translation found for volume_stream_titles:10 (8119402510273906841) -->
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"通话"</item>
+    <item msgid="5997713001067658559">"系统"</item>
+    <item msgid="7858983209929864160">"铃声"</item>
+    <item msgid="1850038478268896762">"媒体"</item>
+    <item msgid="8265110906352372092">"闹钟"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"蓝牙"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+    <item msgid="8119402510273906841">"无障碍"</item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s。点按即可取消静音。"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s。点按即可设为振动，但可能会同时将无障碍服务设为静音。"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s。点按即可设为静音，但可能会同时将无障碍服务设为静音。"</string>

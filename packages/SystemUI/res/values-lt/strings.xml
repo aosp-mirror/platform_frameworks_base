@@ -354,6 +354,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mažiau skubūs pranešimai toliau"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Palieskite dar kartą, kad atidarytumėte"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Perbraukite aukštyn, kad atrakintumėte"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"Šis įrenginys tvarkomas"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"Šį įrenginį tvarko <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Perbraukite iš telefono piktogramos"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Perbraukite iš „Voice Assist“ piktogramos"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Perbraukite iš fotoaparato piktogramos"</string>
@@ -444,7 +446,19 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ yra garsumo valdymo dialogo langas"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Palieskite, kad atkurtumėte originalą."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Naudojate darbo profilį"</string>
-    <!-- no translation found for volume_stream_titles:10 (8119402510273906841) -->
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Skambinti"</item>
+    <item msgid="5997713001067658559">"Sistema"</item>
+    <item msgid="7858983209929864160">"Skambinti"</item>
+    <item msgid="1850038478268896762">"Medija"</item>
+    <item msgid="8265110906352372092">"Signalas"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+    <item msgid="8119402510273906841">"Pritaikymas neįgaliesiems"</item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Palieskite, kad įjungtumėte garsą."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Palieskite, kad nustatytumėte vibravimą. Gali būti nutildytos pritaikymo neįgaliesiems paslaugos."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Palieskite, kad nutildytumėte. Gali būti nutildytos pritaikymo neįgaliesiems paslaugos."</string>

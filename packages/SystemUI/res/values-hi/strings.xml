@@ -350,6 +350,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"कम अत्यावश्यक सूचनाएं नीचे दी गई हैं"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"खोलने के लिए पुन: टैप करें"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"अनलॉक करने के लिए ऊपर स्वाइप करें"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"यह डिवाइस प्रबंधित है"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"इस डिवाइस के प्रबंधक <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> हैं"</string>
     <string name="phone_hint" msgid="4872890986869209950">"फ़ोन के लिए आइकन से स्वाइप करें"</string>
     <string name="voice_hint" msgid="8939888732119726665">"वॉइस सहायक के लिए आइकन से स्वाइप करें"</string>
     <string name="camera_hint" msgid="7939688436797157483">"कैमरे के लिए आइकन से स्वाइप करें"</string>
@@ -440,7 +442,19 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> वॉल्यूम संवाद है"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"मूल को पुन: स्थापित करने के लिए टैप करें."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"आप अपनी कार्य प्रोफ़ाइल का उपयोग कर रहे हैं"</string>
-    <!-- no translation found for volume_stream_titles:10 (8119402510273906841) -->
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"कॉल करें"</item>
+    <item msgid="5997713001067658559">"सिस्‍टम"</item>
+    <item msgid="7858983209929864160">"रिंग करें"</item>
+    <item msgid="1850038478268896762">"मीडिया"</item>
+    <item msgid="8265110906352372092">"अलार्म"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"ब्लूटूथ"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+    <item msgid="8119402510273906841">"एक्सेस-योग्यता"</item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. अनम्यूट करने के लिए टैप करें."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. कंपन पर सेट करने के लिए टैप करें. एक्सेस-योग्यता सेवाएं म्यूट हो सकती हैं."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. म्यूट करने के लिए टैप करें. एक्सेस-योग्यता सेवाएं म्यूट हो सकती हैं."</string>

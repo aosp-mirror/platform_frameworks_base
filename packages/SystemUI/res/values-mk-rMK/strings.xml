@@ -350,6 +350,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Долу се помалку итни известувања"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Допрете повторно за да се отвори"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Повлечете за да се отклучи"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"Со уредов се управува"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"Уредов го управува <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Повлечете од иконата за телефонот"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Повлечете од иконата за гласовна помош"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Повлечете од иконата за камерата"</string>
@@ -526,7 +528,7 @@
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Штедач на батерија"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Ја намалува изведбата и податоците во заднина"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Копче <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="keyboard_key_home" msgid="2243500072071305073">"Почетна страница"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"Home-копче"</string>
     <string name="keyboard_key_back" msgid="2337450286042721351">"Назад"</string>
     <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"Стрелка нагоре"</string>
     <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Стрелка надолу"</string>
@@ -546,7 +548,7 @@
     <string name="keyboard_key_page_up" msgid="5654098530106845603">"Страница нагоре"</string>
     <string name="keyboard_key_page_down" msgid="8720502083731906136">"Страница надолу"</string>
     <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Избриши"</string>
-    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Почетна страница"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Home-копче"</string>
     <string name="keyboard_key_move_end" msgid="5901174332047975247">"Крај"</string>
     <string name="keyboard_key_insert" msgid="8530501581636082614">"Вметни"</string>
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>

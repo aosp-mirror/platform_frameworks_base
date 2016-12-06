@@ -358,6 +358,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"الإشعارات الأقل إلحاحًا أدناه"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"انقر مرة أخرى للفتح"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"مرر سريعًا لأعلى لإلغاء القفل"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"تتم إدارة هذا الجهاز"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"تتم إدارة هذا الجهاز بواسطة <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"يمكنك التمرير سريعًا من الرمز لتشغيل الهاتف"</string>
     <string name="voice_hint" msgid="8939888732119726665">"يمكنك التمرير سريعًا من الرمز لتشغيل المساعد الصوتي"</string>
     <string name="camera_hint" msgid="7939688436797157483">"يمكنك التمرير سريعًا من الرمز لتشغيل الكاميرا"</string>

@@ -352,6 +352,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Мање хитна обавештења су у наставку"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Додирните поново да бисте отворили"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Превуците нагоре да бисте откључали"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"Овим уређајем се управља"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"Овим уређајем управља <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Превуците од иконе за телефон"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Превуците од иконе за гласовну помоћ"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Превуците од иконе за камеру"</string>
