@@ -156,6 +156,10 @@ public class PipTouchHandler implements TunerService.Tunable {
         @Override
         public void onListenerRegistered(IPinnedStackController controller) {
             mPinnedStackController = controller;
+
+            // Update the controller with the current tuner state
+            setMinimizedState(mIsMinimized);
+            setSnapToEdge(mEnableSnapToEdge);
         }
 
         @Override
@@ -353,10 +357,13 @@ public class PipTouchHandler implements TunerService.Tunable {
      */
     private void setSnapToEdge(boolean snapToEdge) {
         mSnapAlgorithm.setSnapToEdge(snapToEdge);
-        try {
-            mPinnedStackController.setSnapToEdge(snapToEdge);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Could not set snap mode to edge", e);
+
+        if (mPinnedStackController != null) {
+            try {
+                mPinnedStackController.setSnapToEdge(snapToEdge);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not set snap mode to edge", e);
+            }
         }
     }
 
@@ -365,10 +372,13 @@ public class PipTouchHandler implements TunerService.Tunable {
      */
     private void setMinimizedState(boolean isMinimized) {
         mIsMinimized = isMinimized;
-        try {
-            mPinnedStackController.setIsMinimized(isMinimized);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Could not set minimized state", e);
+
+        if (mPinnedStackController != null) {
+            try {
+                mPinnedStackController.setIsMinimized(isMinimized);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not set minimized state", e);
+            }
         }
     }
 
