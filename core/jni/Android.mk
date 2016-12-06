@@ -249,6 +249,7 @@ LOCAL_SHARED_LIBRARIES := \
     libGLESv1_CM \
     libGLESv2 \
     libvulkan \
+    libziparchive \
     libETC1 \
     libhardware \
     libhardware_legacy \
