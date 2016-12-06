@@ -484,7 +484,6 @@ public interface WindowManagerPolicy {
         public void switchInputMethod(boolean forwardDirection);
 
         public void shutdown(boolean confirm);
-        public void reboot(boolean confirm);
         public void rebootSafeMode(boolean confirm);
 
         /**

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!--
+     Copyright (C) 2017 Flash ROM
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,7 +14,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/ic_lock_power_off_alpha"
-    android:tint="?attr/colorControlNormal" />
+<resources>
+  <!-- Reboot - Advanced Reboot -->
+  <java-symbol type="array" name="shutdown_reboot_options" />
+  <java-symbol type="array" name="shutdown_reboot_actions" />
+  <java-symbol type="bool" name="config_advanced_reboot" />
+  <java-symbol type="drawable" name="ic_lock_power_reboot" />
+  <java-symbol type="string" name="reboot_confirm" />
+  <java-symbol type="string" name="reboot_progress" />
+  <java-symbol type="string" name="global_action_reboot" />
+</resources>

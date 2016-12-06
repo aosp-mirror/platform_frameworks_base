@@ -2202,11 +2202,9 @@
          "bugreport" = Take bug report, if available
          "silent" = silent mode
          "users" = list of users
-         "restart" = restart device
          -->
     <string-array translatable="false" name="config_globalActionsList">
         <item>power</item>
-        <item>restart</item>
         <item>bugreport</item>
         <item>users</item>
     </string-array>
