@@ -383,6 +383,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Дазваляе праграмам выкарыстоўваць службу IMS, каб рабіць выклікі без вашага ўмяшання."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"чытанне статусу тэлефона і ідэнтыфікацыя"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дазваляе прыкладанням атрымлiваць доступ да функцый тэлефона на прыладзе. Дзякуючы гэтаму дазволу прыкладанне можа вызначаць iдэнтыфiкатары нумару тэлефона i прылады, незалежна ад таго, цi актыўны выклiк, i аддалены нумар, на якi робiцца выклiк."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"чытаць нумар тэлефона"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Праграма зможа атрымліваць доступ да нумара тэлефона прылады."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"прадухіліць планшэт ад пераходу ў рэжым сну"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"прадухіленне пераходу тэлевізара ў рэжым сну"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"забараняць тэлефону пераходзіць ў рэжым сну"</string>
@@ -1614,10 +1616,8 @@
     <string name="select_year" msgid="7952052866994196170">"Выберыце год"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Выдалена: <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (праца)"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Другая праца <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Трэцяя праца <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Каб адмацаваць гэты экран, дакраніцеся і ўтрымлівайце кнопку \"Назад\"."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Праграма замацавана: адмацаванне на гэтай прыладзе не дапускаецца."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Экран замацаваны"</string>
@@ -1755,5 +1755,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Выканаць скід"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Адключаны <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Канферэнц-выклік"</string>
-    <string name="tooltip_popup_title" msgid="8101791425834697618">"Усплывальная падказка"</string>
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
+    <skip />
 </resources>

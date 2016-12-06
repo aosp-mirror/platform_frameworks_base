@@ -383,6 +383,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Programai leidžiama naudoti IMS paslaugą, kad būtų galima atlikti skambučius be jūsų įsikišimo."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"skaityti telefono būseną ir tapatybę"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Leidžiama programai pasiekti telefono funkcijas įrenginyje. Šis leidimas suteikia teisę programai nustatyti telefono numerį ir įrenginio ID, tai, ar skambutis aktyvus, ir skambučiu prijungtą nuotolinį numerį."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"skaityti telefono numerį"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Programai leidžiama pasiekti įrenginio telefono numerį."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"neleisti planšetiniam kompiuteriui užmigti"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"neleisti įjungti TV miego būsenos"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"neleisti telefonui snausti"</string>
@@ -1105,16 +1107,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Medijos garsumas"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Pranešimo apimtis"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Numatytasis skambėjimo tonas"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Numatytasis („<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>“)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Nėra"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Skambėjimo tonai"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Įspėjimų garsai"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Pranešimų garsai"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"Nežinoma"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="one">Pasiekiami „Wi-Fi“ tinklai</item>
       <item quantity="few">Pasiekiami „Wi-Fi“ tinklai</item>
@@ -1618,10 +1616,8 @@
     <string name="select_year" msgid="7952052866994196170">"Pasirinkite metus"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Ištrinta: <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Darbo <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2-asis darbo <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3-iasis darbo <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Kad atsegtumėte šį ekraną, palieskite ir palaikykite „Atgal“."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Programa prisegta: šiame įrenginyje negalima atsegti."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrano prisegtas"</string>
@@ -1759,6 +1755,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Nustatyti iš naujo dabar"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Išj. valdiklis „<xliff:g id="LABEL">%1$s</xliff:g>“"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferencinis skambutis"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
     <skip />
 </resources>

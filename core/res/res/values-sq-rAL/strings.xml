@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Lejon aplikacionin të përdorë shërbimin IMS për të kryer telefonata pa ndërhyrjen tënde."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lexo statusin e telefonit dhe identitetin"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lejon aplikacionin të hyjë në funksionet telefonike të pajisjes. Kjo leje i mundëson aplikacionit të përcaktojë numrin e telefonit dhe ID-të e pajisjes, nëse një telefonatë është aktive apo nëse numri në distancë është i lidhur me një telefonatë."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"lexo numrin e telefonit"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Lejon që aplikacioni të ketë qasje te numri i telefonit i pajisjes."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"parandalo kalimin e tabletit në fjetje"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"parandalo kalimin e televizorit në fjetje"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"parandalo kalimin e telefonit në fjetje"</string>
@@ -1059,16 +1061,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"volumi i klipit \"media\""</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volumi i njoftimeve"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Zile e paracaktuar."</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"I parazgjedhur (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Asnjë"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Zilet"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Tingujt e alarmeve"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Tingujt e njoftimeve"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"E panjohur"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">Rrjete Wi-Fi ofrohen për përdorim</item>
       <item quantity="one">Një rrjet Wi-Fi ofrohet për përdorim</item>
@@ -1564,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"Përzgjidh vitin"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> u fshi"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Puna <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> i dytë i punës"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> i tretë i punës"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Për të hequr gozhdimin e ekranit, prek dhe mbaj të shtypur \"Prapa\"."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ekrani është i gozhduar. Anulimi i mbërthimit nuk lejohet nga organizata jote."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrani u gozhdua"</string>
@@ -1687,6 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Rivendos tani"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> u çaktivizua"</string>
     <string name="conference_call" msgid="3751093130790472426">"Telefonatë konferencë"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
     <skip />
 </resources>

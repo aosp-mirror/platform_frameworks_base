@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Memungkinkan aplikasi menggunakan layanan IMS untuk melakukan panggilan tanpa campur tangan Anda."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"baca identitas dan status ponsel"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Memungkinkan aplikasi mengakses fitur telepon perangkat. Izin ini memungkinkan aplikasi menentukan nomor telepon dan ID perangkat, apakah suatu panggilan aktif atau tidak, dan nomor jarak jauh yang tersambung oleh sebuah panggilan."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"baca nomor telepon"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Mengizinkan aplikasi mengakses nomor telepon perangkat ini."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"cegah tablet dari tidur"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"cegah agar TV tidak tidur"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"mencegah ponsel menjadi tidak aktif"</string>
@@ -988,7 +990,7 @@
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Jepret gambar"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gunakan secara default untuk tindakan ini."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Gunakan aplikasi yang berbeda"</string>
-    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Menghapus default di Setelan sistem &gt; Apl &gt; Terunduh."</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Menghapus default di Setelan sistem &gt; Apl &gt; Terdownload."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Pilih tindakan"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Pilih apl untuk perangkat USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Tidak ada apl yang dapat melakukan tindakan ini."</string>
@@ -1016,7 +1018,7 @@
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> telah diluncurkan aslinya."</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Skala"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Selalu tampilkan"</string>
-    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktifkan kembali dialog ini di Setelan sistem &gt; Apl &gt; Terunduh."</string>
+    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktifkan kembali dialog ini di Setelan sistem &gt; Apl &gt; Terdownload."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak mendukung setelan Ukuran layar saat ini dan dapat menunjukkan perilaku yang tak diharapkan."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Selalu tampilkan"</string>
     <string name="smv_application" msgid="3307209192155442829">"Apl <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar kebijakan StrictMode yang diberlakukannya sendiri."</string>
@@ -1560,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"Pilih tahun"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> dihapus"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Kantor <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Upaya ke-2 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Upaya ke-3 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Untuk melepas pin layar ini, sentuh &amp; tahan tombol Kembali."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Pin dipasang ke aplikasi. Melepas pin tidak diizinkan di perangkat ini."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Layar disematkan"</string>
@@ -1683,5 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Setel ulang sekarang"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> dinonaktifkan"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferensi Telepon"</string>
-    <string name="tooltip_popup_title" msgid="8101791425834697618">"Munculan Keterangan Alat"</string>
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
+    <skip />
 </resources>

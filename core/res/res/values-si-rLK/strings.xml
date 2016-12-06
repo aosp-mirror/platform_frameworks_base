@@ -284,7 +284,7 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"කෙටිමං අස්ථාපනය කරන්න"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"පරිශීලක මැදිහත්වීමෙන් තොරව මුල්තිර කෙටිමං එක් කිරීමට යෙදුමකට අවසර දෙයි."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"පිටවන ඇමතුම් වල මග වෙනස් කිරීම"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"ඇමතුම වෙනත් අංකයකට හරවා යැවීම හෝ ඇමතුම මුළුමනින්ම නැවත් වීම වැනි විකල්ප සමඟ පිටතට යන ඇමතුමකදී ඩයල් කළ අංකය බැලීමට යෙදුමට ඉඩ දෙන්න."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"ඇමතුම වෙනත් අංකයකට හරවා යැවීම හෝ ඇමතුම මුළුමනින්ම නැවත්වීම වැනි විකල්ප සමඟ පිටතට යන ඇමතුමකදී අංකනය කළ අංකය බැලීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"කෙටි පණිවිඩ ලබාගැනීම (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS පණිවිඩ ලැබීමට සහ ක්‍රියාත්මක කිරීමට යෙදුමට අවසර දෙන්න. මෙහි තේරුම යෙදුමට ඔබගේ උපාංගයට ලැබෙන පණිවිඩ අධීක්ෂණය කිරීමට හැකිවීම වන අතර, ඒවා ඔබට නොපෙන්වා මකා දැමීමටද හැකි වීමයි."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"පෙළ පණිවුඩ ලබාගන්න (MMS)"</string>
@@ -376,7 +376,9 @@
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS ඇමතුම් සේවාවට පිවිසෙන්න"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"ඔබේ මැදිහත්වීමකින් තොරව ඇමතුම් සිදු කිරීමට  IMS සේවාව භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"දුරකථනයේ තත්වය සහ අනන්‍යතාවය කියවීම"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"උපාංගයේ දුරකථන විශේෂාංග වෙත පිවිසීමට යෙදුමට අවසර දෙන්න. ඇමතුම සක්‍රිය වුවත් සහ ඇමතුමකින් දුරස්ථ අංකය සම්බන්ධ වුවත් දුරකථන අංකය සහ උපාංග ID හඳුනා ගැනීමට මෙම අවසරය යෙදුමට අවසර දෙයි."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"උපාංගයේ දුරකථන විශේෂාංග වෙත ප්‍රවේශයට යෙදුමට ඉඩ දෙයි.  ඇමතුම සක්‍රිය වුවත්, සහ ඇමතුමකින් දුරස්ථ අංකය සම්බන්ධ වුවත් දුරකථන අංකය සහ උපාංග ID හඳුනා ගැනීමට මෙම අවසරය යෙදුමට ඉඩ දෙයි."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"දුරකථන අංකය කියවන්න"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"උපාංගයේ දුරකථන අංකය වෙත පිවිසීමට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ටැබ්ලටය නින්දෙන් වැළක්වීම"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"රූපවාහිනිය නින්දට යාමෙන් නවත්වන්න"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"දුරකථනය නින්දට යාමෙන් වළකන්න"</string>
@@ -1061,16 +1063,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"මාධ්‍ය ශබ්දය"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"දැනුම්දීමේ ශබ්ද ත්‍රීවතාව"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"සුපුරුදු රින්ටෝනය සකසන්න"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"පෙරනිමි (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"කිසිවක් නැත"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"රිගින්ටෝන"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"එලාම හඬ"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"දැනුම්දීම් හඬ"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"නොදනී"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="one">Wi-Fi ජාල තිබේ</item>
       <item quantity="other">Wi-Fi ජාල තිබේ</item>
@@ -1566,10 +1564,8 @@
     <string name="select_year" msgid="7952052866994196170">"වසර තෝරන්න"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> මකා දමන ලදි"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2වන වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3වන වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"මෙම තිරය ඇමුණුම් ඉවත් කිරීමට, ස්පර්ශ කර අල්ලා ගෙන සිටින්න."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"යෙදුම අමුණා ඇත: ගැලවීමට මෙම උපාංගය මත ඉඩ දිය නොහැකිය.‍"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"තිරය අගුළු දමා ඇත"</string>
@@ -1689,6 +1685,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"දැන් යළි සකසන්න"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"අබල කළ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"සම්මන්ත්‍රණ ඇමතුම"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
     <skip />
 </resources>

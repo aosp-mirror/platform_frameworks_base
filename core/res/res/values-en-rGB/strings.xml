@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Allows the app to use the IMS service to make calls without your intervention."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"read phone status and identity"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Allows the app to access the phone features of the device. This permission allows the app to determine the phone number and device IDs, whether a call is active and the remote number connected by a call."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"read phone number"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Allows the app to access the phone number of the device."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"prevent tablet from sleeping"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"prevent TV from sleeping"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"prevent phone from sleeping"</string>
@@ -1560,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"Select year"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> deleted"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Work <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2nd Work <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3rd Work <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"To unpin this screen, touch &amp; hold Back."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"App is pinned: unpinning isn\'t allowed on this device."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Screen pinned"</string>
@@ -1683,5 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Reset now"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Disabled <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Conference Call"</string>
-    <string name="tooltip_popup_title" msgid="8101791425834697618">"Tooltip Pop-up"</string>
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
+    <skip />
 </resources>

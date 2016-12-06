@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"మీ ప్రమేయం లేకుండా కాల్‌లు చేయడం కోసం IMS సేవను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ఫోన్ స్థితి మరియు గుర్తింపుని చదవడం"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"పరికరం యొక్క ఫోన్ లక్షణాలను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి ఫోన్ నంబర్ మరియు పరికరం IDలను, కాల్ సక్రియంగా ఉందా లేదా అనే విషయాన్ని మరియు కాల్ ద్వారా కనెక్ట్ చేయబడిన రిమోట్ నంబర్‌ను కనుగొనడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"ఫోన్ నంబర్‌ను చదవడం"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"పరికరం యొక్క ఫోన్ నంబర్‌ను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"టాబ్లెట్‌ను నిద్రావస్థకు వెళ్లనీయకుండా నిరోధించడం"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"టీవీ నిద్రావస్థకు వెళ్లకుండా నిరోధించడం"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ఫోన్‌ను నిద్రావస్థకు వెళ్లనీయకుండా నిరోధించడం"</string>
@@ -1059,16 +1061,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"మీడియా వాల్యూమ్"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"నోటిఫికేషన్ వాల్యూమ్"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"డిఫాల్ట్ రింగ్‌టోన్"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"డిఫాల్ట్ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"ఏదీ వద్దు"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"రింగ్‌టోన్‌లు"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"అలారం ధ్వనులు"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"నోటిఫికేషన్ ధ్వనులు"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"తెలియదు"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">Wi-Fi నెట్‌వర్క్‌లు అందుబాటులో ఉన్నాయి</item>
       <item quantity="one">Wi-Fi నెట్‌వర్క్ అందుబాటులో ఉంది</item>
@@ -1564,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"సంవత్సరాన్ని ఎంచుకోండి"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> తొలగించబడింది"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2వ కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3వ కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"ఈ స్క్రీన్‌ని అన్‌పిన్ చేయడానికి, వెనుకకు తాకి &amp; అలాగే పట్టుకోండి."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"అనువర్తనం పిన్ చేయబడింది: ఈ పరికరంలో అన్‌పిన్ చేయడానికి అనుమతి లేదు."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"స్క్రీన్ పిన్ చేయబడింది"</string>
@@ -1687,6 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"ఇప్పుడే రీసెట్ చేయి"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> నిలిపివేయబడింది"</string>
     <string name="conference_call" msgid="3751093130790472426">"కాన్ఫరెన్స్ కాల్"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
     <skip />
 </resources>

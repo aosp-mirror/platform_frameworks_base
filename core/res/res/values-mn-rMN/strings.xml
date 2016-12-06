@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Апп нь дуудлага хийхдээ таны оролцоогүйгээр IMS үйлчилгээг ашиглах боломжтой."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"утасны статус ба таниулбарыг унших"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Апп нь төхөөрөмжийн утасны функцд хандах боломжтой. Энэ зөвшөөрөл нь апп-д утасны дугаар болон төхөөрөмжийн ID-г, дуудлага идэвхтэй эсэх, холын дугаар дуудлагаар холбогдсон байгаа эсэхийг тогтоох боломжийг олгоно,"</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"утасны дугаарыг харах"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Төхөөрөмжийн утасны дугаарт хандах зөвшөөрлийг аппд олгоно."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"таблетыг унтуулахгүй байлгах"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"Телевиз-ийн гэрэл унтрахаас сэргийл"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"утсыг унтуулахгүй байлгах"</string>
@@ -436,7 +438,7 @@
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"хурууны хээний програм хангамжийг удирдах"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Хурууны хээний загварыг нэмэх эсвэл усгтах үйлдлийг хийх зөвшөөрлийг програмд олгодог."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"хурууны хээний програм хангамжийг ашиглах"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Баталгаажуулалт хийх зорилгоор хурууны хээний програм хамгамжийг ашиглах зөвшөөрлийг програмд олгодог"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Баталгаажуулалт хийх зорилгоор хурууны хээний апп хамгамжийг ашиглах зөвшөөрлийг аппд олгодог"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Хурууны хээг дутуу уншуулсан байна. Дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Хурууны хээ боловсруулж чадахгүй байна. Дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Хурууны хээ мэдрэгч бохирдсон байна. Та цэвэрлэсний дараагаар дахин оролдоно уу."</string>
@@ -1059,16 +1061,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Медиа дууны хэмжээ"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Мэдэгдлийн дууны хэмжээ"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Үндсэн хонхны ая"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Үндсэн (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Алийг нь ч биш"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Хонхны ая"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Сэрүүлгийн ая"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Мэдэгдлийн дуу"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"Тодорхойгүй"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">Wi-Fi сүлжээ ашиглах боломжтой</item>
       <item quantity="one">Wi-Fi сүлжээ ашиглах боломжтой</item>
@@ -1208,7 +1206,7 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Хэлбэршүүлж байна..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Оруулаагүй байна"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Таарах активити олдсонгүй."</string>
-    <string name="permlab_route_media_output" msgid="6243022988998972085">"медиа гаралтын маршрут"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"медиа гаралтын чиглэл"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Аппликешн нь медиа гаралтыг бусад гадаад төхөөрөмжрүү чиглүүлэх боломжтой."</string>
     <string name="permlab_readInstallSessions" msgid="3713753067455750349">"Суулгах харилцан үйлдлийг унших"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Аппликешн-д суулгах сешн уншихыг зөвшөөрнө. Энэ нь идэвхтэй багцуудыг суулгалтын талаар дэлгэрэнгүй мэдээллийг үзэх боломж олгоно."</string>
@@ -1240,7 +1238,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Ханын зураг"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Ханын зураг солих"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Мэдэгдэл сонсогч"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR сонсогч"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Виртуал Орчин (VR) сонсогч"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Нөхцөл нийлүүлэгч"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Мэдэгдлийг ангилах үйлчилгээ"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN идэвхтэй болов"</string>
@@ -1564,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"Жилийг сонгоно уу"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> устсан"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ажлын <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2 дахь ажил <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3 дахь ажил <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Энэ дэлгэцийг эхэнд нээхийг болиулахын тулд Буцах товчлуурыг дараад, хүлээнэ үү."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"App-ыг тусгайлан тэмдэглэсэн байна: Энэ төхөөрөмж дээр тусгайлан тэмдэглэсэн сонголтыг устгах боломжгүй."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Дэлгэцийг тогтоосон"</string>
@@ -1685,6 +1681,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Одоо шинэчлэх"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g>-г цуцалсан"</string>
     <string name="conference_call" msgid="3751093130790472426">"Хурлын дуудлага"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
     <skip />
 </resources>

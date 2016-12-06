@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Колдонмого сизди катыштырбай туруп, IMS кызматынын жардамы менен чалууларды жасоо мүмкүнчүлүгүн берет."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"телефондун абалын жана аныктыгын окуу"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Колдонмого түзмөктүн чалуу мүмкүнчүлүктөрүнө жетки алуу уруксатын берет. Бул уруксат колдонмого, телефондун номурун, түзмөктүн ID-син, чалуунун абалын жана байланышта чыккан номурду аныктоого жол берет."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"телефон номерин окуу"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Колдонмого түзмөктүн телефон номерин окуу мүмкүнчүлүгү берилет."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"планшетти уктатпай сактоо"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"сыналгыны көшүтпөө"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"телефонду уктатпай сактоо"</string>
@@ -641,18 +643,18 @@
     <string name="orgTypeCustom" msgid="225523415372088322">"Өзгөчө"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"Өзгөчө"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Жардамчы"</string>
-    <string name="relationTypeBrother" msgid="8757913506784067713">"Ага-ини"</string>
-    <string name="relationTypeChild" msgid="1890746277276881626">"Баласы"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Жергиликтүү Өнөктөш"</string>
-    <string name="relationTypeFather" msgid="5228034687082050725">"Атасы"</string>
-    <string name="relationTypeFriend" msgid="7313106762483391262">"Досу"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"Менежер"</string>
-    <string name="relationTypeMother" msgid="4578571352962758304">"Энеси"</string>
+    <string name="relationTypeBrother" msgid="8757913506784067713">"Ага/Ини"</string>
+    <string name="relationTypeChild" msgid="1890746277276881626">"Бала"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Жарандык нике"</string>
+    <string name="relationTypeFather" msgid="5228034687082050725">"Ата"</string>
+    <string name="relationTypeFriend" msgid="7313106762483391262">"Дос"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Башчы"</string>
+    <string name="relationTypeMother" msgid="4578571352962758304">"Эне"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Ата/эне"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Өнөк"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Төмөнкүдөй аталат"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Сунушталган"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Тууган"</string>
-    <string name="relationTypeSister" msgid="1735983554479076481">"Эже-сиңди"</string>
+    <string name="relationTypeSister" msgid="1735983554479076481">"Эже/Сиңди"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Жубай"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Өзгөчө"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Үй"</string>
@@ -1058,10 +1060,10 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Чалуунун үн деңгээли"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Медиа үнүнүн деңгээли"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Эскертме үнүнүн деңгээли"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"Демейки рингтон"</string>
-    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Демейки рингтон (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"Демейки шыңгыр"</string>
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Демейки шыңгыр (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Эч бир"</string>
-    <string name="ringtone_picker_title" msgid="3515143939175119094">"Ринтондор"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Шыңгырлар"</string>
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Ойготкучтун добуштары"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Эскертменин добуштары"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Белгисиз"</string>
@@ -1560,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"Жылды тандаңыз"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> өчүрүлдү"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Жумуш <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2-жумуш <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3-жумуш <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Бул экранды бошотуу үчүн \"Артка\" баскычын басып, кармап туруңуз."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Колдонмо кадалган: Бул түзмөктө бошотууга уруксат жок."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Экран кадалды"</string>
@@ -1683,5 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Баштапкы абалга келтирүү"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> өчүрүлдү"</string>
     <string name="conference_call" msgid="3751093130790472426">"Конференц чалуу"</string>
-    <string name="tooltip_popup_title" msgid="8101791425834697618">"Калкып чыгуучу кеңеш"</string>
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
+    <skip />
 </resources>

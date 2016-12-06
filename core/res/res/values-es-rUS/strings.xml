@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Permite que la aplicación utilice el servicio IMS para hacer llamadas sin tu intervención."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"leer la identidad y el estado del dispositivo"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite que la aplicación acceda a las funciones de teléfono del dispositivo. La aplicación puede utilizar este permiso para descubrir identificadores de dispositivos y números de teléfono, para saber si una llamada está activa y para conocer el número remoto con el que se ha establecido conexión mediante una llamada."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"leer el número de teléfono"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Permite que la app acceda al número de teléfono del dispositivo."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evitar que el tablet entre en estado de inactividad"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"evitar que la TV entre en suspensión"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"evitar que el dispositivo entre en estado de inactividad"</string>
@@ -1560,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"Seleccionar año"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> borrado"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 2"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 3"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Para dejar de fijar esta pantalla, mantén presionado Atrás."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"La aplicación está fijada, no se puede anular la fijación en este dispositivo."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fija"</string>
@@ -1683,5 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Restablecer ahora"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Se inhabilitó <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Conferencia"</string>
-    <string name="tooltip_popup_title" msgid="8101791425834697618">"Ventana emergente de la información sobre la herramienta"</string>
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
+    <skip />
 </resources>

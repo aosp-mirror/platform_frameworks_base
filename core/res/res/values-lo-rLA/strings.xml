@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ໃຊ້​ການ​ບໍ​ລິ​ການ IMS ເພື່ອ​ໂທ​ໂດຍ​ບໍ່​ມີ​ການ​ຊ່ວຍ​ເຫຼືອ​ຂອງ​ທ່ານ."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ອ່ານສະຖານະ ແລະຂໍ້ມູນລະບຸໂຕຕົນຂອງໂທລະສັບ"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ອະນຸຍາດໃຫ້ແອັບຯ ເຂົ້າເຖິງຄວາມສາມາດການໂທລະສັບຂອງອຸປະກອນ. ການກຳນົດສິດນີ້ເຮັດໃຫ້ແອັບຯສາມາດກວດສອບເບີໂທລະສັບ ແລະ ID ຂອງອຸປະກອນ, ບໍ່ວ່າການໂທຈະຍັງດຳເນີນຢູ່ ແລະເບີປາຍທາງເຊື່ອມຕໍ່ຢູ່ຫຼືບໍ່ກໍຕາມ."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"read phone number"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Allows the app to access the phone number of the device."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ຂັດຂວາງບໍ່ໃຫ້ປິດໜ້າຈໍແທັບເລັດ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"ປ້ອງ​ກັນ​ບໍ່​ໃຫ້ໂທລະພາບຫຼັບ​ພັກ"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ຂັດຂວາງບໍ່ໃຫ້ໂທລະສັບປິດໜ້າຈໍ"</string>
@@ -1059,16 +1061,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"ລະດັບສຽງຂອງສື່"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"ລະດັບສຽງການແຈ້ງເຕືອນ"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"ຣິງໂທນເລີ່ມຕົ້ນ"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Default (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"ບໍ່ມີ"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"ຣິງໂທນ"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Alarm sounds"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Notification sounds"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"ບໍ່ຮູ້ຈັກ"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">ເຄືອຂ່າຍ Wi-Fi ທີ່ມີໃຫ້</item>
       <item quantity="one">ເຄືອຂ່າຍ Wi-Fi ທີ່ມີໃຫ້</item>
@@ -1564,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"ເລືອກ​ປີ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ຖືກລຶບແລ້ວ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"​ບ່ອນ​ເຮັດ​ວຽກ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"ບ່ອນເຮັດວຽກທີ 2 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"ບ່ອນເຮັດວຽກທີ 3 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"ກົດປຸ່ມກັບຄືນຄ້າງໄວ້ເພື່ອເຊົາປັກໝຸດໜ້າຈໍນີ້."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"ແອັບ​ຖືກ​ປັກ​ໝຸດ​ແລ້ວ: ບໍ່​ອະ​ນຸ​ຍາດ​ໃຫ້​ຖອນ​ປັກ​ໝຸດ​ຢູ່​ເທິງ​ອຸ​ປະ​ກອນ​ນີ້."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ແລ້ວ"</string>
@@ -1687,6 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"ຣີເຊັດດຽວນີ້"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"ປິດການນຳໃຊ້ <xliff:g id="LABEL">%1$s</xliff:g> ແລ້ວ"</string>
     <string name="conference_call" msgid="3751093130790472426">"ການປະຊຸມສາຍ"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
     <skip />
 </resources>

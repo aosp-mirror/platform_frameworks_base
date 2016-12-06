@@ -383,6 +383,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"‏מאפשר לאפליקציה להשתמש בשירות ה-IMS לביצוע שיחות ללא התערבותך."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"קריאת הסטטוס והזהות של הטלפון"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"מאפשר לאפליקציה לגשת לתכונות הטלפון של המכשיר. אישור זה מתיר לאפליקציה לגלות את מספר הטלפון ואת זיהויי המכשיר, האם שיחה פעילה ואת המספר המרוחק המחובר באמצעות שיחה."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"קריאת מספר טלפון"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"מאפשרת לאפליקציה לגשת למספר הטלפון של המכשיר."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"מנע מהטאבלט לעבור למצב שינה"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"מניעת מעבר למצב שינה בטלוויזיה"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"מניעת מעבר הטלפון למצב שינה"</string>
@@ -599,7 +601,7 @@
     <string name="phoneTypeMobile" msgid="6501463557754751037">"נייד"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"עבודה"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"פקס בעבודה"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"מס\' פקס בבית"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"פקס בבית"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"זימונית"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"אחר"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"התקשרות חזרה"</string>
@@ -612,7 +614,7 @@
     <string name="phoneTypeTelex" msgid="3367879952476250512">"טלקס"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"נייד של העבודה"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"איתורית של העבודה"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"זימונית מהעבודה"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"מסייע"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"מותאם אישית"</string>
@@ -1105,16 +1107,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"עוצמת קול של מדיה"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"עוצמת קול של התראות"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"רינגטון ברירת מחדל"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"ברירת מחדל (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"ללא"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"רינגטונים"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"צלילי התראה"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"צלילי הודעה"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"לא ידוע"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="two">‏יש רשתות Wi-Fi זמינות</item>
       <item quantity="many">‏יש רשתות Wi-Fi זמינות</item>
@@ -1618,10 +1616,8 @@
     <string name="select_year" msgid="7952052866994196170">"בחר שנה"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> נמחק"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"עבודה <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> שני בעבודה"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> שלישי בעבודה"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"כדי לבטל את הצמדת המסך הזה, לחץ לחיצה ממושכת על הלחצן \'הקודם\'."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"האפליקציה מוצמדת: ביטול ההצמדה אסור במכשיר הזה."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"המסך מוצמד"</string>
@@ -1759,6 +1755,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"אפס עכשיו"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> הושבת"</string>
     <string name="conference_call" msgid="3751093130790472426">"שיחת ועידה"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
     <skip />
 </resources>

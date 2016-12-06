@@ -380,6 +380,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Omogućava aplikaciji da koristi IMS uslugu za pozivanje bez vaše intervencije."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"čitanje statusa i identiteta telefona"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Omogućava aplikaciji pristup telefonskim funkcijama uređaja. Ova dozvola omogućava aplikaciji određivanje telefonskog i identifikacionog broja uređaja, bez obzira da li je poziv aktivan i da li je uspostavljena veza sa pozivanim brojem."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"čitanje telefonskog broja"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Dopušta aplikaciji pristup telefonskom broju telefona."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"sprečavanje tableta da uđe u režim mirovanja"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"spriječi ulazak TV-a u režim mirovanja"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"sprečavanje telefona da uđe u režim mirovanja"</string>
@@ -646,17 +648,17 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Pomoćnik"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Brat"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Dijete"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Domaći partner"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Nevjenčani partner"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Otac"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Prijatelj"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"Menadžer"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Šef"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Majka"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Roditelj"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Uputio(la)"</string>
-    <string name="relationTypeRelative" msgid="1799819930085610271">"Rođak"</string>
+    <string name="relationTypeRelative" msgid="1799819930085610271">"Rođak/ica"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Sestra"</string>
-    <string name="relationTypeSpouse" msgid="394136939428698117">"Bračni partner"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"Suprug/a"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Prilagođeno"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Kuća"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Posao"</string>
@@ -1589,10 +1591,8 @@
     <string name="select_year" msgid="7952052866994196170">"Odaberite godinu"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Broj <xliff:g id="KEY">%1$s</xliff:g> je izbrisan"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Poslovni <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. poslovni <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. poslovni <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Da biste otkačili ovaj ekran, dodirnite i držite dugme Nazad."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikacija je prikačena. Na ovom uređaju nije dozvoljeno otkačivanje."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran je zakačen"</string>
@@ -1721,5 +1721,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Vrati sada na početne postavke"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Onemogućen <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferencijski poziv"</string>
-    <string name="tooltip_popup_title" msgid="8101791425834697618">"Iskočni prozor sa savjetom u vezi alata"</string>
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
+    <skip />
 </resources>

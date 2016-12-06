@@ -163,7 +163,7 @@
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> എന്നതിൽ സൈൻ ഇൻ ചെയ്യുന്നതിൽ പിശക്"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"സമന്വയിപ്പിക്കുക"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"സമന്വയിപ്പിക്കുക"</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"വളരെയധികം <xliff:g id="CONTENT_TYPE">%s</xliff:g> ഇല്ലാതാക്കലുകൾ."</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"വളരെയധികം <xliff:g id="CONTENT_TYPE">%s</xliff:g> ഇല്ലാതാക്കുന്നു."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ടാബ്‌ലെറ്റ് സ്റ്റോറേജ്  കഴിഞ്ഞു. ഇടം ശൂന്യമാക്കാൻ ചില ഫയലുകൾ ഇല്ലാതാക്കുക."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"വാച്ചിലെ സ്റ്റോറേജ്  നിറഞ്ഞു. ഇടം ശൂന്യമാക്കാൻ കുറച്ച് ഫയലുകൾ ഇല്ലാതാക്കുക."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"ടിവി സ്റ്റോറേജ്  നിറഞ്ഞു. ഇടം ശൂന്യമാക്കാൻ കുറച്ച് ഫയലുകൾ ഇല്ലാതാക്കുക."</string>
@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"നിങ്ങളുടെ ഇടപെടൽ ഇല്ലാതെ കോളുകൾ ചെയ്യാൻ IMS സേവനം ഉപയോഗിക്കുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ഫോൺ നിലയും ഐഡന്റിറ്റിയും റീഡുചെയ്യുക"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ഉപകരണത്തിന്റെ ഫോൺ സവിശേഷതകൾ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഈ അനുമതി ഫോൺ നമ്പർ, ഉപകരണ ഐഡികൾ, ഒരു കോൾ സജീവമാണോയെന്നത്, ഒരു കോൾ കണക്റ്റുചെയ്‌ത വിദൂര നമ്പർ എന്നിവ നിർണ്ണയിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"ഫോൺ നമ്പർ വായിക്കുക"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"ഉപകരണത്തിന്റെ ഫോൺ നമ്പർ ആക്സസ്സ് ചെയ്യുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"സുഷുപ്‌തിയിലാകുന്നതിൽ നിന്ന് ടാബ്‌ലെറ്റിനെ തടയുക"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"ടിവിയെ നിർജ്ജീവമാകുന്നതിൽ നിന്ന് തടയുക"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"സുഷുപ്‌തിയിലാകുന്നതിൽ നിന്ന് ഫോണിനെ തടയുക"</string>
@@ -1059,16 +1061,12 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"മീഡിയ വോളിയം"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"അറിയിപ്പ് വോളിയം"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"ഡിഫോൾട്ട് റിംഗ്‌ടോൺ"</string>
-    <!-- no translation found for ringtone_default_with_actual (1767304850491060581) -->
-    <skip />
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"ഡിഫോൾട്ട് (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"ഒന്നും വേണ്ട"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"റിംഗ്ടോണുകൾ"</string>
-    <!-- no translation found for ringtone_picker_title_alarm (6473325356070549702) -->
-    <skip />
-    <!-- no translation found for ringtone_picker_title_notification (4837740874822788802) -->
-    <skip />
-    <!-- no translation found for ringtone_unknown (3914515995813061520) -->
-    <skip />
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"അലാറം ശബ്ദങ്ങൾ"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"അറിയിപ്പ് ശബ്ദങ്ങൾ"</string>
+    <string name="ringtone_unknown" msgid="3914515995813061520">"അറിഞ്ഞുകൂടാത്തത്"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">വൈഫൈ നെറ്റ്‌വർക്കുകൾ ലഭ്യമാണ്</item>
       <item quantity="one">വൈഫൈ നെറ്റ്‌വർക്ക് ലഭ്യമാണ്</item>
@@ -1564,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"വർഷം തിരഞ്ഞെടുക്കുക"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ഇല്ലാതാക്കി"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ഔദ്യോഗികം <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"രണ്ടാമത്തെ ഔദ്യോഗിക <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"മൂന്നാമത്തെ ഔദ്യോഗിക <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, ബാക്ക് ബട്ടൺ സ്‌പർശിച്ച് പിടിക്കുക"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"അപ്ലിക്കേഷൻ പിൻ ചെയ്‌തു: ഈ ഉപകരണത്തിൽ അൺപിൻ ചെയ്യാനാവില്ല."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"സ്ക്രീൻ പിൻ ചെയ്തു"</string>
@@ -1687,6 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"ഇപ്പോൾ പുനക്രമീകരിക്കുക"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="conference_call" msgid="3751093130790472426">"കോൺഫറൻസ് കോൾ"</string>
-    <!-- no translation found for tooltip_popup_title (8101791425834697618) -->
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
     <skip />
 </resources>

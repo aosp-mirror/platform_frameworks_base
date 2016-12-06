@@ -377,6 +377,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Lar appen bruke nettprattjenesten til å ringe uten at du gjør noe."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lese telefonstatus og -identitet"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lar appen bruke enhetens telefonfunksjoner. Med denne tillatelsen kan appen finne telefonnummer og enhets-ID-er, registrere om en samtale pågår, og se det eksterne nummeret det opprettes en forbindelse med via oppringing."</string>
+    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"les telefonnummeret"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Gir appen tilgang til telefonnummeret til enheten."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"hindre nettbrettet fra å gå over til sovemodus"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"hindre TV-en i å gå i hvilemodus"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"forhindre telefonen fra å sove"</string>
@@ -1560,10 +1562,8 @@
     <string name="select_year" msgid="7952052866994196170">"Velg året"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> er slettet"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Jobb-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for managed_profile_label_badge_2 (5048136430082124036) -->
-    <skip />
-    <!-- no translation found for managed_profile_label_badge_3 (2808305070321719040) -->
-    <skip />
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Andre jobbrelaterte <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Tredje jobbrelaterte <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"For å løsne denne skjermen, trykk og hold inne Tilbake."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Appen er festet – du kan ikke løsne apper på denne enheten."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skjermen er festet"</string>
@@ -1683,5 +1683,6 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Tilbakestill nå"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> er slått av"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferansesamtale"</string>
-    <string name="tooltip_popup_title" msgid="8101791425834697618">"Verktøytips i forgrunnen"</string>
+    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
+    <skip />
 </resources>
