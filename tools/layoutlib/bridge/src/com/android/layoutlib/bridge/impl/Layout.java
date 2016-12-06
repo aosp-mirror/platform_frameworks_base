@@ -166,13 +166,13 @@ class Layout extends RelativeLayout {
         FrameLayout contentRoot = new FrameLayout(getContext());
         LayoutParams params = createLayoutParams(MATCH_PARENT, MATCH_PARENT);
         int rule = mBuilder.isNavBarVertical() ? START_OF : ABOVE;
-        if (mBuilder.hasNavBar() && mBuilder.solidBars()) {
+        if (mBuilder.hasSolidNavBar()) {
             params.addRule(rule, getId(ID_NAV_BAR));
         }
         int below = -1;
         if (mBuilder.mActionBarSize <= 0 && mBuilder.mTitleBarSize > 0) {
             below = getId(ID_TITLE_BAR);
-        } else if (mBuilder.hasStatusBar() && mBuilder.solidBars()) {
+        } else if (mBuilder.hasSolidStatusBar()) {
             below = getId(ID_STATUS_BAR);
         }
         if (below != -1) {
@@ -241,10 +241,10 @@ class Layout extends RelativeLayout {
         }
         LayoutParams layoutParams = createLayoutParams(MATCH_PARENT, MATCH_PARENT);
         int rule = mBuilder.isNavBarVertical() ? START_OF : ABOVE;
-        if (mBuilder.hasNavBar() && mBuilder.solidBars()) {
+        if (mBuilder.hasSolidNavBar()) {
             layoutParams.addRule(rule, getId(ID_NAV_BAR));
         }
-        if (mBuilder.hasStatusBar() && mBuilder.solidBars()) {
+        if (mBuilder.hasSolidStatusBar()) {
             layoutParams.addRule(BELOW, getId(ID_STATUS_BAR));
         }
         actionBar.getRootView().setLayoutParams(layoutParams);
@@ -257,10 +257,10 @@ class Layout extends RelativeLayout {
             int simulatedPlatformVersion) {
         TitleBar titleBar = new TitleBar(context, title, simulatedPlatformVersion);
         LayoutParams params = createLayoutParams(MATCH_PARENT, mBuilder.mTitleBarSize);
-        if (mBuilder.hasStatusBar() && mBuilder.solidBars()) {
+        if (mBuilder.hasSolidStatusBar()) {
             params.addRule(BELOW, getId(ID_STATUS_BAR));
         }
-        if (mBuilder.isNavBarVertical() && mBuilder.solidBars()) {
+        if (mBuilder.isNavBarVertical() && mBuilder.hasSolidNavBar()) {
             params.addRule(START_OF, getId(ID_NAV_BAR));
         }
         titleBar.setLayoutParams(params);
@@ -419,11 +419,17 @@ class Layout extends RelativeLayout {
         }
 
         /**
-         * Return true if the status bar or nav bar are present, they are not translucent (i.e
-         * content doesn't overlap with them).
+         * Return true if the nav bar is present and not translucent
          */
-        private boolean solidBars() {
-            return !(hasNavBar() && mTranslucentNav) && !(hasStatusBar() && mTranslucentStatus);
+        private boolean hasSolidNavBar() {
+            return hasNavBar() && !mTranslucentNav;
+        }
+
+        /**
+         * Return true if the status bar is present and not translucent
+         */
+        private boolean hasSolidStatusBar() {
+            return hasStatusBar() && !mTranslucentStatus;
         }
 
         private boolean hasNavBar() {
