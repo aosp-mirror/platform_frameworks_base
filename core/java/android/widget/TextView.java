@@ -1534,7 +1534,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // Setup auto-size.
-        if (mEditor == null) {
+        if (supportsAutoSizeText()) {
             switch (mAutoSizeType) {
                 case AUTO_SIZE_TYPE_NONE:
                     // Nothing to do.
@@ -9261,12 +9261,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return true if this TextView is specialized for showing and interacting with the extracted
-     * text in a full-screen input method.
+     * @return {@code true} if this TextView is specialized for showing and interacting with the
+     * extracted text in a full-screen input method.
      * @hide
      */
     public boolean isInExtractedMode() {
         return false;
+    }
+
+    /**
+     * @return {@code true} if this TextView supports autosizing text to fit within its container.
+     * @hide
+     */
+    protected boolean supportsAutoSizeText() {
+        return true;
     }
 
     /**
