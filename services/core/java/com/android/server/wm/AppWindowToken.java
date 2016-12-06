@@ -1003,10 +1003,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             tStartingWindow.mToken = this;
             tStartingWindow.mAppToken = this;
 
-            if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE || DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
-                    "Removing starting window: " + tStartingWindow);
-            getDisplayContent().removeFromWindowList(tStartingWindow);
-            if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+            if (DEBUG_ADD_REMOVE || DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
                     "Removing starting " + tStartingWindow + " from " + fromToken);
             fromToken.removeChild(tStartingWindow);
             fromToken.postWindowRemoveStartingWindowCleanup(tStartingWindow);
@@ -1261,18 +1258,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
-    int rebuildWindowListUnchecked(int addIndex) {
-        return super.rebuildWindowList(addIndex);
-    }
-
-    @Override
-    int rebuildWindowList(int addIndex) {
-        if (mIsExiting && !waitingForReplacement()) {
-            return addIndex;
-        }
-        return rebuildWindowListUnchecked(addIndex);
-    }
-
     @Override
     boolean forAllWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
         // For legacy reasons we process the TaskStack.mExitingAppTokens first in DisplayContent
@@ -1332,6 +1317,32 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         mLastContainsDismissKeyguardWindow = containsDismissKeyguard;
         mLastContainsShowWhenLockedWindow = containsShowWhenLocked;
+    }
+
+    WindowState getImeTargetBelowWindow(WindowState w) {
+        final int index = mChildren.indexOf(w);
+        if (index > 0) {
+            final WindowState target = mChildren.get(index - 1);
+            if (target.canBeImeTarget()) {
+                return target;
+            }
+        }
+        return null;
+    }
+
+    WindowState getHighestAnimLayerWindow(WindowState currentTarget) {
+        WindowState candidate = null;
+        for (int i = mChildren.indexOf(currentTarget); i >= 0; i--) {
+            final WindowState w = mChildren.get(i);
+            if (w.mRemoved) {
+                continue;
+            }
+            if (candidate == null || w.mWinAnimator.mAnimLayer >
+                    candidate.mWinAnimator.mAnimLayer) {
+                candidate = w;
+            }
+        }
+        return candidate;
     }
 
     @Override
