@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-aapt package -v -I ../system/bundle.apk -M AndroidManifest.xml -S res -F bundle.apk -f && \
-unzip bundle.apk resources.arsc && \
-mv resources.arsc app.arsc && \
-xxd -i app.arsc > app_arsc.h
+set -e
+
+aapt package -I ../system/system.apk -M AndroidManifest.xml -S res -F app.apk -f

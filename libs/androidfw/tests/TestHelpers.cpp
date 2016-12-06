@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "android-base/logging.h"
+#include "ziparchive/zip_archive.h"
 
 namespace android {
 
@@ -31,8 +32,41 @@ const std::string& GetTestDataPath() {
   return sTestDataPath;
 }
 
-::testing::AssertionResult IsStringEqual(const ResTable& table,
-                                         uint32_t resource_id,
+::testing::AssertionResult ReadFileFromZipToString(const std::string& zip_path,
+                                                   const std::string& file,
+                                                   std::string* out_contents) {
+  out_contents->clear();
+  ::ZipArchiveHandle handle;
+  int32_t result = OpenArchive(zip_path.c_str(), &handle);
+  if (result != 0) {
+    return ::testing::AssertionFailure() << "Failed to open zip '" << zip_path
+                                         << "': " << ::ErrorCodeString(result);
+  }
+
+  ::ZipString name(file.c_str());
+  ::ZipEntry entry;
+  result = ::FindEntry(handle, name, &entry);
+  if (result != 0) {
+    ::CloseArchive(handle);
+    return ::testing::AssertionFailure() << "Could not find file '" << file << "' in zip '"
+                                         << zip_path << "' : " << ::ErrorCodeString(result);
+  }
+
+  out_contents->resize(entry.uncompressed_length);
+  result = ::ExtractToMemory(
+      handle, &entry, const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(out_contents->data())),
+      out_contents->size());
+  if (result != 0) {
+    ::CloseArchive(handle);
+    return ::testing::AssertionFailure() << "Failed to extract file '" << file << "' from zip '"
+                                         << zip_path << "': " << ::ErrorCodeString(result);
+  }
+
+  ::CloseArchive(handle);
+  return ::testing::AssertionSuccess();
+}
+
+::testing::AssertionResult IsStringEqual(const ResTable& table, uint32_t resource_id,
                                          const char* expected_str) {
   Res_value val;
   ssize_t block = table.getResource(resource_id, &val, MAY_NOT_BE_BAG);
@@ -46,8 +80,7 @@ const std::string& GetTestDataPath() {
 
   const ResStringPool* pool = table.getTableStringBlock(block);
   if (pool == NULL) {
-    return ::testing::AssertionFailure()
-           << "table has no string pool for block " << block;
+    return ::testing::AssertionFailure() << "table has no string pool for block " << block;
   }
 
   const String8 actual_str = pool->string8ObjectAt(val.data);

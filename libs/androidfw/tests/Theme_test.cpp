@@ -14,55 +14,59 @@
  * limitations under the License.
  */
 
-#include <androidfw/ResourceTypes.h>
+#include "androidfw/ResourceTypes.h"
 
-#include <utils/String8.h>
-#include <utils/String16.h>
+#include "utils/String16.h"
+#include "utils/String8.h"
+
 #include "TestHelpers.h"
-#include "data/system/R.h"
 #include "data/app/R.h"
+#include "data/system/R.h"
 
-#include <gtest/gtest.h>
+namespace app = com::android::app;
 
-using namespace android;
-
-namespace {
-
-#include "data/system/system_arsc.h"
-#include "data/app/app_arsc.h"
-
-enum { MAY_NOT_BE_BAG = false };
+namespace android {
 
 /**
  * TODO(adamlesinski): Enable when fixed.
  */
 TEST(ThemeTest, DISABLED_shouldCopyThemeFromDifferentResTable) {
-    ResTable table;
-    ASSERT_EQ(NO_ERROR, table.add(system_arsc, system_arsc_len));
-    ASSERT_EQ(NO_ERROR, table.add(app_arsc, app_arsc_len));
+  ResTable table;
 
-    ResTable::Theme theme1(table);
-    ASSERT_EQ(NO_ERROR, theme1.applyStyle(app::R::style::Theme_One));
-    Res_value val;
-    ASSERT_GE(theme1.getAttribute(android::R::attr::background, &val), 0);
-    ASSERT_EQ(Res_value::TYPE_INT_COLOR_RGB8, val.dataType);
-    ASSERT_EQ(uint32_t(0xffff0000), val.data);
-    ASSERT_GE(theme1.getAttribute(app::R::attr::number, &val), 0);
-    ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
-    ASSERT_EQ(uint32_t(1), val.data);
+  std::string system_contents;
+  ASSERT_TRUE(ReadFileFromZipToString("/system/system.apk", "resources.arsc",
+                                      &system_contents));
+  ASSERT_EQ(NO_ERROR,
+            table.add(system_contents.data(), system_contents.size()));
 
-    ResTable table2;
-    ASSERT_EQ(NO_ERROR, table2.add(system_arsc, system_arsc_len));
-    ASSERT_EQ(NO_ERROR, table2.add(app_arsc, app_arsc_len));
+  std::string app_contents;
+  ASSERT_TRUE(ReadFileFromZipToString("/basic/basic.apk", "resources.arsc",
+                                      &app_contents));
+  ASSERT_EQ(NO_ERROR, table.add(app_contents.data(), app_contents.size()));
 
-    ResTable::Theme theme2(table2);
-    ASSERT_EQ(NO_ERROR, theme2.setTo(theme1));
-    ASSERT_GE(theme2.getAttribute(android::R::attr::background, &val), 0);
-    ASSERT_EQ(Res_value::TYPE_INT_COLOR_RGB8, val.dataType);
-    ASSERT_EQ(uint32_t(0xffff0000), val.data);
-    ASSERT_GE(theme2.getAttribute(app::R::attr::number, &val), 0);
-    ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
-    ASSERT_EQ(uint32_t(1), val.data);
+  ResTable::Theme theme1(table);
+  ASSERT_EQ(NO_ERROR, theme1.applyStyle(app::R::style::Theme_One));
+  Res_value val;
+  ASSERT_GE(theme1.getAttribute(android::R::attr::background, &val), 0);
+  ASSERT_EQ(Res_value::TYPE_INT_COLOR_RGB8, val.dataType);
+  ASSERT_EQ(uint32_t(0xffff0000), val.data);
+  ASSERT_GE(theme1.getAttribute(app::R::attr::number, &val), 0);
+  ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
+  ASSERT_EQ(uint32_t(1), val.data);
+
+  ResTable table2;
+  ASSERT_EQ(NO_ERROR,
+            table2.add(system_contents.data(), system_contents.size()));
+  ASSERT_EQ(NO_ERROR, table2.add(app_contents.data(), app_contents.size()));
+
+  ResTable::Theme theme2(table2);
+  ASSERT_EQ(NO_ERROR, theme2.setTo(theme1));
+  ASSERT_GE(theme2.getAttribute(android::R::attr::background, &val), 0);
+  ASSERT_EQ(Res_value::TYPE_INT_COLOR_RGB8, val.dataType);
+  ASSERT_EQ(uint32_t(0xffff0000), val.data);
+  ASSERT_GE(theme2.getAttribute(app::R::attr::number, &val), 0);
+  ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
+  ASSERT_EQ(uint32_t(1), val.data);
 }
 
-}
+}  // namespace android

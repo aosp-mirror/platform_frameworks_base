@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-#include <androidfw/Asset.h>
+#include "androidfw/Asset.h"
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
-using namespace android;
+namespace android {
 
 TEST(AssetTest, FileAssetRegistersItself) {
-    const int32_t count = Asset::getGlobalCount();
-    Asset* asset = new _FileAsset();
-    EXPECT_EQ(count + 1, Asset::getGlobalCount());
-    delete asset;
-    EXPECT_EQ(count, Asset::getGlobalCount());
+  const int32_t count = Asset::getGlobalCount();
+  Asset* asset = new _FileAsset();
+  EXPECT_EQ(count + 1, Asset::getGlobalCount());
+  delete asset;
+  EXPECT_EQ(count, Asset::getGlobalCount());
 }
 
 TEST(AssetTest, CompressedAssetRegistersItself) {
-    const int32_t count = Asset::getGlobalCount();
-    Asset* asset = new _CompressedAsset();
-    EXPECT_EQ(count + 1, Asset::getGlobalCount());
-    delete asset;
-    EXPECT_EQ(count, Asset::getGlobalCount());
+  const int32_t count = Asset::getGlobalCount();
+  Asset* asset = new _CompressedAsset();
+  EXPECT_EQ(count + 1, Asset::getGlobalCount());
+  delete asset;
+  EXPECT_EQ(count, Asset::getGlobalCount());
 }
+
+}  // nameapce android

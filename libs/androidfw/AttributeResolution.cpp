@@ -14,34 +14,41 @@
  * limitations under the License.
  */
 
-#include "AttributeFinder.h"
-
 #include "androidfw/AttributeResolution.h"
-#include "androidfw/ResourceTypes.h"
+
+#include <cstdint>
 
 #include <android/log.h>
-#include <cstdint>
+
+#include "androidfw/AttributeFinder.h"
+#include "androidfw/ResourceTypes.h"
 
 constexpr bool kDebugStyles = false;
 
 namespace android {
 
-class XmlAttributeFinder : public BackTrackingAttributeFinder<XmlAttributeFinder, size_t> {
+class XmlAttributeFinder
+    : public BackTrackingAttributeFinder<XmlAttributeFinder, size_t> {
  public:
   explicit XmlAttributeFinder(const ResXMLParser* parser)
-      : BackTrackingAttributeFinder(0, parser != NULL ? parser->getAttributeCount() : 0),
+      : BackTrackingAttributeFinder(
+            0, parser != nullptr ? parser->getAttributeCount() : 0),
         parser_(parser) {}
 
-  inline uint32_t GetAttribute(size_t index) const { return parser_->getAttributeNameResID(index); }
+  inline uint32_t GetAttribute(size_t index) const {
+    return parser_->getAttributeNameResID(index);
+  }
 
  private:
   const ResXMLParser* parser_;
 };
 
 class BagAttributeFinder
-    : public BackTrackingAttributeFinder<BagAttributeFinder, const ResTable::bag_entry*> {
+    : public BackTrackingAttributeFinder<BagAttributeFinder,
+                                         const ResTable::bag_entry*> {
  public:
-  BagAttributeFinder(const ResTable::bag_entry* start, const ResTable::bag_entry* end)
+  BagAttributeFinder(const ResTable::bag_entry* start,
+                     const ResTable::bag_entry* end)
       : BackTrackingAttributeFinder(start, end) {}
 
   inline uint32_t GetAttribute(const ResTable::bag_entry* entry) const {
@@ -49,12 +56,14 @@ class BagAttributeFinder
   }
 };
 
-bool ResolveAttrs(ResTable::Theme* theme, uint32_t def_style_attr, uint32_t def_style_res,
-                  uint32_t* src_values, size_t src_values_length, uint32_t* attrs,
-                  size_t attrs_length, uint32_t* out_values, uint32_t* out_indices) {
+bool ResolveAttrs(ResTable::Theme* theme, uint32_t def_style_attr,
+                  uint32_t def_style_res, uint32_t* src_values,
+                  size_t src_values_length, uint32_t* attrs,
+                  size_t attrs_length, uint32_t* out_values,
+                  uint32_t* out_indices) {
   if (kDebugStyles) {
-    ALOGI("APPLY STYLE: theme=0x%p defStyleAttr=0x%x defStyleRes=0x%x", theme, def_style_attr,
-          def_style_res);
+    ALOGI("APPLY STYLE: theme=0x%p defStyleAttr=0x%x defStyleRes=0x%x", theme,
+          def_style_attr, def_style_res);
   }
 
   const ResTable& res = theme->getResTable();
@@ -67,7 +76,8 @@ bool ResolveAttrs(ResTable::Theme* theme, uint32_t def_style_attr, uint32_t def_
   uint32_t def_style_bag_type_set_flags = 0;
   if (def_style_attr != 0) {
     Res_value value;
-    if (theme->getAttribute(def_style_attr, &value, &def_style_bag_type_set_flags) >= 0) {
+    if (theme->getAttribute(def_style_attr, &value,
+                            &def_style_bag_type_set_flags) >= 0) {
       if (value.dataType == Res_value::TYPE_REFERENCE) {
         def_style_res = value.data;
       }
@@ -78,14 +88,15 @@ bool ResolveAttrs(ResTable::Theme* theme, uint32_t def_style_attr, uint32_t def_
   res.lock();
 
   // Retrieve the default style bag, if requested.
-  const ResTable::bag_entry* def_style_start = NULL;
+  const ResTable::bag_entry* def_style_start = nullptr;
   uint32_t def_style_type_set_flags = 0;
-  ssize_t bag_off =
-      def_style_res != 0
-          ? res.getBagLocked(def_style_res, &def_style_start, &def_style_type_set_flags)
-          : -1;
+  ssize_t bag_off = def_style_res != 0
+                        ? res.getBagLocked(def_style_res, &def_style_start,
+                                           &def_style_type_set_flags)
+                        : -1;
   def_style_type_set_flags |= def_style_bag_type_set_flags;
-  const ResTable::bag_entry* const def_style_end = def_style_start + (bag_off >= 0 ? bag_off : 0);
+  const ResTable::bag_entry* const def_style_end =
+      def_style_start + (bag_off >= 0 ? bag_off : 0);
   BagAttributeFinder def_style_attr_finder(def_style_start, def_style_end);
 
   // Now iterate through all of the attributes that the client has requested,
@@ -113,18 +124,21 @@ bool ResolveAttrs(ResTable::Theme* theme, uint32_t def_style_attr, uint32_t def_
       value.dataType = Res_value::TYPE_ATTRIBUTE;
       value.data = src_values[ii];
       if (kDebugStyles) {
-        ALOGI("-> From values: type=0x%x, data=0x%08x", value.dataType, value.data);
+        ALOGI("-> From values: type=0x%x, data=0x%08x", value.dataType,
+              value.data);
       }
     }
 
     if (value.dataType == Res_value::TYPE_NULL) {
-      const ResTable::bag_entry* const def_style_entry = def_style_attr_finder.Find(cur_ident);
+      const ResTable::bag_entry* const def_style_entry =
+          def_style_attr_finder.Find(cur_ident);
       if (def_style_entry != def_style_end) {
         block = def_style_entry->stringBlock;
         type_set_flags = def_style_type_set_flags;
         value = def_style_entry->map.value;
         if (kDebugStyles) {
-          ALOGI("-> From def style: type=0x%x, data=0x%08x", value.dataType, value.data);
+          ALOGI("-> From def style: type=0x%x, data=0x%08x", value.dataType,
+                value.data);
         }
       }
     }
@@ -132,24 +146,29 @@ bool ResolveAttrs(ResTable::Theme* theme, uint32_t def_style_attr, uint32_t def_
     uint32_t resid = 0;
     if (value.dataType != Res_value::TYPE_NULL) {
       // Take care of resolving the found resource to its final value.
-      ssize_t new_block =
-          theme->resolveAttributeReference(&value, block, &resid, &type_set_flags, &config);
+      ssize_t new_block = theme->resolveAttributeReference(
+          &value, block, &resid, &type_set_flags, &config);
       if (new_block >= 0) block = new_block;
       if (kDebugStyles) {
-        ALOGI("-> Resolved attr: type=0x%x, data=0x%08x", value.dataType, value.data);
+        ALOGI("-> Resolved attr: type=0x%x, data=0x%08x", value.dataType,
+              value.data);
       }
     } else {
       // If we still don't have a value for this attribute, try to find
       // it in the theme!
-      ssize_t new_block = theme->getAttribute(cur_ident, &value, &type_set_flags);
+      ssize_t new_block =
+          theme->getAttribute(cur_ident, &value, &type_set_flags);
       if (new_block >= 0) {
         if (kDebugStyles) {
-          ALOGI("-> From theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+          ALOGI("-> From theme: type=0x%x, data=0x%08x", value.dataType,
+                value.data);
         }
-        new_block = res.resolveReference(&value, new_block, &resid, &type_set_flags, &config);
+        new_block = res.resolveReference(&value, new_block, &resid,
+                                         &type_set_flags, &config);
         if (new_block >= 0) block = new_block;
         if (kDebugStyles) {
-          ALOGI("-> Resolved theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+          ALOGI("-> Resolved theme: type=0x%x, data=0x%08x", value.dataType,
+                value.data);
         }
       }
     }
@@ -165,19 +184,21 @@ bool ResolveAttrs(ResTable::Theme* theme, uint32_t def_style_attr, uint32_t def_
     }
 
     if (kDebugStyles) {
-      ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x", cur_ident, value.dataType, value.data);
+      ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x", cur_ident,
+            value.dataType, value.data);
     }
 
     // Write the final value back to Java.
     out_values[STYLE_TYPE] = value.dataType;
     out_values[STYLE_DATA] = value.data;
     out_values[STYLE_ASSET_COOKIE] =
-        block != -1 ? static_cast<uint32_t>(res.getTableCookie(block)) : static_cast<uint32_t>(-1);
+        block != -1 ? static_cast<uint32_t>(res.getTableCookie(block))
+                    : static_cast<uint32_t>(-1);
     out_values[STYLE_RESOURCE_ID] = resid;
     out_values[STYLE_CHANGING_CONFIGURATIONS] = type_set_flags;
     out_values[STYLE_DENSITY] = config.density;
 
-    if (out_indices != NULL && value.dataType != Res_value::TYPE_NULL) {
+    if (out_indices != nullptr && value.dataType != Res_value::TYPE_NULL) {
       indices_idx++;
       out_indices[indices_idx] = ii;
     }
@@ -187,7 +208,7 @@ bool ResolveAttrs(ResTable::Theme* theme, uint32_t def_style_attr, uint32_t def_
 
   res.unlock();
 
-  if (out_indices != NULL) {
+  if (out_indices != nullptr) {
     out_indices[0] = indices_idx;
   }
   return true;
@@ -197,8 +218,8 @@ void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_s
                 uint32_t def_style_res, const uint32_t* attrs, size_t attrs_length,
                 uint32_t* out_values, uint32_t* out_indices) {
   if (kDebugStyles) {
-    ALOGI("APPLY STYLE: theme=0x%p defStyleAttr=0x%x defStyleRes=0x%x xml=0x%p", theme,
-          def_style_attr, def_style_res, xml_parser);
+    ALOGI("APPLY STYLE: theme=0x%p defStyleAttr=0x%x defStyleRes=0x%x xml=0x%p",
+          theme, def_style_attr, def_style_res, xml_parser);
   }
 
   const ResTable& res = theme->getResTable();
@@ -211,7 +232,8 @@ void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_s
   uint32_t def_style_bag_type_set_flags = 0;
   if (def_style_attr != 0) {
     Res_value value;
-    if (theme->getAttribute(def_style_attr, &value, &def_style_bag_type_set_flags) >= 0) {
+    if (theme->getAttribute(def_style_attr, &value,
+                            &def_style_bag_type_set_flags) >= 0) {
       if (value.dataType == Res_value::TYPE_REFERENCE) {
         def_style_res = value.data;
       }
@@ -221,11 +243,12 @@ void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_s
   // Retrieve the style class associated with the current XML tag.
   int style = 0;
   uint32_t style_bag_type_set_flags = 0;
-  if (xml_parser != NULL) {
+  if (xml_parser != nullptr) {
     ssize_t idx = xml_parser->indexOfStyle();
     if (idx >= 0 && xml_parser->getAttributeValue(idx, &value) >= 0) {
       if (value.dataType == value.TYPE_ATTRIBUTE) {
-        if (theme->getAttribute(value.data, &value, &style_bag_type_set_flags) < 0) {
+        if (theme->getAttribute(value.data, &value, &style_bag_type_set_flags) <
+            0) {
           value.dataType = Res_value::TYPE_NULL;
         }
       }
@@ -239,29 +262,35 @@ void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_s
   res.lock();
 
   // Retrieve the default style bag, if requested.
-  const ResTable::bag_entry* def_style_attr_start = NULL;
+  const ResTable::bag_entry* def_style_attr_start = nullptr;
   uint32_t def_style_type_set_flags = 0;
-  ssize_t bag_off =
-      def_style_res != 0
-          ? res.getBagLocked(def_style_res, &def_style_attr_start, &def_style_type_set_flags)
-          : -1;
+  ssize_t bag_off = def_style_res != 0
+                        ? res.getBagLocked(def_style_res, &def_style_attr_start,
+                                           &def_style_type_set_flags)
+                        : -1;
   def_style_type_set_flags |= def_style_bag_type_set_flags;
   const ResTable::bag_entry* const def_style_attr_end =
       def_style_attr_start + (bag_off >= 0 ? bag_off : 0);
-  BagAttributeFinder def_style_attr_finder(def_style_attr_start, def_style_attr_end);
+  BagAttributeFinder def_style_attr_finder(def_style_attr_start,
+                                           def_style_attr_end);
 
   // Retrieve the style class bag, if requested.
-  const ResTable::bag_entry* style_attr_start = NULL;
+  const ResTable::bag_entry* style_attr_start = nullptr;
   uint32_t style_type_set_flags = 0;
-  bag_off = style != 0 ? res.getBagLocked(style, &style_attr_start, &style_type_set_flags) : -1;
+  bag_off =
+      style != 0
+          ? res.getBagLocked(style, &style_attr_start, &style_type_set_flags)
+          : -1;
   style_type_set_flags |= style_bag_type_set_flags;
-  const ResTable::bag_entry* const style_attr_end = style_attr_start + (bag_off >= 0 ? bag_off : 0);
+  const ResTable::bag_entry* const style_attr_end =
+      style_attr_start + (bag_off >= 0 ? bag_off : 0);
   BagAttributeFinder style_attr_finder(style_attr_start, style_attr_end);
 
   // Retrieve the XML attributes, if requested.
   static const ssize_t kXmlBlock = 0x10000000;
   XmlAttributeFinder xml_attr_finder(xml_parser);
-  const size_t xml_attr_end = xml_parser != NULL ? xml_parser->getAttributeCount() : 0;
+  const size_t xml_attr_end =
+      xml_parser != nullptr ? xml_parser->getAttributeCount() : 0;
 
   // Now iterate through all of the attributes that the client has requested,
   // filling in each with whatever data we can find.
@@ -289,34 +318,41 @@ void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_s
       // We found the attribute we were looking for.
       xml_parser->getAttributeValue(xml_attr_idx, &value);
       if (kDebugStyles) {
-        ALOGI("-> From XML: type=0x%x, data=0x%08x", value.dataType, value.data);
+        ALOGI("-> From XML: type=0x%x, data=0x%08x", value.dataType,
+              value.data);
       }
     }
 
     if (value.dataType == Res_value::TYPE_NULL) {
-      // Walk through the style class values looking for the requested attribute.
-      const ResTable::bag_entry* const style_attr_entry = style_attr_finder.Find(cur_ident);
+      // Walk through the style class values looking for the requested
+      // attribute.
+      const ResTable::bag_entry* const style_attr_entry =
+          style_attr_finder.Find(cur_ident);
       if (style_attr_entry != style_attr_end) {
         // We found the attribute we were looking for.
         block = style_attr_entry->stringBlock;
         type_set_flags = style_type_set_flags;
         value = style_attr_entry->map.value;
         if (kDebugStyles) {
-          ALOGI("-> From style: type=0x%x, data=0x%08x", value.dataType, value.data);
+          ALOGI("-> From style: type=0x%x, data=0x%08x", value.dataType,
+                value.data);
         }
       }
     }
 
     if (value.dataType == Res_value::TYPE_NULL) {
-      // Walk through the default style values looking for the requested attribute.
-      const ResTable::bag_entry* const def_style_attr_entry = def_style_attr_finder.Find(cur_ident);
+      // Walk through the default style values looking for the requested
+      // attribute.
+      const ResTable::bag_entry* const def_style_attr_entry =
+          def_style_attr_finder.Find(cur_ident);
       if (def_style_attr_entry != def_style_attr_end) {
         // We found the attribute we were looking for.
         block = def_style_attr_entry->stringBlock;
         type_set_flags = style_type_set_flags;
         value = def_style_attr_entry->map.value;
         if (kDebugStyles) {
-          ALOGI("-> From def style: type=0x%x, data=0x%08x", value.dataType, value.data);
+          ALOGI("-> From def style: type=0x%x, data=0x%08x", value.dataType,
+                value.data);
         }
       }
     }
@@ -324,30 +360,35 @@ void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_s
     uint32_t resid = 0;
     if (value.dataType != Res_value::TYPE_NULL) {
       // Take care of resolving the found resource to its final value.
-      ssize_t new_block =
-          theme->resolveAttributeReference(&value, block, &resid, &type_set_flags, &config);
+      ssize_t new_block = theme->resolveAttributeReference(
+          &value, block, &resid, &type_set_flags, &config);
       if (new_block >= 0) {
         block = new_block;
       }
 
       if (kDebugStyles) {
-        ALOGI("-> Resolved attr: type=0x%x, data=0x%08x", value.dataType, value.data);
+        ALOGI("-> Resolved attr: type=0x%x, data=0x%08x", value.dataType,
+              value.data);
       }
     } else {
       // If we still don't have a value for this attribute, try to find
       // it in the theme!
-      ssize_t new_block = theme->getAttribute(cur_ident, &value, &type_set_flags);
+      ssize_t new_block =
+          theme->getAttribute(cur_ident, &value, &type_set_flags);
       if (new_block >= 0) {
         if (kDebugStyles) {
-          ALOGI("-> From theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+          ALOGI("-> From theme: type=0x%x, data=0x%08x", value.dataType,
+                value.data);
         }
-        new_block = res.resolveReference(&value, new_block, &resid, &type_set_flags, &config);
+        new_block = res.resolveReference(&value, new_block, &resid,
+                                         &type_set_flags, &config);
         if (new_block >= 0) {
           block = new_block;
         }
 
         if (kDebugStyles) {
-          ALOGI("-> Resolved theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+          ALOGI("-> Resolved theme: type=0x%x, data=0x%08x", value.dataType,
+                value.data);
         }
       }
     }
@@ -363,20 +404,21 @@ void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_s
     }
 
     if (kDebugStyles) {
-      ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x", cur_ident, value.dataType, value.data);
+      ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x", cur_ident,
+            value.dataType, value.data);
     }
 
     // Write the final value back to Java.
     out_values[STYLE_TYPE] = value.dataType;
     out_values[STYLE_DATA] = value.data;
-    out_values[STYLE_ASSET_COOKIE] = block != kXmlBlock
-                                         ? static_cast<uint32_t>(res.getTableCookie(block))
-                                         : static_cast<uint32_t>(-1);
+    out_values[STYLE_ASSET_COOKIE] =
+        block != kXmlBlock ? static_cast<uint32_t>(res.getTableCookie(block))
+                           : static_cast<uint32_t>(-1);
     out_values[STYLE_RESOURCE_ID] = resid;
     out_values[STYLE_CHANGING_CONFIGURATIONS] = type_set_flags;
     out_values[STYLE_DENSITY] = config.density;
 
-    if (value.dataType != Res_value::TYPE_NULL) {
+    if (out_indices != nullptr && value.dataType != Res_value::TYPE_NULL) {
       indices_idx++;
       out_indices[indices_idx] = ii;
     }
@@ -386,11 +428,14 @@ void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_s
 
   res.unlock();
 
-  out_indices[0] = indices_idx;
+  if (out_indices != nullptr) {
+    out_indices[0] = indices_idx;
+  }
 }
 
-bool RetrieveAttributes(const ResTable* res, ResXMLParser* xml_parser, uint32_t* attrs,
-                        size_t attrs_length, uint32_t* out_values, uint32_t* out_indices) {
+bool RetrieveAttributes(const ResTable* res, ResXMLParser* xml_parser,
+                        uint32_t* attrs, size_t attrs_length,
+                        uint32_t* out_values, uint32_t* out_indices) {
   ResTable_config config;
   Res_value value;
 
@@ -434,7 +479,8 @@ bool RetrieveAttributes(const ResTable* res, ResXMLParser* xml_parser, uint32_t*
     if (value.dataType != Res_value::TYPE_NULL) {
       // Take care of resolving the found resource to its final value.
       // printf("Resolving attribute reference\n");
-      ssize_t new_block = res->resolveReference(&value, block, &resid, &type_set_flags, &config);
+      ssize_t new_block = res->resolveReference(&value, block, &resid,
+                                                &type_set_flags, &config);
       if (new_block >= 0) block = new_block;
     }
 
@@ -448,14 +494,14 @@ bool RetrieveAttributes(const ResTable* res, ResXMLParser* xml_parser, uint32_t*
     // Write the final value back to Java.
     out_values[STYLE_TYPE] = value.dataType;
     out_values[STYLE_DATA] = value.data;
-    out_values[STYLE_ASSET_COOKIE] = block != kXmlBlock
-                                         ? static_cast<uint32_t>(res->getTableCookie(block))
-                                         : static_cast<uint32_t>(-1);
+    out_values[STYLE_ASSET_COOKIE] =
+        block != kXmlBlock ? static_cast<uint32_t>(res->getTableCookie(block))
+                           : static_cast<uint32_t>(-1);
     out_values[STYLE_RESOURCE_ID] = resid;
     out_values[STYLE_CHANGING_CONFIGURATIONS] = type_set_flags;
     out_values[STYLE_DENSITY] = config.density;
 
-    if (out_indices != NULL && value.dataType != Res_value::TYPE_NULL) {
+    if (out_indices != nullptr && value.dataType != Res_value::TYPE_NULL) {
       indices_idx++;
       out_indices[indices_idx] = ii;
     }
@@ -465,7 +511,7 @@ bool RetrieveAttributes(const ResTable* res, ResXMLParser* xml_parser, uint32_t*
 
   res->unlock();
 
-  if (out_indices != NULL) {
+  if (out_indices != nullptr) {
     out_indices[0] = indices_idx;
   }
   return true;

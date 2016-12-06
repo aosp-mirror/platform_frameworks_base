@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -e
+
+aapt package -F styles.apk -M AndroidManifest.xml -S res -f
