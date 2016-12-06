@@ -610,9 +610,10 @@ void BootAnimation::drawClock(const Font& font, const int xPos, const int yPos) 
         return;
     }
 
+    char* out = timeBuff[0] == ' ' ? &timeBuff[1] : &timeBuff[0];
     int x = xPos;
     int y = yPos;
-    drawText(timeBuff, font, false, &x, &y);
+    drawText(out, font, false, &x, &y);
 }
 
 bool BootAnimation::parseAnimationDesc(Animation& animation)
