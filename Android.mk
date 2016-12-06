@@ -208,6 +208,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/net/INetworkManagementEventObserver.aidl \
 	core/java/android/net/INetworkPolicyListener.aidl \
 	core/java/android/net/INetworkPolicyManager.aidl \
+	core/java/android/net/INetworkRecommendationProvider.aidl \
 	core/java/android/net/INetworkScoreCache.aidl \
 	core/java/android/net/INetworkScoreService.aidl \
 	core/java/android/net/INetworkStatsService.aidl \
