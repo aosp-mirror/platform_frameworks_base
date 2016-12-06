@@ -216,6 +216,8 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
 
   manifest_action["supports-gl-texture"];
 
+  manifest_action["meta-data"] = meta_data_action;
+
   // Application actions.
   xml::XmlNodeAction& application_action = manifest_action["application"];
   application_action.Action(OptionalNameIsJavaClassName);
