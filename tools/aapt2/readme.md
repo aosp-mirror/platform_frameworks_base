@@ -1,5 +1,9 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.4
+### `aapt2 link ...`
+- Supports `<meta-data>` tags in `<manifest>`.
+
 ## Version 2.3
 ### `aapt2`
 - Support new `font` resource type.

@@ -87,6 +87,23 @@ TEST_F(ManifestFixerTest, EnsureManifestHasPackage) {
   EXPECT_EQ(nullptr, Verify("<manifest package=\"@string/str\" />"));
 }
 
+TEST_F(ManifestFixerTest, AllowMetaData) {
+    auto doc = Verify(R"EOF(
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                  package="android">
+          <meta-data />
+          <application>
+            <meta-data />
+            <activity android:name=".Hi"><meta-data /></activity>
+            <activity-alias android:name=".Ho"><meta-data /></activity-alias>
+            <receiver android:name=".OffToWork"><meta-data /></receiver>
+            <provider android:name=".We"><meta-data /></provider>
+            <service android:name=".Go"><meta-data /></service>
+          </application>
+        </manifest>)EOF");
+    ASSERT_NE(nullptr, doc);
+}
+
 TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
   ManifestFixerOptions options = {std::string("8"), std::string("22")};
 
