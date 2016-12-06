@@ -356,6 +356,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Менш тэрміновыя апавяшчэнні ніжэй"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Дакраніцеся яшчэ раз, каб адкрыць"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Правядзіце пальцам уверх, каб разблакіраваць"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"Гэта прылада знаходзіцца пад кіраваннем"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"Гэта прылада знаходзіцца пад кіраваннем <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Тэлефон: правядзіце пальцам ад значка"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Галасавая дапамога: правядзіце пальцам ад значка"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Камера: правядзіце пальцам ад значка"</string>

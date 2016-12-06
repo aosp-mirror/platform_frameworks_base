@@ -350,6 +350,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"A kevésbé sürgős értesítések lentebb vannak"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Koppintson rá ismét a megnyitáshoz"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Húzza felfelé az ujját a feloldáshoz"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"Ez az eszköz felügyelt"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"Az eszközt a(z) <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> felügyeli."</string>
     <string name="phone_hint" msgid="4872890986869209950">"A telefonhoz csúsztasson az ikonról"</string>
     <string name="voice_hint" msgid="8939888732119726665">"A hangsegéd eléréséhez csúsztassa ujját az ikonról"</string>
     <string name="camera_hint" msgid="7939688436797157483">"A fényképezőhöz csúsztasson az ikonról"</string>

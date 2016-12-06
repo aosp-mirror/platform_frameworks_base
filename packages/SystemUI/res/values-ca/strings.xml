@@ -350,6 +350,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificacions menys urgents a continuació"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Torna a tocar per obrir-la."</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Llisca cap amunt per desbloquejar el teclat"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"Aquest és un dispositiu gestionat"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> gestiona aquest dispositiu"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Llisca des de la icona per obrir el telèfon"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Llisca des de la icona per obrir l\'assistent de veu"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Llisca des de la icona per obrir la càmera"</string>

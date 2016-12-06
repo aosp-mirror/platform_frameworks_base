@@ -354,6 +354,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Poniżej widać mniej pilne powiadomienia"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Kliknij ponownie, by otworzyć"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Przesuń w górę, by odblokować"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"To urządzenie jest zarządzane"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"Tym urządzeniem zarządza <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Aby włączyć telefon, przesuń palcem od ikony"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Aby uzyskać pomoc głosową, przesuń palcem od ikony"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Przesuń palcem od ikony, by włączyć aparat"</string>

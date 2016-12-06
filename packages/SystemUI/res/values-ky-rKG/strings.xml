@@ -350,6 +350,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Анчейин шашылыш эмес эскертмелер төмөндө"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Ачуу үчүн кайра таптап коюңуз"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Кулпуну ачуу үчүн серпип коюңуз"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"Башкарылган түзмөк"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> тарабынан башкарылат"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Сүрөтчөнү серпип телефонго өтүңүз"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Сүрөтчөнү серпип үн жардамчысына өтүңүз"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Сүрөтчөнү серпип камерага өтүңүз"</string>

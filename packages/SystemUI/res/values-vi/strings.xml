@@ -350,6 +350,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Thông báo ít khẩn cấp hơn bên dưới"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Nhấn lại để mở"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Vuốt lên để mở khóa"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"Thiết bị này được quản lý"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"Thiết bị này được <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> quản lý"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Vuốt từ biểu tượng để mở điện thoại"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Vuốt từ biểu tượng để mở trợ lý thoại"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Vuốt từ biểu tượng để mở máy ảnh"</string>
@@ -440,7 +442,19 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> là hộp thoại khối lượng"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Nhấn để khôi phục ảnh chụp màn hình gốc."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Bạn đang sử dụng hồ sơ công việc của mình"</string>
-    <!-- no translation found for volume_stream_titles:10 (8119402510273906841) -->
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Gọi"</item>
+    <item msgid="5997713001067658559">"Hệ thống"</item>
+    <item msgid="7858983209929864160">"Chuông"</item>
+    <item msgid="1850038478268896762">"Phương tiện"</item>
+    <item msgid="8265110906352372092">"Báo thức"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+    <item msgid="8119402510273906841">"Trợ năng"</item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Nhấn để bật tiếng."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Nhấn để đặt chế độ rung. Bạn có thể tắt tiếng dịch vụ trợ năng."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Nhấn để tắt tiếng. Bạn có thể tắt tiếng dịch vụ trợ năng."</string>

@@ -350,6 +350,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Minna áríðandi tilkynningar fyrir neðan"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Ýttu aftur til að opna"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Strjúktu upp til að opna"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"Þessu tæki er stýrt"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"Þessu tæki er stýrt af <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Strjúktu frá tákninu fyrir síma"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Strjúktu frá tákninu fyrir raddaðstoð"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Strjúktu frá tákninu fyrir myndavél"</string>

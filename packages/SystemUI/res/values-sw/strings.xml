@@ -350,6 +350,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Arifa zisizo za dharura sana ziko hapo chini"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Gonga tena ili ufungue"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Telezesha kidole ili ufungue"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"Kifaa hiki kinadhibitiwa"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"Kifaa hiki kinadhibitiwa na <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Telezesha kidole kutoka kwa aikoni ili ufikie simu"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Telezesha kidole kutoka aikoni ili upate mapendekezo ya sauti"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Telezesha kidole kutoka aikoni ili ufikie kamera"</string>

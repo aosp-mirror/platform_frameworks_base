@@ -350,6 +350,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"အရေးပါမှု နည်းသည့် အကြောင်းကြားချက်များ အောက်မှာ"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ဖွင့်ရန် ထပ်ပြီး ပုတ်ပါ"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"သော့ဖွင့်ရန် အပေါ်သို့ ပွတ်ဆွဲပါ"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"ဤစက်ပစ္စည်းကို စီမံခန့်ခွဲထားပါသည်"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"ဤစက်ပစ္စည်းကို <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> က စီမံခန့်ခွဲထားပါသည်"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ဖုန်းအတွက် သင်္ကေတပုံအား ပွတ်ဆွဲပါ"</string>
     <string name="voice_hint" msgid="8939888732119726665">"အသံအကူအညီအတွက် သင်္ကေတပုံအား ပွတ်ဆွဲပါ"</string>
     <string name="camera_hint" msgid="7939688436797157483">"ကင်မရာအတွက် သင်္ကေတပုံအား ပွတ်ဆွဲပါ"</string>

@@ -350,6 +350,8 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ആവശ്യം കുറഞ്ഞ അറിയിപ്പുകൾ ചുവടെ നൽകിയിരിക്കുന്നു"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"തുറക്കുന്നതിന് വീണ്ടും ടാപ്പുചെയ്യുക"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"അൺലോക്കുചെയ്യുന്നതിന് മുകളിലേക്ക് സ്വൈപ്പുചെയ്യുക"</string>
+    <string name="do_disclosure_generic" msgid="8498005633306135779">"മാനേജുചെയ്യപ്പെടുന്ന ഉപകരണമാണിത്"</string>
+    <string name="do_disclosure_with_name" msgid="5640615509915445501">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> മാനേജുചെയ്യുന്ന ഉപകരണമാണിത്"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ഫോൺ ഐക്കണിൽ നിന്ന് സ്വൈപ്പുചെയ്യുക"</string>
     <string name="voice_hint" msgid="8939888732119726665">"വോയ്‌സ് അസിസ്റ്റിനായുള്ള ഐക്കണിൽ നിന്ന് സ്വൈപ്പുചെയ്യുക"</string>
     <string name="camera_hint" msgid="7939688436797157483">"ക്യാമറ ഐക്കണിൽ നിന്ന് സ്വൈപ്പുചെയ്യുക"</string>
@@ -440,7 +442,19 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>, വോളിയം ഡയലോഗാണ്"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"ഒറിജിനൽ പുനഃസ്ഥാപിക്കാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"നിങ്ങൾ ഉപയോഗിക്കുന്നത് ഔദ്യോഗിക പ്രൊഫൈലാണ്"</string>
-    <!-- no translation found for volume_stream_titles:10 (8119402510273906841) -->
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"വിളിക്കുക"</item>
+    <item msgid="5997713001067658559">"സിസ്‌റ്റം"</item>
+    <item msgid="7858983209929864160">"റിംഗുചെയ്യുക"</item>
+    <item msgid="1850038478268896762">"മീഡിയ"</item>
+    <item msgid="8265110906352372092">"അലാറം"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"ബ്ലൂടൂത്ത്"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+    <item msgid="8119402510273906841">"പ്രവേശനക്ഷമത"</item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. അൺമ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. വൈബ്രേറ്റിലേക്ക് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക. പ്രവേശനക്ഷമതാ സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക. പ്രവേശനക്ഷമതാ സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
