@@ -7651,6 +7651,15 @@ public final class Settings {
         @SystemApi
         public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
 
+        /**
+         * Value to specify if network recommendations from
+         * {@link com.android.server.NetworkScoreService} are enabled.
+         * @hide
+         */
+        @SystemApi
+        public static final String NETWORK_RECOMMENDATIONS_ENABLED =
+                "network_recommendations_enabled";
+
        /**
         * Settings to allow BLE scans to be enabled even when Bluetooth is turned off for
         * connectivity.
