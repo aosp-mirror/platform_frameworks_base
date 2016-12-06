@@ -1547,8 +1547,9 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void updateNotificationChannelForPackage(String pkg, int uid,
                 NotificationChannel channel) {
-            checkCallerIsSystem();
+            enforceSystemOrSystemUI("Caller not system or systemui");
             if (!channel.isAllowed()) {
+                // cancel
                 cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
                         UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED,
                         null);

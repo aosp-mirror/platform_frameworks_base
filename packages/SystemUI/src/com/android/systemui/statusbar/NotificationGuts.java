@@ -19,8 +19,10 @@ package com.android.systemui.statusbar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.INotificationManager;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -33,13 +35,17 @@ import android.os.ServiceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
@@ -48,16 +54,14 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
-import com.android.systemui.tuner.TunerService;
 
 import java.util.Set;
 
 /**
  * The guts of a notification revealed when performing a long press.
  */
-public class NotificationGuts extends LinearLayout implements TunerService.Tunable {
-    public static final String SHOW_SLIDER = "show_importance_slider";
-
+public class NotificationGuts extends LinearLayout {
+    private static final String TAG = "NotificationGuts";
     private static final long CLOSE_GUTS_DELAY = 8000;
 
     private Drawable mBackground;
@@ -67,22 +71,20 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
     private boolean mExposed;
     private INotificationManager mINotificationManager;
     private int mStartingUserImportance;
-    private int mNotificationImportance;
-    private boolean mShowSlider;
+    private StatusBarNotification mStatusBarNotification;
 
-    private SeekBar mSeekBar;
     private ImageView mAutoButton;
-    private ColorStateList mActiveSliderTint;
-    private ColorStateList mInactiveSliderTint;
-    private float mActiveSliderAlpha = 1.0f;
-    private float mInactiveSliderAlpha;
     private TextView mImportanceSummary;
     private TextView mImportanceTitle;
     private boolean mAuto;
 
-    private RadioButton mBlock;
-    private RadioButton mSilent;
-    private RadioButton mReset;
+    private View mImportanceGroup;
+    private View mChannelDisabled;
+    private Switch mChannelEnabledSwitch;
+    private RadioButton mMinImportanceButton;
+    private RadioButton mLowImportanceButton;
+    private RadioButton mDefaultImportanceButton;
+    private RadioButton mHighImportanceButton;
 
     private Handler mHandler;
     private Runnable mFalsingCheck;
@@ -101,27 +103,13 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
             @Override
             public void run() {
                 if (mNeedsFalsingProtection && mExposed) {
-                    closeControls(-1 /* x */, -1 /* y */, true /* notify */);
+                    closeControls(-1 /* x */, -1 /* y */, false /* save */);
                 }
             }
         };
         final TypedArray ta =
                 context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Theme, 0, 0);
-        mInactiveSliderAlpha =
-                ta.getFloat(com.android.internal.R.styleable.Theme_disabledAlpha, 0.5f);
         ta.recycle();
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        TunerService.get(mContext).addTunable(this, SHOW_SLIDER);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        TunerService.get(mContext).removeTunable(this);
-        super.onDetachedFromWindow();
     }
 
     public void resetFalsingCheck() {
@@ -177,203 +165,213 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         }
     }
 
-    void bindImportance(final PackageManager pm, final StatusBarNotification sbn,
-            final Set<String> nonBlockablePkgs, final int importance) {
-        mINotificationManager = INotificationManager.Stub.asInterface(
-                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-        mStartingUserImportance = NotificationManager.IMPORTANCE_UNSPECIFIED;
-        mNotificationImportance = importance;
+    interface OnSettingsClickListener {
+        void onClick(View v, int appUid);
+    }
+
+    void bindNotification(final PackageManager pm, final INotificationManager iNotificationManager,
+            final StatusBarNotification sbn, OnSettingsClickListener onSettingsClick,
+            OnClickListener onDoneClick, final Set<String> nonBlockablePkgs) {
+        mINotificationManager = iNotificationManager;
+        mStatusBarNotification = sbn;
+        final NotificationChannel channel = sbn.getNotificationChannel();
+        mStartingUserImportance = channel.getImportance();
+
+        final String pkg = sbn.getPackageName();
+        int appUid = -1;
+        String appname = pkg;
+        Drawable pkgicon = null;
+        try {
+            final ApplicationInfo info = pm.getApplicationInfo(pkg,
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES
+                            | PackageManager.MATCH_DISABLED_COMPONENTS
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_AWARE);
+            if (info != null) {
+                appUid = info.uid;
+                appname = String.valueOf(pm.getApplicationLabel(info));
+                pkgicon = pm.getApplicationIcon(info);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            // app is gone, just show package name and generic icon
+            pkgicon = pm.getDefaultActivityIcon();
+        }
+
+        // If this is the placeholder channel, don't use our channel-specific text.
+        String appNameText;
+        CharSequence channelNameText;
+        if (channel.getId().equals(NotificationChannel.DEFAULT_CHANNEL_ID)) {
+            appNameText = appname;
+            channelNameText = mContext.getString(R.string.notification_header_default_channel);
+        } else {
+            appNameText = mContext.getString(R.string.notification_importance_header_app, appname);
+            channelNameText = channel.getName();
+        }
+        ((TextView) findViewById(R.id.pkgname)).setText(appNameText);
+        ((TextView) findViewById(R.id.channel_name)).setText(channelNameText);
+
+        // Settings button.
+        final TextView settingsButton = (TextView) findViewById(R.id.more_settings);
+        if (appUid >= 0 && onSettingsClick != null) {
+            final int appUidF = appUid;
+            settingsButton.setOnClickListener(
+                    (View view) -> { onSettingsClick.onClick(view, appUidF); });
+            settingsButton.setText(R.string.notification_more_settings);
+        } else {
+            settingsButton.setVisibility(View.GONE);
+        }
+
+        // Done button.
+        final TextView doneButton = (TextView) findViewById(R.id.done);
+        doneButton.setText(R.string.notification_done);
+        doneButton.setOnClickListener(onDoneClick);
+
         boolean nonBlockable = false;
         try {
-            final PackageInfo info =
-                    pm.getPackageInfo(sbn.getPackageName(), PackageManager.GET_SIGNATURES);
+            final PackageInfo info = pm.getPackageInfo(pkg, PackageManager.GET_SIGNATURES);
             nonBlockable = Utils.isSystemPackage(getResources(), pm, info);
         } catch (PackageManager.NameNotFoundException e) {
             // unlikely.
         }
         if (nonBlockablePkgs != null) {
-            nonBlockable |= nonBlockablePkgs.contains(sbn.getPackageName());
+            nonBlockable |= nonBlockablePkgs.contains(pkg);
         }
 
-        final View importanceSlider = findViewById(R.id.importance_slider);
         final View importanceButtons = findViewById(R.id.importance_buttons);
-        if (mShowSlider) {
-            bindSlider(importanceSlider, nonBlockable);
-            importanceSlider.setVisibility(View.VISIBLE);
-            importanceButtons.setVisibility(View.GONE);
-        } else {
-            bindToggles(importanceButtons, mStartingUserImportance, nonBlockable);
-            importanceButtons.setVisibility(View.VISIBLE);
-            importanceSlider.setVisibility(View.GONE);
+        bindToggles(importanceButtons, mStartingUserImportance, nonBlockable);
+
+        // Importance Text (hardcoded to 4 importance levels)
+        final ViewGroup importanceTextGroup =
+                (ViewGroup) findViewById(R.id.importance_buttons_text);
+        final int size = importanceTextGroup.getChildCount();
+        for (int i = 0; i < size; i++) {
+            int importanceNameResId = 0;
+            int importanceDescResId = 0;
+            switch (i) {
+                case 0:
+                    importanceNameResId = R.string.high_importance;
+                    importanceDescResId = R.string.notification_importance_high;
+                    break;
+                case 1:
+                    importanceNameResId = R.string.default_importance;
+                    importanceDescResId = R.string.notification_importance_default;
+                    break;
+                case 2:
+                    importanceNameResId = R.string.low_importance;
+                    importanceDescResId = R.string.notification_importance_low;
+                    break;
+                case 3:
+                    importanceNameResId = R.string.min_importance;
+                    importanceDescResId = R.string.notification_importance_min;
+                    break;
+                default:
+                    Log.e(TAG, "Too many importance groups in this layout.");
+                    break;
+            }
+            final ViewGroup importanceChildGroup = (ViewGroup) importanceTextGroup.getChildAt(i);
+            ((TextView) importanceChildGroup.getChildAt(0)).setText(importanceNameResId);
+            ((TextView) importanceChildGroup.getChildAt(1)).setText(importanceDescResId);
         }
+
+        // Top-level importance group
+        mImportanceGroup = findViewById(R.id.importance);
+        mChannelDisabled = findViewById(R.id.channel_disabled);
+        updateImportanceGroup();
     }
 
     public boolean hasImportanceChanged() {
         return mStartingUserImportance != getSelectedImportance();
     }
 
-    void saveImportance(final StatusBarNotification sbn) {
-        int progress = getSelectedImportance();
+    private void saveImportance() {
+        int selectedImportance = getSelectedImportance();
+        if (selectedImportance == mStartingUserImportance) {
+            return;
+        }
+        final NotificationChannel channel = mStatusBarNotification.getNotificationChannel();
         MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
-                progress - mStartingUserImportance);
+                selectedImportance - mStartingUserImportance);
+        channel.setImportance(selectedImportance);
+        try {
+            mINotificationManager.updateNotificationChannelForPackage(
+                    mStatusBarNotification.getPackageName(), mStatusBarNotification.getUid(),
+                    channel);
+        } catch (RemoteException e) {
+            // :(
+        }
     }
 
     private int getSelectedImportance() {
-        if (mSeekBar!= null && mSeekBar.isShown()) {
-            if (mSeekBar.isEnabled()) {
-                return mSeekBar.getProgress();
-            } else {
-                return NotificationManager.IMPORTANCE_UNSPECIFIED;
-            }
+        if (!mChannelEnabledSwitch.isChecked()) {
+            return NotificationManager.IMPORTANCE_NONE;
+        } else if (mMinImportanceButton.isChecked()) {
+            return NotificationManager.IMPORTANCE_MIN;
+        } else if (mLowImportanceButton.isChecked()) {
+            return NotificationManager.IMPORTANCE_LOW;
+        } else if (mDefaultImportanceButton.isChecked()) {
+            return NotificationManager.IMPORTANCE_DEFAULT;
+        } else if (mHighImportanceButton.isChecked()) {
+            return NotificationManager.IMPORTANCE_HIGH;
         } else {
-            if (mBlock.isChecked()) {
-                return NotificationManager.IMPORTANCE_NONE;
-            } else if (mSilent.isChecked()) {
-                return NotificationManager.IMPORTANCE_LOW;
-            } else {
-                return NotificationManager.IMPORTANCE_UNSPECIFIED;
-            }
+            return NotificationManager.IMPORTANCE_NONE;
         }
     }
 
     private void bindToggles(final View importanceButtons, final int importance,
             final boolean nonBlockable) {
-        ((RadioGroup) importanceButtons).setOnCheckedChangeListener(
-                new RadioGroup.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(RadioGroup group, int checkedId) {
-                        resetFalsingCheck();
-                    }
-                });
-        mBlock = (RadioButton) importanceButtons.findViewById(R.id.block_importance);
-        mSilent = (RadioButton) importanceButtons.findViewById(R.id.silent_importance);
-        mReset = (RadioButton) importanceButtons.findViewById(R.id.reset_importance);
-        if (nonBlockable) {
-            mBlock.setVisibility(View.GONE);
-            mReset.setText(mContext.getString(R.string.do_not_silence));
-        } else {
-            mReset.setText(mContext.getString(R.string.do_not_silence_block));
-        }
-        mBlock.setText(mContext.getString(R.string.block));
-        mSilent.setText(mContext.getString(R.string.show_silently));
-        if (importance == NotificationManager.IMPORTANCE_LOW) {
-            mSilent.setChecked(true);
-        } else {
-            mReset.setChecked(true);
-        }
-    }
+        // Enabled Switch
+        mChannelEnabledSwitch = (Switch) findViewById(R.id.channel_enabled_switch);
+        mChannelEnabledSwitch.setChecked(importance != NotificationManager.IMPORTANCE_NONE);
+        mChannelEnabledSwitch.setVisibility(nonBlockable ? View.INVISIBLE : View.VISIBLE);
 
-    private void bindSlider(final View importanceSlider, final boolean nonBlockable) {
-        mActiveSliderTint = ColorStateList.valueOf(Utils.getColorAccent(mContext));
-        mInactiveSliderTint = loadColorStateList(R.color.notification_guts_disabled_slider_color);
+        // Importance Buttons
+        mMinImportanceButton = (RadioButton) importanceButtons.findViewById(R.id.min_importance);
+        mLowImportanceButton = (RadioButton) importanceButtons.findViewById(R.id.low_importance);
+        mDefaultImportanceButton =
+                (RadioButton) importanceButtons.findViewById(R.id.default_importance);
+        mHighImportanceButton = (RadioButton) importanceButtons.findViewById(R.id.high_importance);
 
-        mImportanceSummary = ((TextView) importanceSlider.findViewById(R.id.summary));
-        mImportanceTitle = ((TextView) importanceSlider.findViewById(R.id.title));
-        mSeekBar = (SeekBar) importanceSlider.findViewById(R.id.seekbar);
-
-        final int minProgress = nonBlockable ?
-                NotificationManager.IMPORTANCE_MIN
-                : NotificationManager.IMPORTANCE_NONE;
-        mSeekBar.setMax(NotificationManager.IMPORTANCE_HIGH);
-        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                resetFalsingCheck();
-                if (progress < minProgress) {
-                    seekBar.setProgress(minProgress);
-                    progress = minProgress;
-                }
-                updateTitleAndSummary(progress);
-                if (fromUser) {
-                    MetricsLogger.action(mContext, MetricsEvent.ACTION_MODIFY_IMPORTANCE_SLIDER);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                resetFalsingCheck();
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                // no-op
-            }
-
-
-        });
-        mSeekBar.setProgress(mNotificationImportance);
-
-        mAutoButton = (ImageView) importanceSlider.findViewById(R.id.auto_importance);
-        mAutoButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mAuto = !mAuto;
-                applyAuto();
-            }
-        });
-        mAuto = mStartingUserImportance == NotificationManager.IMPORTANCE_UNSPECIFIED;
-        applyAuto();
-    }
-
-    private void applyAuto() {
-        mSeekBar.setEnabled(!mAuto);
-
-        final ColorStateList starTint = mAuto ?  mActiveSliderTint : mInactiveSliderTint;
-        final float alpha = mAuto ? mInactiveSliderAlpha : mActiveSliderAlpha;
-        Drawable icon = mAutoButton.getDrawable().mutate();
-        icon.setTintList(starTint);
-        mAutoButton.setImageDrawable(icon);
-        mSeekBar.setAlpha(alpha);
-
-        if (mAuto) {
-            mSeekBar.setProgress(mNotificationImportance);
-            mImportanceSummary.setText(mContext.getString(
-                    R.string.notification_importance_user_unspecified));
-            mImportanceTitle.setText(mContext.getString(
-                    R.string.user_unspecified_importance));
-        } else {
-            updateTitleAndSummary(mSeekBar.getProgress());
-        }
-    }
-
-    private void updateTitleAndSummary(int progress) {
-        switch (progress) {
+        // Set to current importance setting
+        switch (importance) {
             case NotificationManager.IMPORTANCE_NONE:
-                mImportanceSummary.setText(mContext.getString(
-                        R.string.notification_importance_blocked));
-                mImportanceTitle.setText(mContext.getString(R.string.blocked_importance));
                 break;
             case NotificationManager.IMPORTANCE_MIN:
-                mImportanceSummary.setText(mContext.getString(
-                        R.string.notification_importance_min));
-                mImportanceTitle.setText(mContext.getString(R.string.min_importance));
+            case NotificationManager.IMPORTANCE_UNSPECIFIED:
+                mMinImportanceButton.setChecked(true);
                 break;
             case NotificationManager.IMPORTANCE_LOW:
-                mImportanceSummary.setText(mContext.getString(
-                        R.string.notification_importance_low));
-                mImportanceTitle.setText(mContext.getString(R.string.low_importance));
+                mLowImportanceButton.setChecked(true);
                 break;
             case NotificationManager.IMPORTANCE_DEFAULT:
-                mImportanceSummary.setText(mContext.getString(
-                        R.string.notification_importance_default));
-                mImportanceTitle.setText(mContext.getString(R.string.default_importance));
+                mDefaultImportanceButton.setChecked(true);
                 break;
             case NotificationManager.IMPORTANCE_HIGH:
             case NotificationManager.IMPORTANCE_MAX:
-                mImportanceSummary.setText(mContext.getString(
-                        R.string.notification_importance_high));
-                mImportanceTitle.setText(mContext.getString(R.string.high_importance));
+                mHighImportanceButton.setChecked(true);
                 break;
         }
+
+        // Callback when checked.
+        mChannelEnabledSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            resetFalsingCheck();
+            updateImportanceGroup();
+        });
+        ((RadioGroup) importanceButtons).setOnCheckedChangeListener(
+                (buttonView, isChecked) -> { resetFalsingCheck(); });
     }
 
-    private ColorStateList loadColorStateList(int colorResId) {
-        return ColorStateList.valueOf(mContext.getColor(colorResId));
+    private void updateImportanceGroup() {
+        final boolean disabled = getSelectedImportance() == NotificationManager.IMPORTANCE_NONE;
+        mImportanceGroup.setVisibility(disabled ? View.GONE : View.VISIBLE);
+        mChannelDisabled.setVisibility(disabled ? View.VISIBLE : View.GONE);
     }
 
-    public void closeControls(int x, int y, boolean notify) {
+    public void closeControls(int x, int y, boolean saveImportance) {
+        if (saveImportance) {
+            saveImportance();
+        }
         if (getWindowToken() == null) {
-            if (notify && mListener != null) {
+            if (mListener != null) {
                 mListener.onGutsClosed(this);
             }
             return;
@@ -398,7 +396,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         });
         a.start();
         setExposed(false, mNeedsFalsingProtection);
-        if (notify && mListener != null) {
+        if (mListener != null) {
             mListener.onGutsClosed(this);
         }
     }
@@ -442,14 +440,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         }
     }
 
-    public boolean areGutsExposed() {
+    public boolean isExposed() {
         return mExposed;
-    }
-
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        if (SHOW_SLIDER.equals(key)) {
-            mShowSlider = newValue != null && Integer.parseInt(newValue) != 0;
-        }
     }
 }
